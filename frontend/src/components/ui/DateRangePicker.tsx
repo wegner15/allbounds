@@ -62,21 +62,10 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({ range, setRange }) =>
             selected={range}
             onSelect={setRange}
             footer={footer}
-            styles={{
-              caption: { color: 'white' },
-              head: { color: 'white' },
-              day: { color: 'white' },
-              day_selected: {
-                backgroundColor: '#2563EB', // blue-600
-                color: 'white',
-              },
-              day_range_middle: {
-                backgroundColor: 'rgba(37, 99, 235, 0.5)',
-                color: 'white',
-              },
-              day_hidden: {
-                display: 'none',
-              },
+            className="bg-gray-800 text-white"
+            classNames={{
+              day_selected: 'bg-blue-600 text-white',
+              day_range_middle: 'bg-blue-600/50 text-white',
             }}
           />
         </div>

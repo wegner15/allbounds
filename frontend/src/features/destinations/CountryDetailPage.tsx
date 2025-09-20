@@ -6,6 +6,7 @@ import { Helmet } from 'react-helmet-async';
 // Components
 import Breadcrumb from '../../components/layout/Breadcrumb';
 import Button from '../../components/ui/Button';
+import CountryVisitInfo from '../../components/countries/CountryVisitInfo';
 
 // API
 import { apiClient, endpoints } from '../../lib/api';
@@ -134,6 +135,16 @@ const CountryDetailPage: React.FC = () => {
                   )}
                 </div>
               </div>
+              
+              {/* Best Time to Visit */}
+              {country.visit_info ? (
+                <CountryVisitInfo visitInfo={country.visit_info} />
+              ) : (
+                <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+                  <h2 className="text-2xl font-playfair text-charcoal mb-4">Best Time to Visit</h2>
+                  <p className="text-gray-600">Information about the best time to visit {country.name} is coming soon.</p>
+                </div>
+              )}
 
               {/* Packages Section */}
               {country?.packages && country.packages.length > 0 && (

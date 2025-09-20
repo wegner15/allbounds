@@ -44,6 +44,7 @@ import CreateRegionPage from './features/admin/destinations/CreateRegionPage';
 import EditRegionPage from './features/admin/destinations/EditRegionPage';
 import CreateCountryPage from './features/admin/destinations/CreateCountryPage';
 import EditCountryPage from './features/admin/destinations/EditCountryPage';
+import ManageCountryVisitInfoPage from './features/admin/countries/ManageCountryVisitInfoPage';
 
 // Import admin holiday types pages
 import HolidayTypesListPage from './features/admin/holiday-types/HolidayTypesListPage';
@@ -283,6 +284,7 @@ const router = createBrowserRouter([
       { path: 'destinations/countries', element: <CountriesListPage /> },
       { path: 'destinations/countries/new', element: <CreateCountryPage /> },
       { path: 'destinations/countries/:id/edit', element: <EditCountryPage /> },
+      { path: 'countries/:id/visit-info', element: <ManageCountryVisitInfoPage /> },
       // Holiday types management routes
       { path: 'holiday-types', element: <HolidayTypesListPage /> },
       { path: 'holiday-types/new', element: <CreateHolidayTypePage /> },

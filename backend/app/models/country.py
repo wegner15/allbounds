@@ -25,3 +25,4 @@ class Country(Base):
     packages = relationship("Package", back_populates="country")
     group_trips = relationship("GroupTrip", back_populates="country")
     activities = relationship("Activity", secondary="country_activities", back_populates="countries")
+    visit_info = relationship("CountryVisitInfo", back_populates="country", uselist=False)

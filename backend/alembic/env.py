@@ -28,6 +28,7 @@ from app.models.user import User, Role, Permission
 from app.models.audit import AuditLog
 from app.models.itinerary import ItineraryItem, ItineraryActivity
 from app.models.newsletter import NewsletterSubscription
+from app.models.country_visit_info import CountryVisitInfo
 
 from app.db.database import Base
 from app.core.config import settings

@@ -52,7 +52,8 @@ class CountryService:
             joinedload(Country.group_trips).joinedload(GroupTrip.departures),
             joinedload(Country.attractions),
             joinedload(Country.accommodations),
-            joinedload(Country.hotels)
+            joinedload(Country.hotels),
+            joinedload(Country.visit_info)
         ).filter(Country.slug == slug, Country.is_active == True).first()
         
         if not country:
@@ -155,6 +156,14 @@ class CountryService:
                 }
                 for hotel in country.hotels if hotel.is_active
             ],
+            "visit_info": {
+                "id": country.visit_info.id,
+                "country_id": country.visit_info.country_id,
+                "monthly_ratings": country.visit_info.monthly_ratings,
+                "general_notes": country.visit_info.general_notes,
+                "created_at": country.visit_info.created_at.isoformat() if hasattr(country.visit_info, 'created_at') else None,
+                "updated_at": country.visit_info.updated_at.isoformat() if hasattr(country.visit_info, 'updated_at') else None,
+            } if country.visit_info else None,
         }
         
         return country_dict

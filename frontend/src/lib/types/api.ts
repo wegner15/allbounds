@@ -53,6 +53,19 @@ export interface Country extends BaseModel {
   timezone?: string;
 }
 
+// Country Visit Info types
+export interface MonthlyVisitRating {
+  month: string;
+  rating: 'excellent' | 'good' | 'fair' | 'poor' | 'discouraged';
+  notes?: string;
+}
+
+export interface CountryVisitInfo extends BaseModel {
+  country_id: number;
+  monthly_ratings: MonthlyVisitRating[];
+  general_notes?: string;
+}
+
 // Country with destinations details
 export interface CountryWithDetails extends Country {
   packages: Package[];
@@ -60,6 +73,7 @@ export interface CountryWithDetails extends Country {
   attractions: Attraction[];
   accommodations: Accommodation[];
   hotels: Hotel[];
+  visit_info?: CountryVisitInfo;
 }
 
 // Group trip with departures for country details

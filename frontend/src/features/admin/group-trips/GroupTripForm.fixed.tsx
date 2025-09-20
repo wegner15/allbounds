@@ -1,0 +1,587 @@
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useNavigate } from 'react-router-dom';
+import { useCreateGroupTrip, useUpdateGroupTrip } from '../../../lib/hooks/useGroupTrips';
+import { useCountries } from '../../../lib/hooks/useDestinations';
+import { usePackages } from '../../../lib/hooks/usePackages';
+import ImageSelector from '../../../components/ui/ImageSelector';
+import { apiClient } from '../../../lib/api';
+
+// Form validation schema
+const groupTripSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  slug: z.string().min(2, 'Slug must be at least 2 characters')
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase with hyphens'),
+  description: z.string().min(10, 'Description must be at least 10 characters'),
+  country_id: z.number().min(1, 'Please select a destination'),
+  package_id: z.number().optional(),
+  start_date: z.string().min(1, 'Start date is required'),
+  end_date: z.string().min(1, 'End date is required'),
+  duration_days: z.number().min(1, 'Duration must be at least 1 day'),
+  max_participants: z.number().min(1, 'Maximum participants must be at least 1'),
+  price: z.number().min(0, 'Price must be a positive number'),
+  image_id: z.string().optional(),
+  is_active: z.boolean(),
+});
+
+type GroupTripFormData = z.infer<typeof groupTripSchema>;
+
+interface GroupTripFormProps {
+  groupTripData?: any; // The group trip data to edit, if any
+  isEdit?: boolean;
+  groupTripId?: number; // The ID of the group trip being edited
+}
+
+const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = false, groupTripId }) => {
+  const navigate = useNavigate();
+  
+  const { data: countries, isLoading: isLoadingCountries } = useCountries();
+  const isLoadingDestinations = isLoadingCountries;
+  const { data: packages } = usePackages();
+  
+  const createGroupTripMutation = useCreateGroupTrip();
+  const updateGroupTripMutation = useUpdateGroupTrip();
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [selectedCountryId, setSelectedCountryId] = useState<number | null>(
+    isEdit && groupTripData ? groupTripData.country_id : null
+  );
+  
+  // Initialize form with default values or existing group trip data
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<GroupTripFormData>({
+    resolver: zodResolver(groupTripSchema),
+    defaultValues: isEdit && groupTripData
+      ? {
+          name: groupTripData.name,
+          slug: groupTripData.slug,
+          description: groupTripData.description,
+          country_id: groupTripData.country_id,
+          package_id: groupTripData.package_id || 0,
+          duration_days: groupTripData.duration_days || 1,
+          max_participants: groupTripData.max_participants || 10,
+          price: groupTripData.price || 0,
+          image_id: groupTripData.image_id || '',
+          is_active: groupTripData.is_active !== undefined ? groupTripData.is_active : true,
+          start_date: groupTripData.start_date || '',
+          end_date: groupTripData.end_date || '',
+        }
+      : {
+          name: '',
+          slug: '',
+          description: '',
+          country_id: 0,
+          package_id: 0,
+          duration_days: 1,
+          max_participants: 10,
+          price: 0,
+          is_active: true,
+          start_date: '',
+          end_date: ''
+        }
+  });
+  
+  // Auto-generate slug from name
+  const name = watch('name');
+  useEffect(() => {
+    if (!isEdit && name) {
+      const generatedSlug = name
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-');
+      setValue('slug', generatedSlug);
+    }
+  }, [name, setValue, isEdit]);
+  
+  // Watch country_id to filter packages
+  const countryId = watch('country_id');
+  useEffect(() => {
+    setSelectedCountryId(countryId || null);
+  }, [countryId]);
+  
+  // Filter packages by selected country
+  const filteredPackages = packages?.filter(pkg => 
+    pkg.country_id === selectedCountryId
+  );
+  
+  // Add refs to track important form values
+  const imageIdRef = React.useRef<string>('');
+  
+  // Watch image_id and store in ref
+  const currentImageId = watch('image_id');
+  useEffect(() => {
+    if (currentImageId) {
+      imageIdRef.current = currentImageId;
+    }
+  }, [currentImageId]);
+
+  const onSubmit = async (data: GroupTripFormData) => {
+    setIsSubmitting(true);
+    setServerError(null);
+    
+    try {
+      // Log all form data to help with debugging
+      console.log('Form submission data:', data);
+      
+      // Prepare the group trip data - explicitly include only fields the API expects
+      const groupTripData = {
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        country_id: data.country_id,
+        package_id: data.package_id,
+        duration_days: data.duration_days,
+        max_participants: data.max_participants,
+        price: data.price,
+        image_id: data.image_id || undefined,
+        is_active: data.is_active
+      };
+      
+      let savedTrip;
+      
+      if (isEdit) {
+        // Get the group trip ID from props or from URL as fallback
+        const tripId = groupTripId || parseInt(window.location.pathname.split('/').pop() || '0');
+        
+        // Create a clean update data object with only the fields we want to update
+        const updateData = {
+          ...groupTripData,
+          id: tripId
+        };
+        
+        console.log('Update data for group trip:', updateData);
+        savedTrip = await updateGroupTripMutation.mutateAsync(updateData);
+        
+        // After updating the group trip, handle the departure
+        try {
+          // Get existing departures
+          const departures = await apiClient.get(`/api/v1/group-trips/${savedTrip.id}/departures`);
+          
+          if (data.start_date && data.end_date) {
+            // Always use the dates from the form when available
+            const startDate = new Date(data.start_date);
+            const endDate = new Date(data.end_date);
+            
+            const departureData = {
+              start_date: startDate.toISOString(),
+              end_date: endDate.toISOString(),
+              price: data.price,
+              available_slots: data.max_participants || 10,
+              is_active: data.is_active
+            };
+            
+            if (Array.isArray(departures) && departures.length > 0) {
+              // Update existing departure
+              await apiClient.put(
+                `/api/v1/group-trips/${savedTrip.id}/departures/${departures[0].id}`, 
+                departureData
+              );
+            } else {
+              // Create new departure
+              await apiClient.post(
+                `/api/v1/group-trips/${savedTrip.id}/departures`, 
+                {
+                  ...departureData,
+                  group_trip_id: savedTrip.id,
+                  booked_slots: 0
+                }
+              );
+            }
+          }
+        } catch (departureError) {
+          console.error('Error updating/creating departure:', departureError);
+          // Continue with form submission even if departure update fails
+        }
+      } else {
+        // Create new group trip
+        savedTrip = await createGroupTripMutation.mutateAsync(groupTripData);
+        
+        // After creating the group trip, create a departure
+        if (data.start_date && data.end_date) {
+          try {
+            const startDate = new Date(data.start_date);
+            const endDate = new Date(data.end_date);
+            
+            // Create a departure for this trip
+            await apiClient.post(`/api/v1/group-trips/${savedTrip.id}/departures`, {
+              group_trip_id: savedTrip.id,
+              start_date: startDate.toISOString(),
+              end_date: endDate.toISOString(),
+              price: data.price,
+              available_slots: data.max_participants || 10,
+              booked_slots: 0,
+              is_active: data.is_active
+            });
+          } catch (departureError) {
+            console.error('Error creating departure:', departureError);
+            // Continue even if departure creation fails
+          }
+        }
+      }
+      
+      navigate('/admin/group-trips');
+    } catch (error) {
+      console.error('Error saving group trip:', error);
+      setServerError('An error occurred while saving the group trip. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  if (isLoadingDestinations) {
+    return (
+      <div className="text-center py-12">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-charcoal"></div>
+        <p className="mt-2">Loading countries...</p>
+      </div>
+    );
+  }
+  
+  return (
+    <form 
+      onSubmit={handleSubmit(onSubmit)} 
+      className="space-y-8"
+    >
+      {serverError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg relative">
+          {serverError}
+        </div>
+      )}
+      
+      {/* Trip Details Section */}
+      <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
+          <h3 className="text-lg font-medium leading-6 text-gray-900">Trip Details</h3>
+          <p className="mt-1 text-sm text-gray-500">Basic information about the group trip.</p>
+        </div>
+        <div className="px-6 py-6">
+          <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+            {/* Name */}
+            <div className="sm:col-span-4">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                Trip Name
+              </label>
+              <div className="mt-1">
+                <input
+                  type="text"
+                  id="name"
+                  className={`shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 bg-white transition-colors ${
+                    errors.name ? 'border-red-300 bg-red-50' : 'hover:border-gray-400'
+                  }`}
+                  {...register('name')}
+                />
+                {errors.name && (
+                  <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                )}
+              </div>
+            </div>
+            
+            {/* Slug */}
+            <div className="sm:col-span-4">
+              <label htmlFor="slug" className="block text-sm font-medium text-gray-700">
+                Slug
+              </label>
+              <div className="mt-1">
+                <input
+                  type="text"
+                  id="slug"
+                  className={`shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md ${
+                    errors.slug ? 'border-red-300' : ''
+                  }`}
+                  {...register('slug')}
+                />
+                {errors.slug && (
+                  <p className="mt-1 text-sm text-red-600">{errors.slug.message}</p>
+                )}
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                Used in the URL: https://example.com/group-trips/your-slug
+              </p>
+            </div>
+            
+            {/* Destination (Country) */}
+            <div className="sm:col-span-3">
+              <label htmlFor="country_id" className="block text-sm font-medium text-gray-700">
+                Destination
+              </label>
+              <div className="mt-1">
+                <select
+                  id="country_id"
+                  className={`shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 bg-white transition-colors appearance-none ${
+                    errors.country_id ? 'border-red-300 bg-red-50' : 'hover:border-gray-400'
+                  }`}
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                    backgroundPosition: 'right 0.5rem center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: '1.5em 1.5em',
+                    paddingRight: '2.5rem'
+                  }}
+                  {...register('country_id', { valueAsNumber: true })}
+                >
+                  <option value={0}>Select a destination</option>
+                  {countries?.map((country) => (
+                    <option key={country.id} value={country.id}>
+                      {country.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.country_id && (
+                  <p className="mt-1 text-sm text-red-600">{errors.country_id.message}</p>
+                )}
+              </div>
+            </div>
+            
+            {/* Package (optional) */}
+            <div className="sm:col-span-3">
+              <label htmlFor="package_id" className="block text-sm font-medium text-gray-700">
+                Package (Optional)
+              </label>
+              <div className="mt-1">
+                <select
+                  id="package_id"
+                  className={`shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 bg-white transition-colors appearance-none ${
+                    errors.package_id ? 'border-red-300 bg-red-50' : 'hover:border-gray-400'
+                  } ${(!selectedCountryId || filteredPackages?.length === 0) ? 'bg-gray-50 text-gray-500' : ''}`}
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                    backgroundPosition: 'right 0.5rem center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: '1.5em 1.5em',
+                    paddingRight: '2.5rem'
+                  }}
+                  {...register('package_id', { valueAsNumber: true })}
+                  disabled={!selectedCountryId || filteredPackages?.length === 0}
+                >
+                  <option value={0}>Select a package (optional)</option>
+                  {filteredPackages?.map((pkg) => (
+                    <option key={pkg.id} value={pkg.id}>
+                      {pkg.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.package_id && (
+                  <p className="mt-1 text-sm text-red-600">{errors.package_id.message}</p>
+                )}
+                {!selectedCountryId && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    Select a destination first to see available packages
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            {/* Description */}
+            <div className="sm:col-span-6">
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                Description
+              </label>
+              <div className="mt-1">
+                <textarea
+                  id="description"
+                  rows={4}
+                  className={`shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 bg-white transition-colors resize-none ${
+                    errors.description ? 'border-red-300 bg-red-50' : 'hover:border-gray-400'
+                  }`}
+                  {...register('description')}
+                />
+                {errors.description && (
+                  <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Trip Schedule & Capacity Section */}
+      <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
+          <h3 className="text-lg font-medium leading-6 text-gray-900">Schedule & Capacity</h3>
+          <p className="mt-1 text-sm text-gray-500">Set dates, duration, and participant limits.</p>
+        </div>
+        <div className="px-6 py-6">
+          <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+            {/* Start Date */}
+            <div className="sm:col-span-3">
+              <label htmlFor="start_date" className="block text-sm font-medium text-gray-700">
+                Start Date
+              </label>
+              <div className="mt-1">
+                <input
+                  type="date"
+                  id="start_date"
+                  className={`shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 bg-white transition-colors ${
+                    errors.start_date ? 'border-red-300 bg-red-50' : 'hover:border-gray-400'
+                  }`}
+                  style={{
+                    colorScheme: 'light'
+                  }}
+                  {...register('start_date')}
+                />
+                {errors.start_date && (
+                  <p className="mt-1 text-sm text-red-600">{errors.start_date.message}</p>
+                )}
+              </div>
+            </div>
+            
+            {/* End Date */}
+            <div className="sm:col-span-3">
+              <label htmlFor="end_date" className="block text-sm font-medium text-gray-700">
+                End Date
+              </label>
+              <div className="mt-1">
+                <input
+                  type="date"
+                  id="end_date"
+                  className={`shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 bg-white transition-colors ${
+                    errors.end_date ? 'border-red-300 bg-red-50' : 'hover:border-gray-400'
+                  }`}
+                  style={{
+                    colorScheme: 'light'
+                  }}
+                  {...register('end_date')}
+                />
+                {errors.end_date && (
+                  <p className="mt-1 text-sm text-red-600">{errors.end_date.message}</p>
+                )}
+              </div>
+            </div>
+            
+            {/* Max Participants */}
+            <div className="sm:col-span-3">
+              <label htmlFor="max_participants" className="block text-sm font-medium text-gray-700">
+                Maximum Participants
+              </label>
+              <div className="mt-1">
+                <input
+                  type="number"
+                  id="max_participants"
+                  min="1"
+                  className={`shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 bg-white transition-colors ${
+                    errors.max_participants ? 'border-red-300 bg-red-50' : 'hover:border-gray-400'
+                  }`}
+                  {...register('max_participants', { valueAsNumber: true })}
+                />
+                {errors.max_participants && (
+                  <p className="mt-1 text-sm text-red-600">{errors.max_participants.message}</p>
+                )}
+              </div>
+            </div>
+            
+            {/* Price */}
+            <div className="sm:col-span-3">
+              <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+                Price
+              </label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span className="text-gray-500 sm:text-sm">$</span>
+                </div>
+                <input
+                  type="number"
+                  id="price"
+                  min="0"
+                  step="0.01"
+                  className={`pl-7 shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 bg-white transition-colors ${
+                    errors.price ? 'border-red-300 bg-red-50' : 'hover:border-gray-400'
+                  }`}
+                  {...register('price', { valueAsNumber: true })}
+                />
+                {errors.price && (
+                  <p className="mt-1 text-sm text-red-600">{errors.price.message}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Media & Status Section */}
+      <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
+          <h3 className="text-lg font-medium leading-6 text-gray-900">Media & Status</h3>
+          <p className="mt-1 text-sm text-gray-500">Add images and set the trip status.</p>
+        </div>
+        <div className="px-6 py-6">
+          <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+            {/* Image Upload */}
+            <div className="sm:col-span-6">
+              <div className="bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
+                <div className="mb-3">
+                  <p className="text-sm text-gray-700">Upload or select an image for this trip:</p>
+                </div>
+                <ImageSelector
+                  initialImageId={watch('image_id') || ''}
+                  onImageSelected={(imageId) => {
+                    console.log('Image selected:', imageId);
+                    setValue('image_id', imageId);
+                  }}
+                  variant="thumbnail"
+                  className="mt-2"
+                  helperText="Choose a high-quality image that represents this trip"
+                />
+                {/* Hidden input to ensure image_id is included in form data */}
+                <input
+                  type="hidden"
+                  {...register('image_id')}
+                />
+              </div>
+            </div>
+            
+            {/* Status */}
+            <div className="sm:col-span-6">
+              <div className="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <input
+                  id="is_active"
+                  type="checkbox"
+                  className="h-5 w-5 text-teal focus:ring-teal focus:ring-offset-0 border-gray-300 rounded transition-colors cursor-pointer"
+                  {...register('is_active')}
+                />
+                <label htmlFor="is_active" className="ml-3 block text-sm font-medium text-gray-900 cursor-pointer select-none">
+                  Active (visible on the website)
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Form actions */}
+      <div className="flex justify-end space-x-4">
+        <button
+          type="button"
+          className="py-2.5 px-5 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal transition-colors"
+          onClick={() => navigate('/admin/group-trips')}
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="py-2.5 px-5 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal hover:bg-teal-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal disabled:opacity-50 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+        >
+          {isSubmitting ? (
+            <span className="flex items-center">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Saving...
+            </span>
+          ) : isEdit ? 'Update Group Trip' : 'Create Group Trip'}
+        </button>
+      </div>
+    </form>
+  );
+};
+
+export default GroupTripForm;

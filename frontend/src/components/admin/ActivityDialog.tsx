@@ -2,12 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '../ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/DialogComponent';
 import {
   Form,
   FormControl,
@@ -15,15 +10,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../ui/form';
+} from '../ui/FormComponent';
 import Input from '../ui/Input';
 import Textarea from '../ui/FormTextarea';
 import Button from '../ui/Button';
 import FormCheckbox from '../ui/FormCheckbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/SelectComponent';
 import { useCreateActivity, useUpdateActivity, useDeleteActivity } from '../../lib/hooks/useItinerary';
 import { useAttractions } from '../../lib/hooks/useAttractions';
-import { ItineraryActivity } from '../../lib/hooks/useItinerary';
+import type { ItineraryActivity } from '../../lib/types/itinerary';
 
 const activitySchema = z.object({
   time: z.string().optional(),
@@ -32,9 +27,9 @@ const activitySchema = z.object({
   location: z.string().optional(),
   attraction_id: z.string().optional(),
   duration_hours: z.string().optional(),
-  is_meal: z.boolean().default(false),
+  is_meal: z.boolean(),
   meal_type: z.enum(['breakfast', 'lunch', 'dinner']).optional(),
-  order_index: z.number().default(0),
+  order_index: z.number(),
 });
 
 type ActivityFormData = z.infer<typeof activitySchema>;
@@ -68,9 +63,9 @@ export const ActivityDialog: React.FC<ActivityDialogProps> = ({
       location: activity?.location || '',
       attraction_id: activity?.attraction?.id?.toString() || '',
       duration_hours: activity?.duration_hours?.toString() || '',
-      is_meal: activity?.is_meal || false,
-      meal_type: activity?.meal_type || undefined,
-      order_index: activity?.order_index || 0,
+      is_meal: activity?.is_meal !== undefined ? activity.is_meal : false,
+      meal_type: activity?.meal_type as ('breakfast' | 'lunch' | 'dinner' | undefined),
+      order_index: activity?.order_index !== undefined ? activity.order_index : 0,
     },
   });
 
@@ -85,9 +80,9 @@ export const ActivityDialog: React.FC<ActivityDialogProps> = ({
         location: activity?.location || '',
         attraction_id: activity?.attraction?.id?.toString() || '',
         duration_hours: activity?.duration_hours?.toString() || '',
-        is_meal: activity?.is_meal || false,
-        meal_type: activity?.meal_type || undefined,
-        order_index: activity?.order_index || 0,
+        is_meal: activity?.is_meal !== undefined ? activity.is_meal : false,
+        meal_type: activity?.meal_type as ('breakfast' | 'lunch' | 'dinner' | undefined),
+        order_index: activity?.order_index !== undefined ? activity.order_index : 0,
       });
     }
   }, [open, activity, form]);

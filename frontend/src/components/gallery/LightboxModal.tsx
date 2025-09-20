@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { GalleryImage } from './ImageGallery';
+import type { GalleryImage } from './ImageGallery';
 
 interface LightboxModalProps {
   isOpen: boolean;

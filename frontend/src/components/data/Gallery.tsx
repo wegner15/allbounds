@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Dialog from '../ui/Dialog';
+import { Dialog } from '../ui/DialogComponent';
 
 export interface GalleryImage {
   id: string;
@@ -64,9 +64,8 @@ const Gallery: React.FC<GalleryProps> = ({
       </div>
 
       <Dialog 
-        isOpen={!!selectedImage} 
-        onClose={handleClose}
-        className="max-w-3xl"
+        open={!!selectedImage} 
+        onOpenChange={() => handleClose()}
       >
         {selectedImage && (
           <div className="relative">

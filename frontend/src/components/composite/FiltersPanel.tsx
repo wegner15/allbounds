@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Button from '../ui/Button';
-import Select from '../ui/Select';
+import { Select } from '../ui/SelectComponent';
 
 export interface FilterOption {
   id: string;
@@ -182,15 +182,17 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
               )}
 
               {group.type === 'select' && group.options && (
-                <Select
-                  options={group.options.map((option) => ({
-                    value: option.id,
-                    label: option.label,
-                  }))}
+                <select
+                  className="w-full p-2 border rounded"
                   value={(filters[group.id] as string) || ''}
-                  onChange={(value) => handleSelectChange(group.id, value)}
-                  fullWidth
-                />
+                  onChange={(e) => handleSelectChange(group.id, e.target.value)}
+                >
+                  {group.options.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               )}
             </div>
           ))}

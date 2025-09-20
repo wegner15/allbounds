@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import type { DropResult } from '@hello-pangea/dnd';
 import { Plus, GripVertical, Edit2, Trash2, Clock, MapPin, Utensils, Camera } from 'lucide-react';
 import Button from '../ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Badge } from '../ui/badge';
-import { Separator } from '../ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
+import Badge from '../ui/Badge';
+// import { Separator } from '../ui/Separator';
 import { useItinerary, useReorderItineraryItems, useReorderActivities } from '../../lib/hooks/useItinerary';
-import { ItineraryItem, ItineraryActivity } from '../../lib/hooks/useItinerary';
+import type { ItineraryItem, ItineraryActivity } from '../../lib/types/itinerary';
 import { ItineraryItemDialog } from './ItineraryItemDialog';
 import { ActivityDialog } from './ActivityDialog';
 
@@ -53,7 +54,7 @@ export const ItineraryManager: React.FC<ItineraryManagerProps> = ({
       const item = itinerary?.items.find(i => i.id === itemId);
       if (!item) return;
       
-      const activities = Array.from(item.activities);
+      const activities = item.activities ? [...item.activities] : [];
       const [reorderedActivity] = activities.splice(source.index, 1);
       activities.splice(destination.index, 0, reorderedActivity);
       
@@ -171,7 +172,7 @@ export const ItineraryManager: React.FC<ItineraryManagerProps> = ({
                           {!readonly && (
                             <div className="flex items-center space-x-2">
                               <Button
-                                variant="outline"
+                                variant="secondary"
                                 size="sm"
                                 onClick={() => openActivityDialog(undefined, item.id)}
                               >
@@ -179,7 +180,7 @@ export const ItineraryManager: React.FC<ItineraryManagerProps> = ({
                                 Activity
                               </Button>
                               <Button
-                                variant="outline"
+                                variant="secondary"
                                 size="sm"
                                 onClick={() => openItemDialog(item)}
                               >
@@ -223,9 +224,9 @@ export const ItineraryManager: React.FC<ItineraryManagerProps> = ({
                         <Droppable droppableId={`activities-${item.id}`} type="activity">
                           {(provided) => (
                             <div {...provided.droppableProps} ref={provided.innerRef}>
-                              {item.activities.length > 0 ? (
+                              {item.activities && item.activities.length > 0 ? (
                                 <div className="space-y-2">
-                                  {item.activities.map((activity, activityIndex) => (
+                                  {item.activities && item.activities.map((activity, activityIndex) => (
                                     <Draggable
                                       key={activity.id}
                                       draggableId={`activity-${activity.id}`}
@@ -250,7 +251,7 @@ export const ItineraryManager: React.FC<ItineraryManagerProps> = ({
                                               <div className="flex-1">
                                                 <div className="flex items-center space-x-2 mb-1">
                                                   {activity.time && (
-                                                    <Badge variant="outline" className="text-xs">
+                                                    <Badge variant="default" className="text-xs">
                                                       <Clock className="h-3 w-3 mr-1" />
                                                       {formatTime(activity.time)}
                                                     </Badge>
@@ -264,7 +265,7 @@ export const ItineraryManager: React.FC<ItineraryManagerProps> = ({
                                                     </Badge>
                                                   )}
                                                   {activity.attraction && (
-                                                    <Badge variant="outline" className="text-xs">
+                                                    <Badge variant="default" className="text-xs">
                                                       <Camera className="h-3 w-3 mr-1" />
                                                       Attraction
                                                     </Badge>
@@ -309,7 +310,7 @@ export const ItineraryManager: React.FC<ItineraryManagerProps> = ({
                                   <p className="text-sm">No activities scheduled</p>
                                   {!readonly && (
                                     <Button
-                                      variant="outline"
+                                      variant="secondary"
                                       size="sm"
                                       className="mt-2"
                                       onClick={() => openActivityDialog(undefined, item.id)}

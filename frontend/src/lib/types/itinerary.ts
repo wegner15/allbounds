@@ -35,6 +35,10 @@ export interface ItineraryActivity {
   is_meal: boolean;
   meal_type?: string;
   order_index: number;
+  
+  // Backward compatibility properties
+  title?: string;
+  description?: string;
 }
 
 export interface ItineraryItem {
@@ -60,6 +64,11 @@ export interface ItineraryItem {
   // Backward compatibility properties
   activities?: ItineraryActivity[];
   accommodation_hotel?: Hotel;
+  accommodation?: {
+    type: 'hotel' | 'notes';
+    hotel?: Hotel;
+    notes?: string;
+  };
 }
 
 export interface ItineraryResponse {

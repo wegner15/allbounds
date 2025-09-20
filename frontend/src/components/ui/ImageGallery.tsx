@@ -21,7 +21,7 @@ interface ImageGalleryProps {
 
 const ImageGallery: React.FC<ImageGalleryProps> = ({
   images,
-  coverImage,
+  // coverImage is unused but kept for backward compatibility
   title = "Gallery",
   className = ""
 }) => {

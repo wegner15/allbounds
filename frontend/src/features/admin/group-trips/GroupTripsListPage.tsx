@@ -86,7 +86,7 @@ const GroupTripsListPage: React.FC = () => {
   const error = tripsError;
   
   // Filter group trips based on search query
-  const filteredGroupTrips = (groupTrips as GroupTrip[] | undefined)?.filter(trip => {
+  const filteredGroupTrips = (groupTrips as any[] | undefined)?.filter(trip => {
     const nameMatch = trip.name.toLowerCase().includes(searchQuery.toLowerCase());
     // Check country name
     const countryName = getCountryName(trip.country_id).toLowerCase();

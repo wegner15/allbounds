@@ -145,10 +145,10 @@ const SearchPage: React.FC = () => {
                   {Object.entries(groupedResults).map(([type, results]) => (
                     <div key={type} className="mb-8">
                       <h2 className="text-xl font-medium mb-4 capitalize">
-                        {type.replace('_', ' ')}s ({results.length})
+                        {type.replace('_', ' ')}s ({Array.isArray(results) ? results.length : 0})
                       </h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {results.map((result) => (
+                        {Array.isArray(results) && results.map((result) => (
                           <div key={`${result.type}-${result.id}`} className="bg-white rounded-lg shadow-md overflow-hidden">
                             <Link to={result.url}>
                               <img

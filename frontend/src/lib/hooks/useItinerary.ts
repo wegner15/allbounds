@@ -22,6 +22,9 @@ export interface CreateItineraryItemData {
   linked_activity_ids?: number[];
   accommodation_notes?: string;
   custom_activities: CreateActivityData[];
+  
+  // Backward compatibility
+  activities?: any[];
 }
 
 export interface CreateActivityData {

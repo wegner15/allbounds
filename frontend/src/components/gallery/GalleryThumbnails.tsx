@@ -1,5 +1,5 @@
 import React from 'react';
-import { GalleryImage } from './ImageGallery';
+import type { GalleryImage } from './ImageGallery';
 
 interface GalleryThumbnailsProps {
   images: GalleryImage[];

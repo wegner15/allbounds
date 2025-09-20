@@ -104,20 +104,20 @@ export const apiClient = {
   },
   
   // Convenience methods
-  get<T>(endpoint: string) {
-    return this.request<T>(endpoint, 'GET');
+  async get<T>(endpoint: string): Promise<T> {
+    return this.request(endpoint, 'GET') as Promise<T>;
   },
   
-  post<T>(endpoint: string, data: unknown) {
-    return this.request<T>(endpoint, 'POST', data);
+  async post<T>(endpoint: string, data: unknown): Promise<T> {
+    return this.request(endpoint, 'POST', data) as Promise<T>;
   },
   
-  put<T>(endpoint: string, data: unknown) {
-    return this.request<T>(endpoint, 'PUT', data);
+  async put<T>(endpoint: string, data: unknown): Promise<T> {
+    return this.request(endpoint, 'PUT', data) as Promise<T>;
   },
   
-  delete<T>(endpoint: string) {
-    return this.request<T>(endpoint, 'DELETE');
+  async delete<T>(endpoint: string): Promise<T> {
+    return this.request(endpoint, 'DELETE') as Promise<T>;
   },
 };
 

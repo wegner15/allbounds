@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCountries } from '../../../lib/hooks/useCountries';
+import { useHotelTypes } from '../../../lib/hooks/useHotelTypes';
 import { apiClient } from '../../../lib/api';
 import LocationPicker from '../../../components/LocationPicker';
 import TimeSelector from '../../../components/TimeSelector';
@@ -17,10 +18,12 @@ interface HotelFormProps {
 const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading }) => {
   const navigate = useNavigate();
   const { data: countries } = useCountries();
+  const { data: hotelTypes } = useHotelTypes();
   
   const [formData, setFormData] = useState<HotelCreateInput & { is_active?: boolean }>({
     name: '',
     country_id: 0,
+    hotel_type_id: 0,
     stars: 0,
     is_active: true,
   });
@@ -186,20 +189,22 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
           </div>
 
           <div>
-            <label htmlFor="price_category" className="block text-sm font-medium text-gray-700 mb-1">
-              Price Category
+            <label htmlFor="hotel_type_id" className="block text-sm font-medium text-gray-700 mb-1">
+              Hotel Type
             </label>
             <select
-              id="price_category"
-              name="price_category"
-              value={formData.price_category || ''}
+              id="hotel_type_id"
+              name="hotel_type_id"
+              value={formData.hotel_type_id || ''}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
             >
-              <option value="">Select price category</option>
-              <option value="Budget">Budget</option>
-              <option value="Mid-range">Mid-range</option>
-              <option value="Luxury">Luxury</option>
+              <option value="">Select hotel type</option>
+              {hotelTypes?.map((hotelType) => (
+                <option key={hotelType.id} value={hotelType.id}>
+                  {hotelType.name}
+                </option>
+              ))}
             </select>
           </div>
 

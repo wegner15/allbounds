@@ -34,6 +34,7 @@ class Hotel(Base):
     summary = Column(String(255), nullable=True)
     description = Column(Text, nullable=True)
     country_id = Column(Integer, ForeignKey("countries.id"), nullable=False)
+    hotel_type_id = Column(Integer, ForeignKey("hotel_types.id"), nullable=True)  # Reference to hotel type
     stars = Column(Float, nullable=True)  # Hotel star rating
     address = Column(String(255), nullable=True)
     city = Column(String(100), nullable=True)
@@ -51,6 +52,7 @@ class Hotel(Base):
 
     # Relationships
     country = relationship("Country", back_populates="hotels")
+    hotel_type = relationship("HotelType", back_populates="hotels")
     media_assets = relationship("MediaAsset", secondary=hotel_media, back_populates="hotels")
     reviews = relationship("Review", back_populates="hotel")
     

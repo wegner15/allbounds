@@ -1,8 +1,13 @@
 import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import FormField from '../../../components/ui/FormField';
+import { useNavigate } from 'react-router-dom';
+import FormInput from '../../../components/ui/FormInput';
+import FormTextarea from '../../../components/ui/FormTextarea';
+import FormCheckbox from '../../../components/ui/FormCheckbox';
+import FormGroup from '../../../components/ui/FormGroup';
+import Button from '../../../components/ui/Button';
 import ImageSelector from '../../../components/ui/ImageSelector';
 
 // Form validation schema for regions
@@ -11,8 +16,8 @@ const regionSchema = z.object({
   slug: z.string().min(2, 'Slug must be at least 2 characters')
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase with hyphens'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
-  image_id: z.string().optional().default(''),
-  is_active: z.boolean().default(true),
+  image_id: z.string().optional(),
+  is_active: z.boolean(), // Default is handled in useForm
 });
 
 export type RegionFormData = z.infer<typeof regionSchema>;
@@ -32,20 +37,22 @@ const RegionForm: React.FC<RegionFormProps> = ({
   isSubmitting = false,
   serverError = null,
 }) => {
+  const navigate = useNavigate();
   const { 
     register, 
     handleSubmit, 
     setValue, 
     watch, 
+    control,
     formState: { errors } 
   } = useForm<RegionFormData>({
-    resolver: zodResolver(regionSchema) as any,
+    resolver: zodResolver(regionSchema), // No 'as any' needed now
     defaultValues: {
       name: initialData?.name || '',
       slug: initialData?.slug || '',
       description: initialData?.description || '',
       image_id: initialData?.image_id || '',
-      is_active: initialData?.is_active !== undefined ? initialData.is_active : true,
+      is_active: initialData?.is_active ?? true,
     }
   });
 
@@ -61,107 +68,97 @@ const RegionForm: React.FC<RegionFormProps> = ({
     }
   }, [name, setValue, isEdit]);
 
-  // Register all form fields
-  const nameProps = register('name');
-  const slugProps = register('slug');
-  const descriptionProps = register('description');
-  const isActiveProps = register('is_active');
-
   return (
-    <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {serverError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative">
-          {serverError}
+        <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-md">
+          <p className="text-sm text-red-700">{serverError}</p>
         </div>
       )}
       
-      <div className="bg-white shadow rounded-lg p-6">
-        <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+      <div className="bg-white shadow-md rounded-lg p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Name Field */}
-          <div className="sm:col-span-4">
-            <FormField
+          <FormGroup>
+            <FormInput
               id="name"
               label="Region Name"
-              value={watch('name')}
-              onChange={nameProps.onChange}
-              error={errors.name?.message}
-              required
+              error={errors.name}
+              {...register('name')}
             />
-          </div>
+          </FormGroup>
           
           {/* Slug Field */}
-          <div className="sm:col-span-4">
-            <FormField
+          <FormGroup>
+            <FormInput
               id="slug"
               label="Slug"
-              value={watch('slug')}
-              onChange={slugProps.onChange}
-              error={errors.slug?.message}
-              required
-              helperText="Used in the URL: https://example.com/regions/your-slug"
+              error={errors.slug}
+              helperText="Used in the URL, e.g., /regions/your-slug"
+              {...register('slug')}
             />
-          </div>
+          </FormGroup>
           
           {/* Description Field */}
-          <div className="sm:col-span-6">
-            <FormField
-              id="description"
-              label="Description"
-              type="textarea"
-              value={watch('description')}
-              onChange={descriptionProps.onChange}
-              error={errors.description?.message}
-              required
-            />
+          <div className="md:col-span-2">
+            <FormGroup>
+              <FormTextarea
+                id="description"
+                label="Description"
+                error={errors.description}
+                rows={5}
+                {...register('description')}
+              />
+            </FormGroup>
           </div>
           
           {/* Image Upload */}
-          <div className="sm:col-span-6">
-            <ImageSelector
-              initialImageId={watch('image_id')}
-              onImageSelected={(imageId) => setValue('image_id', imageId)}
-              label="Region Image"
-              helperText="Upload an image for this region"
-            />
+          <div className="md:col-span-2">
+            <FormGroup>
+              <Controller
+                name="image_id"
+                control={control}
+                render={({ field }) => (
+                  <ImageSelector
+                    initialImageId={field.value}
+                    onImageSelected={(imageId) => field.onChange(imageId)}
+                    label="Region Image"
+                    helperText="Upload an image for this region"
+                  />
+                )}
+              />
+            </FormGroup>
           </div>
           
           {/* Status */}
-          <div className="sm:col-span-6">
-            <FormField
-              id="is_active"
-              label="Active (visible on the website)"
-              type="checkbox"
-              value={watch('is_active')}
-              onChange={isActiveProps.onChange}
-            />
+          <div className="md:col-span-2">
+            <FormGroup>
+              <FormCheckbox
+                id="is_active"
+                label="Active (visible on the website)"
+                {...register('is_active')}
+              />
+            </FormGroup>
           </div>
         </div>
       </div>
       
       {/* Form actions */}
-      <div className="flex justify-end space-x-3">
-        <button
+      <div className="flex justify-end space-x-4">
+        <Button
           type="button"
-          className="py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal"
-          onClick={() => window.history.back()}
+          variant="outline"
+          onClick={() => navigate('/admin/destinations')}
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
+          variant="primary"
           disabled={isSubmitting}
-          className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal hover:bg-teal-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal disabled:opacity-50"
         >
-          {isSubmitting ? (
-            <span className="flex items-center">
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Saving...
-            </span>
-          ) : isEdit ? 'Update Region' : 'Create Region'}
-        </button>
+          {isSubmitting ? 'Saving...' : (isEdit ? 'Update Region' : 'Create Region')}
+        </Button>
       </div>
     </form>
   );

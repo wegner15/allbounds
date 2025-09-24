@@ -4,6 +4,7 @@ from datetime import datetime, date
 
 # Import at the top level to avoid Pydantic 2.x issues
 from app.schemas.country import CountryResponse
+from app.schemas.inclusion_exclusion import InclusionResponse, ExclusionResponse
 
 # Base Group Trip Schema
 class GroupTripBase(BaseModel):
@@ -24,7 +25,8 @@ class GroupTripBase(BaseModel):
     
 # Schema for creating a new Group Trip
 class GroupTripCreate(GroupTripBase):
-    pass
+    inclusion_ids: Optional[List[int]] = Field(default_factory=list, description="List of inclusion IDs to associate with this group trip")
+    exclusion_ids: Optional[List[int]] = Field(default_factory=list, description="List of exclusion IDs to associate with this group trip")
 
 # Schema for updating a Group Trip
 class GroupTripUpdate(BaseModel):
@@ -45,6 +47,8 @@ class GroupTripUpdate(BaseModel):
     image_id: Optional[str] = Field(None, description="ID of the Cloudflare image for this group trip")
     start_date: Optional[str] = Field(None, description="Start date of the group trip")
     end_date: Optional[str] = Field(None, description="End date of the group trip")
+    inclusion_ids: Optional[List[int]] = Field(None, description="List of inclusion IDs to associate with this group trip")
+    exclusion_ids: Optional[List[int]] = Field(None, description="List of exclusion IDs to associate with this group trip")
 
 # Schema for Group Trip response
 class GroupTripResponse(GroupTripBase):
@@ -55,6 +59,8 @@ class GroupTripResponse(GroupTripBase):
     created_at: datetime
     updated_at: datetime
     published_at: Optional[datetime] = None
+    inclusion_items: List[InclusionResponse] = Field(default_factory=list, description="Inclusions associated with this group trip")
+    exclusion_items: List[ExclusionResponse] = Field(default_factory=list, description="Exclusions associated with this group trip")
     
     class Config:
         from_attributes = True
@@ -100,3 +106,11 @@ class GroupTripDepartureResponse(GroupTripDepartureBase):
 # Schema for adding a holiday type to a group trip
 class GroupTripHolidayTypeCreate(BaseModel):
     holiday_type_id: int = Field(..., description="ID of the holiday type to add to the group trip")
+
+# Schema for adding an inclusion to a group trip
+class GroupTripInclusionCreate(BaseModel):
+    inclusion_id: int = Field(..., description="ID of the inclusion to add to the group trip")
+
+# Schema for adding an exclusion to a group trip
+class GroupTripExclusionCreate(BaseModel):
+    exclusion_id: int = Field(..., description="ID of the exclusion to add to the group trip")

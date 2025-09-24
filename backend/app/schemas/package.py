@@ -5,6 +5,7 @@ from datetime import datetime
 # Import at the top level to avoid Pydantic 2.x issues
 from app.schemas.country import CountryResponse
 from app.schemas.holiday_type import HolidayTypeResponse
+from app.schemas.inclusion_exclusion import InclusionResponse, ExclusionResponse
 
 # Base Package Schema
 class PackageBase(BaseModel):
@@ -22,6 +23,8 @@ class PackageBase(BaseModel):
 # Schema for creating a new Package
 class PackageCreate(PackageBase):
     holiday_type_ids: Optional[List[int]] = Field(default_factory=list, description="List of holiday type IDs to associate with this package")
+    inclusion_ids: Optional[List[int]] = Field(default_factory=list, description="List of inclusion IDs to associate with this package")
+    exclusion_ids: Optional[List[int]] = Field(default_factory=list, description="List of exclusion IDs to associate with this package")
 
 # Schema for updating a Package
 class PackageUpdate(BaseModel):
@@ -39,6 +42,8 @@ class PackageUpdate(BaseModel):
     is_featured: Optional[bool] = Field(None, description="Whether the package is featured")
     published_at: Optional[datetime] = Field(None, description="When the package was published")
     holiday_type_ids: Optional[List[int]] = Field(None, description="List of holiday type IDs to associate with this package")
+    inclusion_ids: Optional[List[int]] = Field(None, description="List of inclusion IDs to associate with this package")
+    exclusion_ids: Optional[List[int]] = Field(None, description="List of exclusion IDs to associate with this package")
 
 # Schema for Package response
 class PackageResponse(PackageBase):
@@ -51,6 +56,8 @@ class PackageResponse(PackageBase):
     updated_at: datetime
     published_at: Optional[datetime] = None
     holiday_types: List[HolidayTypeResponse] = Field(default_factory=list, description="Holiday types associated with this package")
+    inclusion_items: List[InclusionResponse] = Field(default_factory=list, description="Inclusions associated with this package")
+    exclusion_items: List[ExclusionResponse] = Field(default_factory=list, description="Exclusions associated with this package")
     
     class Config:
         from_attributes = True
@@ -65,3 +72,11 @@ class PackageWithCountryResponse(PackageResponse):
 # Schema for adding a holiday type to a package
 class PackageHolidayTypeCreate(BaseModel):
     holiday_type_id: int = Field(..., description="ID of the holiday type to add to the package")
+
+# Schema for adding an inclusion to a package
+class PackageInclusionCreate(BaseModel):
+    inclusion_id: int = Field(..., description="ID of the inclusion to add to the package")
+
+# Schema for adding an exclusion to a package
+class PackageExclusionCreate(BaseModel):
+    exclusion_id: int = Field(..., description="ID of the exclusion to add to the package")

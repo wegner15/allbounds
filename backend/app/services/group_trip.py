@@ -4,9 +4,11 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.models.group_trip import GroupTrip, GroupTripDeparture
 from app.models.media import MediaAsset
+from app.models.inclusion_exclusion import Inclusion, Exclusion
 from app.schemas.group_trip import GroupTripCreate, GroupTripUpdate, GroupTripDepartureCreate, GroupTripDepartureUpdate
 from app.utils.slug import create_slug
 from app.core.cloudflare_config import cloudflare_settings
+from app.services.group_trip_helper import format_group_trip_response
 
 class GroupTripService:
     def get_group_trips(self, db: Session, skip: int = 0, limit: int = 100) -> List[GroupTrip]:
@@ -53,7 +55,9 @@ class GroupTripService:
             joinedload(GroupTrip.media_assets),
             joinedload(GroupTrip.country),
             joinedload(GroupTrip.holiday_types),
-            joinedload(GroupTrip.departures)
+            joinedload(GroupTrip.departures),
+            joinedload(GroupTrip.inclusion_items),
+            joinedload(GroupTrip.exclusion_items)
         ).filter(GroupTrip.slug == slug, GroupTrip.is_active == True).first()
         
         if not group_trip:
@@ -161,6 +165,18 @@ class GroupTripService:
             slug=slug,
         )
         db.add(db_group_trip)
+        db.flush()  # Flush to get the ID
+        
+        # Handle inclusions
+        if hasattr(group_trip_create, 'inclusion_ids') and group_trip_create.inclusion_ids:
+            inclusions = db.query(Inclusion).filter(Inclusion.id.in_(group_trip_create.inclusion_ids)).all()
+            db_group_trip.inclusion_items.extend(inclusions)
+            
+        # Handle exclusions
+        if hasattr(group_trip_create, 'exclusion_ids') and group_trip_create.exclusion_ids:
+            exclusions = db.query(Exclusion).filter(Exclusion.id.in_(group_trip_create.exclusion_ids)).all()
+            db_group_trip.exclusion_items.extend(exclusions)
+        
         db.commit()
         db.refresh(db_group_trip)
         return db_group_trip
@@ -174,6 +190,24 @@ class GroupTripService:
             return None
         
         update_data = group_trip_update.model_dump(exclude_unset=True)
+        
+        # Handle inclusions separately
+        if 'inclusion_ids' in update_data:
+            inclusion_ids = update_data.pop('inclusion_ids')
+            if inclusion_ids is not None:
+                db_group_trip.inclusion_items.clear()
+                if inclusion_ids:
+                    inclusions = db.query(Inclusion).filter(Inclusion.id.in_(inclusion_ids)).all()
+                    db_group_trip.inclusion_items.extend(inclusions)
+                    
+        # Handle exclusions separately
+        if 'exclusion_ids' in update_data:
+            exclusion_ids = update_data.pop('exclusion_ids')
+            if exclusion_ids is not None:
+                db_group_trip.exclusion_items.clear()
+                if exclusion_ids:
+                    exclusions = db.query(Exclusion).filter(Exclusion.id.in_(exclusion_ids)).all()
+                    db_group_trip.exclusion_items.extend(exclusions)
         
         # If name is being updated, update the slug as well
         if "name" in update_data:
@@ -391,7 +425,9 @@ class GroupTripService:
             joinedload(GroupTrip.media_assets),
             joinedload(GroupTrip.country),
             joinedload(GroupTrip.holiday_types),
-            joinedload(GroupTrip.departures)
+            joinedload(GroupTrip.departures),
+            joinedload(GroupTrip.inclusion_items),
+            joinedload(GroupTrip.exclusion_items)
         ).filter(GroupTrip.id == group_trip_id).first()
         
         if not group_trip:
@@ -478,5 +514,73 @@ class GroupTripService:
             "is_active": group_trip.is_active,
             "is_featured": group_trip.is_featured,
         }
+
+    def add_inclusion(self, db: Session, group_trip_id: int, inclusion_id: int) -> Optional[GroupTrip]:
+        """
+        Add an inclusion to a group trip.
+        """
+        db_group_trip = db.query(GroupTrip).filter(GroupTrip.id == group_trip_id).first()
+        db_inclusion = db.query(Inclusion).filter(Inclusion.id == inclusion_id).first()
+        
+        if not db_group_trip or not db_inclusion:
+            return None
+        
+        if db_inclusion not in db_group_trip.inclusion_items:
+            db_group_trip.inclusion_items.append(db_inclusion)
+            db.commit()
+            db.refresh(db_group_trip)
+        
+        return db_group_trip
+    
+    def remove_inclusion(self, db: Session, group_trip_id: int, inclusion_id: int) -> Optional[GroupTrip]:
+        """
+        Remove an inclusion from a group trip.
+        """
+        db_group_trip = db.query(GroupTrip).filter(GroupTrip.id == group_trip_id).first()
+        db_inclusion = db.query(Inclusion).filter(Inclusion.id == inclusion_id).first()
+        
+        if not db_group_trip or not db_inclusion:
+            return None
+        
+        if db_inclusion in db_group_trip.inclusion_items:
+            db_group_trip.inclusion_items.remove(db_inclusion)
+            db.commit()
+            db.refresh(db_group_trip)
+        
+        return db_group_trip
+    
+    def add_exclusion(self, db: Session, group_trip_id: int, exclusion_id: int) -> Optional[GroupTrip]:
+        """
+        Add an exclusion to a group trip.
+        """
+        db_group_trip = db.query(GroupTrip).filter(GroupTrip.id == group_trip_id).first()
+        db_exclusion = db.query(Exclusion).filter(Exclusion.id == exclusion_id).first()
+        
+        if not db_group_trip or not db_exclusion:
+            return None
+        
+        if db_exclusion not in db_group_trip.exclusion_items:
+            db_group_trip.exclusion_items.append(db_exclusion)
+            db.commit()
+            db.refresh(db_group_trip)
+        
+        return db_group_trip
+    
+    def remove_exclusion(self, db: Session, group_trip_id: int, exclusion_id: int) -> Optional[GroupTrip]:
+        """
+        Remove an exclusion from a group trip.
+        """
+        db_group_trip = db.query(GroupTrip).filter(GroupTrip.id == group_trip_id).first()
+        db_exclusion = db.query(Exclusion).filter(Exclusion.id == exclusion_id).first()
+        
+        if not db_group_trip or not db_exclusion:
+            return None
+        
+        if db_exclusion in db_group_trip.exclusion_items:
+            db_group_trip.exclusion_items.remove(db_exclusion)
+            db.commit()
+            db.refresh(db_group_trip)
+        
+        return db_group_trip
 
 group_trip_service = GroupTripService()

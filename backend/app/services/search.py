@@ -10,6 +10,8 @@ from app.models.accommodation import Accommodation
 from app.models.package import Package
 from app.models.group_trip import GroupTrip
 from app.models.blog import BlogPost
+from app.models.hotel_type import HotelType
+from app.models.inclusion_exclusion import Inclusion, Exclusion
 
 class SearchService:
     """
@@ -32,10 +34,31 @@ class SearchService:
     PACKAGE_INDEX = 'packages'
     GROUP_TRIP_INDEX = 'group_trips'
     BLOG_POST_INDEX = 'blog_posts'
+    HOTEL_TYPE_INDEX = 'hotel_types'
+    INCLUSION_INDEX = 'inclusions'
+    EXCLUSION_INDEX = 'exclusions'
     
     # Define searchable attributes for each index
     INDEX_SETTINGS = {
         REGION_INDEX: {
+            'searchableAttributes': ['name', 'description'],
+            'displayedAttributes': ['id', 'name', 'description', 'slug'],
+            'sortableAttributes': ['name'],
+            'filterableAttributes': ['is_active']
+        },
+        INCLUSION_INDEX: {
+            'searchableAttributes': ['name', 'description', 'category'],
+            'displayedAttributes': ['id', 'name', 'description', 'icon', 'category'],
+            'sortableAttributes': ['name', 'category'],
+            'filterableAttributes': ['is_active', 'category']
+        },
+        EXCLUSION_INDEX: {
+            'searchableAttributes': ['name', 'description', 'category'],
+            'displayedAttributes': ['id', 'name', 'description', 'icon', 'category'],
+            'sortableAttributes': ['name', 'category'],
+            'filterableAttributes': ['is_active', 'category']
+        },
+        HOTEL_TYPE_INDEX: {
             'searchableAttributes': ['name', 'description'],
             'displayedAttributes': ['id', 'name', 'description', 'slug'],
             'sortableAttributes': ['name'],
@@ -66,14 +89,14 @@ class SearchService:
             'filterableAttributes': ['is_active', 'country_id', 'stars']
         },
         PACKAGE_INDEX: {
-            'searchableAttributes': ['name', 'summary', 'description', 'itinerary', 'inclusions', 'exclusions'],
-            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'country_id', 'duration_days', 'price'],
+            'searchableAttributes': ['name', 'summary', 'description', 'itinerary', 'inclusions', 'exclusions', 'inclusion_items', 'exclusion_items'],
+            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'country_id', 'duration_days', 'price', 'inclusion_items', 'exclusion_items'],
             'sortableAttributes': ['name', 'price', 'duration_days'],
             'filterableAttributes': ['is_active', 'country_id', 'is_featured', 'duration_days']
         },
         GROUP_TRIP_INDEX: {
-            'searchableAttributes': ['name', 'summary', 'description', 'itinerary', 'inclusions', 'exclusions'],
-            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'country_id', 'duration_days', 'price'],
+            'searchableAttributes': ['name', 'summary', 'description', 'itinerary', 'inclusions', 'exclusions', 'inclusion_items', 'exclusion_items'],
+            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'country_id', 'duration_days', 'price', 'inclusion_items', 'exclusion_items'],
             'sortableAttributes': ['name', 'price', 'duration_days'],
             'filterableAttributes': ['is_active', 'country_id', 'is_featured', 'duration_days']
         },
@@ -247,6 +270,15 @@ class SearchService:
         
         documents = []
         for package in packages:
+            # Format inclusion and exclusion items for search
+            inclusion_items_text = ""
+            if package.inclusion_items:
+                inclusion_items_text = ", ".join([inc.name for inc in package.inclusion_items])
+            
+            exclusion_items_text = ""
+            if package.exclusion_items:
+                exclusion_items_text = ", ".join([exc.name for exc in package.exclusion_items])
+            
             documents.append({
                 'id': package.id,
                 'name': package.name,
@@ -259,6 +291,8 @@ class SearchService:
                 'itinerary': package.itinerary,
                 'inclusions': package.inclusions,
                 'exclusions': package.exclusions,
+                'inclusion_items': inclusion_items_text,
+                'exclusion_items': exclusion_items_text,
                 'is_active': package.is_active,
                 'is_featured': package.is_featured
             })
@@ -279,6 +313,15 @@ class SearchService:
         
         documents = []
         for group_trip in group_trips:
+            # Format inclusion and exclusion items for search
+            inclusion_items_text = ""
+            if group_trip.inclusion_items:
+                inclusion_items_text = ", ".join([inc.name for inc in group_trip.inclusion_items])
+            
+            exclusion_items_text = ""
+            if group_trip.exclusion_items:
+                exclusion_items_text = ", ".join([exc.name for exc in group_trip.exclusion_items])
+            
             documents.append({
                 'id': group_trip.id,
                 'name': group_trip.name,
@@ -291,6 +334,8 @@ class SearchService:
                 'itinerary': group_trip.itinerary,
                 'inclusions': group_trip.inclusions,
                 'exclusions': group_trip.exclusions,
+                'inclusion_items': inclusion_items_text,
+                'exclusion_items': exclusion_items_text,
                 'is_active': group_trip.is_active,
                 'is_featured': group_trip.is_featured
             })
@@ -324,6 +369,30 @@ class SearchService:
         
         return self.meilisearch_client.add_documents(self.BLOG_POST_INDEX, documents)
     
+    def index_hotel_types(self, db: Session) -> bool:
+        """
+        Index all active hotel types.
+        
+        Args:
+            db: Database session
+            
+        Returns:
+            bool: True if hotel types were indexed successfully, False otherwise
+        """
+        hotel_types = db.query(HotelType).filter(HotelType.is_active == True).all()
+        
+        documents = []
+        for hotel_type in hotel_types:
+            documents.append({
+                'id': hotel_type.id,
+                'name': hotel_type.name,
+                'description': hotel_type.description,
+                'slug': hotel_type.slug,
+                'is_active': hotel_type.is_active
+            })
+        
+        return self.meilisearch_client.add_documents(self.HOTEL_TYPE_INDEX, documents)
+    
     def index_all(self, db: Session) -> Dict[str, bool]:
         """
         Index all entities.
@@ -342,7 +411,10 @@ class SearchService:
             self.ACCOMMODATION_INDEX: self.index_accommodations(db),
             self.PACKAGE_INDEX: self.index_packages(db),
             self.GROUP_TRIP_INDEX: self.index_group_trips(db),
-            self.BLOG_POST_INDEX: self.index_blog_posts(db)
+            self.BLOG_POST_INDEX: self.index_blog_posts(db),
+            self.HOTEL_TYPE_INDEX: self.index_hotel_types(db),
+            self.INCLUSION_INDEX: self.index_inclusions(db),
+            self.EXCLUSION_INDEX: self.index_exclusions(db)
         }
     
     def update_region(self, region: Region) -> bool:
@@ -386,6 +458,26 @@ class SearchService:
         
         return self.meilisearch_client.update_documents(self.COUNTRY_INDEX, [document])
     
+    def update_hotel_type(self, hotel_type: HotelType) -> bool:
+        """
+        Update a hotel type in the search index.
+        
+        Args:
+            hotel_type: HotelType model instance
+            
+        Returns:
+            bool: True if hotel type was updated successfully, False otherwise
+        """
+        document = {
+            'id': hotel_type.id,
+            'name': hotel_type.name,
+            'description': hotel_type.description,
+            'slug': hotel_type.slug,
+            'is_active': hotel_type.is_active
+        }
+        
+        return self.meilisearch_client.update_documents(self.HOTEL_TYPE_INDEX, [document])
+    
     def search(self, query: str, index_name: Optional[str] = None, limit: int = 20, offset: int = 0,
               filter: Optional[str] = None, sort: Optional[List[str]] = None) -> Dict[str, Any]:
         """
@@ -424,5 +516,97 @@ class SearchService:
             bool: True if document was deleted successfully, False otherwise
         """
         return self.meilisearch_client.delete_document(index_name, document_id)
+
+    def index_inclusions(self, db: Session) -> bool:
+        """
+        Index all active inclusions.
+        
+        Args:
+            db: Database session
+            
+        Returns:
+            bool: True if inclusions were indexed successfully, False otherwise
+        """
+        inclusions = db.query(Inclusion).filter(Inclusion.is_active == True).all()
+        
+        documents = []
+        for inclusion in inclusions:
+            documents.append({
+                'id': inclusion.id,
+                'name': inclusion.name,
+                'description': inclusion.description,
+                'icon': inclusion.icon,
+                'category': inclusion.category,
+                'is_active': inclusion.is_active
+            })
+        
+        return self.meilisearch_client.add_documents(self.INCLUSION_INDEX, documents)
+    
+    def index_exclusions(self, db: Session) -> bool:
+        """
+        Index all active exclusions.
+        
+        Args:
+            db: Database session
+            
+        Returns:
+            bool: True if exclusions were indexed successfully, False otherwise
+        """
+        exclusions = db.query(Exclusion).filter(Exclusion.is_active == True).all()
+        
+        documents = []
+        for exclusion in exclusions:
+            documents.append({
+                'id': exclusion.id,
+                'name': exclusion.name,
+                'description': exclusion.description,
+                'icon': exclusion.icon,
+                'category': exclusion.category,
+                'is_active': exclusion.is_active
+            })
+        
+        return self.meilisearch_client.add_documents(self.EXCLUSION_INDEX, documents)
+    
+    def update_inclusion(self, inclusion: Inclusion) -> bool:
+        """
+        Update an inclusion in the search index.
+        
+        Args:
+            inclusion: Inclusion model instance
+            
+        Returns:
+            bool: True if inclusion was updated successfully, False otherwise
+        """
+        document = {
+            'id': inclusion.id,
+            'name': inclusion.name,
+            'description': inclusion.description,
+            'icon': inclusion.icon,
+            'category': inclusion.category,
+            'is_active': inclusion.is_active
+        }
+        
+        return self.meilisearch_client.update_documents(self.INCLUSION_INDEX, [document])
+    
+    def update_exclusion(self, exclusion: Exclusion) -> bool:
+        """
+        Update an exclusion in the search index.
+        
+        Args:
+            exclusion: Exclusion model instance
+            
+        Returns:
+            bool: True if exclusion was updated successfully, False otherwise
+        """
+        document = {
+            'id': exclusion.id,
+            'name': exclusion.name,
+            'description': exclusion.description,
+            'icon': exclusion.icon,
+            'category': exclusion.category,
+            'is_active': exclusion.is_active
+        }
+        
+        return self.meilisearch_client.update_documents(self.EXCLUSION_INDEX, [document])
 
 search_service = SearchService()

@@ -254,6 +254,28 @@ def index_blog_posts(
             "message": "Failed to index blog posts"
         }
 
+@router.post("/index-hotel-types", response_model=IndexingStatus)
+def index_hotel_types(
+    *,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(has_permission("search:admin")),
+) -> Any:
+    """
+    Index all hotel types.
+    """
+    success = search_service.index_hotel_types(db)
+    
+    if success:
+        return {
+            "success": True,
+            "message": "Hotel types indexed successfully"
+        }
+    else:
+        return {
+            "success": False,
+            "message": "Failed to index hotel types"
+        }
+
 @router.get("/health", response_model=Dict[str, bool])
 def health_check() -> Any:
     """

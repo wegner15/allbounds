@@ -2,7 +2,8 @@ from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, get_current_user, get_current_superuser
+from app.db.database import get_db
+from app.auth.dependencies import get_current_user, get_current_superuser
 from app.services.country_visit_info import country_visit_info_service
 from app.services.country import country_service
 from app.schemas.country_visit_info import CountryVisitInfo, CountryVisitInfoCreate, CountryVisitInfoUpdate

@@ -89,7 +89,8 @@ class HotelService:
         """
         hotel = db.query(Hotel).options(
             joinedload(Hotel.media_assets),
-            joinedload(Hotel.country)
+            joinedload(Hotel.country),
+            joinedload(Hotel.hotel_type)
         ).filter(Hotel.slug == slug, Hotel.is_active == True).first()
         
         if not hotel:
@@ -149,6 +150,11 @@ class HotelService:
                 "name": hotel.country.name,
                 "slug": hotel.country.slug,
             } if hotel.country else None,
+            "hotel_type": {
+                "id": hotel.hotel_type.id,
+                "name": hotel.hotel_type.name,
+                "slug": hotel.hotel_type.slug,
+            } if hotel.hotel_type else None,
             "is_active": hotel.is_active,
         }
     
@@ -162,6 +168,7 @@ class HotelService:
             summary=hotel_create.summary,
             description=hotel_create.description,
             country_id=hotel_create.country_id,
+            hotel_type_id=hotel_create.hotel_type_id,
             stars=hotel_create.stars,
             address=hotel_create.address,
             city=hotel_create.city,

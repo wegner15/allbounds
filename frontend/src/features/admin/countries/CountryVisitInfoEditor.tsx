@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useCountryVisitInfo, useUpdateCountryVisitInfo } from '../../../lib/hooks/useCountryVisitInfo';
 import type { CountryVisitInfo, MonthlyVisitRating, VisitRating } from '../../../lib/types/country';
@@ -11,6 +11,7 @@ const CountryVisitInfoEditor: React.FC<CountryVisitInfoEditorProps> = ({ country
   const { data: visitInfo, isLoading } = useCountryVisitInfo(countryId);
   const updateVisitInfo = useUpdateCountryVisitInfo(countryId);
   const [isEditing, setIsEditing] = useState(false);
+  const [formInitialized, setFormInitialized] = useState(false);
   
   const allMonths = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -19,20 +20,65 @@ const CountryVisitInfoEditor: React.FC<CountryVisitInfoEditorProps> = ({ country
   
   const ratingOptions: VisitRating[] = ['excellent', 'good', 'fair', 'poor', 'discouraged'];
   
-  const { control, handleSubmit, reset } = useForm<CountryVisitInfo>({
-    defaultValues: visitInfo || {
+  // Create default form values
+  const getDefaultValues = () => {
+    const defaultMonthlyRatings = allMonths.map(month => ({
+      month,
+      rating: 'fair' as VisitRating,
+      notes: '',
+    }));
+    
+    return {
       country_id: countryId,
-      monthly_ratings: allMonths.map(month => ({
-        month,
-        rating: 'fair' as VisitRating,
-        notes: '',
-      })),
+      monthly_ratings: defaultMonthlyRatings,
       general_notes: '',
-    },
+    };
+  };
+  
+  const { control, handleSubmit, reset } = useForm<CountryVisitInfo>({
+    defaultValues: getDefaultValues(),
   });
   
-  // Update form when data is loaded
-  React.useEffect(() => {
+  // Initialize form once when data is loaded
+  useEffect(() => {
+    if (visitInfo && !formInitialized) {
+      // If some months are missing, add them with default values
+      const existingMonths = new Set(visitInfo.monthly_ratings.map(r => r.month));
+      const missingMonths = allMonths.filter(month => !existingMonths.has(month));
+      
+      const updatedRatings = [
+        ...visitInfo.monthly_ratings,
+        ...missingMonths.map(month => ({
+          month,
+          rating: 'fair' as VisitRating,
+          notes: '',
+        })),
+      ];
+      
+      // Sort ratings by month order
+      const sortedRatings = [...updatedRatings].sort((a, b) => 
+        allMonths.indexOf(a.month) - allMonths.indexOf(b.month)
+      );
+      
+      reset({
+        ...visitInfo,
+        monthly_ratings: sortedRatings,
+      });
+      
+      setFormInitialized(true);
+    }
+  }, [visitInfo, formInitialized]);
+  
+  const onSubmit = (data: CountryVisitInfo) => {
+    updateVisitInfo.mutate(data, {
+      onSuccess: () => {
+        setIsEditing(false);
+      },
+    });
+  };
+  
+  // Reset form when canceling edit
+  const handleCancel = () => {
     if (visitInfo) {
       // If some months are missing, add them with default values
       const existingMonths = new Set(visitInfo.monthly_ratings.map(r => r.month));
@@ -47,19 +93,20 @@ const CountryVisitInfoEditor: React.FC<CountryVisitInfoEditorProps> = ({ country
         })),
       ];
       
+      // Sort ratings by month order
+      const sortedRatings = [...updatedRatings].sort((a, b) => 
+        allMonths.indexOf(a.month) - allMonths.indexOf(b.month)
+      );
+      
       reset({
         ...visitInfo,
-        monthly_ratings: updatedRatings,
+        monthly_ratings: sortedRatings,
       });
+    } else {
+      reset(getDefaultValues());
     }
-  }, [visitInfo, reset, allMonths]);
-  
-  const onSubmit = (data: CountryVisitInfo) => {
-    updateVisitInfo.mutate(data, {
-      onSuccess: () => {
-        setIsEditing(false);
-      },
-    });
+    
+    setIsEditing(false);
   };
   
   if (isLoading) {
@@ -80,10 +127,7 @@ const CountryVisitInfoEditor: React.FC<CountryVisitInfoEditorProps> = ({ country
         ) : (
           <div className="space-x-2">
             <button
-              onClick={() => {
-                reset();
-                setIsEditing(false);
-              }}
+              onClick={handleCancel}
               className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
             >
               Cancel

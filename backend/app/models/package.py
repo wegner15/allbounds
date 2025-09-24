@@ -43,7 +43,14 @@ class Package(Base):
     hotels = relationship("Hotel", secondary="package_hotels", back_populates="packages")
     attractions = relationship("Attraction", secondary="package_attractions", back_populates="packages")
     
+    # Relationships with Inclusions and Exclusions
+    inclusion_items = relationship("Inclusion", secondary="package_inclusions", back_populates="packages")
+    exclusion_items = relationship("Exclusion", secondary="package_exclusions", back_populates="packages")
+    
     # Relationship with Itinerary
     itinerary_items = relationship("ItineraryItem", 
                                    primaryjoin="and_(Package.id == foreign(ItineraryItem.entity_id), ItineraryItem.entity_type == 'package')",
                                    cascade="all, delete-orphan")
+    
+    # Relationship with Price Charts
+    price_charts = relationship("PackagePriceChart", back_populates="package", cascade="all, delete-orphan")

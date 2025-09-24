@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { useCreateGroupTrip, useUpdateGroupTrip, useGroupTripDetailsById } from '../../../lib/hooks/useGroupTrips';
 import { useCountries } from '../../../lib/hooks/useDestinations';
 import { usePackages } from '../../../lib/hooks/usePackages';
+import { useInclusions } from '../../../lib/hooks/useInclusions';
+import { useExclusions } from '../../../lib/hooks/useExclusions';
 import GalleryManager from '../../../components/admin/GalleryManager';
 import { SimpleItineraryManager } from '../../../components/admin/SimpleItineraryManager';
 import { apiClient } from '../../../lib/api';
@@ -24,6 +26,8 @@ const groupTripSchema = z.object({
   duration_days: z.number().min(1, 'Duration must be at least 1 day'),
   max_participants: z.number().min(1, 'Maximum participants must be at least 1'),
   price: z.number().min(0, 'Price must be a positive number'),
+  inclusion_ids: z.array(z.number()).optional(),
+  exclusion_ids: z.array(z.number()).optional(),
   image_id: z.string().optional(),
   is_active: z.boolean(),
 });
@@ -42,6 +46,8 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
   const { data: countries, isLoading: isLoadingCountries } = useCountries();
   const isLoadingDestinations = isLoadingCountries;
   const { data: packages } = usePackages();
+  const { data: inclusions, isLoading: isLoadingInclusions } = useInclusions();
+  const { data: exclusions, isLoading: isLoadingExclusions } = useExclusions();
   
   // Fetch group trip details with gallery if editing
   const { data: groupTripDetails } = useGroupTripDetailsById(groupTripId || 0);
@@ -77,6 +83,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
     handleSubmit,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm<GroupTripFormData>({
     resolver: zodResolver(groupTripSchema),
@@ -90,6 +97,8 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
           duration_days: groupTripData.duration_days || 1,
           max_participants: groupTripData.max_participants || 10,
           price: groupTripData.price || 0,
+          inclusion_ids: groupTripData.inclusion_items?.map((item: any) => item.id) || [],
+          exclusion_ids: groupTripData.exclusion_items?.map((item: any) => item.id) || [],
           image_id: groupTripData.image_id || '',
           is_active: groupTripData.is_active !== undefined ? groupTripData.is_active : true,
           start_date: groupTripData.start_date || '',
@@ -104,6 +113,8 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
           duration_days: 1,
           max_participants: 10,
           price: 0,
+          inclusion_ids: [],
+          exclusion_ids: [],
           is_active: true,
           start_date: '',
           end_date: ''
@@ -217,6 +228,21 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
               );
             }
           }
+          
+          // Update inclusions and exclusions
+          try {
+            console.log('Updating inclusions:', data.inclusion_ids);
+            await apiClient.post(`/group-trips/${savedTrip.id}/inclusions`, {
+              inclusion_ids: data.inclusion_ids || []
+            });
+            
+            console.log('Updating exclusions:', data.exclusion_ids);
+            await apiClient.post(`/group-trips/${savedTrip.id}/exclusions`, {
+              exclusion_ids: data.exclusion_ids || []
+            });
+          } catch (error) {
+            console.error('Error updating inclusions/exclusions:', error);
+          }
         } catch (departureError) {
           console.error('Error updating/creating departure:', departureError);
           // Continue with form submission even if departure update fails
@@ -244,6 +270,23 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
           } catch (departureError) {
             console.error('Error creating departure:', departureError);
             // Continue even if departure creation fails
+          }
+        }
+        
+        // Add inclusions and exclusions for the new group trip
+        if (savedTrip?.id) {
+          try {
+            console.log('Adding inclusions to new group trip:', data.inclusion_ids);
+            await apiClient.post(`/group-trips/${savedTrip.id}/inclusions`, {
+              inclusion_ids: data.inclusion_ids || []
+            });
+            
+            console.log('Adding exclusions to new group trip:', data.exclusion_ids);
+            await apiClient.post(`/group-trips/${savedTrip.id}/exclusions`, {
+              exclusion_ids: data.exclusion_ids || []
+            });
+          } catch (error) {
+            console.error('Error adding inclusions/exclusions to new group trip:', error);
           }
         }
       }
@@ -570,6 +613,124 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
                 <input
                   type="hidden"
                   {...register('image_id')}
+                />
+              </div>
+            </div>
+
+            {/* Inclusions */}
+            <div className="sm:col-span-6">
+              <div className="bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
+                <div className="mb-3">
+                  <h4 className="text-lg font-medium text-gray-900">Inclusions</h4>
+                  <p className="text-sm text-gray-700">Select all inclusions that apply to this group trip:</p>
+                </div>
+                <Controller
+                  name="inclusion_ids"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {inclusions?.map((inclusion) => {
+                        const checkboxId = `inclusion-${inclusion.id}`;
+                        const isChecked = (field.value || []).includes(inclusion.id);
+                        
+                        return (
+                          <div key={inclusion.id} className="relative flex items-start">
+                            <div className="flex h-6 items-center">
+                              <input
+                                id={checkboxId}
+                                type="checkbox"
+                                className="h-5 w-5 rounded border-gray-300 text-teal focus:ring-teal focus:ring-offset-0"
+                                checked={isChecked}
+                                onChange={(e) => {
+                                  const currentInclusions = field.value || [];
+                                  if (e.target.checked) {
+                                    field.onChange([...currentInclusions, inclusion.id]);
+                                  } else {
+                                    field.onChange(currentInclusions.filter((id) => id !== inclusion.id));
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div className="ml-3 text-sm leading-6">
+                              <label htmlFor={checkboxId} className="font-medium text-gray-900 cursor-pointer flex items-center">
+                                {inclusion.icon && (
+                                  <i className={`fas fa-${inclusion.icon} mr-2 text-teal`}></i>
+                                )}
+                                {inclusion.name}
+                                {inclusion.category && (
+                                  <span className="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                    {inclusion.category}
+                                  </span>
+                                )}
+                              </label>
+                              {inclusion.description && (
+                                <p className="text-xs text-gray-500 mt-1">{inclusion.description}</p>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Exclusions */}
+            <div className="sm:col-span-6">
+              <div className="bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
+                <div className="mb-3">
+                  <h4 className="text-lg font-medium text-gray-900">Exclusions</h4>
+                  <p className="text-sm text-gray-700">Select all exclusions that apply to this group trip:</p>
+                </div>
+                <Controller
+                  name="exclusion_ids"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {exclusions?.map((exclusion) => {
+                        const checkboxId = `exclusion-${exclusion.id}`;
+                        const isChecked = (field.value || []).includes(exclusion.id);
+                        
+                        return (
+                          <div key={exclusion.id} className="relative flex items-start">
+                            <div className="flex h-6 items-center">
+                              <input
+                                id={checkboxId}
+                                type="checkbox"
+                                className="h-5 w-5 rounded border-gray-300 text-red-500 focus:ring-red-500 focus:ring-offset-0"
+                                checked={isChecked}
+                                onChange={(e) => {
+                                  const currentExclusions = field.value || [];
+                                  if (e.target.checked) {
+                                    field.onChange([...currentExclusions, exclusion.id]);
+                                  } else {
+                                    field.onChange(currentExclusions.filter((id) => id !== exclusion.id));
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div className="ml-3 text-sm leading-6">
+                              <label htmlFor={checkboxId} className="font-medium text-gray-900 cursor-pointer flex items-center">
+                                {exclusion.icon && (
+                                  <i className={`fas fa-${exclusion.icon} mr-2 text-red-500`}></i>
+                                )}
+                                {exclusion.name}
+                                {exclusion.category && (
+                                  <span className="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                    {exclusion.category}
+                                  </span>
+                                )}
+                              </label>
+                              {exclusion.description && (
+                                <p className="text-xs text-gray-500 mt-1">{exclusion.description}</p>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 />
               </div>
             </div>

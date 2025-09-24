@@ -4,6 +4,7 @@ from datetime import datetime
 
 # Import at the top level to avoid Pydantic 2.x issues
 from app.schemas.country import CountryResponse
+from app.schemas.hotel_type import HotelTypeResponse
 
 # Base Hotel Schema
 class HotelBase(BaseModel):
@@ -11,6 +12,7 @@ class HotelBase(BaseModel):
     summary: Optional[str] = Field(None, description="Brief summary of the hotel")
     description: Optional[str] = Field(None, description="Detailed description of the hotel")
     country_id: int = Field(..., description="ID of the country this hotel belongs to")
+    hotel_type_id: Optional[int] = Field(None, description="ID of the hotel type")
     stars: Optional[float] = Field(None, description="Star rating of the hotel (1-5)", ge=0, le=5)
     address: Optional[str] = Field(None, description="Physical address of the hotel")
     city: Optional[str] = Field(None, description="City where the hotel is located")
@@ -32,6 +34,7 @@ class HotelUpdate(BaseModel):
     summary: Optional[str] = Field(None, description="Brief summary of the hotel")
     description: Optional[str] = Field(None, description="Detailed description of the hotel")
     country_id: Optional[int] = Field(None, description="ID of the country this hotel belongs to")
+    hotel_type_id: Optional[int] = Field(None, description="ID of the hotel type")
     stars: Optional[float] = Field(None, description="Star rating of the hotel (1-5)", ge=0, le=5)
     address: Optional[str] = Field(None, description="Physical address of the hotel")
     city: Optional[str] = Field(None, description="City where the hotel is located")
@@ -58,6 +61,7 @@ class HotelResponse(HotelBase):
 # Schema for Hotel with Country details
 class HotelWithCountryResponse(HotelResponse):
     country: CountryResponse
+    hotel_type: Optional[HotelTypeResponse] = None
     
     class Config:
         from_attributes = True

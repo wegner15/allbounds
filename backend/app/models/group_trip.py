@@ -46,6 +46,10 @@ class GroupTrip(Base):
     hotels = relationship("Hotel", secondary="group_trip_hotels", back_populates="group_trips")
     attractions = relationship("Attraction", secondary="group_trip_attractions", back_populates="group_trips")
     
+    # Relationships with Inclusions and Exclusions
+    inclusion_items = relationship("Inclusion", secondary="group_trip_inclusions", back_populates="group_trips")
+    exclusion_items = relationship("Exclusion", secondary="group_trip_exclusions", back_populates="group_trips")
+    
     # Relationship with Itinerary
     itinerary_items = relationship("ItineraryItem", 
                                    primaryjoin="and_(GroupTrip.id == foreign(ItineraryItem.entity_id), ItineraryItem.entity_type == 'group_trip')",

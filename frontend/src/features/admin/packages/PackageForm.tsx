@@ -7,9 +7,12 @@ import { apiClient } from '../../../lib/api';
 import { useCountries } from '../../../lib/hooks/useDestinations';
 import { useHolidayTypes } from '../../../lib/hooks/useHolidayTypes';
 import { useCreatePackage, useUpdatePackage } from '../../../lib/hooks/usePackages';
+import { useInclusions } from '../../../lib/hooks/useInclusions';
+import { useExclusions } from '../../../lib/hooks/useExclusions';
 import ImageSelector from '../../../components/ui/ImageSelector';
 import TipTapEditor from '../../../components/ui/TipTapEditor';
 import GalleryManager from '../../../components/admin/GalleryManager';
+import PriceChartManager from '../../../components/admin/PriceChartManager';
 import { SimpleItineraryManager } from '../../../components/admin/SimpleItineraryManager';
 import type { GalleryImage } from '../../../lib/types/api';
 
@@ -24,6 +27,8 @@ const packageSchema = z.object({
   duration_days: z.number().min(1, 'Duration must be at least 1 day'),
   country_id: z.number().min(1, 'Please select a country'),
   holiday_type_ids: z.array(z.number()).min(1, 'Please select at least one holiday type'),
+  inclusion_ids: z.array(z.number()).optional(),
+  exclusion_ids: z.array(z.number()).optional(),
   image_id: z.string().optional(),
   is_active: z.boolean(),
 });
@@ -41,6 +46,8 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
   const isEdit = !!packageId;
   const { data: countries, isLoading: isLoadingCountries } = useCountries();
   const { data: holidayTypes, isLoading: isLoadingHolidayTypes } = useHolidayTypes();
+  const { data: inclusions, isLoading: isLoadingInclusions } = useInclusions();
+  const { data: exclusions, isLoading: isLoadingExclusions } = useExclusions();
   
   const createPackageMutation = useCreatePackage();
   const updatePackageMutation = useUpdatePackage(packageData?.id);
@@ -69,6 +76,8 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
           duration_days: packageData.duration_days,
           country_id: packageData.country_id,
           holiday_type_ids: packageData.holiday_types?.map((ht: any) => ht.id) || [],
+          inclusion_ids: packageData.inclusion_items?.map((item: any) => item.id) || [],
+          exclusion_ids: packageData.exclusion_items?.map((item: any) => item.id) || [],
           image_id: packageData.image_id || '',
           is_active: packageData.is_active,
         }
@@ -80,6 +89,8 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
           duration_days: 1,
           country_id: 0,
           holiday_type_ids: [],
+          inclusion_ids: [],
+          exclusion_ids: [],
           image_id: '',
           is_active: true,
         },
@@ -91,6 +102,8 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       console.log('PackageForm: Initializing form with packageData:', packageData);
       console.log('PackageForm: Country ID:', packageData.country_id);
       console.log('PackageForm: Holiday types:', packageData.holiday_types);
+      console.log('PackageForm: Inclusions:', packageData.inclusion_items);
+      console.log('PackageForm: Exclusions:', packageData.exclusion_items);
       
       // Update form values when packageData is loaded
       setValue('name', packageData.name || '');
@@ -100,11 +113,15 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       setValue('duration_days', packageData.duration_days || 1);
       setValue('country_id', packageData.country_id || 0);
       setValue('holiday_type_ids', packageData.holiday_types?.map((ht: any) => ht.id) || []);
+      setValue('inclusion_ids', packageData.inclusion_items?.map((item: any) => item.id) || []);
+      setValue('exclusion_ids', packageData.exclusion_items?.map((item: any) => item.id) || []);
       setValue('image_id', packageData.image_id || '');
       setValue('is_active', packageData.is_active ?? true);
       
       console.log('PackageForm: Set country_id to:', packageData.country_id);
       console.log('PackageForm: Set holiday_type_ids to:', packageData.holiday_types?.map((ht: any) => ht.id) || []);
+      console.log('PackageForm: Set inclusion_ids to:', packageData.inclusion_items?.map((item: any) => item.id) || []);
+      console.log('PackageForm: Set exclusion_ids to:', packageData.exclusion_items?.map((item: any) => item.id) || []);
       
       // Initialize gallery images
       if (packageData.gallery_images) {
@@ -164,6 +181,21 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
             console.error('Error setting cover image:', coverError);
           }
         }
+        
+        // Update inclusions and exclusions
+        try {
+          console.log('Updating inclusions:', formData.inclusion_ids);
+          await apiClient.post(`/api/v1/packages/${packageId}/inclusions`, {
+            inclusion_ids: formData.inclusion_ids || []
+          });
+          
+          console.log('Updating exclusions:', formData.exclusion_ids);
+          await apiClient.post(`/api/v1/packages/${packageId}/exclusions`, {
+            exclusion_ids: formData.exclusion_ids || []
+          });
+        } catch (error) {
+          console.error('Error updating inclusions/exclusions:', error);
+        }
       } else {
         const newPackage = await createPackageMutation.mutateAsync(packageData);
         
@@ -176,6 +208,23 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
             });
           } catch (coverError) {
             console.error('Error setting cover image for new package:', coverError);
+          }
+        }
+        
+        // Add inclusions and exclusions for the new package
+        if (newPackage?.id) {
+          try {
+            console.log('Adding inclusions to new package:', formData.inclusion_ids);
+            await apiClient.post(`/api/v1/packages/${newPackage.id}/inclusions`, {
+              inclusion_ids: formData.inclusion_ids || []
+            });
+            
+            console.log('Adding exclusions to new package:', formData.exclusion_ids);
+            await apiClient.post(`/api/v1/packages/${newPackage.id}/exclusions`, {
+              exclusion_ids: formData.exclusion_ids || []
+            });
+          } catch (error) {
+            console.error('Error adding inclusions/exclusions to new package:', error);
           }
         }
       }
@@ -580,6 +629,157 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
             </p>
           </div>
           
+          {/* Inclusions */}
+          <div className="sm:col-span-6">
+            <div className="flex justify-between items-center">
+              <label className="block text-sm font-semibold text-gray-800">
+                Inclusions
+              </label>
+            </div>
+            <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
+              <div className="mb-3">
+                <p className="text-sm text-gray-700">Select all inclusions that apply to this package:</p>
+              </div>
+              <Controller
+                name="inclusion_ids"
+                control={control}
+                render={({ field }) => (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {inclusions?.map((inclusion) => {
+                      const checkboxId = `inclusion-${inclusion.id}`;
+                      const isChecked = (field.value || []).includes(inclusion.id);
+                      
+                      return (
+                        <div key={inclusion.id} className="relative flex items-start">
+                          <div className="flex h-6 items-center">
+                            <input
+                              id={checkboxId}
+                              type="checkbox"
+                              className="h-5 w-5 rounded border-gray-300 text-teal focus:ring-teal focus:ring-offset-0"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                const currentInclusions = field.value || [];
+                                if (e.target.checked) {
+                                  field.onChange([...currentInclusions, inclusion.id]);
+                                } else {
+                                  field.onChange(currentInclusions.filter((id) => id !== inclusion.id));
+                                }
+                              }}
+                            />
+                          </div>
+                          <div className="ml-3 text-sm leading-6">
+                            <label htmlFor={checkboxId} className="font-medium text-gray-900 cursor-pointer flex items-center">
+                              {inclusion.icon && (
+                                <i className={`fas fa-${inclusion.icon} mr-2 text-teal`}></i>
+                              )}
+                              {inclusion.name}
+                              {inclusion.category && (
+                                <span className="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                  {inclusion.category}
+                                </span>
+                              )}
+                            </label>
+                            {inclusion.description && (
+                              <p className="text-xs text-gray-500 mt-1">{inclusion.description}</p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              />
+            </div>
+            <p className="mt-2 text-xs text-gray-500">
+              Select the inclusions that are part of this package. These will be displayed to customers.
+            </p>
+          </div>
+
+          {/* Exclusions */}
+          <div className="sm:col-span-6">
+            <div className="flex justify-between items-center">
+              <label className="block text-sm font-semibold text-gray-800">
+                Exclusions
+              </label>
+            </div>
+            <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
+              <div className="mb-3">
+                <p className="text-sm text-gray-700">Select all exclusions that apply to this package:</p>
+              </div>
+              <Controller
+                name="exclusion_ids"
+                control={control}
+                render={({ field }) => (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {exclusions?.map((exclusion) => {
+                      const checkboxId = `exclusion-${exclusion.id}`;
+                      const isChecked = (field.value || []).includes(exclusion.id);
+                      
+                      return (
+                        <div key={exclusion.id} className="relative flex items-start">
+                          <div className="flex h-6 items-center">
+                            <input
+                              id={checkboxId}
+                              type="checkbox"
+                              className="h-5 w-5 rounded border-gray-300 text-red-500 focus:ring-red-500 focus:ring-offset-0"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                const currentExclusions = field.value || [];
+                                if (e.target.checked) {
+                                  field.onChange([...currentExclusions, exclusion.id]);
+                                } else {
+                                  field.onChange(currentExclusions.filter((id) => id !== exclusion.id));
+                                }
+                              }}
+                            />
+                          </div>
+                          <div className="ml-3 text-sm leading-6">
+                            <label htmlFor={checkboxId} className="font-medium text-gray-900 cursor-pointer flex items-center">
+                              {exclusion.icon && (
+                                <i className={`fas fa-${exclusion.icon} mr-2 text-red-500`}></i>
+                              )}
+                              {exclusion.name}
+                              {exclusion.category && (
+                                <span className="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                  {exclusion.category}
+                                </span>
+                              )}
+                            </label>
+                            {exclusion.description && (
+                              <p className="text-xs text-gray-500 mt-1">{exclusion.description}</p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              />
+            </div>
+            <p className="mt-2 text-xs text-gray-500">
+              Select the exclusions that are NOT part of this package. These will be displayed to customers.
+            </p>
+          </div>
+
+          {/* Price Charts */}
+          <div className="sm:col-span-6">
+            <div className="flex justify-between items-center">
+              <label className="block text-sm font-semibold text-gray-800">
+                Price Charts
+              </label>
+            </div>
+            <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
+              <div className="mb-3">
+                <p className="text-sm text-gray-700">Manage seasonal pricing for this package:</p>
+              </div>
+              {isEdit && packageData?.id ? (
+                <PriceChartManager packageId={packageData.id} />
+              ) : (
+                <p className="text-sm text-gray-500">You can add price charts after saving the package.</p>
+              )}
+            </div>
+          </div>
+
           {/* Gallery Management */}
           <div className="sm:col-span-6">
             <div className="flex justify-between items-center">

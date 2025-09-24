@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.models.package import Package
 from app.models.media import MediaAsset
 from app.models.holiday_type import HolidayType
+from app.models.inclusion_exclusion import Inclusion, Exclusion
 from app.schemas.package import PackageCreate, PackageUpdate
 from app.utils.slug import create_slug
 from app.core.cloudflare_config import cloudflare_settings
@@ -18,14 +19,33 @@ class PackageService:
             return None
         return f"{cloudflare_settings.delivery_url}/{image_id}/{variant}"
 
-    def get_packages(self, db: Session, skip: int = 0, limit: int = 100) -> List[Package]:
+    def get_packages(self, db: Session, skip: int = 0, limit: int = 100, order_by: str = "created_at", order: str = "desc") -> List[Package]:
         """
-        Retrieve all packages with pagination.
+        Retrieve all packages with pagination and ordering.
         """
-        return db.query(Package).options(
+        query = db.query(Package).options(
             joinedload(Package.country),
             joinedload(Package.holiday_types)
-        ).filter(Package.is_active == True).offset(skip).limit(limit).all()
+        ).filter(Package.is_active == True)
+
+        # Apply ordering
+        if order_by == "created_at":
+            if order == "desc":
+                query = query.order_by(Package.created_at.desc())
+            else:
+                query = query.order_by(Package.created_at.asc())
+        elif order_by == "name":
+            if order == "desc":
+                query = query.order_by(Package.name.desc())
+            else:
+                query = query.order_by(Package.name.asc())
+        elif order_by == "price":
+            if order == "desc":
+                query = query.order_by(Package.price.desc())
+            else:
+                query = query.order_by(Package.price.asc())
+
+        return query.offset(skip).limit(limit).all()
     
     def get_packages_by_country(self, db: Session, country_id: int, skip: int = 0, limit: int = 100) -> List[Package]:
         """
@@ -73,7 +93,9 @@ class PackageService:
         package = db.query(Package).options(
             joinedload(Package.media_assets),
             joinedload(Package.country),
-            joinedload(Package.holiday_types)
+            joinedload(Package.holiday_types),
+            joinedload(Package.inclusion_items),
+            joinedload(Package.exclusion_items)
         ).filter(Package.slug == slug, Package.is_active == True).first()
         
         if not package:
@@ -144,6 +166,26 @@ class PackageService:
                 }
                 for ht in package.holiday_types
             ],
+            "inclusion_items": [
+                {
+                    "id": inc.id,
+                    "name": inc.name,
+                    "description": inc.description,
+                    "icon": inc.icon,
+                    "category": inc.category
+                }
+                for inc in package.inclusion_items
+            ],
+            "exclusion_items": [
+                {
+                    "id": exc.id,
+                    "name": exc.name,
+                    "description": exc.description,
+                    "icon": exc.icon,
+                    "category": exc.category
+                }
+                for exc in package.exclusion_items
+            ],
             "is_active": package.is_active,
             "is_featured": package.is_featured,
         }
@@ -172,6 +214,16 @@ class PackageService:
         if package_create.holiday_type_ids:
             holiday_types = db.query(HolidayType).filter(HolidayType.id.in_(package_create.holiday_type_ids)).all()
             db_package.holiday_types.extend(holiday_types)
+            
+        # Handle inclusions
+        if package_create.inclusion_ids:
+            inclusions = db.query(Inclusion).filter(Inclusion.id.in_(package_create.inclusion_ids)).all()
+            db_package.inclusion_items.extend(inclusions)
+            
+        # Handle exclusions
+        if package_create.exclusion_ids:
+            exclusions = db.query(Exclusion).filter(Exclusion.id.in_(package_create.exclusion_ids)).all()
+            db_package.exclusion_items.extend(exclusions)
         
         db.commit()
         db.refresh(db_package)
@@ -195,6 +247,24 @@ class PackageService:
                 if holiday_type_ids:
                     holiday_types = db.query(HolidayType).filter(HolidayType.id.in_(holiday_type_ids)).all()
                     db_package.holiday_types.extend(holiday_types)
+                    
+        # Handle inclusions separately
+        if 'inclusion_ids' in update_data:
+            inclusion_ids = update_data.pop('inclusion_ids')
+            if inclusion_ids is not None:
+                db_package.inclusion_items.clear()
+                if inclusion_ids:
+                    inclusions = db.query(Inclusion).filter(Inclusion.id.in_(inclusion_ids)).all()
+                    db_package.inclusion_items.extend(inclusions)
+                    
+        # Handle exclusions separately
+        if 'exclusion_ids' in update_data:
+            exclusion_ids = update_data.pop('exclusion_ids')
+            if exclusion_ids is not None:
+                db_package.exclusion_items.clear()
+                if exclusion_ids:
+                    exclusions = db.query(Exclusion).filter(Exclusion.id.in_(exclusion_ids)).all()
+                    db_package.exclusion_items.extend(exclusions)
         
         # If name is being updated, update the slug as well
         if "name" in update_data:
@@ -342,6 +412,74 @@ class PackageService:
         
         if db_media in db_package.media_assets:
             db_package.media_assets.remove(db_media)
+            db.commit()
+            db.refresh(db_package)
+        
+        return db_package
+
+    def add_inclusion(self, db: Session, package_id: int, inclusion_id: int) -> Optional[Package]:
+        """
+        Add an inclusion to a package.
+        """
+        db_package = db.query(Package).filter(Package.id == package_id).first()
+        db_inclusion = db.query(Inclusion).filter(Inclusion.id == inclusion_id).first()
+        
+        if not db_package or not db_inclusion:
+            return None
+        
+        if db_inclusion not in db_package.inclusion_items:
+            db_package.inclusion_items.append(db_inclusion)
+            db.commit()
+            db.refresh(db_package)
+        
+        return db_package
+    
+    def remove_inclusion(self, db: Session, package_id: int, inclusion_id: int) -> Optional[Package]:
+        """
+        Remove an inclusion from a package.
+        """
+        db_package = db.query(Package).filter(Package.id == package_id).first()
+        db_inclusion = db.query(Inclusion).filter(Inclusion.id == inclusion_id).first()
+        
+        if not db_package or not db_inclusion:
+            return None
+        
+        if db_inclusion in db_package.inclusion_items:
+            db_package.inclusion_items.remove(db_inclusion)
+            db.commit()
+            db.refresh(db_package)
+        
+        return db_package
+    
+    def add_exclusion(self, db: Session, package_id: int, exclusion_id: int) -> Optional[Package]:
+        """
+        Add an exclusion to a package.
+        """
+        db_package = db.query(Package).filter(Package.id == package_id).first()
+        db_exclusion = db.query(Exclusion).filter(Exclusion.id == exclusion_id).first()
+        
+        if not db_package or not db_exclusion:
+            return None
+        
+        if db_exclusion not in db_package.exclusion_items:
+            db_package.exclusion_items.append(db_exclusion)
+            db.commit()
+            db.refresh(db_package)
+        
+        return db_package
+    
+    def remove_exclusion(self, db: Session, package_id: int, exclusion_id: int) -> Optional[Package]:
+        """
+        Remove an exclusion from a package.
+        """
+        db_package = db.query(Package).filter(Package.id == package_id).first()
+        db_exclusion = db.query(Exclusion).filter(Exclusion.id == exclusion_id).first()
+        
+        if not db_package or not db_exclusion:
+            return None
+        
+        if db_exclusion in db_package.exclusion_items:
+            db_package.exclusion_items.remove(db_exclusion)
             db.commit()
             db.refresh(db_package)
         

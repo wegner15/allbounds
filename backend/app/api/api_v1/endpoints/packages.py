@@ -20,11 +20,15 @@ def get_packages(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
+    order_by: str = "created_at",
+    order: str = "desc",
 ) -> Any:
     """
-    Retrieve all packages.
+    Retrieve all packages with optional ordering.
+    order_by options: created_at, name, price
+    order options: asc, desc
     """
-    packages = package_service.get_packages(db, skip=skip, limit=limit)
+    packages = package_service.get_packages(db, skip=skip, limit=limit, order_by=order_by, order=order)
     return packages
 
 @router.get("/country/{country_id}", response_model=List[PackageWithCountryResponse])

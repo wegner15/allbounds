@@ -61,6 +61,11 @@ import HotelsListPage from './features/admin/hotels/HotelsListPage';
 import CreateHotelPage from './features/admin/hotels/CreateHotelPage';
 import EditHotelPage from './features/admin/hotels/EditHotelPage';
 import HotelRelationshipsPage from './features/admin/hotels/HotelRelationshipsPage';
+
+// Import admin hotel types pages
+import HotelTypesListPage from './features/admin/hotel-types/HotelTypesListPage';
+import CreateHotelTypePage from './features/admin/hotel-types/CreateHotelTypePage';
+import EditHotelTypePage from './features/admin/hotel-types/EditHotelTypePage';
 import AttractionsListPage from './features/admin/attractions/AttractionsListPage';
 import CreateAttractionPage from './features/admin/attractions/CreateAttractionPage';
 import EditAttractionPage from './features/admin/attractions/EditAttractionPage';
@@ -73,6 +78,14 @@ import EditBlogPage from './features/admin/blog/EditBlogPage';
 import ActivityListPage from './features/admin/activities/ActivityListPage';
 import ActivityCreatePage from './features/admin/activities/ActivityCreatePage';
 import ActivityEditPage from './features/admin/activities/ActivityEditPage';
+
+// Import admin inclusion/exclusion pages
+import InclusionsListPage from './features/admin/inclusions/InclusionsListPage';
+import CreateInclusionPage from './features/admin/inclusions/CreateInclusionPage';
+import EditInclusionPage from './features/admin/inclusions/EditInclusionPage';
+import ExclusionsListPage from './features/admin/exclusions/ExclusionsListPage';
+import CreateExclusionPage from './features/admin/exclusions/CreateExclusionPage';
+import EditExclusionPage from './features/admin/exclusions/EditExclusionPage';
 
 // Import public pages
 import BlogListPage from './features/public/blog/BlogListPage';
@@ -298,6 +311,18 @@ const router = createBrowserRouter([
       { path: 'hotels/new', element: <CreateHotelPage /> },
       { path: 'hotels/:id/edit', element: <EditHotelPage /> },
       { path: 'hotels/:id/relationships', element: <HotelRelationshipsPage /> },
+      // Hotel types management routes
+      { path: 'hotel-types', element: <HotelTypesListPage /> },
+      { path: 'hotel-types/new', element: <CreateHotelTypePage /> },
+      { path: 'hotel-types/:id/edit', element: <EditHotelTypePage /> },
+      // Inclusion management routes
+      { path: 'inclusions', element: <InclusionsListPage /> },
+      { path: 'inclusions/new', element: <CreateInclusionPage /> },
+      { path: 'inclusions/:id/edit', element: <EditInclusionPage /> },
+      // Exclusion management routes
+      { path: 'exclusions', element: <ExclusionsListPage /> },
+      { path: 'exclusions/new', element: <CreateExclusionPage /> },
+      { path: 'exclusions/:id/edit', element: <EditExclusionPage /> },
       // Attraction management routes
       { path: 'attractions', element: <AttractionsListPage /> },
       { path: 'attractions/new', element: <CreateAttractionPage /> },

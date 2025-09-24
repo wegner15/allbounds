@@ -12,6 +12,12 @@ export interface Hotel {
     name: string;
     slug: string;
   };
+  hotel_type_id?: number;
+  hotel_type?: {
+    id: number;
+    name: string;
+    slug: string;
+  };
   stars?: number;
   address?: string;
   city?: string;
@@ -33,6 +39,7 @@ export interface HotelCreateInput {
   summary?: string;
   description?: string;
   country_id: number;
+  hotel_type_id?: number;
   stars?: number;
   address?: string;
   city?: string;

@@ -328,6 +328,19 @@ class ItineraryService:
             
             formatted_custom_activities.append(activity_data)
         
+        # Format linked activities
+        linked_activities = []
+        for activity in item.linked_activities:
+            linked_activities.append({
+                "id": activity.id,
+                "name": activity.name,
+                "description": activity.description,
+                "slug": activity.slug,
+                "is_active": activity.is_active,
+                "created_at": activity.created_at.isoformat() if activity.created_at else None,
+                "updated_at": activity.updated_at.isoformat() if activity.updated_at else None
+            })
+            
         return {
             "id": item.id,
             "entity_type": item.entity_type.value,
@@ -344,7 +357,7 @@ class ItineraryService:
             "linked_activity_ids": [activity.id for activity in item.linked_activities],
             "hotels": hotels,
             "attractions": attractions,
-            "linked_activities": [activity.name for activity in item.linked_activities],
+            "linked_activities": linked_activities,
             "accommodation_notes": item.accommodation_notes,
             "custom_activities": formatted_custom_activities
         }

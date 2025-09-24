@@ -28,8 +28,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
     { name: 'Packages', href: '/admin/packages', icon: 'package' },
     { name: 'Group Trips', href: '/admin/group-trips', icon: 'users' },
     { name: 'Hotels', href: '/admin/hotels', icon: 'home' },
+    { name: 'Hotel Types', href: '/admin/hotel-types', icon: 'building' },
     { name: 'Attractions', href: '/admin/attractions', icon: 'ticket' },
     { name: 'Activities', href: '/admin/activities', icon: 'ticket' },
+    { 
+      name: 'Inclusions & Exclusions', 
+      href: '#', 
+      icon: 'list-check',
+      subItems: [
+        { name: 'Inclusions', href: '/admin/inclusions' },
+        { name: 'Exclusions', href: '/admin/exclusions' }
+      ] 
+    },
     { name: 'Blog', href: '/admin/blog', icon: 'newspaper' },
     { name: 'Users', href: '/admin/users', icon: 'user-group' },
     { name: 'Newsletter', href: '/admin/newsletter', icon: 'mail' },
@@ -114,6 +124,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
         return (
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        );
+      case 'building':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+        );
+      case 'list-check':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
           </svg>
         );
       default:

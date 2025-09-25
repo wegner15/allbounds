@@ -64,9 +64,9 @@ const PopularTrips: React.FC = () => {
                   <Heart className="w-5 h-5" />
                 </button>
               </div>
-              <div className="p-4">
-                <h3 className="font-bold text-lg text-gray-800 truncate h-6 group-hover:text-blue-600 transition-colors">{trip.name}</h3>
-                <p className="text-sm text-gray-500 mb-2">{trip.country.name}</p>
+               <div className="p-4">
+                 <h3 className="font-bold text-lg text-gray-800 truncate h-6 group-hover:text-blue-600 transition-colors">{trip.name}</h3>
+                 <p className="text-sm text-gray-600 mb-2 h-8 line-clamp-2">{trip.summary || trip.country.name}</p>
                 <div className="flex items-center mb-4">
                    <div className="flex items-center text-sm text-gray-600">
                         <Star className="w-4 h-4 mr-1 text-yellow-400 fill-current" />

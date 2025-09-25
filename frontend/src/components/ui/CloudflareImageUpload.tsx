@@ -39,6 +39,7 @@ const CloudflareImageUpload: React.FC<CloudflareImageUploadProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Mutations for direct upload and regular upload
@@ -193,6 +194,38 @@ const CloudflareImageUpload: React.FC<CloudflareImageUploadProps> = ({
     fileInputRef.current?.click();
   };
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+
+    if (imageFiles.length > 0) {
+      // Create a synthetic event
+      const syntheticEvent = {
+        target: { files: imageFiles },
+        currentTarget: { files: imageFiles },
+        preventDefault: () => {},
+        stopPropagation: () => {},
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
+      handleFileChange(syntheticEvent);
+    }
+  };
+
   return (
     <div className={`cloudflare-image-upload ${className}`}>
       <input
@@ -203,18 +236,44 @@ const CloudflareImageUpload: React.FC<CloudflareImageUploadProps> = ({
         className="hidden"
         disabled={isUploading}
       />
-      
-      <button
-        type="button"
+
+      <div
+        className={`relative border-2 border-dashed rounded-lg p-4 transition-colors ${
+          isDragOver
+            ? 'border-blue-400 bg-blue-50'
+            : 'border-gray-300 bg-gray-50 hover:border-gray-400'
+        } ${isUploading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         onClick={handleButtonClick}
-        disabled={isUploading}
-        className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-          isUploading ? 'opacity-50 cursor-not-allowed' : ''
-        }`}
       >
-        {isUploading ? 'Uploading...' : buttonText}
-      </button>
-      
+        <div className="text-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className={`mx-auto h-8 w-8 mb-2 ${isDragOver ? 'text-blue-500' : 'text-gray-400'}`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+          <p className={`text-sm font-medium ${isDragOver ? 'text-blue-600' : 'text-gray-600'}`}>
+            {isUploading
+              ? 'Uploading...'
+              : isDragOver
+                ? 'Drop image here'
+                : buttonText
+            }
+          </p>
+          {!isUploading && (
+            <p className="text-xs text-gray-500 mt-1">
+              or drag and drop here
+            </p>
+          )}
+        </div>
+      </div>
+
       {isUploading && (
         <div className="mt-2">
           <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -228,7 +287,7 @@ const CloudflareImageUpload: React.FC<CloudflareImageUploadProps> = ({
           </p>
         </div>
       )}
-      
+
       {error && (
         <p className="text-sm text-red-600 mt-2">{error}</p>
       )}

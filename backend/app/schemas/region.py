@@ -6,6 +6,7 @@ from datetime import datetime
 class RegionBase(BaseModel):
     name: str = Field(..., description="Name of the region", example="Africa")
     description: Optional[str] = Field(None, description="Description of the region")
+    summary: Optional[str] = Field(None, description="Brief summary of the region")
     image_id: Optional[str] = Field(None, description="Cloudflare Images ID for the region image")
     
 # Schema for creating a new Region
@@ -16,6 +17,7 @@ class RegionCreate(RegionBase):
 class RegionUpdate(BaseModel):
     name: Optional[str] = Field(None, description="Name of the region")
     description: Optional[str] = Field(None, description="Description of the region")
+    summary: Optional[str] = Field(None, description="Brief summary of the region")
     image_id: Optional[str] = Field(None, description="Cloudflare Images ID for the region image")
     is_active: Optional[bool] = Field(None, description="Whether the region is active")
 

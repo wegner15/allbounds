@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { usePackages } from '../../../lib/hooks/usePackages';
+import CloudflareImage from '../../../components/ui/CloudflareImage';
 
 const PackagesListPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -100,15 +101,17 @@ const PackagesListPage: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredPackages.map((pkg) => (
                   <tr key={pkg.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <img
-                            className="h-10 w-10 rounded-md object-cover"
-                            src={pkg.image_id ? `${import.meta.env.VITE_CLOUDFLARE_IMAGES_DELIVERY_URL}/${pkg.image_id}/thumbnail` : 'https://source.unsplash.com/random/100x100/?safari'}
-                            alt={pkg.name}
-                          />
-                        </div>
+                     <td className="px-6 py-4 whitespace-nowrap">
+                       <div className="flex items-center">
+                         <div className="flex-shrink-0 h-10 w-10">
+                           <CloudflareImage
+                             imageId={pkg.image_id || ''}
+                             variant="medium"
+                             alt={pkg.name}
+                             className="h-10 w-10 rounded-md object-cover"
+                             placeholder="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=40&h=40&q=80"
+                           />
+                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{pkg.name}</div>
                           <div className="text-sm text-gray-500">{pkg.slug}</div>

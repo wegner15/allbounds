@@ -8,6 +8,7 @@ from .media import MediaAssetResponse
 class ActivityBase(BaseModel):
     name: str = Field(..., description="Name of the activity", example="Safari")
     description: Optional[str] = Field(None, description="Description of the activity")
+    summary: Optional[str] = Field(None, description="Brief summary of the activity")
 
 # Schema for creating a new Activity
 class ActivityCreate(ActivityBase):
@@ -19,6 +20,7 @@ class ActivityCreate(ActivityBase):
 class ActivityUpdate(BaseModel):
     name: Optional[str] = Field(None, description="Name of the activity")
     description: Optional[str] = Field(None, description="Description of the activity")
+    summary: Optional[str] = Field(None, description="Brief summary of the activity")
     is_active: Optional[bool] = Field(None, description="Whether the activity is active")
     cover_image_id: Optional[int] = Field(None, description="ID of the cover image media asset")
     media_asset_ids: Optional[List[int]] = Field(None, description="List of media asset IDs for the gallery")

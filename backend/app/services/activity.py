@@ -56,6 +56,7 @@ class ActivityService:
         db_activity = Activity(
             name=activity_create.name,
             description=activity_create.description,
+            summary=activity_create.summary,
             slug=slug,
             is_active=activity_create.is_active if activity_create.is_active is not None else True,
             cover_image_id=activity_create.cover_image_id

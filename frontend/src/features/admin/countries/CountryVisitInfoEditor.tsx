@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useCountryVisitInfo, useUpdateCountryVisitInfo } from '../../../lib/hooks/useCountryVisitInfo';
+import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
 import type { CountryVisitInfo, MonthlyVisitRating, VisitRating } from '../../../lib/types/country';
 
 interface CountryVisitInfoEditorProps {
@@ -144,18 +145,17 @@ const CountryVisitInfoEditor: React.FC<CountryVisitInfoEditorProps> = ({ country
       
       <form>
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            General Notes
-          </label>
           <Controller
             name="general_notes"
             control={control}
             render={({ field }) => (
-              <textarea
-                {...field}
+              <TinyMCEEditor
+                value={field.value || ''}
+                onChange={field.onChange}
+                label="General Notes"
+                placeholder="Enter general information about visiting this country..."
+                height={300}
                 disabled={!isEditing}
-                className="w-full p-2 border rounded-md"
-                rows={4}
               />
             )}
           />

@@ -59,6 +59,7 @@ class RegionService:
         db_region = Region(
             name=region_create.name,
             description=region_create.description,
+            summary=region_create.summary,
             slug=slug,
         )
         db.add(db_region)

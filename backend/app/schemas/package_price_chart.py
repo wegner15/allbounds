@@ -1,12 +1,12 @@
 from pydantic import BaseModel, Field, validator
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, date
 
 # Base Price Chart Schema
 class PackagePriceChartBase(BaseModel):
     title: str = Field(..., description="Title of the price chart period", example="Summer 2025")
-    start_date: datetime = Field(..., description="Start date of the price period")
-    end_date: datetime = Field(..., description="End date of the price period")
+    start_date: date = Field(..., description="Start date of the price period")
+    end_date: date = Field(..., description="End date of the price period")
     price: float = Field(..., description="Price in USD for this period", ge=0)
 
     @validator('end_date')
@@ -23,8 +23,8 @@ class PackagePriceChartCreate(PackagePriceChartBase):
 # Schema for updating a Price Chart
 class PackagePriceChartUpdate(BaseModel):
     title: Optional[str] = Field(None, description="Title of the price chart period")
-    start_date: Optional[datetime] = Field(None, description="Start date of the price period")
-    end_date: Optional[datetime] = Field(None, description="End date of the price period")
+    start_date: Optional[date] = Field(None, description="Start date of the price period")
+    end_date: Optional[date] = Field(None, description="End date of the price period")
     price: Optional[float] = Field(None, description="Price in USD for this period", ge=0)
     is_active: Optional[bool] = Field(None, description="Whether the price chart is active")
 

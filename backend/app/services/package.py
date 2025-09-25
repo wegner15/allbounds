@@ -1,4 +1,5 @@
 from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 from sqlalchemy.orm import Session, joinedload
 
@@ -11,7 +12,7 @@ from app.utils.slug import create_slug
 from app.core.cloudflare_config import cloudflare_settings
 
 class PackageService:
-    def _get_cloudflare_image_url(self, image_id: str, variant: str = "medium") -> str:
+    def _get_cloudflare_image_url(self, image_id: str, variant: str = "medium") -> Optional[str]:
         """
         Generate Cloudflare Images delivery URL.
         """
@@ -205,6 +206,9 @@ class PackageService:
             itinerary=package_create.itinerary,
             inclusions=package_create.inclusions,
             exclusions=package_create.exclusions,
+            image_id=package_create.image_id,
+            is_active=package_create.is_active,
+            is_featured=package_create.is_featured,
             slug=slug,
         )
         db.add(db_package)
@@ -359,28 +363,39 @@ class PackageService:
         """
         import logging
         logger = logging.getLogger(__name__)
-        
+
         logger.info(f"Setting cover image for package {package_id} with image_id {image_id} (type: {type(image_id)})")
-        
+
         db_package = db.query(Package).filter(Package.id == package_id).first()
         if not db_package:
             logger.error(f"Package with ID {package_id} not found")
             return None
-        
+
         # Convert image_id to string if it's not already
         if image_id is not None and not isinstance(image_id, str):
             image_id = str(image_id)
             logger.info(f"Converted image_id to string: {image_id}")
-        
-        # Update the package's image_id
-        db_package.image_id = image_id
-        logger.info(f"Updated package {package_id} with image_id {image_id}")
-        
+
+        # Check if image_id is a number (internal media ID) or a Cloudflare key
+        final_image_id = image_id
+        if image_id and image_id.isdigit():
+            # It's an internal media ID, look up the storage_key
+            media_asset = db.query(MediaAsset).filter(MediaAsset.id == int(image_id)).first()
+            if media_asset and media_asset.storage_key:
+                final_image_id = media_asset.storage_key
+                logger.info(f"Found Cloudflare key {final_image_id} for media ID {image_id}")
+            else:
+                logger.warning(f"No storage_key found for media ID {image_id}")
+
+        # Update the package's image_id with the Cloudflare key
+        db_package.image_id = final_image_id
+        logger.info(f"Updated package {package_id} with image_id {final_image_id}")
+
         # Commit the changes
         db.commit()
         db.refresh(db_package)
         logger.info(f"Changes committed. Package now has image_id: {db_package.image_id}")
-        
+
         return db_package
     
     def add_media_to_package(self, db: Session, package_id: int, media_id: int) -> Optional[Package]:

@@ -68,9 +68,9 @@ const TrendingActivities: React.FC = () => {
                   <Heart className="w-5 h-5" />
                 </button>
               </div>
-              <div className="p-4">
-                <h3 className="font-bold text-lg text-gray-800 truncate h-12 group-hover:text-blue-600 transition-colors">{activity.name}</h3>
-                <p className="text-sm text-gray-500 mb-2 h-5 truncate">{activity.countries?.map(c => c.name).join(', ') || 'No location specified'}</p>
+               <div className="p-4">
+                 <h3 className="font-bold text-lg text-gray-800 truncate h-12 group-hover:text-blue-600 transition-colors">{activity.name}</h3>
+                 <p className="text-sm text-gray-600 mb-2 h-10 line-clamp-2">{activity.summary || activity.countries?.map(c => c.name).join(', ') || 'No description available'}</p>
                 <div className="flex items-center text-sm text-gray-600 mb-2">
                     <Clock className="w-4 h-4 mr-1" />
                     <span>{activity.duration || 'N/A'}</span>

@@ -10,7 +10,7 @@ import { useCreatePackage, useUpdatePackage } from '../../../lib/hooks/usePackag
 import { useInclusions } from '../../../lib/hooks/useInclusions';
 import { useExclusions } from '../../../lib/hooks/useExclusions';
 import ImageSelector from '../../../components/ui/ImageSelector';
-import TipTapEditor from '../../../components/ui/TipTapEditor';
+import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
 import GalleryManager from '../../../components/admin/GalleryManager';
 import PriceChartManager from '../../../components/admin/PriceChartManager';
 import { SimpleItineraryManager } from '../../../components/admin/SimpleItineraryManager';
@@ -23,6 +23,7 @@ const packageSchema = z.object({
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase with hyphens'),
   description: z.string().min(10, 'Description must be at least 10 characters')
     .max(5000, 'Description cannot exceed 5000 characters'),
+  summary: z.string().max(255, 'Summary cannot exceed 255 characters').optional(),
   price: z.number().min(1, 'Price must be greater than 0'),
   duration_days: z.number().min(1, 'Duration must be at least 1 day'),
   country_id: z.number().min(1, 'Please select a country'),
@@ -31,6 +32,7 @@ const packageSchema = z.object({
   exclusion_ids: z.array(z.number()).optional(),
   image_id: z.string().optional(),
   is_active: z.boolean(),
+  is_featured: z.boolean(),
 });
 
 type PackageFormData = z.infer<typeof packageSchema>;
@@ -72,6 +74,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
           name: packageData.name,
           slug: packageData.slug,
           description: packageData.description,
+          summary: packageData.summary || '',
           price: packageData.price,
           duration_days: packageData.duration_days,
           country_id: packageData.country_id,
@@ -80,11 +83,13 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
           exclusion_ids: packageData.exclusion_items?.map((item: any) => item.id) || [],
           image_id: packageData.image_id || '',
           is_active: packageData.is_active,
+          is_featured: packageData.is_featured,
         }
       : {
           name: '',
           slug: '',
           description: '',
+          summary: '',
           price: 0,
           duration_days: 1,
           country_id: 0,
@@ -93,6 +98,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
           exclusion_ids: [],
           image_id: '',
           is_active: true,
+          is_featured: false,
         },
   });
   
@@ -109,6 +115,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       setValue('name', packageData.name || '');
       setValue('slug', packageData.slug || '');
       setValue('description', packageData.description || '');
+      setValue('summary', packageData.summary || '');
       setValue('price', packageData.price || 0);
       setValue('duration_days', packageData.duration_days || 1);
       setValue('country_id', packageData.country_id || 0);
@@ -117,6 +124,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       setValue('exclusion_ids', packageData.exclusion_items?.map((item: any) => item.id) || []);
       setValue('image_id', packageData.image_id || '');
       setValue('is_active', packageData.is_active ?? true);
+      setValue('is_featured', packageData.is_featured ?? false);
       
       console.log('PackageForm: Set country_id to:', packageData.country_id);
       console.log('PackageForm: Set holiday_type_ids to:', packageData.holiday_types?.map((ht: any) => ht.id) || []);
@@ -128,13 +136,15 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
         setGalleryImages(packageData.gallery_images);
       }
       
-      // Initialize cover image
-      if (packageData.cover_image) {
-        const imageId = typeof packageData.cover_image === 'string' 
-          ? null // We'll need to handle URL to ID conversion if needed
-          : packageData.cover_image;
-        setCoverImageId(imageId);
-      }
+       // Initialize cover image
+       if (packageData.image_id) {
+         setCoverImageId(parseInt(packageData.image_id));
+       } else if (packageData.cover_image) {
+         const imageId = typeof packageData.cover_image === 'string'
+           ? null // We'll need to handle URL to ID conversion if needed
+           : packageData.cover_image;
+         setCoverImageId(imageId);
+       }
     }
   }, [isEdit, packageData, setValue]);
 
@@ -155,32 +165,19 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
     setServerError(null);
     
     try {
-      // Prepare the data for submission
-      const packageData = {
-        ...formData,
-        // Use coverImageId if available, otherwise use the form's image_id
-        // Convert to string as the API expects
-        image_id: coverImageId ? coverImageId.toString() : formData.image_id || undefined
-      };
+        // Prepare the data for submission
+        const packageData = {
+          ...formData,
+          // Ensure is_featured is included from the form state
+          is_featured: watch('is_featured'),
+          // Use the form's image_id (which is now properly set by the ImageSelector)
+          image_id: formData.image_id || undefined
+        };
       
       console.log('Submitting package with data:', packageData);
       
-      if (isEdit) {
-        await updatePackageMutation.mutateAsync(packageData);
-        
-        // If we have a cover image, also update it via the cover image endpoint
-        if (coverImageId) {
-          try {
-            console.log('Setting cover image:', coverImageId);
-            // Make a separate API call to set the cover image
-            const coverImageResponse = await apiClient.post(`/api/v1/packages/${packageId}/cover-image`, {
-              image_id: coverImageId.toString()
-            });
-            console.log('Cover image set successfully:', coverImageResponse);
-          } catch (coverError) {
-            console.error('Error setting cover image:', coverError);
-          }
-        }
+       if (isEdit) {
+         await updatePackageMutation.mutateAsync(packageData);
         
         // Update inclusions and exclusions
         try {
@@ -196,20 +193,11 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
         } catch (error) {
           console.error('Error updating inclusions/exclusions:', error);
         }
-      } else {
-        const newPackage = await createPackageMutation.mutateAsync(packageData);
-        
-        // If we have a cover image and the package was created successfully, set the cover image
-        if (coverImageId && newPackage?.id) {
-          try {
-            console.log('Setting cover image for new package:', coverImageId);
-            await apiClient.post(`/api/v1/packages/${newPackage.id}/cover-image`, {
-              image_id: coverImageId.toString()
-            });
-          } catch (coverError) {
-            console.error('Error setting cover image for new package:', coverError);
-          }
-        }
+       } else {
+         const newPackage = await createPackageMutation.mutateAsync(packageData);
+
+         // The cover image is already set via the image_id in the package data
+         // No additional API call needed for new packages
         
         // Add inclusions and exclusions for the new package
         if (newPackage?.id) {
@@ -354,21 +342,56 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
           
           {/* Description */}
           <div className="sm:col-span-6">
-            <TipTapEditor
+            <Controller
               name="description"
               control={control}
-              label="Description"
-              maxLength={5000}
-              required={true}
-              helperText="Describe the package in detail. Include key features, experiences, and what makes it unique."
-              placeholder="Provide a detailed description of this package..."
-              height={350}
-              value=""
-              onChange={() => {}}
+              render={({ field, fieldState }) => (
+                <TinyMCEEditor
+                  value={field.value}
+                  onChange={field.onChange}
+                  label="Description"
+                  placeholder="Provide a detailed description of this package..."
+                  height={350}
+                  maxLength={5000}
+                  error={fieldState.error?.message}
+                  helperText="Describe the package in detail. Include key features, experiences, and what makes it unique."
+                  required
+                />
+              )}
             />
-          </div>
-          
-          {/* Price */}
+           </div>
+
+           {/* Summary */}
+           <div className="sm:col-span-6">
+             <div className="flex justify-between items-center">
+               <label htmlFor="summary" className="block text-sm font-semibold text-gray-800">
+                 Summary
+               </label>
+               <span className="text-xs text-gray-500 font-medium">
+                 {watch('summary')?.length || 0}/255 characters
+               </span>
+             </div>
+             <div className="mt-2">
+               <textarea
+                 id="summary"
+                 rows={3}
+                 placeholder="Write a concise summary that will appear in cards and previews..."
+                 className={`block w-full px-4 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200
+                   ${errors.summary
+                     ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
+                     : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
+                 `}
+                 {...register('summary')}
+               />
+               {errors.summary ? (
+                 <p className="mt-2 text-sm text-red-600 font-medium">{errors.summary.message}</p>
+               ) : (
+                 <p className="mt-2 text-xs text-gray-500">A brief summary for card displays and search results</p>
+               )}
+             </div>
+           </div>
+
+           {/* Price */}
           <div className="sm:col-span-2">
             <div className="flex justify-between items-center">
               <label htmlFor="price" className="block text-sm font-semibold text-gray-800">
@@ -582,36 +605,39 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
               <div className="mb-3">
                 <p className="text-sm text-gray-700">Upload or select an image for this package:</p>
               </div>
-              <ImageSelector
-                initialImageId={watch('image_id')}
-                onImageSelected={(imageId) => {
-                  console.log('Package image selected:', imageId);
-                  
-                  // Update the form value
-                  setValue('image_id', imageId);
-                  
-                  // If we're editing an existing package, update the cover image immediately
-                  if (isEdit && packageId && imageId) {
-                    console.log('Immediately updating package cover image to:', imageId);
-                    apiClient.post(`/api/v1/packages/${packageId}/cover-image`, {
-                      image_id: imageId
-                    })
-                    .then(response => {
-                      console.log('Package cover image updated successfully:', response);
-                      
-                      // Force refresh the form data
-                      if (packageData) {
-                        packageData.image_id = imageId;
-                      }
-                    })
-                    .catch(error => {
-                      console.error('Error updating package cover image:', error);
-                    });
-                  } else if (!isEdit && imageId) {
-                    // For new packages, just store the image ID to be used when creating the package
-                    console.log('Storing image ID for new package:', imageId);
-                  }
-                }}
+               <ImageSelector
+                 initialImageId={watch('image_id')}
+                 onImageSelected={(imageId) => {
+                   console.log('Package image selected:', imageId);
+
+                   // Update the form value
+                   setValue('image_id', imageId);
+
+                   // Update the cover image state for both create and edit
+                   setCoverImageId(imageId ? parseInt(imageId) : null);
+
+                   // If we're editing an existing package, update the cover image immediately
+                   if (isEdit && packageId && imageId) {
+                     console.log('Immediately updating package cover image to:', imageId);
+                     apiClient.post(`/api/v1/packages/${packageId}/cover-image`, {
+                       image_id: imageId
+                     })
+                     .then(response => {
+                       console.log('Package cover image updated successfully:', response);
+
+                       // Force refresh the form data
+                       if (packageData) {
+                         packageData.image_id = imageId;
+                       }
+                     })
+                     .catch(error => {
+                       console.error('Error updating package cover image:', error);
+                     });
+                   } else if (!isEdit && imageId) {
+                     // For new packages, store the image ID to be used when creating the package
+                     console.log('Storing image ID for new package:', imageId);
+                   }
+                 }}
                 variant="thumbnail"
                 className="mt-2"
               />
@@ -829,10 +855,50 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
           <div className="sm:col-span-6">
             <div className="flex justify-between items-center">
               <label className="block text-sm font-semibold text-gray-800">
-                Visibility Status
+                Package Status
               </label>
             </div>
-            <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-gray-200">
+            <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-gray-200 space-y-6">
+              {/* Featured Status */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-medium text-gray-800">Featured Package</h3>
+                  <p className="text-sm text-gray-500 mt-1">Display this package in the hero carousel on the packages page</p>
+                </div>
+                <div className="flex items-center bg-gray-50 px-4 py-2 rounded-lg">
+                  <span className={`mr-3 text-sm font-medium ${watch('is_featured') ? 'text-yellow-600' : 'text-gray-500'}`}>
+                    {watch('is_featured') ? 'Featured' : 'Not Featured'}
+                  </span>
+                  <button
+                    type="button"
+                    className={`${watch('is_featured') ? 'bg-yellow-500' : 'bg-gray-300'}
+                      relative inline-flex flex-shrink-0 h-7 w-14 border-2 border-transparent rounded-full
+                      cursor-pointer transition-all ease-in-out duration-200 focus:outline-none focus:ring-2
+                      focus:ring-offset-2 focus:ring-yellow-500 shadow-sm`}
+                    onClick={() => setValue('is_featured', !watch('is_featured'))}
+                  >
+                    <span className="sr-only">Toggle featured status</span>
+                    <span
+                      aria-hidden="true"
+                      className={`${watch('is_featured') ? 'translate-x-7' : 'translate-x-0'}
+                        pointer-events-none inline-block h-6 w-6 rounded-full bg-white shadow
+                        transform ring-0 transition ease-in-out duration-200 flex items-center justify-center`}
+                    >
+                      {watch('is_featured') ? (
+                        <svg className="h-3 w-3 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ) : (
+                        <svg className="h-3 w-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Active Status */}
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-base font-medium text-gray-800">Publication Status</h3>
@@ -844,32 +910,38 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                   </span>
                   <button
                     type="button"
-                    className={`${watch('is_active') ? 'bg-teal' : 'bg-gray-300'} 
-                      relative inline-flex flex-shrink-0 h-7 w-14 border-2 border-transparent rounded-full 
-                      cursor-pointer transition-all ease-in-out duration-200 focus:outline-none focus:ring-2 
+                    className={`${watch('is_active') ? 'bg-teal' : 'bg-gray-300'}
+                      relative inline-flex flex-shrink-0 h-7 w-14 border-2 border-transparent rounded-full
+                      cursor-pointer transition-all ease-in-out duration-200 focus:outline-none focus:ring-2
                       focus:ring-offset-2 focus:ring-teal shadow-sm`}
                     onClick={() => setValue('is_active', !watch('is_active'))}
                   >
                     <span className="sr-only">Toggle visibility</span>
                     <span
                       aria-hidden="true"
-                      className={`${watch('is_active') ? 'translate-x-7' : 'translate-x-0'} 
-                        pointer-events-none inline-block h-6 w-6 rounded-full bg-white shadow 
+                      className={`${watch('is_active') ? 'translate-x-7' : 'translate-x-0'}
+                        pointer-events-none inline-block h-6 w-6 rounded-full bg-white shadow
                         transform ring-0 transition ease-in-out duration-200 flex items-center justify-center`}
-                    >
-                      {watch('is_active') ? (
-                        <svg className="h-3 w-3 text-teal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      ) : (
-                        <svg className="h-3 w-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </span>
-                  </button>
-                </div>
-              </div>
+                     >
+                       {watch('is_active') ? (
+                         <svg className="h-3 w-3 text-teal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                         </svg>
+                       ) : (
+                         <svg className="h-3 w-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                           <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                         </svg>
+                       )}
+                     </span>
+                   </button>
+                   {/* Hidden input to register the is_active field */}
+                   <input
+                     type="checkbox"
+                     className="hidden"
+                     {...register('is_active')}
+                   />
+                 </div>
+               </div>
             </div>
           </div>
         </div>
@@ -914,9 +986,15 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                   {isEdit ? 'Update Package' : 'Create Package'}
                 </>
               )}
-            </button>
-          </div>
-        </div>
+                   </button>
+                   {/* Hidden input to register the is_featured field */}
+                   <input
+                     type="checkbox"
+                     className="hidden"
+                     {...register('is_featured')}
+                   />
+                 </div>
+               </div>
       </div>
     </form>
   );

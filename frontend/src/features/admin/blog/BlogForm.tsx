@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Link from '@tiptap/extension-link';
-import Image from '@tiptap/extension-image';
+import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
 import type { BlogPost, BlogPostCreateInput, BlogPostUpdateInput } from '../../../lib/hooks/useBlogs';
 
 interface BlogFormProps {
@@ -23,21 +20,6 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading })
   });
   const [newTag, setNewTag] = useState('');
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Link.configure({
-        openOnClick: false,
-      }),
-      Image,
-    ],
-    content: '',
-    onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      setFormData(prev => ({ ...prev, content: html }));
-    },
-  });
-
   // Initialize form data
   useEffect(() => {
     if (initialData) {
@@ -49,20 +31,10 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading })
         tags: initialData.tags?.map(tag => tag.name) || [],
       };
       setFormData(newFormData);
-      if (editor && initialData.content) {
-        editor.commands.setContent(initialData.content);
-      }
     }
-  }, [initialData, editor]);
+  }, [initialData]);
 
-  // Tiptap toolbar functions
-  const toggleBold = () => editor?.chain().focus().toggleBold().run();
-  const toggleItalic = () => editor?.chain().focus().toggleItalic().run();
-  const toggleStrike = () => editor?.chain().focus().toggleStrike().run();
-  const toggleBulletList = () => editor?.chain().focus().toggleBulletList().run();
-  const toggleOrderedList = () => editor?.chain().focus().toggleOrderedList().run();
-  const setHeading = (level: 1 | 2 | 3) => editor?.chain().focus().toggleHeading({ level }).run();
-  const setParagraph = () => editor?.chain().focus().setParagraph().run();
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -183,169 +155,17 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading })
             </div>
           </div>
 
-          {/* Content Editor Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="px-8 py-6 border-b border-gray-200">
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Post Content *
-              </label>
-              <p className="text-sm text-gray-600">
-                Write your blog post content using the rich text editor below.
-              </p>
-            </div>
-            
-            {/* Enhanced Toolbar */}
-            {editor && (
-              <div className="px-8 py-4 bg-gray-50 border-b border-gray-200">
-                <div className="flex flex-wrap items-center gap-2">
-                  {/* Text Formatting */}
-                  <div className="flex items-center gap-1 bg-white rounded-lg border border-gray-200 p-1">
-                    <button
-                      type="button"
-                      onClick={toggleBold}
-                      className={`p-2 rounded-md transition-colors ${
-                        editor.isActive('bold') 
-                          ? 'bg-blue-500 text-white shadow-sm' 
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                      title="Bold"
-                    >
-                      <svg className="w-4 h-4 font-bold" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M6 4v12h4.5c2.5 0 4.5-2 4.5-4.5 0-1.5-.8-2.8-2-3.5C14.2 7.2 15 5.9 15 4.5 15 2 13 0 10.5 0H6v4zm3 0h1.5C11.3 4 12 4.7 12 5.5S11.3 7 10.5 7H9V4zm0 5h2c1.1 0 2 .9 2 2s-.9 2-2 2H9V9z"/>
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={toggleItalic}
-                      className={`p-2 rounded-md transition-colors ${
-                        editor.isActive('italic') 
-                          ? 'bg-blue-500 text-white shadow-sm' 
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                      title="Italic"
-                    >
-                      <svg className="w-4 h-4 italic" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M8 1h6v2H12l-2 12h2v2H6v-2h2L10 3H8V1z"/>
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={toggleStrike}
-                      className={`p-2 rounded-md transition-colors ${
-                        editor.isActive('strike') 
-                          ? 'bg-blue-500 text-white shadow-sm' 
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                      title="Strikethrough"
-                    >
-                      <span className="text-sm font-medium line-through">S</span>
-                    </button>
-                  </div>
-
-                  {/* Headings */}
-                  <div className="flex items-center gap-1 bg-white rounded-lg border border-gray-200 p-1">
-                    <button
-                      type="button"
-                      onClick={() => setHeading(1)}
-                      className={`px-3 py-2 text-sm font-bold rounded-md transition-colors ${
-                        editor.isActive('heading', { level: 1 }) 
-                          ? 'bg-blue-500 text-white shadow-sm' 
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                      title="Heading 1"
-                    >
-                      H1
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setHeading(2)}
-                      className={`px-3 py-2 text-sm font-bold rounded-md transition-colors ${
-                        editor.isActive('heading', { level: 2 }) 
-                          ? 'bg-blue-500 text-white shadow-sm' 
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                      title="Heading 2"
-                    >
-                      H2
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setHeading(3)}
-                      className={`px-3 py-2 text-sm font-bold rounded-md transition-colors ${
-                        editor.isActive('heading', { level: 3 }) 
-                          ? 'bg-blue-500 text-white shadow-sm' 
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                      title="Heading 3"
-                    >
-                      H3
-                    </button>
-                    <button
-                      type="button"
-                      onClick={setParagraph}
-                      className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                        editor.isActive('paragraph') 
-                          ? 'bg-blue-500 text-white shadow-sm' 
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                      title="Paragraph"
-                    >
-                      P
-                    </button>
-                  </div>
-
-                  {/* Lists */}
-                  <div className="flex items-center gap-1 bg-white rounded-lg border border-gray-200 p-1">
-                    <button
-                      type="button"
-                      onClick={toggleBulletList}
-                      className={`p-2 rounded-md transition-colors ${
-                        editor.isActive('bulletList') 
-                          ? 'bg-blue-500 text-white shadow-sm' 
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                      title="Bullet List"
-                    >
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M4 6a2 2 0 100-4 2 2 0 000 4zM4 12a2 2 0 100-4 2 2 0 000 4zM4 18a2 2 0 100-4 2 2 0 000 4zM8 5h10v2H8V5zM8 11h10v2H8v-2zM8 17h10v2H8v-2z"/>
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={toggleOrderedList}
-                      className={`p-2 rounded-md transition-colors ${
-                        editor.isActive('orderedList') 
-                          ? 'bg-blue-500 text-white shadow-sm' 
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                      title="Numbered List"
-                    >
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M3 4h1v1H3V4zm0 3h1v1H3V7zm0 3h1v1H3v-1zm0 3h1v1H3v-1zM7 4h11v2H7V4zm0 4h11v2H7V8zm0 4h11v2H7v-2zm0 4h11v2H7v-2z"/>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Editor Content Area */}
-            <div className="relative">
-              <EditorContent 
-                editor={editor} 
-                className="prose prose-lg max-w-none px-8 py-8 min-h-[500px] focus-within:bg-white"
-                style={{
-                  fontSize: '16px',
-                  lineHeight: '1.7',
-                }}
-              />
-              {(!editor?.getText() || editor?.getText().trim() === '') && (
-                <div className="absolute top-8 left-8 pointer-events-none text-gray-400 text-lg">
-                  Start writing your blog post here...
-                </div>
-              )}
-            </div>
-          </div>
+           {/* Content Editor Section */}
+           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+             <TinyMCEEditor
+               value={formData.content}
+               onChange={(content) => setFormData(prev => ({ ...prev, content }))}
+               label="Post Content"
+               placeholder="Write your blog post content here..."
+               height={500}
+               required
+             />
+           </div>
 
           {/* Tags Section */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">

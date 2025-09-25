@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
-import Textarea from '../../../components/ui/FormTextarea';
+import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
 import FormCheckbox from '../../../components/ui/FormCheckbox';
 import type { ActivityCreate, ActivityUpdate, MediaAsset } from '../../../lib/types/api';
 import MediaGallery from '../../../components/media/MediaGallery';
@@ -14,6 +14,7 @@ import CloudflareImageUpload from '../../../components/ui/CloudflareImageUpload'
 const activitySchema = z.object({
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional(),
+  summary: z.string().max(255, 'Summary cannot exceed 255 characters').optional(),
   is_active: z.boolean(),
   cover_image_id: z.number().nullable().optional(),
   media_asset_ids: z.array(z.number()).optional(),
@@ -55,12 +56,42 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ onSubmit, defaultValues, is
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
           <Controller
             name="description"
             control={control}
-            render={({ field }) => <Textarea id="description" {...field} />}
+            render={({ field }) => (
+              <TinyMCEEditor
+                name="description"
+                label="Description"
+                value={field.value || ''}
+                onChange={field.onChange}
+                helperText="Describe the activity in detail"
+                placeholder="Detailed description of the activity..."
+                height={300}
+              />
+            )}
           />
+        </div>
+
+        <div>
+          <label htmlFor="summary" className="block text-sm font-medium text-gray-700">
+            Summary
+          </label>
+          <Controller
+            name="summary"
+            control={control}
+            render={({ field }) => (
+              <textarea
+                id="summary"
+                rows={3}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Brief summary for cards and previews..."
+                {...field}
+              />
+            )}
+          />
+          {errors.summary && <p className="text-sm text-red-500 mt-1">{errors.summary.message}</p>}
+          <p className="text-xs text-gray-500 mt-1">A concise summary that appears in activity cards and search results</p>
         </div>
 
         <Controller

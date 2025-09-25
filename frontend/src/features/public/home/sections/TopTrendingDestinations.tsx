@@ -56,13 +56,16 @@ const TopTrendingDestinations: React.FC = () => {
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <h3 className="text-2xl font-bold text-white mb-2">{destination.name}</h3>
-                  <div className="flex items-center text-white/90 text-sm space-x-4">
-                    {tourCount > 0 && <span>{tourCount} Tours</span>}
-                    {activityCount > 0 && <span>{activityCount} Activities</span>}
-                  </div>
-                </div>
+                 <div className="absolute bottom-0 left-0 right-0 p-6">
+                   <h3 className="text-2xl font-bold text-white mb-2">{destination.name}</h3>
+                   {destination.summary && (
+                     <p className="text-white/80 text-sm mb-2 line-clamp-2">{destination.summary}</p>
+                   )}
+                   <div className="flex items-center text-white/90 text-sm space-x-4">
+                     {tourCount > 0 && <span>{tourCount} Tours</span>}
+                     {activityCount > 0 && <span>{activityCount} Activities</span>}
+                   </div>
+                 </div>
               </Link>
             );
           })}

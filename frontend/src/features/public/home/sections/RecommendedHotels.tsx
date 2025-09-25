@@ -81,9 +81,9 @@ const RecommendedHotels: React.FC = () => {
                   <Heart className="w-5 h-5" />
                 </button>
               </div>
-              <div className="p-4">
-                <h3 className="font-bold text-lg text-gray-800 truncate group-hover:text-blue-600 transition-colors">{hotel.name}</h3>
-                <p className="text-sm text-gray-500 mb-2">{hotel.city}, {hotel.country?.name}</p>
+               <div className="p-4">
+                 <h3 className="font-bold text-lg text-gray-800 truncate group-hover:text-blue-600 transition-colors">{hotel.name}</h3>
+                 <p className="text-sm text-gray-600 mb-2 h-8 line-clamp-2">{hotel.summary || `${hotel.city}, ${hotel.country?.name}`}</p>
                 <div className="flex items-center mb-4">
                   <div className="flex items-center text-blue-600 bg-blue-100 px-2 py-1 rounded-md font-bold text-sm">
                     <Star className="w-4 h-4 mr-1" fill="currentColor" />

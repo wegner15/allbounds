@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCountries } from '../../../lib/hooks/useCountries';
 import LocationPicker from '../../../components/LocationPicker';
 import GalleryManager from '../../../components/admin/GalleryManager';
-import RichTextEditor from '../../../components/ui/RichTextEditor';
+import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
 import type { Attraction, AttractionCreateInput, AttractionUpdateInput } from '../../../lib/hooks/useAttractions';
 import type { GalleryImage } from '../../../lib/types/api';
 
@@ -25,7 +25,7 @@ const AttractionForm: React.FC<AttractionFormProps> = ({ initialData, onSubmit, 
   
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [coverImageId, setCoverImageId] = useState<number | null>(null);
-  const [useRichText, setUseRichText] = useState(false);
+
 
   // Set initial form data if editing an existing attraction
   useEffect(() => {
@@ -285,55 +285,26 @@ const AttractionForm: React.FC<AttractionFormProps> = ({ initialData, onSubmit, 
       {/* Description */}
       <div className="border-b pb-6">
         <h2 className="text-lg font-semibold mb-4">Description</h2>
-        <div className="mb-4">
-          <label htmlFor="summary" className="block text-sm font-medium text-gray-700 mb-1">
-            Summary
-          </label>
-          <textarea
-            id="summary"
-            name="summary"
-            rows={2}
+        <div className="mb-6">
+          <TinyMCEEditor
             value={formData.summary || ''}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
-            placeholder="Brief summary of the attraction (1-2 sentences)"
+            onChange={(content) => setFormData(prev => ({ ...prev, summary: content }))}
+            label="Summary"
+            helperText="Brief overview of the attraction (1-2 paragraphs)"
+            placeholder="Write a concise summary of the attraction..."
+            height={200}
           />
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-              Full Description
-            </label>
-            <div className="flex items-center space-x-2">
-              <label className="text-sm text-gray-600">Rich Text Editor</label>
-              <input
-                type="checkbox"
-                checked={useRichText}
-                onChange={(e) => setUseRichText(e.target.checked)}
-                className="h-4 w-4 text-teal focus:ring-teal border-gray-300 rounded"
-              />
-            </div>
-          </div>
-          
-          {useRichText ? (
-            <RichTextEditor
-              value={formData.description || ''}
-              onChange={(content) => setFormData(prev => ({ ...prev, description: content }))}
-              placeholder="Detailed description of the attraction, its history, features, and visitor information..."
-              height={200}
-            />
-          ) : (
-            <textarea
-              id="description"
-              name="description"
-              rows={8}
-              value={formData.description || ''}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
-              placeholder="Detailed description of the attraction, its history, features, and visitor information..."
-            />
-          )}
+          <TinyMCEEditor
+            value={formData.description || ''}
+            onChange={(content) => setFormData(prev => ({ ...prev, description: content }))}
+            label="Full Description"
+            helperText="Detailed description of the attraction, its history, features, and visitor information"
+            placeholder="Provide a comprehensive description of the attraction..."
+            height={350}
+          />
         </div>
       </div>
 

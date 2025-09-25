@@ -12,6 +12,7 @@ import GalleryManager from '../../../components/admin/GalleryManager';
 import { SimpleItineraryManager } from '../../../components/admin/SimpleItineraryManager';
 import { apiClient } from '../../../lib/api';
 import ImageSelector from '../../../components/ui/ImageSelector';
+import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
 
 // Form validation schema
 const groupTripSchema = z.object({
@@ -445,22 +446,22 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
             
             {/* Description */}
             <div className="sm:col-span-6">
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                Description
-              </label>
-              <div className="mt-1">
-                <textarea
-                  id="description"
-                  rows={4}
-                  className={`shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 bg-white transition-colors resize-none ${
-                    errors.description ? 'border-red-300 bg-red-50' : 'hover:border-gray-400'
-                  }`}
-                  {...register('description')}
-                />
-                {errors.description && (
-                  <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
+              <Controller
+                name="description"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <TinyMCEEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                    label="Description"
+                    placeholder="Detailed description of the group trip..."
+                    height={350}
+                    error={fieldState.error?.message}
+                    helperText="Describe the group trip in detail. Include itinerary highlights, included activities, and what makes this trip special."
+                    required
+                  />
                 )}
-              </div>
+              />
             </div>
           </div>
         </div>

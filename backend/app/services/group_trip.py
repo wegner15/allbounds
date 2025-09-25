@@ -374,8 +374,8 @@ class GroupTripService:
         if not group_trip or not media:
             return None
         
-        # Set the cover image to the media's file_path (Cloudflare image ID)
-        group_trip.image_id = media.file_path
+        # Set the cover image to the media's storage_key (Cloudflare image ID)
+        group_trip.image_id = media.storage_key or media.file_path
         db.commit()
         db.refresh(group_trip)
         return group_trip

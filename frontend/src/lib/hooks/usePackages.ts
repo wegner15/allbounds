@@ -3,7 +3,7 @@ import { apiClient, endpoints } from '../api';
 import type { Package } from '../types/api';
 
 // Hook for fetching all packages
-export const usePackages = (params?: { 
+export const usePackages = (params?: {
   country_id?: number;
   holiday_type_id?: number;
   min_price?: number;
@@ -12,6 +12,8 @@ export const usePackages = (params?: {
   max_duration?: number;
   skip?: number;
   limit?: number;
+  order_by?: string;
+  order?: string;
 }) => {
   // Build query string from params
   const queryParams = new URLSearchParams();
@@ -22,14 +24,24 @@ export const usePackages = (params?: {
       }
     });
   }
-  
+
   const queryString = queryParams.toString();
   const endpoint = queryString ? `${endpoints.packages.list()}?${queryString}` : endpoints.packages.list();
-  
+
   return useQuery<Package[]>({
     queryKey: ['packages', params],
     queryFn: async () => {
       return apiClient.get<Package[]>(endpoint);
+    },
+  });
+};
+
+// Hook for fetching featured packages
+export const useFeaturedPackages = (limit: number = 10) => {
+  return useQuery<Package[]>({
+    queryKey: ['packages', 'featured', limit],
+    queryFn: async () => {
+      return apiClient.get<Package[]>(`${endpoints.packages.featured()}?limit=${limit}`);
     },
   });
 };
@@ -130,15 +142,17 @@ export const useCreatePackage = () => {
 // Hook for updating a package (admin only)
 export const useUpdatePackage = (id: number) => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (packageData: Partial<Package>) => {
       return apiClient.put<Package>(endpoints.packages.detail(id), packageData);
     },
     onSuccess: (data) => {
       queryClient.setQueryData(['package', id], data);
-      queryClient.invalidateQueries({ queryKey: ['packages'] });
-      queryClient.invalidateQueries({ queryKey: ['packages', 'country', data.country_id] });
+      // Invalidate all packages queries
+      queryClient.invalidateQueries({ queryKey: ['packages'], exact: false });
+      // Also invalidate package details queries
+      queryClient.invalidateQueries({ queryKey: ['package-details'], exact: false });
     },
   });
 };

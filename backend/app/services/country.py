@@ -176,6 +176,7 @@ class CountryService:
         db_country = Country(
             name=country_create.name,
             description=country_create.description,
+            summary=country_create.summary,
             region_id=country_create.region_id,
             slug=slug,
         )

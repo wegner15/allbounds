@@ -9,6 +9,7 @@ from app.schemas.region import RegionResponse
 class CountryBase(BaseModel):
     name: str = Field(..., description="Name of the country", example="Kenya")
     description: Optional[str] = Field(None, description="Description of the country")
+    summary: Optional[str] = Field(None, description="Brief summary of the country")
     region_id: int = Field(..., description="ID of the region this country belongs to")
     image_id: Optional[str] = Field(None, description="Cloudflare Images ID for the country image")
     
@@ -20,6 +21,7 @@ class CountryCreate(CountryBase):
 class CountryUpdate(BaseModel):
     name: Optional[str] = Field(None, description="Name of the country")
     description: Optional[str] = Field(None, description="Description of the country")
+    summary: Optional[str] = Field(None, description="Brief summary of the country")
     region_id: Optional[int] = Field(None, description="ID of the region this country belongs to")
     image_id: Optional[str] = Field(None, description="Cloudflare Images ID for the country image")
     is_active: Optional[bool] = Field(None, description="Whether the country is active")

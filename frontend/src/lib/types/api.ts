@@ -11,6 +11,7 @@ export interface BaseModel {
 export interface Region extends BaseModel {
   name: string;
   description: string;
+  summary?: string;
   slug: string;
   image_url?: string;
   image_id?: string;
@@ -40,6 +41,7 @@ export interface RegionWithCountries extends BaseModel {
 export interface Country extends BaseModel {
   name: string;
   description: string;
+  summary?: string;
   slug: string;
   region_id: number;
   region: Region;
@@ -95,6 +97,7 @@ export interface GroupTripWithDepartures {
 export interface Activity extends BaseModel {
   name: string;
   description: string;
+  summary?: string;
   slug: string;
   image_url?: string;
   is_active: boolean;
@@ -109,6 +112,7 @@ export interface ActivityResponse extends Activity {
 export interface ActivityCreate {
   name: string;
   description?: string;
+  summary?: string;
   is_active?: boolean;
   cover_image_id?: number | null;
   media_asset_ids?: number[];
@@ -200,6 +204,7 @@ export interface HolidayType extends BaseModel {
 export interface Package extends BaseModel {
   name: string;
   description: string;
+  summary?: string;
   slug: string;
   country_id: number;
   country: Country;
@@ -208,6 +213,7 @@ export interface Package extends BaseModel {
   image_url?: string;
   image_id?: string;
   is_active: boolean;
+  is_featured: boolean;
   inclusions?: string[];
   exclusions?: string[];
   itinerary?: PackageItineraryDay[];

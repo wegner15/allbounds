@@ -22,6 +22,8 @@ class PackageBase(BaseModel):
     
 # Schema for creating a new Package
 class PackageCreate(PackageBase):
+    is_active: Optional[bool] = Field(True, description="Whether the package is active")
+    is_featured: Optional[bool] = Field(False, description="Whether the package is featured")
     holiday_type_ids: Optional[List[int]] = Field(default_factory=list, description="List of holiday type IDs to associate with this package")
     inclusion_ids: Optional[List[int]] = Field(default_factory=list, description="List of inclusion IDs to associate with this package")
     exclusion_ids: Optional[List[int]] = Field(default_factory=list, description="List of exclusion IDs to associate with this package")

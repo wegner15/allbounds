@@ -18,6 +18,7 @@ const countrySchema = z.object({
   slug: z.string().min(2, 'Slug must be at least 2 characters')
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase with hyphens'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
+  summary: z.string().max(255, 'Summary cannot exceed 255 characters').optional(),
   region_id: z.number().min(1, 'Please select a region'),
   image_id: z.string(),
   is_active: z.boolean(),
@@ -54,6 +55,7 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
           name: countryData.name,
           slug: countryData.slug,
           description: countryData.description,
+          summary: countryData.summary || '',
           region_id: countryData.region_id,
           image_id: countryData.image_id || '',
           is_active: countryData.is_active,
@@ -62,6 +64,7 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
           name: '',
           slug: '',
           description: '',
+          summary: '',
           region_id: 0,
           image_id: '',
           is_active: true,
@@ -209,23 +212,57 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
               </FormGroup>
             </div>
             
-            {/* Description */}
-            <div className="sm:col-span-6">
-              <FormGroup>
-                <FormTextarea
-                  id="description"
-                  label="Description"
-                  error={errors.description}
-                  fullWidth
-                  variant="filled"
-                  rows={5}
-                  placeholder="Provide a detailed description of the country, including key attractions, geography, and cultural highlights..."
-                  {...register('description')}
-                />
-              </FormGroup>
-            </div>
-            
-            {/* Status */}
+             {/* Description */}
+             <div className="sm:col-span-6">
+               <FormGroup>
+                 <FormTextarea
+                   id="description"
+                   label="Description"
+                   error={errors.description}
+                   fullWidth
+                   variant="filled"
+                   rows={5}
+                   placeholder="Provide a detailed description of the country, including key attractions, geography, and cultural highlights..."
+                   {...register('description')}
+                 />
+               </FormGroup>
+              </div>
+
+             {/* Summary */}
+             <div className="sm:col-span-6">
+               <FormGroup>
+                 <FormTextarea
+                   id="summary"
+                   label="Summary"
+                   error={errors.summary}
+                   fullWidth
+                   variant="filled"
+                   rows={3}
+                   placeholder="Brief summary for cards and previews..."
+                   helperText="A concise summary that appears in country cards and search results (max 255 characters)"
+                   {...register('summary')}
+                 />
+               </FormGroup>
+              </div>
+
+             {/* Summary */}
+             <div className="sm:col-span-6">
+               <FormGroup>
+                 <FormTextarea
+                   id="summary"
+                   label="Summary"
+                   error={errors.summary}
+                   fullWidth
+                   variant="filled"
+                   rows={3}
+                   placeholder="Brief summary for country cards and search results..."
+                   helperText="A concise summary that appears in country cards and previews"
+                   {...register('summary')}
+                 />
+               </FormGroup>
+             </div>
+
+             {/* Status */}
             <div className="sm:col-span-6">
               <FormGroup>
                 <FormCheckbox

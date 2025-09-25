@@ -4,11 +4,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import FormInput from '../../../components/ui/FormInput';
-import FormTextarea from '../../../components/ui/FormTextarea';
 import FormCheckbox from '../../../components/ui/FormCheckbox';
 import FormGroup from '../../../components/ui/FormGroup';
 import Button from '../../../components/ui/Button';
 import ImageSelector from '../../../components/ui/ImageSelector';
+import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
 
 // Form validation schema for regions
 const regionSchema = z.object({
@@ -16,6 +16,7 @@ const regionSchema = z.object({
   slug: z.string().min(2, 'Slug must be at least 2 characters')
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase with hyphens'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
+  summary: z.string().max(255, 'Summary cannot exceed 255 characters').optional(),
   image_id: z.string().optional(),
   is_active: z.boolean(), // Default is handled in useForm
 });
@@ -51,6 +52,7 @@ const RegionForm: React.FC<RegionFormProps> = ({
       name: initialData?.name || '',
       slug: initialData?.slug || '',
       description: initialData?.description || '',
+      summary: initialData?.summary || '',
       image_id: initialData?.image_id || '',
       is_active: initialData?.is_active ?? true,
     }
@@ -99,20 +101,47 @@ const RegionForm: React.FC<RegionFormProps> = ({
             />
           </FormGroup>
           
-          {/* Description Field */}
-          <div className="md:col-span-2">
-            <FormGroup>
-              <FormTextarea
-                id="description"
-                label="Description"
-                error={errors.description}
-                rows={5}
-                {...register('description')}
-              />
-            </FormGroup>
-          </div>
-          
-          {/* Image Upload */}
+           {/* Description Field */}
+           <div className="md:col-span-2">
+             <Controller
+               name="description"
+               control={control}
+               render={({ field, fieldState }) => (
+                 <TinyMCEEditor
+                   value={field.value}
+                   onChange={field.onChange}
+                   label="Description"
+                   placeholder="Describe this region, its attractions, and what makes it special..."
+                   height={300}
+                   error={fieldState.error?.message}
+                   required
+                 />
+               )}
+             />
+            </div>
+
+            {/* Summary Field */}
+            <div className="md:col-span-2">
+              <FormGroup>
+                <label htmlFor="summary" className="block text-sm font-semibold text-gray-800">
+                  Summary
+                </label>
+                <textarea
+                  id="summary"
+                  rows={3}
+                  className="mt-2 block w-full px-4 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200 ring-gray-300 bg-white focus:ring-2 focus:ring-teal"
+                  placeholder="Brief summary for region cards and search results..."
+                  {...register('summary')}
+                />
+                {errors.summary ? (
+                  <p className="mt-2 text-sm text-red-600 font-medium">{errors.summary.message}</p>
+                ) : (
+                  <p className="mt-2 text-xs text-gray-500">A concise summary that appears in region cards and previews</p>
+                )}
+              </FormGroup>
+            </div>
+
+           {/* Image Upload */}
           <div className="md:col-span-2">
             <FormGroup>
               <Controller

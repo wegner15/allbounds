@@ -6,6 +6,7 @@ import { apiClient } from '../../../lib/api';
 import LocationPicker from '../../../components/LocationPicker';
 import TimeSelector from '../../../components/TimeSelector';
 import GalleryManager from '../../../components/admin/GalleryManager';
+import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
 import type { Hotel, HotelCreateInput, HotelUpdateInput } from '../../../lib/hooks/useHotels';
 import type { GalleryImage } from '../../../lib/types/api';
 
@@ -336,31 +337,25 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
       {/* Description */}
       <div className="border-b pb-6">
         <h2 className="text-lg font-semibold mb-4">Description</h2>
-        <div className="mb-4">
-          <label htmlFor="summary" className="block text-sm font-medium text-gray-700 mb-1">
-            Summary
-          </label>
-          <textarea
-            id="summary"
-            name="summary"
-            rows={2}
+        <div className="mb-6">
+          <TinyMCEEditor
             value={formData.summary || ''}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
+            onChange={(content) => setFormData(prev => ({ ...prev, summary: content }))}
+            label="Summary"
+            helperText="Brief overview of the hotel (1-2 paragraphs)"
+            placeholder="Write a concise summary of the hotel..."
+            height={200}
           />
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-            Full Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            rows={5}
+          <TinyMCEEditor
             value={formData.description || ''}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
+            onChange={(content) => setFormData(prev => ({ ...prev, description: content }))}
+            label="Full Description"
+            helperText="Detailed description of the hotel, its amenities, location, and unique features"
+            placeholder="Provide a comprehensive description of the hotel..."
+            height={350}
           />
         </div>
       </div>

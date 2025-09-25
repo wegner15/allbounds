@@ -39,6 +39,7 @@ const ActivityEditPage: React.FC = () => {
             const updateData: ActivityUpdate = {
               name: data.name,
               description: data.description,
+              summary: data.summary,
               is_active: data.is_active,
               cover_image_id: data.cover_image_id,
               media_asset_ids: data.media_asset_ids
@@ -48,6 +49,7 @@ const ActivityEditPage: React.FC = () => {
           defaultValues={{
             name: activity.name,
             description: activity.description,
+            summary: activity.summary,
             is_active: activity.is_active,
             cover_image_id: activity.cover_image_id || null,
             media_asset_ids: activity.media_assets.map(asset => asset.id),

@@ -160,6 +160,7 @@ export const endpoints = {
   // Packages
   packages: {
     list: () => '/packages/',
+    featured: () => '/packages/featured',
     detail: (id: number) => `/packages/${id}`,
     bySlug: (slug: string) => `/packages/slug/${slug}`,
     byCountry: (countryId: number) => `/packages/?country_id=${countryId}`,

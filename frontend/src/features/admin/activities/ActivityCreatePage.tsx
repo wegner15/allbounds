@@ -27,6 +27,7 @@ const ActivityCreatePage: React.FC = () => {
         const createData: ActivityCreate = {
           name: data.name || '',
           description: data.description,
+          summary: data.summary,
           is_active: data.is_active,
           cover_image_id: data.cover_image_id,
           media_asset_ids: data.media_asset_ids

@@ -287,11 +287,21 @@ class HotelService:
         """
         Set the cover image for a hotel using Cloudflare Image ID.
         """
+        from app.models.media import MediaAsset
+
         hotel = db.query(Hotel).filter(Hotel.id == hotel_id).first()
         if not hotel:
             return False
-        
-        hotel.image_id = image_id
+
+        # Check if image_id is a number (internal media ID) or a Cloudflare key
+        final_image_id = image_id
+        if image_id and image_id.isdigit():
+            # It's an internal media ID, look up the storage_key
+            media_asset = db.query(MediaAsset).filter(MediaAsset.id == int(image_id)).first()
+            if media_asset and media_asset.storage_key:
+                final_image_id = media_asset.storage_key
+
+        hotel.image_id = final_image_id
         db.commit()
         return True
 

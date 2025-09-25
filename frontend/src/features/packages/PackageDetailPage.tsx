@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAppStore } from '../../lib/store';
 import { Helmet } from 'react-helmet-async';
@@ -10,18 +10,31 @@ import Button from '../../components/ui/Button';
 import ImageCarousel from '../../components/ui/ImageCarousel';
 import { EnhancedItineraryDisplay } from '../../components/ui/EnhancedItineraryDisplay';
 import { TextDisplay } from '../../components/ui/RichTextDisplay';
+import PriceChartDisplay from '../../components/ui/PriceChartDisplay';
 
 // Import types from API
 
 // Utils
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils';
 
+// Hooks
+import { useActivePackagePriceCharts } from '../../lib/hooks/usePackagePriceCharts';
+
 const PackageDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const addRecentlyViewed = useAppStore((state) => state.addRecentlyViewed);
-  
+  const [activeTab, setActiveTab] = useState<'included' | 'excluded'>('included');
+
   // Fetch package details with gallery
   const { data: packageDetail, isLoading, error } = usePackageDetailsBySlug(slug!);
+
+  // Fetch active price charts to determine lowest price
+  const { data: priceCharts } = useActivePackagePriceCharts(packageDetail?.id || 0);
+
+  // Calculate the lowest price from active price charts or use base price
+  const lowestPrice = priceCharts && priceCharts.length > 0
+    ? Math.min(...priceCharts.map(chart => chart.price))
+    : packageDetail?.price || 0;
   
   // Add to recently viewed when data is available
   React.useEffect(() => {
@@ -94,51 +107,141 @@ const PackageDetailPage: React.FC = () => {
             <div className="flex items-center mb-6">
               <div className="text-gray-600">
                 {packageDetail.duration_days && `${packageDetail.duration_days} days`}
-                {packageDetail.price && ` • From $${packageDetail.price}`}
+                {lowestPrice > 0 && ` • From $${lowestPrice.toFixed(2)}`}
               </div>
             </div>
             
-            {/* Hero Image Carousel */}
-            {packageDetail.gallery_images && packageDetail.gallery_images.length > 0 && (
-              <div className="mb-6">
-                <ImageCarousel
-                  images={packageDetail.gallery_images}
-                  autoPlay={true}
-                  showThumbnails={false}
-                  className="h-64 md:h-80"
-                />
-              </div>
-            )}
+             {/* Hero Image Carousel */}
+             {(packageDetail.gallery_images && packageDetail.gallery_images.length > 0) || packageDetail.cover_image ? (
+               <div className="mb-6">
+                 {packageDetail.gallery_images && packageDetail.gallery_images.length > 0 ? (
+                    <ImageCarousel
+                      images={packageDetail.gallery_images}
+                      autoPlay={true}
+                      showThumbnails={false}
+                      className="h-96 md:h-[28rem]"
+                    />
+                 ) : packageDetail.cover_image ? (
+                   <div className="h-64 md:h-80 bg-gray-200 rounded-lg overflow-hidden">
+                     <img
+                       src={packageDetail.cover_image}
+                       alt={packageDetail.name}
+                       className="w-full h-full object-cover"
+                     />
+                   </div>
+                 ) : null}
+               </div>
+             ) : null}
             
             {/* Package Content */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
               <h2 className="text-2xl font-semibold mb-4">Overview</h2>
               
-              {packageDetail.description && (
-                <div className="mb-6">
-                  <TextDisplay content={packageDetail.description} />
-                </div>
-              )}
+               {packageDetail.summary && (
+                 <div className="mb-4">
+                   <p className="text-lg text-gray-700 leading-relaxed">{packageDetail.summary}</p>
+                 </div>
+               )}
+
+               {packageDetail.description && (
+                 <div className="mb-6">
+                   <TextDisplay content={packageDetail.description} />
+                 </div>
+               )}
               
-              {packageDetail.inclusions && (
-                <>
-                  <h3 className="text-xl font-semibold mb-3">What's Included</h3>
-                  <div className="mb-6">
-                    <TextDisplay content={packageDetail.inclusions} />
+               {/* Inclusions/Exclusions Tabs */}
+               {((packageDetail.inclusions || (packageDetail.inclusion_items && packageDetail.inclusion_items.length > 0)) ||
+                 (packageDetail.exclusions || (packageDetail.exclusion_items && packageDetail.exclusion_items.length > 0))) && (
+                 <div className="mb-6">
+                   <h3 className="text-xl font-semibold mb-4">Package Details</h3>
+
+                   {/* Tab Navigation */}
+                   <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
+                     {((packageDetail.inclusions || (packageDetail.inclusion_items && packageDetail.inclusion_items.length > 0))) && (
+                       <button
+                         onClick={() => setActiveTab('included')}
+                         className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+                           activeTab === 'included'
+                             ? 'bg-white text-green-700 shadow-sm'
+                             : 'text-gray-600 hover:text-gray-900'
+                         }`}
+                       >
+                         What's Included
+                       </button>
+                     )}
+                     {((packageDetail.exclusions || (packageDetail.exclusion_items && packageDetail.exclusion_items.length > 0))) && (
+                       <button
+                         onClick={() => setActiveTab('excluded')}
+                         className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+                           activeTab === 'excluded'
+                             ? 'bg-white text-red-700 shadow-sm'
+                             : 'text-gray-600 hover:text-gray-900'
+                         }`}
+                       >
+                         What's Not Included
+                       </button>
+                     )}
+                   </div>
+
+                   {/* Tab Content */}
+                   {activeTab === 'included' && (
+                     <div>
+                       {packageDetail.inclusions ? (
+                         <TextDisplay content={packageDetail.inclusions} />
+                       ) : packageDetail.inclusion_items && packageDetail.inclusion_items.length > 0 ? (
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           {packageDetail.inclusion_items.map((item) => (
+                             <div key={item.id} className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                               <div className="flex-shrink-0">
+                                 <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                   <i className={`fas fa-${item.icon} text-green-600 text-sm`}></i>
+                                 </div>
+                               </div>
+                               <div>
+                                 <p className="font-medium text-green-900">{item.name}</p>
+                                 {item.description && (
+                                   <p className="text-sm text-green-700">{item.description}</p>
+                                 )}
+                               </div>
+                             </div>
+                           ))}
+                         </div>
+                       ) : null}
+                     </div>
+                   )}
+
+                   {activeTab === 'excluded' && (
+                     <div>
+                       {packageDetail.exclusions ? (
+                         <TextDisplay content={packageDetail.exclusions} />
+                       ) : packageDetail.exclusion_items && packageDetail.exclusion_items.length > 0 ? (
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           {packageDetail.exclusion_items.map((item) => (
+                             <div key={item.id} className="flex items-center space-x-3 p-3 bg-red-50 rounded-lg border border-red-200">
+                               <div className="flex-shrink-0">
+                                 <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                                   <i className={`fas fa-${item.icon} text-red-600 text-sm`}></i>
+                                 </div>
+                               </div>
+                               <div>
+                                 <p className="font-medium text-red-900">{item.name}</p>
+                                 {item.description && (
+                                   <p className="text-sm text-red-700">{item.description}</p>
+                                 )}
+                               </div>
+                             </div>
+                           ))}
+                         </div>
+                       ) : null}
+                     </div>
+                   )}
                   </div>
-                </>
-              )}
-              
-              {packageDetail.exclusions && (
-                <>
-                  <h3 className="text-xl font-semibold mb-3">What's Not Included</h3>
-                  <div className="mb-6">
-                    <TextDisplay content={packageDetail.exclusions} />
-                  </div>
-                </>
-              )}
-              
-              {/* Itinerary Section */}
+                )}
+
+                {/* Price Chart Section */}
+                <PriceChartDisplay packageId={packageDetail.id} basePrice={packageDetail.price} />
+
+               {/* Itinerary Section */}
               <EnhancedItineraryDisplay 
                 entityType="package" 
                 entityId={packageDetail.id} 
@@ -165,20 +268,7 @@ const PackageDetailPage: React.FC = () => {
                 </>
               )}
 
-              {/* Gallery Section */}
-              {packageDetail.gallery_images && packageDetail.gallery_images.length > 1 && (
-                <>
-                  <h3 className="text-xl font-semibold mb-3">Photo Gallery</h3>
-                  <div className="mb-6">
-                    <ImageCarousel
-                      images={packageDetail.gallery_images}
-                      autoPlay={false}
-                      showThumbnails={true}
-                      className="h-64 md:h-96"
-                    />
-                  </div>
-                </>
-              )}
+
             </div>
           </div>
           
@@ -186,15 +276,15 @@ const PackageDetailPage: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="sticky top-8">
               <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6 mb-6">
-                <div className="text-center mb-6">
-                  {packageDetail.price && (
-                    <div className="mb-4">
-                      <span className="text-sm text-gray-500">Starting from</span>
-                      <div className="text-3xl font-bold text-primary">${packageDetail.price}</div>
-                      <span className="text-sm text-gray-500">per person</span>
-                    </div>
-                  )}
-                </div>
+                 <div className="text-center mb-6">
+                   {lowestPrice > 0 && (
+                     <div className="mb-4">
+                       <span className="text-sm text-gray-500">Starting from</span>
+                       <div className="text-3xl font-bold text-primary">${lowestPrice.toFixed(2)}</div>
+                       <span className="text-sm text-gray-500">per person</span>
+                     </div>
+                   )}
+                 </div>
                 
                 <div className="space-y-4 mb-6">
                   {packageDetail.duration_days && (

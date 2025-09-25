@@ -27,6 +27,7 @@ class Activity(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
+    summary = Column(String(255), nullable=True)
     slug = Column(String(100), unique=True, index=True, nullable=False)
     cover_image_id = Column(Integer, ForeignKey("media_assets.id"), nullable=True)
     is_active = Column(Boolean, default=True)

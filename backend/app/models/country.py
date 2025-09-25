@@ -10,6 +10,7 @@ class Country(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
+    summary = Column(String(255), nullable=True)
     slug = Column(String(100), unique=True, index=True, nullable=False)
     region_id = Column(Integer, ForeignKey("regions.id"), nullable=False)
     image_id = Column(String(255), nullable=True)  # Cloudflare Images ID

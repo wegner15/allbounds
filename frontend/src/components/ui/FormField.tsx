@@ -5,7 +5,7 @@ interface FormFieldProps {
   label: string;
   type?: 'text' | 'textarea' | 'number' | 'checkbox' | 'select';
   placeholder?: string;
-  value: any;
+  value: string | number | boolean | undefined;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   error?: string;
   className?: string;

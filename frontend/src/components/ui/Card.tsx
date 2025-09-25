@@ -4,7 +4,7 @@ interface CardProps {
   children: React.ReactNode;
   className?: string;
   ref?: React.Ref<HTMLDivElement>;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(({ children, className = '', ...props }, ref) => {

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Star, Heart } from 'lucide-react';
 import { usePopularTrips } from '../../hooks/usePopularTrips';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../../utils/imageUtils';
+import FromPriceDisplay from '../../../../components/ui/FromPriceDisplay';
 
 const PopularTrips: React.FC = () => {
   const locations = ['Kenya', 'Uganda', 'Tanzania', 'Rwanda', 'South Africa', 'Egypt', 'Botswana'];
@@ -10,11 +11,20 @@ const PopularTrips: React.FC = () => {
 
   const { data: trips, isLoading, error } = usePopularTrips(activeTab);
 
+  const scrollContainer = (containerId: string, direction: 'left' | 'right') => {
+    const container = document.getElementById(containerId);
+    if (container) {
+      const scrollAmount = 336; // 320px (w-80) + 16px (gap)
+      const scrollLeft = direction === 'left' ? -scrollAmount : scrollAmount;
+      container.scrollBy({ left: scrollLeft, behavior: 'smooth' });
+    }
+  };
+
 
   const renderSkeletons = () => (
     [...Array(4)].map((_, index) => (
-      <div key={index} className="bg-white rounded-lg overflow-hidden border border-gray-200 animate-pulse">
-        <div className="w-full h-48 bg-gray-200"></div>
+      <div key={index} className="bg-white rounded-lg overflow-hidden border border-gray-200 animate-pulse flex-shrink-0 w-80">
+        <div className="w-full h-96 bg-gray-200"></div>
         <div className="p-4">
           <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
           <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
@@ -47,17 +57,18 @@ const PopularTrips: React.FC = () => {
             </button>
           ))}
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {isLoading ? renderSkeletons() : error ? (
-            <div className="col-span-full text-center text-red-500">Failed to load popular trips.</div>
-          ) : trips?.map(trip => (
-            <div key={trip.id} className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 group">
+
+        <div className="relative">
+          <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide mb-8" id="popular-trips-container">
+            {isLoading ? renderSkeletons() : error ? (
+              <div className="flex-shrink-0 w-80 text-center text-red-500">Failed to load popular trips.</div>
+            ) : trips?.map(trip => (
+            <div key={trip.id} className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 group flex-shrink-0 w-80">
               <div className="relative">
-                <img 
+                <img
                   src={getImageUrlWithFallback(trip.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&w=600&q=80')}
                   alt={trip.name}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-96 object-cover"
                 />
                 {/* Placeholder for tags */}
                 <button className="absolute top-3 right-3 bg-white/80 p-2 rounded-full text-gray-600 hover:text-red-500 hover:bg-white transition-colors">
@@ -74,13 +85,37 @@ const PopularTrips: React.FC = () => {
                         <span>({trip.review_count || 0} reviews)</span>
                     </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-500">From</p>
-                  <p className="text-xl font-bold text-gray-900">US${trip.price}</p>
-                </div>
+                 <div className="text-right">
+                   <FromPriceDisplay
+                     packageId={trip.id}
+                     basePrice={trip.price}
+                     className="text-right"
+                   />
+                 </div>
               </div>
             </div>
           ))}
+          </div>
+
+          {/* Navigation Buttons */}
+          <button
+            onClick={() => scrollContainer('popular-trips-container', 'left')}
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-3 rounded-full shadow-lg transition-all duration-200 z-10"
+            aria-label="Scroll left"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={() => scrollContainer('popular-trips-container', 'right')}
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-3 rounded-full shadow-lg transition-all duration-200 z-10"
+            aria-label="Scroll right"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
 
         <div className="text-center">

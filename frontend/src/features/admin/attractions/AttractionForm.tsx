@@ -6,6 +6,7 @@ import GalleryManager from '../../../components/admin/GalleryManager';
 import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
 import type { Attraction, AttractionCreateInput, AttractionUpdateInput } from '../../../lib/hooks/useAttractions';
 import type { GalleryImage } from '../../../lib/types/api';
+import type { Country } from '../../../lib/hooks/useCountries';
 
 interface AttractionFormProps {
   initialData?: Attraction;
@@ -32,10 +33,6 @@ const AttractionForm: React.FC<AttractionFormProps> = ({ initialData, onSubmit, 
     if (initialData) {
       const {
         id,
-        slug,
-        created_at,
-        updated_at,
-        country,
         gallery_images,
         ...rest
       } = initialData;
@@ -146,12 +143,12 @@ const AttractionForm: React.FC<AttractionFormProps> = ({ initialData, onSubmit, 
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
             >
-              <option value="">Select a country</option>
-              {countries?.map((country: any) => (
-                <option key={country.id} value={country.id}>
-                  {country.name}
-                </option>
-              ))}
+               <option value="">Select a country</option>
+               {countries?.map((country: Country) => (
+                 <option key={country.id} value={country.id}>
+                   {country.name}
+                 </option>
+               ))}
             </select>
           </div>
 

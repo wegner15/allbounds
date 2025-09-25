@@ -33,10 +33,10 @@ const ImageSelector: React.FC<ImageSelectorProps> = ({
     if (initialImageId !== imageId) {
       setImageId(initialImageId);
     }
-  }, [initialImageId]);
+  }, [initialImageId, imageId]);
 
   // Handle image upload completion
-  const handleUploadComplete = (imageData: any) => {
+  const handleUploadComplete = (imageData: unknown) => {
     if (imageData && imageData.cloudflare_image && imageData.cloudflare_image.id) {
       // For upload-and-create-media endpoint
       const id = imageData.cloudflare_image.id;

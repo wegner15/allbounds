@@ -21,7 +21,7 @@ export const RichTextDisplay: React.FC<RichTextDisplayProps> = ({
       'href', 'target', 'rel', 'src', 'alt', 'title', 'class', 'style',
       'width', 'height', 'colspan', 'rowspan'
     ],
-    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i
+    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-: ]|$))/i
   });
 
   return (

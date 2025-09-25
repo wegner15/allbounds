@@ -4,7 +4,7 @@ import type { ItineraryItem } from '../../lib/types/itinerary';
 // OpenStreetMap with Leaflet
 declare global {
   interface Window {
-    L: any;
+    L: unknown;
   }
 }
 
@@ -25,7 +25,7 @@ interface LocationPoint {
 
 export const ItineraryMap: React.FC<ItineraryMapProps> = ({ items, className = '' }) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
+  const mapInstanceRef = useRef<unknown>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
@@ -119,7 +119,7 @@ export const ItineraryMap: React.FC<ItineraryMapProps> = ({ items, className = '
 
       if (geocodedPoints.length > 0) {
         // Create markers and polyline
-        const markers: any[] = [];
+        const markers: unknown[] = [];
         const polylinePoints: [number, number][] = [];
 
         geocodedPoints.forEach((point) => {
@@ -206,7 +206,7 @@ export const ItineraryMap: React.FC<ItineraryMapProps> = ({ items, className = '
         mapInstanceRef.current = null;
       }
     };
-  }, [items]);
+  }, [items, locationPoints]);
 
   if (locationPoints.length === 0) {
     return (

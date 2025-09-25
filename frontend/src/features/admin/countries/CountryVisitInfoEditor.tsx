@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useCountryVisitInfo, useUpdateCountryVisitInfo } from '../../../lib/hooks/useCountryVisitInfo';
 import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
-import type { CountryVisitInfo, MonthlyVisitRating, VisitRating } from '../../../lib/types/country';
+import type { CountryVisitInfo, VisitRating } from '../../../lib/types/country';
 
 interface CountryVisitInfoEditorProps {
   countryId: number;
@@ -46,7 +46,7 @@ const CountryVisitInfoEditor: React.FC<CountryVisitInfoEditorProps> = ({ country
       // If some months are missing, add them with default values
       const existingMonths = new Set(visitInfo.monthly_ratings.map(r => r.month));
       const missingMonths = allMonths.filter(month => !existingMonths.has(month));
-      
+
       const updatedRatings = [
         ...visitInfo.monthly_ratings,
         ...missingMonths.map(month => ({
@@ -55,20 +55,20 @@ const CountryVisitInfoEditor: React.FC<CountryVisitInfoEditorProps> = ({ country
           notes: '',
         })),
       ];
-      
+
       // Sort ratings by month order
-      const sortedRatings = [...updatedRatings].sort((a, b) => 
+      const sortedRatings = [...updatedRatings].sort((a, b) =>
         allMonths.indexOf(a.month) - allMonths.indexOf(b.month)
       );
-      
+
       reset({
         ...visitInfo,
         monthly_ratings: sortedRatings,
       });
-      
+
       setFormInitialized(true);
     }
-  }, [visitInfo, formInitialized]);
+  }, [visitInfo, formInitialized, allMonths, reset]);
   
   const onSubmit = (data: CountryVisitInfo) => {
     updateVisitInfo.mutate(data, {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils';
+import { useActivePackagePriceCharts } from '../../lib/hooks/usePackagePriceCharts';
 import type { Package } from '../../lib/types/api';
 
 interface PackageCarouselProps {
@@ -11,6 +12,24 @@ interface PackageCarouselProps {
   autoPlay?: boolean;
   autoPlayInterval?: number;
 }
+
+// Component for carousel price display
+const CarouselPriceDisplay: React.FC<{ packageId: number; basePrice: number }> = ({ packageId, basePrice }) => {
+  const { data: priceCharts } = useActivePackagePriceCharts(packageId);
+
+  const lowestPrice = priceCharts && priceCharts.length > 0
+    ? Math.min(...priceCharts.map(chart => chart.price))
+    : basePrice;
+
+  return (
+    <div className="flex items-center">
+      <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+      </svg>
+      From ${lowestPrice.toFixed(2)}
+    </div>
+  );
+};
 
 const PackageCarousel: React.FC<PackageCarouselProps> = ({
   packages,
@@ -131,12 +150,7 @@ const PackageCarousel: React.FC<PackageCarouselProps> = ({
                   {currentPackage.duration_days} days
                 </div>
 
-                <div className="flex items-center">
-                  <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
-                  From ${currentPackage.price}
-                </div>
+                <CarouselPriceDisplay packageId={currentPackage.id} basePrice={currentPackage.price} />
               </div>
 
               {/* CTA Button */}

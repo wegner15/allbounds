@@ -95,7 +95,7 @@ export const usePackageDetailsBySlug = (slug: string) => {
   return useQuery({
     queryKey: ['package-details', slug],
     queryFn: async () => {
-      return apiClient.get<any>(`/api/v1/packages/details/${slug}`);
+      return apiClient.get<unknown>(`/api/v1/packages/details/${slug}`);
     },
     enabled: !!slug, // Only run the query if slug is provided
   });
@@ -109,7 +109,7 @@ export const usePackageDetailsById = (id: number) => {
       // First get the basic package to get its slug
       const packageData = await apiClient.get<Package>(endpoints.packages.detail(id));
       // Then get the full details with gallery and relationships
-      const detailsData = await apiClient.get<any>(`/api/v1/packages/details/${packageData.slug}`);
+      const detailsData = await apiClient.get<unknown>(`/api/v1/packages/details/${packageData.slug}`);
       // Merge the basic data with details data, ensuring we have all fields needed for editing
       return {
         ...packageData,

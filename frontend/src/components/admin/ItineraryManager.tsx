@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
-import { Plus, GripVertical, Edit2, Trash2, Clock, MapPin, Utensils, Camera } from 'lucide-react';
+import { Plus, GripVertical, Edit2, Clock, MapPin, Utensils, Camera } from 'lucide-react';
 import Button from '../ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import Badge from '../ui/Badge';
@@ -92,7 +92,7 @@ export const ItineraryManager: React.FC<ItineraryManagerProps> = ({
     });
   };
 
-  const getMealIcon = (mealType?: string) => {
+  const getMealIcon = () => {
     return <Utensils className="h-4 w-4" />;
   };
 

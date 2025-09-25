@@ -15,9 +15,9 @@ const NewsletterForm: React.FC = () => {
       console.log('Successfully subscribed!');
       setEmail('');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       // You can add an error message or toast here
-      console.error('Subscription failed:', error.response?.data?.detail || error.message);
+      console.error('Subscription failed:', error);
     },
   });
 

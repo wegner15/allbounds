@@ -202,9 +202,9 @@ const CountriesListPage: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {(country as any).package_count || 0}
-                      </div>
+                       <div className="text-sm font-medium text-gray-900">
+                         {(country as Country & { package_count?: number }).package_count || 0}
+                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end space-x-2">

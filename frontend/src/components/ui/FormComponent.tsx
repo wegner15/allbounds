@@ -3,7 +3,7 @@ import { useFormContext, Controller } from 'react-hook-form';
 
 interface FormProps {
   children: React.ReactNode;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const Form = React.forwardRef<HTMLFormElement, FormProps>(({ children, ...props }, ref) => {
@@ -16,8 +16,8 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(({ children, ...props 
 
 interface FormFieldProps {
   name: string;
-  control?: any;
-  render: ({ field }: { field: any }) => React.ReactNode;
+  control?: unknown;
+  render: ({ field }: { field: unknown }) => React.ReactNode;
 }
 
 const FormField: React.FC<FormFieldProps> = ({ name, control, render }) => {

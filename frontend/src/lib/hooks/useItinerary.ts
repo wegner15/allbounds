@@ -24,7 +24,7 @@ export interface CreateItineraryItemData {
   custom_activities: CreateActivityData[];
   
   // Backward compatibility
-  activities?: any[];
+  activities?: unknown[];
 }
 
 export interface CreateActivityData {
@@ -116,7 +116,7 @@ export const useUpdateItineraryItem = () => {
   return useMutation({
     mutationFn: ({ itemId, data }: { itemId: number; data: UpdateItineraryItemData }) =>
       apiClient.put<ItineraryItem>(`/itinerary/items/${itemId}`, data),
-    onSuccess: (data: any) => {
+    onSuccess: (data: ItineraryItem) => {
       queryClient.invalidateQueries({
         queryKey: ['itinerary-item', data.id]
       });
@@ -164,7 +164,7 @@ export const useUpdateActivity = () => {
   return useMutation({
     mutationFn: ({ activityId, data }: { activityId: number; data: UpdateActivityData }) =>
       apiClient.put<ItineraryActivity>(`/itinerary/activities/${activityId}`, data),
-    onSuccess: (data: any) => {
+    onSuccess: (data: ItineraryItem) => {
       queryClient.invalidateQueries({
         queryKey: ['itinerary-item', data.itinerary_item_id]
       });

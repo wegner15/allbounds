@@ -23,7 +23,7 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({ value, onChan
       );
       const data = await response.json();
       
-      const options: LocationOption[] = data.map((item: any) => ({
+      const options: LocationOption[] = data.map((item: unknown) => ({
         label: item.display_name,
         value: item.display_name,
       }));
@@ -36,33 +36,33 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({ value, onChan
   };
 
   const customStyles = {
-    control: (provided: any) => ({
+    control: (provided: unknown) => ({
       ...provided,
       backgroundColor: 'transparent',
       border: 'none',
       boxShadow: 'none',
       minHeight: 'auto',
     }),
-    input: (provided: any) => ({
+    input: (provided: unknown) => ({
       ...provided,
       color: 'white',
     }),
-    singleValue: (provided: any) => ({
+    singleValue: (provided: unknown) => ({
       ...provided,
       color: 'white',
     }),
-    placeholder: (provided: any) => ({
+    placeholder: (provided: unknown) => ({
       ...provided,
       color: '#D1D5DB', // gray-300
     }),
-    menu: (provided: any) => ({
+    menu: (provided: unknown) => ({
       ...provided,
       backgroundColor: 'rgba(255, 255, 255, 0.1)',
       backdropFilter: 'blur(10px)',
       borderRadius: '0.5rem',
       border: '1px solid rgba(255, 255, 255, 0.2)',
     }),
-    option: (provided: any, state: { isFocused: boolean }) => ({
+    option: (provided: unknown, state: { isFocused: boolean }) => ({
       ...provided,
       backgroundColor: state.isFocused ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
       color: 'white',

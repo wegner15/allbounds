@@ -7,7 +7,8 @@ import {
   usePackagePriceCharts,
   useCreatePriceChart,
   useUpdatePriceChart,
-  useDeletePriceChart
+  useDeletePriceChart,
+  type PriceChart
 } from '../../lib/hooks/usePackagePriceCharts';
 
 const priceChartSchema = z.object({
@@ -37,7 +38,7 @@ interface EditingChart {
 }
 
 const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId }) => {
-  const { data: priceCharts, isLoading, refetch } = usePackagePriceCharts(packageId);
+  const { data: priceCharts, isLoading } = usePackagePriceCharts(packageId);
   const createPriceChart = useCreatePriceChart();
   const deletePriceChart = useDeletePriceChart();
 
@@ -99,7 +100,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId }) => {
     }
   };
 
-  const handleEdit = (chart: any) => {
+  const handleEdit = (chart: PriceChart) => {
     const formData: PriceChartFormData = {
       title: chart.title,
       start_date: format(parseISO(chart.start_date), 'yyyy-MM-dd'),
@@ -136,7 +137,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId }) => {
     setCurrentPriceChartId(null);
   };
 
-  const getStatusBadge = (chart: any) => {
+  const getStatusBadge = (chart: PriceChart) => {
     const now = new Date();
     const startDate = parseISO(chart.start_date);
     const endDate = parseISO(chart.end_date);

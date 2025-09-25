@@ -33,7 +33,7 @@ const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   const deliveryUrl = import.meta.env.VITE_CLOUDFLARE_IMAGES_DELIVERY_URL;
 
   // Handle image upload completion
-  const handleUploadComplete = (imageData: any, onChange: (value: string) => void) => {
+  const handleUploadComplete = (imageData: unknown, onChange: (value: string) => void) => {
     if (imageData && imageData.id) {
       onChange(imageData.id);
       setPreviewImageId(imageData.id);
@@ -51,11 +51,9 @@ const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
         control={control}
         render={({ field: { onChange, value } }) => {
           // Update preview when value changes
-          useEffect(() => {
-            if (value && value !== previewImageId) {
-              setPreviewImageId(value);
-            }
-          }, [value]);
+          if (value && value !== previewImageId) {
+            setPreviewImageId(value);
+          }
 
           return (
             <div className="space-y-4">

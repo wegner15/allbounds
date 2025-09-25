@@ -13,7 +13,7 @@ interface CloudflareImageProps {
   height?: number | string;
   requireSignedUrl?: boolean;
   deliveryUrl?: string;
-  onError?: (error: any) => void;
+  onError?: (error: unknown) => void;
   objectFit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
   placeholder?: string;
 }
@@ -65,8 +65,8 @@ const CloudflareImage: React.FC<CloudflareImageProps> = ({
         }
         
         setIsLoading(false);
-      } catch (err: any) {
-        const errorMessage = err.message || 'Failed to load image';
+      } catch (err: unknown) {
+        const errorMessage = (err as Error).message || 'Failed to load image';
         setError(errorMessage);
         setIsLoading(false);
         if (onError) onError(err);

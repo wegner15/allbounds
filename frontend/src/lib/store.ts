@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 
 // Define types for our store
 interface FilterState {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface UserPreferences {
@@ -118,10 +118,10 @@ export const useAppStore = create<AppState>()(
 // Create a hook for search state (non-persisted)
 interface SearchState {
   query: string;
-  results: any[];
+  results: unknown[];
   isLoading: boolean;
   setQuery: (query: string) => void;
-  setResults: (results: any[]) => void;
+  setResults: (results: unknown[]) => void;
   setIsLoading: (isLoading: boolean) => void;
   clearSearch: () => void;
 }

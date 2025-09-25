@@ -4,7 +4,7 @@ import { apiClient, endpoints } from '../api';
 // Types for Cloudflare Images
 export interface DirectUploadRequest {
   require_signed_urls?: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   expiry_minutes?: number;
 }
 
@@ -19,7 +19,7 @@ export interface ImageUploadResponse {
   uploaded: string;
   require_signed_urls: boolean;
   variants: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ImageListResponse {
@@ -74,7 +74,7 @@ export const useImageUpload = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ file, requireSignedUrls = true, metadata }: { file: File; requireSignedUrls?: boolean; metadata?: Record<string, any> }) => {
+    mutationFn: async ({ file, requireSignedUrls = true, metadata }: { file: File; requireSignedUrls?: boolean; metadata?: Record<string, unknown> }) => {
       // Create a new FormData object
       const formData = new FormData();
       
@@ -132,7 +132,7 @@ export const useImageUploadAndCreateMedia = () => {
       title?: string;
       caption?: string;
       requireSignedUrls?: boolean; 
-      metadata?: Record<string, any> 
+      metadata?: Record<string, unknown> 
     }) => {
       // Create a new FormData object
       const formData = new FormData();
@@ -153,7 +153,7 @@ export const useImageUploadAndCreateMedia = () => {
       // Make the request with the FormData
       try {
         console.log('Sending upload request to:', endpoints.cloudflareImages.uploadAndCreateMedia());
-        const response = await apiClient.request<any>(
+        const response = await apiClient.request<unknown>(
           endpoints.cloudflareImages.uploadAndCreateMedia(),
           'POST',
           formData

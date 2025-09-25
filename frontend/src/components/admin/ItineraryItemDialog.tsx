@@ -7,14 +7,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/DialogCo
 // Create simple form components since they don't exist
 const Form = ({ children, ...props }: { children: React.ReactNode } & React.FormHTMLAttributes<HTMLFormElement>) => <form {...props}>{children}</form>;
 const FormControl = ({ children }: { children: React.ReactNode }) => <div className="mt-1">{children}</div>;
-const FormField = ({ name, children, control, render, ...props }: { name: string; children?: any; control?: any; render?: any; [key: string]: any }) => <div>{render ? render({ field: { onChange: () => {}, value: '', ref: null } }) : children}</div>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const FormField = ({ children, render }: { children?: React.ReactNode; render?: any }) => <div>{render ? render({ field: { onChange: () => {}, value: '', ref: null } }) : children}</div>;
 const FormItem = ({ children }: { children: React.ReactNode }) => <div className="mb-4">{children}</div>;
 const FormLabel = ({ children }: { children: React.ReactNode }) => <label className="block text-sm font-medium text-gray-700 mb-1">{children}</label>;
 const FormMessage = ({ children }: { children?: React.ReactNode }) => <p className="mt-1 text-sm text-red-600">{children}</p>;
 import Input from '../ui/Input';
 import Textarea from '../ui/FormTextarea';
 import Button from '../ui/Button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/SelectComponent';
+
 // Import hooks
 import { useCreateItineraryItem, useUpdateItineraryItem, useDeleteItineraryItem } from '../../lib/hooks/useItinerary';
 import { useHotels } from '../../lib/hooks/useHotels';

@@ -13,8 +13,6 @@ interface TinyMCEEditorProps {
   placeholder?: string;
   helperText?: string;
   maxLength?: number;
-  name?: string;
-  control?: any; // For react-hook-form integration
   required?: boolean;
   disabled?: boolean;
 }
@@ -28,8 +26,6 @@ const TinyMCEEditor: React.FC<TinyMCEEditorProps> = ({
   placeholder = 'Enter your content here...',
   helperText,
   maxLength,
-  name,
-  control,
   required = false,
   disabled = false,
 }) => {
@@ -81,7 +77,7 @@ const TinyMCEEditor: React.FC<TinyMCEEditorProps> = ({
     placeholder,
     branding: false,
     promotion: false,
-    setup: (editor: any) => {
+    setup: (editor: TinyMCEEditorType) => {
       editorRef.current = editor;
 
       // Add custom image button that only allows uploads

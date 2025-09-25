@@ -24,6 +24,7 @@ const CloudflareImageExample: React.FC<CloudflareImageExampleProps> = ({
   ];
 
   // Handle image upload completion
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleUploadComplete = (imageData: any) => {
     if (imageData && imageData.id) {
       setImageId(imageData.id);

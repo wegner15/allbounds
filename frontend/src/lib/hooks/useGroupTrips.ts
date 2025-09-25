@@ -85,7 +85,7 @@ export const useGroupTripDetailsBySlug = (slug: string) => {
   return useQuery({
     queryKey: ['groupTripDetails', 'slug', slug],
     queryFn: async () => {
-      return apiClient.get<any>(`/group-trips/details/${slug}`);
+      return apiClient.get<unknown>(`/group-trips/details/${slug}`);
     },
     enabled: !!slug,
   });
@@ -96,7 +96,7 @@ export const useGroupTripDetailsById = (id: number) => {
   return useQuery({
     queryKey: ['groupTripDetails', 'id', id],
     queryFn: async () => {
-      return apiClient.get<any>(`/group-trips/details/id/${id}`);
+      return apiClient.get<unknown>(`/group-trips/details/id/${id}`);
     },
     enabled: !!id,
   });

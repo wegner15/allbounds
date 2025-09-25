@@ -49,7 +49,7 @@ export const isCloudflareImageId = (str: string | null | undefined): boolean => 
  * @returns The best available image URL
  */
 export const getEntityImageUrl = (
-  entity: any,
+  entity: unknown,
   fallbackUrl: string = 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=80'
 ): string => {
   // Try cover_image first (might be a Cloudflare ID or full URL)

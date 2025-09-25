@@ -118,7 +118,7 @@ export interface ActivityCreate {
   media_asset_ids?: number[];
 }
 
-export interface ActivityUpdate extends Partial<ActivityCreate> {}
+export type ActivityUpdate = Partial<ActivityCreate>;
 
 // Attraction types
 export interface Attraction extends BaseModel {

@@ -5,10 +5,9 @@ import type { CountryVisitInfo as CountryVisitInfoType } from '../../lib/types/c
 
 interface CountryVisitInfoProps {
   visitInfo?: CountryVisitInfoType;
-  countryId?: number; // Optional for backward compatibility
 }
 
-const CountryVisitInfo: React.FC<CountryVisitInfoProps> = ({ visitInfo, countryId }) => {
+const CountryVisitInfo: React.FC<CountryVisitInfoProps> = ({ visitInfo }) => {
   // If no visit info is provided, show a placeholder
   if (!visitInfo || !visitInfo.monthly_ratings || visitInfo.monthly_ratings.length === 0) {
     return (

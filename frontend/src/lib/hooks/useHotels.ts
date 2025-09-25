@@ -24,7 +24,7 @@ export interface Hotel {
   latitude?: number;
   longitude?: number;
   price_category?: string;
-  amenities?: Record<string, any>;
+  amenities?: Record<string, unknown>;
   check_in_time?: string;
   check_out_time?: string;
   image_id?: string;
@@ -46,7 +46,7 @@ export interface HotelCreateInput {
   latitude?: number;
   longitude?: number;
   price_category?: string;
-  amenities?: Record<string, any>;
+  amenities?: Record<string, unknown>;
   check_in_time?: string;
   check_out_time?: string;
   image_id?: string;

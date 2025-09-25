@@ -6,9 +6,18 @@ import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../../utils/image
 const TopTrendingDestinations: React.FC = () => {
   const { data: destinations, isLoading, error } = useTrendingDestinations();
 
+  const scrollContainer = (containerId: string, direction: 'left' | 'right') => {
+    const container = document.getElementById(containerId);
+    if (container) {
+      const scrollAmount = 336; // 320px (w-80) + 16px (gap)
+      const scrollLeft = direction === 'left' ? -scrollAmount : scrollAmount;
+      container.scrollBy({ left: scrollLeft, behavior: 'smooth' });
+    }
+  };
+
   const renderSkeletons = () => (
     [...Array(6)].map((_, index) => (
-      <div key={index} className="relative h-64 rounded-lg overflow-hidden bg-gray-200 animate-pulse"></div>
+      <div key={index} className="relative flex-shrink-0 w-80 h-96 rounded-lg overflow-hidden bg-gray-200 animate-pulse"></div>
     ))
   );
 
@@ -39,36 +48,58 @@ const TopTrendingDestinations: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {isLoading ? renderSkeletons() : destinations?.map(destination => {
-            const tourCount = (destination.packages?.length || 0) + (destination.group_trips?.length || 0);
-            const activityCount = destination.attractions?.length || 0;
+        <div className="relative mb-8">
+          <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide" id="destinations-container">
+            {isLoading ? renderSkeletons() : destinations?.map(destination => {
+              const tourCount = (destination.packages?.length || 0) + (destination.group_trips?.length || 0);
+              const activityCount = destination.attractions?.length || 0;
 
-            return (
-              <Link
-                key={destination.id}
-                to={`/destinations/${destination.slug}`}
-                className="relative h-64 rounded-lg overflow-hidden group cursor-pointer block"
-              >
-                <img 
-                  src={getImageUrlWithFallback(destination.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=600&q=80')}
-                  alt={destination.name}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                 <div className="absolute bottom-0 left-0 right-0 p-6">
-                   <h3 className="text-2xl font-bold text-white mb-2">{destination.name}</h3>
-                   {destination.summary && (
-                     <p className="text-white/80 text-sm mb-2 line-clamp-2">{destination.summary}</p>
-                   )}
-                   <div className="flex items-center text-white/90 text-sm space-x-4">
-                     {tourCount > 0 && <span>{tourCount} Tours</span>}
-                     {activityCount > 0 && <span>{activityCount} Activities</span>}
-                   </div>
-                 </div>
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={destination.id}
+                  to={`/destinations/${destination.slug}`}
+                  className="relative flex-shrink-0 w-80 h-96 rounded-lg overflow-hidden group cursor-pointer block"
+                >
+                  <img
+                    src={getImageUrlWithFallback(destination.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=600&q=80')}
+                    alt={destination.name}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                   <div className="absolute bottom-0 left-0 right-0 p-6">
+                      <h3 className="text-2xl font-bold text-white mb-2">{destination.name}</h3>
+                      {destination.summary && (
+                        <p className="text-white/80 text-sm mb-2 line-clamp-2">{destination.summary}</p>
+                      )}
+                      <div className="flex items-center text-white/90 text-sm space-x-4">
+                        {tourCount > 0 && <span>{tourCount} Tours</span>}
+                        {activityCount > 0 && <span>{activityCount} Activities</span>}
+                      </div>
+                    </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Navigation Buttons */}
+          <button
+            onClick={() => scrollContainer('destinations-container', 'left')}
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-3 rounded-full shadow-lg transition-all duration-200 z-10"
+            aria-label="Scroll left"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={() => scrollContainer('destinations-container', 'right')}
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-3 rounded-full shadow-lg transition-all duration-200 z-10"
+            aria-label="Scroll right"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
 
         <div className="text-center">

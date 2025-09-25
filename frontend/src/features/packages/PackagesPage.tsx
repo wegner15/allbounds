@@ -10,6 +10,7 @@ import { usePackages } from '../../lib/hooks/usePackages';
 import { useFeaturedPackages } from '../../lib/hooks/usePackages';
 import { useCountries } from '../../lib/hooks/useCountries';
 import { useHolidayTypes } from '../../lib/hooks/useHolidayTypes';
+import { useActivePackagePriceCharts } from '../../lib/hooks/usePackagePriceCharts';
 
 
 // Utils
@@ -18,6 +19,22 @@ import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils'
 // Filter options
 const priceRanges = ['All', '$0-$1000', '$1000-$2000', '$2000-$3000', '$3000+'];
 const durations = ['All', '1-3 days', '4-7 days', '8-14 days', '14+ days'];
+
+// Component for package price display
+const PackagePriceDisplay: React.FC<{ packageId: number; basePrice: number }> = ({ packageId, basePrice }) => {
+  const { data: priceCharts } = useActivePackagePriceCharts(packageId);
+
+  const lowestPrice = priceCharts && priceCharts.length > 0
+    ? Math.min(...priceCharts.map(chart => chart.price))
+    : basePrice;
+
+  return (
+    <div>
+      <span className="font-bold text-lg">From ${lowestPrice.toFixed(2)}</span>
+      <span className="text-gray-600 text-sm"> / person</span>
+    </div>
+  );
+};
 
 const PackagesPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -329,36 +346,37 @@ const PackagesPage: React.FC = () => {
                   {currentPackages.map(pkg => (
                     <div key={pkg.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                       <Link to={`/packages/${pkg.slug}`}>
-                        <img
-                          src={getImageUrlWithFallback(pkg.image_id, IMAGE_VARIANTS.MEDIUM)}
-                          alt={pkg.name}
-                          className="w-full h-48 object-cover"
-                        />
+                         <img
+                           src={getImageUrlWithFallback(pkg.image_id, IMAGE_VARIANTS.MEDIUM)}
+                           alt={pkg.name}
+                           className="w-full h-64 object-cover"
+                         />
                       </Link>
                       <div className="p-4">
-                        <div className="flex flex-wrap gap-2 mb-2">
+                        <div className="flex items-center justify-between mb-3">
                           {pkg.country && (
-                            <span className="inline-block bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded">
+                            <div className="flex items-center text-sm font-medium text-gray-700">
+                              <svg className="w-4 h-4 mr-1 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
                               {pkg.country.name}
+                            </div>
+                          )}
+                          {pkg.holiday_types && pkg.holiday_types.length > 0 && (
+                            <span className="inline-block bg-butter text-charcoal text-xs px-2 py-1 rounded font-medium">
+                              {pkg.holiday_types[0].name}
                             </span>
                           )}
-                          {pkg.holiday_types && pkg.holiday_types.slice(0, 1).map(type => (
-                            <span key={type.id} className="inline-block bg-butter text-charcoal text-xs px-2 py-1 rounded">
-                              {type.name}
-                            </span>
-                          ))}
                         </div>
                         <Link to={`/packages/${pkg.slug}`} className="block">
                           <h3 className="text-lg font-medium text-charcoal hover:text-hover transition-colors mb-2">
                             {pkg.name}
                           </h3>
                         </Link>
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{pkg.description}</p>
+                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{pkg.summary || pkg.description}</p>
                         <div className="flex justify-between items-center">
-                          <div>
-                            <span className="font-bold text-lg">From ${pkg.price}</span>
-                            <span className="text-gray-600 text-sm"> / person</span>
-                          </div>
+                          <PackagePriceDisplay packageId={pkg.id} basePrice={pkg.price} />
                           <div className="text-sm text-gray-600">{pkg.duration_days} days</div>
                         </div>
                         {pkg.rating && (

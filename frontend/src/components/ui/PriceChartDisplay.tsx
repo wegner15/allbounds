@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { format, parseISO, isAfter, isBefore } from 'date-fns';
-import { useActivePackagePriceCharts, useUpdatePriceChart } from '../../lib/hooks/usePackagePriceCharts';
+import { useActivePackagePriceCharts, useUpdatePriceChart, type PriceChart } from '../../lib/hooks/usePackagePriceCharts';
 
 interface PriceChartDisplayProps {
   packageId: number;
@@ -21,7 +21,7 @@ const PriceChartDisplay: React.FC<PriceChartDisplayProps> = ({ packageId, basePr
   // Create update mutation for the currently editing chart
   const updatePriceChart = useUpdatePriceChart(editingId || 0);
 
-  const handleEdit = (chart: any) => {
+  const handleEdit = (chart: PriceChart) => {
     console.log('Editing chart:', chart);
     setEditingId(chart.id);
     setEditForm({
@@ -193,7 +193,6 @@ const PriceChartDisplay: React.FC<PriceChartDisplayProps> = ({ packageId, basePr
                     const endDate = parseISO(chart.end_date);
                     const isCurrent = isAfter(now, startDate) && isBefore(now, endDate);
                     const isUpcoming = isAfter(startDate, now);
-                    const isExpired = isBefore(endDate, now);
                     const isEditing = editingId === chart.id;
 
                     let statusText = 'Expired';

@@ -2,10 +2,10 @@ import React, { useState, useRef, useCallback } from 'react';
 import { useDirectUpload, useImageUpload, useImageUploadAndCreateMedia } from '../../lib/hooks/useCloudflareImages';
 
 interface CloudflareImageUploadProps {
-  onUploadComplete?: (imageData: any) => void;
-  onUploadError?: (error: any) => void;
+  onUploadComplete?: (imageData: unknown) => void;
+  onUploadError?: (error: unknown) => void;
   requireSignedUrls?: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   className?: string;
   buttonText?: string;
   acceptedFileTypes?: string;
@@ -157,8 +157,8 @@ const CloudflareImageUpload: React.FC<CloudflareImageUploadProps> = ({
             }
           }
         }
-      } catch (error: any) {
-        const errorMessage = error.message || 'An error occurred during upload';
+      } catch (error: unknown) {
+        const errorMessage = (error as Error).message || 'An error occurred during upload';
         setError(errorMessage);
         setIsUploading(false);
         if (onUploadError) onUploadError(error);

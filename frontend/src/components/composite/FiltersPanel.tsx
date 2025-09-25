@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Button from '../ui/Button';
-import { Select } from '../ui/SelectComponent';
 
 export interface FilterOption {
   id: string;

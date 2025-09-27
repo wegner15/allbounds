@@ -2,15 +2,20 @@ import React from 'react';
 
 interface DialogProps {
   open: boolean;
+  onOpenChange?: (open: boolean) => void;
   children: React.ReactNode;
 }
 
-const Dialog: React.FC<DialogProps> = ({ open, children }) => {
+const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) => {
   if (!open) return null;
 
+  const handleBackdropClick = () => {
+    onOpenChange?.(false);
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-lg max-w-md w-full">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={handleBackdropClick}>
+      <div className="bg-white rounded-lg shadow-lg max-w-md w-full" onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
     </div>

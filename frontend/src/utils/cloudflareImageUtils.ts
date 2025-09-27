@@ -53,17 +53,17 @@ export const getEntityImageUrl = (
   fallbackUrl: string = 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=80'
 ): string => {
   // Try cover_image first (might be a Cloudflare ID or full URL)
-  if (entity?.cover_image) {
-    return isCloudflareImageId(entity.cover_image)
-      ? getCloudflareImageUrl(entity.cover_image, 'medium')
-      : entity.cover_image;
+  if ((entity as any)?.cover_image) {
+    return isCloudflareImageId((entity as any).cover_image)
+      ? getCloudflareImageUrl((entity as any).cover_image, 'medium')
+      : (entity as any).cover_image;
   }
-  
+
   // Then try image_id
-  if (entity?.image_id) {
-    return isCloudflareImageId(entity.image_id)
-      ? getCloudflareImageUrl(entity.image_id, 'medium')
-      : entity.image_id;
+  if ((entity as any)?.image_id) {
+    return isCloudflareImageId((entity as any).image_id)
+      ? getCloudflareImageUrl((entity as any).image_id, 'medium')
+      : (entity as any).image_id;
   }
   
   // Finally use the fallback

@@ -18,33 +18,33 @@ const SpecialTopDeals: React.FC = () => {
 
   const renderSkeletons = () => (
     [...Array(6)].map((_, index) => (
-      <div key={index} className="relative flex-shrink-0 w-80 h-96 rounded-lg overflow-hidden bg-gray-200 animate-pulse"></div>
+      <div key={index} className="relative flex-shrink-0 w-80 h-96 rounded-lg overflow-hidden bg-charcoal/10 animate-pulse"></div>
     ))
   );
 
   if (error) {
     return (
-      <div className="py-16 bg-gray-50">
+      <div className="py-16 bg-paper">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-red-500">Failed to load special deals.</p>
+          <p className="text-red-500 font-lato">Failed to load special deals.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="py-16 bg-gray-50">
+    <div className="py-16 bg-paper">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Our Special Top Deals</h2>
-            <p className="text-gray-600 max-w-2xl">
+            <h2 className="text-h2 font-playfair font-bold text-charcoal mb-2">Our Special Top Deals</h2>
+            <p className="text-body font-lato text-charcoal/70 max-w-2xl">
               Enjoy our seasonal holiday special offers, meticulously curated to provide you with unforgettable experiences at exceptional value.
             </p>
           </div>
-          <Link 
-            to="/packages" 
-            className="text-blue-600 hover:text-blue-800 flex items-center font-medium"
+          <Link
+            to="/packages"
+            className="text-teal hover:text-teal/80 flex items-center font-lato font-medium"
           >
             View All Deals
             <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,7 +84,7 @@ const SpecialTopDeals: React.FC = () => {
           {/* Navigation Buttons */}
           <button
             onClick={() => scrollContainer('special-deals-container', 'left')}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-3 rounded-full shadow-lg transition-all duration-200 z-10"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-paper/90 hover:bg-paper text-charcoal hover:text-charcoal/80 p-3 rounded-full shadow-lg transition-all duration-200 z-10"
             aria-label="Scroll left"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -93,7 +93,7 @@ const SpecialTopDeals: React.FC = () => {
           </button>
           <button
             onClick={() => scrollContainer('special-deals-container', 'right')}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-3 rounded-full shadow-lg transition-all duration-200 z-10"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-paper/90 hover:bg-paper text-charcoal hover:text-charcoal/80 p-3 rounded-full shadow-lg transition-all duration-200 z-10"
             aria-label="Scroll right"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

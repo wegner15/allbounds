@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, Heart } from 'lucide-react';
-import { useRecommendedHotels } from '../../hooks/useRecommendedHotels';
+import { useRecommendedHotels, useCountriesWithHotels } from '../../hooks/useRecommendedHotels';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../../utils/imageUtils';
 
 const RecommendedHotels: React.FC = () => {
-  const locations = ['Kenya', 'Uganda', 'Zanzibar', 'Dubai', 'Seychelles', 'Mauritius', 'Cape Town'];
-  const [activeTab, setActiveTab] = useState(locations[0]);
+  const { data: countries, isLoading: countriesLoading } = useCountriesWithHotels();
+  const [activeTab, setActiveTab] = useState<string>('');
+
+  // Set the first country as active when countries are loaded
+  React.useEffect(() => {
+    if (countries && countries.length > 0 && !activeTab) {
+      setActiveTab(countries[0].name);
+    }
+  }, [countries, activeTab]);
 
   const { data: hotels, isLoading, error } = useRecommendedHotels(activeTab);
 
@@ -58,24 +65,34 @@ const RecommendedHotels: React.FC = () => {
         <p className="text-gray-600 text-center max-w-2xl mx-auto mb-8">Exclusive discounts directly from hotels all over the World.</p>
         
         <div className="flex justify-center flex-wrap gap-2 mb-8">
-          {locations.map(location => (
-            <button
-              key={location}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                activeTab === location 
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-              onClick={() => setActiveTab(location)}
-            >
-              {location}
-            </button>
-          ))}
+          {countriesLoading ? (
+            <div className="flex gap-2">
+              {[...Array(4)].map((_, index) => (
+                <div key={index} className="w-20 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+              ))}
+            </div>
+          ) : countries && countries.length > 0 ? (
+            countries.map(country => (
+              <button
+                key={country.id}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  activeTab === country.name
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+                onClick={() => setActiveTab(country.name)}
+              >
+                {country.name}
+              </button>
+            ))
+          ) : (
+            <div className="text-gray-500 text-sm">No countries with hotels available</div>
+          )}
         </div>
         
         <div className="relative mb-8">
           <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide" id="hotels-container">
-            {isLoading ? (
+            {countriesLoading || isLoading ? (
               renderSkeletons()
             ) : error ? (
               <div className="flex-shrink-0 w-80 text-center text-red-500">
@@ -83,53 +100,71 @@ const RecommendedHotels: React.FC = () => {
               </div>
             ) : (
               hotels?.map((hotel) => (
-                <div
+                <Link
                   key={hotel.id}
-                  className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 group flex-shrink-0 w-80"
+                  to={`/hotels/${hotel.slug}`}
+                  className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 group flex-shrink-0 w-80 border border-gray-100"
                 >
                   <div className="relative">
                     <img
-                      src={getImageUrlWithFallback(
+                      src={hotel.image_url || getImageUrlWithFallback(
                         hotel.image_id,
                         IMAGE_VARIANTS.MEDIUM,
                         'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80'
                       )}
                       alt={hotel.name}
-                      className="w-full h-96 object-cover"
+                      className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     {hotel.price_category && (
-                      <div className={`absolute top-3 left-3 text-xs font-bold px-2 py-1 rounded ${getTagColor(hotel.price_category)}`}>
+                      <div className={`absolute top-3 left-3 text-xs font-bold px-3 py-1 rounded-full shadow-sm ${getTagColor(hotel.price_category)}`}>
                         {hotel.price_category}
                       </div>
                     )}
-                    <button className="absolute top-3 right-3 bg-white/80 p-2 rounded-full text-gray-600 hover:text-red-500 hover:bg-white transition-colors">
+                    <button
+                      className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-2 rounded-full text-gray-600 hover:text-red-500 hover:bg-white transition-all duration-200 shadow-sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        // Handle favorite functionality
+                      }}
+                    >
                       <Heart className="w-5 h-5" />
                     </button>
+                    <div className="absolute bottom-3 left-3 right-3">
+                      <div className="flex items-center bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg shadow-sm">
+                        <div className="flex items-center text-yellow-500">
+                          <Star className="w-4 h-4 mr-1" fill="currentColor" />
+                          <span className="text-sm font-semibold text-gray-800">{hotel.stars}</span>
+                        </div>
+                        <span className="text-xs text-gray-600 ml-2">
+                          ({hotel.stars} Stars)
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-lg text-gray-800 truncate group-hover:text-blue-600 transition-colors">
+                  <div className="p-5">
+                    <h3 className="font-bold text-xl text-gray-800 mb-2 group-hover:text-blue-600 transition-colors line-clamp-1">
                       {hotel.name}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-2 h-8 line-clamp-2">
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2 min-h-[2.5rem]">
                       {hotel.summary || `${hotel.city}, ${hotel.country?.name}`}
                     </p>
-                    <div className="flex items-center mb-4">
-                      <div className="flex items-center text-blue-600 bg-blue-100 px-2 py-1 rounded-md font-bold text-sm">
-                        <Star className="w-4 h-4 mr-1" fill="currentColor" />
-                        <span>{hotel.stars}</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center text-sm text-gray-500">
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        {hotel.city}, {hotel.country?.name}
                       </div>
-                      <span className="text-sm text-gray-600 ml-2">
-                        {hotel.stars} Stars
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-500">Price Category</p>
-                      <p className="text-xl font-bold text-gray-900">
-                        {hotel.price_category}
-                      </p>
+                      <div className="text-right">
+                        <p className="text-xs text-gray-400 uppercase tracking-wide">From</p>
+                        <p className="text-lg font-bold text-green-600">
+                          ${hotel.price_category === 'Budget' ? '50' : hotel.price_category === 'Mid-range' ? '120' : hotel.price_category === 'Luxury' ? '300' : '100'}/night
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))
             )}
           </div>

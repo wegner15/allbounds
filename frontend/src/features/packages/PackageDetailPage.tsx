@@ -150,14 +150,14 @@ const PackageDetailPage: React.FC = () => {
                )}
               
                {/* Inclusions/Exclusions Tabs */}
-               {((packageDetail.inclusions || (packageDetail.inclusion_items && packageDetail.inclusion_items.length > 0)) ||
-                 (packageDetail.exclusions || (packageDetail.exclusion_items && packageDetail.exclusion_items.length > 0))) && (
+               {((packageDetail.inclusions || (packageDetail.inclusions && packageDetail.inclusions.length > 0)) ||
+                 (packageDetail.exclusions || (packageDetail.exclusions && packageDetail.exclusions.length > 0))) && (
                  <div className="mb-6">
                    <h3 className="text-xl font-semibold mb-4">Package Details</h3>
 
                    {/* Tab Navigation */}
                    <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
-                     {((packageDetail.inclusions || (packageDetail.inclusion_items && packageDetail.inclusion_items.length > 0))) && (
+                     {((packageDetail.inclusions || (packageDetail.inclusions && packageDetail.inclusions.length > 0))) && (
                        <button
                          onClick={() => setActiveTab('included')}
                          className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
@@ -169,7 +169,7 @@ const PackageDetailPage: React.FC = () => {
                          What's Included
                        </button>
                      )}
-                     {((packageDetail.exclusions || (packageDetail.exclusion_items && packageDetail.exclusion_items.length > 0))) && (
+                     {((packageDetail.exclusions || (packageDetail.exclusions && packageDetail.exclusions.length > 0))) && (
                        <button
                          onClick={() => setActiveTab('excluded')}
                          className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
@@ -186,11 +186,11 @@ const PackageDetailPage: React.FC = () => {
                    {/* Tab Content */}
                    {activeTab === 'included' && (
                      <div>
-                       {packageDetail.inclusions ? (
-                         <TextDisplay content={packageDetail.inclusions} />
-                       ) : packageDetail.inclusion_items && packageDetail.inclusion_items.length > 0 ? (
+                        {typeof packageDetail.inclusions === 'string' ? (
+                          <TextDisplay content={packageDetail.inclusions} />
+                        ) : Array.isArray(packageDetail.inclusions) && packageDetail.inclusions.length > 0 ? (
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                           {packageDetail.inclusion_items.map((item) => (
+                           {packageDetail.inclusions.map((item) => (
                              <div key={item.id} className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
                                <div className="flex-shrink-0">
                                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -212,11 +212,11 @@ const PackageDetailPage: React.FC = () => {
 
                    {activeTab === 'excluded' && (
                      <div>
-                       {packageDetail.exclusions ? (
-                         <TextDisplay content={packageDetail.exclusions} />
-                       ) : packageDetail.exclusion_items && packageDetail.exclusion_items.length > 0 ? (
+                        {typeof packageDetail.exclusions === 'string' ? (
+                          <TextDisplay content={packageDetail.exclusions} />
+                        ) : Array.isArray(packageDetail.exclusions) && packageDetail.exclusions.length > 0 ? (
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                           {packageDetail.exclusion_items.map((item) => (
+                           {packageDetail.exclusions.map((item) => (
                              <div key={item.id} className="flex items-center space-x-3 p-3 bg-red-50 rounded-lg border border-red-200">
                                <div className="flex-shrink-0">
                                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">

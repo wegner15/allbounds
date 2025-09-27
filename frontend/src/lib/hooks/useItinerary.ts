@@ -164,7 +164,7 @@ export const useUpdateActivity = () => {
   return useMutation({
     mutationFn: ({ activityId, data }: { activityId: number; data: UpdateActivityData }) =>
       apiClient.put<ItineraryActivity>(`/itinerary/activities/${activityId}`, data),
-    onSuccess: (data: ItineraryItem) => {
+    onSuccess: (data: ItineraryActivity) => {
       queryClient.invalidateQueries({
         queryKey: ['itinerary-item', data.itinerary_item_id]
       });

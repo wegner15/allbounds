@@ -304,11 +304,11 @@ const TipTapEditor: React.FC<TipTapEditorProps> = ({
                     <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
                       <h4 className="text-sm font-medium text-gray-700 mb-2">Upload an image</h4>
                       <CloudflareImageUpload
-                        onUploadComplete={(imageData) => {
-                          // Immediately use the uploaded image
-                          if (imageData?.id) {
-                            // Set the selected image ID which will trigger the image insertion
-                            setSelectedImageId(imageData.id);
+                         onUploadComplete={(imageData) => {
+                           // Immediately use the uploaded image
+                           if ((imageData as any)?.id) {
+                             // Set the selected image ID which will trigger the image insertion
+                             setSelectedImageId((imageData as any).id);
                             
                             // Close the modal after a short delay to allow the user to see the upload completed
                             setTimeout(() => {
@@ -406,11 +406,11 @@ const TipTapEditor: React.FC<TipTapEditorProps> = ({
             <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
               <h4 className="text-sm font-medium text-gray-700 mb-2">Upload an image</h4>
               <CloudflareImageUpload
-                onUploadComplete={(imageData) => {
-                  // Immediately use the uploaded image
-                  if (imageData?.id) {
-                    // Set the selected image ID which will trigger the image insertion
-                    setSelectedImageId(imageData.id);
+                 onUploadComplete={(imageData) => {
+                   // Immediately use the uploaded image
+                   if ((imageData as any)?.id) {
+                     // Set the selected image ID which will trigger the image insertion
+                     setSelectedImageId((imageData as any).id);
                     
                     // Close the modal after a short delay to allow the user to see the upload completed
                     setTimeout(() => {

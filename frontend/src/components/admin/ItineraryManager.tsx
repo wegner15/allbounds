@@ -92,7 +92,7 @@ export const ItineraryManager: React.FC<ItineraryManagerProps> = ({
     });
   };
 
-  const getMealIcon = () => {
+  const getMealIcon = (mealType?: string) => {
     return <Utensils className="h-4 w-4" />;
   };
 

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useCountries, useRegions } from '../../../lib/hooks/useDestinations';
 import Button from '../../../components/ui/Button';
 import FormInputWithIcon from '../../../components/ui/FormInputWithIcon';
+import type { Country } from '../../../lib/types/api';
 
 const CountriesListPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');

@@ -20,7 +20,55 @@ class CountryService:
             Country.region_id == region_id,
             Country.is_active == True
         ).offset(skip).limit(limit).all()
-    
+
+    def get_countries_with_hotels(self, db: Session, skip: int = 0, limit: int = 100) -> List[Country]:
+        """
+        Retrieve countries that have active hotels.
+        """
+        from app.models.hotel import Hotel
+
+        return db.query(Country).join(Hotel).filter(
+            Country.is_active == True,
+            Hotel.is_active == True
+        ).distinct().offset(skip).limit(limit).all()
+
+    def get_countries_with_packages(self, db: Session, skip: int = 0, limit: int = 100) -> List[Country]:
+        """
+        Retrieve countries that have active packages.
+        """
+        from app.models.package import Package
+
+        return db.query(Country).join(Package).filter(
+            Country.is_active == True,
+            Package.is_active == True
+        ).distinct().offset(skip).limit(limit).all()
+
+    def get_countries_with_activities(self, db: Session, skip: int = 0, limit: int = 100) -> List[Country]:
+        """
+        Retrieve countries that have active activities.
+        """
+        from app.models.activity import Activity
+
+        return db.query(Country).join(
+            Country.activities
+        ).filter(
+            Country.is_active == True,
+            Activity.is_active == True
+        ).distinct().offset(skip).limit(limit).all()
+
+    def get_countries_with_attractions(self, db: Session, skip: int = 0, limit: int = 100) -> List[Country]:
+        """
+        Retrieve countries that have active attractions.
+        """
+        from app.models.attraction import Attraction
+
+        return db.query(Country).join(
+            Country.attractions
+        ).filter(
+            Country.is_active == True,
+            Attraction.is_active == True
+        ).distinct().offset(skip).limit(limit).all()
+
     def get_country(self, db: Session, country_id: int) -> Optional[Country]:
         """
         Retrieve a specific country by ID.
@@ -167,7 +215,142 @@ class CountryService:
         }
         
         return country_dict
-    
+
+    def get_countries_with_details(self, db: Session, skip: int = 0, limit: int = 100) -> List[dict]:
+        """
+        Retrieve all countries with detailed related data for trending destinations.
+        """
+        from sqlalchemy.orm import joinedload
+        from app.models.group_trip import GroupTrip, GroupTripDeparture
+
+        countries = db.query(Country).options(
+            joinedload(Country.region),
+            joinedload(Country.packages),
+            joinedload(Country.group_trips).joinedload(GroupTrip.departures),
+            joinedload(Country.attractions),
+            joinedload(Country.accommodations),
+            joinedload(Country.hotels),
+            joinedload(Country.visit_info)
+        ).filter(Country.is_active == True).offset(skip).limit(limit).all()
+
+        result = []
+        for country in countries:
+            country_dict = {
+                "id": country.id,
+                "name": country.name,
+                "description": country.description,
+                "summary": country.summary,
+                "slug": country.slug,
+                "region_id": country.region_id,
+                "image_id": country.image_id,
+                "is_active": country.is_active,
+                "created_at": country.created_at.isoformat() if country.created_at else None,
+                "updated_at": country.updated_at.isoformat() if country.updated_at else None,
+                "region": {
+                    "id": country.region.id,
+                    "name": country.region.name,
+                    "slug": country.region.slug,
+                    "description": country.region.description,
+                    "image_id": country.region.image_id,
+                } if country.region else None,
+                "packages": [
+                    {
+                        "id": pkg.id,
+                        "name": pkg.name,
+                        "slug": pkg.slug,
+                        "description": pkg.description,
+                        "summary": pkg.summary,
+                        "price": float(pkg.price) if pkg.price else None,
+                        "duration_days": pkg.duration_days,
+                        "image_id": pkg.image_id,
+                        "is_active": pkg.is_active,
+                        "is_featured": pkg.is_featured,
+                    }
+                    for pkg in country.packages if pkg.is_active
+                ],
+                "group_trips": [
+                    {
+                        "id": gt.id,
+                        "name": gt.name,
+                        "slug": gt.slug,
+                        "description": gt.description,
+                        "price": float(gt.price) if gt.price else None,
+                        "duration_days": gt.duration_days,
+                        "image_id": gt.image_id,
+                        "is_active": gt.is_active,
+                        "max_participants": gt.max_participants,
+                        "min_participants": gt.min_participants,
+                        "departures": [
+                            {
+                                "id": dep.id,
+                                "start_date": dep.start_date.isoformat() if dep.start_date else None,
+                                "end_date": dep.end_date.isoformat() if dep.end_date else None,
+                                "price": float(dep.price) if dep.price else None,
+                                "available_slots": dep.available_slots,
+                                "is_active": dep.is_active,
+                            }
+                            for dep in gt.departures if dep.is_active
+                        ]
+                    }
+                    for gt in country.group_trips if gt.is_active
+                ],
+                "attractions": [
+                    {
+                        "id": attr.id,
+                        "name": attr.name,
+                        "slug": attr.slug,
+                        "description": attr.description,
+                        "city": attr.city,
+                        "image_id": attr.image_id,
+                        "is_active": attr.is_active,
+                    }
+                    for attr in country.attractions if attr.is_active
+                ],
+                "accommodations": [
+                    {
+                        "id": acc.id,
+                        "name": acc.name,
+                        "slug": acc.slug,
+                        "description": acc.description,
+
+                        "is_active": acc.is_active,
+                        "address": acc.address,
+                        "stars": acc.stars,
+                        "price_per_night": float(acc.price_per_night) if acc.price_per_night else None,
+                        "amenities": acc.amenities,
+                    }
+                    for acc in country.accommodations if acc.is_active
+                ],
+                "hotels": [
+                    {
+                        "id": hotel.id,
+                        "name": hotel.name,
+                        "summary": hotel.summary,
+                        "description": hotel.description,
+                        "stars": hotel.stars,
+                        "address": hotel.address,
+                        "city": hotel.city,
+                        "price_category": hotel.price_category,
+                        "amenities": hotel.amenities,
+                        "image_id": hotel.image_id,
+                        "slug": hotel.slug,
+                        "is_active": hotel.is_active,
+                    }
+                    for hotel in country.hotels if hotel.is_active
+                ],
+                "visit_info": {
+                    "id": country.visit_info.id,
+                    "country_id": country.visit_info.country_id,
+                    "monthly_ratings": country.visit_info.monthly_ratings,
+                    "general_notes": country.visit_info.general_notes,
+                    "created_at": country.visit_info.created_at.isoformat() if hasattr(country.visit_info, 'created_at') else None,
+                    "updated_at": country.visit_info.updated_at.isoformat() if hasattr(country.visit_info, 'updated_at') else None,
+                } if country.visit_info else None,
+            }
+            result.append(country_dict)
+
+        return result
+
     def create_country(self, db: Session, country_create: CountryCreate) -> Country:
         """
         Create a new country.

@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTrendingAttractions } from '../../hooks/useTrendingAttractions';
+import { useCountriesWithAttractions } from '../../hooks/useRecommendedHotels';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../../utils/imageUtils';
 
 const TrendingAttractions: React.FC = () => {
-  const locations = ['Kenya', 'Uganda', 'Tanzania', 'Dubai', 'South Africa', 'Egypt', 'Turkey', 'Greece', 'Thailand'];
-  const [activeTab, setActiveTab] = useState(locations[0]);
+  const { data: availableCountries, isLoading: countriesLoading } = useCountriesWithAttractions();
+  const locations = availableCountries?.map(country => country.name) || [];
+  const [activeTab, setActiveTab] = useState<string>('');
+
+  // Set initial active tab when countries load
+  React.useEffect(() => {
+    if (locations.length > 0 && !activeTab) {
+      setActiveTab(locations[0]);
+    }
+  }, [locations, activeTab]);
 
   const { data: attractions, isLoading, error } = useTrendingAttractions(activeTab);
 
@@ -21,6 +30,36 @@ const TrendingAttractions: React.FC = () => {
     ))
   );
 
+  if (countriesLoading) {
+    return (
+      <div className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-4">
+            <h2 className="text-3xl font-bold text-gray-900">Trending Attractions</h2>
+          </div>
+          <p className="text-gray-600 text-center max-w-2xl mx-auto mb-8">Discover top-rated attractions and must-see sights from around the world.</p>
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!locations.length) {
+    return (
+      <div className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-4">
+            <h2 className="text-3xl font-bold text-gray-900">Trending Attractions</h2>
+          </div>
+          <p className="text-gray-600 text-center max-w-2xl mx-auto mb-8">Discover top-rated attractions and must-see sights from around the world.</p>
+          <p className="text-gray-500 text-center">No attractions available at the moment.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
@@ -28,13 +67,13 @@ const TrendingAttractions: React.FC = () => {
           <h2 className="text-3xl font-bold text-gray-900">Trending Attractions</h2>
         </div>
         <p className="text-gray-600 text-center max-w-2xl mx-auto mb-8">Discover top-rated attractions and must-see sights from around the world.</p>
-        
+
         <div className="flex justify-center flex-wrap gap-2 mb-8">
           {locations.map(location => (
             <button
               key={location}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                activeTab === location 
+                activeTab === location
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}

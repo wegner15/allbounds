@@ -5,7 +5,7 @@ interface FormFieldProps {
   label: string;
   type?: 'text' | 'textarea' | 'number' | 'checkbox' | 'select';
   placeholder?: string;
-  value: string | number | boolean | undefined;
+  value?: string | number | boolean;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   error?: string;
   className?: string;
@@ -46,7 +46,7 @@ const FormField: React.FC<FormFieldProps> = ({
             rows={rows}
             className={baseInputClasses}
             placeholder={placeholder}
-            value={value}
+            value={value?.toString() || ''}
             onChange={onChange}
           />
         );
@@ -56,7 +56,7 @@ const FormField: React.FC<FormFieldProps> = ({
             id={id}
             name={id}
             className={baseInputClasses}
-            value={value}
+            value={value as string | number}
             onChange={onChange}
           >
             {options.map((option) => (
@@ -74,7 +74,7 @@ const FormField: React.FC<FormFieldProps> = ({
               name={id}
               type="checkbox"
               className="h-4 w-4 text-teal focus:ring-teal border-gray-300 rounded"
-              checked={value}
+              checked={Boolean(value)}
               onChange={onChange}
             />
             <label htmlFor={id} className="ml-2 block text-sm text-gray-900">
@@ -90,7 +90,7 @@ const FormField: React.FC<FormFieldProps> = ({
             name={id}
             className={baseInputClasses}
             placeholder={placeholder}
-            value={value}
+            value={value?.toString() || ''}
             onChange={onChange}
           />
         );

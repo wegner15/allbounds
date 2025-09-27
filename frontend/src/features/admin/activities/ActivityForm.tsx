@@ -61,7 +61,6 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ onSubmit, defaultValues, is
             control={control}
             render={({ field }) => (
               <TinyMCEEditor
-                name="description"
                 label="Description"
                 value={field.value || ''}
                 onChange={field.onChange}
@@ -130,8 +129,8 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ onSubmit, defaultValues, is
           
           <CloudflareImageUpload
             onUploadComplete={(response) => {
-              if (response?.media_asset?.id) {
-                setValue('cover_image_id', response.media_asset.id);
+              if ((response as any)?.media_asset?.id) {
+                setValue('cover_image_id', (response as any).media_asset.id);
               }
             }}
             buttonText={defaultValues?.cover_image ? "Replace Cover Image" : "Upload Cover Image"}
@@ -150,8 +149,8 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ onSubmit, defaultValues, is
             <label className="block text-sm font-medium text-gray-700">Gallery</label>
             <CloudflareImageUpload
               onUploadComplete={(response) => {
-                if (response?.media_asset?.id) {
-                  setValue('media_asset_ids', [...mediaAssetIds, response.media_asset.id]);
+                if ((response as any)?.media_asset?.id) {
+                  setValue('media_asset_ids', [...mediaAssetIds, (response as any).media_asset.id]);
                   queryClient.invalidateQueries({ queryKey: ['admin-media'] });
                 }
               }}

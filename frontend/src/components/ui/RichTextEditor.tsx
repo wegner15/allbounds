@@ -16,7 +16,7 @@ interface RichTextEditorProps {
   helperText?: string;
   maxLength?: number;
   name?: string;
-  control?: unknown; // For react-hook-form integration
+  control?: any; // For react-hook-form integration
   required?: boolean;
 }
 
@@ -35,7 +35,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
   const [editorContent, setEditorContent] = useState(value || '');
   const quillRef = useRef<HTMLDivElement>(null);
-  const quillInstance = useRef<unknown>(null);
+  const quillInstance = useRef<Quill | null>(null);
 
   
   // Initialize Quill with standard toolbar
@@ -163,7 +163,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             const editorElement = document.getElementById(editorId);
             if (!editorElement) return;
             
-            const quillEditor = Quill.find(editorElement) as unknown;
+            const quillEditor = Quill.find(editorElement) as Quill;
             if (quillEditor && field.value !== quillEditor.root.innerHTML) {
               quillEditor.clipboard.dangerouslyPasteHTML(field.value || '');
             }

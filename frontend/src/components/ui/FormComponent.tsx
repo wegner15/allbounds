@@ -1,9 +1,9 @@
 import React from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
+import type { Control, FieldValues } from 'react-hook-form';
 
-interface FormProps {
+interface FormProps extends React.FormHTMLAttributes<HTMLFormElement> {
   children: React.ReactNode;
-  [key: string]: unknown;
 }
 
 const Form = React.forwardRef<HTMLFormElement, FormProps>(({ children, ...props }, ref) => {
@@ -16,8 +16,8 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(({ children, ...props 
 
 interface FormFieldProps {
   name: string;
-  control?: unknown;
-  render: ({ field }: { field: unknown }) => React.ReactNode;
+  control?: any;
+  render: ({ field }: { field: any }) => React.ReactNode;
 }
 
 const FormField: React.FC<FormFieldProps> = ({ name, control, render }) => {

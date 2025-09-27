@@ -7,9 +7,9 @@ export const useTrendingAttractions = (countryName?: string) => {
   return useQuery<Attraction[], Error>({
     queryKey: ['trending-attractions', countryName],
     queryFn: async () => {
-      let url = `${endpoints.attractions.list()}?trending=true`;
+      let url = `${endpoints.attractions.list()}?limit=12`;
       if (countryName) {
-        url += `&country=${countryName}`;
+        url += `&country=${encodeURIComponent(countryName)}`;
       }
       const response = await apiClient.get<Attraction[]>(url);
       return response;

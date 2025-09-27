@@ -38,9 +38,7 @@ const MainNavigation: React.FC = () => {
     { label: 'HOLIDAY TYPES', path: '/holiday-types', hasDropdown: true },
     { label: 'PACKAGES', path: '/packages' },
     { label: 'GROUP TRIPS', path: '/group-trips' },
-    { label: 'ABOUT US', path: '/about-us' },
     { label: 'BLOG', path: '/blog' },
-    { label: 'CONTACT US', path: '/contact-us' },
   ];
 
     // Fetch regions with countries from API
@@ -182,7 +180,7 @@ const MainNavigation: React.FC = () => {
   };
 
   return (
-    <header className="relative z-50">
+    <header className="sticky top-0 z-50">
       {/* Main Navigation Bar */}
       <div className="bg-white shadow-sm">
         <div className="container mx-auto px-4">
@@ -190,10 +188,10 @@ const MainNavigation: React.FC = () => {
             {/* Logo */}
             <Link to="/" className="flex items-center">
               <div className="flex items-center">
-                <img 
-                  src="/logo/android-chrome-192x192.png" 
-                  alt="AllBounds Vacations" 
-                  className="h-10 w-auto"
+                <img
+                  src="/logo/android-chrome-192x192.png"
+                  alt="AllBounds Vacations"
+                  className="h-10 w-24"
                   onError={(e) => {
                     // Fallback if logo image is not available
                     const target = e.currentTarget as HTMLImageElement;
@@ -212,7 +210,7 @@ const MainNavigation: React.FC = () => {
                 <div key={item.path} className="relative">
                   {item.hasDropdown ? (
                     <button
-                      className="flex items-center text-xs font-medium text-charcoal hover:text-hover transition-colors"
+                      className="flex items-center text-base font-medium text-charcoal hover:text-hover transition-colors"
                       onClick={item.label === 'DESTINATIONS' ? toggleDestinations : toggleHolidayTypes}
                       data-dropdown={item.label === 'DESTINATIONS' ? 'destinations' : 'holiday-types'}
                     >
@@ -234,7 +232,7 @@ const MainNavigation: React.FC = () => {
                   ) : (
                     <Link
                       to={item.path}
-                      className="text-xs font-medium text-charcoal hover:text-hover transition-colors"
+                      className="text-base font-medium text-charcoal hover:text-hover transition-colors"
                     >
                       {item.label}
                     </Link>

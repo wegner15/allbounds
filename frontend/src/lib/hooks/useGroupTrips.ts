@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient, endpoints } from '../api';
-import type { GroupTrip, GroupTripDeparture } from '../types/api';
+import type { GroupTrip, GroupTripWithGallery, GroupTripDeparture } from '../types/api';
 
 // Hook for fetching all group trips
 export const useGroupTrips = (params?: { 
@@ -85,7 +85,7 @@ export const useGroupTripDetailsBySlug = (slug: string) => {
   return useQuery({
     queryKey: ['groupTripDetails', 'slug', slug],
     queryFn: async () => {
-      return apiClient.get<unknown>(`/group-trips/details/${slug}`);
+      return apiClient.get<GroupTripWithGallery>(`/group-trips/details/${slug}`);
     },
     enabled: !!slug,
   });

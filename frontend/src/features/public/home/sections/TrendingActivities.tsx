@@ -2,10 +2,19 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, Heart, Clock } from 'lucide-react';
 import { useTrendingActivities } from '../../hooks/useTrendingActivities';
+import { useCountriesWithActivities } from '../../hooks/useRecommendedHotels';
 
 const TrendingActivities: React.FC = () => {
-  const locations = ['Kenya', 'Uganda', 'Zanzibar', 'Dubai', 'Seychelles', 'Mauritius'];
-  const [activeTab, setActiveTab] = useState(locations[0]);
+  const { data: availableCountries, isLoading: countriesLoading } = useCountriesWithActivities();
+  const locations = availableCountries?.map(country => country.name) || [];
+  const [activeTab, setActiveTab] = useState<string>('');
+
+  // Set initial active tab when countries load
+  React.useEffect(() => {
+    if (locations.length > 0 && !activeTab) {
+      setActiveTab(locations[0]);
+    }
+  }, [locations, activeTab]);
 
   const { data: activities, isLoading, error } = useTrendingActivities(activeTab);
 
@@ -22,6 +31,36 @@ const TrendingActivities: React.FC = () => {
     ))
   );
 
+  if (countriesLoading) {
+    return (
+      <div className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-4">
+            <h2 className="text-3xl font-bold text-gray-900">Trending Activities</h2>
+          </div>
+          <p className="text-gray-600 text-center max-w-2xl mx-auto mb-8">Exclusive discounts on activities all over the World.</p>
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!locations.length) {
+    return (
+      <div className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-4">
+            <h2 className="text-3xl font-bold text-gray-900">Trending Activities</h2>
+          </div>
+          <p className="text-gray-600 text-center max-w-2xl mx-auto mb-8">Exclusive discounts on activities all over the World.</p>
+          <p className="text-gray-500 text-center">No activities available at the moment.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="py-16 bg-white">
       <div className="container mx-auto px-4">
@@ -29,13 +68,13 @@ const TrendingActivities: React.FC = () => {
           <h2 className="text-3xl font-bold text-gray-900">Trending Activities</h2>
         </div>
         <p className="text-gray-600 text-center max-w-2xl mx-auto mb-8">Exclusive discounts on activities all over the World.</p>
-        
+
         <div className="flex justify-center flex-wrap gap-2 mb-8">
           {locations.map(location => (
             <button
               key={location}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                activeTab === location 
+                activeTab === location
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}

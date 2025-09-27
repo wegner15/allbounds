@@ -18,13 +18,18 @@ const regionSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters'),
   summary: z.string().max(255, 'Summary cannot exceed 255 characters').optional(),
   image_id: z.string().optional(),
+  image_alt_text: z.string().optional(),
+  image_title: z.string().optional(),
   is_active: z.boolean(), // Default is handled in useForm
 });
 
-export type RegionFormData = z.infer<typeof regionSchema>;
+export type RegionFormData = z.infer<typeof regionSchema> & {
+  image_alt_text?: string;
+  image_title?: string;
+};
 
 interface RegionFormProps {
-  initialData?: Partial<RegionFormData>;
+  initialData?: Partial<RegionFormData & { id?: number }>;
   isEdit?: boolean;
   onSubmit: (data: RegionFormData) => Promise<void>;
   isSubmitting?: boolean;
@@ -54,12 +59,17 @@ const RegionForm: React.FC<RegionFormProps> = ({
       description: initialData?.description || '',
       summary: initialData?.summary || '',
       image_id: initialData?.image_id || '',
+      image_alt_text: initialData?.image_alt_text || '',
+      image_title: initialData?.image_title || '',
       is_active: initialData?.is_active ?? true,
     }
   });
 
   // Auto-generate slug from name
   const name = watch('name');
+  const imageTitle = watch('image_title');
+  const imageAltText = watch('image_alt_text');
+
   useEffect(() => {
     if (!isEdit && name) {
       const generatedSlug = name
@@ -141,23 +151,46 @@ const RegionForm: React.FC<RegionFormProps> = ({
               </FormGroup>
             </div>
 
-           {/* Image Upload */}
-          <div className="md:col-span-2">
-            <FormGroup>
-              <Controller
-                name="image_id"
-                control={control}
-                render={({ field }) => (
-                  <ImageSelector
-                    initialImageId={field.value}
-                    onImageSelected={(imageId) => field.onChange(imageId)}
-                    label="Region Image"
-                    helperText="Upload an image for this region"
-                  />
-                )}
-              />
-            </FormGroup>
-          </div>
+            {/* Image Upload */}
+           <div className="md:col-span-2">
+             <FormGroup>
+               <Controller
+                 name="image_id"
+                 control={control}
+                 render={({ field }) => (
+                   <ImageSelector
+                     initialImageId={field.value}
+                     onImageSelected={(imageId) => field.onChange(imageId)}
+                     label="Region Image"
+                     helperText="Upload an image for this region"
+                     entityType="region"
+                     entityId={isEdit ? initialData?.id : undefined}
+                     altText={imageAltText}
+                     title={imageTitle}
+                   />
+                 )}
+               />
+             </FormGroup>
+           </div>
+
+           {/* Image Metadata */}
+           <FormGroup>
+             <FormInput
+               id="image_title"
+               label="Image Title"
+               helperText="Optional title for the image (for SEO)"
+               {...register('image_title')}
+             />
+           </FormGroup>
+
+           <FormGroup>
+             <FormInput
+               id="image_alt_text"
+               label="Image Alt Text"
+               helperText="Describe the image for accessibility"
+               {...register('image_alt_text')}
+             />
+           </FormGroup>
           
           {/* Status */}
           <div className="md:col-span-2">

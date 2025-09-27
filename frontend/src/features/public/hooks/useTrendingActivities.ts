@@ -17,12 +17,13 @@ export const useTrendingActivities = (countryName?: string) => {
   return useQuery<ActivityWithDetails[], Error>({
     queryKey: ['trending-activities', countryName],
     queryFn: async () => {
-      // For now, just fetch all activities since the backend doesn't support trending parameter
-      // TODO: Add trending support to backend or implement client-side filtering
-      const url = `${endpoints.activities.list()}?limit=12`;
+      let url = `${endpoints.activities.list()}?limit=12`;
+      if (countryName) {
+        url += `&country=${encodeURIComponent(countryName)}`;
+      }
       const response = await apiClient.get<ActivityWithDetails[]>(url);
       return response;
     },
-    enabled: true, // Always fetch activities
+    enabled: !!countryName, // Only fetch when a country is selected
   });
 };

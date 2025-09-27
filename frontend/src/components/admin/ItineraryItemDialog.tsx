@@ -3,15 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/DialogComponent';
-// Form components
-// Create simple form components since they don't exist
-const Form = ({ children, ...props }: { children: React.ReactNode } & React.FormHTMLAttributes<HTMLFormElement>) => <form {...props}>{children}</form>;
-const FormControl = ({ children }: { children: React.ReactNode }) => <div className="mt-1">{children}</div>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const FormField = ({ children, render }: { children?: React.ReactNode; render?: any }) => <div>{render ? render({ field: { onChange: () => {}, value: '', ref: null } }) : children}</div>;
-const FormItem = ({ children }: { children: React.ReactNode }) => <div className="mb-4">{children}</div>;
-const FormLabel = ({ children }: { children: React.ReactNode }) => <label className="block text-sm font-medium text-gray-700 mb-1">{children}</label>;
-const FormMessage = ({ children }: { children?: React.ReactNode }) => <p className="mt-1 text-sm text-red-600">{children}</p>;
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '../ui/FormComponent';
 import Input from '../ui/Input';
 import Textarea from '../ui/FormTextarea';
 import Button from '../ui/Button';
@@ -138,8 +130,7 @@ export const ItineraryItemDialog: React.FC<ItineraryItemDialogProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -287,7 +278,6 @@ export const ItineraryItemDialog: React.FC<ItineraryItemDialogProps> = ({
               </div>
             </div>
           </form>
-        </Form>
       </DialogContent>
     </Dialog>
   );

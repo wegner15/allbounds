@@ -16,7 +16,7 @@ class MockIntersectionObserver {
 }
 
 // Add to window object
-window.IntersectionObserver = MockIntersectionObserver as unknown;
+window.IntersectionObserver = MockIntersectionObserver as any;
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -48,4 +48,4 @@ class MockResizeObserver {
 }
 
 // Add to window object
-window.ResizeObserver = MockResizeObserver as unknown;
+window.ResizeObserver = MockResizeObserver as any;

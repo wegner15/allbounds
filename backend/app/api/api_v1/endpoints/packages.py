@@ -22,13 +22,26 @@ def get_packages(
     limit: int = 100,
     order_by: str = "created_at",
     order: str = "desc",
+    popular: bool = Query(False, description="Get popular (featured) packages"),
+    country: str = Query(None, description="Filter by country name"),
 ) -> Any:
     """
-    Retrieve all packages with optional ordering.
+    Retrieve all packages with optional ordering and filtering.
     order_by options: created_at, name, price
     order options: asc, desc
     """
-    packages = package_service.get_packages(db, skip=skip, limit=limit, order_by=order_by, order=order)
+    if country:
+        # Find country by name and get packages for that country
+        from app.models.country import Country
+        country_obj = db.query(Country).filter(Country.name == country, Country.is_active == True).first()
+        if country_obj:
+            packages = package_service.get_packages_by_country(db, country_id=country_obj.id, skip=skip, limit=limit)
+        else:
+            packages = []
+    elif popular:
+        packages = package_service.get_featured_packages(db, skip=skip, limit=limit)
+    else:
+        packages = package_service.get_packages(db, skip=skip, limit=limit, order_by=order_by, order=order)
     return packages
 
 @router.get("/country/{country_id}", response_model=List[PackageWithCountryResponse])

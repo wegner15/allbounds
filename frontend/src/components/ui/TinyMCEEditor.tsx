@@ -81,7 +81,7 @@ const TinyMCEEditor: React.FC<TinyMCEEditorProps> = ({
       editorRef.current = editor;
 
       // Add custom image button that only allows uploads
-      editor.ui.registry.addButton('customimage', {
+      (editor as any).ui.registry.addButton('customimage', {
         text: 'Image',
         icon: 'image',
         tooltip: 'Insert image',

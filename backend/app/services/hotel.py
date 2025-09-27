@@ -2,12 +2,13 @@ from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.hotel import Hotel
+from app.models.country import Country
 from app.schemas.hotel import HotelCreate, HotelUpdate
 from app.utils.slug import create_slug
 from app.core.cloudflare_config import cloudflare_settings
 
 class HotelService:
-    def _get_cloudflare_image_url(self, image_id: str, variant: str = "medium") -> str:
+    def _get_cloudflare_image_url(self, image_id: str, variant: str = "medium") -> Optional[str]:
         """
         Generate Cloudflare Images delivery URL.
         """
@@ -15,11 +16,69 @@ class HotelService:
             return None
         return f"{cloudflare_settings.delivery_url}/{image_id}/{variant}"
     
-    def get_hotels(self, db: Session, skip: int = 0, limit: int = 100) -> List[Hotel]:
+    def get_hotels(self, db: Session, skip: int = 0, limit: int = 100, recommended: Optional[bool] = None, country: Optional[str] = None) -> List[Dict[str, Any]]:
         """
-        Retrieve all hotels with pagination.
+        Retrieve all hotels with pagination and optional filtering, including cover images.
         """
-        return db.query(Hotel).filter(Hotel.is_active == True).offset(skip).limit(limit).all()
+        query = db.query(Hotel).options(
+            joinedload(Hotel.country),
+            joinedload(Hotel.media_assets)
+        ).filter(Hotel.is_active == True)
+
+        if recommended is not None and recommended:
+            # For now, recommended means all active hotels (can be enhanced later with a recommended field)
+            pass  # No additional filtering needed
+
+        if country:
+            # Join with country to filter by country name
+            query = query.join(Hotel.country).filter(Country.name.ilike(f"%{country}%"))
+
+        hotels = query.offset(skip).limit(limit).all()
+
+        # Format hotels with cover images
+        result = []
+        for hotel in hotels:
+            # Get cover image
+            cover_image_url = None
+            if hotel.image_id:
+                cover_image_url = self._get_cloudflare_image_url(hotel.image_id)
+            else:
+                # Fallback to first gallery image
+                for media in hotel.media_assets:
+                    if media.is_active:
+                        if media.file_path.startswith("cloudflare://") and media.storage_key:
+                            cover_image_url = self._get_cloudflare_image_url(media.storage_key)
+                            break
+                        elif media.storage_key:
+                            cover_image_url = self._get_cloudflare_image_url(media.storage_key)
+                            break
+
+            hotel_data = {
+                "id": hotel.id,
+                "name": hotel.name,
+                "summary": hotel.summary,
+                "description": hotel.description,
+                "slug": hotel.slug,
+                "country_id": hotel.country_id,
+                "country": {
+                    "id": hotel.country.id,
+                    "name": hotel.country.name,
+                    "slug": hotel.country.slug,
+                } if hotel.country else None,
+                "image_id": hotel.image_id,
+                "image_url": cover_image_url,  # Add this for backward compatibility
+                "is_active": hotel.is_active,
+                "address": hotel.address,
+                "city": hotel.city,
+                "stars": hotel.stars,
+                "price_category": hotel.price_category,
+                "amenities": hotel.amenities,
+                "created_at": hotel.created_at,
+                "updated_at": hotel.updated_at,
+            }
+            result.append(hotel_data)
+
+        return result
     
     def get_hotels_by_country(self, db: Session, country_id: int, skip: int = 0, limit: int = 100) -> List[Dict[str, Any]]:
         """

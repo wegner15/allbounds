@@ -124,18 +124,18 @@ const GroupTripDetailPage: React.FC = () => {
               {tripDetail.inclusions && (
                 <>
                   <h3 className="text-xl font-semibold mb-3">What's Included</h3>
-                  <div className="mb-6">
-                    <TextDisplay content={tripDetail.inclusions} />
-                  </div>
+                   <div className="mb-6">
+                     <TextDisplay content={Array.isArray(tripDetail.inclusions) ? tripDetail.inclusions.join('\n') : tripDetail.inclusions} />
+                   </div>
                 </>
               )}
               
               {tripDetail.exclusions && (
                 <>
                   <h3 className="text-xl font-semibold mb-3">What's Not Included</h3>
-                  <div className="mb-6">
-                    <TextDisplay content={tripDetail.exclusions} />
-                  </div>
+                   <div className="mb-6">
+                     <TextDisplay content={Array.isArray(tripDetail.exclusions) ? tripDetail.exclusions.join('\n') : tripDetail.exclusions} />
+                   </div>
                 </>
               )}
               

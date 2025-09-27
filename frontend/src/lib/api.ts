@@ -149,6 +149,10 @@ export const endpoints = {
   // Countries
   countries: {
     list: () => '/countries/',
+    withHotels: () => '/countries/with-hotels',
+    withPackages: () => '/countries/with-packages',
+    withActivities: () => '/countries/with-activities',
+    withAttractions: () => '/countries/with-attractions',
     byId: (id: number) => `/countries/${id}`,
     bySlug: (slug: string) => `/countries/slug/${slug}`,
     bySlugWithDetails: (slug: string) => `/countries/slug/${slug}/details`,
@@ -253,6 +257,11 @@ export const endpoints = {
       });
       return `/search/?${searchParams.toString()}`;
     },
+  },
+
+  // Stats
+  stats: {
+    get: () => '/stats/',
   },
   
   // Media

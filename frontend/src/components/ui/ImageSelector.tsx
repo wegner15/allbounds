@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react';
 import CloudflareImageUpload from './CloudflareImageUpload';
 import CloudflareImage from './CloudflareImage';
 
+interface UploadState {
+  isUploading: boolean;
+  progress: number;
+  error: string | null;
+}
+
 interface ImageSelectorProps {
   initialImageId?: string;
   onImageSelected: (imageId: string) => void;
@@ -9,6 +15,10 @@ interface ImageSelectorProps {
   label?: string;
   helperText?: string;
   className?: string;
+  entityType?: string;
+  entityId?: number;
+  altText?: string;
+  title?: string;
 }
 
 /**
@@ -22,8 +32,17 @@ const ImageSelector: React.FC<ImageSelectorProps> = ({
   label = 'Image',
   helperText,
   className = '',
+  entityType,
+  entityId,
+  altText,
+  title,
 }) => {
   const [imageId, setImageId] = useState<string>(initialImageId);
+  const [uploadState, setUploadState] = useState<UploadState>({
+    isUploading: false,
+    progress: 0,
+    error: null,
+  });
 
   // Get the delivery URL from environment variables
   const deliveryUrl = import.meta.env.VITE_CLOUDFLARE_IMAGES_DELIVERY_URL;
@@ -37,20 +56,57 @@ const ImageSelector: React.FC<ImageSelectorProps> = ({
 
   // Handle image upload completion
   const handleUploadComplete = (imageData: unknown) => {
-    if (imageData && imageData.cloudflare_image && imageData.cloudflare_image.id) {
-      // For upload-and-create-media endpoint
-      const id = imageData.cloudflare_image.id;
-      console.log('Image upload complete with cloudflare_image.id:', id);
-      setImageId(id);
-      onImageSelected(id);
-    } else if (imageData && imageData.id) {
-      // For direct upload endpoint
-      console.log('Image upload complete with id:', imageData.id);
-      setImageId(imageData.id);
-      onImageSelected(imageData.id);
-    } else {
-      console.error('Invalid image data received:', imageData);
+    let imageId: string | null = null;
+
+    if (imageData && typeof imageData === 'object') {
+      // Check for MediaAsset structure (upload and create media)
+      if ('id' in imageData && typeof imageData.id === 'number') {
+        imageId = imageData.id.toString();
+        console.log('Image upload complete with MediaAsset id:', imageId);
+      }
+      // Check for cloudflare_image structure
+      else if ('cloudflare_image' in imageData && imageData.cloudflare_image && typeof imageData.cloudflare_image === 'object' && 'id' in imageData.cloudflare_image) {
+        imageId = (imageData.cloudflare_image as { id: string }).id;
+        console.log('Image upload complete with cloudflare_image.id:', imageId);
+      }
+      // Check for direct id field
+      else if ('id' in imageData && typeof imageData.id === 'string') {
+        imageId = imageData.id;
+        console.log('Image upload complete with direct id:', imageId);
+      }
     }
+
+    if (imageId) {
+      setImageId(imageId);
+      onImageSelected(imageId);
+      setUploadState({ isUploading: false, progress: 0, error: null });
+    } else {
+      const error = 'Invalid image data received - no valid id found';
+      console.error(error, imageData);
+      setUploadState(prev => ({ ...prev, isUploading: false, error }));
+    }
+  };
+
+  // Handle upload error
+  const handleUploadError = (error: unknown) => {
+    const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+    console.error('Upload error:', error);
+    setUploadState(prev => ({ ...prev, isUploading: false, error: errorMessage }));
+  };
+
+  // Handle upload progress
+  const handleUploadProgress = (progress: number) => {
+    setUploadState(prev => ({
+      ...prev,
+      isUploading: progress > 0,
+      progress,
+      error: null
+    }));
+  };
+
+  // Handle upload start
+  const handleUploadStart = () => {
+    setUploadState({ isUploading: true, progress: 0, error: null });
   };
 
   // Handle image removal
@@ -92,10 +148,37 @@ const ImageSelector: React.FC<ImageSelectorProps> = ({
       {/* Upload button */}
       <CloudflareImageUpload
         onUploadComplete={handleUploadComplete}
-        onUploadError={(error) => console.error('Upload error:', error)}
+        onUploadError={handleUploadError}
+        onProgress={handleUploadProgress}
         buttonText={imageId ? "Replace Image" : "Upload Image"}
         className="w-full"
+        entityType={entityType}
+        entityId={entityId}
+        altText={altText}
+        title={title}
       />
+
+      {/* Upload status */}
+      {uploadState.isUploading && (
+        <div className="mt-2">
+          <div className="flex items-center">
+            <div className="flex-1 bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${uploadState.progress}%` }}
+              ></div>
+            </div>
+            <span className="ml-2 text-sm text-gray-600">{uploadState.progress}%</span>
+          </div>
+          <p className="text-sm text-gray-600 mt-1">Uploading image...</p>
+        </div>
+      )}
+
+      {uploadState.error && (
+        <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-sm text-red-600">{uploadState.error}</p>
+        </div>
+      )}
       
       {/* Helper text */}
       {helperText && (

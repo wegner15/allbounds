@@ -68,10 +68,10 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
   
   // Initialize gallery data when editing
   useEffect(() => {
-    if (isEdit && groupTripDetails?.gallery) {
-      setGalleryImages(groupTripDetails.gallery);
+    if (isEdit && (groupTripDetails as any)?.gallery) {
+      setGalleryImages((groupTripDetails as any).gallery);
       // Find cover image from gallery or use the main image_id
-      const coverImage = groupTripDetails.gallery.find((img: any) => img.id === groupTripDetails.cover_image_id);
+      const coverImage = (groupTripDetails as any).gallery.find((img: any) => img.id === (groupTripDetails as any).cover_image_id);
       if (coverImage) {
         setCoverImageId(coverImage.id);
       }

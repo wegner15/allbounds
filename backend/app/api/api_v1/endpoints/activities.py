@@ -17,11 +17,20 @@ def get_activities(
     skip: int = 0,
     limit: int = 100,
     country_id: int = Query(None, description="Filter activities by country ID"),
+    country: str = Query(None, description="Filter activities by country name"),
 ) -> Any:
     """
     Retrieve all activities.
     """
-    if country_id:
+    if country:
+        # Find country by name and get activities for that country
+        from app.models.country import Country
+        country_obj = db.query(Country).filter(Country.name == country, Country.is_active == True).first()
+        if country_obj:
+            activities = activity_service.get_activities_by_country(db, country_id=country_obj.id, skip=skip, limit=limit)
+        else:
+            activities = []
+    elif country_id:
         activities = activity_service.get_activities_by_country(db, country_id=country_id, skip=skip, limit=limit)
     else:
         activities = activity_service.get_activities(db, skip=skip, limit=limit)

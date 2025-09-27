@@ -55,7 +55,7 @@ const NewsletterForm: React.FC = () => {
       )}
       {mutation.isError && (
         <p className="text-red-400 mt-2 text-sm">
-          {mutation.error.response?.data?.detail || 'An error occurred. Please try again.'}
+          {(mutation.error as any)?.response?.data?.detail || 'An error occurred. Please try again.'}
         </p>
       )}
     </form>

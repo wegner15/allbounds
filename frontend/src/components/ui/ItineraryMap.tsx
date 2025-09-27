@@ -1,12 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { ItineraryItem } from '../../lib/types/itinerary';
-
-// OpenStreetMap with Leaflet
-declare global {
-  interface Window {
-    L: unknown;
-  }
-}
+import L from 'leaflet';
 
 interface ItineraryMapProps {
   items: ItineraryItem[];
@@ -25,7 +19,7 @@ interface LocationPoint {
 
 export const ItineraryMap: React.FC<ItineraryMapProps> = ({ items, className = '' }) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<unknown>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
@@ -78,7 +72,7 @@ export const ItineraryMap: React.FC<ItineraryMapProps> = ({ items, className = '
         document.head.appendChild(link);
       }
 
-      if (!window.L) {
+      if (!L) {
         const script = document.createElement('script');
         script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
         script.onload = () => initializeMap();
@@ -89,14 +83,14 @@ export const ItineraryMap: React.FC<ItineraryMapProps> = ({ items, className = '
     };
 
     const initializeMap = async () => {
-      if (!mapRef.current || !window.L) return;
+      if (!mapRef.current || !L) return;
 
       // Initialize map
-      const map = window.L.map(mapRef.current).setView([0, 0], 2);
+      const map = L.map(mapRef.current).setView([0, 0], 2);
       mapInstanceRef.current = map;
 
       // Add tile layer
-      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
       }).addTo(map);
 
@@ -119,12 +113,12 @@ export const ItineraryMap: React.FC<ItineraryMapProps> = ({ items, className = '
 
       if (geocodedPoints.length > 0) {
         // Create markers and polyline
-        const markers: unknown[] = [];
+        const markers: L.Layer[] = [];
         const polylinePoints: [number, number][] = [];
 
         geocodedPoints.forEach((point) => {
           // Create custom marker icon
-          const markerIcon = window.L.divIcon({
+          const markerIcon = L.divIcon({
             html: `
               <div class="relative">
                 <div class="w-10 h-10 bg-teal text-white rounded-full flex items-center justify-center font-bold text-sm shadow-lg border-2 border-white">
@@ -138,7 +132,7 @@ export const ItineraryMap: React.FC<ItineraryMapProps> = ({ items, className = '
             iconAnchor: [20, 45]
           });
 
-          const marker = window.L.marker([point.lat, point.lng], { icon: markerIcon })
+          const marker = L.marker([point.lat, point.lng], { icon: markerIcon })
             .addTo(map);
 
           // Create popup content
@@ -180,7 +174,7 @@ export const ItineraryMap: React.FC<ItineraryMapProps> = ({ items, className = '
 
         // Add route polyline
         if (polylinePoints.length > 1) {
-          const polyline = window.L.polyline(polylinePoints, {
+          const polyline = L.polyline(polylinePoints, {
             color: '#14b8a6',
             weight: 3,
             opacity: 0.8,
@@ -188,7 +182,8 @@ export const ItineraryMap: React.FC<ItineraryMapProps> = ({ items, className = '
           }).addTo(map);
 
           // Fit map to show all points
-          const group = new window.L.featureGroup([...markers, polyline]);
+          const layers: L.Layer[] = [...markers, polyline];
+          const group = L.featureGroup(layers);
           map.fitBounds(group.getBounds().pad(0.1));
         } else if (polylinePoints.length === 1) {
           map.setView(polylinePoints[0], 10);

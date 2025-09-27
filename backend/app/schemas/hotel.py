@@ -52,9 +52,10 @@ class HotelResponse(HotelBase):
     id: int
     slug: str = Field(..., description="URL-friendly slug for the hotel", example="hilton-hotel")
     is_active: bool = Field(..., description="Whether the hotel is active")
+    image_url: Optional[str] = Field(None, description="URL of the hotel's cover image")
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 

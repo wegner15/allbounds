@@ -6,9 +6,9 @@ interface RichTextDisplayProps {
   className?: string;
 }
 
-export const RichTextDisplay: React.FC<RichTextDisplayProps> = ({ 
-  content, 
-  className = '' 
+export const RichTextDisplay: React.FC<RichTextDisplayProps> = ({
+  content,
+  className = ''
 }) => {
   // Sanitize HTML content to prevent XSS attacks
   const sanitizedContent = DOMPurify.sanitize(content, {

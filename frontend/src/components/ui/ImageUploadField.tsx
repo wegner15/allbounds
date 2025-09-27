@@ -34,9 +34,10 @@ const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
 
   // Handle image upload completion
   const handleUploadComplete = (imageData: unknown, onChange: (value: string) => void) => {
-    if (imageData && imageData.id) {
-      onChange(imageData.id);
-      setPreviewImageId(imageData.id);
+    if (imageData && typeof imageData === 'object' && 'id' in imageData && typeof (imageData as any).id === 'string') {
+      const id = (imageData as any).id;
+      onChange(id);
+      setPreviewImageId(id);
     }
   };
 

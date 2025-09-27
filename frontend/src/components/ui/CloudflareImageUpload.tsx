@@ -4,6 +4,7 @@ import { useDirectUpload, useImageUpload, useImageUploadAndCreateMedia } from '.
 interface CloudflareImageUploadProps {
   onUploadComplete?: (imageData: unknown) => void;
   onUploadError?: (error: unknown) => void;
+  onProgress?: (progress: number) => void;
   requireSignedUrls?: boolean;
   metadata?: Record<string, unknown>;
   className?: string;
@@ -22,6 +23,7 @@ interface CloudflareImageUploadProps {
 const CloudflareImageUpload: React.FC<CloudflareImageUploadProps> = ({
   onUploadComplete,
   onUploadError,
+  onProgress,
   requireSignedUrls = true,
   metadata = {},
   className = '',
@@ -92,6 +94,7 @@ const CloudflareImageUpload: React.FC<CloudflareImageUploadProps> = ({
             if (event.lengthComputable) {
               const progress = Math.round((event.loaded / event.total) * 100);
               setUploadProgress(progress);
+              if (onProgress) onProgress(progress);
             }
           });
 

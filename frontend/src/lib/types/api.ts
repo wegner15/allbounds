@@ -179,7 +179,7 @@ export interface Hotel extends BaseModel {
   city?: string;
   stars?: number;
   price_category?: string;
-  amenities?: string[];
+   amenities?: string[];
 }
 
 // Hotel with gallery
@@ -214,8 +214,8 @@ export interface Package extends BaseModel {
   image_id?: string;
   is_active: boolean;
   is_featured: boolean;
-  inclusions?: string[];
-  exclusions?: string[];
+  inclusions?: InclusionExclusionItem[];
+  exclusions?: InclusionExclusionItem[];
   itinerary?: PackageItineraryDay[];
   holiday_types: HolidayType[];
   gallery_images?: MediaAsset[];
@@ -227,6 +227,13 @@ export interface Package extends BaseModel {
 export interface PackageWithGallery extends Omit<Package, 'gallery_images'> {
   cover_image?: string;
   gallery_images: GalleryImage[];
+}
+
+export interface InclusionExclusionItem {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: string;
 }
 
 export interface PackageItineraryDay {
@@ -397,4 +404,12 @@ export interface ErrorResponse {
     message: string;
     fields?: Record<string, string>;
   };
+}
+
+// Stats types
+export interface Stats {
+  group_trips: number;
+  activities: number;
+  hotels: number;
+  attractions: number;
 }

@@ -11,17 +11,19 @@ from app.auth.dependencies import get_current_user, has_permission
 
 router = APIRouter()
 
-@router.get("/", response_model=List[HotelResponse])
-@router.get("", response_model=List[HotelResponse])  # Explicit route without trailing slash
+@router.get("/")
+@router.get("")  # Explicit route without trailing slash
 def get_hotels(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
+    recommended: bool = Query(None, description="Filter for recommended hotels"),
+    country: str = Query(None, description="Filter by country name"),
 ) -> Any:
     """
-    Retrieve all hotels.
+    Retrieve all hotels with optional filtering.
     """
-    hotels = hotel_service.get_hotels(db, skip=skip, limit=limit)
+    hotels = hotel_service.get_hotels(db, skip=skip, limit=limit, recommended=recommended, country=country)
     return hotels
 
 @router.get("/country/{country_id}")

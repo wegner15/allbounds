@@ -19,12 +19,17 @@ def get_countries(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
+    details: bool = Query(False, description="Include detailed related data (packages, group_trips, attractions, etc.)"),
 ) -> Any:
     """
     Retrieve all countries.
     """
-    countries = country_service.get_countries(db, skip=skip, limit=limit)
-    return countries
+    if details:
+        countries = country_service.get_countries_with_details(db, skip=skip, limit=limit)
+        return countries
+    else:
+        countries = country_service.get_countries(db, skip=skip, limit=limit)
+        return [CountryResponse.from_orm(country) for country in countries]
 
 @router.get("/region/{region_id}", response_model=List[CountryResponse])
 def get_countries_by_region(
@@ -37,7 +42,55 @@ def get_countries_by_region(
     Retrieve countries by region ID.
     """
     countries = country_service.get_countries_by_region(db, region_id=region_id, skip=skip, limit=limit)
-    return countries
+    return [CountryResponse.from_orm(country) for country in countries]
+
+@router.get("/with-hotels", response_model=List[CountryResponse])
+def get_countries_with_hotels(
+    db: Session = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+) -> Any:
+    """
+    Retrieve countries that have active hotels.
+    """
+    countries = country_service.get_countries_with_hotels(db, skip=skip, limit=limit)
+    return [CountryResponse.from_orm(country) for country in countries]
+
+@router.get("/with-packages", response_model=List[CountryResponse])
+def get_countries_with_packages(
+    db: Session = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+) -> Any:
+    """
+    Retrieve countries that have active packages.
+    """
+    countries = country_service.get_countries_with_packages(db, skip=skip, limit=limit)
+    return [CountryResponse.from_orm(country) for country in countries]
+
+@router.get("/with-activities", response_model=List[CountryResponse])
+def get_countries_with_activities(
+    db: Session = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+) -> Any:
+    """
+    Retrieve countries that have active activities.
+    """
+    countries = country_service.get_countries_with_activities(db, skip=skip, limit=limit)
+    return [CountryResponse.from_orm(country) for country in countries]
+
+@router.get("/with-attractions", response_model=List[CountryResponse])
+def get_countries_with_attractions(
+    db: Session = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+) -> Any:
+    """
+    Retrieve countries that have active attractions.
+    """
+    countries = country_service.get_countries_with_attractions(db, skip=skip, limit=limit)
+    return [CountryResponse.from_orm(country) for country in countries]
 
 @router.get("/{country_id}", response_model=CountryWithRegionResponse)
 def get_country(
@@ -50,7 +103,7 @@ def get_country(
     country = country_service.get_country_for_admin(db, country_id=country_id)
     if country is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Country not found")
-    return country
+    return CountryWithRegionResponse.from_orm(country)
 
 @router.get("/slug/{slug}", response_model=CountryWithRegionResponse)
 def get_country_by_slug(
@@ -63,7 +116,7 @@ def get_country_by_slug(
     country = country_service.get_country_by_slug(db, slug=slug)
     if country is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Country not found")
-    return country
+    return CountryWithRegionResponse.from_orm(country)
 
 @router.get("/slug/{slug}/details", response_model=Any)
 def get_country_details_by_slug(
@@ -89,7 +142,7 @@ def create_country(
     Create new country.
     """
     country = country_service.create_country(db, country_in)
-    return country
+    return CountryResponse.from_orm(country)
 
 @router.put("/{country_id}", response_model=CountryResponse)
 def update_country(
@@ -106,7 +159,7 @@ def update_country(
     if country is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Country not found")
     country = country_service.update_country(db, country_id=country_id, country_update=country_in)
-    return country
+    return CountryResponse.from_orm(country)
 
 @router.delete("/{country_id}", response_model=CountryResponse)
 def delete_country(
@@ -122,7 +175,7 @@ def delete_country(
     if country is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Country not found")
     country_service.delete_country(db, country_id=country_id)
-    return country
+    return CountryResponse.from_orm(country)
 
 # Country Visit Info endpoints
 @router.get("/{country_id}/visit-info", response_model=CountryVisitInfo)

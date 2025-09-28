@@ -21,6 +21,8 @@ from app.models.media import MediaAsset
 from app.models.audit import AuditLog
 from app.models.seo import SeoMeta
 from app.models.itinerary import ItineraryItem, ItineraryActivity
+from app.models.booking import Booking, BookingTraveler
+from app.models.inquiry import Inquiry
 
 # This ensures all models are imported in the correct order
 __all__ = [
@@ -31,4 +33,5 @@ __all__ = [
     'Review', 'BlogPost', 'Tag',
     'MediaAsset', 'AuditLog', 'SeoMeta',
     'ItineraryItem', 'ItineraryActivity',
+    'Booking', 'BookingTraveler', 'Inquiry',
 ]

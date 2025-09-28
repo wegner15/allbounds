@@ -32,6 +32,8 @@ from app.models.newsletter import NewsletterSubscription
 from app.models.country_visit_info import CountryVisitInfo
 from app.models.inclusion_exclusion import Inclusion, Exclusion, package_inclusions, package_exclusions, group_trip_inclusions, group_trip_exclusions
 from app.models.package_price_chart import PackagePriceChart
+from app.models.booking import Booking, BookingTraveler
+from app.models.inquiry import Inquiry
 
 from app.db.database import Base
 from app.core.config import settings

@@ -11,6 +11,8 @@ import ImageCarousel from '../../components/ui/ImageCarousel';
 import { EnhancedItineraryDisplay } from '../../components/ui/EnhancedItineraryDisplay';
 import { TextDisplay } from '../../components/ui/RichTextDisplay';
 import PriceChartDisplay from '../../components/ui/PriceChartDisplay';
+import PackageBookingForm from '../../components/forms/PackageBookingForm';
+import InquiryForm from '../../components/forms/InquiryForm';
 
 // Import types from API
 
@@ -24,6 +26,8 @@ const PackageDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const addRecentlyViewed = useAppStore((state) => state.addRecentlyViewed);
   const [activeTab, setActiveTab] = useState<'included' | 'excluded'>('included');
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [showInquiryForm, setShowInquiryForm] = useState(false);
 
   // Fetch package details with gallery
   const { data: packageDetail, isLoading, error } = usePackageDetailsBySlug(slug!);
@@ -331,29 +335,23 @@ const PackageDetailPage: React.FC = () => {
                   </div>
                 </div>
                 
-                <Button
-                  variant="primary"
-                  size="lg"
-                  className="w-full mb-3"
-                  onClick={() => {
-                    // Handle booking action
-                    console.log('Book now clicked');
-                  }}
-                >
-                  Book Now
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full mb-4"
-                  onClick={() => {
-                    // Handle inquiry action
-                    console.log('Send inquiry clicked');
-                  }}
-                >
-                  Send Inquiry
-                </Button>
+                 <Button
+                   variant="primary"
+                   size="lg"
+                   className="w-full mb-3"
+                   onClick={() => setShowBookingForm(true)}
+                 >
+                   Book Now
+                 </Button>
+
+                 <Button
+                   variant="outline"
+                   size="lg"
+                   className="w-full mb-4"
+                   onClick={() => setShowInquiryForm(true)}
+                 >
+                   Send Inquiry
+                 </Button>
                 
                 <div className="text-center">
                   <p className="text-sm text-gray-500 mb-2">Need help planning?</p>
@@ -394,6 +392,29 @@ const PackageDetailPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Booking Form Modal */}
+      <PackageBookingForm
+        packageData={packageDetail}
+        isOpen={showBookingForm}
+        onClose={() => setShowBookingForm(false)}
+        onSuccess={() => {
+          // Could show a success message here
+          console.log('Booking submitted successfully');
+        }}
+      />
+
+      {/* Inquiry Form Modal */}
+      <InquiryForm
+        isOpen={showInquiryForm}
+        onClose={() => setShowInquiryForm(false)}
+        onSuccess={() => {
+          // Could show a success message here
+          console.log('Inquiry submitted successfully');
+        }}
+        defaultSubject={`Inquiry about ${packageDetail.name}`}
+        defaultMessage={`I'm interested in the ${packageDetail.name} package. Please provide more information.`}
+      />
     </>
   );
 };

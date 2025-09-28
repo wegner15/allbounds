@@ -410,6 +410,68 @@ export interface ErrorResponse {
   };
 }
 
+// Booking types
+export interface Traveler {
+  id?: number;
+  full_name: string;
+  traveler_type: 'adult' | 'child';
+  age?: number;
+}
+
+export interface Booking extends BaseModel {
+  booking_type: 'package' | 'group_trip';
+  entity_slug: string;
+  contact_name: string;
+  contact_email: string;
+  contact_phone?: string;
+  country_of_origin?: string;
+  number_of_adults: number;
+  number_of_children: number;
+  travelers: Traveler[];
+  special_requests?: string;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  source: string;
+}
+
+export interface BookingCreate {
+  booking_type: 'package' | 'group_trip';
+  entity_id: number;
+  entity_slug: string;
+  contact_name: string;
+  contact_email: string;
+  contact_phone?: string;
+  country_of_origin?: string;
+  number_of_adults: number;
+  number_of_children: number;
+  travelers: Traveler[];
+  special_requests?: string;
+  source: string;
+  departure_id?: number;
+}
+
+// Inquiry types
+export interface Inquiry extends BaseModel {
+  name: string;
+  email: string;
+  phone?: string;
+  country_of_origin?: string;
+  subject: string;
+  message: string;
+  source: string;
+  status: 'new' | 'in_progress' | 'resolved' | 'closed';
+  is_read: boolean;
+}
+
+export interface InquiryCreate {
+  name: string;
+  email: string;
+  phone?: string;
+  country_of_origin?: string;
+  subject: string;
+  message: string;
+  source: string;
+}
+
 // Stats types
 export interface Stats {
   group_trips: number;

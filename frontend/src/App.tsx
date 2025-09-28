@@ -101,6 +101,11 @@ import CreateUserPage from './features/admin/users/CreateUserPage';
 import EditUserPage from './features/admin/users/EditUserPage';
 import SubscriberList from './features/admin/newsletter/SubscriberList';
 
+// Import admin booking pages
+import PackageBookingsPage from './features/admin/bookings/PackageBookingsPage';
+import GroupTripBookingsPage from './features/admin/bookings/GroupTripBookingsPage';
+import GeneralInquiriesPage from './features/admin/bookings/GeneralInquiriesPage';
+
 import HomePage from './features/public/HomePage';
 
 // Placeholder pages for routes we haven't fully implemented yet
@@ -343,10 +348,14 @@ const router = createBrowserRouter([
       { path: 'packages', element: <PackagesListPage /> },
       { path: 'packages/new', element: <CreatePackagePage /> },
       { path: 'packages/:id/edit', element: <EditPackagePage /> },
-      // Newsletter subscribers
-      { path: 'newsletter', element: <SubscriberList /> },
-      // Other admin routes
-      { path: 'preview/:type/:id', element: <AdminPreviewPage /> },
+       // Newsletter subscribers
+       { path: 'newsletter', element: <SubscriberList /> },
+       // Booking management routes
+       { path: 'bookings/packages', element: <PackageBookingsPage /> },
+       { path: 'bookings/group-trips', element: <GroupTripBookingsPage /> },
+       { path: 'bookings/inquiries', element: <GeneralInquiriesPage /> },
+       // Other admin routes
+       { path: 'preview/:type/:id', element: <AdminPreviewPage /> },
     ],
   },
 ]);

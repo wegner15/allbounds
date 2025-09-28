@@ -23,6 +23,16 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
 
   const navigation: NavItem[] = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: 'chart-bar' },
+    {
+      name: 'Bookings',
+      href: '#',
+      icon: 'clipboard-document',
+      subItems: [
+        { name: 'Package Bookings', href: '/admin/bookings/packages' },
+        { name: 'Group Trip Bookings', href: '/admin/bookings/group-trips' },
+        { name: 'General Inquiries', href: '/admin/bookings/inquiries' }
+      ]
+    },
     { name: 'Destinations', href: '/admin/destinations', icon: 'globe' },
     { name: 'Holiday Types', href: '/admin/holiday-types', icon: 'tag' },
     { name: 'Packages', href: '/admin/packages', icon: 'package' },
@@ -31,14 +41,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
     { name: 'Hotel Types', href: '/admin/hotel-types', icon: 'building' },
     { name: 'Attractions', href: '/admin/attractions', icon: 'ticket' },
     { name: 'Activities', href: '/admin/activities', icon: 'ticket' },
-    { 
-      name: 'Inclusions & Exclusions', 
-      href: '#', 
+    {
+      name: 'Inclusions & Exclusions',
+      href: '#',
       icon: 'list-check',
       subItems: [
         { name: 'Inclusions', href: '/admin/inclusions' },
         { name: 'Exclusions', href: '/admin/exclusions' }
-      ] 
+      ]
     },
     { name: 'Blog', href: '/admin/blog', icon: 'newspaper' },
     { name: 'Users', href: '/admin/users', icon: 'user-group' },
@@ -136,6 +146,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
         return (
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+        );
+      case 'clipboard-document':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         );
       default:
@@ -262,7 +278,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
 
       {/* Desktop sidebar */}
       <div className="hidden md:flex md:flex-shrink-0">
-        <div className="flex flex-col w-64">
+        <div className="flex flex-col w-56">
           <div className="flex flex-col h-0 flex-1 bg-charcoal">
             <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
               <div className="flex items-center flex-shrink-0 px-4">
@@ -381,8 +397,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
 
         {/* Page content */}
         <main className="flex-1 relative overflow-y-auto focus:outline-none">
-          <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          <div className="py-4">
+            <div className="max-w-none px-4 sm:px-6 lg:px-8">
               {children}
             </div>
           </div>

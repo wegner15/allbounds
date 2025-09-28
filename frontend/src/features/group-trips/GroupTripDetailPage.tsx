@@ -11,6 +11,7 @@ import Badge from '../../components/ui/Badge';
 import ImageCarousel from '../../components/ui/ImageCarousel';
 import { EnhancedItineraryDisplay } from '../../components/ui/EnhancedItineraryDisplay';
 import { TextDisplay } from '../../components/ui/RichTextDisplay';
+import GroupTripBookingForm from '../../components/forms/GroupTripBookingForm';
 
 
 // Utils
@@ -21,6 +22,7 @@ const GroupTripDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const addRecentlyViewed = useAppStore((state) => state.addRecentlyViewed);
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const [showBookingForm, setShowBookingForm] = React.useState(false);
 
   // Fetch group trip details with gallery
   const { data: tripDetail, isLoading, error } = useGroupTripDetailsBySlug(slug || '');
@@ -374,21 +376,29 @@ const GroupTripDetailPage: React.FC = () => {
                 )}
               </div>
               
-              <Button
-                variant="primary"
-                size="lg"
-                className="w-full mt-6"
-                onClick={() => {
-                  // Handle booking action
-                  console.log('Join group trip clicked');
-                }}
-              >
-                Join This Trip
-              </Button>
+               <Button
+                 variant="primary"
+                 size="lg"
+                 className="w-full mt-6"
+                 onClick={() => setShowBookingForm(true)}
+               >
+                 Join This Trip
+               </Button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Booking Form Modal */}
+      <GroupTripBookingForm
+        groupTripData={tripDetail}
+        isOpen={showBookingForm}
+        onClose={() => setShowBookingForm(false)}
+        onSuccess={() => {
+          // Could show a success message here
+          console.log('Group trip booking submitted successfully');
+        }}
+      />
     </>
   );
 };

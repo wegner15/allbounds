@@ -23,6 +23,7 @@ from app.api.api_v1.endpoints import (
     inclusions,
     exclusions,
     package_price_charts,
+    bookings,
     stats,
 )
 
@@ -56,3 +57,4 @@ api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 api_router.include_router(users.router, prefix="/users", tags=["Users"])
 api_router.include_router(itinerary.router, prefix="/itinerary", tags=["Itinerary"])
 api_router.include_router(package_price_charts.router, prefix="", tags=["Package Price Charts"])
+api_router.include_router(bookings.router, prefix="/bookings", tags=["Bookings"])

@@ -8,7 +8,7 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   noMargin?: boolean;
 }
 
-const Input: React.FC<InputProps> = ({
+const Input = React.forwardRef<HTMLInputElement, InputProps>(({
   label,
   error,
   fullWidth = false,
@@ -16,13 +16,13 @@ const Input: React.FC<InputProps> = ({
   className = '',
   id,
   ...props
-}) => {
+}, ref) => {
   const inputId = id || `input-${Math.random().toString(36).substring(2, 9)}`;
-  
+
   const baseStyles = 'font-lato rounded border border-gray-300 focus:border-teal focus:ring-1 focus:ring-teal focus:outline-none px-4 py-2';
   const errorStyles = error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '';
   const widthStyles = fullWidth ? 'w-full' : '';
-  
+
   return (
     <div className={`${noMargin ? '' : 'mb-4'} ${fullWidth ? 'w-full' : ''}`}>
       {label && (
@@ -31,6 +31,7 @@ const Input: React.FC<InputProps> = ({
         </label>
       )}
       <input
+        ref={ref}
         id={inputId}
         className={`${baseStyles} ${errorStyles} ${widthStyles} ${className}`}
         {...props}
@@ -40,6 +41,8 @@ const Input: React.FC<InputProps> = ({
       )}
     </div>
   );
-};
+});
+
+Input.displayName = 'Input';
 
 export default Input;

@@ -43,6 +43,7 @@ def get_regions_with_countries(
             "name": region.name,
             "slug": region.slug,
             "description": region.description,
+            "image_id": region.image_id,
             "is_active": region.is_active,
             "created_at": region.created_at,
             "updated_at": region.updated_at,
@@ -57,6 +58,7 @@ def get_regions_with_countries(
                 "name": country.name,
                 "slug": country.slug,
                 "description": country.description,
+                "image_id": country.image_id,
                 "is_active": country.is_active
             }
             region_dict["countries"].append(country_dict)
@@ -89,18 +91,19 @@ def get_region_with_countries(
     region = region_service.get_region(db, region_id=region_id)
     if region is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Region not found")
-    
+
     region_dict = {
         "id": region.id,
         "name": region.name,
         "slug": region.slug,
         "description": region.description,
+        "image_id": region.image_id,
         "is_active": region.is_active,
         "created_at": region.created_at,
         "updated_at": region.updated_at,
         "countries": []
     }
-    
+
     # Get countries for this region
     countries = country_service.get_countries_by_region(db, region_id=region.id)
     for country in countries:
@@ -109,10 +112,11 @@ def get_region_with_countries(
             "name": country.name,
             "slug": country.slug,
             "description": country.description,
+            "image_id": country.image_id,
             "is_active": country.is_active
         }
         region_dict["countries"].append(country_dict)
-    
+
     return region_dict
 
 @router.get("/slug/{slug}", response_model=RegionResponse)
@@ -139,18 +143,19 @@ def get_region_by_slug_with_countries(
     region = region_service.get_region_by_slug(db, slug=slug)
     if region is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Region not found")
-    
+
     region_dict = {
         "id": region.id,
         "name": region.name,
         "slug": region.slug,
         "description": region.description,
+        "image_id": region.image_id,
         "is_active": region.is_active,
         "created_at": region.created_at,
         "updated_at": region.updated_at,
         "countries": []
     }
-    
+
     # Get countries for this region
     countries = country_service.get_countries_by_region(db, region_id=region.id)
     for country in countries:
@@ -159,10 +164,11 @@ def get_region_by_slug_with_countries(
             "name": country.name,
             "slug": country.slug,
             "description": country.description,
+            "image_id": country.image_id,
             "is_active": country.is_active
         }
         region_dict["countries"].append(country_dict)
-    
+
     return region_dict
 
 @router.post("/", response_model=RegionResponse)

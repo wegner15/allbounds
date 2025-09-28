@@ -85,39 +85,40 @@ const MainNavigation: React.FC = () => {
   // Fetch holiday types from API
   const { data: holidayTypesData, isLoading: isLoadingHolidayTypes, error: holidayTypesError } = useHolidayTypes();
   
-  // Map of icons for holiday types
-  const holidayTypeIcons: Record<string, string> = {
-    'safari': '🦁',
-    'family': '👨‍👩‍👧‍👦',
-    'beach': '🏖️',
-    'city': '🏙️',
-    'honeymoon': '💑',
-    'school': '🎒',
-    'incentive': '🏆',
-    'weekend': '🌅',
-    'inclusive': '🍹',
-    'cruise': '🚢',
-    'mountain': '🏔️',
-    'luxury': '💎',
-    'food': '🍷',
-    'conference': '🎤',
-    'sport': '⚽',
-    'default': '✈️'
-  };
-  
-  // Function to determine icon based on holiday type name
-  const getHolidayTypeIcon = (name: string): string => {
+  // Function to determine icon based on holiday type name (fallback)
+  const getHolidayTypeIconFallback = (name: string): string => {
     const lowerName = name.toLowerCase();
-    const iconKey = Object.keys(holidayTypeIcons).find(key => lowerName.includes(key));
-    return iconKey ? holidayTypeIcons[iconKey] : holidayTypeIcons.default;
+
+    if (lowerName.includes('safari') || lowerName.includes('wildlife')) return '🦁';
+    if (lowerName.includes('beach') || lowerName.includes('coastal')) return '🏖️';
+    if (lowerName.includes('city') || lowerName.includes('urban')) return '🏙️';
+    if (lowerName.includes('honeymoon') || lowerName.includes('romantic')) return '💑';
+    if (lowerName.includes('family') || lowerName.includes('kids')) return '👨‍👩‍👧‍👦';
+    if (lowerName.includes('adventure') || lowerName.includes('trekking')) return '🧗‍♂️';
+    if (lowerName.includes('cruise') || lowerName.includes('boat')) return '🚢';
+    if (lowerName.includes('mountain') || lowerName.includes('hiking')) return '🏔️';
+    if (lowerName.includes('luxury') || lowerName.includes('premium')) return '💎';
+    if (lowerName.includes('food') || lowerName.includes('culinary') || lowerName.includes('gastronomic')) return '🍽️';
+    if (lowerName.includes('wine') || lowerName.includes('vineyard')) return '🍷';
+    if (lowerName.includes('cultural') || lowerName.includes('heritage')) return '🏛️';
+    if (lowerName.includes('historical') || lowerName.includes('history')) return '🏺';
+    if (lowerName.includes('sport') || lowerName.includes('active')) return '⚽';
+    if (lowerName.includes('school') || lowerName.includes('educational')) return '🎒';
+    if (lowerName.includes('incentive') || lowerName.includes('corporate')) return '🏆';
+    if (lowerName.includes('weekend') || lowerName.includes('short')) return '🌅';
+    if (lowerName.includes('inclusive') || lowerName.includes('all-inclusive')) return '🍹';
+    if (lowerName.includes('conference') || lowerName.includes('meeting')) return '🎤';
+
+    // Default icon
+    return '✈️';
   };
   
   // Transform API data into the format needed for the dropdown
-  const holidayTypeItems: HolidayTypeDisplay[] = holidayTypesData ? 
+  const holidayTypeItems: HolidayTypeDisplay[] = holidayTypesData ?
     holidayTypesData.map(type => ({
       name: type.name,
       slug: type.slug,
-      icon: getHolidayTypeIcon(type.name)
+      icon: type.icon || getHolidayTypeIconFallback(type.name)
     })) : [
       // Fallback data in case API fails
       { name: 'Safaris', slug: 'safaris', icon: '🦁' },

@@ -14,6 +14,7 @@ class HolidayType(Base):
     description = Column(Text, nullable=True)
     slug = Column(String(100), unique=True, index=True, nullable=False)
     image_id = Column(String(255), nullable=True)  # Cloudflare Images ID
+    icon = Column(String(50), nullable=True)  # Custom icon (emoji or icon name)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

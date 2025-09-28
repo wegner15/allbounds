@@ -15,13 +15,25 @@ class GroupTripService:
         """
         Retrieve all group trips with pagination.
         """
-        return db.query(GroupTrip).filter(GroupTrip.is_active == True).offset(skip).limit(limit).all()
+        return db.query(GroupTrip).options(
+            joinedload(GroupTrip.departures),
+            joinedload(GroupTrip.country),
+            joinedload(GroupTrip.holiday_types),
+            joinedload(GroupTrip.inclusion_items),
+            joinedload(GroupTrip.exclusion_items)
+        ).filter(GroupTrip.is_active == True).offset(skip).limit(limit).all()
     
     def get_group_trips_by_country(self, db: Session, country_id: int, skip: int = 0, limit: int = 100) -> List[GroupTrip]:
         """
         Retrieve all group trips for a specific country with pagination.
         """
-        return db.query(GroupTrip).filter(
+        return db.query(GroupTrip).options(
+            joinedload(GroupTrip.departures),
+            joinedload(GroupTrip.country),
+            joinedload(GroupTrip.holiday_types),
+            joinedload(GroupTrip.inclusion_items),
+            joinedload(GroupTrip.exclusion_items)
+        ).filter(
             GroupTrip.country_id == country_id,
             GroupTrip.is_active == True
         ).offset(skip).limit(limit).all()
@@ -30,11 +42,33 @@ class GroupTripService:
         """
         Retrieve featured group trips with pagination.
         """
-        return db.query(GroupTrip).filter(
+        return db.query(GroupTrip).options(
+            joinedload(GroupTrip.departures),
+            joinedload(GroupTrip.country),
+            joinedload(GroupTrip.holiday_types),
+            joinedload(GroupTrip.inclusion_items),
+            joinedload(GroupTrip.exclusion_items)
+        ).filter(
             GroupTrip.is_active == True,
             GroupTrip.is_featured == True
         ).offset(skip).limit(limit).all()
-    
+
+    def get_group_trips_by_holiday_type(self, db: Session, holiday_type_id: int, skip: int = 0, limit: int = 100) -> List[GroupTrip]:
+        """
+        Retrieve all group trips for a specific holiday type with pagination.
+        """
+        from app.models.holiday_type import HolidayType
+        return db.query(GroupTrip).options(
+            joinedload(GroupTrip.departures),
+            joinedload(GroupTrip.country),
+            joinedload(GroupTrip.holiday_types),
+            joinedload(GroupTrip.inclusion_items),
+            joinedload(GroupTrip.exclusion_items)
+        ).filter(
+            GroupTrip.holiday_types.any(HolidayType.id == holiday_type_id),
+            GroupTrip.is_active == True
+        ).offset(skip).limit(limit).all()
+
     def get_group_trip(self, db: Session, group_trip_id: int) -> Optional[GroupTrip]:
         """
         Retrieve a specific group trip by ID.

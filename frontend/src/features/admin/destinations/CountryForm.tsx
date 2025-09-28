@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,7 @@ import FormGroup from '../../../components/ui/FormGroup';
 import FormSelect from '../../../components/ui/FormSelect';
 import Button from '../../../components/ui/Button';
 import ImageSelector from '../../../components/ui/ImageSelector';
+import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
 
 // Form validation schema
 const countrySchema = z.object({
@@ -41,14 +42,15 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   
-  // Initialize form with default values or existing country data
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<CountryFormData>({
+   // Initialize form with default values or existing country data
+   const {
+     register,
+     handleSubmit,
+     setValue,
+     watch,
+     control,
+     formState: { errors },
+   } = useForm<CountryFormData>({
     resolver: zodResolver(countrySchema),
     defaultValues: isEdit && countryData
       ? {
@@ -212,20 +214,23 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
               </FormGroup>
             </div>
             
-             {/* Description */}
-             <div className="sm:col-span-6">
-               <FormGroup>
-                 <FormTextarea
-                   id="description"
-                   label="Description"
-                   error={errors.description}
-                   fullWidth
-                   variant="filled"
-                   rows={5}
-                   placeholder="Provide a detailed description of the country, including key attractions, geography, and cultural highlights..."
-                   {...register('description')}
-                 />
-               </FormGroup>
+              {/* Description */}
+              <div className="sm:col-span-6">
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <TinyMCEEditor
+                      value={field.value}
+                      onChange={field.onChange}
+                      label="Description"
+                      placeholder="Provide a detailed description of the country, including key attractions, geography, and cultural highlights..."
+                      height={300}
+                      error={fieldState.error?.message}
+                      required
+                    />
+                  )}
+                />
               </div>
 
              {/* Summary */}
@@ -245,22 +250,7 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
                </FormGroup>
               </div>
 
-             {/* Summary */}
-             <div className="sm:col-span-6">
-               <FormGroup>
-                 <FormTextarea
-                   id="summary"
-                   label="Summary"
-                   error={errors.summary}
-                   fullWidth
-                   variant="filled"
-                   rows={3}
-                   placeholder="Brief summary for country cards and search results..."
-                   helperText="A concise summary that appears in country cards and previews"
-                   {...register('summary')}
-                 />
-               </FormGroup>
-             </div>
+
 
              {/* Status */}
             <div className="sm:col-span-6">

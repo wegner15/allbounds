@@ -80,11 +80,12 @@ def create_holiday_type(
     
     # Create holiday type
     holiday_type = holiday_type_service.create_holiday_type(
-        db=db, 
+        db=db,
         name=holiday_type_in.name,
         description=holiday_type_in.description,
         slug=slug,
-        image_id=holiday_type_in.image_id
+        image_id=holiday_type_in.image_id,
+        icon=holiday_type_in.icon
     )
     return holiday_type
 
@@ -108,7 +109,8 @@ def update_holiday_type(
         name=holiday_type_in.name,
         description=holiday_type_in.description,
         is_active=holiday_type_in.is_active,
-        image_id=holiday_type_in.image_id
+        image_id=holiday_type_in.image_id,
+        icon=holiday_type_in.icon
     )
     return holiday_type
 

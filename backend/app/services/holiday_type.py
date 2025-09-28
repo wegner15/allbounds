@@ -41,24 +41,26 @@ class HolidayTypeService:
         return db.query(HolidayType).filter(HolidayType.slug == slug).first()
 
     def create_holiday_type(
-        self, 
-        db: Session, 
+        self,
+        db: Session,
         name: str,
         description: Optional[str] = None,
         slug: Optional[str] = None,
-        image_id: Optional[str] = None
+        image_id: Optional[str] = None,
+        icon: Optional[str] = None
     ) -> HolidayType:
         """
         Create a new holiday type.
         """
         if not slug:
             slug = create_slug(name)
-            
+
         db_holiday_type = HolidayType(
             name=name,
             description=description,
             slug=slug,
-            image_id=image_id
+            image_id=image_id,
+            icon=icon
         )
         db.add(db_holiday_type)
         db.commit()
@@ -66,13 +68,14 @@ class HolidayTypeService:
         return db_holiday_type
 
     def update_holiday_type(
-        self, 
-        db: Session, 
+        self,
+        db: Session,
         holiday_type_id: int,
         name: Optional[str] = None,
         description: Optional[str] = None,
         is_active: Optional[bool] = None,
-        image_id: Optional[str] = None
+        image_id: Optional[str] = None,
+        icon: Optional[str] = None
     ) -> Optional[HolidayType]:
         """
         Update a holiday type.
@@ -80,7 +83,7 @@ class HolidayTypeService:
         db_holiday_type = self.get_holiday_type(db, holiday_type_id)
         if db_holiday_type is None:
             return None
-            
+
         if name is not None:
             db_holiday_type.name = name
         if description is not None:
@@ -89,7 +92,9 @@ class HolidayTypeService:
             db_holiday_type.is_active = is_active
         if image_id is not None:
             db_holiday_type.image_id = image_id
-            
+        if icon is not None:
+            db_holiday_type.icon = icon
+
         db.commit()
         db.refresh(db_holiday_type)
         return db_holiday_type

@@ -7,12 +7,14 @@ interface EnhancedItineraryDisplayProps {
   entityType: EntityType;
   entityId: number;
   className?: string;
+  isScrolled?: boolean;
 }
 
 export const EnhancedItineraryDisplay: React.FC<EnhancedItineraryDisplayProps> = ({
   entityType,
   entityId,
-  className = ''
+  className = '',
+  isScrolled = false
 }) => {
   const { data: itinerary, isLoading, error } = useItinerary(entityType, entityId);
   const [activeView, setActiveView] = useState<'timeline' | 'map'>('timeline');
@@ -117,7 +119,7 @@ export const EnhancedItineraryDisplay: React.FC<EnhancedItineraryDisplayProps> =
       {activeView === 'timeline' ? (
         <TimelineView items={itinerary.items} />
       ) : (
-        <ItineraryMap items={itinerary.items} />
+        <ItineraryMap items={itinerary.items} isScrolled={isScrolled} />
       )}
     </div>
   );
@@ -129,7 +131,7 @@ interface TimelineViewProps {
 
 const TimelineView: React.FC<TimelineViewProps> = ({ items }) => {
   return (
-    <div className="relative">
+    <div style={{ position: 'static', zIndex: 'auto' }}>
       {/* Timeline line */}
       <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-teal via-teal-light to-teal opacity-30"></div>
       
@@ -157,10 +159,10 @@ const EnhancedItineraryDayCard: React.FC<EnhancedItineraryDayCardProps> = ({ ite
   const [isExpanded, setIsExpanded] = useState(index < 2); // First 2 days expanded by default
 
   return (
-    <div className="relative">
+    <div style={{ position: 'static', zIndex: 'auto' }}>
       <div className="flex items-start space-x-6">
         {/* Enhanced Day Circle */}
-        <div className="relative z-10">
+        <div style={{ position: 'static', zIndex: 'auto' }}>
           <div className="w-16 h-16 bg-gradient-to-br from-teal to-teal-dark text-white rounded-full flex flex-col items-center justify-center font-bold shadow-lg border-4 border-white">
             <span className="text-xs uppercase tracking-wide">Day</span>
             <span className="text-lg leading-none">{item.day_number}</span>
@@ -172,7 +174,7 @@ const EnhancedItineraryDayCard: React.FC<EnhancedItineraryDayCardProps> = ({ ite
         
         {/* Enhanced Content Card */}
         <div className="flex-1 min-w-0">
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden" style={{ position: 'static', zIndex: 'auto' }}>
             {/* Header */}
             <div 
               className="p-6 cursor-pointer"

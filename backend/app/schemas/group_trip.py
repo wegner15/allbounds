@@ -6,6 +6,11 @@ from datetime import datetime, date
 from app.schemas.country import CountryResponse
 from app.schemas.inclusion_exclusion import InclusionResponse, ExclusionResponse
 
+# Forward reference for GroupTripDepartureResponse
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    pass
+
 # Base Group Trip Schema
 class GroupTripBase(BaseModel):
     name: str = Field(..., description="Name of the group trip", example="Kenya Safari Group Tour")
@@ -50,27 +55,7 @@ class GroupTripUpdate(BaseModel):
     inclusion_ids: Optional[List[int]] = Field(None, description="List of inclusion IDs to associate with this group trip")
     exclusion_ids: Optional[List[int]] = Field(None, description="List of exclusion IDs to associate with this group trip")
 
-# Schema for Group Trip response
-class GroupTripResponse(GroupTripBase):
-    id: int
-    slug: str = Field(..., description="URL-friendly slug for the group trip", example="kenya-safari-group-tour")
-    is_active: bool = Field(..., description="Whether the group trip is active")
-    is_featured: bool = Field(..., description="Whether the group trip is featured")
-    created_at: datetime
-    updated_at: datetime
-    published_at: Optional[datetime] = None
-    inclusion_items: List[InclusionResponse] = Field(default_factory=list, description="Inclusions associated with this group trip")
-    exclusion_items: List[ExclusionResponse] = Field(default_factory=list, description="Exclusions associated with this group trip")
-    
-    class Config:
-        from_attributes = True
 
-# Schema for Group Trip with Country details
-class GroupTripWithCountryResponse(GroupTripResponse):
-    country: CountryResponse
-    
-    class Config:
-        from_attributes = True
 
 # Base Group Trip Departure Schema
 class GroupTripDepartureBase(BaseModel):
@@ -100,6 +85,29 @@ class GroupTripDepartureResponse(GroupTripDepartureBase):
     created_at: datetime
     updated_at: datetime
     
+    class Config:
+        from_attributes = True
+
+# Schema for Group Trip response
+class GroupTripResponse(GroupTripBase):
+    id: int
+    slug: str = Field(..., description="URL-friendly slug for the group trip", example="kenya-safari-group-tour")
+    is_active: bool = Field(..., description="Whether the group trip is active")
+    is_featured: bool = Field(..., description="Whether the group trip is featured")
+    created_at: datetime
+    updated_at: datetime
+    published_at: Optional[datetime] = None
+    inclusion_items: List[InclusionResponse] = Field(default_factory=list, description="Inclusions associated with this group trip")
+    exclusion_items: List[ExclusionResponse] = Field(default_factory=list, description="Exclusions associated with this group trip")
+    departures: List[GroupTripDepartureResponse] = Field(default_factory=list, description="Departures associated with this group trip")
+
+    class Config:
+        from_attributes = True
+
+# Schema for Group Trip with Country details
+class GroupTripWithCountryResponse(GroupTripResponse):
+    country: CountryResponse
+
     class Config:
         from_attributes = True
 

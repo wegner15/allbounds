@@ -69,6 +69,20 @@ class CountryService:
             Attraction.is_active == True
         ).distinct().offset(skip).limit(limit).all()
 
+    def get_countries_by_holiday_type(self, db: Session, holiday_type_slug: str, skip: int = 0, limit: int = 100) -> List[Country]:
+        """
+        Retrieve countries that have packages with the specified holiday type.
+        """
+        from app.models.package import Package
+        from app.models.holiday_type import HolidayType
+
+        return db.query(Country).join(Package).join(HolidayType, Package.holiday_types).filter(
+            Country.is_active == True,
+            Package.is_active == True,
+            HolidayType.slug == holiday_type_slug,
+            HolidayType.is_active == True
+        ).distinct().offset(skip).limit(limit).all()
+
     def get_country(self, db: Session, country_id: int) -> Optional[Country]:
         """
         Retrieve a specific country by ID.

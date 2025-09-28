@@ -10,26 +10,30 @@ const HolidayTypesPage: React.FC = () => {
   // Fetch holiday types from API
   const { data: holidayTypes, isLoading, error } = useHolidayTypes();
 
-  // Function to get an appropriate icon for each holiday type
-  const getHolidayTypeIcon = (name: string): string => {
+  // Function to get an appropriate icon for each holiday type (fallback)
+  const getHolidayTypeIconFallback = (name: string): string => {
     const lowerName = name.toLowerCase();
-    
-    if (lowerName.includes('safari')) return '🦁';
-    if (lowerName.includes('beach')) return '🏖️';
-    if (lowerName.includes('city')) return '🏙️';
-    if (lowerName.includes('honeymoon')) return '💑';
-    if (lowerName.includes('family')) return '👨‍👩‍👧‍👦';
-    if (lowerName.includes('adventure')) return '🧗‍♂️';
-    if (lowerName.includes('cruise')) return '🚢';
-    if (lowerName.includes('mountain')) return '🏔️';
-    if (lowerName.includes('luxury')) return '💎';
-    if (lowerName.includes('food')) return '🍽️';
-    if (lowerName.includes('wine')) return '🍷';
-    if (lowerName.includes('cultural')) return '🏛️';
-    if (lowerName.includes('historical')) return '🏺';
-    if (lowerName.includes('wildlife')) return '🐘';
-    if (lowerName.includes('sport')) return '⚽';
-    
+
+    if (lowerName.includes('safari') || lowerName.includes('wildlife')) return '🦁';
+    if (lowerName.includes('beach') || lowerName.includes('coastal')) return '🏖️';
+    if (lowerName.includes('city') || lowerName.includes('urban')) return '🏙️';
+    if (lowerName.includes('honeymoon') || lowerName.includes('romantic')) return '💑';
+    if (lowerName.includes('family') || lowerName.includes('kids')) return '👨‍👩‍👧‍👦';
+    if (lowerName.includes('adventure') || lowerName.includes('trekking')) return '🧗‍♂️';
+    if (lowerName.includes('cruise') || lowerName.includes('boat')) return '🚢';
+    if (lowerName.includes('mountain') || lowerName.includes('hiking')) return '🏔️';
+    if (lowerName.includes('luxury') || lowerName.includes('premium')) return '💎';
+    if (lowerName.includes('food') || lowerName.includes('culinary') || lowerName.includes('gastronomic')) return '🍽️';
+    if (lowerName.includes('wine') || lowerName.includes('vineyard')) return '🍷';
+    if (lowerName.includes('cultural') || lowerName.includes('heritage')) return '🏛️';
+    if (lowerName.includes('historical') || lowerName.includes('history')) return '🏺';
+    if (lowerName.includes('sport') || lowerName.includes('active')) return '⚽';
+    if (lowerName.includes('school') || lowerName.includes('educational')) return '🎒';
+    if (lowerName.includes('incentive') || lowerName.includes('corporate')) return '🏆';
+    if (lowerName.includes('weekend') || lowerName.includes('short')) return '🌅';
+    if (lowerName.includes('inclusive') || lowerName.includes('all-inclusive')) return '🍹';
+    if (lowerName.includes('conference') || lowerName.includes('meeting')) return '🎤';
+
     // Default icon
     return '✈️';
   };
@@ -86,10 +90,10 @@ const HolidayTypesPage: React.FC = () => {
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
                     <div className="p-4 text-white">
-                      <div className="flex items-center mb-2">
-                        <span className="text-3xl mr-3">{getHolidayTypeIcon(holidayType.name)}</span>
-                        <h2 className="text-xl font-medium">{holidayType.name}</h2>
-                      </div>
+                       <div className="flex items-center mb-2">
+                         <span className="text-3xl mr-3">{holidayType.icon || getHolidayTypeIconFallback(holidayType.name)}</span>
+                         <h2 className="text-xl font-medium">{holidayType.name}</h2>
+                       </div>
                     </div>
                   </div>
                 </div>

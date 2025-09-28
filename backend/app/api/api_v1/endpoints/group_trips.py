@@ -24,11 +24,20 @@ def get_group_trips(
     limit: int = 100,
     country_id: int = Query(None, description="Filter group trips by country ID"),
     featured: bool = Query(None, description="Filter group trips by featured status"),
+    holiday_type: str = Query(None, description="Filter by holiday type slug"),
 ) -> Any:
     """
     Retrieve all group trips.
     """
-    if country_id:
+    if holiday_type:
+        # Find holiday type by slug and get group trips for that holiday type
+        from app.models.holiday_type import HolidayType
+        holiday_type_obj = db.query(HolidayType).filter(HolidayType.slug == holiday_type, HolidayType.is_active == True).first()
+        if holiday_type_obj:
+            group_trips = group_trip_service.get_group_trips_by_holiday_type(db, holiday_type_id=holiday_type_obj.id, skip=skip, limit=limit)
+        else:
+            group_trips = []
+    elif country_id:
         group_trips = group_trip_service.get_group_trips_by_country(db, country_id=country_id, skip=skip, limit=limit)
     elif featured is not None:
         if featured:

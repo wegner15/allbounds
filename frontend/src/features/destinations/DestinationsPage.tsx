@@ -8,14 +8,18 @@ import Button from '../../components/ui/Button';
 // Utils
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils';
 
+// Components
+import { TextDisplay } from '../../components/ui/RichTextDisplay';
+
 // API Hooks
-import { useRegionsWithCountries } from '../../lib/hooks/useDestinations';
+import { useRegionsWithCountries, useCountries } from '../../lib/hooks/useDestinations';
 
 const DestinationsPage: React.FC = () => {
   const [selectedRegion, setSelectedRegion] = useState<string>('All');
   
   // Fetch data from API
   const { data: regionsData, isLoading: isLoadingRegions, error: regionsError } = useRegionsWithCountries();
+  const { data: countriesData, isLoading: isLoadingCountries } = useCountries();
   
   const regions = regionsData || [];
   
@@ -89,22 +93,26 @@ const DestinationsPage: React.FC = () => {
               {regions
                 .filter(region => selectedRegion === 'All' || region.name === selectedRegion)
                 .map(region => (
-                  <div key={region.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                    <Link to={`/destinations/regions/${region.slug}`}>
-                      <img 
-                        src={getImageUrlWithFallback(region.image_url, IMAGE_VARIANTS.LARGE, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')} 
-                        alt={region.name}
-                        className="w-full h-48 object-cover"
-                      />
-                    </Link>
-                    <div className="p-6">
+                  <div key={region.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col h-full">
+                     <Link to={`/destinations/regions/${region.slug}`}>
+                       <img
+                         src={getImageUrlWithFallback(region.image_id || region.image_url, IMAGE_VARIANTS.LARGE, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')}
+                         alt={region.name}
+                         className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                       />
+                     </Link>
+                     <div className="p-6 flex-1 flex flex-col">
                       <Link to={`/destinations/regions/${region.slug}`}>
-                        <h3 className="text-xl font-playfair text-charcoal hover:text-hover transition-colors mb-2">
+                        <h3 className="text-xl font-playfair text-charcoal hover:text-hover transition-colors mb-3">
                           {region.name}
                         </h3>
                       </Link>
-                      <p className="text-gray-600 mb-4 line-clamp-3">{region.description}</p>
-                      
+                       {region.description && (
+                         <div className="text-gray-600 text-sm mb-4 line-clamp-3">
+                           <TextDisplay content={region.description} />
+                         </div>
+                       )}
+
                       {/* Countries in Region */}
                       {region.countries && region.countries.length > 0 && (
                         <div className="mb-4">
@@ -127,12 +135,12 @@ const DestinationsPage: React.FC = () => {
                           </div>
                         </div>
                       )}
-                      
-                      <Link to={`/destinations/regions/${region.slug}`}>
-                        <Button variant="outline" size="sm" className="w-full">
-                          Explore Region
-                        </Button>
-                      </Link>
+
+                       <Link to={`/destinations/regions/${region.slug}`} className="mt-auto">
+                         <Button variant="primary" className="w-full">
+                           Explore Region
+                         </Button>
+                       </Link>
                     </div>
                   </div>
                 ))}
@@ -141,29 +149,46 @@ const DestinationsPage: React.FC = () => {
             {/* Featured Countries Section */}
             <div className="mt-16">
               <h2 className="text-3xl font-playfair text-charcoal mb-8 text-center">Popular Countries</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {regions.flatMap(region => region.countries || [])
-                  .slice(0, 8)
-                  .map(country => (
-                    <Link 
-                      key={country.id}
-                      to={`/destinations/countries/${country.slug}`}
-                      className="group block relative h-48 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
-                    >
-                      <img 
-                        src={`https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80`}
-                        alt={country.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                      <div className="absolute bottom-0 left-0 right-0 p-4">
-                        <h3 className="text-white font-playfair text-lg group-hover:text-butter transition-colors">
-                          {country.name}
-                        </h3>
+              {isLoadingCountries ? (
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-charcoal"></div>
+                  <p className="mt-2">Loading countries...</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {(countriesData || [])
+                    .filter(country => country.is_active)
+                    .slice(0, 9)
+                    .map(country => (
+                      <div key={country.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col h-full">
+                        <Link to={`/destinations/countries/${country.slug}`}>
+                          <img
+                            src={getImageUrlWithFallback(country.image_id || country.image_url, IMAGE_VARIANTS.LARGE, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')}
+                            alt={country.name}
+                            className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </Link>
+                        <div className="p-6 flex-1 flex flex-col">
+                          <Link to={`/destinations/countries/${country.slug}`}>
+                            <h3 className="text-xl font-playfair text-charcoal hover:text-hover transition-colors mb-3">
+                              {country.name}
+                            </h3>
+                          </Link>
+                          {country.summary && (
+                            <div className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1">
+                              <TextDisplay content={country.summary} />
+                            </div>
+                          )}
+                          <Link to={`/destinations/countries/${country.slug}`} className="mt-auto">
+                            <Button variant="outline" size="sm" className="w-full">
+                              Explore {country.name}
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
-                    </Link>
-                  ))}
-              </div>
+                    ))}
+                </div>
+              )}
             </div>
           </>
         )}

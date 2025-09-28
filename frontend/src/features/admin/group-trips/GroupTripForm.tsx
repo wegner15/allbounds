@@ -17,6 +17,7 @@ import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
 // Form validation schema
 const groupTripSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
+  summary: z.string().max(255, 'Summary must be less than 255 characters').optional(),
   slug: z.string().min(2, 'Slug must be at least 2 characters')
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase with hyphens'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
@@ -61,6 +62,9 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
   const [selectedCountryId, setSelectedCountryId] = useState<number | null>(
     isEdit && groupTripData ? groupTripData.country_id : null
   );
+  const [selectedImageId, setSelectedImageId] = useState<string>(
+    isEdit && groupTripData ? groupTripData.image_id || '' : ''
+  );
   
   // Gallery state
   const [galleryImages, setGalleryImages] = useState<any[]>([]);
@@ -91,6 +95,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
     defaultValues: isEdit && groupTripData
       ? {
           name: groupTripData.name,
+          summary: groupTripData.summary || '',
           slug: groupTripData.slug,
           description: groupTripData.description,
           country_id: groupTripData.country_id,
@@ -107,6 +112,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
         }
       : {
           name: '',
+          summary: '',
           slug: '',
           description: '',
           country_id: 0,
@@ -116,6 +122,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
           price: 0,
           inclusion_ids: [],
           exclusion_ids: [],
+          image_id: '',
           is_active: true,
           start_date: '',
           end_date: ''
@@ -156,6 +163,13 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
     }
   }, [currentImageId]);
 
+  // Sync selectedImageId with form data when editing
+  useEffect(() => {
+    if (isEdit && groupTripData?.image_id) {
+      setSelectedImageId(groupTripData.image_id);
+    }
+  }, [isEdit, groupTripData]);
+
   const onSubmit = async (data: GroupTripFormData) => {
     setIsSubmitting(true);
     setServerError(null);
@@ -167,6 +181,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
       // Prepare the group trip data - explicitly include only fields the API expects
       const groupTripData = {
         name: data.name,
+        summary: data.summary || undefined,
         slug: data.slug,
         description: data.description,
         country_id: data.country_id,
@@ -175,7 +190,9 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
         max_participants: data.max_participants,
         price: data.price,
         image_id: data.image_id || undefined,
-        is_active: data.is_active
+        is_active: data.is_active,
+        inclusion_ids: data.inclusion_ids || [],
+        exclusion_ids: data.exclusion_ids || []
       };
       
       let savedTrip;
@@ -184,25 +201,25 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
         // Get the group trip ID from props or from URL as fallback
         const tripId = groupTripId || parseInt(window.location.pathname.split('/').pop() || '0');
         
-        // Create a clean update data object with only the fields we want to update
+        // Create update data with the trip ID
         const updateData = {
-          ...groupTripData,
-          id: tripId
+          id: tripId,
+          ...groupTripData
         };
-        
+
         console.log('Update data for group trip:', updateData);
         savedTrip = await updateGroupTripMutation.mutateAsync(updateData);
-        
+
         // After updating the group trip, handle the departure
         try {
           // Get existing departures
           const departures = await apiClient.get(`/group-trips/${savedTrip.id}/departures`);
-          
+
           if (data.start_date && data.end_date) {
             // Always use the dates from the form when available
             const startDate = new Date(data.start_date);
             const endDate = new Date(data.end_date);
-            
+
             const departureData = {
               start_date: startDate.toISOString(),
               end_date: endDate.toISOString(),
@@ -210,17 +227,17 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
               available_slots: data.max_participants || 10,
               is_active: data.is_active
             };
-            
+
             if (Array.isArray(departures) && departures.length > 0) {
               // Update existing departure
               await apiClient.put(
-                `/group-trips/${savedTrip.id}/departures/${departures[0].id}`, 
+                `/group-trips/${savedTrip.id}/departures/${departures[0].id}`,
                 departureData
               );
             } else {
               // Create new departure
               await apiClient.post(
-                `/group-trips/${savedTrip.id}/departures`, 
+                `/group-trips/${savedTrip.id}/departures`,
                 {
                   ...departureData,
                   group_trip_id: savedTrip.id,
@@ -229,21 +246,6 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
               );
             }
           }
-          
-          // Update inclusions and exclusions
-          try {
-            console.log('Updating inclusions:', data.inclusion_ids);
-            await apiClient.post(`/group-trips/${savedTrip.id}/inclusions`, {
-              inclusion_ids: data.inclusion_ids || []
-            });
-            
-            console.log('Updating exclusions:', data.exclusion_ids);
-            await apiClient.post(`/group-trips/${savedTrip.id}/exclusions`, {
-              exclusion_ids: data.exclusion_ids || []
-            });
-          } catch (error) {
-            console.error('Error updating inclusions/exclusions:', error);
-          }
         } catch (departureError) {
           console.error('Error updating/creating departure:', departureError);
           // Continue with form submission even if departure update fails
@@ -251,13 +253,13 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
       } else {
         // Create new group trip
         savedTrip = await createGroupTripMutation.mutateAsync(groupTripData);
-        
+
         // After creating the group trip, create a departure
         if (data.start_date && data.end_date) {
           try {
             const startDate = new Date(data.start_date);
             const endDate = new Date(data.end_date);
-            
+
             // Create a departure for this trip
             await apiClient.post(`/group-trips/${savedTrip.id}/departures`, {
               group_trip_id: savedTrip.id,
@@ -271,23 +273,6 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
           } catch (departureError) {
             console.error('Error creating departure:', departureError);
             // Continue even if departure creation fails
-          }
-        }
-        
-        // Add inclusions and exclusions for the new group trip
-        if (savedTrip?.id) {
-          try {
-            console.log('Adding inclusions to new group trip:', data.inclusion_ids);
-            await apiClient.post(`/group-trips/${savedTrip.id}/inclusions`, {
-              inclusion_ids: data.inclusion_ids || []
-            });
-            
-            console.log('Adding exclusions to new group trip:', data.exclusion_ids);
-            await apiClient.post(`/group-trips/${savedTrip.id}/exclusions`, {
-              exclusion_ids: data.exclusion_ids || []
-            });
-          } catch (error) {
-            console.error('Error adding inclusions/exclusions to new group trip:', error);
           }
         }
       }
@@ -347,9 +332,33 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
                   <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
                 )}
               </div>
-            </div>
-            
-            {/* Slug */}
+             </div>
+
+             {/* Summary */}
+             <div className="sm:col-span-6">
+               <label htmlFor="summary" className="block text-sm font-medium text-gray-700">
+                 Summary
+               </label>
+               <div className="mt-1">
+                 <textarea
+                   id="summary"
+                   rows={3}
+                   className={`shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 bg-white transition-colors ${
+                     errors.summary ? 'border-red-300 bg-red-50' : 'hover:border-gray-400'
+                   }`}
+                   placeholder="Brief summary of the group trip (max 255 characters)..."
+                   {...register('summary')}
+                 />
+                 {errors.summary && (
+                   <p className="mt-1 text-sm text-red-600">{errors.summary.message}</p>
+                 )}
+               </div>
+               <p className="mt-1 text-xs text-gray-500">
+                 Short description displayed in trip cards. Keep it under 255 characters.
+               </p>
+             </div>
+
+             {/* Slug */}
             <div className="sm:col-span-4">
               <label htmlFor="slug" className="block text-sm font-medium text-gray-700">
                 Slug
@@ -370,9 +379,9 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
               <p className="mt-1 text-xs text-gray-500">
                 Used in the URL: https://example.com/group-trips/your-slug
               </p>
-            </div>
-            
-            {/* Destination (Country) */}
+              </div>
+
+              {/* Destination (Country) */}
             <div className="sm:col-span-3">
               <label htmlFor="country_id" className="block text-sm font-medium text-gray-700">
                 Destination
@@ -587,9 +596,10 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
                 </div>
                 
                 <ImageSelector
-                  initialImageId={watch('image_id')}
+                  initialImageId={selectedImageId}
                   onImageSelected={(imageId: string) => {
                     console.log('Group trip cover image selected:', imageId);
+                    setSelectedImageId(imageId);
                     setValue('image_id', imageId);
                     setCoverImageId(Number(imageId)); // Also update the local state for gallery manager
 

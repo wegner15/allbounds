@@ -44,6 +44,19 @@ def get_countries_by_region(
     countries = country_service.get_countries_by_region(db, region_id=region_id, skip=skip, limit=limit)
     return [CountryResponse.from_orm(country) for country in countries]
 
+@router.get("/by-holiday-type/{holiday_type_slug}", response_model=List[CountryResponse])
+def get_countries_by_holiday_type(
+    holiday_type_slug: str,
+    db: Session = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+) -> Any:
+    """
+    Retrieve countries that have packages with the specified holiday type.
+    """
+    countries = country_service.get_countries_by_holiday_type(db, holiday_type_slug=holiday_type_slug, skip=skip, limit=limit)
+    return [CountryResponse.from_orm(country) for country in countries]
+
 @router.get("/with-hotels", response_model=List[CountryResponse])
 def get_countries_with_hotels(
     db: Session = Depends(get_db),

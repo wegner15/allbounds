@@ -57,16 +57,7 @@ export const usePackagesByCountry = (countryId: number) => {
   });
 };
 
-// Hook for fetching packages by holiday type
-export const usePackagesByHolidayType = (holidayTypeId: number) => {
-  return useQuery({
-    queryKey: ['packages', 'holidayType', holidayTypeId],
-    queryFn: async () => {
-      return apiClient.get<Package[]>(endpoints.packages.byHolidayType(holidayTypeId));
-    },
-    enabled: !!holidayTypeId, // Only run the query if holidayTypeId is provided
-  });
-};
+
 
 // Hook for fetching a single package by ID
 export const usePackage = (id: number) => {
@@ -154,5 +145,22 @@ export const useUpdatePackage = (id: number) => {
       // Also invalidate package details queries
       queryClient.invalidateQueries({ queryKey: ['package-details'], exact: false });
     },
+  });
+};
+
+// Hook for fetching packages by holiday type
+export const usePackagesByHolidayType = (holidayTypeSlug: string, options?: { skip?: number; limit?: number }) => {
+  return useQuery({
+    queryKey: ['packages', 'holidayType', holidayTypeSlug, options],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (options?.skip !== undefined) params.append('skip', options.skip.toString());
+      if (options?.limit !== undefined) params.append('limit', options.limit.toString());
+      params.append('holiday_type', holidayTypeSlug);
+
+      const response = await apiClient.get<Package[]>(`${endpoints.packages.list()}?${params.toString()}`);
+      return response;
+    },
+    enabled: !!holidayTypeSlug,
   });
 };

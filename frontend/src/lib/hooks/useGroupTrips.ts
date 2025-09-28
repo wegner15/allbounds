@@ -47,16 +47,7 @@ export const useGroupTripsByCountry = (countryId: number) => {
   });
 };
 
-// Hook for fetching group trips by holiday type
-export const useGroupTripsByHolidayType = (holidayTypeId: number) => {
-  return useQuery({
-    queryKey: ['groupTrips', 'holidayType', holidayTypeId],
-    queryFn: async () => {
-      return apiClient.get<GroupTrip[]>(endpoints.groupTrips.byHolidayType(holidayTypeId));
-    },
-    enabled: !!holidayTypeId, // Only run the query if holidayTypeId is provided
-  });
-};
+
 
 // Hook for fetching a single group trip by ID
 export const useGroupTrip = (id: number) => {
@@ -158,7 +149,7 @@ export const useUpdateGroupTrip = () => {
 // Hook for creating a new departure for a group trip (admin only)
 export const useCreateGroupTripDeparture = (groupTripId: number) => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (departureData: Omit<GroupTripDeparture, 'id' | 'group_trip_id'>) => {
       return apiClient.post<GroupTripDeparture>(`${endpoints.groupTrips.byId(groupTripId)}/departures`, {
@@ -170,5 +161,22 @@ export const useCreateGroupTripDeparture = (groupTripId: number) => {
       queryClient.invalidateQueries({ queryKey: ['groupTrip', groupTripId, 'departures'] });
       queryClient.invalidateQueries({ queryKey: ['groupTrip', groupTripId] });
     },
+  });
+};
+
+// Hook for fetching group trips by holiday type
+export const useGroupTripsByHolidayType = (holidayTypeSlug: string, options?: { skip?: number; limit?: number }) => {
+  return useQuery({
+    queryKey: ['groupTrips', 'holidayType', holidayTypeSlug, options],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (options?.skip !== undefined) params.append('skip', options.skip.toString());
+      if (options?.limit !== undefined) params.append('limit', options.limit.toString());
+      params.append('holiday_type', holidayTypeSlug);
+
+      const response = await apiClient.get<GroupTrip[]>(`${endpoints.groupTrips.list()}?${params.toString()}`);
+      return response;
+    },
+    enabled: !!holidayTypeSlug,
   });
 };

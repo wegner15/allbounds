@@ -5,9 +5,11 @@ import { format } from 'date-fns';
 
 // Components
 import Button from '../../components/ui/Button';
+import GroupTripCarousel from '../../components/ui/GroupTripCarousel';
 
 // Utils
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils';
+import { cleanTextForDisplay } from '../../lib/utils/text';
 
 // API Hooks
 import { useGroupTrips } from '../../lib/hooks/useGroupTrips';
@@ -34,13 +36,48 @@ const GroupTripsPage: React.FC = () => {
   const { data: holidayTypesData, isLoading: isLoadingHolidayTypes } = useHolidayTypes();
   
   // Prepare filter options from API data
-  const countryOptions = !isLoadingCountries && countriesData 
+  const countryOptions = !isLoadingCountries && countriesData
     ? ['All', ...countriesData.map(country => country.name)]
     : ['All'];
-    
+
   const holidayTypeOptions = !isLoadingHolidayTypes && holidayTypesData
     ? ['All', ...holidayTypesData.map(type => type.name)]
     : ['All'];
+
+  // Filter upcoming group trips (next 3 months, limit 10)
+  const { featuredTrips, hasUpcomingTrips } = React.useMemo(() => {
+    if (!groupTripsData) return { featuredTrips: [], hasUpcomingTrips: false };
+
+    const now = new Date();
+    const threeMonthsFromNow = new Date();
+    threeMonthsFromNow.setMonth(now.getMonth() + 3);
+
+    // First try to find trips with upcoming departures
+    const upcomingTrips = groupTripsData
+      .filter(trip => {
+        // Check if trip has departures in the next 3 months
+        if (!trip.departures || trip.departures.length === 0) return false;
+
+        return trip.departures.some(departure => {
+          const departureDate = new Date(departure.start_date);
+          return departureDate >= now && departureDate <= threeMonthsFromNow;
+        });
+      })
+      .sort((a, b) => {
+        // Sort by earliest departure date
+        const aEarliest = Math.min(...a.departures.map(d => new Date(d.start_date).getTime()));
+        const bEarliest = Math.min(...b.departures.map(d => new Date(d.start_date).getTime()));
+        return aEarliest - bEarliest;
+      });
+
+    // If we have upcoming trips, return them (limited to 10)
+    if (upcomingTrips.length > 0) {
+      return { featuredTrips: upcomingTrips.slice(0, 10), hasUpcomingTrips: true };
+    }
+
+    // If no upcoming trips, show the first 10 available trips as featured
+    return { featuredTrips: groupTripsData.slice(0, 10), hasUpcomingTrips: false };
+  }, [groupTripsData]);
   
   // Pagination
   const tripsPerPage = 6;
@@ -111,7 +148,7 @@ const GroupTripsPage: React.FC = () => {
     try {
       const date = new Date(dateString);
       return format(date, 'MMM d, yyyy');
-    } catch (error) {
+    } catch {
       return dateString;
     }
   };
@@ -123,15 +160,19 @@ const GroupTripsPage: React.FC = () => {
         <meta name="description" content="Join our scheduled group trips to destinations across Africa and beyond." />
       </Helmet>
       
-      {/* Hero Section */}
-      <div className="bg-cover bg-center h-64 md:h-80 flex items-center justify-center" style={{ backgroundImage: 'url(https://source.unsplash.com/random/1600x900/?group,travel)' }}>
-        <div className="text-center text-white p-4 bg-black bg-opacity-50 rounded">
-          <h1 className="text-3xl md:text-4xl font-playfair mb-2">Group Trips</h1>
-          <p className="text-lg md:text-xl">Join like-minded travelers on scheduled departures</p>
-        </div>
-      </div>
-      
-      <div className="container mx-auto px-4 py-8">
+       {/* Featured Group Trips Carousel */}
+       {featuredTrips.length > 0 && (
+        <GroupTripCarousel
+          groupTrips={featuredTrips}
+          isLoading={isLoadingGroupTrips}
+          className="h-96 md:h-[500px]"
+          showUpcomingBadge={hasUpcomingTrips}
+          title="Group Trips"
+          subtitle="Join like-minded travelers on scheduled departures"
+        />
+       )}
+
+       <div className="container mx-auto px-4 py-8">
         {/* Filters */}
         <div className="bg-white p-4 rounded shadow mb-6">
           <h2 className="text-xl font-medium mb-4">Filter Group Trips</h2>
@@ -220,17 +261,17 @@ const GroupTripsPage: React.FC = () => {
                   </Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
                   {currentTrips.map(trip => (
-                    <div key={trip.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                     <div key={trip.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
                       <Link to={`/group-trips/${trip.slug}`}>
-                        <img 
-                          src={getImageUrlWithFallback(trip.image_id, IMAGE_VARIANTS.MEDIUM, 'https://source.unsplash.com/random/600x400/?group,travel')} 
+                         <img
+                          src={getImageUrlWithFallback(trip.image_id, IMAGE_VARIANTS.LARGE, 'https://source.unsplash.com/random/1000x800/?group,travel')}
                           alt={trip.name}
-                          className="w-full h-48 object-cover"
+                          className="w-full h-72 object-cover"
                         />
                       </Link>
-                      <div className="p-4">
+                       <div className="p-6">
                         {/* Tags */}
                         <div className="flex flex-wrap gap-2 mb-3">
                           {trip.country && (
@@ -250,12 +291,71 @@ const GroupTripsPage: React.FC = () => {
                           )}
                         </div>
 
-                        <Link to={`/group-trips/${trip.slug}`} className="block">
-                          <h3 className="text-lg font-semibold text-charcoal hover:text-hover transition-colors mb-2">
-                            {trip.name}
-                          </h3>
-                        </Link>
-                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{trip.description}</p>
+                         <Link to={`/group-trips/${trip.slug}`} className="block">
+                           <h3 className="text-lg font-semibold text-charcoal hover:text-hover transition-colors mb-2">
+                             {trip.name}
+                           </h3>
+                         </Link>
+                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">{cleanTextForDisplay(trip.summary || trip.description || '')}</p>
+
+                          {/* Prominent Next Departure */}
+                          {trip.departures && trip.departures.length > 0 && (
+                            <div className="group relative bg-teal-50 border-2 border-teal-200 rounded-lg p-3 mb-4 transition-all duration-500 hover:border-teal-400 hover:shadow-2xl hover:shadow-teal-300/40 hover:-translate-y-1 transform cursor-pointer overflow-hidden">
+                              {/* Snake-like animated border effect */}
+                              <div className="absolute inset-0 rounded-lg overflow-hidden">
+                                {/* Top border segments - evenly distributed */}
+                                <div className="absolute top-0 left-0 w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-0"></div>
+                                <div className="absolute top-0 left-[20%] w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-100"></div>
+                                <div className="absolute top-0 left-[40%] w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-200"></div>
+                                <div className="absolute top-0 left-[60%] w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-300"></div>
+                                <div className="absolute top-0 left-[80%] w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-400"></div>
+
+                                {/* Right border segments - evenly distributed */}
+                                <div className="absolute top-0 right-0 w-1 h-6 bg-gradient-to-b from-blue-500 to-teal-400 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-500"></div>
+                                <div className="absolute top-[20%] right-0 w-1 h-6 bg-gradient-to-b from-blue-500 to-teal-400 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-600"></div>
+                                <div className="absolute top-[40%] right-0 w-1 h-6 bg-gradient-to-b from-blue-500 to-teal-400 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-700"></div>
+                                <div className="absolute top-[60%] right-0 w-1 h-6 bg-gradient-to-b from-blue-500 to-teal-400 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-800"></div>
+                                <div className="absolute top-[80%] right-0 w-1 h-6 bg-gradient-to-b from-blue-500 to-teal-400 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-900"></div>
+
+                                 {/* Bottom border segments - evenly distributed */}
+                                 <div className="absolute bottom-0 left-0 w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1000"></div>
+                                 <div className="absolute bottom-0 left-[20%] w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1100"></div>
+                                 <div className="absolute bottom-0 left-[40%] w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1200"></div>
+                                 <div className="absolute bottom-0 left-[60%] w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1300"></div>
+                                 <div className="absolute bottom-0 left-[80%] w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1400"></div>
+
+                                 {/* Left border segments - evenly distributed */}
+                                 <div className="absolute top-0 left-0 w-1 h-6 bg-gradient-to-b from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1500"></div>
+                                 <div className="absolute top-[20%] left-0 w-1 h-6 bg-gradient-to-b from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1600"></div>
+                                 <div className="absolute top-[40%] left-0 w-1 h-6 bg-gradient-to-b from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1700"></div>
+                                 <div className="absolute top-[60%] left-0 w-1 h-6 bg-gradient-to-b from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1800"></div>
+                                 <div className="absolute top-[80%] left-0 w-1 h-6 bg-gradient-to-b from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1900"></div>
+                              </div>
+
+                              {/* Animated gradient background */}
+                              <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-teal-100 via-blue-50 to-teal-100 opacity-0 group-hover:opacity-100 transition-opacity duration-500 group-hover:animate-pulse"></div>
+
+                              {/* Subtle inner glow */}
+                              <div className="absolute inset-1 rounded-md bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+
+                              <div className="relative flex items-center justify-between">
+                                <div className="flex items-center">
+                                  <svg className="w-5 h-5 mr-2 text-teal-600 group-hover:text-teal-700 group-hover:animate-bounce transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                  <span className="text-sm font-medium text-teal-800 group-hover:text-teal-900 transition-colors duration-300">Next Departure</span>
+                                </div>
+                                <span className="text-lg font-bold text-teal-900 group-hover:text-blue-900 group-hover:scale-110 transform transition-all duration-300 drop-shadow-sm">
+                                  {formatDate(trip.departures[0].start_date)}
+                                </span>
+                              </div>
+                              {trip.departures.length > 1 && (
+                                <div className="relative mt-1 text-xs text-teal-600 group-hover:text-teal-700 transition-colors duration-300">
+                                  +{trip.departures.length - 1} more dates available
+                                </div>
+                              )}
+                            </div>
+                          )}
                         
                         {/* Trip Details */}
                         <div className="space-y-2 mb-4">
@@ -275,94 +375,56 @@ const GroupTripsPage: React.FC = () => {
                             </div>
                           )}
 
-                          {/* Next Departure */}
-                          {trip.departures && trip.departures.length > 0 && (
-                            <div className="flex items-center text-sm text-gray-600">
-                              <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                              <span>Next departure: {formatDate(trip.departures[0].start_date)}</span>
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* Upcoming departures */}
-                        {trip.departures && trip.departures.length > 0 && (
-                          <div className="mb-4 bg-gray-50 rounded-lg p-3">
-                            <h4 className="text-sm font-medium mb-2 text-gray-700">Available Departures:</h4>
-                            <div className="space-y-1">
-                              {trip.departures.slice(0, 2).map(departure => (
-                                <div key={departure.id} className="flex justify-between items-center text-sm">
-                                  <span className="text-gray-600">
-                                    {formatDate(departure.start_date)} - {formatDate(departure.end_date)}
-                                  </span>
-                                  <div className="flex items-center space-x-2">
-                                    {departure.price !== trip.price && (
-                                      <span className="text-xs text-gray-500">${departure.price}</span>
-                                    )}
-                                    {departure.available_spots > 0 ? (
-                                      <span className="text-green-600 text-xs font-medium">
-                                        {departure.available_spots} spots
-                                      </span>
-                                    ) : (
-                                      <span className="text-red-600 text-xs font-medium">Sold out</span>
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
-                              {trip.departures.length > 2 && (
-                                <div className="text-center pt-1">
-                                  <Link 
-                                    to={`/group-trips/${trip.slug}`}
-                                    className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                                  >
-                                    + {trip.departures.length - 2} more dates available
-                                  </Link>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Price and Rating */}
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <div className="flex items-baseline">
-                              <span className="text-sm text-gray-500">From</span>
-                              <span className="font-bold text-xl text-primary ml-1">${trip.price}</span>
-                            </div>
-                            <span className="text-gray-600 text-xs">per person</span>
-                          </div>
-                          
-                          {trip.rating && (
-                            <div className="text-right">
-                              <div className="flex items-center justify-end">
-                                <div className="flex text-yellow-400">
-                                  {[...Array(5)].map((_, i) => (
-                                    <svg key={i} className={`w-3 h-3 ${i < Math.floor(trip.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20">
-                                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                    </svg>
-                                  ))}
-                                </div>
-                                <span className="ml-1 text-xs text-gray-600">
-                                  {trip.rating}
-                                </span>
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                ({trip.review_count || 0} reviews)
-                              </div>
-                            </div>
-                          )}
-                        </div>
 
-                        {/* Action Button */}
-                        <div className="mt-4 pt-3 border-t border-gray-100">
-                          <Link to={`/group-trips/${trip.slug}`}>
-                            <Button variant="primary" size="sm" className="w-full">
-                              View Details & Book
-                            </Button>
-                          </Link>
                         </div>
+                        
+                         {/* Additional departures info */}
+                         {trip.departures && trip.departures.length > 1 && (
+                           <div className="mb-4 text-xs text-gray-500">
+                             <Link
+                               to={`/group-trips/${trip.slug}`}
+                               className="text-blue-600 hover:text-blue-800 font-medium"
+                             >
+                               View all {trip.departures.length} available departures
+                             </Link>
+                           </div>
+                         )}
+                        
+                         {/* Rating (if exists) */}
+                         {trip.rating && (
+                           <div className="flex items-center justify-end mb-3">
+                             <div className="flex text-yellow-400">
+                               {[...Array(5)].map((_, i) => (
+                                 <svg key={i} className={`w-3 h-3 ${i < Math.floor(trip.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20">
+                                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                 </svg>
+                               ))}
+                             </div>
+                             <span className="ml-1 text-xs text-gray-600">
+                               {trip.rating}
+                             </span>
+                             <span className="ml-1 text-xs text-gray-500">
+                               ({trip.review_count || 0} reviews)
+                             </span>
+                           </div>
+                         )}
+
+                         {/* Price and Action Button */}
+                         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                           <div className="flex flex-col">
+                             <div className="flex items-baseline">
+                               <span className="text-sm text-gray-500">From</span>
+                               <span className="font-bold text-xl text-primary ml-1">${trip.price}</span>
+                             </div>
+                             <span className="text-gray-600 text-xs">per person</span>
+                           </div>
+
+                           <Link to={`/group-trips/${trip.slug}`}>
+                             <Button variant="primary" size="md" className="px-6 py-2">
+                               View Details & Book
+                             </Button>
+                           </Link>
+                         </div>
                       </div>
                     </div>
                   ))}

@@ -5,6 +5,7 @@ import L from 'leaflet';
 interface ItineraryMapProps {
   items: ItineraryItem[];
   className?: string;
+  isScrolled?: boolean;
 }
 
 interface LocationPoint {
@@ -17,7 +18,7 @@ interface LocationPoint {
   accommodation?: string;
 }
 
-export const ItineraryMap: React.FC<ItineraryMapProps> = ({ items, className = '' }) => {
+export const ItineraryMap: React.FC<ItineraryMapProps> = ({ items, className = '', isScrolled = false }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -220,21 +221,29 @@ export const ItineraryMap: React.FC<ItineraryMapProps> = ({ items, className = '
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-6 ${isScrolled ? 'mt-16' : ''} ${className}`}>
       {/* Map Container */}
       <div className="relative bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {isLoading && (
-          <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+          <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-20">
             <div className="text-center">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal"></div>
               <p className="mt-2 text-gray-600">Loading map...</p>
             </div>
           </div>
         )}
-        <div ref={mapRef} className="h-96 w-full" />
+        <div ref={mapRef} className={`${isScrolled ? 'h-[550px]' : 'h-96'} w-full`} />
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            .leaflet-control-container { z-index: 10 !important; }
+            .leaflet-popup { z-index: 10 !important; }
+            .leaflet-popup-content-wrapper { z-index: 10 !important; }
+            .leaflet-popup-tip { z-index: 10 !important; }
+          `
+        }} />
         
         {/* Map Legend */}
-        <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-3 z-[1000]">
+        <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-3 z-30">
           <h4 className="font-medium text-gray-900 mb-2 text-sm">Your Journey</h4>
           <div className="space-y-2 text-xs">
             <div className="flex items-center">

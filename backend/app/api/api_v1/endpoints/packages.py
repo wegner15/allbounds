@@ -24,13 +24,22 @@ def get_packages(
     order: str = "desc",
     popular: bool = Query(False, description="Get popular (featured) packages"),
     country: str = Query(None, description="Filter by country name"),
+    holiday_type: str = Query(None, description="Filter by holiday type slug"),
 ) -> Any:
     """
     Retrieve all packages with optional ordering and filtering.
     order_by options: created_at, name, price
     order options: asc, desc
     """
-    if country:
+    if holiday_type:
+        # Find holiday type by slug and get packages for that holiday type
+        from app.models.holiday_type import HolidayType
+        holiday_type_obj = db.query(HolidayType).filter(HolidayType.slug == holiday_type, HolidayType.is_active == True).first()
+        if holiday_type_obj:
+            packages = package_service.get_packages_by_holiday_type(db, holiday_type_id=holiday_type_obj.id, skip=skip, limit=limit)
+        else:
+            packages = []
+    elif country:
         # Find country by name and get packages for that country
         from app.models.country import Country
         country_obj = db.query(Country).filter(Country.name == country, Country.is_active == True).first()

@@ -157,6 +157,7 @@ export const endpoints = {
     bySlug: (slug: string) => `/countries/slug/${slug}`,
     bySlugWithDetails: (slug: string) => `/countries/slug/${slug}/details`,
     byRegion: (regionId: number) => `/countries/region/${regionId}`,
+    byHolidayType: (holidayTypeSlug: string) => `/countries/by-holiday-type/${holidayTypeSlug}`,
     visitInfo: (countryId: number) => `/countries/${countryId}/visit-info`,
     updateVisitInfo: (countryId: number) => `/countries/${countryId}/visit-info`,
   },

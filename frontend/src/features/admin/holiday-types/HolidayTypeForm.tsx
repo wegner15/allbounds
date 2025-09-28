@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { useCreateHolidayType, useUpdateHolidayType } from '../../../lib/hooks/useHolidayTypes';
 import ImageSelector from '../../../components/ui/ImageSelector';
+import IconSelector from '../../../components/ui/IconSelector';
 import { apiClient } from '../../../lib/api';
 
 // Form validation schema
@@ -24,6 +25,9 @@ const holidayTypeSchema = z.object({
     .max(2000, 'Description cannot exceed 2000 characters'),
   image_id: z.string()
     .min(1, 'Please select an image for this holiday type'),
+  icon: z.string()
+    .max(10, 'Icon cannot exceed 10 characters')
+    .optional(),
   is_active: z.boolean(),
 });
 
@@ -58,6 +62,7 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
           slug: holidayTypeData.slug,
           description: holidayTypeData.description,
           image_id: holidayTypeData.image_id || '',
+          icon: holidayTypeData.icon || '',
           is_active: holidayTypeData.is_active,
         }
       : {
@@ -65,6 +70,7 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
           slug: '',
           description: '',
           image_id: '',
+          icon: '',
           is_active: true,
         },
   });
@@ -263,9 +269,22 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
                 Describe the holiday type in detail. Include key features, experiences, and what makes it unique.
               </p>
             </div>
-          </div>
-          
-          {/* Image Upload */}
+           </div>
+
+           {/* Icon */}
+           <div className="sm:col-span-6">
+             <IconSelector
+               selectedIcon={watch('icon')}
+               onIconSelect={(icon) => setValue('icon', icon)}
+               label="Holiday Type Icon (Optional)"
+               helperText="Choose an icon to visually represent this holiday type"
+             />
+             {errors.icon && (
+               <p className="mt-4 text-sm text-red-600 font-medium">{errors.icon.message}</p>
+             )}
+           </div>
+
+           {/* Image Upload */}
           <div className="sm:col-span-6">
             <div className="flex justify-between items-center">
               <label className="block text-sm font-semibold text-gray-800">

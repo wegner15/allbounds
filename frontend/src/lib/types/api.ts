@@ -24,6 +24,7 @@ export interface CountryInRegion {
   name: string;
   slug: string;
   description: string;
+  image_id?: string;
   is_active: boolean;
 }
 
@@ -33,6 +34,7 @@ export interface RegionWithCountries extends BaseModel {
   description: string;
   slug: string;
   image_url?: string;
+  image_id?: string;
   is_active: boolean;
   countries: CountryInRegion[];
 }
@@ -197,6 +199,7 @@ export interface HolidayType extends BaseModel {
   slug: string;
   image_url?: string;
   image_id?: string;
+  icon?: string;
   is_active: boolean;
 }
 
@@ -262,6 +265,7 @@ export interface PackageItineraryDay {
 // Group Trip types
 export interface GroupTrip extends BaseModel {
   name: string;
+  summary?: string;
   description: string;
   slug: string;
   country_id: number;

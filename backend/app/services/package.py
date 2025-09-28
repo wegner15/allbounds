@@ -71,7 +71,19 @@ class PackageService:
             Package.is_active == True,
             Package.is_featured == True
         ).offset(skip).limit(limit).all()
-    
+
+    def get_packages_by_holiday_type(self, db: Session, holiday_type_id: int, skip: int = 0, limit: int = 100) -> List[Package]:
+        """
+        Retrieve all packages for a specific holiday type with pagination.
+        """
+        return db.query(Package).options(
+            joinedload(Package.country),
+            joinedload(Package.holiday_types)
+        ).filter(
+            Package.holiday_types.any(HolidayType.id == holiday_type_id),
+            Package.is_active == True
+        ).offset(skip).limit(limit).all()
+
     def get_package(self, db: Session, package_id: int) -> Optional[Package]:
         """
         Retrieve a specific package by ID.

@@ -113,6 +113,22 @@ export const useCountryBySlug = (slug: string) => {
   });
 };
 
+// Hook for fetching countries by holiday type
+export const useCountriesByHolidayType = (holidayTypeSlug: string, options?: { skip?: number; limit?: number }) => {
+  return useQuery({
+    queryKey: ['countries', 'holidayType', holidayTypeSlug, options],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (options?.skip !== undefined) params.append('skip', options.skip.toString());
+      if (options?.limit !== undefined) params.append('limit', options.limit.toString());
+
+      const response = await apiClient.get<Country[]>(`${endpoints.countries.byHolidayType(holidayTypeSlug)}?${params.toString()}`);
+      return response;
+    },
+    enabled: !!holidayTypeSlug,
+  });
+};
+
 // ===== Admin Mutation Hooks =====
 
 // Hook for creating a new region (admin only)

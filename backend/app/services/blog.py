@@ -45,13 +45,13 @@ class BlogService:
         return db.query(BlogPost).filter(BlogPost.slug == slug).first()
 
     def create_blog_post(
-        self, 
-        db: Session, 
+        self,
+        db: Session,
         title: str,
         content: str,
         author_id: int,
         summary: Optional[str] = None,
-        featured_image: Optional[str] = None,
+        cover_image_id: Optional[str] = None,
         tags: Optional[List[str]] = None,
         slug: Optional[str] = None,
         is_published: bool = False
@@ -68,6 +68,7 @@ class BlogService:
             summary=summary,
             slug=slug,
             author_id=author_id,
+            cover_image_id=cover_image_id,
             is_published=is_published
         )
         
@@ -94,13 +95,13 @@ class BlogService:
         return db_blog_post
 
     def update_blog_post(
-        self, 
-        db: Session, 
+        self,
+        db: Session,
         post_id: int,
         title: Optional[str] = None,
         content: Optional[str] = None,
         summary: Optional[str] = None,
-        featured_image: Optional[str] = None,
+        cover_image_id: Optional[str] = None,
         tags: Optional[List[str]] = None,
         is_published: Optional[bool] = None,
         is_active: Optional[bool] = None
@@ -118,8 +119,8 @@ class BlogService:
             db_blog_post.content = content
         if summary is not None:
             db_blog_post.summary = summary
-        if featured_image is not None:
-            db_blog_post.featured_image = featured_image
+        if cover_image_id is not None:
+            db_blog_post.cover_image_id = cover_image_id
         if tags is not None:
             # Clear existing tags
             db_blog_post.tags = []
@@ -183,8 +184,8 @@ class BlogService:
         return db_blog_post
 
     def unpublish_blog_post(
-        self, 
-        db: Session, 
+        self,
+        db: Session,
         post_id: int
     ) -> Optional[BlogPost]:
         """
@@ -193,8 +194,42 @@ class BlogService:
         db_blog_post = self.get_blog_post(db, post_id)
         if db_blog_post is None:
             return None
-            
+
         db_blog_post.is_published = False
+        db.commit()
+        db.refresh(db_blog_post)
+        return db_blog_post
+
+    def feature_blog_post(
+        self,
+        db: Session,
+        post_id: int
+    ) -> Optional[BlogPost]:
+        """
+        Mark a blog post as featured.
+        """
+        db_blog_post = self.get_blog_post(db, post_id)
+        if db_blog_post is None:
+            return None
+
+        db_blog_post.is_featured = True
+        db.commit()
+        db.refresh(db_blog_post)
+        return db_blog_post
+
+    def unfeature_blog_post(
+        self,
+        db: Session,
+        post_id: int
+    ) -> Optional[BlogPost]:
+        """
+        Remove featured status from a blog post.
+        """
+        db_blog_post = self.get_blog_post(db, post_id)
+        if db_blog_post is None:
+            return None
+
+        db_blog_post.is_featured = False
         db.commit()
         db.refresh(db_blog_post)
         return db_blog_post

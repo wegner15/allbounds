@@ -12,6 +12,7 @@ from app.api.api_v1.endpoints import (
     group_trips,
     holiday_types,
     blog,
+    content,
     search,
     media,
     auth,
@@ -43,6 +44,7 @@ api_router.include_router(holiday_types.router, prefix="/holiday-types", tags=["
 api_router.include_router(inclusions.router, prefix="/inclusions", tags=["Inclusions"])
 api_router.include_router(exclusions.router, prefix="/exclusions", tags=["Exclusions"])
 api_router.include_router(blog.router, prefix="/blog", tags=["Blog"])
+api_router.include_router(content.router, prefix="/content", tags=["Content"])
 api_router.include_router(search.router, prefix="/search", tags=["Search"])
 api_router.include_router(stats.router, prefix="/stats", tags=["Stats"])
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 
 // Components
 import Button from '../../components/ui/Button';
@@ -374,7 +375,10 @@ const PackagesPage: React.FC = () => {
                             {pkg.name}
                           </h3>
                         </Link>
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{pkg.summary || pkg.description}</p>
+                        <div
+                          className="text-gray-600 text-sm mb-4 line-clamp-2"
+                          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pkg.summary || pkg.description || '') }}
+                        />
                         <div className="flex justify-between items-center">
                           <PackagePriceDisplay packageId={pkg.id} basePrice={pkg.price} />
                           <div className="text-sm text-gray-600">{pkg.duration_days} days</div>

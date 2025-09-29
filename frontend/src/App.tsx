@@ -90,6 +90,7 @@ import EditExclusionPage from './features/admin/exclusions/EditExclusionPage';
 // Import public pages
 import BlogListPage from './features/public/blog/BlogListPage';
 import BlogDetailPage from './features/public/blog/BlogDetailPage';
+import ContentPage from './features/public/content/ContentPage';
 import HotelListPage from './features/public/hotels/HotelListPage';
 import HotelDetailPage from './features/public/hotels/HotelDetailPage';
 import AttractionListPage from './features/public/attractions/AttractionListPage';
@@ -105,6 +106,10 @@ import SubscriberList from './features/admin/newsletter/SubscriberList';
 import PackageBookingsPage from './features/admin/bookings/PackageBookingsPage';
 import GroupTripBookingsPage from './features/admin/bookings/GroupTripBookingsPage';
 import GeneralInquiriesPage from './features/admin/bookings/GeneralInquiriesPage';
+
+// Import admin content pages
+import ContentListPage from './features/admin/content/ContentListPage';
+import ContentForm from './features/admin/content/ContentForm';
 
 import HomePage from './features/public/HomePage';
 
@@ -178,23 +183,11 @@ const MainLayout = () => {
   const footerSections = [
     {
       title: 'Destinations',
-      links: [
-        { label: 'Africa', path: '/regions/africa' },
-        { label: 'Asia', path: '/regions/asia' },
-        { label: 'Europe', path: '/regions/europe' },
-        { label: 'North America', path: '/regions/north-america' },
-        { label: 'South America', path: '/regions/south-america' },
-      ],
+      links: [], // Will be populated dynamically from API
     },
     {
       title: 'Holiday Types',
-      links: [
-        { label: 'Safari', path: '/holiday-types/safari' },
-        { label: 'Beach', path: '/holiday-types/beach' },
-        { label: 'Adventure', path: '/holiday-types/adventure' },
-        { label: 'Cultural', path: '/holiday-types/cultural' },
-        { label: 'Luxury', path: '/holiday-types/luxury' },
-      ],
+      links: [], // Will be populated dynamically from API
     },
     {
       title: 'Company',
@@ -276,6 +269,11 @@ const router = createBrowserRouter([
       { path: 'holiday-types/:slug', element: <HolidayTypeDetailPage /> },
       { path: 'blog', element: <BlogListPage /> },
       { path: 'blog/:slug', element: <BlogDetailPage /> },
+      { path: 'about-us', element: <ContentPage /> },
+      { path: 'contact-us', element: <ContentPage /> },
+      { path: 'careers', element: <ContentPage /> },
+      { path: 'terms', element: <ContentPage /> },
+      { path: 'privacy', element: <ContentPage /> },
       { path: 'search', element: <SearchPage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'unauthorized', element: <UnauthorizedPage /> },
@@ -350,12 +348,16 @@ const router = createBrowserRouter([
       { path: 'packages/:id/edit', element: <EditPackagePage /> },
        // Newsletter subscribers
        { path: 'newsletter', element: <SubscriberList /> },
-       // Booking management routes
-       { path: 'bookings/packages', element: <PackageBookingsPage /> },
-       { path: 'bookings/group-trips', element: <GroupTripBookingsPage /> },
-       { path: 'bookings/inquiries', element: <GeneralInquiriesPage /> },
-       // Other admin routes
-       { path: 'preview/:type/:id', element: <AdminPreviewPage /> },
+        // Booking management routes
+        { path: 'bookings/packages', element: <PackageBookingsPage /> },
+        { path: 'bookings/group-trips', element: <GroupTripBookingsPage /> },
+        { path: 'bookings/inquiries', element: <GeneralInquiriesPage /> },
+        // Content management routes
+        { path: 'content', element: <ContentListPage /> },
+        { path: 'content/create', element: <ContentForm /> },
+        { path: 'content/edit/:id', element: <ContentForm /> },
+        // Other admin routes
+        { path: 'preview/:type/:id', element: <AdminPreviewPage /> },
     ],
   },
 ]);

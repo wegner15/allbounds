@@ -17,6 +17,7 @@ from app.models.package import Package
 from app.models.group_trip import GroupTrip, GroupTripDeparture
 from app.models.review import Review
 from app.models.blog import BlogPost, Tag
+from app.models.content import ContentPage
 from app.models.media import MediaAsset
 from app.models.audit import AuditLog
 from app.models.seo import SeoMeta
@@ -30,7 +31,7 @@ __all__ = [
     'Region', 'Country', 'HolidayType',
     'Attraction', 'Accommodation', 'Hotel', 'Package',
     'GroupTrip', 'GroupTripDeparture',
-    'Review', 'BlogPost', 'Tag',
+    'Review', 'BlogPost', 'Tag', 'ContentPage',
     'MediaAsset', 'AuditLog', 'SeoMeta',
     'ItineraryItem', 'ItineraryActivity',
     'Booking', 'BookingTraveler', 'Inquiry',

@@ -4,23 +4,32 @@ from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.models.blog import BlogPost
+from app.models.user import User
 from app.schemas.blog import BlogPostResponse, BlogPostCreate, BlogPostUpdate
 from app.services.blog import blog_service
-from app.auth.dependencies import get_current_active_superuser, get_current_user
+from app.auth.dependencies import get_current_active_superuser, get_current_user, get_current_user_optional
 from app.utils.slug import create_slug
 
 router = APIRouter()
 
 @router.get("/", response_model=List[BlogPostResponse])
 def read_blog_posts(
-    skip: int = 0, 
+    skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db)
+    include_drafts: bool = False,
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
     """
     Retrieve all blog posts.
+    For admin users, can include draft posts by setting include_drafts=true.
     """
-    blog_posts = blog_service.get_blog_posts(db, skip=skip, limit=limit)
+    # If user is superuser and requests drafts, show all posts
+    if current_user and current_user.is_superuser and include_drafts:
+        blog_posts = blog_service.get_blog_posts(db, skip=skip, limit=limit, active_only=True, published_only=False)
+    else:
+        # Default behavior: only published posts
+        blog_posts = blog_service.get_blog_posts(db, skip=skip, limit=limit)
     return blog_posts
 
 @router.get("/{post_id}", response_model=BlogPostResponse)
@@ -32,7 +41,7 @@ def read_blog_post(
     Get a specific blog post by ID.
     """
     blog_post = blog_service.get_blog_post(db, post_id=post_id)
-    if blog_post is None:
+    if blog_post is None or not blog_post.is_published or not blog_post.is_active:
         raise HTTPException(status_code=404, detail="Blog post not found")
     return blog_post
 
@@ -45,7 +54,7 @@ def read_blog_post_by_slug(
     Get a specific blog post by slug.
     """
     blog_post = blog_service.get_blog_post_by_slug(db, slug=slug)
-    if blog_post is None:
+    if blog_post is None or not blog_post.is_published or not blog_post.is_active:
         raise HTTPException(status_code=404, detail="Blog post not found")
     return blog_post
 
@@ -74,12 +83,12 @@ def create_blog_post(
     
     # Create blog post
     blog_post = blog_service.create_blog_post(
-        db=db, 
+        db=db,
         title=blog_post_in.title,
         content=blog_post_in.content,
         summary=blog_post_in.summary,
         author_id=current_user.id,
-        featured_image=blog_post_in.featured_image,
+        cover_image_id=blog_post_in.cover_image_id,
         slug=slug,
         tags=blog_post_in.tags
     )
@@ -105,7 +114,7 @@ def update_blog_post(
         title=blog_post_in.title,
         content=blog_post_in.content,
         summary=blog_post_in.summary,
-        featured_image=blog_post_in.featured_image,
+        cover_image_id=blog_post_in.cover_image_id,
         tags=blog_post_in.tags,
         is_published=blog_post_in.is_published,
         is_active=blog_post_in.is_active
@@ -156,6 +165,38 @@ def unpublish_blog_post(
     blog_post = blog_service.get_blog_post(db, post_id=post_id)
     if blog_post is None:
         raise HTTPException(status_code=404, detail="Blog post not found")
-    
+
     blog_post = blog_service.unpublish_blog_post(db, post_id=post_id)
+    return blog_post
+
+@router.post("/{post_id}/feature", response_model=BlogPostResponse)
+def feature_blog_post(
+    post_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_active_superuser)
+):
+    """
+    Mark a blog post as featured.
+    """
+    blog_post = blog_service.get_blog_post(db, post_id=post_id)
+    if blog_post is None:
+        raise HTTPException(status_code=404, detail="Blog post not found")
+
+    blog_post = blog_service.feature_blog_post(db, post_id=post_id)
+    return blog_post
+
+@router.post("/{post_id}/unfeature", response_model=BlogPostResponse)
+def unfeature_blog_post(
+    post_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_active_superuser)
+):
+    """
+    Remove featured status from a blog post.
+    """
+    blog_post = blog_service.get_blog_post(db, post_id=post_id)
+    if blog_post is None:
+        raise HTTPException(status_code=404, detail="Blog post not found")
+
+    blog_post = blog_service.unfeature_blog_post(db, post_id=post_id)
     return blog_post

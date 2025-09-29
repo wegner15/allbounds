@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useBlogs } from '../../../lib/hooks/useBlogs';
+import { getCloudflareImageUrl } from '../../../utils/cloudflareImageUtils';
 
 const BlogListPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,16 +32,19 @@ const BlogListPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-2">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white rounded-xl shadow-sm p-6">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-                  <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-2/3 mb-4"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                <div key={i} className="bg-white rounded-xl shadow-sm overflow-hidden">
+                  <div className="h-48 bg-gray-200"></div>
+                  <div className="p-6">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                    <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-2/3 mb-4"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -96,7 +100,7 @@ const BlogListPage: React.FC = () => {
       </div>
 
       {/* Blog Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {filteredBlogs.length === 0 ? (
           <div className="text-center py-12">
             <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -110,9 +114,19 @@ const BlogListPage: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
             {filteredBlogs.map((blog) => (
               <article key={blog.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
+                {blog.cover_image_id && (
+                  <div className="aspect-w-16 aspect-h-9">
+                    <img
+                      src={getCloudflareImageUrl(blog.cover_image_id, 'medium')}
+                      alt={blog.title}
+                      className="w-full h-48 object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
                 <div className="p-6">
                   <div className="flex items-center text-sm text-gray-500 mb-3">
                     <time dateTime={blog.created_at}>
@@ -122,17 +136,17 @@ const BlogListPage: React.FC = () => {
                     <span>{getReadTime(blog.content)}</span>
                   </div>
                   
-                  <h2 className="text-xl font-semibold text-gray-900 mb-3 line-clamp-2">
-                    <Link 
+                  <h2 className="text-xl font-semibold text-gray-900 mb-3 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                    <Link
                       to={`/blog/${blog.slug}`}
                       className="hover:text-blue-600 transition-colors"
                     >
                       {blog.title}
                     </Link>
                   </h2>
-                  
+
                   {blog.summary && (
-                    <p className="text-gray-600 mb-4 line-clamp-3">
+                    <p className="text-gray-600 mb-4 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
                       {blog.summary}
                     </p>
                   )}

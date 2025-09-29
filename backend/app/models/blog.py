@@ -17,10 +17,11 @@ class BlogPost(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(200), nullable=False)
-    summary = Column(String(255), nullable=True)
+    summary = Column(String(1000), nullable=True)
     content = Column(Text, nullable=False)
     author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     slug = Column(String(200), unique=True, index=True, nullable=False)
+    cover_image_id = Column(String(255), nullable=True)  # Cloudflare Images ID
     is_active = Column(Boolean, default=True)
     is_published = Column(Boolean, default=False)
     is_featured = Column(Boolean, default=False)

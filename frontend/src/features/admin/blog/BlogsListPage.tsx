@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useBlogs, useDeleteBlog, usePublishBlog, useUnpublishBlog } from '../../../lib/hooks/useBlogs';
+import { useBlogs, useDeleteBlog, usePublishBlog, useUnpublishBlog, useFeatureBlog, useUnfeatureBlog } from '../../../lib/hooks/useBlogs';
 import type { BlogPost } from '../../../lib/hooks/useBlogs';
 
 const BlogsListPage: React.FC = () => {
-  const { data: blogs, isLoading, error } = useBlogs();
+  const { data: blogs, isLoading, error } = useBlogs(true); // Include drafts for admin
   const deleteBlogMutation = useDeleteBlog();
   const publishBlogMutation = usePublishBlog();
   const unpublishBlogMutation = useUnpublishBlog();
+  const featureBlogMutation = useFeatureBlog();
+  const unfeatureBlogMutation = useUnfeatureBlog();
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleDelete = async (id: number) => {
@@ -33,6 +35,22 @@ const BlogsListPage: React.FC = () => {
       await unpublishBlogMutation.mutateAsync(id);
     } catch (error) {
       console.error('Error unpublishing blog post:', error);
+    }
+  };
+
+  const handleFeature = async (id: number) => {
+    try {
+      await featureBlogMutation.mutateAsync(id);
+    } catch (error) {
+      console.error('Error featuring blog post:', error);
+    }
+  };
+
+  const handleUnfeature = async (id: number) => {
+    try {
+      await unfeatureBlogMutation.mutateAsync(id);
+    } catch (error) {
+      console.error('Error unfeaturing blog post:', error);
     }
   };
 
@@ -67,8 +85,11 @@ const BlogsListPage: React.FC = () => {
         </div>
         <Link
           to="/admin/blog/create"
-          className="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 transition-colors duration-200"
+          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow-md hover:scale-105"
         >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
           Create New Post
         </Link>
       </div>
@@ -91,8 +112,11 @@ const BlogsListPage: React.FC = () => {
             <p className="text-gray-500">No blog posts found.</p>
             <Link
               to="/admin/blog/create"
-              className="text-teal-600 hover:text-teal-700 font-medium"
+              className="inline-flex items-center gap-2 mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow-md"
             >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
               Create your first blog post
             </Link>
           </div>
@@ -165,30 +189,47 @@ const BlogsListPage: React.FC = () => {
                       >
                         Edit
                       </Link>
-                      {blog.is_published ? (
-                        <button
-                          onClick={() => handleUnpublish(blog.id)}
-                          disabled={unpublishBlogMutation.isPending}
-                          className="text-yellow-600 hover:text-yellow-900 disabled:opacity-50"
-                        >
-                          Unpublish
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handlePublish(blog.id)}
-                          disabled={publishBlogMutation.isPending}
-                          className="text-green-600 hover:text-green-900 disabled:opacity-50"
-                        >
-                          Publish
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleDelete(blog.id)}
-                        disabled={deleteBlogMutation.isPending}
-                        className="text-red-600 hover:text-red-900 disabled:opacity-50"
-                      >
-                        Delete
-                      </button>
+                       {blog.is_published ? (
+                         <button
+                           onClick={() => handleUnpublish(blog.id)}
+                           disabled={unpublishBlogMutation.isPending}
+                           className="text-yellow-600 hover:text-yellow-900 disabled:opacity-50"
+                         >
+                           Unpublish
+                         </button>
+                       ) : (
+                         <button
+                           onClick={() => handlePublish(blog.id)}
+                           disabled={publishBlogMutation.isPending}
+                           className="text-green-600 hover:text-green-900 disabled:opacity-50"
+                         >
+                           Publish
+                         </button>
+                       )}
+                       {blog.is_featured ? (
+                         <button
+                           onClick={() => handleUnfeature(blog.id)}
+                           disabled={unfeatureBlogMutation.isPending}
+                           className="text-purple-600 hover:text-purple-900 disabled:opacity-50"
+                         >
+                           Unfeature
+                         </button>
+                       ) : (
+                         <button
+                           onClick={() => handleFeature(blog.id)}
+                           disabled={featureBlogMutation.isPending}
+                           className="text-blue-600 hover:text-blue-900 disabled:opacity-50"
+                         >
+                           Feature
+                         </button>
+                       )}
+                       <button
+                         onClick={() => handleDelete(blog.id)}
+                         disabled={deleteBlogMutation.isPending}
+                         className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                       >
+                         Delete
+                       </button>
                     </td>
                   </tr>
                 ))}

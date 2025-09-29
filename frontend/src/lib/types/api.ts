@@ -308,7 +308,7 @@ export interface BlogPost extends BaseModel {
   title: string;
   content: string;
   slug: string;
-  image_url?: string;
+  cover_image_id?: string;
   is_active: boolean;
   is_featured: boolean;
   author_id?: number;

@@ -7,6 +7,7 @@ export interface BlogPost {
   content: string;
   summary?: string;
   slug: string;
+  cover_image_id?: string;
   author_id: number;
   is_published: boolean;
   is_active: boolean;
@@ -27,6 +28,7 @@ export interface BlogPostCreateInput {
   title: string;
   content: string;
   summary?: string;
+  cover_image_id?: string;
   tags?: string[];
   slug?: string;
 }
@@ -35,17 +37,19 @@ export interface BlogPostUpdateInput {
   title?: string;
   content?: string;
   summary?: string;
+  cover_image_id?: string;
   tags?: string[];
   is_published?: boolean;
   is_active?: boolean;
 }
 
 // Hook for fetching all blog posts
-export const useBlogs = () => {
+export const useBlogs = (includeDrafts: boolean = false) => {
   return useQuery<BlogPost[]>({
-    queryKey: ['blogs'],
+    queryKey: ['blogs', includeDrafts],
     queryFn: async () => {
-      const response = await apiClient.get<BlogPost[]>('/blog/');
+      const params = includeDrafts ? '?include_drafts=true' : '';
+      const response = await apiClient.get<BlogPost[]>(`/blog/${params}`);
       return response;
     }
   });
@@ -60,6 +64,19 @@ export const useBlogBySlug = (slug: string) => {
       return response;
     },
     enabled: !!slug,
+  });
+};
+
+// Hook for fetching related blog posts
+export const useRelatedBlogs = (currentBlogId?: number, limit: number = 3) => {
+  return useQuery<BlogPost[]>({
+    queryKey: ['blogs', 'related', currentBlogId, limit],
+    queryFn: async () => {
+      const response = await apiClient.get<BlogPost[]>(`/blog/?limit=${limit + 1}`);
+      // Filter out the current blog and limit to the desired number
+      return response.filter(blog => blog.id !== currentBlogId).slice(0, limit);
+    },
+    enabled: !!currentBlogId,
   });
 };
 
@@ -140,10 +157,42 @@ export const usePublishBlog = () => {
 // Hook for unpublishing a blog post
 export const useUnpublishBlog = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (id: number) => {
       const response = await apiClient.post(`/blog/${id}/unpublish`, {});
+      return response;
+    },
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] });
+      queryClient.invalidateQueries({ queryKey: ['blogs', id] });
+    },
+  });
+};
+
+// Hook for featuring a blog post
+export const useFeatureBlog = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiClient.post(`/blog/${id}/feature`, {});
+      return response;
+    },
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] });
+      queryClient.invalidateQueries({ queryKey: ['blogs', id] });
+    },
+  });
+};
+
+// Hook for unfeaturing a blog post
+export const useUnfeatureBlog = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiClient.post(`/blog/${id}/unfeature`, {});
       return response;
     },
     onSuccess: (_, id) => {

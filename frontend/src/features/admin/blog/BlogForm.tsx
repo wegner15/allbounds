@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
+import BlogInlineEditor from '../../../components/ui/BlogInlineEditor';
+import ImageSelector from '../../../components/ui/ImageSelector';
 import type { BlogPost, BlogPostCreateInput, BlogPostUpdateInput } from '../../../lib/hooks/useBlogs';
 
 interface BlogFormProps {
@@ -15,10 +16,12 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading })
     title: '',
     content: '',
     summary: '',
+    cover_image_id: '',
     tags: [] as string[],
     slug: ''
   });
   const [newTag, setNewTag] = useState('');
+  const [isEditing, setIsEditing] = useState(true);
 
   // Initialize form data
   useEffect(() => {
@@ -28,6 +31,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading })
         slug: initialData.slug || '',
         summary: initialData.summary || '',
         content: initialData.content || '',
+        cover_image_id: initialData.cover_image_id || '',
         tags: initialData.tags?.map(tag => tag.name) || [],
       };
       setFormData(newFormData);
@@ -70,14 +74,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading })
       .trim();
   };
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const title = e.target.value;
-    setFormData(prev => ({
-      ...prev,
-      title,
-      slug: !initialData ? generateSlug(title) : prev.slug
-    }));
-  };
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,22 +96,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading })
               </p>
             </div>
 
-            {/* Title */}
-            <div className="mb-6">
-              <label htmlFor="title" className="block text-sm font-semibold text-gray-900 mb-3">
-                Post Title *
-              </label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                value={formData.title}
-                onChange={handleTitleChange}
-                placeholder="Enter an engaging title for your blog post..."
-                className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors placeholder-gray-400"
-                required
-              />
-            </div>
+
 
             {/* Slug */}
             <div className="mb-6">
@@ -135,37 +117,66 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading })
               </p>
             </div>
 
-            {/* Summary */}
-            <div>
-              <label htmlFor="summary" className="block text-sm font-semibold text-gray-900 mb-3">
-                Post Summary
-              </label>
-              <textarea
-                id="summary"
-                name="summary"
-                value={formData.summary}
-                onChange={handleChange}
-                placeholder="Write a compelling summary that will appear in previews and search results..."
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical transition-colors placeholder-gray-400"
-              />
-              <p className="mt-2 text-sm text-gray-500">
-                A good summary helps readers understand what your post is about and improves SEO.
-              </p>
-            </div>
+             {/* Summary */}
+             <div>
+               <label htmlFor="summary" className="block text-sm font-semibold text-gray-900 mb-3">
+                 Post Summary
+               </label>
+               <textarea
+                 id="summary"
+                 name="summary"
+                 value={formData.summary}
+                 onChange={handleChange}
+                 placeholder="Write a compelling summary that will appear in previews and search results..."
+                 rows={4}
+                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical transition-colors placeholder-gray-400"
+               />
+               <p className="mt-2 text-sm text-gray-500">
+                 A good summary helps readers understand what your post is about and improves SEO.
+               </p>
+             </div>
+
+             {/* Cover Image */}
+             <div>
+               <label className="block text-sm font-semibold text-gray-900 mb-3">
+                 Cover Image
+               </label>
+               <ImageSelector
+                 initialImageId={formData.cover_image_id}
+                 onImageSelected={(imageId) => {
+                   setFormData(prev => ({
+                     ...prev,
+                     cover_image_id: imageId
+                   }));
+                 }}
+                 label="Select Cover Image"
+                 helperText="Choose an eye-catching image that represents your blog post."
+               />
+               {formData.cover_image_id && (
+                 <p className="mt-2 text-sm text-gray-600">
+                   Cover image selected (ID: {formData.cover_image_id})
+                 </p>
+               )}
+             </div>
           </div>
 
            {/* Content Editor Section */}
-           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-             <TinyMCEEditor
-               value={formData.content}
-               onChange={(content) => setFormData(prev => ({ ...prev, content }))}
-               label="Post Content"
-               placeholder="Write your blog post content here..."
-               height={500}
-               required
-             />
-           </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+              <BlogInlineEditor
+                title={formData.title}
+                content={formData.content}
+                onTitleChange={(title) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    title,
+                    slug: !initialData ? generateSlug(title) : prev.slug
+                  }));
+                }}
+                onContentChange={(content) => setFormData(prev => ({ ...prev, content }))}
+                isEditing={isEditing}
+                onEditToggle={() => setIsEditing(!isEditing)}
+              />
+            </div>
 
           {/* Tags Section */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">

@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import NewsletterForm from '../forms/NewsletterForm';
+import { useRegionsWithCountries } from '../../lib/hooks/useDestinations';
+import { useHolidayTypes } from '../../lib/hooks/useHolidayTypes';
 
 export interface FooterLink {
   label: string;
@@ -31,6 +33,45 @@ const Footer: React.FC<FooterProps> = ({
   className = '',
 }) => {
   const currentYear = new Date().getFullYear();
+
+  // Fetch dynamic data for destinations and holiday types
+  const { data: regionsWithCountries, isLoading: isLoadingRegions } = useRegionsWithCountries();
+  const { data: holidayTypesData, isLoading: isLoadingHolidayTypes } = useHolidayTypes();
+
+  // Transform API data into footer sections format
+  const dynamicSections = React.useMemo(() => {
+    const newSections = [...sections];
+
+    // Update Destinations section
+    const destinationsIndex = newSections.findIndex(section => section.title === 'Destinations');
+    if (destinationsIndex !== -1 && regionsWithCountries) {
+      const destinationLinks = regionsWithCountries.flatMap(region =>
+        region.countries.map(country => ({
+          label: country.name,
+          path: `/destinations/${country.slug}`
+        }))
+      );
+      newSections[destinationsIndex] = {
+        ...newSections[destinationsIndex],
+        links: destinationLinks
+      };
+    }
+
+    // Update Holiday Types section
+    const holidayTypesIndex = newSections.findIndex(section => section.title === 'Holiday Types');
+    if (holidayTypesIndex !== -1 && holidayTypesData) {
+      const holidayTypeLinks = holidayTypesData.map(type => ({
+        label: type.name,
+        path: `/holiday-types/${type.slug}`
+      }));
+      newSections[holidayTypesIndex] = {
+        ...newSections[holidayTypesIndex],
+        links: holidayTypeLinks
+      };
+    }
+
+    return newSections;
+  }, [sections, regionsWithCountries, holidayTypesData]);
 
   return (
     <footer className={`bg-gray-800 py-12 text-gray-300 ${className}`}>
@@ -88,13 +129,13 @@ const Footer: React.FC<FooterProps> = ({
 
           {/* Link Sections and Newsletter */}
           <div className="md:col-span-1 lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-            {sections.map((section, index) => (
+            {dynamicSections.map((section, index) => (
               <div key={index}>
                 <h3 className="text-sm font-semibold text-white tracking-wider uppercase mb-4">{section.title}</h3>
                 <ul className="space-y-2">
                   {section.links.map((link, linkIndex) => (
                     <li key={linkIndex}>
-                      <Link 
+                      <Link
                         to={link.path}
                         className="text-sm text-gray-400 hover:text-white transition-colors"
                       >

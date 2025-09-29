@@ -18,6 +18,7 @@ interface AdminLayoutProps {
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dashboard' }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['Destinations', 'Holiday Types', 'Group Trips', 'Hotels', 'Hotel Types', 'Attractions', 'Activities', 'Blog', 'Content', 'Users', 'Newsletter', 'Settings']));
   const location = useLocation();
   const { user, handleLogout } = useAuthHook();
 
@@ -51,6 +52,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
       ]
     },
     { name: 'Blog', href: '/admin/blog', icon: 'newspaper' },
+    { name: 'Content', href: '/admin/content', icon: 'document-text' },
     { name: 'Users', href: '/admin/users', icon: 'user-group' },
     { name: 'Newsletter', href: '/admin/newsletter', icon: 'mail' },
     { name: 'Settings', href: '/admin/settings', icon: 'cog' },
@@ -58,6 +60,16 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
+  };
+
+  const toggleExpanded = (itemName: string) => {
+    const newExpanded = new Set(expandedItems);
+    if (newExpanded.has(itemName)) {
+      newExpanded.delete(itemName);
+    } else {
+      newExpanded.add(itemName);
+    }
+    setExpandedItems(newExpanded);
   };
 
   // Render icon based on name
@@ -154,6 +166,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         );
+      case 'document-text':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        );
       default:
         return (
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -200,51 +218,65 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
                   </Link>
                 </div>
                 <nav className="mt-5 px-2 space-y-1">
-                  {navigation.map((item) => (
-                    <div key={item.name}>
-                      <Link
-                        to={item.href}
-                        className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${
-                          isActive(item.href)
-                            ? 'bg-teal text-white'
-                            : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                        }`}
-                      >
-                        <div className="mr-4 flex-shrink-0 h-6 w-6">
-                          {renderIcon(item.icon)}
-                        </div>
-                        {item.name}
-                        {item.subItems && (
-                          <svg 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            className="ml-auto h-5 w-5" 
-                            viewBox="0 0 20 20" 
-                            fill="currentColor"
-                          >
-                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                          </svg>
-                        )}
-                      </Link>
-                      
-                      {item.subItems && (
-                        <div className="ml-8 mt-1 space-y-1">
-                          {item.subItems.map((subItem) => (
-                            <Link
-                              key={subItem.name}
-                              to={subItem.href}
-                              className={`group flex items-center px-2 py-1 text-sm font-medium rounded-md ${
-                                location.pathname === subItem.href
-                                  ? 'bg-gray-700 text-white'
-                                  : 'text-gray-400 hover:bg-gray-700 hover:text-white'
-                              }`}
-                            >
-                              {subItem.name}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                   {navigation.map((item) => (
+                     <div key={item.name}>
+                       {item.subItems ? (
+                         <button
+                           onClick={() => toggleExpanded(item.name)}
+                           className={`group flex items-center w-full px-2 py-2 text-base font-medium rounded-md ${
+                             isActive(item.href)
+                               ? 'bg-teal text-white'
+                               : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                           }`}
+                         >
+                           <div className="mr-4 flex-shrink-0 h-6 w-6">
+                             {renderIcon(item.icon)}
+                           </div>
+                           {item.name}
+                           <svg
+                             xmlns="http://www.w3.org/2000/svg"
+                             className={`ml-auto h-5 w-5 transition-transform ${expandedItems.has(item.name) ? 'rotate-180' : ''}`}
+                             viewBox="0 0 20 20"
+                             fill="currentColor"
+                           >
+                             <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                           </svg>
+                         </button>
+                       ) : (
+                         <Link
+                           to={item.href}
+                           className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${
+                             isActive(item.href)
+                               ? 'bg-teal text-white'
+                               : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                           }`}
+                         >
+                           <div className="mr-4 flex-shrink-0 h-6 w-6">
+                             {renderIcon(item.icon)}
+                           </div>
+                           {item.name}
+                         </Link>
+                       )}
+
+                       {item.subItems && expandedItems.has(item.name) && (
+                         <div className="ml-8 mt-1 space-y-1">
+                           {item.subItems.map((subItem) => (
+                             <Link
+                               key={subItem.name}
+                               to={subItem.href}
+                               className={`group flex items-center px-2 py-1 text-sm font-medium rounded-md ${
+                                 location.pathname === subItem.href
+                                   ? 'bg-gray-700 text-white'
+                                   : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                               }`}
+                             >
+                               {subItem.name}
+                             </Link>
+                           ))}
+                         </div>
+                       )}
+                     </div>
+                   ))}
                 </nav>
               </div>
 
@@ -287,51 +319,65 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
                 </Link>
               </div>
               <nav className="mt-5 flex-1 px-2 space-y-1">
-                {navigation.map((item) => (
-                  <div key={item.name}>
-                    <Link
-                      to={item.href}
-                      className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                        isActive(item.href)
-                          ? 'bg-teal text-white'
-                          : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                      }`}
-                    >
-                      <div className="mr-3 flex-shrink-0 h-6 w-6">
-                        {renderIcon(item.icon)}
-                      </div>
-                      {item.name}
-                      {item.subItems && (
-                        <svg 
-                          xmlns="http://www.w3.org/2000/svg" 
-                          className="ml-auto h-4 w-4" 
-                          viewBox="0 0 20 20" 
-                          fill="currentColor"
-                        >
-                          <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </Link>
-                    
-                    {item.subItems && (
-                      <div className="ml-7 mt-1 space-y-1">
-                        {item.subItems.map((subItem) => (
-                          <Link
-                            key={subItem.name}
-                            to={subItem.href}
-                            className={`group flex items-center px-2 py-1 text-xs font-medium rounded-md ${
-                              location.pathname === subItem.href
-                                ? 'bg-gray-700 text-white'
-                                : 'text-gray-400 hover:bg-gray-700 hover:text-white'
-                            }`}
-                          >
-                            {subItem.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                 {navigation.map((item) => (
+                   <div key={item.name}>
+                     {item.subItems ? (
+                       <button
+                         onClick={() => toggleExpanded(item.name)}
+                         className={`group flex items-center w-full px-2 py-2 text-sm font-medium rounded-md ${
+                           isActive(item.href)
+                             ? 'bg-teal text-white'
+                             : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                         }`}
+                       >
+                         <div className="mr-3 flex-shrink-0 h-6 w-6">
+                           {renderIcon(item.icon)}
+                         </div>
+                         {item.name}
+                         <svg
+                           xmlns="http://www.w3.org/2000/svg"
+                           className={`ml-auto h-4 w-4 transition-transform ${expandedItems.has(item.name) ? 'rotate-180' : ''}`}
+                           viewBox="0 0 20 20"
+                           fill="currentColor"
+                         >
+                           <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                         </svg>
+                       </button>
+                     ) : (
+                       <Link
+                         to={item.href}
+                         className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                           isActive(item.href)
+                             ? 'bg-teal text-white'
+                             : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                         }`}
+                       >
+                         <div className="mr-3 flex-shrink-0 h-6 w-6">
+                           {renderIcon(item.icon)}
+                         </div>
+                         {item.name}
+                       </Link>
+                     )}
+
+                     {item.subItems && expandedItems.has(item.name) && (
+                       <div className="ml-7 mt-1 space-y-1">
+                         {item.subItems.map((subItem) => (
+                           <Link
+                             key={subItem.name}
+                             to={subItem.href}
+                             className={`group flex items-center px-2 py-1 text-xs font-medium rounded-md ${
+                               location.pathname === subItem.href
+                                 ? 'bg-gray-700 text-white'
+                                 : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                             }`}
+                           >
+                             {subItem.name}
+                           </Link>
+                         ))}
+                       </div>
+                     )}
+                   </div>
+                 ))}
               </nav>
             </div>
             <div className="flex-shrink-0 flex border-t border-gray-700 p-4">

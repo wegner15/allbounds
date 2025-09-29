@@ -61,8 +61,8 @@ const InspirationForNextTrip: React.FC = () => {
                 className="block group"
               >
                 <div className="relative h-64 rounded-lg overflow-hidden">
-                  <img 
-                    src={getImageUrlWithFallback(article.image_url, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80')}
+                  <img
+                    src={getImageUrlWithFallback(article.cover_image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80')}
                     alt={article.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -80,8 +80,8 @@ const InspirationForNextTrip: React.FC = () => {
                 to={`/blog/${article.slug}`}
                 className="flex items-center group"
               >
-                <img 
-                  src={getImageUrlWithFallback(article.image_url, IMAGE_VARIANTS.THUMBNAIL, 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=400&q=80')}
+                <img
+                  src={getImageUrlWithFallback(article.cover_image_id, IMAGE_VARIANTS.THUMBNAIL, 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=400&q=80')}
                   alt={article.title}
                   className="w-24 h-24 object-cover rounded-lg mr-4"
                 />

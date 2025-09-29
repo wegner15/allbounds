@@ -11,20 +11,21 @@ from app.models.user import User, Role, Permission
 from app.schemas.token import TokenPayload
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login", auto_error=False)
 
 async def get_current_user(
     db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
 ) -> User:
     """
     Get the current user from the JWT token.
-    
+
     Args:
         db: Database session
         token: JWT token
-        
+
     Returns:
         The current user
-        
+
     Raises:
         HTTPException: If the token is invalid or the user doesn't exist
     """
@@ -33,28 +34,62 @@ async def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     try:
         payload = jwt.decode(
             token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
         )
         token_data = TokenPayload(**payload)
-        
+
         if token_data.type != "access":
             raise credentials_exception
-            
+
     except JWTError:
         raise credentials_exception
-    
+
     user = db.query(User).filter(User.id == int(token_data.sub)).first()
     if not user:
         raise credentials_exception
-    
+
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user"
         )
-    
+
+    return user
+
+async def get_current_user_optional(
+    db: Session = Depends(get_db), token: Optional[str] = Depends(oauth2_scheme_optional)
+) -> Optional[User]:
+    """
+    Get the current user from the JWT token if provided, otherwise return None.
+
+    Args:
+        db: Database session
+        token: JWT token (optional)
+
+    Returns:
+        The current user or None if no token provided or invalid
+    """
+    if not token:
+        return None
+
+    try:
+        payload = jwt.decode(
+            token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
+        )
+        token_data = TokenPayload(**payload)
+
+        if token_data.type != "access":
+            return None
+
+    except JWTError:
+        return None
+
+    user = db.query(User).filter(User.id == int(token_data.sub)).first()
+    if not user or not user.is_active:
+        return None
+
     return user
 
 async def get_current_active_superuser(

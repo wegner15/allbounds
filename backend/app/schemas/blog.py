@@ -20,9 +20,10 @@ class TagResponse(TagBase):
 class BlogPostBase(BaseModel):
     title: str = Field(..., description="Title of the blog post", example="Top 10 Safari Destinations")
     content: str = Field(..., description="Content of the blog post")
-    summary: Optional[str] = Field(None, description="Summary of the blog post")
+    summary: Optional[str] = Field(None, description="Summary of the blog post", max_length=1000)
+    cover_image_id: Optional[str] = Field(None, description="Cloudflare Images ID for the cover image")
     tags: Optional[List[str]] = Field(None, description="Tags for the blog post")
-    
+
 # Schema for creating a new Blog Post
 class BlogPostCreate(BlogPostBase):
     slug: Optional[str] = Field(None, description="URL-friendly slug for the blog post")
@@ -31,8 +32,8 @@ class BlogPostCreate(BlogPostBase):
 class BlogPostUpdate(BaseModel):
     title: Optional[str] = Field(None, description="Title of the blog post")
     content: Optional[str] = Field(None, description="Content of the blog post")
-    summary: Optional[str] = Field(None, description="Summary of the blog post")
-    featured_image: Optional[str] = Field(None, description="Featured image URL for the blog post")
+    summary: Optional[str] = Field(None, description="Summary of the blog post", max_length=1000)
+    cover_image_id: Optional[str] = Field(None, description="Cloudflare Images ID for the cover image")
     tags: Optional[List[str]] = Field(None, description="Tags for the blog post")
     is_published: Optional[bool] = Field(None, description="Whether the blog post is published")
     is_active: Optional[bool] = Field(None, description="Whether the blog post is active")

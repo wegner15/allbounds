@@ -91,6 +91,7 @@ import EditExclusionPage from './features/admin/exclusions/EditExclusionPage';
 import BlogListPage from './features/public/blog/BlogListPage';
 import BlogDetailPage from './features/public/blog/BlogDetailPage';
 import ContentPage from './features/public/content/ContentPage';
+import ContactUsPage from './features/public/ContactUsPage';
 import HotelListPage from './features/public/hotels/HotelListPage';
 import HotelDetailPage from './features/public/hotels/HotelDetailPage';
 import AttractionListPage from './features/public/attractions/AttractionListPage';
@@ -269,9 +270,9 @@ const router = createBrowserRouter([
       { path: 'holiday-types/:slug', element: <HolidayTypeDetailPage /> },
       { path: 'blog', element: <BlogListPage /> },
       { path: 'blog/:slug', element: <BlogDetailPage /> },
-      { path: 'about-us', element: <ContentPage /> },
-      { path: 'contact-us', element: <ContentPage /> },
-      { path: 'careers', element: <ContentPage /> },
+       { path: 'about-us', element: <ContentPage /> },
+       { path: 'contact-us', element: <ContactUsPage /> },
+       { path: 'careers', element: <ContentPage /> },
       { path: 'terms', element: <ContentPage /> },
       { path: 'privacy', element: <ContentPage /> },
       { path: 'search', element: <SearchPage /> },

@@ -1,14 +1,39 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useRegions, useCountries } from '../../../lib/hooks/useDestinations';
+import { useRegions, useCountries, useDeleteRegion, useDeleteCountry } from '../../../lib/hooks/useDestinations';
 import CloudflareImageDisplay from '../../../components/ui/CloudflareImageDisplay';
 
 const DestinationsListPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'regions' | 'countries'>('regions');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const { data: regions, isLoading: isLoadingRegions, error: regionsError } = useRegions();
   const { data: countries, isLoading: isLoadingCountries, error: countriesError } = useCountries();
+
+  const deleteRegionMutation = useDeleteRegion();
+  const deleteCountryMutation = useDeleteCountry();
+
+  const handleDeleteRegion = async (regionId: number, regionName: string) => {
+    if (window.confirm(`Are you sure you want to delete the region "${regionName}"? This action cannot be undone.`)) {
+      try {
+        await deleteRegionMutation.mutateAsync(regionId);
+      } catch (error) {
+        console.error('Error deleting region:', error);
+        alert('Failed to delete region. Please try again.');
+      }
+    }
+  };
+
+  const handleDeleteCountry = async (countryId: number, countryName: string) => {
+    if (window.confirm(`Are you sure you want to delete the country "${countryName}"? This action cannot be undone.`)) {
+      try {
+        await deleteCountryMutation.mutateAsync(countryId);
+      } catch (error) {
+        console.error('Error deleting country:', error);
+        alert('Failed to delete country. Please try again.');
+      }
+    }
+  };
   
   // Filter destinations based on search query
   const filteredRegions = regions?.filter(region => 
@@ -167,22 +192,29 @@ const DestinationsListPage: React.FC = () => {
                           {region.is_active ? 'Active' : 'Inactive'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <Link
-                          to={`/admin/destinations/regions/${region.id}/edit`}
-                          className="text-teal hover:text-teal-dark mr-4"
-                        >
-                          Edit
-                        </Link>
-                        <Link
-                          to={`/regions/${region.slug}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gray-600 hover:text-gray-900"
-                        >
-                          View
-                        </Link>
-                      </td>
+                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                         <Link
+                           to={`/admin/destinations/regions/${region.id}/edit`}
+                           className="text-teal hover:text-teal-dark mr-4"
+                         >
+                           Edit
+                         </Link>
+                         <Link
+                           to={`/regions/${region.slug}`}
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           className="text-gray-600 hover:text-gray-900 mr-4"
+                         >
+                           View
+                         </Link>
+                         <button
+                           onClick={() => handleDeleteRegion(region.id, region.name)}
+                           className="text-red-600 hover:text-red-900"
+                           disabled={deleteRegionMutation.isPending}
+                         >
+                           {deleteRegionMutation.isPending ? 'Deleting...' : 'Delete'}
+                         </button>
+                       </td>
                     </tr>
                   ))}
                 </tbody>
@@ -282,22 +314,29 @@ const DestinationsListPage: React.FC = () => {
                           {country.is_active ? 'Active' : 'Inactive'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <Link
-                          to={`/admin/destinations/countries/${country.id}/edit`}
-                          className="text-teal hover:text-teal-dark mr-4"
-                        >
-                          Edit
-                        </Link>
-                        <Link
-                          to={`/countries/${country.slug}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gray-600 hover:text-gray-900"
-                        >
-                          View
-                        </Link>
-                      </td>
+                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                         <Link
+                           to={`/admin/destinations/countries/${country.id}/edit`}
+                           className="text-teal hover:text-teal-dark mr-4"
+                         >
+                           Edit
+                         </Link>
+                         <Link
+                           to={`/countries/${country.slug}`}
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           className="text-gray-600 hover:text-gray-900 mr-4"
+                         >
+                           View
+                         </Link>
+                         <button
+                           onClick={() => handleDeleteCountry(country.id, country.name)}
+                           className="text-red-600 hover:text-red-900"
+                           disabled={deleteCountryMutation.isPending}
+                         >
+                           {deleteCountryMutation.isPending ? 'Deleting...' : 'Delete'}
+                         </button>
+                       </td>
                     </tr>
                   ))}
                 </tbody>

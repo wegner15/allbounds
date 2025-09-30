@@ -23,15 +23,20 @@ const DestinationForm: React.FC<DestinationFormProps> = ({ type, destinationData
   const handleRegionSubmit = async (data: any) => {
     setIsSubmitting(true);
     setServerError(null);
-    
+
     try {
       if (isEdit) {
         await updateRegionMutation.mutateAsync(data);
+        // For edit, navigate immediately since we know the data is updated
+        navigate('/admin/destinations');
       } else {
+        // For create, wait a bit to ensure the list refreshes with the new data
         await createRegionMutation.mutateAsync(data);
+        // Add a small delay to ensure query invalidation completes
+        setTimeout(() => {
+          navigate('/admin/destinations');
+        }, 500);
       }
-      
-      navigate('/admin/destinations');
     } catch (error) {
       console.error('Error saving region:', error);
       setServerError('An error occurred while saving the region. Please try again.');

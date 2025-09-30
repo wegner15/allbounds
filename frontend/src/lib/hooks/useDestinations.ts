@@ -178,7 +178,7 @@ export const useCreateCountry = () => {
 // Hook for updating a country (admin only)
 export const useUpdateCountry = (id: number) => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (country: Partial<Country>) => {
       return apiClient.put<Country>(endpoints.countries.byId(id), country);
@@ -187,6 +187,36 @@ export const useUpdateCountry = (id: number) => {
       queryClient.setQueryData(['country', id], data);
       queryClient.invalidateQueries({ queryKey: ['countries'] });
       queryClient.invalidateQueries({ queryKey: ['countries', 'region', data.region_id] });
+    },
+  });
+};
+
+// Hook for deleting a region (admin only)
+export const useDeleteRegion = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      return apiClient.delete(endpoints.regions.detail(id));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['regions'] });
+      queryClient.invalidateQueries({ queryKey: ['regions', 'with-countries'] });
+    },
+  });
+};
+
+// Hook for deleting a country (admin only)
+export const useDeleteCountry = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      return apiClient.delete(endpoints.countries.byId(id));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['countries'] });
+      queryClient.invalidateQueries({ queryKey: ['regions', 'with-countries'] });
     },
   });
 };

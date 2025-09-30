@@ -126,7 +126,10 @@ export const endpoints = {
   // Regions
   regions: {
     list: () => '/regions/',
+    create: () => '/regions/',
     detail: (id: number) => `/regions/${id}`,
+    update: (id: number) => `/regions/${id}`,
+    delete: (id: number) => `/regions/${id}`,
     bySlug: (slug: string) => `/regions/slug/${slug}`,
     withCountries: () => '/regions/with-countries',
     detailWithCountries: (id: number) => `/regions/${id}/with-countries`,
@@ -149,11 +152,14 @@ export const endpoints = {
   // Countries
   countries: {
     list: () => '/countries/',
+    create: () => '/countries/',
     withHotels: () => '/countries/with-hotels',
     withPackages: () => '/countries/with-packages',
     withActivities: () => '/countries/with-activities',
     withAttractions: () => '/countries/with-attractions',
     byId: (id: number) => `/countries/${id}`,
+    update: (id: number) => `/countries/${id}`,
+    delete: (id: number) => `/countries/${id}`,
     bySlug: (slug: string) => `/countries/slug/${slug}`,
     bySlugWithDetails: (slug: string) => `/countries/slug/${slug}/details`,
     byRegion: (regionId: number) => `/countries/region/${regionId}`,
@@ -165,8 +171,11 @@ export const endpoints = {
   // Packages
   packages: {
     list: () => '/packages/',
+    create: () => '/packages/',
     featured: () => '/packages/featured',
     detail: (id: number) => `/packages/${id}`,
+    update: (id: number) => `/packages/${id}`,
+    delete: (id: number) => `/packages/${id}`,
     bySlug: (slug: string) => `/packages/slug/${slug}`,
     byCountry: (countryId: number) => `/packages/?country_id=${countryId}`,
     byHolidayType: (holidayTypeId: number) => `/packages/?holiday_type_id=${holidayTypeId}`,
@@ -176,14 +185,27 @@ export const endpoints = {
   // Hotels
   hotels: {
     list: () => '/hotels/',
+    create: () => '/hotels/',
     detail: (id: number) => `/hotels/${id}`,
+    update: (id: number) => `/hotels/${id}`,
+    delete: (id: number) => `/hotels/${id}`,
     bySlug: (slug: string) => `/hotels/slug/${slug}`,
+    detailsBySlug: (slug: string) => `/hotels/details/${slug}`,
+    relationships: (id: number) => `/hotels/${id}/relationships`,
+    assignPackage: (hotelId: number, packageId: number) => `/hotels/${hotelId}/packages/${packageId}`,
+    removePackage: (hotelId: number, packageId: number) => `/hotels/${hotelId}/packages/${packageId}`,
+    assignGroupTrip: (hotelId: number, groupTripId: number) => `/hotels/${hotelId}/group-trips/${groupTripId}`,
+    removeGroupTrip: (hotelId: number, groupTripId: number) => `/hotels/${hotelId}/group-trips/${groupTripId}`,
+    setCoverImage: (id: number) => `/hotels/${id}/cover-image`,
   },
 
   // Group Trips
   groupTrips: {
     list: () => '/group-trips/',
+    create: () => '/group-trips/',
     byId: (id: number) => `/group-trips/${id}`,
+    update: (id: number) => `/group-trips/${id}`,
+    delete: (id: number) => `/group-trips/${id}`,
     bySlug: (slug: string) => `/group-trips/slug/${slug}`,
     detailsBySlug: (slug: string) => `/group-trips/details/${slug}`,
     byCountry: (countryId: number) => `/group-trips/?country_id=${countryId}`,
@@ -214,7 +236,10 @@ export const endpoints = {
   // Attractions
   attractions: {
     list: () => '/attractions/',
+    create: () => '/attractions/',
     detail: (id: number) => `/attractions/${id}`,
+    update: (id: number) => `/attractions/${id}`,
+    delete: (id: number) => `/attractions/${id}`,
     bySlug: (slug: string) => `/attractions/slug/${slug}`,
     byCountry: (countryId: number) => `/attractions/?country_id=${countryId}`,
     trips: (id: number) => `/attractions/${id}/trips`,
@@ -224,7 +249,10 @@ export const endpoints = {
   // Holiday Types
   holidayTypes: {
     list: () => '/holiday-types/',
+    create: () => '/holiday-types/',
     detail: (id: number) => `/holiday-types/${id}`,
+    update: (id: number) => `/holiday-types/${id}`,
+    delete: (id: number) => `/holiday-types/${id}`,
     bySlug: (slug: string) => `/holiday-types/slug/${slug}`,
     coverImage: (id: number) => `/holiday-types/${id}/cover-image`,
   },

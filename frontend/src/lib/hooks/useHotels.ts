@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '../api';
+import { apiClient, endpoints } from '../api';
 
 export interface Hotel {
   id: number;
@@ -66,7 +66,7 @@ export const useHotels = () => {
   return useQuery<Hotel[]>({
     queryKey: ['hotels'],
     queryFn: async () => {
-      const response = await apiClient.get<Hotel[]>('/hotels');
+      const response = await apiClient.get<Hotel[]>(endpoints.hotels.list());
       return response;
     }
   });
@@ -77,7 +77,7 @@ export const useHotel = (id: number) => {
   return useQuery<Hotel>({
     queryKey: ['hotels', id],
     queryFn: async () => {
-      const response = await apiClient.get<Hotel>(`/hotels/${id}`);
+      const response = await apiClient.get<Hotel>(endpoints.hotels.detail(id));
       return response;
     },
     enabled: !!id,
@@ -104,7 +104,7 @@ export const useHotelBySlug = (slug: string) => {
   return useQuery<HotelDetails>({
     queryKey: ['hotels', 'slug', slug],
     queryFn: async () => {
-      const response = await apiClient.get<HotelDetails>(`/hotels/details/${slug}`);
+      const response = await apiClient.get<HotelDetails>(endpoints.hotels.detailsBySlug(slug));
       return response;
     },
     enabled: !!slug,
@@ -114,10 +114,10 @@ export const useHotelBySlug = (slug: string) => {
 // Hook for creating a new hotel
 export const useCreateHotel = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (hotel: HotelCreateInput) => {
-      const response = await apiClient.post('/hotels', hotel);
+      const response = await apiClient.post(endpoints.hotels.create(), hotel);
       return response;
     },
     onSuccess: () => {

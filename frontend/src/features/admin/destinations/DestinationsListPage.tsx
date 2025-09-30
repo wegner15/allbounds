@@ -1,11 +1,29 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useRegions, useCountries, useDeleteRegion, useDeleteCountry } from '../../../lib/hooks/useDestinations';
+import { useErrorHandler } from '../../../lib/hooks/useErrorHandler';
 import CloudflareImageDisplay from '../../../components/ui/CloudflareImageDisplay';
+import ConfirmationModal from '../../../components/ui/ConfirmationModal';
+import ErrorModal from '../../../components/ui/ErrorModal';
 
 const DestinationsListPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'regions' | 'countries'>('regions');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Modal states
+  const [deleteRegionModal, setDeleteRegionModal] = useState<{
+    isOpen: boolean;
+    regionId: number | null;
+    regionName: string;
+  }>({ isOpen: false, regionId: null, regionName: '' });
+
+  const [deleteCountryModal, setDeleteCountryModal] = useState<{
+    isOpen: boolean;
+    countryId: number | null;
+    countryName: string;
+  }>({ isOpen: false, countryId: null, countryName: '' });
+
+  const { error: errorModal, showError, hideError, handleApiError } = useErrorHandler();
 
   const { data: regions, isLoading: isLoadingRegions, error: regionsError } = useRegions();
   const { data: countries, isLoading: isLoadingCountries, error: countriesError } = useCountries();
@@ -13,25 +31,45 @@ const DestinationsListPage: React.FC = () => {
   const deleteRegionMutation = useDeleteRegion();
   const deleteCountryMutation = useDeleteCountry();
 
-  const handleDeleteRegion = async (regionId: number, regionName: string) => {
-    if (window.confirm(`Are you sure you want to delete the region "${regionName}"? This action cannot be undone.`)) {
-      try {
-        await deleteRegionMutation.mutateAsync(regionId);
-      } catch (error) {
-        console.error('Error deleting region:', error);
-        alert('Failed to delete region. Please try again.');
-      }
+  const handleDeleteRegionClick = (regionId: number, regionName: string) => {
+    setDeleteRegionModal({
+      isOpen: true,
+      regionId,
+      regionName,
+    });
+  };
+
+  const handleDeleteRegionConfirm = async () => {
+    if (!deleteRegionModal.regionId) return;
+
+    try {
+      await deleteRegionMutation.mutateAsync(deleteRegionModal.regionId);
+      setDeleteRegionModal({ isOpen: false, regionId: null, regionName: '' });
+    } catch (error) {
+      console.error('Error deleting region:', error);
+      handleApiError(error, 'Delete Failed', 'Failed to delete the region. Please try again.');
+      setDeleteRegionModal({ isOpen: false, regionId: null, regionName: '' });
     }
   };
 
-  const handleDeleteCountry = async (countryId: number, countryName: string) => {
-    if (window.confirm(`Are you sure you want to delete the country "${countryName}"? This action cannot be undone.`)) {
-      try {
-        await deleteCountryMutation.mutateAsync(countryId);
-      } catch (error) {
-        console.error('Error deleting country:', error);
-        alert('Failed to delete country. Please try again.');
-      }
+  const handleDeleteCountryClick = (countryId: number, countryName: string) => {
+    setDeleteCountryModal({
+      isOpen: true,
+      countryId,
+      countryName,
+    });
+  };
+
+  const handleDeleteCountryConfirm = async () => {
+    if (!deleteCountryModal.countryId) return;
+
+    try {
+      await deleteCountryMutation.mutateAsync(deleteCountryModal.countryId);
+      setDeleteCountryModal({ isOpen: false, countryId: null, countryName: '' });
+    } catch (error) {
+      console.error('Error deleting country:', error);
+      handleApiError(error, 'Delete Failed', 'Failed to delete the country. Please try again.');
+      setDeleteCountryModal({ isOpen: false, countryId: null, countryName: '' });
     }
   };
   
@@ -208,7 +246,7 @@ const DestinationsListPage: React.FC = () => {
                            View
                          </Link>
                          <button
-                           onClick={() => handleDeleteRegion(region.id, region.name)}
+                           onClick={() => handleDeleteRegionClick(region.id, region.name)}
                            className="text-red-600 hover:text-red-900"
                            disabled={deleteRegionMutation.isPending}
                          >
@@ -330,7 +368,7 @@ const DestinationsListPage: React.FC = () => {
                            View
                          </Link>
                          <button
-                           onClick={() => handleDeleteCountry(country.id, country.name)}
+                           onClick={() => handleDeleteCountryClick(country.id, country.name)}
                            className="text-red-600 hover:text-red-900"
                            disabled={deleteCountryMutation.isPending}
                          >
@@ -366,6 +404,38 @@ const DestinationsListPage: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* Delete Confirmation Modals */}
+      <ConfirmationModal
+        isOpen={deleteRegionModal.isOpen}
+        onClose={() => setDeleteRegionModal({ isOpen: false, regionId: null, regionName: '' })}
+        onConfirm={handleDeleteRegionConfirm}
+        title="Delete Region"
+        message={`Are you sure you want to delete the region "${deleteRegionModal.regionName}"? This action cannot be undone and may affect related countries and packages.`}
+        confirmText="Delete Region"
+        isLoading={deleteRegionMutation.isPending}
+        variant="danger"
+      />
+
+      <ConfirmationModal
+        isOpen={deleteCountryModal.isOpen}
+        onClose={() => setDeleteCountryModal({ isOpen: false, countryId: null, countryName: '' })}
+        onConfirm={handleDeleteCountryConfirm}
+        title="Delete Country"
+        message={`Are you sure you want to delete the country "${deleteCountryModal.countryName}"? This action cannot be undone and may affect related packages and activities.`}
+        confirmText="Delete Country"
+        isLoading={deleteCountryMutation.isPending}
+        variant="danger"
+      />
+
+      {/* Error Modal */}
+      <ErrorModal
+        isOpen={errorModal.isOpen}
+        onClose={hideError}
+        title={errorModal.title}
+        message={errorModal.message}
+        details={errorModal.details}
+      />
     </>
   );
 };

@@ -14,7 +14,8 @@ const createUserSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   confirm_password: z.string().min(8, 'Please confirm your password'),
-  full_name: z.string().min(2, 'Full name must be at least 2 characters').optional().or(z.literal('')),
+  first_name: z.string().min(1, 'First name is required').optional().or(z.literal('')),
+  last_name: z.string().min(1, 'Last name is required').optional().or(z.literal('')),
   is_active: z.boolean(),
   is_superuser: z.boolean(),
 }).refine(data => data.password === data.confirm_password, {
@@ -26,7 +27,8 @@ const updateUserSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters').optional().or(z.literal('')),
   confirm_password: z.string().min(8, 'Please confirm your password').optional().or(z.literal('')),
-  full_name: z.string().min(2, 'Full name must be at least 2 characters').optional().or(z.literal('')),
+  first_name: z.string().min(1, 'First name is required').optional().or(z.literal('')),
+  last_name: z.string().min(1, 'Last name is required').optional().or(z.literal('')),
   is_active: z.boolean(),
   is_superuser: z.boolean(),
 }).refine(data => !data.password || data.password === data.confirm_password, {
@@ -63,7 +65,8 @@ const UserForm: React.FC<UserFormProps> = ({ userData, isEdit = false }) => {
           email: userData.email,
           password: '',
           confirm_password: '',
-          full_name: userData.full_name || '',
+          first_name: userData.first_name || '',
+          last_name: userData.last_name || '',
           is_active: userData.is_active,
           is_superuser: userData.is_superuser,
         }
@@ -71,7 +74,8 @@ const UserForm: React.FC<UserFormProps> = ({ userData, isEdit = false }) => {
           email: '',
           password: '',
           confirm_password: '',
-          full_name: '',
+          first_name: '',
+          last_name: '',
           is_active: true,
           is_superuser: false,
         },
@@ -135,17 +139,31 @@ const UserForm: React.FC<UserFormProps> = ({ userData, isEdit = false }) => {
             />
           </div>
           
-          {/* Full Name */}
-          <div className="sm:col-span-4">
+          {/* First Name */}
+          <div className="sm:col-span-2">
             <FormInput
-              id="full_name"
+              id="first_name"
               type="text"
-              label="Full Name"
-              autoComplete="name"
-              error={errors.full_name}
+              label="First Name"
+              autoComplete="given-name"
+              error={errors.first_name}
               fullWidth
               variant="filled"
-              {...register('full_name')}
+              {...register('first_name')}
+            />
+          </div>
+
+          {/* Last Name */}
+          <div className="sm:col-span-2">
+            <FormInput
+              id="last_name"
+              type="text"
+              label="Last Name"
+              autoComplete="family-name"
+              error={errors.last_name}
+              fullWidth
+              variant="filled"
+              {...register('last_name')}
             />
           </div>
           

@@ -5,12 +5,23 @@ import { useUsers } from '../../../lib/hooks/useUsers';
 const UsersListPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { data: users, isLoading, error } = useUsers();
-  
+
+  // Helper function to get full name
+  const getFullName = (user: any) => {
+    if (user.first_name && user.last_name) {
+      return `${user.first_name} ${user.last_name}`;
+    }
+    if (user.first_name) return user.first_name;
+    if (user.last_name) return user.last_name;
+    return null;
+  };
+
   // Filter users based on search query
-  const filteredUsers = users?.filter(user => 
-    user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredUsers = users?.filter(user => {
+    const fullName = getFullName(user);
+    return user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           (fullName && fullName.toLowerCase().includes(searchQuery.toLowerCase()));
+  });
 
   return (
     <>
@@ -75,60 +86,77 @@ const UsersListPage: React.FC = () => {
         ) : filteredUsers && filteredUsers.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    User
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Role
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th scope="col" className="relative px-6 py-3">
-                    <span className="sr-only">Actions</span>
-                  </th>
-                </tr>
-              </thead>
+               <thead className="bg-gray-50">
+                 <tr>
+                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                     User
+                   </th>
+                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                     Email
+                   </th>
+                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                     Role
+                   </th>
+                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                     Status
+                   </th>
+                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                     Created
+                   </th>
+                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                     Last Login
+                   </th>
+                   <th scope="col" className="relative px-6 py-3">
+                     <span className="sr-only">Actions</span>
+                   </th>
+                 </tr>
+               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredUsers.map((user) => (
                   <tr key={user.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                            <span className="text-lg font-medium text-gray-600">
-                              {user.full_name ? user.full_name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{user.full_name || 'No name'}</div>
-                          <div className="text-sm text-gray-500">Created: {new Date(user.created_at).toLocaleDateString()}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{user.email}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        user.is_superuser ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
-                      }`}>
-                        {user.is_superuser ? 'Admin' : 'User'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        user.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {user.is_active ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
+                     <td className="px-6 py-4 whitespace-nowrap">
+                       <div className="flex items-center">
+                         <div className="flex-shrink-0 h-10 w-10">
+                           <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                             <span className="text-lg font-medium text-gray-600">
+                               {getFullName(user) ? getFullName(user).charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
+                             </span>
+                           </div>
+                         </div>
+                         <div className="ml-4">
+                           <div className="text-sm font-medium text-gray-900">{getFullName(user) || 'No name'}</div>
+                         </div>
+                       </div>
+                     </td>
+                     <td className="px-6 py-4 whitespace-nowrap">
+                       <div className="text-sm text-gray-900">{user.email}</div>
+                     </td>
+                     <td className="px-6 py-4 whitespace-nowrap">
+                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                         user.is_superuser ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                       }`}>
+                         {user.is_superuser ? 'Admin' : 'User'}
+                       </span>
+                     </td>
+                     <td className="px-6 py-4 whitespace-nowrap">
+                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                         user.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                       }`}>
+                         {user.is_active ? 'Active' : 'Inactive'}
+                       </span>
+                     </td>
+                     <td className="px-6 py-4 whitespace-nowrap">
+                       <div className="text-sm text-gray-900">{new Date(user.created_at).toLocaleDateString()}</div>
+                       <div className="text-sm text-gray-500">{new Date(user.created_at).toLocaleTimeString()}</div>
+                     </td>
+                     <td className="px-6 py-4 whitespace-nowrap">
+                       <div className="text-sm text-gray-900">
+                         {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
+                       </div>
+                       <div className="text-sm text-gray-500">
+                         {user.last_login ? new Date(user.last_login).toLocaleTimeString() : ''}
+                       </div>
+                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <Link
                         to={`/admin/users/${user.id}/edit`}

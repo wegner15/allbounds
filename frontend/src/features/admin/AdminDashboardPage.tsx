@@ -13,6 +13,9 @@ const AdminDashboardPage: React.FC = () => {
     { name: 'Holiday Types', value: statsData.holiday_types.toString(), icon: 'tag', href: '/admin/holiday-types' },
     { name: 'Packages', value: statsData.packages.toString(), icon: 'package', href: '/admin/packages' },
     { name: 'Group Trips', value: statsData.group_trips.toString(), icon: 'users', href: '/admin/group-trips' },
+    { name: 'Package Bookings', value: statsData.package_bookings.toString(), icon: 'package', href: '/admin/bookings/packages' },
+    { name: 'Group Trip Bookings', value: statsData.group_trip_bookings.toString(), icon: 'users', href: '/admin/bookings/group-trips' },
+    { name: 'Inquiries', value: statsData.inquiries.toString(), icon: 'message', href: '/admin/bookings/inquiries' },
   ] : [];
 
   // Recent activity from API
@@ -28,8 +31,7 @@ const AdminDashboardPage: React.FC = () => {
   const quickActions = [
     { name: 'Add New Package', href: '/admin/packages/new', icon: 'plus-circle' },
     { name: 'Add New Group Trip', href: '/admin/group-trips/new', icon: 'plus-circle' },
-    { name: 'Upload Media', href: '/admin/media/upload', icon: 'upload' },
-    { name: 'Create Blog Post', href: '/admin/blog/new', icon: 'pencil' },
+    { name: 'Create Blog Post', href: '/admin/blog/create', icon: 'pencil' },
   ];
 
   // Render icon based on name
@@ -65,16 +67,16 @@ const AdminDashboardPage: React.FC = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         );
-      case 'upload':
-        return (
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-          </svg>
-        );
       case 'pencil':
         return (
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+        );
+      case 'message':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
         );
       default:
@@ -119,7 +121,7 @@ const AdminDashboardPage: React.FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-6">
         {stats.map((stat) => (
           <Link
             key={stat.name}
@@ -173,7 +175,7 @@ const AdminDashboardPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent activity */}
         <div className="bg-white shadow rounded-lg p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
@@ -224,6 +226,70 @@ const AdminDashboardPage: React.FC = () => {
               className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
             >
               View all activity
+            </Link>
+          </div>
+        </div>
+
+        {/* Recent bookings */}
+        <div className="bg-white shadow rounded-lg p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Bookings</h3>
+          <div className="flow-root">
+            <ul className="-mb-8">
+              {statsData?.recent_bookings.map((booking, bookingIdx) => (
+                <li key={booking.id}>
+                  <div className="relative pb-8">
+                    {bookingIdx !== (statsData?.recent_bookings.length || 0) - 1 ? (
+                      <span
+                        className="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200"
+                        aria-hidden="true"
+                      />
+                    ) : null}
+                    <div className="relative flex items-start space-x-3">
+                      <div className="relative">
+                        <div className={`h-10 w-10 rounded-full flex items-center justify-center ring-8 ring-white ${
+                          booking.booking_type === 'package' ? 'bg-blue-500' :
+                          booking.booking_type === 'group_trip' ? 'bg-green-500' : 'bg-gray-500'
+                        }`}>
+                          <svg className="h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div>
+                          <div className="text-sm">
+                            <span className="font-medium text-gray-900">
+                              {booking.contact_name}
+                            </span>{' '}
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                              booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                              booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {booking.status}
+                            </span>
+                          </div>
+                          <p className="mt-0.5 text-sm text-gray-500">
+                            {booking.booking_type.replace('_', ' ')} • {new Date(booking.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="mt-2 text-sm text-gray-700">
+                          <p>{booking.contact_email}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="mt-6">
+            <Link
+              to="/admin/bookings/packages"
+              className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            >
+              View all bookings
             </Link>
           </div>
         </div>

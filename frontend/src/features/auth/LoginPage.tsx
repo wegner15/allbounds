@@ -33,12 +33,7 @@ const LoginPage: React.FC = () => {
   });
   
   const onSubmit = async (data: LoginFormData) => {
-    // For admin users, explicitly set the redirect path to the admin dashboard
-    if (data.email === 'admin@allbounds.com') {
-      await handleLogin(data.email, data.password, '/admin/dashboard');
-    } else {
-      await handleLogin(data.email, data.password);
-    }
+    await handleLogin(data.email, data.password);
   };
   
   return (

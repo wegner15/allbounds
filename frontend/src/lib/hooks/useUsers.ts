@@ -27,7 +27,8 @@ export const useUser = (id: number) => {
 export interface CreateUserData {
   email: string;
   password: string;
-  full_name?: string;
+  first_name?: string;
+  last_name?: string;
   is_active: boolean;
   is_superuser: boolean;
 }
@@ -49,7 +50,8 @@ export const useCreateUser = () => {
 export interface UpdateUserData {
   email?: string;
   password?: string;
-  full_name?: string;
+  first_name?: string;
+  last_name?: string;
   is_active?: boolean;
   is_superuser?: boolean;
 }

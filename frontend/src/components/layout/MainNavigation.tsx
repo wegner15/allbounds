@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useRegionsWithCountries } from '../../lib/hooks/useDestinations';
 import { useHolidayTypes } from '../../lib/hooks/useHolidayTypes';
+import { useAuth } from '../../lib/contexts/AuthContext';
+import useAuthHook from '../../lib/hooks/useAuthHook';
 import type { RegionWithCountries } from '../../lib/types/api';
 
 // Types for navigation items
@@ -30,6 +32,10 @@ const MainNavigation: React.FC = () => {
   const [holidayTypesOpen, setHolidayTypesOpen] = useState(false);
   const destinationsRef = useRef<HTMLDivElement>(null);
   const holidayTypesRef = useRef<HTMLDivElement>(null);
+
+  // Auth hooks
+  const { user } = useAuth();
+  const { handleLogout } = useAuthHook();
 
   // Navigation items
   const navItems: NavItem[] = [
@@ -250,12 +256,21 @@ const MainNavigation: React.FC = () => {
               >
                 Contact Us
               </Link>
-              <Link
-                to="/login"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded text-charcoal bg-white hover:bg-gray-50 transition-colors"
-              >
-                Sign In / Register
-              </Link>
+              {user ? (
+                <button
+                  onClick={handleLogout}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded text-charcoal bg-white hover:bg-gray-50 transition-colors"
+                >
+                  Logout
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded text-charcoal bg-white hover:bg-gray-50 transition-colors"
+                >
+                  Sign In / Register
+                </Link>
+              )}
               
               {/* Mobile menu button */}
               <button className="md:hidden p-2 rounded-md text-charcoal hover:bg-gray-100">

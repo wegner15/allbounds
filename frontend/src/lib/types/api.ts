@@ -359,9 +359,11 @@ export interface MediaAsset extends BaseModel {
 // User types
 export interface User extends BaseModel {
   email: string;
+  first_name?: string;
+  last_name?: string;
   is_active: boolean;
   is_superuser: boolean;
-  full_name?: string;
+  last_login?: string;
 }
 
 // Review types
@@ -482,6 +484,15 @@ export interface RecentActivityItem {
   created_at: string;
 }
 
+export interface RecentBookingItem {
+  id: number;
+  booking_type: string;
+  contact_name: string;
+  contact_email: string;
+  status: string;
+  created_at: string;
+}
+
 export interface Stats {
   destinations: number;
   holiday_types: number;
@@ -490,5 +501,9 @@ export interface Stats {
   activities: number;
   hotels: number;
   attractions: number;
+  package_bookings: number;
+  group_trip_bookings: number;
+  inquiries: number;
   recent_activity: RecentActivityItem[];
+  recent_bookings: RecentBookingItem[];
 }

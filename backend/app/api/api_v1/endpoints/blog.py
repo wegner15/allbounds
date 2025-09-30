@@ -7,6 +7,7 @@ from app.models.blog import BlogPost
 from app.models.user import User
 from app.schemas.blog import BlogPostResponse, BlogPostCreate, BlogPostUpdate
 from app.services.blog import blog_service
+from app.services.audit import create_audit_log
 from app.auth.dependencies import get_current_active_superuser, get_current_user, get_current_user_optional
 from app.utils.slug import create_slug
 
@@ -92,6 +93,16 @@ def create_blog_post(
         slug=slug,
         tags=blog_post_in.tags
     )
+
+    # Create audit log
+    create_audit_log(
+        db=db,
+        user_id=current_user.id,
+        action="create",
+        entity_type="blog_post",
+        entity_id=blog_post.id
+    )
+
     return blog_post
 
 @router.put("/{post_id}", response_model=BlogPostResponse)
@@ -119,6 +130,16 @@ def update_blog_post(
         is_published=blog_post_in.is_published,
         is_active=blog_post_in.is_active
     )
+
+    # Create audit log
+    create_audit_log(
+        db=db,
+        user_id=current_user.id,
+        action="update",
+        entity_type="blog_post",
+        entity_id=post_id
+    )
+
     return blog_post
 
 @router.delete("/{post_id}", response_model=BlogPostResponse)
@@ -135,6 +156,16 @@ def delete_blog_post(
         raise HTTPException(status_code=404, detail="Blog post not found")
     
     blog_post = blog_service.delete_blog_post(db, post_id=post_id)
+
+    # Create audit log
+    create_audit_log(
+        db=db,
+        user_id=current_user.id,
+        action="delete",
+        entity_type="blog_post",
+        entity_id=post_id
+    )
+
     return blog_post
 
 @router.post("/{post_id}/publish", response_model=BlogPostResponse)
@@ -151,6 +182,16 @@ def publish_blog_post(
         raise HTTPException(status_code=404, detail="Blog post not found")
     
     blog_post = blog_service.publish_blog_post(db, post_id=post_id)
+
+    # Create audit log
+    create_audit_log(
+        db=db,
+        user_id=current_user.id,
+        action="publish",
+        entity_type="blog_post",
+        entity_id=post_id
+    )
+
     return blog_post
 
 @router.post("/{post_id}/unpublish", response_model=BlogPostResponse)
@@ -167,6 +208,16 @@ def unpublish_blog_post(
         raise HTTPException(status_code=404, detail="Blog post not found")
 
     blog_post = blog_service.unpublish_blog_post(db, post_id=post_id)
+
+    # Create audit log
+    create_audit_log(
+        db=db,
+        user_id=current_user.id,
+        action="unpublish",
+        entity_type="blog_post",
+        entity_id=post_id
+    )
+
     return blog_post
 
 @router.post("/{post_id}/feature", response_model=BlogPostResponse)

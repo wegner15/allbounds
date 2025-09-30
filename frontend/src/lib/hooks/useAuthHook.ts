@@ -13,20 +13,11 @@ export const useAuthHook = () => {
     setIsSubmitting(true);
     try {
       await auth.login(email, password);
-      
-      // After successful login, check if the user is an admin
-      // The auth.user should now be populated after the login call
-      let targetPath;
-      
-      if (auth.user?.is_superuser) {
-        // Admin users always go to the dashboard
-        targetPath = '/admin/dashboard';
-        console.log('Admin user detected, redirecting to dashboard');
-      } else {
-        // For non-admin users, use the normal redirection logic
-        targetPath = location.state?.from?.pathname || redirectPath || '/';
-      }
-      
+
+      // After successful login, redirect to admin dashboard
+      const targetPath = '/admin/dashboard';
+      console.log('Login successful, redirecting to dashboard');
+
       // Navigate to the target path
       navigate(targetPath, { replace: true });
       return true;

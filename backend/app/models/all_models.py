@@ -13,7 +13,11 @@ from app.models.holiday_type import HolidayType
 from app.models.attraction import Attraction
 from app.models.accommodation import Accommodation
 from app.models.hotel import Hotel
-from app.models.package import Package
+from app.models.hotel_type import HotelType
+from app.models.activity import Activity
+from app.models.package import Package, PackageHolidayType
+from app.models.package_price_chart import PackagePriceChart
+from app.models.inclusion_exclusion import Inclusion, Exclusion
 from app.models.group_trip import GroupTrip, GroupTripDeparture
 from app.models.review import Review
 from app.models.blog import BlogPost, Tag
@@ -24,15 +28,20 @@ from app.models.seo import SeoMeta
 from app.models.itinerary import ItineraryItem, ItineraryActivity
 from app.models.booking import Booking, BookingTraveler
 from app.models.inquiry import Inquiry
+from app.models.country_visit_info import CountryVisitInfo
+from app.models.newsletter import NewsletterSubscription
 
 # This ensures all models are imported in the correct order
 __all__ = [
     'User', 'Role', 'Permission',
     'Region', 'Country', 'HolidayType',
-    'Attraction', 'Accommodation', 'Hotel', 'Package',
+    'Attraction', 'Accommodation', 'Hotel', 'HotelType', 'Activity',
+    'Package', 'PackageHolidayType', 'PackagePriceChart',
+    'Inclusion', 'Exclusion',
     'GroupTrip', 'GroupTripDeparture',
     'Review', 'BlogPost', 'Tag', 'ContentPage',
     'MediaAsset', 'AuditLog', 'SeoMeta',
     'ItineraryItem', 'ItineraryActivity',
     'Booking', 'BookingTraveler', 'Inquiry',
+    'CountryVisitInfo', 'NewsletterSubscription',
 ]

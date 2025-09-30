@@ -11,7 +11,7 @@ from sqlalchemy import pool
 from alembic import context
 
 # Import all models for Alembic to detect
-from app.models import *
+from app.models.all_models import *
 
 
 from app.db.database import Base

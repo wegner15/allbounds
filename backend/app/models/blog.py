@@ -31,9 +31,9 @@ class BlogPost(Base):
 
     # Relationships
     # Remove back_populates to break circular dependencies
-    author = relationship("User")
-    tags = relationship("Tag", secondary=blog_post_tags)
-    media_assets = relationship("MediaAsset", secondary="blog_post_media")
+    author = relationship("User", overlaps="blog_posts")
+    tags = relationship("Tag", secondary=blog_post_tags, overlaps="blog_posts")
+    media_assets = relationship("MediaAsset", secondary="blog_post_media", overlaps="blog_posts")
     seo_meta = relationship("SeoMeta", uselist=False)
 
 class Tag(Base):
@@ -46,4 +46,4 @@ class Tag(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     # Relationships
-    blog_posts = relationship("BlogPost", secondary=blog_post_tags)
+    blog_posts = relationship("BlogPost", secondary=blog_post_tags, overlaps="tags")

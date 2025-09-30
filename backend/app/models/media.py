@@ -67,11 +67,11 @@ class MediaAsset(Base):
 
     # Relationships
     # Remove back_populates to break circular dependencies
-    created_by = relationship("User")
+    created_by = relationship("User", overlaps="media_assets")
     attractions = relationship("Attraction", secondary=attraction_media)
     accommodations = relationship("Accommodation", secondary=accommodation_media)
     hotels = relationship("Hotel", secondary="hotel_media", back_populates="media_assets")
     activities = relationship("Activity", secondary="activity_media", back_populates="media_assets")
     packages = relationship("Package", secondary=package_media)
     group_trips = relationship("GroupTrip", secondary=group_trip_media)
-    blog_posts = relationship("BlogPost", secondary=blog_post_media)
+    blog_posts = relationship("BlogPost", secondary=blog_post_media, overlaps="media_assets")

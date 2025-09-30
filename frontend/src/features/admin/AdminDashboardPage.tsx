@@ -1,26 +1,28 @@
 import React from 'react';
 import { useAuth } from '../../lib/contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import { useStats } from '../../lib/hooks/useStats';
 
 const AdminDashboardPage: React.FC = () => {
   const { user } = useAuth();
+  const { data: statsData, isLoading: statsLoading, error: statsError } = useStats();
 
-  // Sample stats for dashboard
-  const stats = [
-    { name: 'Total Destinations', value: '42', icon: 'globe', href: '/admin/destinations' },
-    { name: 'Holiday Types', value: '15', icon: 'tag', href: '/admin/holiday-types' },
-    { name: 'Packages', value: '78', icon: 'package', href: '/admin/packages' },
-    { name: 'Group Trips', value: '24', icon: 'users', href: '/admin/group-trips' },
-  ];
+  // Stats for dashboard
+  const stats = statsData ? [
+    { name: 'Total Destinations', value: statsData.destinations.toString(), icon: 'globe', href: '/admin/destinations' },
+    { name: 'Holiday Types', value: statsData.holiday_types.toString(), icon: 'tag', href: '/admin/holiday-types' },
+    { name: 'Packages', value: statsData.packages.toString(), icon: 'package', href: '/admin/packages' },
+    { name: 'Group Trips', value: statsData.group_trips.toString(), icon: 'users', href: '/admin/group-trips' },
+  ] : [];
 
-  // Recent activity (placeholder data)
-  const recentActivity = [
-    { id: 1, action: 'Created new package', user: 'Admin User', time: '2 hours ago', target: 'Kenya Safari Adventure' },
-    { id: 2, action: 'Updated destination', user: 'Admin User', time: '3 hours ago', target: 'Tanzania' },
-    { id: 3, action: 'Published blog post', user: 'Content Editor', time: '5 hours ago', target: 'Top 10 Safari Destinations' },
-    { id: 4, action: 'Added new group trip', user: 'Admin User', time: '1 day ago', target: 'Serengeti Migration Special' },
-    { id: 5, action: 'Updated holiday type', user: 'Content Editor', time: '2 days ago', target: 'Beach Holidays' },
-  ];
+  // Recent activity from API
+  const recentActivity = statsData?.recent_activity.map(activity => ({
+    id: activity.id,
+    action: `${activity.action.charAt(0).toUpperCase() + activity.action.slice(1)} ${activity.entity_type.replace('_', ' ')}`,
+    user: activity.user_name,
+    time: new Date(activity.created_at).toLocaleString(),
+    target: `${activity.entity_type} #${activity.entity_id}`
+  })) || [];
 
   // Quick actions
   const quickActions = [
@@ -83,6 +85,26 @@ const AdminDashboardPage: React.FC = () => {
         );
     }
   };
+
+  if (statsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (statsError) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+        <h3 className="text-lg font-medium text-red-800">Error loading dashboard</h3>
+        <p className="mt-2 text-red-700">Unable to load dashboard statistics. Please try again later.</p>
+      </div>
+    );
+  }
 
   return (
     <>

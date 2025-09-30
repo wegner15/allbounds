@@ -35,4 +35,4 @@ class Review(Base):
     hotel = relationship("Hotel", back_populates="reviews")
     attraction = relationship("Attraction", back_populates="reviews")
     # Remove back_populates to break circular dependencies
-    approved_by = relationship("User")
+    approved_by = relationship("User", overlaps="approved_reviews")

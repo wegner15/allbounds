@@ -52,8 +52,8 @@ class Role(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     # Relationships
-    users = relationship("User", secondary=user_roles)
-    permissions = relationship("Permission", secondary=role_permissions)
+    users = relationship("User", secondary=user_roles, overlaps="roles")
+    permissions = relationship("Permission", secondary=role_permissions, overlaps="permissions")
 
 class Permission(Base):
     __tablename__ = "permissions"
@@ -65,4 +65,4 @@ class Permission(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     # Relationships
-    roles = relationship("Role", secondary=role_permissions)
+    roles = relationship("Role", secondary=role_permissions, overlaps="permissions")

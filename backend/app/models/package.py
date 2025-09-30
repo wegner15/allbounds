@@ -48,9 +48,10 @@ class Package(Base):
     exclusion_items = relationship("Exclusion", secondary="package_exclusions", back_populates="packages")
     
     # Relationship with Itinerary
-    itinerary_items = relationship("ItineraryItem", 
+    itinerary_items = relationship("ItineraryItem",
                                    primaryjoin="and_(Package.id == foreign(ItineraryItem.entity_id), ItineraryItem.entity_type == 'package')",
-                                   cascade="all, delete-orphan")
+                                   cascade="all, delete-orphan",
+                                   overlaps="itinerary_items")
     
     # Relationship with Price Charts
     price_charts = relationship("PackagePriceChart", back_populates="package", cascade="all, delete-orphan")

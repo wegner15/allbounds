@@ -473,9 +473,22 @@ export interface InquiryCreate {
 }
 
 // Stats types
+export interface RecentActivityItem {
+  id: number;
+  action: string;
+  entity_type: string;
+  entity_id: number;
+  user_name: string;
+  created_at: string;
+}
+
 export interface Stats {
+  destinations: number;
+  holiday_types: number;
+  packages: number;
   group_trips: number;
   activities: number;
   hotels: number;
   attractions: number;
+  recent_activity: RecentActivityItem[];
 }

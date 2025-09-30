@@ -19,4 +19,4 @@ class AuditLog(Base):
 
     # Relationships
     # Remove back_populates to break circular dependencies
-    user = relationship("User")
+    user = relationship("User", overlaps="audit_logs")

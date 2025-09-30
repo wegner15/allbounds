@@ -10,7 +10,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sqlalchemy.orm import Session
 from app.db.database import SessionLocal
-from app.models.user import User
+# Import all models to ensure relationships are properly resolved
+from app.models.all_models import *
 from app.auth.security import get_password_hash
 from app.services.auth import auth_service
 from app.schemas.user import UserCreate

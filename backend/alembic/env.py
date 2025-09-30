@@ -11,29 +11,8 @@ from sqlalchemy import pool
 from alembic import context
 
 # Import all models for Alembic to detect
-from app.models.hotel_type import HotelType
-from app.models.region import Region
-from app.models.country import Country
-from app.models.activity import Activity
-from app.models.attraction import Attraction
-from app.models.accommodation import Accommodation
-from app.models.hotel import Hotel
-from app.models.package import Package
-from app.models.group_trip import GroupTrip, GroupTripDeparture
-from app.models.holiday_type import HolidayType
-from app.models.blog import BlogPost, Tag
-from app.models.media import MediaAsset, attraction_media, package_media, group_trip_media, accommodation_media, blog_post_media
-from app.models.review import Review
-from app.models.seo import SeoMeta
-from app.models.user import User, Role, Permission
-from app.models.audit import AuditLog
-from app.models.itinerary import ItineraryItem, ItineraryActivity
-from app.models.newsletter import NewsletterSubscription
-from app.models.country_visit_info import CountryVisitInfo
-from app.models.inclusion_exclusion import Inclusion, Exclusion, package_inclusions, package_exclusions, group_trip_inclusions, group_trip_exclusions
-from app.models.package_price_chart import PackagePriceChart
-from app.models.booking import Booking, BookingTraveler
-from app.models.inquiry import Inquiry
+from app.models import *
+
 
 from app.db.database import Base
 from app.core.config import settings

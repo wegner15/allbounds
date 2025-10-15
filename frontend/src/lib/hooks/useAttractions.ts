@@ -89,7 +89,7 @@ export const useCreateAttraction = () => {
   
   return useMutation({
     mutationFn: async (attraction: AttractionCreateInput) => {
-      const response = await apiClient.post('/attractions', attraction);
+      const response = await apiClient.post('/attractions/', attraction);
       return response;
     },
     onSuccess: () => {

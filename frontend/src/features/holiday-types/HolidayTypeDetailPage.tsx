@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import DOMPurify from 'dompurify';
 import CloudflareImage from '../../components/ui/CloudflareImage';
 
 // API Hooks
@@ -402,7 +403,10 @@ const HolidayTypeDetailPage: React.FC = () => {
                         </div>
                       </div>
 
-                      <p className="text-gray-600 mb-4 line-clamp-2">{pkg.summary || pkg.description}</p>
+                      <div 
+                        className="text-gray-600 mb-4 line-clamp-2"
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pkg.summary || pkg.description || '') }}
+                      />
 
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4 text-sm text-gray-600">
@@ -494,7 +498,10 @@ const HolidayTypeDetailPage: React.FC = () => {
                         {trip.name}
                       </h3>
 
-                      <p className="text-gray-600 mb-4 line-clamp-2">{trip.description}</p>
+                      <div 
+                        className="text-gray-600 mb-4 line-clamp-2"
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trip.description || '') }}
+                      />
 
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-1 text-sm text-gray-600">

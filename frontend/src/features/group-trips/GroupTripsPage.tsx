@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
+import DOMPurify from 'dompurify';
 
 // Components
 import Button from '../../components/ui/Button';
@@ -9,7 +10,6 @@ import GroupTripCarousel from '../../components/ui/GroupTripCarousel';
 
 // Utils
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils';
-import { cleanTextForDisplay } from '../../lib/utils/text';
 
 // API Hooks
 import { useGroupTrips } from '../../lib/hooks/useGroupTrips';
@@ -296,7 +296,10 @@ const GroupTripsPage: React.FC = () => {
                              {trip.name}
                            </h3>
                          </Link>
-                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">{cleanTextForDisplay(trip.summary || trip.description || '')}</p>
+                          <div 
+                            className="text-gray-600 text-sm mb-3 line-clamp-2"
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trip.summary || trip.description || '') }}
+                          />
 
                           {/* Prominent Next Departure */}
                           {trip.departures && trip.departures.length > 0 && (

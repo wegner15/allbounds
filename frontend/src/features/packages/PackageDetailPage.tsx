@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAppStore } from '../../lib/store';
 import { Helmet } from 'react-helmet-async';
+import DOMPurify from 'dompurify';
 import { usePackageDetailsBySlug } from '../../lib/hooks/usePackages';
 
 // Components
@@ -143,7 +144,10 @@ const PackageDetailPage: React.FC = () => {
               
                {packageDetail.summary && (
                  <div className="mb-4">
-                   <p className="text-lg text-gray-700 leading-relaxed">{packageDetail.summary}</p>
+                   <div 
+                     className="text-lg text-gray-700 leading-relaxed"
+                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(packageDetail.summary) }}
+                   />
                  </div>
                )}
 

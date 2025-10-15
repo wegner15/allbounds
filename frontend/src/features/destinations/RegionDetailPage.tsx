@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
+import DOMPurify from 'dompurify';
 
 // Components
 import Breadcrumb from '../../components/layout/Breadcrumb';
@@ -257,7 +258,10 @@ const RegionDetailPage: React.FC = () => {
                                <span className="text-sm text-gray-600">{pkg.duration_days} days</span>
                              </div>
                              {pkg.summary && (
-                               <p className="text-gray-600 text-sm line-clamp-2">{pkg.summary}</p>
+                               <div 
+                                 className="text-gray-600 text-sm line-clamp-2"
+                                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pkg.summary) }}
+                               />
                              )}
                              <div className="mt-3 flex justify-between items-center">
                                <span className="text-primary font-medium text-sm">View Package</span>
@@ -311,7 +315,10 @@ const RegionDetailPage: React.FC = () => {
                                <span className="text-sm text-gray-600">{trip.duration_days} days</span>
                              </div>
                              {trip.summary && (
-                               <p className="text-gray-600 text-sm line-clamp-2">{trip.summary}</p>
+                               <div 
+                                 className="text-gray-600 text-sm line-clamp-2"
+                                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trip.summary) }}
+                               />
                              )}
                              <div className="mt-3 flex justify-between items-center">
                                <span className="text-primary font-medium text-sm">View Group Trip</span>

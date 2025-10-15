@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
+import DOMPurify from 'dompurify';
 
 // Components
 import Breadcrumb from '../../components/layout/Breadcrumb';
@@ -84,7 +85,10 @@ const CountryDetailPage: React.FC = () => {
           <div className="absolute bottom-0 left-0 right-0 p-8">
             <div className="container mx-auto">
               <h1 className="text-4xl md:text-6xl font-playfair text-white mb-4">{country.name}</h1>
-              <p className="text-xl text-white/90 max-w-2xl">{country.description}</p>
+              <div 
+                className="text-xl text-white/90 max-w-2xl"
+                dangerouslySetInnerHTML={{ __html: country.description || '' }}
+              />
             </div>
           </div>
         </div>
@@ -168,7 +172,10 @@ const CountryDetailPage: React.FC = () => {
                             <h3 className="font-semibold text-charcoal group-hover:text-hover transition-colors mb-1">
                               {pkg.name}
                             </h3>
-                            <p className="text-sm text-gray-600 mb-2 line-clamp-2">{pkg.description}</p>
+                            <div 
+                              className="text-sm text-gray-600 mb-2 line-clamp-2"
+                              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pkg.description || '') }}
+                            />
                             <div className="flex justify-between items-center">
                               <span className="text-sm text-gray-500">{pkg.duration_days} days</span>
                               <span className="font-bold text-primary">From ${pkg.price}</span>
@@ -203,7 +210,10 @@ const CountryDetailPage: React.FC = () => {
                             <h3 className="font-semibold text-charcoal group-hover:text-hover transition-colors mb-1">
                               {trip.name}
                             </h3>
-                            <p className="text-sm text-gray-600 mb-2 line-clamp-2">{trip.description}</p>
+                            <div 
+                              className="text-sm text-gray-600 mb-2 line-clamp-2"
+                              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trip.description || '') }}
+                            />
                             
                             {/* Trip Details */}
                             <div className="space-y-1 mb-2">

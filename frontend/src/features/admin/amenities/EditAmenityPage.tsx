@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import AmenityForm from './AmenityForm';
 import { useAmenity, useUpdateAmenity } from '../../../lib/hooks/useAmenities';
+import ErrorAlert from '../../../components/ui/ErrorAlert';
 import type { AmenityUpdate } from '../../../lib/types/api';
 
 const EditAmenityPage: React.FC = () => {
@@ -12,16 +13,20 @@ const EditAmenityPage: React.FC = () => {
   
   const { data: amenity, isLoading } = useAmenity(amenityId);
   const updateAmenity = useUpdateAmenity();
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (data: AmenityUpdate) => {
     if (!amenityId) return;
     
+    setError(null);
     try {
       await updateAmenity.mutateAsync({ id: amenityId, data });
       toast.success('Amenity updated successfully');
       navigate('/admin/amenities');
     } catch (error: any) {
-      toast.error(error?.response?.data?.detail || 'Failed to update amenity');
+      const errorMessage = error?.response?.data?.detail || error?.message || 'Failed to update amenity. Please try again.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -53,6 +58,17 @@ const EditAmenityPage: React.FC = () => {
           Update amenity details.
         </p>
       </div>
+      
+      {error && (
+        <div className="mb-6">
+          <ErrorAlert
+            title="Error updating amenity"
+            message={error}
+            onDismiss={() => setError(null)}
+          />
+        </div>
+      )}
+      
       <div className="bg-white shadow-md rounded-lg p-6">
         <AmenityForm
           initialData={amenity}

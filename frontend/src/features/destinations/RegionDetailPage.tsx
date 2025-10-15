@@ -129,7 +129,7 @@ const RegionDetailPage: React.FC = () => {
             <div className="container mx-auto">
               <h1 className="text-4xl md:text-6xl font-playfair text-white mb-4">{region.name}</h1>
               {region.description && (
-                <div className="text-xl text-white/90 max-w-2xl">
+                <div className="text-xl text-white/90 max-w-2xl line-clamp-3">
                   <TextDisplay content={region.description} />
                 </div>
               )}

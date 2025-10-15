@@ -86,8 +86,8 @@ const CountryDetailPage: React.FC = () => {
             <div className="container mx-auto">
               <h1 className="text-4xl md:text-6xl font-playfair text-white mb-4">{country.name}</h1>
               <div 
-                className="text-xl text-white/90 max-w-2xl"
-                dangerouslySetInnerHTML={{ __html: country.description || '' }}
+                className="text-xl text-white/90 max-w-2xl line-clamp-3"
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(country.description || '') }}
               />
             </div>
           </div>
@@ -109,7 +109,10 @@ const CountryDetailPage: React.FC = () => {
               {/* Country Overview */}
               <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
                 <h2 className="text-2xl font-playfair text-charcoal mb-4">About {country.name}</h2>
-                <p className="text-gray-700 leading-relaxed mb-6">{country.description}</p>
+                <div 
+                  className="text-gray-700 leading-relaxed mb-6 prose prose-lg max-w-none"
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(country.description || '') }}
+                />
                 
                 {/* Quick Facts */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

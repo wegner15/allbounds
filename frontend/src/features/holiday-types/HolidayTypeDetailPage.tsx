@@ -202,9 +202,10 @@ const HolidayTypeDetailPage: React.FC = () => {
               </div>
             </div>
 
-            <p className="text-lg md:text-xl text-white/90 max-w-2xl mb-8 leading-relaxed">
-              {holidayType.description}
-            </p>
+            <div 
+              className="text-lg md:text-xl text-white/90 max-w-2xl mb-8 leading-relaxed line-clamp-3"
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(holidayType.description || '') }}
+            />
 
             <div className="flex flex-wrap gap-4 mb-8">
               <Link

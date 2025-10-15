@@ -26,6 +26,13 @@ group_trip_hotels = Table(
     Column("hotel_id", Integer, ForeignKey("hotels.id"), primary_key=True)
 )
 
+hotel_amenities = Table(
+    "hotel_amenities",
+    Base.metadata,
+    Column("hotel_id", Integer, ForeignKey("hotels.id"), primary_key=True),
+    Column("amenity_id", Integer, ForeignKey("amenities.id"), primary_key=True)
+)
+
 class Hotel(Base):
     __tablename__ = "hotels"
 
@@ -41,7 +48,7 @@ class Hotel(Base):
     latitude = Column(Float, nullable=True)  # Geographic coordinates
     longitude = Column(Float, nullable=True)  # Geographic coordinates
     price_category = Column(String(50), nullable=True)  # e.g., Budget, Mid-range, Luxury
-    amenities = Column(JSON, nullable=True)  # List of amenities as JSON
+    amenities_json = Column("amenities", JSON, nullable=True)  # DEPRECATED: Old amenities as JSON (kept for migration)
     check_in_time = Column(String(50), nullable=True)  # Standard check-in time
     check_out_time = Column(String(50), nullable=True)  # Standard check-out time
     image_id = Column(String(255), nullable=True)  # Primary image ID
@@ -53,6 +60,7 @@ class Hotel(Base):
     # Relationships
     country = relationship("Country", back_populates="hotels")
     hotel_type = relationship("HotelType", back_populates="hotels")
+    amenities = relationship("Amenity", secondary=hotel_amenities, backref="hotels")
     media_assets = relationship("MediaAsset", secondary=hotel_media, back_populates="hotels")
     reviews = relationship("Review", back_populates="hotel")
     

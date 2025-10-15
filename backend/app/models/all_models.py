@@ -12,6 +12,7 @@ from app.models.holiday_type import HolidayType
 # Import models that depend on base models
 from app.models.attraction import Attraction
 from app.models.accommodation import Accommodation
+from app.models.amenity import Amenity
 from app.models.hotel import Hotel
 from app.models.hotel_type import HotelType
 from app.models.activity import Activity
@@ -35,7 +36,7 @@ from app.models.newsletter import NewsletterSubscription
 __all__ = [
     'User', 'Role', 'Permission',
     'Region', 'Country', 'HolidayType',
-    'Attraction', 'Accommodation', 'Hotel', 'HotelType', 'Activity',
+    'Attraction', 'Accommodation', 'Amenity', 'Hotel', 'HotelType', 'Activity',
     'Package', 'PackageHolidayType', 'PackagePriceChart',
     'Inclusion', 'Exclusion',
     'GroupTrip', 'GroupTripDeparture',

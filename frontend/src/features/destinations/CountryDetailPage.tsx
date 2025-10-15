@@ -331,7 +331,7 @@ const CountryDetailPage: React.FC = () => {
                               <div className="flex flex-wrap gap-1 mb-2">
                                 {hotel.amenities.slice(0, 3).map((amenity, index) => (
                                   <span key={index} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                                    {amenity}
+                                    {amenity.name}
                                   </span>
                                 ))}
                                 {hotel.amenities.length > 3 && (

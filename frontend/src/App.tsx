@@ -66,6 +66,11 @@ import HotelRelationshipsPage from './features/admin/hotels/HotelRelationshipsPa
 import HotelTypesListPage from './features/admin/hotel-types/HotelTypesListPage';
 import CreateHotelTypePage from './features/admin/hotel-types/CreateHotelTypePage';
 import EditHotelTypePage from './features/admin/hotel-types/EditHotelTypePage';
+
+// Import admin amenities pages
+import AmenitiesListPage from './features/admin/amenities/AmenitiesListPage';
+import CreateAmenityPage from './features/admin/amenities/CreateAmenityPage';
+import EditAmenityPage from './features/admin/amenities/EditAmenityPage';
 import AttractionsListPage from './features/admin/attractions/AttractionsListPage';
 import CreateAttractionPage from './features/admin/attractions/CreateAttractionPage';
 import EditAttractionPage from './features/admin/attractions/EditAttractionPage';
@@ -319,6 +324,10 @@ const router = createBrowserRouter([
       { path: 'hotel-types', element: <HotelTypesListPage /> },
       { path: 'hotel-types/new', element: <CreateHotelTypePage /> },
       { path: 'hotel-types/:id/edit', element: <EditHotelTypePage /> },
+      // Amenities management routes
+      { path: 'amenities', element: <AmenitiesListPage /> },
+      { path: 'amenities/new', element: <CreateAmenityPage /> },
+      { path: 'amenities/:id/edit', element: <EditAmenityPage /> },
       // Inclusion management routes
       { path: 'inclusions', element: <InclusionsListPage /> },
       { path: 'inclusions/new', element: <CreateInclusionPage /> },

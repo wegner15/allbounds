@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.models.hotel import Hotel
 from app.models.country import Country
+from app.models.amenity import Amenity
 from app.schemas.hotel import HotelCreate, HotelUpdate
 from app.utils.slug import create_slug
 from app.core.cloudflare_config import cloudflare_settings
@@ -222,6 +223,10 @@ class HotelService:
         Create a new hotel.
         """
         slug = create_slug(hotel_create.name)
+        
+        # Extract amenity_ids before creating hotel
+        amenity_ids = hotel_create.amenity_ids or []
+        
         db_hotel = Hotel(
             name=hotel_create.name,
             summary=hotel_create.summary,
@@ -234,13 +239,20 @@ class HotelService:
             latitude=hotel_create.latitude,
             longitude=hotel_create.longitude,
             price_category=hotel_create.price_category,
-            amenities=hotel_create.amenities,
+            amenities_json=hotel_create.amenities,  # Keep old JSON for backward compatibility
             check_in_time=hotel_create.check_in_time,
             check_out_time=hotel_create.check_out_time,
             image_id=hotel_create.image_id,
             slug=slug,
         )
         db.add(db_hotel)
+        db.flush()  # Flush to get the hotel ID
+        
+        # Add amenities if provided
+        if amenity_ids:
+            amenities = db.query(Amenity).filter(Amenity.id.in_(amenity_ids)).all()
+            db_hotel.amenities = amenities
+        
         db.commit()
         db.refresh(db_hotel)
         return db_hotel
@@ -255,12 +267,24 @@ class HotelService:
         
         update_data = hotel_update.model_dump(exclude_unset=True)
         
+        # Handle amenity_ids separately
+        amenity_ids = update_data.pop("amenity_ids", None)
+        
         # If name is being updated, update the slug as well
         if "name" in update_data:
             update_data["slug"] = create_slug(update_data["name"])
         
+        # Handle old amenities JSON for backward compatibility
+        if "amenities" in update_data:
+            update_data["amenities_json"] = update_data.pop("amenities")
+        
         for key, value in update_data.items():
             setattr(db_hotel, key, value)
+        
+        # Update amenities if provided
+        if amenity_ids is not None:
+            amenities = db.query(Amenity).filter(Amenity.id.in_(amenity_ids)).all()
+            db_hotel.amenities = amenities
         
         db.commit()
         db.refresh(db_hotel)
@@ -363,5 +387,54 @@ class HotelService:
         hotel.image_id = final_image_id
         db.commit()
         return True
+    
+    def add_amenities(self, db: Session, hotel_id: int, amenity_ids: List[int]) -> Optional[Hotel]:
+        """
+        Add amenities to a hotel.
+        """
+        hotel = db.query(Hotel).filter(Hotel.id == hotel_id).first()
+        if not hotel:
+            return None
+        
+        amenities = db.query(Amenity).filter(Amenity.id.in_(amenity_ids)).all()
+        
+        # Add only new amenities (avoid duplicates)
+        existing_ids = {a.id for a in hotel.amenities}
+        new_amenities = [a for a in amenities if a.id not in existing_ids]
+        hotel.amenities.extend(new_amenities)
+        
+        db.commit()
+        db.refresh(hotel)
+        return hotel
+    
+    def remove_amenities(self, db: Session, hotel_id: int, amenity_ids: List[int]) -> Optional[Hotel]:
+        """
+        Remove amenities from a hotel.
+        """
+        hotel = db.query(Hotel).filter(Hotel.id == hotel_id).first()
+        if not hotel:
+            return None
+        
+        # Remove specified amenities
+        hotel.amenities = [a for a in hotel.amenities if a.id not in amenity_ids]
+        
+        db.commit()
+        db.refresh(hotel)
+        return hotel
+    
+    def set_amenities(self, db: Session, hotel_id: int, amenity_ids: List[int]) -> Optional[Hotel]:
+        """
+        Replace all amenities for a hotel.
+        """
+        hotel = db.query(Hotel).filter(Hotel.id == hotel_id).first()
+        if not hotel:
+            return None
+        
+        amenities = db.query(Amenity).filter(Amenity.id.in_(amenity_ids)).all()
+        hotel.amenities = amenities
+        
+        db.commit()
+        db.refresh(hotel)
+        return hotel
 
 hotel_service = HotelService()

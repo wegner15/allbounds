@@ -181,7 +181,7 @@ const HotelDetailPage: React.FC = () => {
                     {hotel.amenities.map((amenity, index) => (
                       <div key={index} className="flex items-center space-x-2 p-2 bg-gray-50 rounded">
                         <span className="text-teal">✓</span>
-                        <span className="text-sm text-gray-700">{amenity}</span>
+                        <span className="text-sm text-gray-700">{amenity.name}</span>
                       </div>
                     ))}
                   </div>

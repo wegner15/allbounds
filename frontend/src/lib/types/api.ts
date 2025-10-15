@@ -166,6 +166,26 @@ export interface GalleryImage {
   file_path: string;
 }
 
+// Amenity types
+export interface Amenity extends BaseModel {
+  name: string;
+  description?: string;
+  icon?: string;
+  category?: string;
+  is_active: boolean;
+}
+
+export interface AmenityCreate {
+  name: string;
+  description?: string;
+  icon?: string;
+  category?: string;
+}
+
+export type AmenityUpdate = Partial<AmenityCreate> & {
+  is_active?: boolean;
+};
+
 // Hotel types
 export interface Hotel extends BaseModel {
   name: string;
@@ -181,7 +201,8 @@ export interface Hotel extends BaseModel {
   city?: string;
   stars?: number;
   price_category?: string;
-   amenities?: string[];
+  amenities?: Amenity[];
+  amenity_ids?: number[];
 }
 
 // Hotel with gallery

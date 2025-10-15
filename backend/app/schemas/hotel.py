@@ -5,6 +5,7 @@ from datetime import datetime
 # Import at the top level to avoid Pydantic 2.x issues
 from app.schemas.country import CountryResponse
 from app.schemas.hotel_type import HotelTypeResponse
+from app.schemas.amenity import AmenityResponse
 
 # Base Hotel Schema
 class HotelBase(BaseModel):
@@ -19,14 +20,14 @@ class HotelBase(BaseModel):
     latitude: Optional[float] = Field(None, description="Latitude coordinate of the hotel")
     longitude: Optional[float] = Field(None, description="Longitude coordinate of the hotel")
     price_category: Optional[str] = Field(None, description="Price category (e.g., Budget, Mid-range, Luxury)")
-    amenities: Optional[Dict[str, Any]] = Field(None, description="Amenities offered by the hotel")
+    amenity_ids: Optional[List[int]] = Field(None, description="List of amenity IDs associated with the hotel")
     check_in_time: Optional[str] = Field(None, description="Standard check-in time")
     check_out_time: Optional[str] = Field(None, description="Standard check-out time")
     image_id: Optional[str] = Field(None, description="Cloudflare Image ID for the hotel's primary image")
     
 # Schema for creating a new Hotel
 class HotelCreate(HotelBase):
-    pass
+    amenities: Optional[Dict[str, Any]] = Field(None, description="DEPRECATED: Old amenities as JSON (for backward compatibility)")
 
 # Schema for updating a Hotel
 class HotelUpdate(BaseModel):
@@ -41,7 +42,8 @@ class HotelUpdate(BaseModel):
     latitude: Optional[float] = Field(None, description="Latitude coordinate of the hotel")
     longitude: Optional[float] = Field(None, description="Longitude coordinate of the hotel")
     price_category: Optional[str] = Field(None, description="Price category (e.g., Budget, Mid-range, Luxury)")
-    amenities: Optional[Dict[str, Any]] = Field(None, description="Amenities offered by the hotel")
+    amenity_ids: Optional[List[int]] = Field(None, description="List of amenity IDs associated with the hotel")
+    amenities: Optional[Dict[str, Any]] = Field(None, description="DEPRECATED: Old amenities as JSON (for backward compatibility)")
     check_in_time: Optional[str] = Field(None, description="Standard check-in time")
     check_out_time: Optional[str] = Field(None, description="Standard check-out time")
     image_id: Optional[str] = Field(None, description="Cloudflare Image ID for the hotel's primary image")
@@ -63,6 +65,7 @@ class HotelResponse(HotelBase):
 class HotelWithCountryResponse(HotelResponse):
     country: CountryResponse
     hotel_type: Optional[HotelTypeResponse] = None
+    amenities: List[AmenityResponse] = Field(default_factory=list, description="List of amenities associated with the hotel")
     
     class Config:
         from_attributes = True

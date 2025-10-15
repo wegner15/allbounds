@@ -6,6 +6,7 @@ from app.api.api_v1.endpoints import (
     activities,
     attractions,
     accommodations,
+    amenities,
     hotels,
     hotel_types,
     packages,
@@ -36,6 +37,7 @@ api_router.include_router(countries.router, prefix="/countries", tags=["Countrie
 api_router.include_router(activities.router, prefix="/activities", tags=["Activities"])
 api_router.include_router(attractions.router, prefix="/attractions", tags=["Attractions"])
 api_router.include_router(accommodations.router, prefix="/accommodations", tags=["Accommodations"])
+api_router.include_router(amenities.router, prefix="/amenities", tags=["Amenities"])
 api_router.include_router(hotels.router, prefix="/hotels", tags=["Hotels"])
 api_router.include_router(hotel_types.router, prefix="/hotel-types", tags=["Hotel Types"])
 api_router.include_router(packages.router, prefix="/packages", tags=["Packages"])

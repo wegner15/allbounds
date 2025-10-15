@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCountries } from '../../../lib/hooks/useCountries';
 import { useHotelTypes } from '../../../lib/hooks/useHotelTypes';
+import { useAmenities } from '../../../lib/hooks/useAmenities';
 import { apiClient } from '../../../lib/api';
 import LocationPicker from '../../../components/LocationPicker';
 import TimeSelector from '../../../components/TimeSelector';
@@ -20,6 +21,7 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
   const navigate = useNavigate();
   const { data: countries } = useCountries();
   const { data: hotelTypes } = useHotelTypes();
+  const { data: amenities } = useAmenities();
   
   const [formData, setFormData] = useState<HotelCreateInput & { is_active?: boolean }>({
     name: '',
@@ -102,16 +104,14 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
     }));
   };
 
-  const handleAmenitiesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    const currentAmenities = formData.amenities || {};
+  const handleAmenitiesChange = (amenityId: number, checked: boolean) => {
+    const currentAmenityIds = formData.amenity_ids || [];
     
     setFormData(prev => ({
       ...prev,
-      amenities: {
-        ...currentAmenities,
-        [name]: checked
-      }
+      amenity_ids: checked
+        ? [...currentAmenityIds, amenityId]
+        : currentAmenityIds.filter(id => id !== amenityId)
     }));
   };
 
@@ -120,18 +120,15 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
     onSubmit(formData);
   };
 
-  const commonAmenities = [
-    { id: 'wifi', label: 'WiFi' },
-    { id: 'pool', label: 'Swimming Pool' },
-    { id: 'gym', label: 'Fitness Center' },
-    { id: 'spa', label: 'Spa' },
-    { id: 'restaurant', label: 'Restaurant' },
-    { id: 'bar', label: 'Bar' },
-    { id: 'parking', label: 'Parking' },
-    { id: 'roomService', label: 'Room Service' },
-    { id: 'airConditioning', label: 'Air Conditioning' },
-    { id: 'laundry', label: 'Laundry Service' }
-  ];
+  // Group amenities by category
+  const amenitiesByCategory = amenities?.reduce((acc, amenity) => {
+    const category = amenity.category || 'Other';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(amenity);
+    return acc;
+  }, {} as Record<string, Array<typeof amenities[number]>>);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-md">
@@ -315,23 +312,33 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
       {/* Hotel Amenities */}
       <div className="border-b pb-6">
         <h2 className="text-lg font-semibold mb-4">Amenities</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {commonAmenities.map((amenity) => (
-            <div key={amenity.id} className="flex items-center">
-              <input
-                type="checkbox"
-                id={amenity.id}
-                name={amenity.id}
-                checked={!!(formData.amenities && formData.amenities[amenity.id])}
-                onChange={handleAmenitiesChange}
-                className="h-4 w-4 text-teal focus:ring-teal border-gray-300 rounded"
-              />
-              <label htmlFor={amenity.id} className="ml-2 block text-sm text-gray-700">
-                {amenity.label}
-              </label>
-            </div>
-          ))}
-        </div>
+        {amenitiesByCategory && Object.keys(amenitiesByCategory).length > 0 ? (
+          <div className="space-y-6">
+            {Object.entries(amenitiesByCategory).map(([category, categoryAmenities]) => (
+              <div key={category}>
+                <h3 className="text-sm font-medium text-gray-700 mb-3">{category}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {categoryAmenities?.map((amenity) => (
+                    <div key={amenity.id} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={`amenity-${amenity.id}`}
+                        checked={(formData.amenity_ids || []).includes(amenity.id)}
+                        onChange={(e) => handleAmenitiesChange(amenity.id, e.target.checked)}
+                        className="h-4 w-4 text-teal focus:ring-teal border-gray-300 rounded"
+                      />
+                      <label htmlFor={`amenity-${amenity.id}`} className="ml-2 block text-sm text-gray-700">
+                        {amenity.name}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500">No amenities available. Please add amenities in the admin panel.</p>
+        )}
       </div>
 
       {/* Description */}

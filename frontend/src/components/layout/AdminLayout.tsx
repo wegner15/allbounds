@@ -40,6 +40,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
     { name: 'Group Trips', href: '/admin/group-trips', icon: 'users' },
     { name: 'Hotels', href: '/admin/hotels', icon: 'home' },
     { name: 'Hotel Types', href: '/admin/hotel-types', icon: 'building' },
+    { name: 'Amenities', href: '/admin/amenities', icon: 'sparkles' },
     { name: 'Attractions', href: '/admin/attractions', icon: 'ticket' },
     { name: 'Activities', href: '/admin/activities', icon: 'ticket' },
     {

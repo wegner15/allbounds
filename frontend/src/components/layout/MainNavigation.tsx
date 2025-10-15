@@ -291,7 +291,11 @@ const MainNavigation: React.FC = () => {
         >
           <div className="container mx-auto px-4 py-6">
             <div className="mb-4">
-              <Link to="/destinations" className="text-blue-600 hover:underline flex items-center">
+              <Link 
+                to="/destinations" 
+                className="text-blue-600 hover:underline flex items-center"
+                onClick={() => setDestinationsOpen(false)}
+              >
                 <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
@@ -314,6 +318,7 @@ const MainNavigation: React.FC = () => {
                           <Link 
                             to={`/destinations/${country.slug}`}
                             className="text-sm text-gray-600 hover:text-hover transition-colors"
+                            onClick={() => setDestinationsOpen(false)}
                           >
                             {country.name}
                           </Link>
@@ -336,7 +341,11 @@ const MainNavigation: React.FC = () => {
         >
           <div className="container mx-auto px-4 py-6">
             <div className="mb-4">
-              <Link to="/holiday-types" className="text-blue-600 hover:underline">
+              <Link 
+                to="/holiday-types" 
+                className="text-blue-600 hover:underline"
+                onClick={() => setHolidayTypesOpen(false)}
+              >
                 All Holidays
               </Link>
             </div>
@@ -352,6 +361,7 @@ const MainNavigation: React.FC = () => {
                     key={type.slug}
                     to={`/holiday-types/${type.slug}`}
                     className="flex items-center space-x-2 text-charcoal hover:text-hover transition-colors"
+                    onClick={() => setHolidayTypesOpen(false)}
                   >
                     <span className="text-xl">{type.icon}</span>
                     <span>{type.name}</span>
@@ -366,6 +376,7 @@ const MainNavigation: React.FC = () => {
                   key={option.slug}
                   to={`/${option.slug}`}
                   className="flex items-center space-x-2 text-charcoal hover:text-hover transition-colors"
+                  onClick={() => setHolidayTypesOpen(false)}
                 >
                   <span className="text-xl">{option.icon}</span>
                   <span>{option.name}</span>

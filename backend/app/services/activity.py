@@ -48,6 +48,18 @@ class ActivityService:
             joinedload(Activity.media_assets)
         ).offset(skip).limit(limit).all()
     
+    def get_featured_activities(self, db: Session, skip: int = 0, limit: int = 100) -> List[Activity]:
+        """
+        Retrieve featured activities with pagination.
+        """
+        return db.query(Activity).filter(
+            Activity.is_active == True,
+            Activity.is_featured == True
+        ).options(
+            joinedload(Activity.cover_image),
+            joinedload(Activity.media_assets)
+        ).offset(skip).limit(limit).all()
+    
     def create_activity(self, db: Session, activity_create: ActivityCreate) -> Activity:
         """
         Create a new activity.

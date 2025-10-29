@@ -32,6 +32,7 @@ const groupTripSchema = z.object({
   exclusion_ids: z.array(z.number()).optional(),
   image_id: z.string().optional(),
   is_active: z.boolean(),
+  is_featured: z.boolean(),
 });
 
 type GroupTripFormData = z.infer<typeof groupTripSchema>;
@@ -107,6 +108,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
           exclusion_ids: groupTripData.exclusion_items?.map((item: any) => item.id) || [],
           image_id: groupTripData.image_id || '',
           is_active: groupTripData.is_active !== undefined ? groupTripData.is_active : true,
+          is_featured: groupTripData.is_featured !== undefined ? groupTripData.is_featured : false,
           start_date: groupTripData.start_date || '',
           end_date: groupTripData.end_date || '',
         }
@@ -124,6 +126,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
           exclusion_ids: [],
           image_id: '',
           is_active: true,
+          is_featured: false,
           start_date: '',
           end_date: ''
         }
@@ -191,6 +194,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
         price: data.price,
         image_id: data.image_id || undefined,
         is_active: data.is_active,
+        is_featured: data.is_featured,
         inclusion_ids: data.inclusion_ids || [],
         exclusion_ids: data.exclusion_ids || []
       };
@@ -792,7 +796,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
             )}
             
             {/* Status */}
-            <div className="sm:col-span-6">
+            <div className="sm:col-span-6 space-y-3">
               <div className="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                 <input
                   id="is_active"
@@ -802,6 +806,17 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
                 />
                 <label htmlFor="is_active" className="ml-3 block text-sm font-medium text-gray-900 cursor-pointer select-none">
                   Active (visible on the website)
+                </label>
+              </div>
+              <div className="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <input
+                  id="is_featured"
+                  type="checkbox"
+                  className="h-5 w-5 text-teal focus:ring-teal focus:ring-offset-0 border-gray-300 rounded transition-colors cursor-pointer"
+                  {...register('is_featured')}
+                />
+                <label htmlFor="is_featured" className="ml-3 block text-sm font-medium text-gray-900 cursor-pointer select-none">
+                  Featured (highlighted on the website)
                 </label>
               </div>
             </div>

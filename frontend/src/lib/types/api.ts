@@ -103,6 +103,7 @@ export interface Activity extends BaseModel {
   slug: string;
   image_url?: string;
   is_active: boolean;
+  is_featured: boolean;
   countries: Country[];
 }
 
@@ -116,6 +117,7 @@ export interface ActivityCreate {
   description?: string;
   summary?: string;
   is_active?: boolean;
+  is_featured?: boolean;
   cover_image_id?: number | null;
   media_asset_ids?: number[];
 }

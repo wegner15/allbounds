@@ -18,12 +18,28 @@ def get_hotels(
     skip: int = 0,
     limit: int = 100,
     recommended: bool = Query(None, description="Filter for recommended hotels"),
+    featured: bool = Query(None, description="Filter for featured hotels"),
     country: str = Query(None, description="Filter by country name"),
 ) -> Any:
     """
     Retrieve all hotels with optional filtering.
     """
-    hotels = hotel_service.get_hotels(db, skip=skip, limit=limit, recommended=recommended, country=country)
+    if featured is not None and featured:
+        hotels = hotel_service.get_featured_hotels(db, skip=skip, limit=limit)
+    else:
+        hotels = hotel_service.get_hotels(db, skip=skip, limit=limit, recommended=recommended, country=country)
+    return hotels
+
+@router.get("/featured")
+def get_featured_hotels(
+    db: Session = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+) -> Any:
+    """
+    Retrieve featured hotels with cover images.
+    """
+    hotels = hotel_service.get_featured_hotels(db, skip=skip, limit=limit)
     return hotels
 
 @router.get("/country/{country_id}")

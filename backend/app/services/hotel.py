@@ -129,6 +129,64 @@ class HotelService:
         
         return result
     
+    def get_featured_hotels(self, db: Session, skip: int = 0, limit: int = 100) -> List[Dict[str, Any]]:
+        """
+        Retrieve featured hotels with pagination, including cover images.
+        """
+        hotels = db.query(Hotel).options(
+            joinedload(Hotel.country),
+            joinedload(Hotel.media_assets)
+        ).filter(
+            Hotel.is_active == True,
+            Hotel.is_featured == True
+        ).offset(skip).limit(limit).all()
+        
+        # Format hotels with cover images
+        result = []
+        for hotel in hotels:
+            # Get cover image
+            cover_image_url = None
+            if hotel.image_id:
+                cover_image_url = self._get_cloudflare_image_url(hotel.image_id)
+            else:
+                # Fallback to first gallery image
+                for media in hotel.media_assets:
+                    if media.is_active:
+                        if media.file_path.startswith("cloudflare://") and media.storage_key:
+                            cover_image_url = self._get_cloudflare_image_url(media.storage_key)
+                            break
+                        elif media.storage_key:
+                            cover_image_url = self._get_cloudflare_image_url(media.storage_key)
+                            break
+            
+            hotel_data = {
+                "id": hotel.id,
+                "name": hotel.name,
+                "summary": hotel.summary,
+                "description": hotel.description,
+                "slug": hotel.slug,
+                "country_id": hotel.country_id,
+                "country": {
+                    "id": hotel.country.id,
+                    "name": hotel.country.name,
+                    "slug": hotel.country.slug,
+                } if hotel.country else None,
+                "image_id": hotel.image_id,
+                "image_url": cover_image_url,
+                "is_active": hotel.is_active,
+                "is_featured": hotel.is_featured,
+                "address": hotel.address,
+                "city": hotel.city,
+                "stars": hotel.stars,
+                "price_category": hotel.price_category,
+                "amenities": hotel.amenities,
+                "created_at": hotel.created_at,
+                "updated_at": hotel.updated_at,
+            }
+            result.append(hotel_data)
+        
+        return result
+    
     def get_hotel(self, db: Session, hotel_id: int) -> Optional[Hotel]:
         """
         Retrieve a specific hotel by ID.

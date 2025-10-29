@@ -23,12 +23,13 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
   const { data: hotelTypes } = useHotelTypes();
   const { data: amenities } = useAmenities();
   
-  const [formData, setFormData] = useState<HotelCreateInput & { is_active?: boolean }>({
+  const [formData, setFormData] = useState<HotelCreateInput & { is_active?: boolean; is_featured?: boolean }>({
     name: '',
     country_id: 0,
     hotel_type_id: 0,
     stars: 0,
     is_active: true,
+    is_featured: false,
   });
 
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
@@ -382,7 +383,7 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
 
       {/* Status */}
       {initialData && (
-        <div>
+        <div className="space-y-3">
           <div className="flex items-center">
             <input
               type="checkbox"
@@ -394,6 +395,19 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
             />
             <label htmlFor="is_active" className="ml-2 block text-sm text-gray-700">
               Active
+            </label>
+          </div>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="is_featured"
+              name="is_featured"
+              checked={formData.is_featured === true}
+              onChange={handleCheckboxChange}
+              className="h-4 w-4 text-teal focus:ring-teal border-gray-300 rounded"
+            />
+            <label htmlFor="is_featured" className="ml-2 block text-sm text-gray-700">
+              Featured
             </label>
           </div>
         </div>

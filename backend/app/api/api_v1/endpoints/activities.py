@@ -18,6 +18,7 @@ def get_activities(
     limit: int = 100,
     country_id: int = Query(None, description="Filter activities by country ID"),
     country: str = Query(None, description="Filter activities by country name"),
+    featured: bool = Query(None, description="Filter activities by featured status"),
 ) -> Any:
     """
     Retrieve all activities.
@@ -32,8 +33,22 @@ def get_activities(
             activities = []
     elif country_id:
         activities = activity_service.get_activities_by_country(db, country_id=country_id, skip=skip, limit=limit)
+    elif featured is not None and featured:
+        activities = activity_service.get_featured_activities(db, skip=skip, limit=limit)
     else:
         activities = activity_service.get_activities(db, skip=skip, limit=limit)
+    return activities
+
+@router.get("/featured", response_model=List[ActivityResponse])
+def get_featured_activities(
+    db: Session = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+) -> Any:
+    """
+    Retrieve featured activities.
+    """
+    activities = activity_service.get_featured_activities(db, skip=skip, limit=limit)
     return activities
 
 @router.get("/{activity_id}", response_model=ActivityResponse)

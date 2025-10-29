@@ -16,6 +16,7 @@ const activitySchema = z.object({
   description: z.string().optional(),
   summary: z.string().max(255, 'Summary cannot exceed 255 characters').optional(),
   is_active: z.boolean(),
+  is_featured: z.boolean(),
   cover_image_id: z.number().nullable().optional(),
   media_asset_ids: z.array(z.number()).optional(),
 });
@@ -34,7 +35,7 @@ interface ActivityFormProps {
 const ActivityForm: React.FC<ActivityFormProps> = ({ onSubmit, defaultValues, isEditing = false }) => {
   const methods = useForm<ActivityFormValues>({
     resolver: zodResolver(activitySchema),
-    defaultValues: defaultValues || { name: '', description: '', is_active: true, cover_image_id: null, media_asset_ids: [] },
+    defaultValues: defaultValues || { name: '', description: '', is_active: true, is_featured: false, cover_image_id: null, media_asset_ids: [] },
   });
   const { control, handleSubmit, formState: { errors }, setValue, watch } = methods;
 
@@ -93,18 +94,33 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ onSubmit, defaultValues, is
           <p className="text-xs text-gray-500 mt-1">A concise summary that appears in activity cards and search results</p>
         </div>
 
-        <Controller
-          name="is_active"
-          control={control}
-          render={({ field }) => (
-            <FormCheckbox
-              id="is_active"
-              label="Active"
-              checked={field.value}
-              onChange={field.onChange}
-            />
-          )}
-        />
+        <div className="space-y-3">
+          <Controller
+            name="is_active"
+            control={control}
+            render={({ field }) => (
+              <FormCheckbox
+                id="is_active"
+                label="Active"
+                checked={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
+          
+          <Controller
+            name="is_featured"
+            control={control}
+            render={({ field }) => (
+              <FormCheckbox
+                id="is_featured"
+                label="Featured"
+                checked={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
+        </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Cover Image</label>

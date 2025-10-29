@@ -186,6 +186,7 @@ export const endpoints = {
   hotels: {
     list: () => '/hotels/',
     create: () => '/hotels/',
+    featured: () => '/hotels/featured',
     detail: (id: number) => `/hotels/${id}`,
     update: (id: number) => `/hotels/${id}`,
     delete: (id: number) => `/hotels/${id}`,
@@ -203,6 +204,7 @@ export const endpoints = {
   groupTrips: {
     list: () => '/group-trips/',
     create: () => '/group-trips/',
+    featured: () => '/group-trips?featured=true',
     byId: (id: number) => `/group-trips/${id}`,
     update: (id: number) => `/group-trips/${id}`,
     delete: (id: number) => `/group-trips/${id}`,
@@ -225,6 +227,7 @@ export const endpoints = {
   // Activities
   activities: {
     list: () => '/activities/',
+    featured: () => '/activities/featured',
     detail: (id: number) => `/activities/${id}`,
     bySlug: (slug: string) => `/activities/slug/${slug}`,
     byCountry: (countryId: number) => `/activities/?country_id=${countryId}`,

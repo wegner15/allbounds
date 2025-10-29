@@ -30,6 +30,7 @@ export interface Hotel {
   image_id?: string;
   slug: string;
   is_active: boolean;
+  is_featured: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -55,6 +56,7 @@ export interface HotelCreateInput {
 
 export interface HotelUpdateInput extends Partial<HotelCreateInput> {
   is_active?: boolean;
+  is_featured?: boolean;
 }
 
 export interface HotelRelationships {

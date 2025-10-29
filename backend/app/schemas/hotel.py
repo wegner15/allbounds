@@ -48,12 +48,14 @@ class HotelUpdate(BaseModel):
     check_out_time: Optional[str] = Field(None, description="Standard check-out time")
     image_id: Optional[str] = Field(None, description="Cloudflare Image ID for the hotel's primary image")
     is_active: Optional[bool] = Field(None, description="Whether the hotel is active")
+    is_featured: Optional[bool] = Field(None, description="Whether the hotel is featured")
 
 # Schema for Hotel response
 class HotelResponse(HotelBase):
     id: int
     slug: str = Field(..., description="URL-friendly slug for the hotel", example="hilton-hotel")
     is_active: bool = Field(..., description="Whether the hotel is active")
+    is_featured: bool = Field(False, description="Whether the hotel is featured")
     image_url: Optional[str] = Field(None, description="URL of the hotel's cover image")
     created_at: datetime
     updated_at: datetime

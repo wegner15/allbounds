@@ -41,6 +41,7 @@ const ActivityEditPage: React.FC = () => {
               description: data.description,
               summary: data.summary,
               is_active: data.is_active,
+              is_featured: data.is_featured,
               cover_image_id: data.cover_image_id,
               media_asset_ids: data.media_asset_ids
             };
@@ -51,6 +52,7 @@ const ActivityEditPage: React.FC = () => {
             description: activity.description,
             summary: activity.summary,
             is_active: activity.is_active,
+            is_featured: activity.is_featured || false,
             cover_image_id: activity.cover_image_id || null,
             media_asset_ids: activity.media_assets.map(asset => asset.id),
             cover_image: activity.media_assets.find(asset => asset.id === activity.cover_image_id),

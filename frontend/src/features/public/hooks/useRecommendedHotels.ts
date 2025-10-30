@@ -46,14 +46,15 @@ export const useCountriesWithAttractions = () => {
   });
 };
 
-// Fetch recommended hotels, optionally filtered by country
+// Fetch recommended hotels (featured hotels), optionally filtered by country
 export const useRecommendedHotels = (countryName?: string) => {
   return useQuery<Hotel[], Error>({
     queryKey: ['recommended-hotels', countryName],
     queryFn: async () => {
-      let url = `${endpoints.hotels.list()}?recommended=true`;
+      // Use the dedicated featured endpoint with optional country filter
+      let url = endpoints.hotels.featured();
       if (countryName) {
-        url += `&country=${countryName}`;
+        url += `?country=${countryName}`;
       }
       const response = await apiClient.get<Hotel[]>(url);
       return response;

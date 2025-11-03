@@ -313,6 +313,10 @@ class HotelService:
         
         db.commit()
         db.refresh(db_hotel)
+        
+        # Expunge amenities relationship to prevent serialization issues
+        db.expire(db_hotel, ['amenities'])
+        
         return db_hotel
     
     def update_hotel(self, db: Session, hotel_id: int, hotel_update: HotelUpdate) -> Optional[Hotel]:
@@ -332,10 +336,6 @@ class HotelService:
         if "name" in update_data:
             update_data["slug"] = create_slug(update_data["name"])
         
-        # Handle old amenities JSON for backward compatibility
-        if "amenities" in update_data:
-            update_data["amenities_json"] = update_data.pop("amenities")
-        
         for key, value in update_data.items():
             setattr(db_hotel, key, value)
         
@@ -346,6 +346,10 @@ class HotelService:
         
         db.commit()
         db.refresh(db_hotel)
+        
+        # Expunge amenities relationship to prevent serialization issues
+        db.expire(db_hotel, ['amenities'])
+        
         return db_hotel
     
     def delete_hotel(self, db: Session, hotel_id: int) -> bool:

@@ -459,7 +459,7 @@ export interface Booking extends BaseModel {
 }
 
 export interface BookingCreate {
-  booking_type: 'package' | 'group_trip';
+  booking_type: 'package' | 'group_trip' | 'hotel';
   entity_id: number;
   entity_slug: string;
   contact_name: string;

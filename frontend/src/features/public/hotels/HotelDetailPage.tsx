@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useHotelBySlug } from '../../../lib/hooks/useHotels';
 import ImageCarousel from '../../../components/ui/ImageCarousel';
+import PackageBookingForm from '../../../components/forms/PackageBookingForm';
+import InquiryForm from '../../../components/forms/InquiryForm';
 
 const HotelDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: hotel, isLoading, error } = useHotelBySlug(slug!);
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [showInquiryForm, setShowInquiryForm] = useState(false);
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -260,12 +264,18 @@ const HotelDetailPage: React.FC = () => {
                 </div>
               )}
 
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors mb-4">
+              <button 
+                onClick={() => setShowBookingForm(true)}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors mb-4"
+              >
                 Book Now
               </button>
 
-              <button className="w-full border border-gray-300 hover:border-gray-400 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors mb-6">
-                Add to Wishlist
+              <button 
+                onClick={() => setShowInquiryForm(true)}
+                className="w-full border border-gray-300 hover:border-gray-400 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors mb-6"
+              >
+                Send Inquiry
               </button>
 
               <div className="text-sm text-gray-600">
@@ -287,6 +297,43 @@ const HotelDetailPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Booking Form Modal */}
+      {hotel && (
+        <PackageBookingForm
+          packageData={{
+            id: hotel.id,
+            name: hotel.name,
+            slug: hotel.slug,
+            description: hotel.description || '',
+            summary: hotel.summary,
+            country: hotel.country as any,
+            country_id: hotel.country_id!,
+            is_active: hotel.is_active,
+            is_published: true,
+            is_featured: hotel.is_featured,
+            created_at: hotel.created_at,
+            updated_at: hotel.updated_at,
+          } as any}
+          bookingType="hotel"
+          isOpen={showBookingForm}
+          onClose={() => setShowBookingForm(false)}
+          onSuccess={() => {
+            console.log('Hotel booking submitted successfully');
+          }}
+        />
+      )}
+
+      {/* Inquiry Form Modal */}
+      <InquiryForm
+        isOpen={showInquiryForm}
+        onClose={() => setShowInquiryForm(false)}
+        onSuccess={() => {
+          console.log('Inquiry submitted successfully');
+        }}
+        defaultSubject={hotel ? `Inquiry about ${hotel.name}` : ''}
+        defaultMessage={hotel ? `I'm interested in staying at ${hotel.name}. Please provide more information about availability and rates.` : ''}
+      />
     </div>
   );
 };

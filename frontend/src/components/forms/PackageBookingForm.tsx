@@ -59,13 +59,15 @@ interface PackageBookingFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  bookingType?: 'package' | 'group_trip' | 'hotel';
 }
 
 const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
   packageData,
   isOpen,
   onClose,
-  onSuccess
+  onSuccess,
+  bookingType = 'package'
 }) => {
   const [step, setStep] = useState<'details' | 'travelers' | 'confirmation'>('details');
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -148,7 +150,7 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
   const bookingMutation = useMutation({
     mutationFn: async (data: BookingFormData) => {
       const bookingData: BookingCreate = {
-        booking_type: 'package',
+        booking_type: bookingType,
         entity_id: packageData.id,
         entity_slug: packageData.slug,
         contact_name: data.contact_name,

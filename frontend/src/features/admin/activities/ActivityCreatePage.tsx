@@ -29,8 +29,10 @@ const ActivityCreatePage: React.FC = () => {
           description: data.description,
           summary: data.summary,
           is_active: data.is_active,
+          is_featured: data.is_featured,
           cover_image_id: data.cover_image_id,
-          media_asset_ids: data.media_asset_ids
+          media_asset_ids: data.media_asset_ids,
+          country_ids: data.country_ids
         };
         mutate(createData);
       }} />

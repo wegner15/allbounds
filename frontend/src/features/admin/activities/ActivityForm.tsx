@@ -10,6 +10,7 @@ import FormCheckbox from '../../../components/ui/FormCheckbox';
 import type { ActivityCreate, ActivityUpdate, MediaAsset } from '../../../lib/types/api';
 import MediaGallery from '../../../components/media/MediaGallery';
 import CloudflareImageUpload from '../../../components/ui/CloudflareImageUpload';
+import { useCountries } from '../../../lib/hooks/useCountries';
 
 const activitySchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -19,6 +20,7 @@ const activitySchema = z.object({
   is_featured: z.boolean(),
   cover_image_id: z.number().nullable().optional(),
   media_asset_ids: z.array(z.number()).optional(),
+  country_ids: z.array(z.number()).optional(),
 });
 
 type ActivityFormValues = z.infer<typeof activitySchema>;
@@ -35,13 +37,15 @@ interface ActivityFormProps {
 const ActivityForm: React.FC<ActivityFormProps> = ({ onSubmit, defaultValues, isEditing = false }) => {
   const methods = useForm<ActivityFormValues>({
     resolver: zodResolver(activitySchema),
-    defaultValues: defaultValues || { name: '', description: '', is_active: true, is_featured: false, cover_image_id: null, media_asset_ids: [] },
+    defaultValues: defaultValues || { name: '', description: '', is_active: true, is_featured: false, cover_image_id: null, media_asset_ids: [], country_ids: [] },
   });
   const { control, handleSubmit, formState: { errors }, setValue, watch } = methods;
 
   const mediaAssetIds = watch('media_asset_ids') || [];
   const coverImageId = watch('cover_image_id');
+  const countryIds = watch('country_ids') || [];
   const queryClient = useQueryClient();
+  const { data: countries, isLoading: countriesLoading } = useCountries();
 
   return (
     <FormProvider {...methods}>
@@ -92,6 +96,37 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ onSubmit, defaultValues, is
           />
           {errors.summary && <p className="text-sm text-red-500 mt-1">{errors.summary.message}</p>}
           <p className="text-xs text-gray-500 mt-1">A concise summary that appears in activity cards and search results</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Countries</label>
+          {countriesLoading ? (
+            <p className="text-sm text-gray-500">Loading countries...</p>
+          ) : (
+            <div className="border border-gray-300 rounded-md p-3 max-h-48 overflow-y-auto">
+              {countries?.map((country) => (
+                <div key={country.id} className="flex items-center mb-2">
+                  <input
+                    type="checkbox"
+                    id={`country-${country.id}`}
+                    checked={countryIds.includes(country.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setValue('country_ids', [...countryIds, country.id]);
+                      } else {
+                        setValue('country_ids', countryIds.filter(id => id !== country.id));
+                      }
+                    }}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor={`country-${country.id}`} className="ml-2 text-sm text-gray-700">
+                    {country.name}
+                  </label>
+                </div>
+              ))}
+            </div>
+          )}
+          <p className="text-xs text-gray-500 mt-1">Select countries where this activity is available</p>
         </div>
 
         <div className="space-y-3">

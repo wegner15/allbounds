@@ -13,7 +13,8 @@ class ActivityService:
         """
         return db.query(Activity).filter(Activity.is_active == True).options(
             joinedload(Activity.cover_image),
-            joinedload(Activity.media_assets)
+            joinedload(Activity.media_assets),
+            joinedload(Activity.countries)
         ).offset(skip).limit(limit).all()
     
     def get_activity(self, db: Session, activity_id: int) -> Optional[Activity]:
@@ -22,7 +23,8 @@ class ActivityService:
         """
         return db.query(Activity).filter(Activity.id == activity_id, Activity.is_active == True).options(
             joinedload(Activity.cover_image),
-            joinedload(Activity.media_assets)
+            joinedload(Activity.media_assets),
+            joinedload(Activity.countries)
         ).first()
     
     def get_activity_by_slug(self, db: Session, slug: str) -> Optional[Activity]:
@@ -31,7 +33,8 @@ class ActivityService:
         """
         return db.query(Activity).filter(Activity.slug == slug, Activity.is_active == True).options(
             joinedload(Activity.cover_image),
-            joinedload(Activity.media_assets)
+            joinedload(Activity.media_assets),
+            joinedload(Activity.countries)
         ).first()
     
     def get_activities_by_country(self, db: Session, country_id: int, skip: int = 0, limit: int = 100) -> List[Activity]:
@@ -45,7 +48,8 @@ class ActivityService:
             Activity.countries.any(id=country_id)
         ).options(
             joinedload(Activity.cover_image),
-            joinedload(Activity.media_assets)
+            joinedload(Activity.media_assets),
+            joinedload(Activity.countries)
         ).offset(skip).limit(limit).all()
     
     def get_featured_activities(self, db: Session, skip: int = 0, limit: int = 100) -> List[Activity]:
@@ -57,7 +61,8 @@ class ActivityService:
             Activity.is_featured == True
         ).options(
             joinedload(Activity.cover_image),
-            joinedload(Activity.media_assets)
+            joinedload(Activity.media_assets),
+            joinedload(Activity.countries)
         ).offset(skip).limit(limit).all()
     
     def get_featured_activities_by_country(self, db: Session, country_name: str, skip: int = 0, limit: int = 100) -> List[Activity]:
@@ -82,6 +87,8 @@ class ActivityService:
         """
         Create a new activity.
         """
+        from app.models.country import Country
+        
         slug = create_slug(activity_create.name)
         db_activity = Activity(
             name=activity_create.name,
@@ -89,6 +96,7 @@ class ActivityService:
             summary=activity_create.summary,
             slug=slug,
             is_active=activity_create.is_active if activity_create.is_active is not None else True,
+            is_featured=activity_create.is_featured if activity_create.is_featured is not None else False,
             cover_image_id=activity_create.cover_image_id
         )
         db.add(db_activity)
@@ -104,12 +112,23 @@ class ActivityService:
             db.commit()
             db.refresh(db_activity)
         
+        # Associate countries if provided
+        if activity_create.country_ids:
+            for country_id in activity_create.country_ids:
+                db_country = db.query(Country).filter(Country.id == country_id).first()
+                if db_country:
+                    db_activity.countries.append(db_country)
+            db.commit()
+            db.refresh(db_activity)
+        
         return db_activity
     
     def update_activity(self, db: Session, activity_id: int, activity_update: ActivityUpdate) -> Optional[Activity]:
         """
         Update an existing activity.
         """
+        from app.models.country import Country
+        
         db_activity = db.query(Activity).filter(Activity.id == activity_id).first()
         if not db_activity:
             return None
@@ -118,6 +137,9 @@ class ActivityService:
         
         # Handle media_asset_ids separately
         media_asset_ids = update_data.pop("media_asset_ids", None)
+        
+        # Handle country_ids separately
+        country_ids = update_data.pop("country_ids", None)
         
         # If name is being updated, update the slug as well
         if "name" in update_data:
@@ -136,6 +158,17 @@ class ActivityService:
                 db_media = db.query(MediaAsset).filter(MediaAsset.id == media_id).first()
                 if db_media:
                     db_activity.media_assets.append(db_media)
+        
+        # Update countries if provided
+        if country_ids is not None:
+            # Clear existing countries
+            db_activity.countries.clear()
+            
+            # Add new countries
+            for country_id in country_ids:
+                db_country = db.query(Country).filter(Country.id == country_id).first()
+                if db_country:
+                    db_activity.countries.append(db_country)
         
         db.commit()
         db.refresh(db_activity)

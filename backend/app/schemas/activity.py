@@ -3,6 +3,7 @@ from typing import Optional, List
 from datetime import datetime
 
 from .media import MediaAssetResponse
+from .country import CountryResponse
 
 # Base Activity Schema
 class ActivityBase(BaseModel):
@@ -16,6 +17,7 @@ class ActivityCreate(ActivityBase):
     is_featured: Optional[bool] = Field(False, description="Whether the activity is featured")
     cover_image_id: Optional[int] = Field(None, description="ID of the cover image media asset")
     media_asset_ids: Optional[List[int]] = Field([], description="List of media asset IDs for the gallery")
+    country_ids: Optional[List[int]] = Field([], description="List of country IDs associated with the activity")
 
 # Schema for updating an Activity
 class ActivityUpdate(BaseModel):
@@ -26,6 +28,7 @@ class ActivityUpdate(BaseModel):
     is_featured: Optional[bool] = Field(None, description="Whether the activity is featured")
     cover_image_id: Optional[int] = Field(None, description="ID of the cover image media asset")
     media_asset_ids: Optional[List[int]] = Field(None, description="List of media asset IDs for the gallery")
+    country_ids: Optional[List[int]] = Field(None, description="List of country IDs associated with the activity")
 
 # Schema for Activity response
 class ActivityResponse(ActivityBase):
@@ -35,6 +38,7 @@ class ActivityResponse(ActivityBase):
     is_featured: bool = Field(default=False, description="Whether the activity is featured")
     cover_image: Optional[MediaAssetResponse] = Field(None, description="Cover image of the activity")
     media_assets: List[MediaAssetResponse] = Field([], description="Gallery of media assets for the activity")
+    countries: List[CountryResponse] = Field([], description="Countries associated with the activity")
     created_at: datetime
     updated_at: datetime
     

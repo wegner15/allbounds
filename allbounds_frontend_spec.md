@@ -97,7 +97,7 @@
 
 ---
 
-## 7) Pages & UX
+## 7) Pages & UX 
 
 - Country: hero, stats, packages, activities.  
 - Packages: filters, detail with itinerary & reviews.  

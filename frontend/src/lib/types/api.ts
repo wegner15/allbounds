@@ -120,6 +120,7 @@ export interface ActivityCreate {
   is_featured?: boolean;
   cover_image_id?: number | null;
   media_asset_ids?: number[];
+  country_ids?: number[];
 }
 
 export type ActivityUpdate = Partial<ActivityCreate>;

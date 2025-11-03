@@ -156,12 +156,14 @@ const RecommendedHotels: React.FC = () => {
                         </svg>
                         {hotel.city}, {hotel.country?.name}
                       </div>
-                      <div className="text-right">
-                        <p className="text-xs text-gray-400 uppercase tracking-wide">From</p>
-                        <p className="text-lg font-bold text-green-600">
-                          ${hotel.price_category === 'Budget' ? '50' : hotel.price_category === 'Mid-range' ? '120' : hotel.price_category === 'Luxury' ? '300' : '100'}/night
-                        </p>
-                      </div>
+                      {hotel.price_category && (
+                        <div className="text-right">
+                          <p className="text-xs text-gray-400 uppercase tracking-wide">From</p>
+                          <p className="text-lg font-bold text-green-600">
+                            ${hotel.price_category === 'Budget' ? '50' : hotel.price_category === 'Mid-range' ? '120' : hotel.price_category === 'Luxury' ? '300' : '100'}/night
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Link>

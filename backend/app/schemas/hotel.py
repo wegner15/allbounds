@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
@@ -65,8 +65,7 @@ class HotelResponse(HotelBase):
         """Convert None to False for boolean fields"""
         return v if v is not None else False
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, extra='ignore')
 
 # Schema for Hotel with Country details
 class HotelWithCountryResponse(HotelResponse):

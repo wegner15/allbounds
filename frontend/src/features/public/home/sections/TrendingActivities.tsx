@@ -108,22 +108,18 @@ const TrendingActivities: React.FC = () => {
                 </button>
               </div>
                <div className="p-4">
-                 <h3 className="font-bold text-lg text-gray-800 truncate h-12 group-hover:text-blue-600 transition-colors">{activity.name}</h3>
-                 <p className="text-sm text-gray-600 mb-2 h-10 line-clamp-2">{activity.summary || activity.countries?.map(c => c.name).join(', ') || 'No description available'}</p>
-                <div className="flex items-center text-sm text-gray-600 mb-2">
-                    <Clock className="w-4 h-4 mr-1" />
-                    <span>{activity.duration || 'N/A'}</span>
-                </div>
-                <div className="flex items-center mb-4">
-                   <div className="flex items-center text-sm text-gray-600">
-                        <Star className="w-4 h-4 mr-1 text-yellow-400 fill-current" />
-                        <span className="font-bold mr-1">{activity.rating || 'N/A'}</span>
-                        <span>({activity.review_count || 0} reviews)</span>
-                    </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-500">From</p>
-                  <p className="text-xl font-bold text-gray-900">US${activity.price || 'N/A'}</p>
+                 <h3 className="font-bold text-lg text-gray-800 truncate group-hover:text-blue-600 transition-colors mb-2">{activity.name}</h3>
+                 <p className="text-sm text-gray-600 mb-3 line-clamp-2">{activity.summary || activity.countries?.map(c => c.name).join(', ') || 'No description available'}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center text-sm text-gray-600">
+                      <Clock className="w-4 h-4 mr-1" />
+                      <span>{activity.duration || 'N/A'}</span>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                      <Star className="w-4 h-4 mr-1 text-yellow-400 fill-current" />
+                      <span className="font-bold mr-1">{activity.rating || 'N/A'}</span>
+                      <span>({activity.review_count || 0} reviews)</span>
+                  </div>
                 </div>
               </div>
             </div>

@@ -12,6 +12,7 @@ import ImageCarousel from '../../components/ui/ImageCarousel';
 import { EnhancedItineraryDisplay } from '../../components/ui/EnhancedItineraryDisplay';
 import { TextDisplay } from '../../components/ui/RichTextDisplay';
 import GroupTripBookingForm from '../../components/forms/GroupTripBookingForm';
+import SimilarGroupTrips from '../../components/recommendations/SimilarGroupTrips';
 
 
 // Utils
@@ -387,6 +388,9 @@ const GroupTripDetailPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Similar Group Trips Section */}
+        <SimilarGroupTrips groupTripId={tripDetail.id} limit={4} />
       </div>
 
       {/* Booking Form Modal */}

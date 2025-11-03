@@ -87,6 +87,18 @@ def get_group_trip_details_by_slug(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group trip not found")
     return group_trip_details
 
+@router.get("/{group_trip_id}/similar", response_model=List[GroupTripResponse])
+def get_similar_group_trips(
+    group_trip_id: int,
+    db: Session = Depends(get_db),
+    limit: int = Query(4, description="Number of similar trips to return"),
+) -> Any:
+    """
+    Retrieve similar group trips based on country and holiday types.
+    """
+    similar_trips = group_trip_service.get_similar_group_trips(db, group_trip_id=group_trip_id, limit=limit)
+    return similar_trips
+
 @router.post("/", response_model=GroupTripResponse)
 def create_group_trip(
     *,

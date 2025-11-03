@@ -81,6 +81,59 @@ class GroupTripService:
         """
         return db.query(GroupTrip).filter(GroupTrip.slug == slug, GroupTrip.is_active == True).first()
     
+    def get_similar_group_trips(self, db: Session, group_trip_id: int, limit: int = 4) -> List[GroupTrip]:
+        """
+        Retrieve similar group trips based on country and holiday types.
+        """
+        # Get the current group trip
+        current_trip = self.get_group_trip(db, group_trip_id)
+        if not current_trip:
+            return []
+        
+        # Get trips from the same country with similar holiday types
+        from app.models.holiday_type import HolidayType
+        
+        query = db.query(GroupTrip).options(
+            joinedload(GroupTrip.departures),
+            joinedload(GroupTrip.country),
+            joinedload(GroupTrip.holiday_types),
+            joinedload(GroupTrip.inclusion_items),
+            joinedload(GroupTrip.exclusion_items)
+        ).filter(
+            GroupTrip.id != group_trip_id,  # Exclude current trip
+            GroupTrip.is_active == True,
+            GroupTrip.country_id == current_trip.country_id  # Same country
+        )
+        
+        # If the current trip has holiday types, prioritize trips with matching holiday types
+        if current_trip.holiday_types:
+            holiday_type_ids = [ht.id for ht in current_trip.holiday_types]
+            query = query.filter(
+                GroupTrip.holiday_types.any(HolidayType.id.in_(holiday_type_ids))
+            )
+        
+        similar_trips = query.limit(limit).all()
+        
+        # If we don't have enough similar trips, get more from the same country
+        if len(similar_trips) < limit:
+            remaining = limit - len(similar_trips)
+            additional_trips = db.query(GroupTrip).options(
+                joinedload(GroupTrip.departures),
+                joinedload(GroupTrip.country),
+                joinedload(GroupTrip.holiday_types),
+                joinedload(GroupTrip.inclusion_items),
+                joinedload(GroupTrip.exclusion_items)
+            ).filter(
+                GroupTrip.id != group_trip_id,
+                GroupTrip.is_active == True,
+                GroupTrip.country_id == current_trip.country_id,
+                GroupTrip.id.notin_([t.id for t in similar_trips])
+            ).limit(remaining).all()
+            
+            similar_trips.extend(additional_trips)
+        
+        return similar_trips
+    
     def get_group_trip_details_by_slug(self, db: Session, slug: str) -> Optional[Dict[str, Any]]:
         """
         Get group trip details with gallery images formatted for frontend.

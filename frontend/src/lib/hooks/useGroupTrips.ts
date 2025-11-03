@@ -104,6 +104,17 @@ export const useGroupTripDepartures = (groupTripId: number) => {
   });
 };
 
+// Hook for fetching similar group trips
+export const useSimilarGroupTrips = (groupTripId: number, limit: number = 4) => {
+  return useQuery({
+    queryKey: ['groupTrip', groupTripId, 'similar', limit],
+    queryFn: async () => {
+      return apiClient.get<GroupTrip[]>(`/api/v1/group-trips/${groupTripId}/similar?limit=${limit}`);
+    },
+    enabled: !!groupTripId,
+  });
+};
+
 // Hook for creating a new group trip (admin only)
 export const useCreateGroupTrip = () => {
   const queryClient = useQueryClient();

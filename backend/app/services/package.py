@@ -99,6 +99,51 @@ class PackageService:
         """
         return db.query(Package).filter(Package.slug == slug, Package.is_active == True).first()
     
+    def get_similar_packages(self, db: Session, package_id: int, limit: int = 4) -> List[Package]:
+        """
+        Retrieve similar packages based on country and holiday types.
+        """
+        # Get the current package
+        current_package = self.get_package(db, package_id)
+        if not current_package:
+            return []
+        
+        # Get packages from the same country with similar holiday types
+        query = db.query(Package).options(
+            joinedload(Package.country),
+            joinedload(Package.holiday_types)
+        ).filter(
+            Package.id != package_id,  # Exclude current package
+            Package.is_active == True,
+            Package.country_id == current_package.country_id  # Same country
+        )
+        
+        # If the current package has holiday types, prioritize packages with matching holiday types
+        if current_package.holiday_types:
+            holiday_type_ids = [ht.id for ht in current_package.holiday_types]
+            query = query.filter(
+                Package.holiday_types.any(HolidayType.id.in_(holiday_type_ids))
+            )
+        
+        similar_packages = query.limit(limit).all()
+        
+        # If we don't have enough similar packages, get more from the same country
+        if len(similar_packages) < limit:
+            remaining = limit - len(similar_packages)
+            additional_packages = db.query(Package).options(
+                joinedload(Package.country),
+                joinedload(Package.holiday_types)
+            ).filter(
+                Package.id != package_id,
+                Package.is_active == True,
+                Package.country_id == current_package.country_id,
+                Package.id.notin_([p.id for p in similar_packages])
+            ).limit(remaining).all()
+            
+            similar_packages.extend(additional_packages)
+        
+        return similar_packages
+    
     def get_package_details_by_slug(self, db: Session, slug: str) -> Optional[Dict[str, Any]]:
         """
         Get package details with gallery images formatted for frontend.

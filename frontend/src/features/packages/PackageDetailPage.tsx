@@ -14,6 +14,7 @@ import { TextDisplay } from '../../components/ui/RichTextDisplay';
 import PriceChartDisplay from '../../components/ui/PriceChartDisplay';
 import PackageBookingForm from '../../components/forms/PackageBookingForm';
 import InquiryForm from '../../components/forms/InquiryForm';
+import SimilarPackages from '../../components/recommendations/SimilarPackages';
 
 // Import types from API
 
@@ -395,6 +396,9 @@ const PackageDetailPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Similar Packages Section */}
+        <SimilarPackages packageId={packageDetail.id} limit={4} />
       </div>
 
       {/* Booking Form Modal */}

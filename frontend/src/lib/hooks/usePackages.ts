@@ -92,6 +92,17 @@ export const usePackageDetailsBySlug = (slug: string) => {
   });
 };
 
+// Hook for fetching similar packages
+export const useSimilarPackages = (packageId: number, limit: number = 4) => {
+  return useQuery({
+    queryKey: ['package', packageId, 'similar', limit],
+    queryFn: async () => {
+      return apiClient.get<Package[]>(`/api/v1/packages/${packageId}/similar?limit=${limit}`);
+    },
+    enabled: !!packageId,
+  });
+};
+
 // Hook for fetching package details with gallery by ID
 export const usePackageDetailsById = (id: number) => {
   return useQuery({

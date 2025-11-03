@@ -117,6 +117,18 @@ def get_package_details_by_slug(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Package not found")
     return package_details
 
+@router.get("/{package_id}/similar", response_model=List[PackageWithCountryResponse])
+def get_similar_packages(
+    package_id: int,
+    db: Session = Depends(get_db),
+    limit: int = Query(4, description="Number of similar packages to return"),
+) -> Any:
+    """
+    Retrieve similar packages based on country and holiday types.
+    """
+    similar_packages = package_service.get_similar_packages(db, package_id=package_id, limit=limit)
+    return similar_packages
+
 @router.post("/", response_model=PackageResponse)
 def create_package(
     *,

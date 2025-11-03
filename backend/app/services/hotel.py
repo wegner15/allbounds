@@ -73,7 +73,7 @@ class HotelService:
                 "city": hotel.city,
                 "stars": hotel.stars,
                 "price_category": hotel.price_category,
-                "amenities": hotel.amenities,
+                "amenity_ids": [amenity.id for amenity in hotel.amenities] if hotel.amenities else [],
                 "created_at": hotel.created_at,
                 "updated_at": hotel.updated_at,
             }
@@ -179,7 +179,7 @@ class HotelService:
                 "city": hotel.city,
                 "stars": hotel.stars,
                 "price_category": hotel.price_category,
-                "amenities": hotel.amenities,
+                "amenity_ids": [amenity.id for amenity in hotel.amenities] if hotel.amenities else [],
                 "created_at": hotel.created_at,
                 "updated_at": hotel.updated_at,
             }
@@ -258,7 +258,7 @@ class HotelService:
             "address": hotel.address,
             "city": hotel.city,
             "price_category": hotel.price_category,
-            "amenities": hotel.amenities,
+            "amenity_ids": [amenity.id for amenity in hotel.amenities] if hotel.amenities else [],
             "check_in_time": hotel.check_in_time,
             "check_out_time": hotel.check_out_time,
             "cover_image": cover_image,

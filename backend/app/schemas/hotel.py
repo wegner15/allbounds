@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator, ConfigDict, model_serializer
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
@@ -72,6 +72,18 @@ class HotelWithCountryResponse(HotelResponse):
     country: CountryResponse
     hotel_type: Optional[HotelTypeResponse] = None
     amenities: List[AmenityResponse] = Field(default_factory=list, description="List of amenities associated with the hotel")
+    amenity_ids: Optional[List[int]] = Field(default=None, description="List of amenity IDs for form editing")
+    
+    @model_serializer(mode='wrap')
+    def serialize_model(self, serializer, info):
+        """Custom serializer to add amenity_ids from amenities"""
+        data = serializer(self)
+        # Extract amenity IDs from amenities if not already set
+        if 'amenities' in data and data['amenities']:
+            data['amenity_ids'] = [amenity['id'] for amenity in data['amenities']]
+        elif 'amenity_ids' not in data or data['amenity_ids'] is None:
+            data['amenity_ids'] = []
+        return data
     
     class Config:
         from_attributes = True

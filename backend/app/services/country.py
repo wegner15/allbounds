@@ -45,7 +45,7 @@ class CountryService:
 
     def get_countries_with_activities(self, db: Session, skip: int = 0, limit: int = 100) -> List[Country]:
         """
-        Retrieve countries that have active activities.
+        Retrieve countries that have active and featured activities.
         """
         from app.models.activity import Activity
 
@@ -53,7 +53,8 @@ class CountryService:
             Country.activities
         ).filter(
             Country.is_active == True,
-            Activity.is_active == True
+            Activity.is_active == True,
+            Activity.is_featured == True
         ).distinct().offset(skip).limit(limit).all()
 
     def get_countries_with_attractions(self, db: Session, skip: int = 0, limit: int = 100) -> List[Country]:

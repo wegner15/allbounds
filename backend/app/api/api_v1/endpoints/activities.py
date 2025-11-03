@@ -44,11 +44,15 @@ def get_featured_activities(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
+    country: str = Query(None, description="Filter featured activities by country name"),
 ) -> Any:
     """
-    Retrieve featured activities.
+    Retrieve featured activities, optionally filtered by country.
     """
-    activities = activity_service.get_featured_activities(db, skip=skip, limit=limit)
+    if country:
+        activities = activity_service.get_featured_activities_by_country(db, country_name=country, skip=skip, limit=limit)
+    else:
+        activities = activity_service.get_featured_activities(db, skip=skip, limit=limit)
     return activities
 
 @router.get("/{activity_id}", response_model=ActivityResponse)

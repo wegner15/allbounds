@@ -60,6 +60,24 @@ class ActivityService:
             joinedload(Activity.media_assets)
         ).offset(skip).limit(limit).all()
     
+    def get_featured_activities_by_country(self, db: Session, country_name: str, skip: int = 0, limit: int = 100) -> List[Activity]:
+        """
+        Retrieve featured activities filtered by country name.
+        """
+        from app.models.country import Country
+        
+        return db.query(Activity).join(
+            Activity.countries
+        ).filter(
+            Activity.is_active == True,
+            Activity.is_featured == True,
+            Country.name == country_name
+        ).options(
+            joinedload(Activity.cover_image),
+            joinedload(Activity.media_assets),
+            joinedload(Activity.countries)
+        ).offset(skip).limit(limit).all()
+    
     def create_activity(self, db: Session, activity_create: ActivityCreate) -> Activity:
         """
         Create a new activity.

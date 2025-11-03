@@ -12,14 +12,14 @@ export interface ActivityWithDetails extends Activity {
   cover_image?: MediaAsset;
 }
 
-// Fetch trending activities, optionally filtered by country
+// Fetch trending activities (featured), optionally filtered by country
 export const useTrendingActivities = (countryName?: string) => {
   return useQuery<ActivityWithDetails[], Error>({
     queryKey: ['trending-activities', countryName],
     queryFn: async () => {
-      let url = `${endpoints.activities.list()}?limit=12`;
+      let url = endpoints.activities.featured();
       if (countryName) {
-        url += `&country=${encodeURIComponent(countryName)}`;
+        url += `?country=${encodeURIComponent(countryName)}`;
       }
       const response = await apiClient.get<ActivityWithDetails[]>(url);
       return response;

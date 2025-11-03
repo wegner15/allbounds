@@ -27,7 +27,7 @@ class HotelBase(BaseModel):
     
 # Schema for creating a new Hotel
 class HotelCreate(HotelBase):
-    amenities: Optional[Dict[str, Any]] = Field(None, description="DEPRECATED: Old amenities as JSON (for backward compatibility)")
+    pass
 
 # Schema for updating a Hotel
 class HotelUpdate(BaseModel):
@@ -43,7 +43,6 @@ class HotelUpdate(BaseModel):
     longitude: Optional[float] = Field(None, description="Longitude coordinate of the hotel")
     price_category: Optional[str] = Field(None, description="Price category (e.g., Budget, Mid-range, Luxury)")
     amenity_ids: Optional[List[int]] = Field(None, description="List of amenity IDs associated with the hotel")
-    amenities: Optional[Dict[str, Any]] = Field(None, description="DEPRECATED: Old amenities as JSON (for backward compatibility)")
     check_in_time: Optional[str] = Field(None, description="Standard check-in time")
     check_out_time: Optional[str] = Field(None, description="Standard check-out time")
     image_id: Optional[str] = Field(None, description="Cloudflare Image ID for the hotel's primary image")

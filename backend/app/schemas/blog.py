@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 from datetime import datetime
 
@@ -50,6 +50,12 @@ class BlogPostResponse(BlogPostBase):
     updated_at: datetime
     published_at: Optional[datetime] = None
     tags: List[TagResponse] = []
+    
+    @field_validator('is_published', 'is_active', 'is_featured', mode='before')
+    @classmethod
+    def validate_boolean_fields(cls, v):
+        """Convert None to False for boolean fields"""
+        return v if v is not None else False
     
     class Config:
         from_attributes = True

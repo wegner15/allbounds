@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 from datetime import datetime
 
@@ -32,11 +32,17 @@ class ActivityResponse(ActivityBase):
     id: int
     slug: str = Field(..., description="URL-friendly slug for the activity", example="safari")
     is_active: bool = Field(..., description="Whether the activity is active")
-    is_featured: bool = Field(False, description="Whether the activity is featured")
+    is_featured: bool = Field(default=False, description="Whether the activity is featured")
     cover_image: Optional[MediaAssetResponse] = Field(None, description="Cover image of the activity")
     media_assets: List[MediaAssetResponse] = Field([], description="Gallery of media assets for the activity")
     created_at: datetime
     updated_at: datetime
+    
+    @field_validator('is_featured', mode='before')
+    @classmethod
+    def validate_is_featured(cls, v):
+        """Convert None to False for is_featured field"""
+        return v if v is not None else False
     
     class Config:
         from_attributes = True

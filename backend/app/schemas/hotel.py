@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
@@ -59,6 +59,12 @@ class HotelResponse(HotelBase):
     image_url: Optional[str] = Field(None, description="URL of the hotel's cover image")
     created_at: datetime
     updated_at: datetime
+
+    @field_validator('is_active', 'is_featured', mode='before')
+    @classmethod
+    def validate_boolean_fields(cls, v):
+        """Convert None to False for boolean fields"""
+        return v if v is not None else False
 
     class Config:
         from_attributes = True

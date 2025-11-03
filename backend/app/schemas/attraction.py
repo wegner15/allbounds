@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List, ClassVar, Type, Any
 from datetime import datetime
 
@@ -59,6 +59,13 @@ class AttractionResponse(AttractionBase):
     created_at: datetime
     updated_at: datetime
     cover_image: Optional[str] = Field(None, description="Cover image file path")
+    
+    @field_validator('is_active', mode='before')
+    @classmethod
+    def validate_boolean_fields(cls, v):
+        """Convert None to False for boolean fields"""
+        return v if v is not None else False
+    
     gallery_images: Optional[List[GalleryImageResponse]] = Field(None, description="Gallery images")
     
     class Config:

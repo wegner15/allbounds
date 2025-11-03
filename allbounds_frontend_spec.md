@@ -152,5 +152,4 @@
 - [ ] Analytics & CI pipeline  
 
 ---
-Email: admin@allbounds.com
-Password: Admin123!
+4

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List, ClassVar, Type, Any
 from datetime import datetime, date
 
@@ -100,6 +100,12 @@ class GroupTripResponse(GroupTripBase):
     inclusion_items: List[InclusionResponse] = Field(default_factory=list, description="Inclusions associated with this group trip")
     exclusion_items: List[ExclusionResponse] = Field(default_factory=list, description="Exclusions associated with this group trip")
     departures: List[GroupTripDepartureResponse] = Field(default_factory=list, description="Departures associated with this group trip")
+
+    @field_validator('is_active', 'is_featured', mode='before')
+    @classmethod
+    def validate_boolean_fields(cls, v):
+        """Convert None to False for boolean fields"""
+        return v if v is not None else False
 
     class Config:
         from_attributes = True

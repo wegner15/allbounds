@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List, ClassVar, Type, Any
 from datetime import datetime
 
@@ -60,6 +60,12 @@ class PackageResponse(PackageBase):
     holiday_types: List[HolidayTypeResponse] = Field(default_factory=list, description="Holiday types associated with this package")
     inclusion_items: List[InclusionResponse] = Field(default_factory=list, description="Inclusions associated with this package")
     exclusion_items: List[ExclusionResponse] = Field(default_factory=list, description="Exclusions associated with this package")
+    
+    @field_validator('is_active', 'is_featured', 'is_published', mode='before')
+    @classmethod
+    def validate_boolean_fields(cls, v):
+        """Convert None to False for boolean fields"""
+        return v if v is not None else False
     
     class Config:
         from_attributes = True

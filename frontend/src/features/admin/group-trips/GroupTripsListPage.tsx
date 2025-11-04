@@ -1,40 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useGroupTrips } from '../../../lib/hooks/useGroupTrips';
+import { useDeleteGroupTrip, useGroupTrips } from '../../../lib/hooks/useGroupTrips';
 import { useCountries } from '../../../lib/hooks/useDestinations';
 import { apiClient } from '../../../lib/api';
 import CloudflareImage from '../../../components/ui/CloudflareImage';
-
-// Define the GroupTrip interface
-interface GroupTrip {
-  id: string;
-  name: string;
-  slug: string;
-  image_id?: string;
-  country_id: number;
-  is_active: boolean;
-}
 
 interface Country {
   id: number;
   name: string;
 }
 
-
 const GroupTripsListPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { data: groupTrips, isLoading: tripsLoading, error: tripsError } = useGroupTrips();
   const { data: countries, isLoading: countriesLoading } = useCountries();
-  const [tripDates, setTripDates] = useState<Record<string, {start?: string, end?: string}>>({});
-  
+  const deleteGroupTrip = useDeleteGroupTrip();
+  const [tripDates, setTripDates] = useState<Record<number, { start?: string; end?: string }>>({});
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+
   // Simplified direct approach to get dates
   useEffect(() => {
     if (!groupTrips || !Array.isArray(groupTrips)) return;
-    
+
     // We'll use this function for each trip when rendering instead of pre-fetching all
     const loadDatesForTrips = async () => {
-      const dates: Record<string, {start?: string, end?: string}> = {};
-      
+      const dates: Record<number, { start?: string; end?: string }> = {};
+
       for (let i = 0; i < groupTrips.length; i++) {
         const trip = groupTrips[i];
         try {
@@ -68,7 +59,7 @@ const GroupTripsListPage: React.FC = () => {
   };
   
   // Get formatted dates for a trip
-  const getFormattedDates = (tripId: string): string => {
+  const getFormattedDates = (tripId: number): string => {
     const dates = tripDates[tripId];
     if (!dates || !dates.start || !dates.end) return 'No dates set';
     
@@ -86,13 +77,23 @@ const GroupTripsListPage: React.FC = () => {
   const error = tripsError;
   
   // Filter group trips based on search query
-  const filteredGroupTrips = (groupTrips as any[] | undefined)?.filter(trip => {
+  const filteredGroupTrips = groupTrips?.filter(trip => {
     const nameMatch = trip.name.toLowerCase().includes(searchQuery.toLowerCase());
     // Check country name
     const countryName = getCountryName(trip.country_id).toLowerCase();
     const destinationMatch = countryName.includes(searchQuery.toLowerCase());
     return nameMatch || destinationMatch;
   });
+
+  const handleDelete = async (groupTripId: number) => {
+    try {
+      await deleteGroupTrip.mutateAsync(groupTripId);
+      setDeleteConfirmId(null);
+    } catch (err) {
+      console.error('Failed to delete group trip:', err);
+      alert('Failed to delete group trip. Please try again.');
+    }
+  };
 
   return (
     <>
@@ -220,20 +221,29 @@ const GroupTripsListPage: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Link
-                        to={`/admin/group-trips/${trip.id}/edit`}
-                        className="text-teal hover:text-teal-dark mr-4"
-                      >
-                        Edit
-                      </Link>
-                      <Link
-                        to={`/group-trips/${trip.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-gray-600 hover:text-gray-900"
-                      >
-                        View
-                      </Link>
+                      <div className="flex items-center justify-end space-x-4">
+                        <Link
+                          to={`/admin/group-trips/${trip.id}/edit`}
+                          className="text-teal hover:text-teal-dark"
+                        >
+                          Edit
+                        </Link>
+                        <Link
+                          to={`/group-trips/${trip.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-600 hover:text-gray-900"
+                        >
+                          View
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => setDeleteConfirmId(trip.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -263,6 +273,36 @@ const GroupTripsListPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Delete confirmation modal */}
+      {deleteConfirmId !== null && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Confirm Delete</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this group trip? This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmId(null)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                disabled={deleteGroupTrip.isPending}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(deleteConfirmId)}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                disabled={deleteGroupTrip.isPending}
+              >
+                {deleteGroupTrip.isPending ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

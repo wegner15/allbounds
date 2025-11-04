@@ -191,3 +191,19 @@ export const useGroupTripsByHolidayType = (holidayTypeSlug: string, options?: { 
     enabled: !!holidayTypeSlug,
   });
 };
+
+// Hook for deleting a group trip (admin only)
+export const useDeleteGroupTrip = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (groupTripId: number) => {
+      return apiClient.delete(endpoints.groupTrips.delete(groupTripId));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['groupTrips'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['groupTrip'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['groupTripDetails'], exact: false });
+    },
+  });
+};

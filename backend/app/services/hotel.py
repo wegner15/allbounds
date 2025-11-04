@@ -297,7 +297,7 @@ class HotelService:
             latitude=hotel_create.latitude,
             longitude=hotel_create.longitude,
             price_category=hotel_create.price_category,
-            amenities_json=hotel_create.amenities,  # Keep old JSON for backward compatibility
+            amenities_json=None,  # Will be populated from amenity_ids relationship
             check_in_time=hotel_create.check_in_time,
             check_out_time=hotel_create.check_out_time,
             image_id=hotel_create.image_id,

@@ -32,6 +32,8 @@ class GroupTripBase(BaseModel):
 class GroupTripCreate(GroupTripBase):
     inclusion_ids: Optional[List[int]] = Field(default_factory=list, description="List of inclusion IDs to associate with this group trip")
     exclusion_ids: Optional[List[int]] = Field(default_factory=list, description="List of exclusion IDs to associate with this group trip")
+    is_active: Optional[bool] = Field(True, description="Whether the group trip is active")
+    is_featured: Optional[bool] = Field(False, description="Whether the group trip is featured")
 
 # Schema for updating a Group Trip
 class GroupTripUpdate(BaseModel):

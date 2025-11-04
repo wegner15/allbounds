@@ -249,6 +249,9 @@ class GroupTripService:
             exclusions=group_trip_create.exclusions,
             min_participants=group_trip_create.min_participants,
             max_participants=group_trip_create.max_participants,
+            image_id=group_trip_create.image_id,
+            is_active=group_trip_create.is_active if group_trip_create.is_active is not None else True,
+            is_featured=group_trip_create.is_featured if group_trip_create.is_featured is not None else False,
             slug=slug,
         )
         db.add(db_group_trip)

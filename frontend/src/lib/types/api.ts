@@ -92,6 +92,7 @@ export interface GroupTripWithDepartures {
   min_participants: number;
   image_id?: string;
   is_active: boolean;
+  itinerary?: string | PackageItineraryDay[] | null;
   departures: GroupTripDeparture[];
 }
 
@@ -299,10 +300,11 @@ export interface GroupTrip extends BaseModel {
   price: number;
   image_url?: string;
   image_id?: string;
+  package_id?: number;
   is_active: boolean;
   inclusions?: string[];
   exclusions?: string[];
-  itinerary?: PackageItineraryDay[];
+  itinerary?: string | PackageItineraryDay[] | null;
   holiday_types: HolidayType[];
   gallery_images?: MediaAsset[];
   rating?: number;

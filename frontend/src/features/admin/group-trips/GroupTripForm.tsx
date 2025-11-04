@@ -26,6 +26,7 @@ const groupTripSchema = z.object({
   start_date: z.string().min(1, 'Start date is required'),
   end_date: z.string().min(1, 'End date is required'),
   duration_days: z.number().min(1, 'Duration must be at least 1 day'),
+  min_participants: z.number().optional(),
   max_participants: z.number().min(1, 'Maximum participants must be at least 1'),
   price: z.number().min(0, 'Price must be a positive number'),
   inclusion_ids: z.array(z.number()).optional(),
@@ -33,6 +34,7 @@ const groupTripSchema = z.object({
   image_id: z.string().optional(),
   is_active: z.boolean(),
   is_featured: z.boolean(),
+  itinerary: z.string().optional(),
 });
 
 type GroupTripFormData = z.infer<typeof groupTripSchema>;
@@ -102,6 +104,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
           country_id: groupTripData.country_id,
           package_id: groupTripData.package_id || 0,
           duration_days: groupTripData.duration_days || 1,
+          min_participants: groupTripData.min_participants || 0,
           max_participants: groupTripData.max_participants || 10,
           price: groupTripData.price || 0,
           inclusion_ids: groupTripData.inclusion_items?.map((item: any) => item.id) || [],
@@ -111,6 +114,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
           is_featured: groupTripData.is_featured !== undefined ? groupTripData.is_featured : false,
           start_date: groupTripData.start_date || '',
           end_date: groupTripData.end_date || '',
+          itinerary: groupTripData.itinerary || '',
         }
       : {
           name: '',
@@ -120,6 +124,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
           country_id: 0,
           package_id: 0,
           duration_days: 1,
+          min_participants: 0,
           max_participants: 10,
           price: 0,
           inclusion_ids: [],
@@ -128,7 +133,8 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
           is_active: true,
           is_featured: false,
           start_date: '',
-          end_date: ''
+          end_date: '',
+          itinerary: ''
         }
   });
   

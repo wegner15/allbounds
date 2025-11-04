@@ -1,16 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient, endpoints } from '../../../lib/api';
 import type { ActivityResponse } from '../../../lib/types/api';
 import Button from '../../../components/ui/Button';
 import { getCloudflareImageUrl } from '../../../utils/imageUtils';
+import { useDeleteActivity } from '../../../lib/hooks/useActivities';
 
 const ActivityListPage: React.FC = () => {
   const { data: activities, isLoading, error } = useQuery<ActivityResponse[]>({
     queryKey: ['admin-activities'],
     queryFn: () => apiClient.get(endpoints.activities.list()),
   });
+  const deleteActivity = useDeleteActivity();
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteActivity.mutateAsync(id);
+      setDeleteConfirmId(null);
+    } catch (error) {
+      console.error('Failed to delete activity:', error);
+      alert('Failed to delete activity. Please try again.');
+    }
+  };
+
+  const getSummaryText = (value?: string | null) => {
+    if (!value) return '';
+    const plainText = value.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+    return plainText;
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -60,8 +79,10 @@ const ActivityListPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{activity.name}</div>
-                    {activity.description && (
-                      <div className="text-sm text-gray-500 truncate max-w-xs">{activity.description}</div>
+                    {getSummaryText(activity.summary || activity.description) && (
+                      <div className="text-sm text-gray-500 truncate max-w-xs">
+                        {getSummaryText(activity.summary || activity.description)}
+                      </div>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{activity.slug}</td>
@@ -75,12 +96,51 @@ const ActivityListPage: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <Link to={`/admin/activities/${activity.id}/edit`} className="text-blue-600 hover:underline">Edit</Link>
+                    <div className="flex items-center justify-end space-x-4">
+                      <Link to={`/admin/activities/${activity.id}/edit`} className="text-blue-600 hover:underline">Edit</Link>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteConfirmId(activity.id)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Confirm Delete</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this activity? This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmId(null)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                disabled={deleteActivity.isPending}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(deleteConfirmId)}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                disabled={deleteActivity.isPending}
+              >
+                {deleteActivity.isPending ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

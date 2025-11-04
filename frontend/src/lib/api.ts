@@ -200,6 +200,15 @@ export const endpoints = {
     setCoverImage: (id: number) => `/hotels/${id}/cover-image`,
   },
 
+  // Activities
+  activities: {
+    list: () => '/activities/',
+    create: () => '/activities/',
+    detail: (id: number) => `/activities/${id}`,
+    update: (id: number) => `/activities/${id}`,
+    delete: (id: number) => `/activities/${id}`,
+  },
+
   // Group Trips
   groupTrips: {
     list: () => '/group-trips/',

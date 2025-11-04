@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient, endpoints } from '../../../lib/api';
 import type { ActivityResponse } from '../../../lib/types/api';
 import Button from '../../../components/ui/Button';
+import { getCloudflareImageUrl } from '../../../utils/imageUtils';
 
 const ActivityListPage: React.FC = () => {
   const { data: activities, isLoading, error } = useQuery<ActivityResponse[]>({
@@ -37,17 +38,25 @@ const ActivityListPage: React.FC = () => {
               {activities.map(activity => (
                 <tr key={activity.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {activity.cover_image_id && activity.media_assets?.length > 0 ? (
-                      <img 
-                        src={`${import.meta.env.VITE_CLOUDFLARE_IMAGES_DELIVERY_URL}/${activity.media_assets.find(asset => asset.id === activity.cover_image_id)?.storage_key || ''}/medium`}
-                        alt={activity.media_assets.find(asset => asset.id === activity.cover_image_id)?.alt_text || activity.name}
-                        className="w-12 h-12 object-cover rounded border"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 bg-gray-200 rounded border flex items-center justify-center">
-                        <span className="text-xs text-gray-500">No image</span>
-                      </div>
-                    )}
+                    {(() => {
+                      const coverMedia = activity.cover_image
+                        ? activity.cover_image
+                        : activity.media_assets.find(asset => asset.id === (activity.cover_image?.id || activity.cover_image_id));
+                      const sourceId = coverMedia?.storage_key || coverMedia?.file_path || coverMedia?.url;
+                      const coverUrl = sourceId ? getCloudflareImageUrl(sourceId, 'medium') : null;
+                      const resolvedUrl = coverUrl || coverMedia?.url || coverMedia?.file_path;
+                      return resolvedUrl ? (
+                        <img
+                          src={resolvedUrl}
+                          alt={coverMedia?.alt_text || coverMedia?.filename || activity.name}
+                          className="w-12 h-12 object-cover rounded border"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-gray-200 rounded border flex items-center justify-center">
+                          <span className="text-xs text-gray-500">No image</span>
+                        </div>
+                      );
+                    })()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{activity.name}</div>

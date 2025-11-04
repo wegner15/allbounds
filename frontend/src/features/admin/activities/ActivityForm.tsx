@@ -11,6 +11,7 @@ import type { ActivityCreate, ActivityUpdate, MediaAsset } from '../../../lib/ty
 import MediaGallery from '../../../components/media/MediaGallery';
 import CloudflareImageUpload from '../../../components/ui/CloudflareImageUpload';
 import { useCountries } from '../../../lib/hooks/useCountries';
+import { getCloudflareImageUrl } from '../../../utils/imageUtils';
 
 const activitySchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -165,11 +166,19 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ onSubmit, defaultValues, is
             <div className="mt-2 mb-4">
               <p className="text-sm text-gray-600 mb-2">Current cover image:</p>
               <div className="flex items-center space-x-4">
-                <img 
-                  src={`${import.meta.env.VITE_CLOUDFLARE_IMAGES_DELIVERY_URL}/${defaultValues.cover_image.storage_key}/medium`}
-                  alt={defaultValues.cover_image.alt_text || defaultValues.cover_image.filename}
-                  className="w-20 h-20 object-cover rounded border"
-                />
+                {(() => {
+                  const coverImage = defaultValues.cover_image as MediaAsset;
+                  const sourceId = coverImage?.storage_key || coverImage?.file_path || coverImage?.url;
+                  const coverImageUrl = sourceId ? getCloudflareImageUrl(sourceId, 'medium') : null;
+                  const resolvedUrl = coverImageUrl || coverImage?.url || coverImage?.file_path;
+                  return resolvedUrl ? (
+                    <img
+                      src={resolvedUrl}
+                      alt={coverImage?.alt_text || coverImage?.filename}
+                      className="w-20 h-20 object-cover rounded border"
+                    />
+                  ) : null;
+                })()}
                 <div>
                   <p className="text-sm font-medium">{defaultValues.cover_image.filename}</p>
                   <p className="text-xs text-gray-500">ID: {defaultValues.cover_image.id}</p>

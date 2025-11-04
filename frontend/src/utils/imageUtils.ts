@@ -3,7 +3,15 @@
  */
 
 // Cloudflare Images delivery URL from environment or fallback
-const CLOUDFLARE_DELIVERY_URL = 'https://imagedelivery.net/4J4CgzUI_LpQRpA_N1TErQ';
+const DEFAULT_CLOUDFLARE_DELIVERY_URL = 'https://imagedelivery.net/4J4CgzUI_LpQRpA_N1TErQ';
+const CLOUDFLARE_DELIVERY_URL = (import.meta.env.VITE_CLOUDFLARE_IMAGES_DELIVERY_URL || DEFAULT_CLOUDFLARE_DELIVERY_URL).replace(/\/+$/, '');
+
+const normalizeImageId = (imageId: string) => {
+  if (imageId.startsWith('cloudflare://')) {
+    return imageId.replace('cloudflare://', '');
+  }
+  return imageId;
+};
 
 /**
  * Generate a Cloudflare image URL from an image ID
@@ -21,7 +29,7 @@ export const getCloudflareImageUrl = (imageId: string | null | undefined, varian
     return imageId;
   }
   
-  return `${CLOUDFLARE_DELIVERY_URL}/${imageId}/${variant}`;
+  return `${CLOUDFLARE_DELIVERY_URL}/${normalizeImageId(imageId)}/${variant}`;
 };
 
 /**
@@ -36,7 +44,7 @@ export const getImageUrlWithFallback = (
   variant: string = 'public',
   fallbackUrl?: string
 ): string => {
-  const cloudflareUrl = getCloudflareImageUrl(imageId, variant);
+  const cloudflareUrl = getCloudflareImageUrl(imageId ? normalizeImageId(imageId) : imageId, variant);
   
   if (cloudflareUrl) {
     return cloudflareUrl;

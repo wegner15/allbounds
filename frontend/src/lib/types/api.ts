@@ -110,6 +110,7 @@ export interface Activity extends BaseModel {
 export interface ActivityResponse extends Activity {
   media_assets: MediaAsset[];
   cover_image_id?: number;
+  cover_image?: MediaAsset;
 }
 
 export interface ActivityCreate {

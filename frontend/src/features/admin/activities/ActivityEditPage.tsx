@@ -54,10 +54,10 @@ const ActivityEditPage: React.FC = () => {
             summary: activity.summary,
             is_active: activity.is_active,
             is_featured: activity.is_featured || false,
-            cover_image_id: activity.cover_image_id || null,
+            cover_image_id: activity.cover_image?.id || null,
             media_asset_ids: activity.media_assets.map(asset => asset.id),
             country_ids: activity.countries?.map(country => country.id) || [],
-            cover_image: activity.media_assets.find(asset => asset.id === activity.cover_image_id),
+            cover_image: activity.cover_image || null,
             media_assets: activity.media_assets,
           }}
           isEditing

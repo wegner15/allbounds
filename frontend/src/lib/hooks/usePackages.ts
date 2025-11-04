@@ -159,6 +159,22 @@ export const useUpdatePackage = (id: number) => {
   });
 };
 
+// Hook for deleting a package (admin only)
+export const useDeletePackage = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      return apiClient.delete(endpoints.packages.delete(id));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['packages'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['package'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['package-details'], exact: false });
+    },
+  });
+};
+
 // Hook for fetching packages by holiday type
 export const usePackagesByHolidayType = (holidayTypeSlug: string, options?: { skip?: number; limit?: number }) => {
   return useQuery({

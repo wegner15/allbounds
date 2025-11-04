@@ -20,6 +20,7 @@ class HotelService:
     def get_hotels(self, db: Session, skip: int = 0, limit: int = 100, recommended: Optional[bool] = None, country: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Retrieve all hotels with pagination and optional filtering, including cover images.
+        Hotels are ordered by creation date (newest first).
         """
         query = db.query(Hotel).options(
             joinedload(Hotel.country),
@@ -33,6 +34,9 @@ class HotelService:
         if country:
             # Join with country to filter by country name
             query = query.join(Hotel.country).filter(Country.name.ilike(f"%{country}%"))
+
+        # Order by created_at descending (newest first)
+        query = query.order_by(Hotel.created_at.desc())
 
         hotels = query.offset(skip).limit(limit).all()
 
@@ -84,13 +88,14 @@ class HotelService:
     def get_hotels_by_country(self, db: Session, country_id: int, skip: int = 0, limit: int = 100) -> List[Dict[str, Any]]:
         """
         Retrieve all hotels for a specific country with pagination, including cover images.
+        Hotels are ordered by creation date (newest first).
         """
         hotels = db.query(Hotel).options(
             joinedload(Hotel.media_assets)
         ).filter(
             Hotel.country_id == country_id,
             Hotel.is_active == True
-        ).offset(skip).limit(limit).all()
+        ).order_by(Hotel.created_at.desc()).offset(skip).limit(limit).all()
         
         # Format hotels with cover images
         result = []
@@ -131,7 +136,8 @@ class HotelService:
     
     def get_featured_hotels(self, db: Session, skip: int = 0, limit: int = 100) -> List[Dict[str, Any]]:
         """
-        Retrieve featured hotels with pagination, including cover images.
+        Retrieve featured hotels with cover images.
+        Hotels are ordered by creation date (newest first).
         """
         hotels = db.query(Hotel).options(
             joinedload(Hotel.country),
@@ -139,7 +145,7 @@ class HotelService:
         ).filter(
             Hotel.is_active == True,
             Hotel.is_featured == True
-        ).offset(skip).limit(limit).all()
+        ).order_by(Hotel.created_at.desc()).offset(skip).limit(limit).all()
         
         # Format hotels with cover images
         result = []

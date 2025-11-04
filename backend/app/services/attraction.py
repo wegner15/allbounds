@@ -8,18 +8,32 @@ from app.utils.slug import create_slug
 class AttractionService:
     def get_attractions(self, db: Session, skip: int = 0, limit: int = 100) -> List[Attraction]:
         """
-        Retrieve all attractions with pagination.
+        Retrieve all attractions with pagination ordered by newest first.
         """
-        return db.query(Attraction).filter(Attraction.is_active == True).offset(skip).limit(limit).all()
+        return (
+            db.query(Attraction)
+            .filter(Attraction.is_active == True)
+            .order_by(Attraction.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
     
     def get_attractions_by_country(self, db: Session, country_id: int, skip: int = 0, limit: int = 100) -> List[Attraction]:
         """
-        Retrieve all attractions for a specific country with pagination.
+        Retrieve all attractions for a specific country with pagination ordered by newest first.
         """
-        return db.query(Attraction).filter(
-            Attraction.country_id == country_id,
-            Attraction.is_active == True
-        ).offset(skip).limit(limit).all()
+        return (
+            db.query(Attraction)
+            .filter(
+                Attraction.country_id == country_id,
+                Attraction.is_active == True,
+            )
+            .order_by(Attraction.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
     
     def get_attraction(self, db: Session, attraction_id: int) -> Optional[Attraction]:
         """

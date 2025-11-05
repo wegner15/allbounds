@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Star, Heart } from 'lucide-react';
 import { useRecommendedHotels, useCountriesWithHotels } from '../../hooks/useRecommendedHotels';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../../utils/imageUtils';
+import DOMPurify from 'dompurify';
 
 const RecommendedHotels: React.FC = () => {
   const { data: countries, isLoading: countriesLoading } = useCountriesWithHotels();
@@ -145,9 +146,16 @@ const RecommendedHotels: React.FC = () => {
                     <h3 className="font-bold text-xl text-gray-800 mb-2 group-hover:text-blue-600 transition-colors line-clamp-1">
                       {hotel.name}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2 min-h-[2.5rem]">
-                      {hotel.summary || `${hotel.city}, ${hotel.country?.name}`}
-                    </p>
+                    {hotel.summary ? (
+                      <div
+                        className="text-sm text-gray-600 mb-3 line-clamp-2 min-h-[2.5rem]"
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(hotel.summary) }}
+                      />
+                    ) : (
+                      <p className="text-sm text-gray-600 mb-3 line-clamp-2 min-h-[2.5rem]">
+                        {hotel.city}, {hotel.country?.name}
+                      </p>
+                    )}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center text-sm text-gray-500">
                         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

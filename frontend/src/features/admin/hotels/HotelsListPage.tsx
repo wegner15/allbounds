@@ -75,6 +75,7 @@ const HotelsListPage: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cover</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stars</th>
@@ -85,6 +86,26 @@ const HotelsListPage: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredHotels?.map((hotel) => (
                   <tr key={hotel.id}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="h-14 w-14 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
+                        {hotel.cover_image || hotel.image_id ? (
+                          <img
+                            src={hotel.cover_image || hotel.image_id || ''}
+                            alt={hotel.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6 text-gray-300"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l3-4 2 3 3-4 4 5z" />
+                          </svg>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="font-medium text-gray-900">{hotel.name}</div>
                     </td>

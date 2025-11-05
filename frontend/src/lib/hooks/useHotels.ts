@@ -28,6 +28,7 @@ export interface Hotel {
   check_in_time?: string;
   check_out_time?: string;
   image_id?: string;
+  cover_image?: string;
   slug: string;
   is_active: boolean;
   is_featured: boolean;

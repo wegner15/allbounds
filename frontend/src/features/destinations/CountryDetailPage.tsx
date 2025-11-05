@@ -29,6 +29,21 @@ const CountryDetailPage: React.FC = () => {
     },
   });
 
+  const prioritizedHotels = React.useMemo(() => {
+    if (!country?.hotels) {
+      return [];
+    }
+
+    return [...country.hotels].sort((a, b) => {
+      const bHasImage = Boolean(b.cover_image || b.image_id);
+      const aHasImage = Boolean(a.cover_image || a.image_id);
+      if (bHasImage === aHasImage) {
+        return 0;
+      }
+      return bHasImage ? 1 : -1;
+    });
+  }, [country?.hotels]);
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -285,7 +300,7 @@ const CountryDetailPage: React.FC = () => {
               )}
 
               {/* Hotels Section */}
-              {country?.hotels && country.hotels.length > 0 && (
+              {prioritizedHotels.length > 0 && (
                 <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
                   <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-playfair text-charcoal">Featured Hotels</h2>
@@ -294,7 +309,7 @@ const CountryDetailPage: React.FC = () => {
                     </Link>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {country.hotels.slice(0, 4).map(hotel => (
+                    {prioritizedHotels.slice(0, 4).map(hotel => (
                       <Link key={hotel.id} to={`/hotels/${hotel.slug}`} className="group">
                         <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                           <img

@@ -13,6 +13,42 @@ def _cloudflare_image_url(image_id: Optional[str], variant: str = "medium") -> O
         return None
     return f"{cloudflare_settings.delivery_url}/{image_id}/{variant}"
 
+
+def _resolve_media_asset_url(media_asset) -> Optional[str]:
+    if not media_asset or not getattr(media_asset, "is_active", True):
+        return None
+
+    storage_key = getattr(media_asset, "storage_key", None)
+    file_path = getattr(media_asset, "file_path", None)
+
+    if storage_key:
+        return _cloudflare_image_url(storage_key)
+
+    if isinstance(file_path, str) and file_path:
+        if file_path.startswith("http"):
+            return file_path
+        if file_path.startswith("cloudflare://"):
+            # Remove scheme and use remaining as Cloudflare ID
+            parts = file_path.split("cloudflare://", 1)
+            if len(parts) == 2 and parts[1]:
+                return _cloudflare_image_url(parts[1])
+        return _cloudflare_image_url(file_path)
+
+    return None
+
+
+def _get_hotel_cover_image(hotel) -> Optional[str]:
+    primary = _cloudflare_image_url(getattr(hotel, "image_id", None))
+    if primary:
+        return primary
+
+    for media in getattr(hotel, "media_assets", []) or []:
+        asset_url = _resolve_media_asset_url(media)
+        if asset_url:
+            return asset_url
+
+    return None
+
 class CountryService:
     def get_countries(self, db: Session, skip: int = 0, limit: int = 100) -> List[Country]:
         """
@@ -117,13 +153,15 @@ class CountryService:
         from sqlalchemy.orm import joinedload
         from app.models.group_trip import GroupTrip, GroupTripDeparture
         
+        from app.models.hotel import Hotel
+
         country = db.query(Country).options(
             joinedload(Country.region),
             joinedload(Country.packages),
             joinedload(Country.group_trips).joinedload(GroupTrip.departures),
             joinedload(Country.attractions),
             joinedload(Country.accommodations),
-            joinedload(Country.hotels),
+            joinedload(Country.hotels).joinedload(Hotel.media_assets),
             joinedload(Country.visit_info)
         ).filter(Country.slug == slug, Country.is_active == True).first()
         
@@ -227,7 +265,7 @@ class CountryService:
                         if getattr(amenity, "is_active", True)
                     ],
                     "image_id": hotel.image_id,
-                    "cover_image": _cloudflare_image_url(hotel.image_id),
+                    "cover_image": _get_hotel_cover_image(hotel),
                     "slug": hotel.slug,
                     "is_active": hotel.is_active,
                 }
@@ -252,13 +290,15 @@ class CountryService:
         from sqlalchemy.orm import joinedload
         from app.models.group_trip import GroupTrip, GroupTripDeparture
 
+        from app.models.hotel import Hotel
+
         countries = db.query(Country).options(
             joinedload(Country.region),
             joinedload(Country.packages),
             joinedload(Country.group_trips).joinedload(GroupTrip.departures),
             joinedload(Country.attractions),
             joinedload(Country.accommodations),
-            joinedload(Country.hotels),
+            joinedload(Country.hotels).joinedload(Hotel.media_assets),
             joinedload(Country.visit_info)
         ).filter(Country.is_active == True).offset(skip).limit(limit).all()
 
@@ -367,7 +407,7 @@ class CountryService:
                             if getattr(amenity, "is_active", True)
                         ],
                         "image_id": hotel.image_id,
-                        "cover_image": _cloudflare_image_url(hotel.image_id),
+                        "cover_image": _get_hotel_cover_image(hotel),
                         "slug": hotel.slug,
                         "is_active": hotel.is_active,
                     }

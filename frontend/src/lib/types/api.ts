@@ -76,7 +76,7 @@ export interface CountryWithDetails extends Country {
   group_trips: GroupTripWithDepartures[];
   attractions: Attraction[];
   accommodations: Accommodation[];
-  hotels: Hotel[];
+  hotels: (Hotel & { cover_image?: string | null })[];
   visit_info?: CountryVisitInfo;
 }
 

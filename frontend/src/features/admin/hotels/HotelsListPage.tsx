@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useHotels, useDeleteHotel } from '../../../lib/hooks/useHotels';
 import type { Hotel } from '../../../lib/hooks/useHotels';
+import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 
 const HotelsListPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -88,9 +89,9 @@ const HotelsListPage: React.FC = () => {
                   <tr key={hotel.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="h-14 w-14 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
-                        {hotel.cover_image || hotel.image_id ? (
+                        {hotel.cover_image || hotel.image_url || hotel.image_id ? (
                           <img
-                            src={hotel.cover_image || hotel.image_id || ''}
+                            src={getImageUrlWithFallback(hotel.cover_image || hotel.image_url || hotel.image_id, IMAGE_VARIANTS.THUMBNAIL, 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=200&q=80')}
                             alt={hotel.name}
                             className="h-full w-full object-cover"
                           />

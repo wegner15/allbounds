@@ -298,7 +298,7 @@ const CountryDetailPage: React.FC = () => {
                       <Link key={hotel.id} to={`/hotels/${hotel.slug}`} className="group">
                         <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                           <img
-                            src={getImageUrlWithFallback(hotel.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=80')}
+                            src={getImageUrlWithFallback(hotel.cover_image || hotel.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=80')}
                             alt={hotel.name}
                             className="w-full h-32 object-cover"
                           />

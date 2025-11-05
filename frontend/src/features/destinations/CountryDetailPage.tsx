@@ -332,7 +332,10 @@ const CountryDetailPage: React.FC = () => {
                             </div>
                             
                             {hotel.summary && (
-                              <p className="text-sm text-gray-600 mb-2 line-clamp-2">{hotel.summary}</p>
+                              <div
+                                className="text-sm text-gray-600 mb-2 line-clamp-2"
+                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(hotel.summary) }}
+                              />
                             )}
                             
                             <div className="space-y-1 mb-2">

@@ -85,13 +85,11 @@ class HotelWithCountryResponse(HotelResponse):
             data['amenity_ids'] = []
         return data
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Schema for Hotel with package relationships
 class HotelWithRelationshipsResponse(HotelWithCountryResponse):
     package_ids: Optional[List[int]] = Field(None, description="IDs of packages associated with this hotel")
     group_trip_ids: Optional[List[int]] = Field(None, description="IDs of group trips associated with this hotel")
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

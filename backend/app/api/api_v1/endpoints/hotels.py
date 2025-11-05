@@ -8,8 +8,13 @@ from app.models.user import User
 from app.schemas.hotel import HotelResponse, HotelCreate, HotelUpdate, HotelWithCountryResponse, HotelWithRelationshipsResponse
 from app.services.hotel import hotel_service
 from app.auth.dependencies import get_current_user, has_permission
+from pydantic import BaseModel
 
 router = APIRouter()
+
+
+class SetCoverImageRequest(BaseModel):
+    image_id: str
 
 @router.get("/")
 @router.get("")  # Explicit route without trailing slash
@@ -228,13 +233,13 @@ def set_hotel_cover_image(
     *,
     db: Session = Depends(get_db),
     hotel_id: int,
-    image_id: str,
+    request: SetCoverImageRequest,
     current_user: User = Depends(has_permission("content:update")),
 ) -> Any:
     """
     Set the cover image for a hotel using Cloudflare Image ID.
     """
-    success = hotel_service.set_cover_image(db, hotel_id=hotel_id, image_id=image_id)
+    success = hotel_service.set_cover_image(db, hotel_id=hotel_id, image_id=request.image_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hotel not found")
     return {"status": "success", "message": f"Cover image set for hotel {hotel_id}"}

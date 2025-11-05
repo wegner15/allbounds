@@ -5,6 +5,13 @@ from app.models.country import Country
 from app.schemas.country import CountryCreate, CountryUpdate
 from app.utils.slug import create_slug
 from app.schemas.amenity import AmenityResponse
+from app.core.cloudflare_config import cloudflare_settings
+
+
+def _cloudflare_image_url(image_id: Optional[str], variant: str = "medium") -> Optional[str]:
+    if not image_id:
+        return None
+    return f"{cloudflare_settings.delivery_url}/{image_id}/{variant}"
 
 class CountryService:
     def get_countries(self, db: Session, skip: int = 0, limit: int = 100) -> List[Country]:
@@ -189,6 +196,7 @@ class CountryService:
                     "description": attr.description,
                     "city": attr.city,
                     "image_id": attr.image_id,
+                    "cover_image": _cloudflare_image_url(attr.image_id),
                     "is_active": attr.is_active,
                 }
                 for attr in country.attractions if attr.is_active
@@ -219,6 +227,7 @@ class CountryService:
                         if getattr(amenity, "is_active", True)
                     ],
                     "image_id": hotel.image_id,
+                    "cover_image": _cloudflare_image_url(hotel.image_id),
                     "slug": hotel.slug,
                     "is_active": hotel.is_active,
                 }
@@ -322,6 +331,7 @@ class CountryService:
                         "description": attr.description,
                         "city": attr.city,
                         "image_id": attr.image_id,
+                        "cover_image": _cloudflare_image_url(attr.image_id),
                         "is_active": attr.is_active,
                     }
                     for attr in country.attractions if attr.is_active
@@ -357,6 +367,7 @@ class CountryService:
                             if getattr(amenity, "is_active", True)
                         ],
                         "image_id": hotel.image_id,
+                        "cover_image": _cloudflare_image_url(hotel.image_id),
                         "slug": hotel.slug,
                         "is_active": hotel.is_active,
                     }

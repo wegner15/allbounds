@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.models.country import Country
 from app.schemas.country import CountryCreate, CountryUpdate
 from app.utils.slug import create_slug
+from app.schemas.amenity import AmenityResponse
 
 class CountryService:
     def get_countries(self, db: Session, skip: int = 0, limit: int = 100) -> List[Country]:
@@ -212,7 +213,11 @@ class CountryService:
                     "address": hotel.address,
                     "city": hotel.city,
                     "price_category": hotel.price_category,
-                    "amenities": hotel.amenities,
+                    "amenities": [
+                        AmenityResponse.model_validate(amenity).model_dump()
+                        for amenity in getattr(hotel, "amenities", [])
+                        if getattr(amenity, "is_active", True)
+                    ],
                     "image_id": hotel.image_id,
                     "slug": hotel.slug,
                     "is_active": hotel.is_active,
@@ -346,7 +351,11 @@ class CountryService:
                         "address": hotel.address,
                         "city": hotel.city,
                         "price_category": hotel.price_category,
-                        "amenities": hotel.amenities,
+                        "amenities": [
+                            AmenityResponse.model_validate(amenity).model_dump()
+                            for amenity in getattr(hotel, "amenities", [])
+                            if getattr(amenity, "is_active", True)
+                        ],
                         "image_id": hotel.image_id,
                         "slug": hotel.slug,
                         "is_active": hotel.is_active,

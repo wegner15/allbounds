@@ -153,7 +153,7 @@ def get_hotel_with_relationships(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hotel not found")
     
     # Convert relationships to IDs for the response
-    response = HotelWithRelationshipsResponse.from_orm(hotel)
+    response = HotelWithRelationshipsResponse.model_validate(hotel)
     response.package_ids = [package.id for package in hotel.packages]
     response.group_trip_ids = [group_trip.id for group_trip in hotel.group_trips]
     

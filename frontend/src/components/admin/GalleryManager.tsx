@@ -98,9 +98,16 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
               }
               
               if (endpoint) {
-                await apiClient.post(endpoint, {
-                  image_id: response.id.toString()
-                });
+                // Use PUT for hotel and group_trip, POST for others
+                if (entityType === 'hotel' || entityType === 'group_trip') {
+                  await apiClient.put(endpoint, {
+                    image_id: response.id.toString()
+                  });
+                } else {
+                  await apiClient.post(endpoint, {
+                    image_id: response.id.toString()
+                  });
+                }
                 console.log(`First image set as cover for ${entityType} successfully`);
               }
             } catch (coverError) {
@@ -170,9 +177,10 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
         }
         
         if (endpoint) {
-          const response = await apiClient.post(endpoint, {
-            image_id: imageId.toString()
-          });
+          // Use PUT for hotel and group_trip, POST for others
+          const response = entityType === 'hotel' || entityType === 'group_trip'
+            ? await apiClient.put(endpoint, { image_id: imageId.toString() })
+            : await apiClient.post(endpoint, { image_id: imageId.toString() });
           console.log(`Cover image for ${entityType} updated successfully:`, response);
           setSuccess('Cover image updated successfully');
           setTimeout(() => setSuccess(null), 2000);

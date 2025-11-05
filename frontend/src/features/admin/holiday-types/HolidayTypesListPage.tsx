@@ -1,11 +1,23 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useHolidayTypes } from '../../../lib/hooks/useHolidayTypes';
+import { useDeleteHolidayType, useHolidayTypes } from '../../../lib/hooks/useHolidayTypes';
 import CloudflareImage from '../../../components/ui/CloudflareImage';
 
 const HolidayTypesListPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { data: holidayTypes, isLoading, error } = useHolidayTypes();
+  const deleteHolidayType = useDeleteHolidayType();
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteHolidayType.mutateAsync(id);
+      setDeleteConfirmId(null);
+    } catch (err) {
+      console.error('Failed to delete holiday type:', err);
+      alert('Failed to delete holiday type. Please try again.');
+    }
+  };
   
   // Filter holiday types based on search query
   const filteredHolidayTypes = holidayTypes?.filter(type => 
@@ -134,20 +146,29 @@ const HolidayTypesListPage: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Link
-                        to={`/admin/holiday-types/${holidayType.id}/edit`}
-                        className="text-teal hover:text-teal-dark mr-4"
-                      >
-                        Edit
-                      </Link>
-                      <Link
-                        to={`/holiday-types/${holidayType.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-gray-600 hover:text-gray-900"
-                      >
-                        View
-                      </Link>
+                      <div className="flex items-center justify-end space-x-4">
+                        <Link
+                          to={`/admin/holiday-types/${holidayType.id}/edit`}
+                          className="text-teal hover:text-teal-dark"
+                        >
+                          Edit
+                        </Link>
+                        <Link
+                          to={`/holiday-types/${holidayType.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-600 hover:text-gray-900"
+                        >
+                          View
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => setDeleteConfirmId(holidayType.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -177,6 +198,36 @@ const HolidayTypesListPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Delete confirmation modal */}
+      {deleteConfirmId !== null && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Confirm Delete</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this holiday type? This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmId(null)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                disabled={deleteHolidayType.isPending}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(deleteConfirmId)}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                disabled={deleteHolidayType.isPending}
+              >
+                {deleteHolidayType.isPending ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

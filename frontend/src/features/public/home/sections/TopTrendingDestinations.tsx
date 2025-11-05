@@ -32,7 +32,7 @@ const TopTrendingDestinations: React.FC = () => {
 
   return (
     <div className="py-16 bg-white">
-      <div className="container mx-auto px-4 max-w-7xl">
+      <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">

@@ -1,28 +1,106 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAttractions } from '../../../lib/hooks/useAttractions';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 
 const AttractionListPage: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(() => searchParams.get('search') || '');
+  const [selectedCountry, setSelectedCountry] = useState(() => searchParams.get('country') || '');
+  const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get('category') || '');
   const { data: attractions, isLoading, error } = useAttractions();
 
-  const filteredAttractions = attractions?.filter(attraction => {
-    const matchesSearch = attraction.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         attraction.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         attraction.location?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCountry = !selectedCountry || attraction.country?.name === selectedCountry;
-    
-    const matchesCategory = !selectedCategory || attraction.category === selectedCategory;
-    
-    return matchesSearch && matchesCountry && matchesCategory;
-  }) || [];
+  const updateFiltersInUrl = useCallback((updates: { search?: string; country?: string; category?: string }) => {
+    const params = new URLSearchParams(searchParams);
 
-  const countries = Array.from(new Set(attractions?.map(attraction => attraction.country?.name).filter(Boolean))) || [];
-  const categories = Array.from(new Set(attractions?.map(attraction => attraction.category).filter(Boolean))) || [];
+    if (updates.search !== undefined) {
+      if (updates.search) {
+        params.set('search', updates.search);
+      } else {
+        params.delete('search');
+      }
+    }
+
+    if (updates.country !== undefined) {
+      if (updates.country) {
+        params.set('country', updates.country);
+      } else {
+        params.delete('country');
+      }
+    }
+
+    if (updates.category !== undefined) {
+      if (updates.category) {
+        params.set('category', updates.category);
+      } else {
+        params.delete('category');
+      }
+    }
+
+    setSearchParams(params, { replace: true });
+  }, [searchParams, setSearchParams]);
+
+  useEffect(() => {
+    const urlSearch = searchParams.get('search') || '';
+    const urlCountry = searchParams.get('country') || '';
+    const urlCategory = searchParams.get('category') || '';
+
+    if (urlSearch !== searchTerm) {
+      setSearchTerm(urlSearch);
+    }
+
+    if (urlCountry !== selectedCountry) {
+      setSelectedCountry(urlCountry);
+    }
+
+    if (urlCategory !== selectedCategory) {
+      setSelectedCategory(urlCategory);
+    }
+  }, [searchParams, searchTerm, selectedCountry, selectedCategory]);
+
+  const filteredAttractions = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+
+    return attractions?.filter((attraction) => {
+      const matchesSearch = !normalizedSearch ||
+        attraction.name.toLowerCase().includes(normalizedSearch) ||
+        attraction.description?.toLowerCase().includes(normalizedSearch) ||
+        attraction.location?.toLowerCase().includes(normalizedSearch);
+
+      const matchesCountry = !selectedCountry || attraction.country?.name === selectedCountry;
+
+      const matchesCategory = !selectedCategory || attraction.category === selectedCategory;
+
+      return matchesSearch && matchesCountry && matchesCategory;
+    }) || [];
+  }, [attractions, searchTerm, selectedCountry, selectedCategory]);
+
+  const countries = useMemo(
+    () => Array.from(new Set(attractions?.map((attraction) => attraction.country?.name).filter(Boolean))) || [],
+    [attractions]
+  );
+  const categories = useMemo(
+    () => Array.from(new Set(attractions?.map((attraction) => attraction.category).filter(Boolean))) || [],
+    [attractions]
+  );
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setSearchTerm(value);
+    updateFiltersInUrl({ search: value });
+  };
+
+  const handleCountryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedCountry(value);
+    updateFiltersInUrl({ country: value });
+  };
+
+  const handleCategoryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedCategory(value);
+    updateFiltersInUrl({ category: value });
+  };
 
 
   const formatPrice = (price: number) => {
@@ -100,7 +178,7 @@ const AttractionListPage: React.FC = () => {
                 type="text"
                 placeholder="Search attractions..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={handleSearchChange}
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -108,7 +186,7 @@ const AttractionListPage: React.FC = () => {
             {/* Country Filter */}
             <select
               value={selectedCountry}
-              onChange={(e) => setSelectedCountry(e.target.value)}
+              onChange={handleCountryChange}
               className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">All Countries</option>
@@ -122,7 +200,7 @@ const AttractionListPage: React.FC = () => {
             {/* Category Filter */}
             <select
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              onChange={handleCategoryChange}
               className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">All Categories</option>

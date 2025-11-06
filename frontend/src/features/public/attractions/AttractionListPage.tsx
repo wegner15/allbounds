@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import { useAttractions } from '../../../lib/hooks/useAttractions';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 
@@ -67,7 +68,10 @@ const AttractionListPage: React.FC = () => {
         attraction.description?.toLowerCase().includes(normalizedSearch) ||
         attraction.location?.toLowerCase().includes(normalizedSearch);
 
-      const matchesCountry = !selectedCountry || attraction.country?.name === selectedCountry;
+      const matchesCountry =
+        !selectedCountry ||
+        attraction.country?.slug === selectedCountry ||
+        attraction.country?.name === selectedCountry;
 
       const matchesCategory = !selectedCategory || attraction.category === selectedCategory;
 
@@ -75,10 +79,29 @@ const AttractionListPage: React.FC = () => {
     }) || [];
   }, [attractions, searchTerm, selectedCountry, selectedCategory]);
 
-  const countries = useMemo(
-    () => Array.from(new Set(attractions?.map((attraction) => attraction.country?.name).filter(Boolean))) || [],
-    [attractions]
-  );
+  const countries = useMemo(() => {
+    if (!attractions) return [] as { value: string; label: string }[];
+
+    const map = new Map<string, { value: string; label: string }>();
+
+    attractions.forEach((attraction) => {
+      const slug = attraction.country?.slug;
+      const name = attraction.country?.name;
+
+      if (slug && name) {
+        if (!map.has(slug)) {
+          map.set(slug, { value: slug, label: name });
+        }
+      } else if (name) {
+        // fallback if slug missing
+        if (!map.has(name)) {
+          map.set(name, { value: name, label: name });
+        }
+      }
+    });
+
+    return Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label));
+  }, [attractions]);
   const categories = useMemo(
     () => Array.from(new Set(attractions?.map((attraction) => attraction.category).filter(Boolean))) || [],
     [attractions]
@@ -191,8 +214,8 @@ const AttractionListPage: React.FC = () => {
             >
               <option value="">All Countries</option>
               {countries.map((country) => (
-                <option key={country} value={country}>
-                  {country}
+                <option key={country.value} value={country.value}>
+                  {country.label}
                 </option>
               ))}
             </select>
@@ -245,9 +268,16 @@ const AttractionListPage: React.FC = () => {
                   <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2 h-14">
                     {attraction.name}
                   </h3>
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-3 flex-grow">
-                    {attraction.description || 'No description available.'}
-                  </p>
+                  {attraction.description ? (
+                    <div
+                      className="text-sm text-gray-600 mb-4 line-clamp-3 flex-grow"
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(attraction.description) }}
+                    />
+                  ) : (
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-3 flex-grow">
+                      No description available.
+                    </p>
+                  )}
                   <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-100">
                     <p className="text-lg font-bold text-teal-600">
                       {attraction.price ? `${formatPrice(attraction.price)}` : 'Free'}

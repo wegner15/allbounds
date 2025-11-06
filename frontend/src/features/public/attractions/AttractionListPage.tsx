@@ -237,7 +237,7 @@ const AttractionListPage: React.FC = () => {
       </div>
 
       {/* Attractions Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-4 lg:px-6 xl:px-8 py-8">
         {filteredAttractions.length === 0 ? (
           <div className="text-center py-12">
             <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -248,10 +248,10 @@ const AttractionListPage: React.FC = () => {
             <p className="text-gray-500">Try adjusting your search criteria.</p>
           </div>
         ) : (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredAttractions.map((attraction) => (
               <div key={attraction.id} className="bg-white rounded-2xl shadow-lg overflow-hidden group transform hover:-translate-y-1 transition-all duration-300 flex flex-col">
-                <Link to={`/attractions/${attraction.slug}`} className="block h-48 overflow-hidden">
+                <Link to={`/attractions/${attraction.slug}`} className="block h-48 md:h-56 overflow-hidden">
                   <img
                     src={getImageUrlWithFallback(attraction.cover_image || attraction.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')}
                     alt={attraction.name}

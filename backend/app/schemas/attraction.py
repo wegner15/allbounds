@@ -59,6 +59,7 @@ class AttractionResponse(AttractionBase):
     created_at: datetime
     updated_at: datetime
     cover_image: Optional[str] = Field(None, description="Cover image file path")
+    country: Optional[CountryResponse] = Field(None, description="Country details for the attraction")
     
     @field_validator('is_active', mode='before')
     @classmethod

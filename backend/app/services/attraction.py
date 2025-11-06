@@ -1,5 +1,5 @@
 from typing import List, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 
 from app.models.attraction import Attraction
@@ -21,7 +21,11 @@ class AttractionService:
         """
         Retrieve all attractions with pagination ordered by newest first.
         """
-        query = db.query(Attraction).filter(Attraction.is_active == True)
+        query = (
+            db.query(Attraction)
+            .options(joinedload(Attraction.country))
+            .filter(Attraction.is_active == True)
+        )
 
         if search:
             normalized = f"%{search.strip().lower()}%"

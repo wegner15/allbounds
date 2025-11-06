@@ -74,7 +74,7 @@ export interface CountryVisitInfo extends BaseModel {
 export interface CountryWithDetails extends Country {
   packages: Package[];
   group_trips: GroupTripWithDepartures[];
-  attractions: Attraction[];
+  attractions: (Attraction & { cover_image?: string | null })[];
   accommodations: Accommodation[];
   hotels: (Hotel & { cover_image?: string | null })[];
   visit_info?: CountryVisitInfo;

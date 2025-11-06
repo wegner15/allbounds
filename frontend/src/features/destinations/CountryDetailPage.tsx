@@ -275,13 +275,18 @@ const CountryDetailPage: React.FC = () => {
               {/* Attractions Section */}
               {country?.attractions && country.attractions.length > 0 && (
                 <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-                  <h2 className="text-2xl font-playfair text-charcoal mb-6">Top Attractions</h2>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                    <h2 className="text-2xl font-playfair text-charcoal">Top Attractions</h2>
+                    <Link to={`/attractions?country=${encodeURIComponent(country.slug)}`}>
+                      <Button variant="outline" size="sm">View All Attractions</Button>
+                    </Link>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {country.attractions.slice(0, 6).map(attraction => (
                       <Link key={attraction.id} to={`/attractions/${attraction.slug}`} className="group">
                         <div className="flex space-x-3 p-3 border rounded-lg hover:shadow-md transition-shadow">
                           <img
-                            src={getImageUrlWithFallback(attraction.image_id, IMAGE_VARIANTS.THUMBNAIL, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=100&q=80')}
+                            src={getImageUrlWithFallback(attraction.cover_image || attraction.image_id, IMAGE_VARIANTS.THUMBNAIL, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=100&q=80')}
                             alt={attraction.name}
                             className="w-16 h-16 object-cover rounded"
                           />

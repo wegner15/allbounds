@@ -234,7 +234,7 @@ class CountryService:
                     "description": attr.description,
                     "city": attr.city,
                     "image_id": attr.image_id,
-                    "cover_image": _cloudflare_image_url(attr.image_id),
+                    "cover_image": attr.cover_image or _cloudflare_image_url(attr.image_id),
                     "is_active": attr.is_active,
                 }
                 for attr in country.attractions if attr.is_active
@@ -371,7 +371,7 @@ class CountryService:
                         "description": attr.description,
                         "city": attr.city,
                         "image_id": attr.image_id,
-                        "cover_image": _cloudflare_image_url(attr.image_id),
+                        "cover_image": attr.cover_image or _cloudflare_image_url(attr.image_id),
                         "is_active": attr.is_active,
                     }
                     for attr in country.attractions if attr.is_active

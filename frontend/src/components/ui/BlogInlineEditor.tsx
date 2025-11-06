@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
 import type { Editor as TinyMCEEditorType } from 'tinymce';
+import { RichTextDisplay } from './RichTextDisplay';
 import ImageSelector from './ImageSelector';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils';
 
@@ -140,10 +141,7 @@ const BlogInlineEditor: React.FC<BlogInlineEditorProps> = ({
             />
           </div>
         ) : (
-          <div
-            className="text-gray-800 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: content || '<p>Start writing your blog post...</p>' }}
-          />
+          <RichTextDisplay content={content || '<p>Start writing your blog post...</p>'} />
         )}
       </div>
 

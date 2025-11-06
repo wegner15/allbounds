@@ -1,5 +1,6 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { RichTextDisplay } from '../../../components/ui/RichTextDisplay';
 import { useContentBySlug } from '../../../lib/hooks/useContent';
 
 const ContentPage: React.FC = () => {
@@ -83,10 +84,7 @@ const ContentPage: React.FC = () => {
         </header>
 
         {/* Content */}
-        <div
-          className="prose prose-lg max-w-none"
-          dangerouslySetInnerHTML={{ __html: content.content }}
-        />
+        <RichTextDisplay content={content.content} />
       </article>
     </div>
   );

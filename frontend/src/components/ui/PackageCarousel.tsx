@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils';
 import { useActivePackagePriceCharts } from '../../lib/hooks/usePackagePriceCharts';
@@ -126,9 +127,10 @@ const PackageCarousel: React.FC<PackageCarouselProps> = ({
 
               {/* Package Summary */}
               {currentPackage.summary && (
-                <p className="text-white/90 text-sm md:text-base mb-4 max-w-lg">
-                  {currentPackage.summary}
-                </p>
+                <p
+                  className="text-white/90 text-sm md:text-base mb-4 max-w-lg"
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(currentPackage.summary) }}
+                ></p>
               )}
 
               {/* Package Details */}

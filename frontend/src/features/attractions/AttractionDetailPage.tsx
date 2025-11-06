@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { MapPin, Clock, DollarSign, ChevronLeft, ChevronRight } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
+import DOMPurify from 'dompurify';
 import { useAttractionTrips } from '../../hooks/useAttractionTrips';
 import { RichTextDisplay } from '../../components/ui/RichTextDisplay';
 import Button from '../../components/ui/Button';
@@ -100,9 +101,10 @@ const AttractionDetailPage: React.FC = () => {
               </h1>
               
               {attraction?.summary && (
-                <p className="text-xl text-gray-600 mb-6">
-                  {attraction.summary}
-                </p>
+                <div
+                  className="text-xl text-gray-600 mb-6"
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(attraction.summary) }}
+                />
               )}
 
               {/* Quick Info */}
@@ -212,7 +214,12 @@ const AttractionDetailPage: React.FC = () => {
                             {pkg?.name}
                           </h3>
                         </Link>
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{pkg?.summary}</p>
+                        {pkg?.summary && (
+                          <div
+                            className="text-gray-600 text-sm mb-4 line-clamp-2"
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pkg.summary) }}
+                          />
+                        )}
                         
                         <div className="flex justify-between items-center mb-2">
                           <div>
@@ -292,7 +299,12 @@ const AttractionDetailPage: React.FC = () => {
                               {trip?.name}
                             </h3>
                           </Link>
-                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">{trip?.summary}</p>
+                          {trip?.summary && (
+                            <div
+                              className="text-gray-600 text-sm mb-3 line-clamp-2"
+                              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trip.summary) }}
+                            />
+                          )}
                           
                           {/* Trip Details */}
                           <div className="space-y-2 mb-4">

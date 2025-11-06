@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import { useBlogs } from '../../../lib/hooks/useBlogs';
 import { getCloudflareImageUrl } from '../../../utils/cloudflareImageUtils';
 
@@ -146,9 +147,11 @@ const BlogListPage: React.FC = () => {
                   </h2>
 
                   {blog.summary && (
-                    <p className="text-gray-600 mb-4 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
-                      {blog.summary}
-                    </p>
+                    <div
+                      className="text-gray-600 mb-4 overflow-hidden"
+                      style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.summary) }}
+                    />
                   )}
                   
                   {blog.tags && blog.tags.length > 0 && (

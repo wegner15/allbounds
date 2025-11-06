@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
+import DOMPurify from 'dompurify';
 
 // Components
 import Breadcrumb from '../../components/layout/Breadcrumb';
@@ -132,10 +133,16 @@ const HotelDetailPage: React.FC = () => {
               <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
                 <h2 className="text-2xl font-playfair text-charcoal mb-4">About {hotel.name}</h2>
                 {hotel.summary && (
-                  <p className="text-lg text-gray-700 leading-relaxed mb-4">{hotel.summary}</p>
+                  <div
+                    className="text-lg text-gray-700 leading-relaxed mb-4"
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(hotel.summary) }}
+                  />
                 )}
                 {hotel.description && (
-                  <p className="text-gray-700 leading-relaxed mb-6">{hotel.description}</p>
+                  <div
+                    className="text-gray-700 leading-relaxed mb-6"
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(hotel.description) }}
+                  />
                 )}
                 
                 {/* Hotel Details */}

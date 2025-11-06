@@ -1,8 +1,9 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
+import DOMPurify from 'dompurify';
+import { RichTextDisplay } from '../../../components/ui/RichTextDisplay';
 import { useBlogBySlug as useBlog, useRelatedBlogs } from '../../../lib/hooks/useBlogs';
 import { getCloudflareImageUrl } from '../../../utils/cloudflareImageUtils';
-import DOMPurify from 'dompurify';
 
 const BlogDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -118,9 +119,9 @@ const BlogDetailPage: React.FC = () => {
           </h1>
           
           {blog.summary && (
-            <p className="text-xl text-gray-600 mb-6">
-              {blog.summary}
-            </p>
+            <div className="text-xl text-gray-600 mb-6">
+              <RichTextDisplay content={blog.summary} />
+            </div>
           )}
           
           <div className="flex items-center justify-between border-b border-gray-200 pb-6">
@@ -279,9 +280,11 @@ const BlogDetailPage: React.FC = () => {
                       {relatedBlog.title}
                     </h3>
                     {relatedBlog.summary && (
-                      <p className="text-gray-600 text-sm mb-4 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                        {relatedBlog.summary}
-                      </p>
+                      <div
+                        className="text-gray-600 text-sm mb-4 overflow-hidden"
+                        style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(relatedBlog.summary) }}
+                      />
                     )}
                     <div className="flex items-center text-sm text-gray-500">
                       <time dateTime={relatedBlog.created_at}>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useSearchParams } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 
 // API Hooks
 import { useSearch } from '../../lib/hooks/useSearch';
@@ -163,7 +164,12 @@ const SearchPage: React.FC = () => {
                                   {result.title}
                                 </h3>
                               </Link>
-                              <p className="text-gray-600 text-sm mb-4 line-clamp-2">{result.description}</p>
+                              {result.description && (
+                                <div
+                                  className="text-gray-600 text-sm mb-4 line-clamp-2"
+                                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(result.description) }}
+                                />
+                              )}
                               
                               {/* Highlight matches */}
                               {result.highlights && result.highlights.length > 0 && (
@@ -172,7 +178,7 @@ const SearchPage: React.FC = () => {
                                   <ul className="list-disc pl-5">
                                     {result.highlights.map((highlight, index) => (
                                       <li key={index} className="text-gray-600">
-                                        <span dangerouslySetInnerHTML={{ __html: highlight }} />
+                                        <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(highlight) }} />
                                       </li>
                                     ))}
                                   </ul>

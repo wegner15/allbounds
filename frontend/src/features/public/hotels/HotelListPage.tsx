@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import { useHotels } from '../../../lib/hooks/useHotels';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 
@@ -197,9 +198,10 @@ const HotelListPage: React.FC = () => {
                   )}
 
                   {hotel.description && (
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                      {hotel.description}
-                    </p>
+                    <div
+                      className="text-gray-600 text-sm mb-4 line-clamp-2"
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(hotel.description) }}
+                    />
                   )}
 
                   <div className="flex items-center justify-between">

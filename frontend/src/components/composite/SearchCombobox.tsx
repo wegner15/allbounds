@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 
 export interface SearchResult {
   id: string;
@@ -257,7 +258,10 @@ const SearchCombobox: React.FC<SearchComboboxProps> = ({
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-charcoal truncate">{result.title}</p>
                   {result.description && (
-                    <p className="text-xs text-gray-500 truncate">{result.description}</p>
+                    <p
+                      className="text-xs text-gray-500 truncate"
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(result.description) }}
+                    />
                   )}
                   <p className="text-xs text-teal capitalize">
                     {result.type.replace('-', ' ')}

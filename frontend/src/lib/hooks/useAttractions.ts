@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type UseQueryOptions } from '@tanstack/react-query';
 import { apiClient } from '../api';
 
 export interface Attraction {
@@ -60,14 +60,65 @@ export interface AttractionRelationships {
   group_trip_ids: number[];
 }
 
+export interface AttractionsQueryParams {
+  search?: string;
+  country?: string;
+  category?: string;
+  skip?: number;
+  limit?: number;
+}
+
+const buildAttractionsQueryString = (params?: AttractionsQueryParams) => {
+  if (!params) return '';
+
+  const searchParams = new URLSearchParams();
+
+  if (params.search) {
+    searchParams.set('search', params.search);
+  }
+
+  if (params.country) {
+    searchParams.set('country', params.country);
+  }
+
+  if (params.category) {
+    searchParams.set('category', params.category);
+  }
+
+  if (typeof params.skip === 'number') {
+    searchParams.set('skip', params.skip.toString());
+  }
+
+  if (typeof params.limit === 'number') {
+    searchParams.set('limit', params.limit.toString());
+  }
+
+  return searchParams.toString();
+};
+
 // Hook for fetching attractions
-export const useAttractions = () => {
-  return useQuery<Attraction[]>({
-    queryKey: ['attractions'],
+export const useAttractions = <TData = Attraction[]>(
+  params?: AttractionsQueryParams,
+  options?: UseQueryOptions<Attraction[], Error, TData>
+) => {
+  const queryKey: (string | number | null)[] = [
+    'attractions',
+    params?.search ?? null,
+    params?.country ?? null,
+    params?.category ?? null,
+    params?.skip ?? null,
+    params?.limit ?? null,
+  ];
+
+  return useQuery<Attraction[], Error, TData>({
+    queryKey,
     queryFn: async () => {
-      const response = await apiClient.get<Attraction[]>('/attractions');
+      const queryString = buildAttractionsQueryString(params);
+      const endpoint = queryString ? `/attractions?${queryString}` : '/attractions';
+      const response = await apiClient.get<Attraction[]>(endpoint);
       return response;
-    }
+    },
+    ...options,
   });
 };
 

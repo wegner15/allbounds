@@ -23,21 +23,21 @@ def get_attractions(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
-    country: str = Query(None, description="Filter attractions by country name"),
+    search: Optional[str] = Query(None, description="Full-text search over attraction name, summary, description, city, address"),
+    country: Optional[str] = Query(None, description="Filter by country slug or name"),
+    category: Optional[str] = Query(None, description="Filter by attraction category"),
 ) -> Any:
     """
-    Retrieve all attractions.
+    Retrieve all attractions optionally filtered by search, country, and category.
     """
-    if country:
-        # Find country by name and get attractions for that country
-        from app.models.country import Country
-        country_obj = db.query(Country).filter(Country.name == country, Country.is_active == True).first()
-        if country_obj:
-            attractions = attraction_service.get_attractions_by_country(db, country_id=country_obj.id, skip=skip, limit=limit)
-        else:
-            attractions = []
-    else:
-        attractions = attraction_service.get_attractions(db, skip=skip, limit=limit)
+    attractions = attraction_service.get_attractions(
+        db,
+        skip=skip,
+        limit=limit,
+        search=search,
+        country=country,
+        category=category,
+    )
     return attractions
 
 @router.get("/country/{country_id}", response_model=List[AttractionResponse])

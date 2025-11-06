@@ -9,7 +9,21 @@ const AttractionListPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState(() => searchParams.get('search') || '');
   const [selectedCountry, setSelectedCountry] = useState(() => searchParams.get('country') || '');
   const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get('category') || '');
-  const { data: attractions, isLoading, error } = useAttractions();
+
+  const filterParams = useMemo(() => ({
+    search: searchTerm.trim() || undefined,
+    country: selectedCountry || undefined,
+    category: selectedCategory || undefined,
+  }), [searchTerm, selectedCountry, selectedCategory]);
+
+  const { data: filteredAttractions = [], isLoading, error } = useAttractions(filterParams);
+  const { data: allAttractions = [] } = useAttractions(
+    { limit: 1000 },
+    {
+      queryKey: ['attractions', null, null, null, null, 1000],
+      staleTime: 5 * 60 * 1000,
+    }
+  );
 
   const updateFiltersInUrl = useCallback((updates: { search?: string; country?: string; category?: string }) => {
     const params = new URLSearchParams(searchParams);
@@ -59,32 +73,12 @@ const AttractionListPage: React.FC = () => {
     }
   }, [searchParams, searchTerm, selectedCountry, selectedCategory]);
 
-  const filteredAttractions = useMemo(() => {
-    const normalizedSearch = searchTerm.trim().toLowerCase();
-
-    return attractions?.filter((attraction) => {
-      const matchesSearch = !normalizedSearch ||
-        attraction.name.toLowerCase().includes(normalizedSearch) ||
-        attraction.description?.toLowerCase().includes(normalizedSearch) ||
-        attraction.location?.toLowerCase().includes(normalizedSearch);
-
-      const matchesCountry =
-        !selectedCountry ||
-        attraction.country?.slug === selectedCountry ||
-        attraction.country?.name === selectedCountry;
-
-      const matchesCategory = !selectedCategory || attraction.category === selectedCategory;
-
-      return matchesSearch && matchesCountry && matchesCategory;
-    }) || [];
-  }, [attractions, searchTerm, selectedCountry, selectedCategory]);
-
   const countries = useMemo(() => {
-    if (!attractions) return [] as { value: string; label: string }[];
+    if (!allAttractions.length) return [] as { value: string; label: string }[];
 
     const map = new Map<string, { value: string; label: string }>();
 
-    attractions.forEach((attraction) => {
+    allAttractions.forEach((attraction) => {
       const slug = attraction.country?.slug;
       const name = attraction.country?.name;
 
@@ -101,10 +95,10 @@ const AttractionListPage: React.FC = () => {
     });
 
     return Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label));
-  }, [attractions]);
+  }, [allAttractions]);
   const categories = useMemo(
-    () => Array.from(new Set(attractions?.map((attraction) => attraction.category).filter(Boolean))) || [],
-    [attractions]
+    () => Array.from(new Set(allAttractions.map((attraction) => attraction.category).filter(Boolean))) || [],
+    [allAttractions]
   );
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {

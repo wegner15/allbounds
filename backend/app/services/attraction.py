@@ -1,19 +1,60 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 
 from app.models.attraction import Attraction
+from app.models.country import Country
 from app.schemas.attraction import AttractionCreate, AttractionUpdate
 from app.utils.slug import create_slug
 
 class AttractionService:
-    def get_attractions(self, db: Session, skip: int = 0, limit: int = 100) -> List[Attraction]:
+    def get_attractions(
+        self,
+        db: Session,
+        *,
+        skip: int = 0,
+        limit: int = 100,
+        search: Optional[str] = None,
+        country: Optional[str] = None,
+        category: Optional[str] = None,
+    ) -> List[Attraction]:
         """
         Retrieve all attractions with pagination ordered by newest first.
         """
+        query = db.query(Attraction).filter(Attraction.is_active == True)
+
+        if search:
+            normalized = f"%{search.strip().lower()}%"
+            query = query.filter(
+                or_(
+                    Attraction.name.ilike(normalized),
+                    Attraction.description.ilike(normalized),
+                    Attraction.summary.ilike(normalized),
+                    Attraction.city.ilike(normalized),
+                    Attraction.address.ilike(normalized),
+                )
+            )
+
+        if country:
+            country_obj = (
+                db.query(Country)
+                .filter(
+                    Country.is_active == True,
+                    or_(Country.slug == country, Country.name == country),
+                )
+                .first()
+            )
+            if country_obj:
+                query = query.filter(Attraction.country_id == country_obj.id)
+            else:
+                # No matching country means no results
+                return []
+
+        if category:
+            query = query.filter(Attraction.category == category)
+
         return (
-            db.query(Attraction)
-            .filter(Attraction.is_active == True)
-            .order_by(Attraction.created_at.desc())
+            query.order_by(Attraction.created_at.desc())
             .offset(skip)
             .limit(limit)
             .all()

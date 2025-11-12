@@ -119,7 +119,7 @@ const SearchPage: React.FC = () => {
   // Get image URL for a hit
   const getImageUrl = (hit: MeilisearchHit, index: string): string => {
     if (hit.image_id) {
-      return `https://imagedelivery.net/4J4CgzUI_LpQRpA_N1TErQ/${hit.image_id}/public`;
+      return `https://imagedelivery.net/4J4CgzUI_LpQRpA_N1TErQ/${hit.image_id}/medium`;
     }
     // Fallback to Unsplash based on type
     const searchTerm = hit.name || hit.title || index;

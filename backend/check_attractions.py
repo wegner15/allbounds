@@ -38,10 +38,12 @@ def main():
                 # Get first few documents
                 results = index.get_documents({'limit': 5})
                 for doc in results.results:
-                    print(f"\nID: {doc.get('id')}")
-                    print(f"Name: {doc.get('name')}")
-                    print(f"image_id: {doc.get('image_id')}")
-                    print(f"slug: {doc.get('slug')}")
+                    # Convert Document object to dict
+                    doc_dict = doc.__dict__
+                    print(f"\nID: {doc_dict.get('id')}")
+                    print(f"Name: {doc_dict.get('name')}")
+                    print(f"image_id: {doc_dict.get('image_id')}")
+                    print(f"slug: {doc_dict.get('slug')}")
             else:
                 print("Could not get attractions index")
         else:

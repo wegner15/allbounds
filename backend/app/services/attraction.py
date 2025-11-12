@@ -153,6 +153,7 @@ class AttractionService:
     def set_cover_image(self, db: Session, attraction_id: int, image_id: str) -> Optional[Attraction]:
         """
         Set the cover image for an attraction.
+        Accepts either a Cloudflare image ID directly or a MediaAsset ID.
         """
         from app.models.media import MediaAsset
 
@@ -160,14 +161,24 @@ class AttractionService:
         if not db_attraction:
             return None
 
-        # Fetch the media asset to get the Cloudflare ID (storage_key)
-        media_asset = db.query(MediaAsset).filter(MediaAsset.id == int(image_id)).first()
-        if not media_asset:
-            # If no media asset is found, we can't set the image
-            return db_attraction
+        # Check if image_id looks like a Cloudflare ID (UUID format with dashes)
+        # Example: 7508c42c-720d-423f-2308-1f352c33c900
+        if '-' in image_id and len(image_id) > 30:
+            # Assume it's a Cloudflare image ID, use it directly
+            db_attraction.image_id = image_id
+        else:
+            # Assume it's a MediaAsset ID, fetch the media asset to get the Cloudflare ID
+            try:
+                media_asset = db.query(MediaAsset).filter(MediaAsset.id == int(image_id)).first()
+                if media_asset and media_asset.storage_key:
+                    db_attraction.image_id = media_asset.storage_key
+                else:
+                    # If no media asset is found or no storage_key, return without updating
+                    return db_attraction
+            except (ValueError, TypeError):
+                # If conversion to int fails, treat as Cloudflare ID
+                db_attraction.image_id = image_id
 
-        # The image_id on the attraction should be the Cloudflare ID
-        db_attraction.image_id = media_asset.storage_key
         db.commit()
         db.refresh(db_attraction)
         return db_attraction

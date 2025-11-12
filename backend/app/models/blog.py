@@ -35,6 +35,16 @@ class BlogPost(Base):
     tags = relationship("Tag", secondary=blog_post_tags, overlaps="blog_posts")
     media_assets = relationship("MediaAsset", secondary="blog_post_media", overlaps="blog_posts")
     seo_meta = relationship("SeoMeta", uselist=False)
+    
+    @property
+    def cover_image_url(self) -> Optional[str]:
+        """
+        Generate the cover image URL from cover_image_id if available.
+        """
+        if self.cover_image_id:
+            from app.core.cloudflare_config import cloudflare_settings
+            return f"{cloudflare_settings.delivery_url}/{self.cover_image_id}/medium"
+        return None
 
 class Tag(Base):
     __tablename__ = "tags"

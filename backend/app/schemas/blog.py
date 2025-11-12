@@ -49,6 +49,7 @@ class BlogPostResponse(BlogPostBase):
     created_at: datetime
     updated_at: datetime
     published_at: Optional[datetime] = None
+    cover_image_url: Optional[str] = Field(None, description="Generated cover image URL")
     tags: List[TagResponse] = []
     
     @field_validator('is_published', 'is_active', 'is_featured', mode='before')
@@ -56,6 +57,17 @@ class BlogPostResponse(BlogPostBase):
     def validate_boolean_fields(cls, v):
         """Convert None to False for boolean fields"""
         return v if v is not None else False
+    
+    @field_validator('cover_image_url', mode='before')
+    @classmethod
+    def compute_cover_image_url(cls, v, info):
+        """Generate cover_image_url from cover_image_id if available"""
+        if hasattr(info, 'data') and 'cover_image_id' in info.data:
+            cover_image_id = info.data.get('cover_image_id')
+            if cover_image_id:
+                from app.core.cloudflare_config import cloudflare_settings
+                return f"{cloudflare_settings.delivery_url}/{cover_image_id}/medium"
+        return v
     
     class Config:
         from_attributes = True

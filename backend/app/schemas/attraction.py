@@ -58,7 +58,7 @@ class AttractionResponse(AttractionBase):
     is_active: bool = Field(..., description="Whether the attraction is active")
     created_at: datetime
     updated_at: datetime
-    cover_image: Optional[str] = Field(None, description="Cover image file path")
+    cover_image: Optional[str] = Field(None, description="Cover image URL")
     country: Optional[CountryResponse] = Field(None, description="Country details for the attraction")
     
     @field_validator('is_active', mode='before')
@@ -66,6 +66,18 @@ class AttractionResponse(AttractionBase):
     def validate_boolean_fields(cls, v):
         """Convert None to False for boolean fields"""
         return v if v is not None else False
+    
+    @field_validator('cover_image', mode='before')
+    @classmethod
+    def compute_cover_image(cls, v, info):
+        """Generate cover_image URL from image_id if available"""
+        # Get the model instance from validation context
+        if hasattr(info, 'data') and 'image_id' in info.data:
+            image_id = info.data.get('image_id')
+            if image_id:
+                from app.core.cloudflare_config import cloudflare_settings
+                return f"{cloudflare_settings.delivery_url}/{image_id}/medium"
+        return v
     
     gallery_images: Optional[List[GalleryImageResponse]] = Field(None, description="Gallery images")
     

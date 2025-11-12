@@ -53,5 +53,16 @@ class Attraction(Base):
     # Relationship with Itinerary
     itinerary_activities = relationship("ItineraryActivity", back_populates="attraction")
     itinerary_items = relationship("ItineraryItem", secondary="itinerary_attractions", back_populates="attractions")
+    
+    @property
+    def computed_cover_image(self) -> str:
+        """
+        Generate the cover image URL from image_id if available.
+        Falls back to the cover_image field if image_id is not set.
+        """
+        if self.image_id:
+            from app.core.cloudflare_config import cloudflare_settings
+            return f"{cloudflare_settings.delivery_url}/{self.image_id}/medium"
+        return self.cover_image
 
 # Note: attraction_media table is defined in media.py

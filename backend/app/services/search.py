@@ -102,7 +102,7 @@ class SearchService:
         },
         BLOG_POST_INDEX: {
             'searchableAttributes': ['title', 'summary', 'content'],
-            'displayedAttributes': ['id', 'title', 'summary', 'slug', 'author'],
+            'displayedAttributes': ['id', 'title', 'summary', 'slug', 'author', 'cover_image_id'],
             'sortableAttributes': ['title', 'published_at'],
             'filterableAttributes': ['is_active', 'published_at']
         }
@@ -373,6 +373,7 @@ class SearchService:
                 'content': blog_post.content,
                 'slug': blog_post.slug,
                 'author': author_name,
+                'cover_image_id': blog_post.cover_image_id,
                 'published_at': blog_post.published_at.isoformat() if blog_post.published_at else None,
                 'is_active': blog_post.is_active
             })
@@ -786,6 +787,7 @@ class SearchService:
             'content': blog_post.content,
             'slug': blog_post.slug,
             'author': author_name,
+            'cover_image_id': blog_post.cover_image_id,
             'published_at': blog_post.published_at.isoformat() if blog_post.published_at else None,
             'is_active': blog_post.is_active
         }

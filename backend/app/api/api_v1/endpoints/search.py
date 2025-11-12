@@ -34,9 +34,19 @@ def search(
     
     # If searching in a specific index, wrap the result in a dict
     if search_query.index:
-        return {"results": {search_query.index: results}}
+        # Filter out empty results
+        if results and results.get('hits') is not None:
+            return {"results": {search_query.index: results}}
+        return {"results": {}}
     
-    return {"results": results}
+    # Filter out empty results from multi-index search
+    filtered_results = {}
+    for index_name, index_results in results.items():
+        # Only include indexes that have valid results with hits
+        if index_results and isinstance(index_results, dict) and index_results.get('hits') is not None:
+            filtered_results[index_name] = index_results
+    
+    return {"results": filtered_results}
 
 @router.post("/initialize", response_model=IndexingStatus)
 def initialize_indexes(

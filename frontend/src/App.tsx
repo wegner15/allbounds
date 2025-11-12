@@ -118,6 +118,7 @@ import ContentListPage from './features/admin/content/ContentListPage';
 import ContentForm from './features/admin/content/ContentForm';
 
 import HomePage from './features/public/HomePage';
+import SearchPage from './features/search/SearchPage';
 
 // Placeholder pages for routes we haven't fully implemented yet
 const RegionsPage = () => (
@@ -149,13 +150,6 @@ const ActivitiesPage = () => (
 );
 
 // Remove the placeholder BlogPage since we now have proper public blog pages
-
-const SearchPage = () => (
-  <div>
-    <h1 className="text-4xl font-playfair mb-6">Search Results</h1>
-    <p className="text-lg mb-4">Find your perfect travel experience.</p>
-  </div>
-);
 
 const NotFoundPage = () => (
   <div className="text-center py-16">

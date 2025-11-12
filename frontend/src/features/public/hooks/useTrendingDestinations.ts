@@ -3,7 +3,7 @@ import { apiClient, endpoints } from '../../../lib/api';
 import type { CountryWithDetails } from '../../../lib/types/api';
 
 // Fetch trending destinations (countries with their related entities)
-export const useTrendingDestinations = (limit: number = 6) => {
+export const useTrendingDestinations = (limit: number = 20) => {
   return useQuery<CountryWithDetails[], Error>({
     queryKey: ['trending-destinations', limit],
     queryFn: async () => {

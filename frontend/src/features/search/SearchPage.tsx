@@ -133,7 +133,9 @@ const SearchPage: React.FC = () => {
   
   // Get description for a hit
   const getDescription = (hit: MeilisearchHit): string => {
-    return hit.summary || hit.description || '';
+    const text = hit.summary || hit.description || '';
+    // Strip HTML tags
+    return text.replace(/<[^>]*>/g, '');
   };
   
   // Render result card

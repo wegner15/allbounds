@@ -252,9 +252,15 @@ class MeilisearchClient:
             return False
         
         try:
+            # Try to get the index, if it doesn't exist, create it first
             index = self.get_index(index_name)
             if not index:
-                return False
+                # Create the index if it doesn't exist
+                if not self.create_index(index_name):
+                    return False
+                index = self.get_index(index_name)
+                if not index:
+                    return False
             
             index.update_settings(settings)
             return True

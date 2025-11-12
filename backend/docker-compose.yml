@@ -19,6 +19,12 @@ services:
       - JWT_ALGORITHM=HS256
       - JWT_ACCESS_TOKEN_EXPIRE_MINUTES=43200
       - JWT_REFRESH_TOKEN_EXPIRE_DAYS=14
+      - DB_POOL_SIZE=20
+      - DB_MAX_OVERFLOW=10
+      - DB_POOL_RECYCLE=3600
+      - DB_POOL_TIMEOUT=30
+      - DB_CONNECT_TIMEOUT=10
+      - DB_POOL_PRE_PING=true
     depends_on:
       - db
       - meilisearch

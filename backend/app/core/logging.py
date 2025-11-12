@@ -151,6 +151,14 @@ def setup_logging(log_level: str = "INFO") -> None:
     logging.getLogger("api.request").setLevel(numeric_level)
     logging.getLogger("app").setLevel(numeric_level)
     
+    # Configure database logger to capture pool events
+    db_logger = logging.getLogger("app.database")
+    db_logger.setLevel(numeric_level)
+    
+    # Enable SQLAlchemy pool logging at DEBUG level
+    if numeric_level == logging.DEBUG:
+        logging.getLogger("sqlalchemy.pool").setLevel(logging.DEBUG)
+    
     # Disable uvicorn access logs (we have our own middleware)
     uvicorn_logger = logging.getLogger("uvicorn.access")
     uvicorn_logger.disabled = True

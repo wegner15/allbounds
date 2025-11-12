@@ -58,6 +58,30 @@ def health_check():
     """Health check endpoint for the API."""
     return {"status": "ok"}
 
+@app.get("/health/db")
+async def database_health_check():
+    """
+    Health check endpoint for database connectivity.
+    
+    Returns:
+        200 with {"status": "healthy"} when database is accessible
+        503 with {"status": "unhealthy", "error": "..."} when database is not accessible
+    """
+    from app.db.database import check_database_health
+    
+    is_healthy, error_message = await check_database_health()
+    
+    if is_healthy:
+        logger.info("Database health check: healthy")
+        return {"status": "healthy"}
+    else:
+        logger.info(f"Database health check: unhealthy - {error_message}")
+        return Response(
+            content='{"status": "unhealthy", "error": "' + (error_message or "Unknown error") + '"}',
+            status_code=503,
+            media_type="application/json"
+        )
+
 @app.middleware("http")
 async def add_correlation_id_header(request: Request, call_next):
     """Add correlation ID header to response."""
@@ -68,6 +92,10 @@ async def add_correlation_id_header(request: Request, call_next):
 @app.on_event("startup")
 async def startup_event():
     """Run startup tasks."""
+    # Log database connection pool statistics
+    from app.db.database import log_pool_stats
+    log_pool_stats()
+    
     logger.info("Application startup complete")
 
 @app.on_event("shutdown")

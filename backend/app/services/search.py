@@ -656,6 +656,7 @@ class SearchService:
             'description': attraction.description,
             'slug': attraction.slug,
             'country_id': attraction.country_id,
+            'image_id': attraction.image_id,
             'is_active': attraction.is_active
         }
         

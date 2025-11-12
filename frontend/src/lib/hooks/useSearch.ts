@@ -1,32 +1,91 @@
 import { useQuery } from '@tanstack/react-query';
-import { apiClient, endpoints } from '../api';
-import type { SearchResult } from '../types/api';
+import { apiClient } from '../api';
 
-// Hook for searching across all content types
-export const useSearch = (query: string, options?: { enabled?: boolean }) => {
+// Meilisearch response types
+export interface MeilisearchHit {
+  id: number;
+  name?: string;
+  title?: string;
+  description?: string;
+  summary?: string;
+  slug: string;
+  is_active?: boolean;
+  image_id?: string;
+  country_id?: number;
+  region_id?: number;
+  price?: number;
+  duration_days?: number;
+  [key: string]: any;
+}
+
+export interface MeilisearchResults {
+  hits: MeilisearchHit[];
+  processing_time_ms: number;
+  query: string;
+  limit: number;
+  offset: number;
+  estimated_total_hits: number;
+}
+
+export interface MultiSearchResults {
+  results: Record<string, MeilisearchResults>;
+}
+
+// Hook for searching across all content types or specific index
+export const useSearch = (
+  query: string, 
+  index?: string,
+  options?: { enabled?: boolean }
+) => {
   return useQuery({
-    queryKey: ['search', query],
+    queryKey: ['search', query, index],
     queryFn: async () => {
-      if (!query.trim()) return { items: [], total: 0 };
-      return apiClient.get<{ items: SearchResult[], total: number }>(endpoints.search.query(query));
+      if (!query.trim()) {
+        return { results: {} } as MultiSearchResults;
+      }
+      
+      const searchPayload = {
+        query: query.trim(),
+        index: index || null,
+        limit: 50,
+        offset: 0,
+      };
+      
+      return apiClient.post<MultiSearchResults>('/search/', searchPayload);
     },
     enabled: !!query.trim() && (options?.enabled !== false),
   });
 };
 
-// Hook for filtered search
+// Hook for filtered search with additional parameters
 export const useFilteredSearch = (
   query: string,
-  filters: Record<string, string>,
+  index?: string,
+  filters?: {
+    limit?: number;
+    offset?: number;
+    filter?: string;
+    sort?: string[];
+  },
   options?: { enabled?: boolean }
 ) => {
-  const filterParams = { q: query, ...filters };
-  
   return useQuery({
-    queryKey: ['search', 'filtered', query, filters],
+    queryKey: ['search', 'filtered', query, index, filters],
     queryFn: async () => {
-      if (!query.trim()) return { items: [], total: 0 };
-      return apiClient.get<{ items: SearchResult[], total: number }>(endpoints.search.filter(filterParams));
+      if (!query.trim()) {
+        return { results: {} } as MultiSearchResults;
+      }
+      
+      const searchPayload = {
+        query: query.trim(),
+        index: index || null,
+        limit: filters?.limit || 50,
+        offset: filters?.offset || 0,
+        filter: filters?.filter || null,
+        sort: filters?.sort || null,
+      };
+      
+      return apiClient.post<MultiSearchResults>('/search/', searchPayload);
     },
     enabled: !!query.trim() && (options?.enabled !== false),
   });

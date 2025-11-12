@@ -148,6 +148,7 @@ class SearchService:
                 'name': region.name,
                 'description': region.description,
                 'slug': region.slug,
+                'image_id': region.image_id,
                 'is_active': region.is_active
             })
         
@@ -173,6 +174,7 @@ class SearchService:
                 'description': country.description,
                 'slug': country.slug,
                 'region_id': country.region_id,
+                'image_id': country.image_id,
                 'is_active': country.is_active
             })
         
@@ -288,6 +290,7 @@ class SearchService:
                 'country_id': package.country_id,
                 'duration_days': package.duration_days,
                 'price': package.price,
+                'image_id': package.cover_image_id,
                 'itinerary': package.itinerary,
                 'inclusions': package.inclusions,
                 'exclusions': package.exclusions,
@@ -331,6 +334,7 @@ class SearchService:
                 'country_id': group_trip.country_id,
                 'duration_days': group_trip.duration_days,
                 'price': group_trip.price,
+                'image_id': group_trip.cover_image_id,
                 'itinerary': group_trip.itinerary,
                 'inclusions': group_trip.inclusions,
                 'exclusions': group_trip.exclusions,

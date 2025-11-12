@@ -96,6 +96,10 @@ async def startup_event():
     from app.db.database import log_pool_stats
     log_pool_stats()
     
+    # Setup Meilisearch sync listeners
+    from app.db.search_sync import setup_search_sync_listeners
+    setup_search_sync_listeners()
+    
     logger.info("Application startup complete")
 
 @app.on_event("shutdown")

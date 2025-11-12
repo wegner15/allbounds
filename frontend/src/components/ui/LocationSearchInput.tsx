@@ -10,9 +10,10 @@ interface LocationOption {
 interface LocationSearchInputProps {
   value: LocationOption | null;
   onChange: (option: LocationOption | null) => void;
+  variant?: 'dark' | 'light';
 }
 
-const LocationSearchInput: React.FC<LocationSearchInputProps> = ({ value, onChange }) => {
+const LocationSearchInput: React.FC<LocationSearchInputProps> = ({ value, onChange, variant = 'dark' }) => {
 
   const loadOptions = async (inputValue: string): Promise<LocationOption[]> => {
     if (inputValue.length < 2) return [];
@@ -35,46 +36,60 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({ value, onChan
     }
   };
 
+  const isDark = variant === 'dark';
+
   const customStyles = {
     control: (provided: any) => ({
       ...provided,
-      backgroundColor: 'transparent',
-      border: 'none',
+      backgroundColor: isDark ? 'transparent' : 'white',
+      border: isDark ? 'none' : '2px solid rgba(140, 185, 191, 0.3)',
+      borderRadius: isDark ? '0' : '0.5rem',
       boxShadow: 'none',
-      minHeight: 'auto',
+      minHeight: isDark ? 'auto' : '48px',
+      '&:hover': {
+        borderColor: isDark ? 'none' : '#8cb9bf',
+      },
     }),
     input: (provided: any) => ({
       ...provided,
-      color: 'white',
+      color: isDark ? 'white' : '#3c4852',
     }),
     singleValue: (provided: any) => ({
       ...provided,
-      color: 'white',
+      color: isDark ? 'white' : '#3c4852',
     }),
     placeholder: (provided: any) => ({
       ...provided,
-      color: '#D1D5DB', // gray-300
+      color: isDark ? '#D1D5DB' : 'rgba(60, 72, 82, 0.5)',
     }),
     menu: (provided: any) => ({
       ...provided,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-      backdropFilter: 'blur(10px)',
+      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'white',
+      backdropFilter: isDark ? 'blur(10px)' : 'none',
       borderRadius: '0.5rem',
-      border: '1px solid rgba(255, 255, 255, 0.2)',
+      border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(140, 185, 191, 0.3)',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+      zIndex: 9998,
+    }),
+    menuPortal: (provided: any) => ({
+      ...provided,
+      zIndex: 9998,
     }),
     option: (provided: any, state: { isFocused: boolean }) => ({
       ...provided,
-      backgroundColor: state.isFocused ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
-      color: 'white',
+      backgroundColor: state.isFocused 
+        ? (isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(140, 185, 191, 0.1)') 
+        : 'transparent',
+      color: isDark ? 'white' : '#3c4852',
       '&:active': {
-        backgroundColor: 'rgba(255, 255, 255, 0.3)',
+        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(140, 185, 191, 0.2)',
       },
     }),
   };
 
   return (
-    <div className="flex items-center border-b border-white/30 py-1">
-      <MapPin className="w-4 h-4 mr-2 text-gray-200" />
+    <div className={`flex items-center ${isDark ? 'border-b border-white/30 py-1' : ''}`}>
+      {isDark && <MapPin className="w-4 h-4 mr-2 text-gray-200" />}
       <AsyncSelect
         cacheOptions
         loadOptions={loadOptions}
@@ -86,6 +101,8 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({ value, onChan
         className="w-full"
         classNamePrefix="react-select"
         components={{ DropdownIndicator: null, IndicatorSeparator: null }}
+        menuPortalTarget={document.body}
+        menuPosition="fixed"
       />
     </div>
   );

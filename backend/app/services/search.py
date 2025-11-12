@@ -608,5 +608,172 @@ class SearchService:
         }
         
         return self.meilisearch_client.update_documents(self.EXCLUSION_INDEX, [document])
+    
+    def update_activity(self, activity: Activity) -> bool:
+        """
+        Update an activity in the search index.
+        
+        Args:
+            activity: Activity model instance
+            
+        Returns:
+            bool: True if activity was updated successfully, False otherwise
+        """
+        document = {
+            'id': activity.id,
+            'name': activity.name,
+            'description': activity.description,
+            'slug': activity.slug,
+            'is_active': activity.is_active
+        }
+        
+        return self.meilisearch_client.update_documents(self.ACTIVITY_INDEX, [document])
+    
+    def update_attraction(self, attraction: Attraction) -> bool:
+        """
+        Update an attraction in the search index.
+        
+        Args:
+            attraction: Attraction model instance
+            
+        Returns:
+            bool: True if attraction was updated successfully, False otherwise
+        """
+        document = {
+            'id': attraction.id,
+            'name': attraction.name,
+            'summary': attraction.summary,
+            'description': attraction.description,
+            'slug': attraction.slug,
+            'country_id': attraction.country_id,
+            'is_active': attraction.is_active
+        }
+        
+        return self.meilisearch_client.update_documents(self.ATTRACTION_INDEX, [document])
+    
+    def update_accommodation(self, accommodation: Accommodation) -> bool:
+        """
+        Update an accommodation in the search index.
+        
+        Args:
+            accommodation: Accommodation model instance
+            
+        Returns:
+            bool: True if accommodation was updated successfully, False otherwise
+        """
+        document = {
+            'id': accommodation.id,
+            'name': accommodation.name,
+            'summary': accommodation.summary,
+            'description': accommodation.description,
+            'slug': accommodation.slug,
+            'country_id': accommodation.country_id,
+            'stars': accommodation.stars,
+            'address': accommodation.address,
+            'is_active': accommodation.is_active
+        }
+        
+        return self.meilisearch_client.update_documents(self.ACCOMMODATION_INDEX, [document])
+    
+    def update_package(self, package: Package) -> bool:
+        """
+        Update a package in the search index.
+        
+        Args:
+            package: Package model instance
+            
+        Returns:
+            bool: True if package was updated successfully, False otherwise
+        """
+        # Format inclusion and exclusion items for search
+        inclusion_items_text = ""
+        if package.inclusion_items:
+            inclusion_items_text = ", ".join([inc.name for inc in package.inclusion_items])
+        
+        exclusion_items_text = ""
+        if package.exclusion_items:
+            exclusion_items_text = ", ".join([exc.name for exc in package.exclusion_items])
+        
+        document = {
+            'id': package.id,
+            'name': package.name,
+            'summary': package.summary,
+            'description': package.description,
+            'slug': package.slug,
+            'country_id': package.country_id,
+            'duration_days': package.duration_days,
+            'price': package.price,
+            'itinerary': package.itinerary,
+            'inclusions': package.inclusions,
+            'exclusions': package.exclusions,
+            'inclusion_items': inclusion_items_text,
+            'exclusion_items': exclusion_items_text,
+            'is_active': package.is_active,
+            'is_featured': package.is_featured
+        }
+        
+        return self.meilisearch_client.update_documents(self.PACKAGE_INDEX, [document])
+    
+    def update_group_trip(self, group_trip: GroupTrip) -> bool:
+        """
+        Update a group trip in the search index.
+        
+        Args:
+            group_trip: GroupTrip model instance
+            
+        Returns:
+            bool: True if group trip was updated successfully, False otherwise
+        """
+        # Format inclusion and exclusion items for search
+        inclusion_items_text = ""
+        if group_trip.inclusion_items:
+            inclusion_items_text = ", ".join([inc.name for inc in group_trip.inclusion_items])
+        
+        exclusion_items_text = ""
+        if group_trip.exclusion_items:
+            exclusion_items_text = ", ".join([exc.name for exc in group_trip.exclusion_items])
+        
+        document = {
+            'id': group_trip.id,
+            'name': group_trip.name,
+            'summary': group_trip.summary,
+            'description': group_trip.description,
+            'slug': group_trip.slug,
+            'country_id': group_trip.country_id,
+            'duration_days': group_trip.duration_days,
+            'price': group_trip.price,
+            'itinerary': group_trip.itinerary,
+            'inclusions': group_trip.inclusions,
+            'exclusions': group_trip.exclusions,
+            'inclusion_items': inclusion_items_text,
+            'exclusion_items': exclusion_items_text,
+            'is_active': group_trip.is_active,
+            'is_featured': group_trip.is_featured
+        }
+        
+        return self.meilisearch_client.update_documents(self.GROUP_TRIP_INDEX, [document])
+    
+    def update_blog_post(self, blog_post: BlogPost) -> bool:
+        """
+        Update a blog post in the search index.
+        
+        Args:
+            blog_post: BlogPost model instance
+            
+        Returns:
+            bool: True if blog post was updated successfully, False otherwise
+        """
+        document = {
+            'id': blog_post.id,
+            'title': blog_post.title,
+            'summary': blog_post.summary,
+            'content': blog_post.content,
+            'slug': blog_post.slug,
+            'author': blog_post.author,
+            'published_at': blog_post.published_at.isoformat() if blog_post.published_at else None,
+            'is_active': blog_post.is_active
+        }
+        
+        return self.meilisearch_client.update_documents(self.BLOG_POST_INDEX, [document])
 
 search_service = SearchService()

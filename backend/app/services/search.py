@@ -356,13 +356,18 @@ class SearchService:
         
         documents = []
         for blog_post in blog_posts:
+            # Get author name if available, otherwise use author_id
+            author_name = None
+            if blog_post.author:
+                author_name = getattr(blog_post.author, 'full_name', None) or getattr(blog_post.author, 'email', None)
+            
             documents.append({
                 'id': blog_post.id,
                 'title': blog_post.title,
                 'summary': blog_post.summary,
                 'content': blog_post.content,
                 'slug': blog_post.slug,
-                'author': blog_post.author,
+                'author': author_name,
                 'published_at': blog_post.published_at.isoformat() if blog_post.published_at else None,
                 'is_active': blog_post.is_active
             })
@@ -763,13 +768,18 @@ class SearchService:
         Returns:
             bool: True if blog post was updated successfully, False otherwise
         """
+        # Get author name if available, otherwise use author_id
+        author_name = None
+        if blog_post.author:
+            author_name = getattr(blog_post.author, 'full_name', None) or getattr(blog_post.author, 'email', None)
+        
         document = {
             'id': blog_post.id,
             'title': blog_post.title,
             'summary': blog_post.summary,
             'content': blog_post.content,
             'slug': blog_post.slug,
-            'author': blog_post.author,
+            'author': author_name,
             'published_at': blog_post.published_at.isoformat() if blog_post.published_at else None,
             'is_active': blog_post.is_active
         }

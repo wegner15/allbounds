@@ -42,7 +42,7 @@ class SearchService:
     INDEX_SETTINGS = {
         REGION_INDEX: {
             'searchableAttributes': ['name', 'description'],
-            'displayedAttributes': ['id', 'name', 'description', 'slug'],
+            'displayedAttributes': ['id', 'name', 'description', 'slug', 'image_id'],
             'sortableAttributes': ['name'],
             'filterableAttributes': ['is_active']
         },
@@ -66,7 +66,7 @@ class SearchService:
         },
         COUNTRY_INDEX: {
             'searchableAttributes': ['name', 'description'],
-            'displayedAttributes': ['id', 'name', 'description', 'slug', 'region_id'],
+            'displayedAttributes': ['id', 'name', 'description', 'slug', 'region_id', 'image_id'],
             'sortableAttributes': ['name'],
             'filterableAttributes': ['is_active', 'region_id']
         },
@@ -90,13 +90,13 @@ class SearchService:
         },
         PACKAGE_INDEX: {
             'searchableAttributes': ['name', 'summary', 'description', 'itinerary', 'inclusions', 'exclusions', 'inclusion_items', 'exclusion_items'],
-            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'country_id', 'duration_days', 'price', 'inclusion_items', 'exclusion_items'],
+            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'country_id', 'duration_days', 'price', 'image_id', 'inclusion_items', 'exclusion_items'],
             'sortableAttributes': ['name', 'price', 'duration_days'],
             'filterableAttributes': ['is_active', 'country_id', 'is_featured', 'duration_days']
         },
         GROUP_TRIP_INDEX: {
             'searchableAttributes': ['name', 'summary', 'description', 'itinerary', 'inclusions', 'exclusions', 'inclusion_items', 'exclusion_items'],
-            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'country_id', 'duration_days', 'price', 'inclusion_items', 'exclusion_items'],
+            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'country_id', 'duration_days', 'price', 'image_id', 'inclusion_items', 'exclusion_items'],
             'sortableAttributes': ['name', 'price', 'duration_days'],
             'filterableAttributes': ['is_active', 'country_id', 'is_featured', 'duration_days']
         },

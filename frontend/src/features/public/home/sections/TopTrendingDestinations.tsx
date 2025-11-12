@@ -9,7 +9,7 @@ const TopTrendingDestinations: React.FC = () => {
 
   const renderSkeletons = () => (
     <>
-      {[...Array(6)].map((_, index) => (
+      {[...Array(8)].map((_, index) => (
         <div 
           key={index} 
           className={`relative rounded-xl overflow-hidden bg-gray-200 animate-pulse ${
@@ -47,7 +47,7 @@ const TopTrendingDestinations: React.FC = () => {
 
         {/* Grid Layout */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          {isLoading ? renderSkeletons() : destinations?.slice(0, 6).map((destination, index) => {
+          {isLoading ? renderSkeletons() : destinations?.slice(0, 8).map((destination, index) => {
             const tourCount = (destination.packages?.length || 0) + (destination.group_trips?.length || 0);
             const activityCount = destination.attractions?.length || 0;
 

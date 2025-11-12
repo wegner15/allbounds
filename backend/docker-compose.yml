@@ -3,6 +3,7 @@
 services:
   api:
     build: .
+    restart: unless-stopped
     ports:
       - "8005:8000"
     volumes:
@@ -29,13 +30,23 @@ services:
       - DB_CONNECT_TIMEOUT=10
       - DB_POOL_PRE_PING=true
     depends_on:
-      - db
-      - redis
-      - meilisearch
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      meilisearch:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
   db:
     image: postgres:15-alpine
+    restart: unless-stopped
     ports:
       - "5435:5432"
     environment:
@@ -44,26 +55,47 @@ services:
       - POSTGRES_DB=allbounds
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U allbounds"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   meilisearch:
     image: getmeili/meilisearch:v1.3
+    restart: unless-stopped
     ports:
       - "7705:7700"
     environment:
       - MEILI_MASTER_KEY=masterKey
     volumes:
       - meilisearch_data:/meili_data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
   redis:
     image: redis:7-alpine
+    restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
 
   celery_worker:
     build: .
+    restart: unless-stopped
     volumes:
       - ./:/app
     environment:
@@ -74,9 +106,18 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
-      - db
-      - redis
-      - meilisearch
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      meilisearch:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A app.celery_app inspect ping -d celery@$$HOSTNAME"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     command: celery -A app.celery_app worker --loglevel=info
 
 volumes:

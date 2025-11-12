@@ -96,9 +96,24 @@ async def startup_event():
     from app.db.database import log_pool_stats
     log_pool_stats()
     
-    # Setup Meilisearch sync listeners
-    from app.db.search_sync import setup_search_sync_listeners
-    setup_search_sync_listeners()
+    # Setup Celery-based Meilisearch sync listeners
+    try:
+        from app.db.search_sync_celery import setup_search_sync_listeners
+        setup_search_sync_listeners()
+        logger.info("Celery-based Meilisearch sync enabled")
+    except Exception as e:
+        logger.warning(f"Failed to setup Meilisearch sync: {e}. Sync will be disabled.")
+    
+    # Test Redis connection
+    try:
+        from app.core.cache import redis_client
+        if redis_client:
+            redis_client.ping()
+            logger.info("Redis connection successful")
+        else:
+            logger.warning("Redis client not initialized. Caching disabled.")
+    except Exception as e:
+        logger.warning(f"Redis connection failed: {e}. Caching disabled.")
     
     logger.info("Application startup complete")
 

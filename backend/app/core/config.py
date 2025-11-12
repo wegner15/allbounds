@@ -30,6 +30,14 @@ class Settings(BaseSettings):
     # Meilisearch settings
     MEILISEARCH_URL: str = os.getenv("MEILISEARCH_URL", "http://localhost:7700")
     MEILISEARCH_MASTER_KEY: Optional[str] = os.getenv("MEILISEARCH_MASTER_KEY")
+    
+    # Redis settings
+    REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    REDIS_CACHE_TTL: int = int(os.getenv("REDIS_CACHE_TTL", "300"))  # 5 minutes default
+    
+    # Celery settings
+    CELERY_BROKER_URL: str = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+    CELERY_RESULT_BACKEND: str = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 
     # Cloudflare Images settings
     CLOUDFLARE_IMAGES_DELIVERY_URL: Optional[str] = os.getenv("CLOUDFLARE_IMAGES_DELIVERY_URL")

@@ -13,11 +13,14 @@ class SearchQuery(BaseModel):
 # Schema for search results
 class SearchResults(BaseModel):
     hits: List[Dict[str, Any]] = Field(..., description="Search results")
-    processing_time_ms: int = Field(..., description="Processing time in milliseconds")
+    processing_time_ms: int = Field(..., description="Processing time in milliseconds", alias="processingTimeMs")
     query: str = Field(..., description="Search query")
     limit: int = Field(..., description="Maximum number of results returned")
     offset: int = Field(..., description="Number of results skipped")
-    estimated_total_hits: int = Field(..., description="Estimated total number of hits")
+    estimated_total_hits: int = Field(..., description="Estimated total number of hits", alias="estimatedTotalHits")
+    
+    class Config:
+        populate_by_name = True  # Allow both snake_case and camelCase
 
 # Schema for multi-index search results
 class MultiSearchResults(BaseModel):

@@ -11,6 +11,7 @@ export interface MeilisearchHit {
   slug: string;
   is_active?: boolean;
   image_id?: string;
+  cover_image_id?: string; // Used by blog posts
   country_id?: number;
   region_id?: number;
   price?: number;

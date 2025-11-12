@@ -78,7 +78,7 @@ class SearchService:
         },
         ATTRACTION_INDEX: {
             'searchableAttributes': ['name', 'summary', 'description'],
-            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'country_id'],
+            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'country_id', 'image_id'],
             'sortableAttributes': ['name'],
             'filterableAttributes': ['is_active', 'country_id']
         },
@@ -225,6 +225,7 @@ class SearchService:
                 'description': attraction.description,
                 'slug': attraction.slug,
                 'country_id': attraction.country_id,
+                'image_id': attraction.image_id,
                 'is_active': attraction.is_active
             })
         

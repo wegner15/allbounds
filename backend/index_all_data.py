@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 # Import all models first to ensure they're registered
 from app.models.region import Region
 from app.models.country import Country
+from app.models.country_visit_info import CountryVisitInfo
 from app.models.activity import Activity
 from app.models.attraction import Attraction
 from app.models.accommodation import Accommodation

@@ -161,7 +161,7 @@ def setup_logging(log_level: str = "INFO") -> None:
     
     # Disable uvicorn access logs (we have our own middleware)
     uvicorn_logger = logging.getLogger("uvicorn.access")
-    uvicorn_logger.disabled = True
+    uvicorn_logger.disabled = False
     
     # Log configuration complete
     logging.getLogger("app.startup").info(

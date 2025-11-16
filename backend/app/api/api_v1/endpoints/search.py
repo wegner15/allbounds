@@ -73,15 +73,22 @@ def initialize_indexes(
 @router.post("/index-all", response_model=IndexingStatus)
 def index_all(
     *,
-    db: Session = Depends(get_db),
     background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("search:admin")),
 ) -> Any:
     """
     Index all entities in the background.
     """
-    # Run indexing in the background
-    background_tasks.add_task(search_service.index_all, db)
+    # Run indexing in the background with its own session
+    def index_all_with_session():
+        from app.db.database import SessionLocal
+        db = SessionLocal()
+        try:
+            search_service.index_all(db)
+        finally:
+            db.close()
+    
+    background_tasks.add_task(index_all_with_session)
     
     return {
         "success": True,
@@ -287,7 +294,7 @@ def index_hotel_types(
         }
 
 @router.get("/health", response_model=Dict[str, bool])
-def health_check() -> Any:
+async def health_check() -> Any:
     """
     Check if Meilisearch is healthy.
     """

@@ -54,7 +54,7 @@ if hasattr(settings, 'ENABLE_TRACING') and settings.ENABLE_TRACING:
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/health")
-def health_check():
+async def health_check():
     """Health check endpoint for the API."""
     return {"status": "ok"}
 
@@ -81,6 +81,30 @@ async def database_health_check():
             status_code=503,
             media_type="application/json"
         )
+
+@app.get("/health/db/pool")
+async def database_pool_status():
+    """
+    Get current database connection pool status.
+    
+    Returns:
+        Connection pool statistics including size, checked out connections, and overflow.
+    """
+    from app.db.database import engine
+    
+    pool = engine.pool
+    
+    return {
+        "status": "ok",
+        "pool_size": pool.size(),
+        "checked_out": pool.checkedout(),
+        "overflow": pool.overflow(),
+        "max_pool_size": settings.DB_POOL_SIZE,
+        "max_overflow": settings.DB_MAX_OVERFLOW,
+        "total_capacity": settings.DB_POOL_SIZE + settings.DB_MAX_OVERFLOW,
+        "available": (settings.DB_POOL_SIZE + settings.DB_MAX_OVERFLOW) - pool.checkedout(),
+        "utilization_percent": round((pool.checkedout() / (settings.DB_POOL_SIZE + settings.DB_MAX_OVERFLOW)) * 100, 2)
+    }
 
 @app.middleware("http")
 async def add_correlation_id_header(request: Request, call_next):

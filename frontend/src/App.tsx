@@ -215,7 +215,7 @@ const MainLayout = () => {
         <Outlet />
       </main>
       <Footer 
-        logo="/logo/android-chrome-192x192.png"
+        logo="/logo/main_logo.png"
         sections={footerSections} 
         socialLinks={{
           facebook: 'https://facebook.com',

@@ -196,9 +196,9 @@ const MainNavigation: React.FC = () => {
             <Link to="/" className="flex items-center">
               <div className="flex items-center">
                 <img
-                  src="/logo/android-chrome-192x192.png"
+                  src="/logo/main_logo.png"
                   alt="AllBounds Vacations"
-                  className="h-10 w-24"
+                  className="h-10 w-auto"
                   onError={(e) => {
                     // Fallback if logo image is not available
                     const target = e.currentTarget as HTMLImageElement;

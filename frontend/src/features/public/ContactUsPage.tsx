@@ -36,10 +36,10 @@ const ContactUsPage: React.FC = () => {
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Phone</h3>
               <a
-                href="tel:+256754969593"
+                href="tel:+256782594008"
                 className="text-blue-600 hover:text-blue-800 font-medium"
               >
-                +256 754 969 593
+                +(256) 782 594008
               </a>
               <p className="text-sm text-gray-600 mt-1">24/7 Support</p>
             </div>
@@ -51,10 +51,10 @@ const ContactUsPage: React.FC = () => {
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Email</h3>
               <a
-                href="mailto:info@allbounds.com"
+                href="mailto:bookings@allboundvacations.com"
                 className="text-green-600 hover:text-green-800 font-medium"
               >
-                info@allbounds.com
+                bookings@allboundvacations.com
               </a>
               <p className="text-sm text-gray-600 mt-1">Quick Response</p>
             </div>

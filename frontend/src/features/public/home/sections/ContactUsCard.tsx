@@ -30,13 +30,13 @@ const ContactUsCard: React.FC = () => {
                 </div>
                 <div className="p-6 text-center flex-1 flex flex-col justify-center">
                   <a
-                    href="tel:+256754969593"
+                    href="tel:+256782594008"
                     className="text-2xl font-bold block mb-2 transition-colors duration-200"
                     style={{ color: '#3c4852', fontFamily: 'Lato, sans-serif' }}
                     onMouseEnter={(e) => e.currentTarget.style.color = '#b54359'}
                     onMouseLeave={(e) => e.currentTarget.style.color = '#3c4852'}
                   >
-                    +256 754 969 593
+                    +(256) 782 594008
                   </a>
                   <p className="text-sm" style={{ color: '#3c4852', fontFamily: 'Lato, sans-serif' }}>Available 24/7 for your convenience</p>
                 </div>
@@ -54,13 +54,13 @@ const ContactUsCard: React.FC = () => {
                 </div>
                 <div className="p-6 text-center flex-1 flex flex-col justify-center">
                   <a
-                    href="mailto:info@allboundholidays.com"
+                    href="mailto:bookings@allboundvacations.com"
                     className="text-lg font-bold block mb-2 transition-colors duration-200"
                     style={{ color: '#3c4852', fontFamily: 'Lato, sans-serif' }}
                     onMouseEnter={(e) => e.currentTarget.style.color = '#b54359'}
                     onMouseLeave={(e) => e.currentTarget.style.color = '#3c4852'}
                   >
-                    info@allboundholidays.com
+                    bookings@allboundvacations.com
                   </a>
                   <p className="text-sm" style={{ color: '#3c4852', fontFamily: 'Lato, sans-serif' }}>Get instant responses to your queries</p>
                 </div>

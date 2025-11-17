@@ -202,8 +202,8 @@ const MainLayout = () => {
     {
       title: 'Contact Info',
       links: [
-        { label: 'Phone: +256754969593', path: 'tel:+256754969593' },
-        { label: 'Email: info@allbounds.com', path: 'mailto:info@allbounds.com' },
+        { label: 'Phone: +(256) 782 594008', path: 'tel:+256782594008' },
+        { label: 'Email: bookings@allboundvacations.com', path: 'mailto:bookings@allboundvacations.com' },
       ],
     },
   ];

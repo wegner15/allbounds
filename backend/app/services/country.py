@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.models.country import Country
 from app.schemas.country import CountryCreate, CountryUpdate
-from app.utils.slug import create_slug
+from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
 from app.schemas.amenity import AmenityResponse
 from app.core.cloudflare_config import cloudflare_settings
 
@@ -431,6 +431,9 @@ class CountryService:
         Create a new country.
         """
         slug = create_slug(country_create.name)
+        # Ensure slug is unique
+        slug = ensure_unique_slug(db, Country, slug)
+        
         db_country = Country(
             name=country_create.name,
             description=country_create.description,
@@ -453,9 +456,10 @@ class CountryService:
         
         update_data = country_update.model_dump(exclude_unset=True)
         
-        # If name is being updated, update the slug as well
-        if "name" in update_data:
-            update_data["slug"] = create_slug(update_data["name"])
+        # Safely update slug if name changed
+        update_data = update_slug_if_name_changed(
+            update_data, db, Country, db_country.slug, country_id
+        )
         
         for key, value in update_data.items():
             setattr(db_country, key, value)

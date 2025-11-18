@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.models.region import Region
 from app.schemas.region import RegionCreate, RegionUpdate
-from app.utils.slug import create_slug
+from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
 
 class RegionService:
     def get_regions(self, db: Session, skip: int = 0, limit: int = 100) -> List[Region]:
@@ -77,9 +77,10 @@ class RegionService:
         
         update_data = region_update.model_dump(exclude_unset=True)
         
-        # If name is being updated, update the slug as well
-        if "name" in update_data:
-            update_data["slug"] = create_slug(update_data["name"])
+        # Safely update slug if name changed
+        update_data = update_slug_if_name_changed(
+            update_data, db, Region, db_region.slug, region_id
+        )
         
         for key, value in update_data.items():
             setattr(db_region, key, value)

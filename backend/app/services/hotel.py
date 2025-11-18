@@ -5,7 +5,7 @@ from app.models.hotel import Hotel
 from app.models.country import Country
 from app.models.amenity import Amenity
 from app.schemas.hotel import HotelCreate, HotelUpdate
-from app.utils.slug import create_slug
+from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
 from app.core.cloudflare_config import cloudflare_settings
 
 class HotelService:
@@ -338,9 +338,10 @@ class HotelService:
         # Handle amenity_ids separately
         amenity_ids = update_data.pop("amenity_ids", None)
         
-        # If name is being updated, update the slug as well
-        if "name" in update_data:
-            update_data["slug"] = create_slug(update_data["name"])
+        # Safely update slug if name changed
+        update_data = update_slug_if_name_changed(
+            update_data, db, Hotel, db_hotel.slug, hotel_id
+        )
         
         for key, value in update_data.items():
             setattr(db_hotel, key, value)

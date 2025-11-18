@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.models.hotel_type import HotelType
 from app.schemas.hotel_type import HotelTypeCreate, HotelTypeUpdate
-from app.utils.slug import create_slug
+from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
 
 class HotelTypeService:
     def get_hotel_types(self, db: Session, skip: int = 0, limit: int = 100) -> List[HotelType]:
@@ -49,9 +49,10 @@ class HotelTypeService:
         
         update_data = hotel_type_update.model_dump(exclude_unset=True)
         
-        # If name is being updated, update the slug as well
-        if "name" in update_data:
-            update_data["slug"] = create_slug(update_data["name"])
+        # Safely update slug if name changed
+        update_data = update_slug_if_name_changed(
+            update_data, db, HotelType, db_hotel_type.slug, hotel_type_id
+        )
         
         for key, value in update_data.items():
             setattr(db_hotel_type, key, value)

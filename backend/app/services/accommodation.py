@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.models.accommodation import Accommodation
 from app.schemas.accommodation import AccommodationCreate, AccommodationUpdate
-from app.utils.slug import create_slug
+from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
 
 class AccommodationService:
     def get_accommodations(self, db: Session, skip: int = 0, limit: int = 100) -> List[Accommodation]:
@@ -65,9 +65,10 @@ class AccommodationService:
         
         update_data = accommodation_update.model_dump(exclude_unset=True)
         
-        # If name is being updated, update the slug as well
-        if "name" in update_data:
-            update_data["slug"] = create_slug(update_data["name"])
+        # Safely update slug if name changed
+        update_data = update_slug_if_name_changed(
+            update_data, db, Accommodation, db_accommodation.slug, accommodation_id
+        )
         
         for key, value in update_data.items():
             setattr(db_accommodation, key, value)

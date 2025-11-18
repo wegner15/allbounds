@@ -30,6 +30,7 @@ interface HolidayTypeDisplay {
 const MainNavigation: React.FC = () => {
   const [destinationsOpen, setDestinationsOpen] = useState(false);
   const [holidayTypesOpen, setHolidayTypesOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const destinationsRef = useRef<HTMLDivElement>(null);
   const holidayTypesRef = useRef<HTMLDivElement>(null);
 
@@ -190,15 +191,15 @@ const MainNavigation: React.FC = () => {
     <header className="sticky top-0 z-50">
       {/* Main Navigation Bar */}
       <div className="bg-white shadow-sm">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center">
+            <Link to="/" className="flex items-center flex-shrink-0">
               <div className="flex items-center">
                 <img
                   src="/logo/main_logo.png"
                   alt="AllBounds Vacations"
-                  className="h-10 w-auto"
+                  className="h-8 sm:h-10 w-auto"
                   onError={(e) => {
                     // Fallback if logo image is not available
                     const target = e.currentTarget as HTMLImageElement;
@@ -211,13 +212,13 @@ const MainNavigation: React.FC = () => {
               </div>
             </Link>
 
-            {/* Navigation Links */}
-            <nav className="hidden md:flex items-center space-x-4">
+            {/* Desktop Navigation Links */}
+            <nav className="hidden lg:flex items-center space-x-2 xl:space-x-6">
               {navItems.map((item) => (
                 <div key={item.path} className="relative">
                   {item.hasDropdown ? (
                     <button
-                      className="flex items-center text-base font-medium text-charcoal hover:text-hover transition-colors"
+                      className="flex items-center text-sm xl:text-base font-medium text-charcoal hover:text-hover transition-colors whitespace-nowrap px-2"
                       onClick={item.label === 'DESTINATIONS' ? toggleDestinations : toggleHolidayTypes}
                       data-dropdown={item.label === 'DESTINATIONS' ? 'destinations' : 'holiday-types'}
                     >
@@ -239,7 +240,7 @@ const MainNavigation: React.FC = () => {
                   ) : (
                     <Link
                       to={item.path}
-                      className="text-base font-medium text-charcoal hover:text-hover transition-colors"
+                      className="text-sm xl:text-base font-medium text-charcoal hover:text-hover transition-colors whitespace-nowrap px-2"
                     >
                       {item.label}
                     </Link>
@@ -249,47 +250,187 @@ const MainNavigation: React.FC = () => {
             </nav>
 
             {/* Right Side Buttons */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <Link
                 to="/contact-us"
-                className="hidden sm:inline-flex items-center px-4 py-2 bg-[#0a1f44] text-white text-sm font-medium rounded hover:bg-opacity-90 transition-colors"
+                className="hidden md:inline-flex items-center px-3 lg:px-4 py-2 bg-[#0a1f44] text-white text-xs lg:text-sm font-medium rounded hover:bg-opacity-90 transition-colors whitespace-nowrap"
               >
                 Contact Us
               </Link>
               {user ? (
                 <button
                   onClick={handleLogout}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded text-charcoal bg-white hover:bg-gray-50 transition-colors"
+                  className="hidden sm:inline-flex items-center px-3 lg:px-4 py-2 border border-gray-300 text-xs lg:text-sm font-medium rounded text-charcoal bg-white hover:bg-gray-50 transition-colors whitespace-nowrap"
                 >
                   Logout
                 </button>
               ) : (
                 <Link
                   to="/login"
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded text-charcoal bg-white hover:bg-gray-50 transition-colors"
+                  className="hidden sm:inline-flex items-center px-3 lg:px-4 py-2 border border-gray-300 text-xs lg:text-sm font-medium rounded text-charcoal bg-white hover:bg-gray-50 transition-colors whitespace-nowrap"
                 >
-                  Sign In / Register
+                  <span className="hidden md:inline">Sign In / Register</span>
+                  <span className="md:hidden">Sign In</span>
                 </Link>
               )}
               
               {/* Mobile menu button */}
-              <button className="md:hidden p-2 rounded-md text-charcoal hover:bg-gray-100">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+              <button 
+                className="lg:hidden p-2 rounded-md text-charcoal hover:bg-gray-100 transition-colors"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? (
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
               </button>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden bg-white border-t border-gray-200 shadow-lg">
+          <div className="px-4 py-3 space-y-3">
+            {navItems.map((item) => (
+              <div key={item.path}>
+                {item.hasDropdown ? (
+                  <div>
+                    <button
+                      className="flex items-center justify-between w-full text-base font-medium text-charcoal hover:text-hover transition-colors py-2"
+                      onClick={() => {
+                        if (item.label === 'DESTINATIONS') {
+                          setDestinationsOpen(!destinationsOpen);
+                          setHolidayTypesOpen(false);
+                        } else {
+                          setHolidayTypesOpen(!holidayTypesOpen);
+                          setDestinationsOpen(false);
+                        }
+                      }}
+                    >
+                      {item.label}
+                      <svg
+                        className={`h-5 w-5 transition-transform ${
+                          (item.label === 'DESTINATIONS' && destinationsOpen) || 
+                          (item.label === 'HOLIDAY TYPES' && holidayTypesOpen) 
+                            ? 'rotate-180' 
+                            : ''
+                        }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {item.label === 'DESTINATIONS' && destinationsOpen && (
+                      <div className="pl-4 py-2 space-y-2">
+                        <Link
+                          to="/destinations"
+                          className="block text-sm text-blue-600 hover:underline py-1"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          All Destinations
+                        </Link>
+                        {destinationRegions.slice(0, 3).map((region) => (
+                          <div key={region.name} className="py-1">
+                            <p className="text-xs font-semibold text-gray-500 uppercase mb-1">{region.name}</p>
+                            {region.countries.slice(0, 3).map((country) => (
+                              <Link
+                                key={country.slug}
+                                to={`/destinations/${country.slug}`}
+                                className="block text-sm text-gray-700 hover:text-hover py-1 pl-2"
+                                onClick={() => setMobileMenuOpen(false)}
+                              >
+                                {country.name}
+                              </Link>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {item.label === 'HOLIDAY TYPES' && holidayTypesOpen && (
+                      <div className="pl-4 py-2 space-y-2">
+                        <Link
+                          to="/holiday-types"
+                          className="block text-sm text-blue-600 hover:underline py-1"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          All Holiday Types
+                        </Link>
+                        {holidayTypeItems.slice(0, 5).map((type) => (
+                          <Link
+                            key={type.slug}
+                            to={`/holiday-types/${type.slug}`}
+                            className="flex items-center space-x-2 text-sm text-gray-700 hover:text-hover py-1"
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            <span>{type.icon}</span>
+                            <span>{type.name}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    to={item.path}
+                    className="block text-base font-medium text-charcoal hover:text-hover transition-colors py-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                )}
+              </div>
+            ))}
+            
+            {/* Mobile Contact & Auth */}
+            <div className="pt-3 border-t border-gray-200 space-y-2">
+              <Link
+                to="/contact-us"
+                className="block w-full text-center px-4 py-2 bg-[#0a1f44] text-white text-sm font-medium rounded hover:bg-opacity-90 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Contact Us
+              </Link>
+              {user ? (
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="block w-full text-center px-4 py-2 border border-gray-300 text-sm font-medium rounded text-charcoal bg-white hover:bg-gray-50 transition-colors"
+                >
+                  Logout
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  className="block w-full text-center px-4 py-2 border border-gray-300 text-sm font-medium rounded text-charcoal bg-white hover:bg-gray-50 transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Sign In / Register
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Destinations Dropdown */}
-      {destinationsOpen && (
+      {destinationsOpen && !mobileMenuOpen && (
         <div 
           ref={destinationsRef}
-          className="absolute left-0 right-0 bg-white shadow-lg border-t border-gray-200 z-50"
+          className="hidden lg:block absolute left-0 right-0 bg-white shadow-lg border-t border-gray-200 z-50"
         >
-          <div className="container mx-auto px-4 py-6">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="mb-4">
               <Link 
                 to="/destinations" 
@@ -334,12 +475,12 @@ const MainNavigation: React.FC = () => {
       )}
 
       {/* Holiday Types Dropdown */}
-      {holidayTypesOpen && (
+      {holidayTypesOpen && !mobileMenuOpen && (
         <div 
           ref={holidayTypesRef}
-          className="absolute left-0 right-0 bg-white shadow-lg border-t border-gray-200 z-50"
+          className="hidden lg:block absolute left-0 right-0 bg-white shadow-lg border-t border-gray-200 z-50"
         >
-          <div className="container mx-auto px-4 py-6">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="mb-4">
               <Link 
                 to="/holiday-types" 

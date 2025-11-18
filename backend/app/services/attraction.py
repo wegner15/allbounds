@@ -5,7 +5,7 @@ from sqlalchemy import or_
 from app.models.attraction import Attraction
 from app.models.country import Country
 from app.schemas.attraction import AttractionCreate, AttractionUpdate
-from app.utils.slug import create_slug
+from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
 
 class AttractionService:
     def get_attractions(
@@ -127,9 +127,10 @@ class AttractionService:
         
         update_data = attraction_update.model_dump(exclude_unset=True)
         
-        # If name is being updated, update the slug as well
-        if "name" in update_data:
-            update_data["slug"] = create_slug(update_data["name"])
+        # Safely update slug if name changed
+        update_data = update_slug_if_name_changed(
+            update_data, db, Attraction, db_attraction.slug, attraction_id
+        )
         
         for key, value in update_data.items():
             setattr(db_attraction, key, value)

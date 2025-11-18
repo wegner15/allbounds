@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.models.activity import Activity
 from app.models.media import MediaAsset
 from app.schemas.activity import ActivityCreate, ActivityUpdate
-from app.utils.slug import create_slug
+from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
 
 class ActivityService:
     def get_activities(self, db: Session, skip: int = 0, limit: int = 100) -> List[Activity]:
@@ -141,9 +141,10 @@ class ActivityService:
         # Handle country_ids separately
         country_ids = update_data.pop("country_ids", None)
         
-        # If name is being updated, update the slug as well
-        if "name" in update_data:
-            update_data["slug"] = create_slug(update_data["name"])
+        # Safely update slug if name changed
+        update_data = update_slug_if_name_changed(
+            update_data, db, Activity, db_activity.slug, activity_id
+        )
         
         for key, value in update_data.items():
             setattr(db_activity, key, value)

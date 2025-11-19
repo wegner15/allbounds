@@ -290,13 +290,16 @@ class HotelService:
         
         # Extract amenity_ids before creating hotel
         amenity_ids = hotel_create.amenity_ids or []
+        hotel_type_id = hotel_create.hotel_type_id
+        if hotel_type_id in (0, "0"):
+            hotel_type_id = None
         
         db_hotel = Hotel(
             name=hotel_create.name,
             summary=hotel_create.summary,
             description=hotel_create.description,
             country_id=hotel_create.country_id,
-            hotel_type_id=hotel_create.hotel_type_id,
+            hotel_type_id=hotel_type_id,
             stars=hotel_create.stars,
             address=hotel_create.address,
             city=hotel_create.city,
@@ -334,6 +337,9 @@ class HotelService:
             return None
         
         update_data = hotel_update.model_dump(exclude_unset=True)
+        hotel_type_id = update_data.get("hotel_type_id")
+        if hotel_type_id in (0, "0"):
+            update_data["hotel_type_id"] = None
         
         # Handle amenity_ids separately
         amenity_ids = update_data.pop("amenity_ids", None)

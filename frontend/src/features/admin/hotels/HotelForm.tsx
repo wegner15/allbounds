@@ -118,6 +118,10 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.hotel_type_id) {
+      alert('Please select a hotel type');
+      return;
+    }
     onSubmit(formData);
   };
 
@@ -189,11 +193,12 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
 
           <div>
             <label htmlFor="hotel_type_id" className="block text-sm font-medium text-gray-700 mb-1">
-              Hotel Type
+              Hotel Type *
             </label>
             <select
               id="hotel_type_id"
               name="hotel_type_id"
+              required
               value={formData.hotel_type_id || ''}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"

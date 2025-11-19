@@ -56,6 +56,10 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         self.logger = logging.getLogger("api.request")
     
     async def dispatch(self, request: Request, call_next) -> Response:
+        # Skip detailed logging for Prometheus metrics endpoint
+        if request.url.path.startswith("/metrics"):
+            return await call_next(request)
+
         # Generate request ID
         request_id = str(uuid.uuid4())
         request_id_var.set(request_id)

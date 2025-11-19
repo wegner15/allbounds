@@ -65,8 +65,12 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         # Extract endpoint from request
-        endpoint = request.url.path
         method = request.method
+        route = request.scope.get("route")
+        if route and hasattr(route, "path"):
+            endpoint = route.path
+        else:
+            endpoint = request.url.path
         
         # Track request in progress
         REQUEST_IN_PROGRESS.labels(method=method, endpoint=endpoint).inc()

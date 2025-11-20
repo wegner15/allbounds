@@ -56,8 +56,8 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         self.logger = logging.getLogger("api.request")
     
     async def dispatch(self, request: Request, call_next) -> Response:
-        # Skip detailed logging for Prometheus metrics endpoint
-        if request.url.path.startswith("/metrics"):
+        # Skip detailed logging for Prometheus metrics endpoint and health checks
+        if request.url.path.startswith("/metrics") or request.url.path == "/health":
             return await call_next(request)
 
         # Generate request ID
@@ -67,7 +67,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         # Start timer
         start_time = time.time()
         
-        # Log request
+        # Log request (without full headers to reduce memory)
         self.logger.info(
             f"Request started: {request.method} {request.url.path}",
             extra={
@@ -76,7 +76,6 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                     "method": request.method,
                     "path": request.url.path,
                     "query": str(request.query_params),
-                    "headers": dict(request.headers),
                     "client": request.client.host if request.client else None,
                 }
             }
@@ -89,14 +88,13 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             # Calculate duration
             duration = time.time() - start_time
             
-            # Log response
+            # Log response (without full headers to reduce memory)
             self.logger.info(
                 f"Request completed: {request.method} {request.url.path} {response.status_code}",
                 extra={
                     "response": {
                         "status_code": response.status_code,
                         "duration": duration,
-                        "headers": dict(response.headers),
                     }
                 }
             )

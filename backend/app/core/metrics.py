@@ -67,10 +67,18 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
         # Extract endpoint from request
         method = request.method
         route = request.scope.get("route")
+        
+        # Use route template if available, otherwise classify as unknown/404
         if route and hasattr(route, "path"):
             endpoint = route.path
         else:
-            endpoint = request.url.path
+            # Don't track individual 404/unknown paths to prevent unbounded cardinality
+            # Group all unmatched paths under a single label
+            endpoint = "<unmatched>"
+        
+        # Skip metrics for /metrics endpoint itself to avoid recursion
+        if request.url.path.startswith("/metrics"):
+            return await call_next(request)
         
         # Track request in progress
         REQUEST_IN_PROGRESS.labels(method=method, endpoint=endpoint).inc()

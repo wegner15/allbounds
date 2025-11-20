@@ -42,7 +42,7 @@ services:
       timeout: 10s
       retries: 2
       start_period: 40s
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2 --log-level info --access-log
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2 --log-level warning --limit-max-requests 10000 --timeout-keep-alive 5
 
   db:
     image: postgres:15-alpine

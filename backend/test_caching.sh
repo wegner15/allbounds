@@ -12,7 +12,7 @@ NC='\033[0m' # No Color
 
 # Test 1: Check Redis is running
 echo "1. Checking Redis connection..."
-if docker exec backend_redis_1 redis-cli PING 2>/dev/null | grep -q "PONG"; then
+if sudo docker exec backend-redis-1 redis-cli PING 2>/dev/null | grep -q "PONG"; then
     echo -e "${GREEN}✓ Redis is running${NC}"
 else
     echo -e "${RED}✗ Redis is not running${NC}"
@@ -22,7 +22,7 @@ echo ""
 
 # Test 2: Clear cache for clean test
 echo "2. Clearing cache for clean test..."
-docker exec backend_redis_1 redis-cli FLUSHDB > /dev/null 2>&1
+sudo docker exec backend-redis-1 redis-cli FLUSHDB > /dev/null 2>&1
 echo -e "${GREEN}✓ Cache cleared${NC}"
 echo ""
 
@@ -58,11 +58,11 @@ echo ""
 
 # Test 5: Check cache keys
 echo "5. Checking cache keys in Redis..."
-CACHE_KEYS=$(docker exec backend_redis_1 redis-cli KEYS "cache:*" 2>/dev/null | wc -l)
+CACHE_KEYS=$(sudo docker exec backend-redis-1 redis-cli KEYS "cache:*" 2>/dev/null | wc -l)
 if [ $CACHE_KEYS -gt 0 ]; then
     echo -e "${GREEN}✓ Found ${CACHE_KEYS} cache keys${NC}"
     echo "Sample keys:"
-    docker exec backend_redis_1 redis-cli KEYS "cache:*" 2>/dev/null | head -5
+    sudo docker exec backend-redis-1 redis-cli KEYS "cache:*" 2>/dev/null | head -5
 else
     echo -e "${RED}✗ No cache keys found${NC}"
 fi
@@ -70,9 +70,9 @@ echo ""
 
 # Test 6: Check TTL
 echo "6. Checking cache TTL..."
-FIRST_KEY=$(docker exec backend_redis_1 redis-cli KEYS "cache:*" 2>/dev/null | head -1)
+FIRST_KEY=$(sudo docker exec backend-redis-1 redis-cli KEYS "cache:*" 2>/dev/null | head -1)
 if [ ! -z "$FIRST_KEY" ]; then
-    TTL=$(docker exec backend_redis_1 redis-cli TTL "$FIRST_KEY" 2>/dev/null)
+    TTL=$(sudo docker exec backend-redis-1 redis-cli TTL "$FIRST_KEY" 2>/dev/null)
     echo -e "${GREEN}✓ TTL for first key: ${TTL} seconds${NC}"
 else
     echo -e "${YELLOW}⚠ No keys to check TTL${NC}"
@@ -104,7 +104,7 @@ echo ""
 
 # Test 8: Check Redis memory usage
 echo "8. Checking Redis memory usage..."
-REDIS_MEM=$(docker exec backend_redis_1 redis-cli INFO memory 2>/dev/null | grep "used_memory_human" | cut -d: -f2 | tr -d '\r')
+REDIS_MEM=$(sudo docker exec backend-redis-1 redis-cli INFO memory 2>/dev/null | grep "used_memory_human" | cut -d: -f2 | tr -d '\r')
 echo -e "${GREEN}✓ Redis memory: ${REDIS_MEM}${NC}"
 echo ""
 

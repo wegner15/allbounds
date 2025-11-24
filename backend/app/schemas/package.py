@@ -57,9 +57,9 @@ class PackageResponse(PackageBase):
     created_at: datetime
     updated_at: datetime
     published_at: Optional[datetime] = None
-    holiday_types: List[HolidayTypeResponse] = Field(default_factory=list, description="Holiday types associated with this package")
-    inclusion_items: List[InclusionResponse] = Field(default_factory=list, description="Inclusions associated with this package")
-    exclusion_items: List[ExclusionResponse] = Field(default_factory=list, description="Exclusions associated with this package")
+    # REMOVED: holiday_types, inclusion_items, exclusion_items to prevent circular loading
+    # These cause exponential memory growth due to bidirectional relationships
+    # Use dedicated endpoints to fetch these if needed
     
     @field_validator('is_active', 'is_featured', 'is_published', mode='before')
     @classmethod

@@ -177,7 +177,15 @@ def log_pool_stats():
     )
 
 # Create SessionLocal class
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# NOTE: expire_on_commit defaults to True, which expires objects after commit
+# This is good for memory management but can cause DetachedInstanceError
+# We keep default True and handle serialization before session closes
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+    # expire_on_commit=True (default) - objects expire after commit, freeing memory
+)
 
 # Create Base class for models
 Base = declarative_base()
@@ -247,6 +255,9 @@ def get_db():
     try:
         yield db
     finally:
+        # CRITICAL: Expunge all objects to free memory before closing
+        # This prevents lazy-loading during response serialization from keeping objects in memory
+        db.expunge_all()
         db.close()
 
 # Database health check function

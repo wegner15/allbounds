@@ -121,12 +121,14 @@ async def startup_event():
     log_pool_stats()
     
     # Setup Celery-based Meilisearch sync listeners
-    try:
-        from app.db.search_sync_celery import setup_search_sync_listeners
-        setup_search_sync_listeners()
-        logger.info("Celery-based Meilisearch sync enabled")
-    except Exception as e:
-        logger.warning(f"Failed to setup Meilisearch sync: {e}. Sync will be disabled.")
+    # TEMPORARILY DISABLED TO TEST IF INDEXING CAUSES OOM ERRORS
+    # try:
+    #     from app.db.search_sync_celery import setup_search_sync_listeners
+    #     setup_search_sync_listeners()
+    #     logger.info("Celery-based Meilisearch sync enabled")
+    # except Exception as e:
+    #     logger.warning(f"Failed to setup Meilisearch sync: {e}. Sync will be disabled.")
+    logger.warning("Meilisearch sync DISABLED for testing - search is read-only")
     
     # Test Redis connection
     try:

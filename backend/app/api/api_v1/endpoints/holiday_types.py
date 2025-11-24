@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from app.db.database import get_db
+from app.core.cache_decorator import cache_response
 from app.models.holiday_type import HolidayType
 from app.models.user import User
 from app.schemas.holiday_type import HolidayTypeResponse, HolidayTypeCreate, HolidayTypeUpdate
@@ -18,6 +19,7 @@ router = APIRouter()
 
 @router.get("/", response_model=List[HolidayTypeResponse])
 @router.get("", response_model=List[HolidayTypeResponse])  # Explicit route without trailing slash
+@cache_response(ttl=600)  # Cache for 10 minutes (rarely changes)
 def read_holiday_types(
     skip: int = 0, 
     limit: int = 100,

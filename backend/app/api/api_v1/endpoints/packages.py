@@ -9,6 +9,7 @@ from app.models.user import User
 from app.schemas.package import PackageResponse, PackageCreate, PackageUpdate, PackageWithCountryResponse, PackageHolidayTypeCreate, PackageListResponse
 from app.services.package import package_service
 from app.auth.dependencies import get_current_user, has_permission
+from app.core.cache_decorator import cache_response, invalidate_cache
 
 class SetCoverImageRequest(BaseModel):
     image_id: str
@@ -16,6 +17,7 @@ class SetCoverImageRequest(BaseModel):
 router = APIRouter()
 
 @router.get("/", response_model=List[PackageListResponse])
+@cache_response(ttl=300)  # Cache for 5 minutes
 def get_packages(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -68,6 +70,7 @@ def get_packages_by_country(
     return packages
 
 @router.get("/featured", response_model=List[PackageWithCountryResponse])
+@cache_response(ttl=300)  # Cache for 5 minutes
 def get_featured_packages(
     db: Session = Depends(get_db),
     skip: int = 0,

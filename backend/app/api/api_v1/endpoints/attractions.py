@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
+from app.core.cache_decorator import cache_response
 from app.models.user import User
 from app.schemas.attraction import AttractionResponse, AttractionCreate, AttractionUpdate, AttractionWithCountryResponse, AttractionWithRelationshipsResponse
 from app.schemas.package import PackageWithCountryResponse
@@ -41,6 +42,7 @@ def get_attractions(
     return attractions
 
 @router.get("/country/{country_id}", response_model=List[AttractionResponse])
+@cache_response(ttl=300)  # Cache for 5 minutes
 def get_attractions_by_country(
     country_id: int,
     db: Session = Depends(get_db),

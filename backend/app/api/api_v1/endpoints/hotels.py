@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
+from app.core.cache_decorator import cache_response
 from app.models.user import User
 from app.schemas.hotel import HotelResponse, HotelCreate, HotelUpdate, HotelWithCountryResponse, HotelWithRelationshipsResponse
 from app.services.hotel import hotel_service
@@ -36,6 +37,7 @@ def get_hotels(
     return hotels
 
 @router.get("/featured")
+@cache_response(ttl=300)  # Cache for 5 minutes
 def get_featured_hotels(
     db: Session = Depends(get_db),
     skip: int = 0,

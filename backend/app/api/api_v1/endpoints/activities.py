@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
+from app.core.cache_decorator import cache_response
 from app.models.user import User
 from app.schemas.activity import ActivityResponse, ActivityCreate, ActivityUpdate
 from app.services.activity import activity_service
@@ -40,6 +41,7 @@ def get_activities(
     return activities
 
 @router.get("/featured", response_model=List[ActivityResponse])
+@cache_response(ttl=300)  # Cache for 5 minutes
 def get_featured_activities(
     db: Session = Depends(get_db),
     skip: int = 0,

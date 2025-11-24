@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
+from app.core.cache_decorator import cache_response
 from app.models.user import User
 from app.schemas.region import RegionResponse, RegionCreate, RegionUpdate
 from app.schemas.country import CountryResponse
@@ -26,6 +27,7 @@ def get_regions(
     return regions
 
 @router.get("/with-countries", response_model=List[Dict])
+@cache_response(ttl=600)  # Cache for 10 minutes (rarely changes)
 def get_regions_with_countries(
     db: Session = Depends(get_db),
     skip: int = 0,

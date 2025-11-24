@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from app.db.database import get_db
 from app.models.user import User
-from app.schemas.package import PackageResponse, PackageCreate, PackageUpdate, PackageWithCountryResponse, PackageHolidayTypeCreate
+from app.schemas.package import PackageResponse, PackageCreate, PackageUpdate, PackageWithCountryResponse, PackageHolidayTypeCreate, PackageListResponse
 from app.services.package import package_service
 from app.auth.dependencies import get_current_user, has_permission
 
@@ -15,7 +15,7 @@ class SetCoverImageRequest(BaseModel):
 
 router = APIRouter()
 
-@router.get("/", response_model=List[PackageWithCountryResponse])
+@router.get("/", response_model=List[PackageListResponse])
 def get_packages(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -28,6 +28,7 @@ def get_packages(
 ) -> Any:
     """
     Retrieve all packages with optional ordering and filtering.
+    Uses lightweight response to prevent OOM errors.
     order_by options: created_at, name, price
     order options: asc, desc
     """

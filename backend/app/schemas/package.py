@@ -77,6 +77,24 @@ class PackageWithCountryResponse(PackageResponse):
     class Config:
         from_attributes = True
 
+# Lightweight schema for list endpoints (prevents OOM by not loading all relationships)
+class PackageListResponse(BaseModel):
+    id: int
+    name: str
+    summary: Optional[str] = None
+    country_id: int
+    duration_days: Optional[int] = None
+    price: Optional[float] = None
+    image_id: Optional[str] = None
+    slug: str
+    is_active: bool
+    is_featured: bool
+    created_at: datetime
+    country: CountryResponse  # Only load country, not all relationships
+    
+    class Config:
+        from_attributes = True
+
 # Schema for adding a holiday type to a package
 class PackageHolidayTypeCreate(BaseModel):
     holiday_type_id: int = Field(..., description="ID of the holiday type to add to the package")

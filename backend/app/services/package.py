@@ -23,10 +23,12 @@ class PackageService:
     def get_packages(self, db: Session, skip: int = 0, limit: int = 100, order_by: str = "created_at", order: str = "desc") -> List[Package]:
         """
         Retrieve all packages with pagination and ordering.
+        MEMORY FIX: Only load essential relationships to prevent OOM
         """
         query = db.query(Package).options(
-            joinedload(Package.country),
-            joinedload(Package.holiday_types)
+            joinedload(Package.country)
+            # Removed joinedload(Package.holiday_types) - causes memory spike
+            # Other relationships (inclusion_items, exclusion_items) are lazy-loaded on access
         ).filter(Package.is_active == True)
 
         # Apply ordering

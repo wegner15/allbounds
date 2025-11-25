@@ -132,16 +132,18 @@ async def startup_event():
     #     logger.warning(f"Failed to setup Meilisearch sync: {e}. Sync will be disabled.")
     logger.warning("Meilisearch sync DISABLED for testing - search is read-only")
     
-    # Test Redis connection
-    try:
-        from app.core.cache import redis_client
-        if redis_client:
-            redis_client.ping()
-            logger.info("Redis connection successful")
-        else:
-            logger.warning("Redis client not initialized. Caching disabled.")
-    except Exception as e:
-        logger.warning(f"Redis connection failed: {e}. Caching disabled.")
+    # TEMPORARILY DISABLED - Testing minimal setup
+    # # Test Redis connection
+    # try:
+    #     from app.core.cache import redis_client
+    #     if redis_client:
+    #         redis_client.ping()
+    #         logger.info("Redis connection successful")
+    #     else:
+    #         logger.warning("Redis client not initialized. Caching disabled.")
+    # except Exception as e:
+    #     logger.warning(f"Redis connection failed: {e}. Caching disabled.")
+    logger.warning("Redis DISABLED for minimal testing")
     
     logger.info("Application startup complete")
 

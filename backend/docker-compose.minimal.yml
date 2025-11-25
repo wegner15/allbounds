@@ -1,0 +1,47 @@
+services:
+  api:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8005:8000"
+    volumes:
+      - ./:/app
+    environment:
+      - DATABASE_URL=postgresql://allbounds:allbounds@db:5432/allbounds
+      - DB_POOL_SIZE=10
+      - DB_MAX_OVERFLOW=0
+      - DB_POOL_RECYCLE=3600
+      - DB_POOL_TIMEOUT=30
+      - DB_CONNECT_TIMEOUT=10
+      - DB_POOL_PRE_PING=true
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--max-time", "5", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 2
+      start_period: 40s
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2 --log-level warning --limit-max-requests 100 --timeout-keep-alive 5
+
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    ports:
+      - "5435:5432"
+    environment:
+      - POSTGRES_USER=allbounds
+      - POSTGRES_PASSWORD=allbounds
+      - POSTGRES_DB=allbounds
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U allbounds"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  postgres_data:

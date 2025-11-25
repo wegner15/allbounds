@@ -38,17 +38,18 @@ if settings.BACKEND_CORS_ORIGINS:
 # Add request logging middleware
 app.add_middleware(RequestLoggingMiddleware)
 
-# Add Prometheus metrics middleware
-app.add_middleware(PrometheusMiddleware)
+# TEMPORARILY DISABLED - Testing if Prometheus/OpenTelemetry causes memory leak
+# # Add Prometheus metrics middleware
+# app.add_middleware(PrometheusMiddleware)
 
-# Create metrics endpoint
-metrics_app = make_asgi_app()
-app.mount("/metrics", metrics_app)
+# # Create metrics endpoint
+# metrics_app = make_asgi_app()
+# app.mount("/metrics", metrics_app)
 
-# Set up OpenTelemetry tracing
-if hasattr(settings, 'ENABLE_TRACING') and settings.ENABLE_TRACING:
-    setup_tracing(app, service_name="allbounds-backend", endpoint=getattr(settings, 'OTLP_ENDPOINT', None))
-    logger.info("OpenTelemetry tracing enabled")
+# # Set up OpenTelemetry tracing
+# if hasattr(settings, 'ENABLE_TRACING') and settings.ENABLE_TRACING:
+#     setup_tracing(app, service_name="allbounds-backend", endpoint=getattr(settings, 'OTLP_ENDPOINT', None))
+#     logger.info("OpenTelemetry tracing enabled")
 
 # Include API router
 app.include_router(api_router, prefix=settings.API_V1_STR)

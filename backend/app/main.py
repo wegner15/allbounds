@@ -9,9 +9,8 @@ from app.models.all_models import __all__ as all_models
 from app.api.api_v1.api import api_router
 from app.core.config import settings
 from app.core.logging import setup_logging, RequestLoggingMiddleware
-# TEMPORARILY DISABLED - Testing if these cause memory leak
-# from app.core.metrics import PrometheusMiddleware
-# from app.core.tracing import setup_tracing
+from app.core.metrics import PrometheusMiddleware
+from app.core.tracing import setup_tracing
 
 # Set up logging
 setup_logging(settings.LOG_LEVEL)
@@ -39,18 +38,17 @@ if settings.BACKEND_CORS_ORIGINS:
 # Add request logging middleware
 app.add_middleware(RequestLoggingMiddleware)
 
-# TEMPORARILY DISABLED - Testing if Prometheus/OpenTelemetry causes memory leak
-# # Add Prometheus metrics middleware
-# app.add_middleware(PrometheusMiddleware)
+# Add Prometheus metrics middleware
+app.add_middleware(PrometheusMiddleware)
 
-# # Create metrics endpoint
-# metrics_app = make_asgi_app()
-# app.mount("/metrics", metrics_app)
+# Create metrics endpoint
+metrics_app = make_asgi_app()
+app.mount("/metrics", metrics_app)
 
-# # Set up OpenTelemetry tracing
-# if hasattr(settings, 'ENABLE_TRACING') and settings.ENABLE_TRACING:
-#     setup_tracing(app, service_name="allbounds-backend", endpoint=getattr(settings, 'OTLP_ENDPOINT', None))
-#     logger.info("OpenTelemetry tracing enabled")
+# Set up OpenTelemetry tracing
+if hasattr(settings, 'ENABLE_TRACING') and settings.ENABLE_TRACING:
+    setup_tracing(app, service_name="allbounds-backend", endpoint=getattr(settings, 'OTLP_ENDPOINT', None))
+    logger.info("OpenTelemetry tracing enabled")
 
 # Include API router
 app.include_router(api_router, prefix=settings.API_V1_STR)
@@ -123,27 +121,23 @@ async def startup_event():
     log_pool_stats()
     
     # Setup Celery-based Meilisearch sync listeners
-    # TEMPORARILY DISABLED TO TEST IF INDEXING CAUSES OOM ERRORS
-    # try:
-    #     from app.db.search_sync_celery import setup_search_sync_listeners
-    #     setup_search_sync_listeners()
-    #     logger.info("Celery-based Meilisearch sync enabled")
-    # except Exception as e:
-    #     logger.warning(f"Failed to setup Meilisearch sync: {e}. Sync will be disabled.")
-    logger.warning("Meilisearch sync DISABLED for testing - search is read-only")
+    try:
+        from app.db.search_sync_celery import setup_search_sync_listeners
+        setup_search_sync_listeners()
+        logger.info("Celery-based Meilisearch sync enabled")
+    except Exception as e:
+        logger.warning(f"Failed to setup Meilisearch sync: {e}. Sync will be disabled.")
     
-    # TEMPORARILY DISABLED - Testing minimal setup
-    # # Test Redis connection
-    # try:
-    #     from app.core.cache import redis_client
-    #     if redis_client:
-    #         redis_client.ping()
-    #         logger.info("Redis connection successful")
-    #     else:
-    #         logger.warning("Redis client not initialized. Caching disabled.")
-    # except Exception as e:
-    #     logger.warning(f"Redis connection failed: {e}. Caching disabled.")
-    logger.warning("Redis DISABLED for minimal testing")
+    # Test Redis connection
+    try:
+        from app.core.cache import redis_client
+        if redis_client:
+            redis_client.ping()
+            logger.info("Redis connection successful")
+        else:
+            logger.warning("Redis client not initialized. Caching disabled.")
+    except Exception as e:
+        logger.warning(f"Redis connection failed: {e}. Caching disabled.")
     
     logger.info("Application startup complete")
 

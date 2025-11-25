@@ -33,10 +33,9 @@ engine = create_engine(
 )
 
 # Connection pool event listeners for logging
-# TEMPORARILY DISABLED - Testing if event listeners cause infinite loop
 
-# @event.listens_for(engine, "connect")
-def receive_connect_DISABLED(dbapi_conn, connection_record):
+@event.listens_for(engine, "connect")
+def receive_connect(dbapi_conn, connection_record):
     """Log new database connections."""
     # Increment connection counter
     db_pool_connects_total.inc()
@@ -56,8 +55,8 @@ def receive_connect_DISABLED(dbapi_conn, connection_record):
         extra=extra_data
     )
 
-# @event.listens_for(engine, "checkout")
-def receive_checkout_DISABLED(dbapi_conn, connection_record, connection_proxy):
+@event.listens_for(engine, "checkout")
+def receive_checkout(dbapi_conn, connection_record, connection_proxy):
     """Log connection checkout from pool."""
     pool_obj = connection_proxy._pool
     
@@ -87,8 +86,8 @@ def receive_checkout_DISABLED(dbapi_conn, connection_record, connection_proxy):
         extra=extra_data
     )
 
-# @event.listens_for(engine, "checkin")
-def receive_checkin_DISABLED(dbapi_conn, connection_record):
+@event.listens_for(engine, "checkin")
+def receive_checkin(dbapi_conn, connection_record):
     """Log connection return to pool."""
     # Increment checkin counter
     db_pool_checkins_total.inc()
@@ -112,8 +111,8 @@ def receive_checkin_DISABLED(dbapi_conn, connection_record):
         extra=extra_data
     )
 
-# @event.listens_for(engine, "close")
-def receive_close_DISABLED(dbapi_conn, connection_record):
+@event.listens_for(engine, "close")
+def receive_close(dbapi_conn, connection_record):
     """Log connection closure."""
     # Get request_id from context if available
     request_id = request_id_var.get() if request_id_var.get() else None
@@ -130,8 +129,8 @@ def receive_close_DISABLED(dbapi_conn, connection_record):
         extra=extra_data
     )
 
-# @event.listens_for(engine, "invalidate")
-def receive_invalidate_DISABLED(dbapi_conn, connection_record, exception):
+@event.listens_for(engine, "invalidate")
+def receive_invalidate(dbapi_conn, connection_record, exception):
     """Log stale connection detection (pool pre-ping failures)."""
     # Increment pre-ping failure counter
     db_pool_pre_ping_failures_total.inc()

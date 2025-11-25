@@ -25,14 +25,9 @@ def get_countries(
     """
     Retrieve all countries.
     """
-    import logging
-    import traceback
-    logger = logging.getLogger("app.countries")
-    logger.warning(f"🚨 get_countries called! details={details}, skip={skip}, limit={limit}")
-    logger.warning(f"🚨 Call stack: {''.join(traceback.format_stack())}")
-    
     if details:
-        countries = country_service.get_countries_with_details(db, skip=skip, limit=limit)
+        # get_countries_with_details already returns dicts, return them directly
+        return country_service.get_countries_with_details(db, skip=skip, limit=limit)
     else:
         countries = country_service.get_countries(db, skip=skip, limit=limit)
     

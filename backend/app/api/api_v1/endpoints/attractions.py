@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.core.cache_decorator import cache_response
+from app.core.redis_cache import cache_endpoint
 from app.models.user import User
 from app.schemas.attraction import AttractionResponse, AttractionCreate, AttractionUpdate, AttractionWithCountryResponse, AttractionWithRelationshipsResponse
 from app.schemas.package import PackageWithCountryResponse
@@ -39,10 +39,10 @@ def get_attractions(
         country=country,
         category=category,
     )
-    return attractions
+    # CRITICAL: Serialize to Pydantic to prevent lazy-loading
+    return [AttractionResponse.from_orm(attraction) for attraction in attractions]
 
 @router.get("/country/{country_id}", response_model=List[AttractionResponse])
-@cache_response(ttl=300)  # Cache for 5 minutes
 def get_attractions_by_country(
     country_id: int,
     db: Session = Depends(get_db),
@@ -53,7 +53,8 @@ def get_attractions_by_country(
     Retrieve attractions by country ID.
     """
     attractions = attraction_service.get_attractions_by_country(db, country_id=country_id, skip=skip, limit=limit)
-    return attractions
+    # CRITICAL: Serialize to Pydantic to prevent lazy-loading
+    return [AttractionResponse.from_orm(attraction) for attraction in attractions]
 
 @router.get("/{attraction_id}", response_model=AttractionWithCountryResponse)
 def get_attraction(

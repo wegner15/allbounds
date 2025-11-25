@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.core.cache_decorator import cache_response
+from app.core.redis_cache import cache_endpoint
 from app.models.user import User
 from app.schemas.hotel import HotelResponse, HotelCreate, HotelUpdate, HotelWithCountryResponse, HotelWithRelationshipsResponse
 from app.services.hotel import hotel_service
@@ -34,10 +34,10 @@ def get_hotels(
         hotels = hotel_service.get_featured_hotels(db, skip=skip, limit=limit)
     else:
         hotels = hotel_service.get_hotels(db, skip=skip, limit=limit, recommended=recommended, country=country)
-    return hotels
+    # CRITICAL: Serialize to Pydantic to prevent lazy-loading
+    return [HotelResponse.from_orm(hotel) for hotel in hotels]
 
 @router.get("/featured")
-@cache_response(ttl=300)  # Cache for 5 minutes
 def get_featured_hotels(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -47,7 +47,8 @@ def get_featured_hotels(
     Retrieve featured hotels with cover images.
     """
     hotels = hotel_service.get_featured_hotels(db, skip=skip, limit=limit)
-    return hotels
+    # CRITICAL: Serialize to Pydantic to prevent lazy-loading
+    return [HotelResponse.from_orm(hotel) for hotel in hotels]
 
 @router.get("/country/{country_id}")
 def get_hotels_by_country(
@@ -60,7 +61,8 @@ def get_hotels_by_country(
     Retrieve hotels by country ID with cover images.
     """
     hotels = hotel_service.get_hotels_by_country(db, country_id=country_id, skip=skip, limit=limit)
-    return hotels
+    # CRITICAL: Serialize to Pydantic to prevent lazy-loading
+    return [HotelResponse.from_orm(hotel) for hotel in hotels]
 
 @router.get("/{hotel_id}", response_model=HotelWithCountryResponse)
 def get_hotel(

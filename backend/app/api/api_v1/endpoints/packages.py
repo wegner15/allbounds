@@ -9,7 +9,8 @@ from app.models.user import User
 from app.schemas.package import PackageResponse, PackageCreate, PackageUpdate, PackageWithCountryResponse, PackageHolidayTypeCreate, PackageListResponse
 from app.services.package import package_service
 from app.auth.dependencies import get_current_user, has_permission
-from app.core.cache_decorator import cache_response, invalidate_cache
+from app.core.memory_profiler import profile_memory_detailed
+from app.core.redis_cache import cache_endpoint, invalidate_cache_pattern
 
 class SetCoverImageRequest(BaseModel):
     image_id: str
@@ -17,7 +18,7 @@ class SetCoverImageRequest(BaseModel):
 router = APIRouter()
 
 @router.get("/", response_model=List[PackageListResponse])
-@cache_response(ttl=300)  # Cache for 5 minutes
+# @profile_memory_detailed  # DISABLED - may be causing memory leak
 def get_packages(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -54,7 +55,9 @@ def get_packages(
         packages = package_service.get_featured_packages(db, skip=skip, limit=limit)
     else:
         packages = package_service.get_packages(db, skip=skip, limit=limit, order_by=order_by, order=order)
-    return packages
+    
+    # CRITICAL: Serialize to Pydantic INSIDE endpoint to prevent lazy-loading
+    return [PackageListResponse.from_orm(pkg) for pkg in packages]
 
 @router.get("/country/{country_id}", response_model=List[PackageWithCountryResponse])
 def get_packages_by_country(
@@ -67,10 +70,10 @@ def get_packages_by_country(
     Retrieve packages by country ID.
     """
     packages = package_service.get_packages_by_country(db, country_id=country_id, skip=skip, limit=limit)
-    return packages
+    # CRITICAL: Serialize to Pydantic INSIDE endpoint to prevent lazy-loading
+    return [PackageWithCountryResponse.from_orm(pkg) for pkg in packages]
 
 @router.get("/featured", response_model=List[PackageWithCountryResponse])
-@cache_response(ttl=300)  # Cache for 5 minutes
 def get_featured_packages(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -80,7 +83,8 @@ def get_featured_packages(
     Retrieve featured packages.
     """
     packages = package_service.get_featured_packages(db, skip=skip, limit=limit)
-    return packages
+    # CRITICAL: Serialize to Pydantic INSIDE endpoint to prevent lazy-loading
+    return [PackageWithCountryResponse.from_orm(pkg) for pkg in packages]
 
 @router.get("/{package_id}", response_model=PackageWithCountryResponse)
 def get_package(

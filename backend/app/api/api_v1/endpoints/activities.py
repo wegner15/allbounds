@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.core.cache_decorator import cache_response
+from app.core.redis_cache import cache_endpoint
 from app.models.user import User
 from app.schemas.activity import ActivityResponse, ActivityCreate, ActivityUpdate
 from app.services.activity import activity_service
@@ -38,10 +38,10 @@ def get_activities(
         activities = activity_service.get_featured_activities(db, skip=skip, limit=limit)
     else:
         activities = activity_service.get_activities(db, skip=skip, limit=limit)
-    return activities
+    # CRITICAL: Serialize to Pydantic to prevent lazy-loading
+    return [ActivityResponse.from_orm(activity) for activity in activities]
 
 @router.get("/featured", response_model=List[ActivityResponse])
-@cache_response(ttl=300)  # Cache for 5 minutes
 def get_featured_activities(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -55,7 +55,8 @@ def get_featured_activities(
         activities = activity_service.get_featured_activities_by_country(db, country_name=country, skip=skip, limit=limit)
     else:
         activities = activity_service.get_featured_activities(db, skip=skip, limit=limit)
-    return activities
+    # CRITICAL: Serialize to Pydantic to prevent lazy-loading
+    return [ActivityResponse.from_orm(activity) for activity in activities]
 
 @router.get("/{activity_id}", response_model=ActivityResponse)
 def get_activity(

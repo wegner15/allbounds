@@ -20,10 +20,11 @@ class Country(Base):
 
     # Relationships
     region = relationship("Region", back_populates="countries")
-    attractions = relationship("Attraction", back_populates="country")
-    accommodations = relationship("Accommodation", back_populates="country")
-    hotels = relationship("Hotel", back_populates="country")
-    packages = relationship("Package", back_populates="country")
-    group_trips = relationship("GroupTrip", back_populates="country")
-    activities = relationship("Activity", secondary="country_activities", back_populates="countries")
+    # CRITICAL: lazy='noload' prevents circular loading when accessing country.packages
+    attractions = relationship("Attraction", back_populates="country", lazy='noload')
+    accommodations = relationship("Accommodation", back_populates="country", lazy='noload')
+    hotels = relationship("Hotel", back_populates="country", lazy='noload')
+    packages = relationship("Package", back_populates="country", lazy='noload')
+    group_trips = relationship("GroupTrip", back_populates="country", lazy='noload')
+    activities = relationship("Activity", secondary="country_activities", back_populates="countries", lazy='noload')
     visit_info = relationship("CountryVisitInfo", back_populates="country", uselist=False)

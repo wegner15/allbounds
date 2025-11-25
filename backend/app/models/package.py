@@ -35,17 +35,19 @@ class Package(Base):
 
     # Relationships
     country = relationship("Country", back_populates="packages")
-    holiday_types = relationship("HolidayType", secondary="package_holiday_types", back_populates="packages")
-    media_assets = relationship("MediaAsset", secondary="package_media", back_populates="packages")
-    reviews = relationship("Review", back_populates="package")
+    # CRITICAL: lazy='noload' prevents automatic loading, must explicitly joinedload() in queries
+    # This prevents circular loading: Package → HolidayType → Package → ...
+    holiday_types = relationship("HolidayType", secondary="package_holiday_types", back_populates="packages", lazy='noload')
+    media_assets = relationship("MediaAsset", secondary="package_media", back_populates="packages", lazy='noload')
+    reviews = relationship("Review", back_populates="package", lazy='noload')
     
     # Relationships with Hotels and Attractions
-    hotels = relationship("Hotel", secondary="package_hotels", back_populates="packages")
-    attractions = relationship("Attraction", secondary="package_attractions", back_populates="packages")
+    hotels = relationship("Hotel", secondary="package_hotels", back_populates="packages", lazy='noload')
+    attractions = relationship("Attraction", secondary="package_attractions", back_populates="packages", lazy='noload')
     
     # Relationships with Inclusions and Exclusions
-    inclusion_items = relationship("Inclusion", secondary="package_inclusions", back_populates="packages")
-    exclusion_items = relationship("Exclusion", secondary="package_exclusions", back_populates="packages")
+    inclusion_items = relationship("Inclusion", secondary="package_inclusions", back_populates="packages", lazy='noload')
+    exclusion_items = relationship("Exclusion", secondary="package_exclusions", back_populates="packages", lazy='noload')
     
     # Relationship with Itinerary
     itinerary_items = relationship("ItineraryItem",

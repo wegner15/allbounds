@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.core.cache_decorator import cache_response
+from app.core.redis_cache import cache_endpoint
 from app.models.user import User
 from app.schemas.country import CountryResponse, CountryCreate, CountryUpdate, CountryWithRegionResponse
 from app.schemas.country_visit_info import CountryVisitInfo, CountryVisitInfoCreate, CountryVisitInfoUpdate
@@ -16,7 +16,6 @@ router = APIRouter()
 
 @router.get("/", response_model=List[CountryResponse])
 @router.get("", response_model=List[CountryResponse])
-@cache_response(ttl=600)  # Cache for 10 minutes (rarely changes)
 def get_countries(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -28,10 +27,25 @@ def get_countries(
     """
     if details:
         countries = country_service.get_countries_with_details(db, skip=skip, limit=limit)
-        return countries
     else:
         countries = country_service.get_countries(db, skip=skip, limit=limit)
-        return [CountryResponse.from_orm(country) for country in countries]
+    
+    # CRITICAL: Manually construct Pydantic objects to avoid ANY lazy-loading
+    return [
+        CountryResponse(
+            id=c.id,
+            name=c.name,
+            description=c.description,
+            summary=c.summary,
+            region_id=c.region_id,
+            image_id=c.image_id,
+            slug=c.slug,
+            is_active=c.is_active,
+            created_at=c.created_at,
+            updated_at=c.updated_at
+        )
+        for c in countries
+    ]
 
 @router.get("/region/{region_id}", response_model=List[CountryResponse])
 def get_countries_by_region(
@@ -60,7 +74,6 @@ def get_countries_by_holiday_type(
     return [CountryResponse.from_orm(country) for country in countries]
 
 @router.get("/with-hotels", response_model=List[CountryResponse])
-@cache_response(ttl=600)  # Cache for 10 minutes
 def get_countries_with_hotels(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -73,7 +86,6 @@ def get_countries_with_hotels(
     return [CountryResponse.from_orm(country) for country in countries]
 
 @router.get("/with-packages", response_model=List[CountryResponse])
-@cache_response(ttl=600)  # Cache for 10 minutes
 def get_countries_with_packages(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -86,7 +98,6 @@ def get_countries_with_packages(
     return [CountryResponse.from_orm(country) for country in countries]
 
 @router.get("/with-activities", response_model=List[CountryResponse])
-@cache_response(ttl=600)  # Cache for 10 minutes
 def get_countries_with_activities(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -99,7 +110,6 @@ def get_countries_with_activities(
     return [CountryResponse.from_orm(country) for country in countries]
 
 @router.get("/with-attractions", response_model=List[CountryResponse])
-@cache_response(ttl=600)  # Cache for 10 minutes
 def get_countries_with_attractions(
     db: Session = Depends(get_db),
     skip: int = 0,

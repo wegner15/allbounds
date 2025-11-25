@@ -259,6 +259,10 @@ def get_db():
         # This prevents lazy-loading during response serialization from keeping objects in memory
         db.expunge_all()
         db.close()
+        
+        # Force garbage collection to immediately free memory
+        import gc
+        gc.collect()
 
 # Database health check function
 async def check_database_health() -> Tuple[bool, Optional[str]]:

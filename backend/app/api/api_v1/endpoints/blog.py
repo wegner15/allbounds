@@ -31,7 +31,8 @@ def read_blog_posts(
     else:
         # Default behavior: only published posts
         blog_posts = blog_service.get_blog_posts(db, skip=skip, limit=limit)
-    return blog_posts
+    # CRITICAL: Serialize to Pydantic to prevent lazy-loading
+    return [BlogPostResponse.from_orm(post) for post in blog_posts]
 
 @router.get("/{post_id}", response_model=BlogPostResponse)
 def read_blog_post(

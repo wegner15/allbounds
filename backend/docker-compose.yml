@@ -13,6 +13,7 @@ services:
       - MEILISEARCH_URL=http://meilisearch:7700
       - MEILISEARCH_MASTER_KEY=masterKey
       - REDIS_URL=redis://redis:6379/0
+      - REDIS_CACHE_TTL=300
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - R2_ENDPOINT=
@@ -23,7 +24,7 @@ services:
       - JWT_ALGORITHM=HS256
       - JWT_ACCESS_TOKEN_EXPIRE_MINUTES=43200
       - JWT_REFRESH_TOKEN_EXPIRE_DAYS=30
-      - DB_POOL_SIZE=20
+      - DB_POOL_SIZE=5
       - DB_MAX_OVERFLOW=10
       - DB_POOL_RECYCLE=3600
       - DB_POOL_TIMEOUT=30
@@ -42,7 +43,7 @@ services:
       timeout: 10s
       retries: 2
       start_period: 40s
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2 --log-level warning --limit-max-requests 10000 --timeout-keep-alive 5
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2 --log-level warning --limit-max-requests 100 --timeout-keep-alive 5
 
   db:
     image: postgres:15-alpine

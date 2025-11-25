@@ -55,8 +55,8 @@ class PackageService:
         Retrieve all packages for a specific country with pagination.
         """
         return db.query(Package).options(
-            joinedload(Package.country),
-            joinedload(Package.holiday_types)
+            joinedload(Package.country)
+            # Removed joinedload(Package.holiday_types) - causes circular loading
         ).filter(
             Package.country_id == country_id,
             Package.is_active == True
@@ -67,8 +67,8 @@ class PackageService:
         Retrieve featured packages with pagination.
         """
         return db.query(Package).options(
-            joinedload(Package.country),
-            joinedload(Package.holiday_types)
+            joinedload(Package.country)
+            # Removed joinedload(Package.holiday_types) - causes circular loading
         ).filter(
             Package.is_active == True,
             Package.is_featured == True
@@ -80,7 +80,7 @@ class PackageService:
         """
         return db.query(Package).options(
             joinedload(Package.country),
-            joinedload(Package.holiday_types)
+            # Removed joinedload(Package.holiday_types) - causes circular loading
         ).filter(
             Package.holiday_types.any(HolidayType.id == holiday_type_id),
             Package.is_active == True
@@ -92,7 +92,7 @@ class PackageService:
         """
         return db.query(Package).options(
             joinedload(Package.country),
-            joinedload(Package.holiday_types)
+            # Removed joinedload(Package.holiday_types) - causes circular loading
         ).filter(Package.id == package_id, Package.is_active == True).first()
     
     def get_package_by_slug(self, db: Session, slug: str) -> Optional[Package]:
@@ -113,7 +113,7 @@ class PackageService:
         # Get packages from the same country with similar holiday types
         query = db.query(Package).options(
             joinedload(Package.country),
-            joinedload(Package.holiday_types)
+            # Removed joinedload(Package.holiday_types) - causes circular loading
         ).filter(
             Package.id != package_id,  # Exclude current package
             Package.is_active == True,
@@ -134,7 +134,7 @@ class PackageService:
             remaining = limit - len(similar_packages)
             additional_packages = db.query(Package).options(
                 joinedload(Package.country),
-                joinedload(Package.holiday_types)
+                # Removed joinedload(Package.holiday_types) - causes circular loading
             ).filter(
                 Package.id != package_id,
                 Package.is_active == True,
@@ -153,7 +153,7 @@ class PackageService:
         package = db.query(Package).options(
             joinedload(Package.media_assets),
             joinedload(Package.country),
-            joinedload(Package.holiday_types),
+            # Removed joinedload(Package.holiday_types) - causes circular loading,
             joinedload(Package.inclusion_items),
             joinedload(Package.exclusion_items)
         ).filter(Package.slug == slug, Package.is_active == True).first()

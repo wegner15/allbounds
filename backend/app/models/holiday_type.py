@@ -20,5 +20,6 @@ class HolidayType(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     # Relationships
-    packages = relationship("Package", secondary="package_holiday_types", back_populates="holiday_types")
-    group_trips = relationship("GroupTrip", secondary=group_trip_holiday_types, back_populates="holiday_types")
+    # CRITICAL: lazy='noload' prevents circular loading: HolidayType → Package → HolidayType → ...
+    packages = relationship("Package", secondary="package_holiday_types", back_populates="holiday_types", lazy='noload')
+    group_trips = relationship("GroupTrip", secondary=group_trip_holiday_types, back_populates="holiday_types", lazy='noload')

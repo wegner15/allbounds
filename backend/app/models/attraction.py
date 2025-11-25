@@ -47,8 +47,9 @@ class Attraction(Base):
     reviews = relationship("Review", back_populates="attraction")
     
     # Relationships with Packages and Group Trips
-    packages = relationship("Package", secondary=package_attractions, back_populates="attractions")
-    group_trips = relationship("GroupTrip", secondary=group_trip_attractions, back_populates="attractions")
+    # CRITICAL: lazy='noload' prevents circular loading: Attraction → Package → Attraction → ...
+    packages = relationship("Package", secondary=package_attractions, back_populates="attractions", lazy='noload')
+    group_trips = relationship("GroupTrip", secondary=group_trip_attractions, back_populates="attractions", lazy='noload')
     
     # Relationship with Itinerary
     itinerary_activities = relationship("ItineraryActivity", back_populates="attraction")

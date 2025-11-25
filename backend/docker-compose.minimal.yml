@@ -13,7 +13,7 @@ services:
       - DB_POOL_RECYCLE=3600
       - DB_POOL_TIMEOUT=30
       - DB_CONNECT_TIMEOUT=10
-      - DB_POOL_PRE_PING=true
+      - DB_POOL_PRE_PING=false
     depends_on:
       db:
         condition: service_healthy

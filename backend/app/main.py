@@ -9,8 +9,9 @@ from app.models.all_models import __all__ as all_models
 from app.api.api_v1.api import api_router
 from app.core.config import settings
 from app.core.logging import setup_logging, RequestLoggingMiddleware
-from app.core.metrics import PrometheusMiddleware
-from app.core.tracing import setup_tracing
+# TEMPORARILY DISABLED - Testing if these cause memory leak
+# from app.core.metrics import PrometheusMiddleware
+# from app.core.tracing import setup_tracing
 
 # Set up logging
 setup_logging(settings.LOG_LEVEL)

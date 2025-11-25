@@ -255,9 +255,9 @@ def get_db():
     try:
         yield db
     finally:
-        # CRITICAL: Expunge all objects to free memory before closing
-        # This prevents lazy-loading during response serialization from keeping objects in memory
+        # CRITICAL: Aggressive cleanup to ensure connection returns to pool
         try:
+            # Remove all objects from session
             db.expunge_all()
         except Exception as e:
             logger.warning(f"Error during expunge_all: {e}")
@@ -269,12 +269,14 @@ def get_db():
             logger.warning(f"Error during rollback: {e}")
         
         try:
-            # Close the session (returns connection to pool)
+            # Remove session from registry (if using scoped_session)
             db.close()
         except Exception as e:
             logger.warning(f"Error during close: {e}")
         
-        # Force garbage collection to immediately free memory
+        # Don't dispose the entire pool - that would affect all sessions
+        
+        # Force garbage collection
         import gc
         gc.collect()
 

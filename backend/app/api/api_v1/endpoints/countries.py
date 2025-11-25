@@ -20,16 +20,11 @@ def get_countries(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
-    details: bool = Query(False, description="Include detailed related data (packages, group_trips, attractions, etc.)"),
 ) -> Any:
     """
-    Retrieve all countries.
+    Retrieve all countries (basic data only).
     """
-    if details:
-        # get_countries_with_details already returns dicts, return them directly
-        return country_service.get_countries_with_details(db, skip=skip, limit=limit)
-    else:
-        countries = country_service.get_countries(db, skip=skip, limit=limit)
+    countries = country_service.get_countries(db, skip=skip, limit=limit)
     
     # CRITICAL: Manually construct Pydantic objects to avoid ANY lazy-loading
     return [

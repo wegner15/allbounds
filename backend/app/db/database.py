@@ -257,8 +257,22 @@ def get_db():
     finally:
         # CRITICAL: Expunge all objects to free memory before closing
         # This prevents lazy-loading during response serialization from keeping objects in memory
-        db.expunge_all()
-        db.close()
+        try:
+            db.expunge_all()
+        except Exception as e:
+            logger.warning(f"Error during expunge_all: {e}")
+        
+        try:
+            # Rollback any pending transaction
+            db.rollback()
+        except Exception as e:
+            logger.warning(f"Error during rollback: {e}")
+        
+        try:
+            # Close the session (returns connection to pool)
+            db.close()
+        except Exception as e:
+            logger.warning(f"Error during close: {e}")
         
         # Force garbage collection to immediately free memory
         import gc

@@ -103,6 +103,19 @@ export const useSimilarPackages = (packageId: number, limit: number = 4) => {
   });
 };
 
+// Hook for fetching recommended packages by country
+export const useRecommendedPackages = (countryId: number, currentPackageId: number, limit: number = 4) => {
+  return useQuery({
+    queryKey: ['packages', 'recommended', countryId, currentPackageId, limit],
+    queryFn: async () => {
+      const packages = await apiClient.get<Package[]>(`/api/v1/packages?country_id=${countryId}&limit=${limit + 1}`);
+      // Filter out current package
+      return packages.filter(pkg => pkg.id !== currentPackageId).slice(0, limit);
+    },
+    enabled: !!countryId && !!currentPackageId,
+  });
+};
+
 // Hook for fetching package details with gallery by ID
 export const usePackageDetailsById = (id: number) => {
   return useQuery({
@@ -189,5 +202,19 @@ export const usePackagesByHolidayType = (holidayTypeSlug: string, options?: { sk
       return response;
     },
     enabled: !!holidayTypeSlug,
+  });
+};
+
+// Hook for fetching comprehensive package details by slug (for tour page redesign)
+export const useComprehensivePackageBySlug = (slug: string) => {
+  return useQuery({
+    queryKey: ['package', 'comprehensive', slug],
+    queryFn: async () => {
+      return apiClient.get<import('../types/api').PackageDetailResponse>(
+        endpoints.packages.comprehensiveBySlug(slug)
+      );
+    },
+    enabled: !!slug,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };

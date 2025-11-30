@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from app.db.database import get_db
 from app.models.user import User
 from app.schemas.package import PackageResponse, PackageCreate, PackageUpdate, PackageWithCountryResponse, PackageHolidayTypeCreate, PackageListResponse
+from app.schemas.package_detail import PackageDetailResponse
 from app.services.package import package_service
 from app.auth.dependencies import get_current_user, has_permission
 from app.core.memory_profiler import profile_memory_detailed
@@ -124,6 +125,46 @@ def get_package_details_by_slug(
     if package_details is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Package not found")
     return package_details
+
+@router.get("/comprehensive/{slug}", response_model=PackageDetailResponse)
+def get_comprehensive_package_by_slug(
+    slug: str,
+    db: Session = Depends(get_db),
+) -> Any:
+    """
+    Retrieve comprehensive package details with ALL relationships for the tour page.
+    Includes: country, holiday_types, media_assets, itinerary_items (with hotels, 
+    attractions, activities), inclusion_items, exclusion_items, hotels, attractions, 
+    reviews, and price_charts.
+    """
+    package = package_service.get_comprehensive_package_by_slug(db, slug=slug)
+    if package is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Package not found")
+    
+    # Filter reviews to only show approved ones
+    if package.reviews:
+        package.reviews = [r for r in package.reviews if r.is_approved]
+    
+    # Sort itinerary items by day number
+    if package.itinerary_items:
+        package.itinerary_items = sorted(package.itinerary_items, key=lambda x: x.day_number)
+        # Sort custom activities within each itinerary item
+        for item in package.itinerary_items:
+            if item.custom_activities:
+                item.custom_activities = sorted(item.custom_activities, key=lambda x: x.order_index)
+    
+    # Filter active media assets (no sorting since order_index doesn't exist)
+    if package.media_assets:
+        package.media_assets = [m for m in package.media_assets if m.is_active]
+    
+    # Filter active price charts and sort by start date
+    if package.price_charts:
+        package.price_charts = sorted(
+            [pc for pc in package.price_charts if pc.is_active],
+            key=lambda x: x.start_date
+        )
+    
+    return package
 
 @router.get("/{package_id}/similar", response_model=List[PackageWithCountryResponse])
 def get_similar_packages(

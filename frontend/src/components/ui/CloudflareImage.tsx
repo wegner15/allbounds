@@ -16,6 +16,7 @@ interface CloudflareImageProps {
   onError?: (error: unknown) => void;
   objectFit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
   placeholder?: string;
+  loading?: 'lazy' | 'eager';
 }
 
 const CloudflareImage: React.FC<CloudflareImageProps> = ({
@@ -30,6 +31,7 @@ const CloudflareImage: React.FC<CloudflareImageProps> = ({
   onError,
   objectFit = 'cover',
   placeholder = 'https://placehold.co/600x400?text=Image+Not+Found',
+  loading = 'lazy',
 }) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -143,6 +145,7 @@ const CloudflareImage: React.FC<CloudflareImageProps> = ({
         height: height || '100%',
         objectFit
       }}
+      loading={loading}
       onError={handleImageError}
     />
   );

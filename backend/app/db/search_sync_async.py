@@ -26,46 +26,51 @@ def sync_to_meilisearch_background(entity_type: str, entity_id: int, operation: 
         entity_id: ID of the entity
         operation: Operation type ('insert', 'update', 'delete')
     """
+    db = None
     try:
         from app.services.search import search_service
         from app.db.database import SessionLocal
         
         # Create a new database session for this background task
         db = SessionLocal()
-        try:
-            if operation == 'delete':
-                # Map entity types to index names
-                index_map = {
-                    'Region': search_service.REGION_INDEX,
-                    'Country': search_service.COUNTRY_INDEX,
-                    'Activity': search_service.ACTIVITY_INDEX,
-                    'Attraction': search_service.ATTRACTION_INDEX,
-                    'Accommodation': search_service.ACCOMMODATION_INDEX,
-                    'Package': search_service.PACKAGE_INDEX,
-                    'GroupTrip': search_service.GROUP_TRIP_INDEX,
-                    'BlogPost': search_service.BLOG_POST_INDEX,
-                    'HotelType': search_service.HOTEL_TYPE_INDEX,
-                    'Inclusion': search_service.INCLUSION_INDEX,
-                    'Exclusion': search_service.EXCLUSION_INDEX,
-                }
-                
-                if entity_type in index_map:
-                    success = search_service.delete_from_index(index_map[entity_type], entity_id)
-                    if success:
-                        logger.info(f"Background: Removed {entity_type} (id={entity_id}) from Meilisearch")
-                    else:
-                        logger.warning(f"Background: Failed to remove {entity_type} (id={entity_id}) from Meilisearch")
-            else:
-                # For insert/update, we need to fetch the entity and sync it
-                # This requires model imports which we'll skip for now
-                # Instead, we'll just log that we would sync
-                logger.info(f"Background: Would sync {entity_type} (id={entity_id}) operation={operation}")
-                
-        finally:
-            db.close()
+        
+        if operation == 'delete':
+            # Map entity types to index names
+            index_map = {
+                'Region': search_service.REGION_INDEX,
+                'Country': search_service.COUNTRY_INDEX,
+                'Activity': search_service.ACTIVITY_INDEX,
+                'Attraction': search_service.ATTRACTION_INDEX,
+                'Accommodation': search_service.ACCOMMODATION_INDEX,
+                'Package': search_service.PACKAGE_INDEX,
+                'GroupTrip': search_service.GROUP_TRIP_INDEX,
+                'BlogPost': search_service.BLOG_POST_INDEX,
+                'HotelType': search_service.HOTEL_TYPE_INDEX,
+                'Inclusion': search_service.INCLUSION_INDEX,
+                'Exclusion': search_service.EXCLUSION_INDEX,
+            }
             
+            if entity_type in index_map:
+                success = search_service.delete_from_index(index_map[entity_type], entity_id)
+                if success:
+                    logger.info(f"Background: Removed {entity_type} (id={entity_id}) from Meilisearch")
+                else:
+                    logger.warning(f"Background: Failed to remove {entity_type} (id={entity_id}) from Meilisearch")
+        else:
+            # For insert/update, we need to fetch the entity and sync it
+            # This requires model imports which we'll skip for now
+            # Instead, we'll just log that we would sync
+            logger.info(f"Background: Would sync {entity_type} (id={entity_id}) operation={operation}")
+                
     except Exception as e:
         logger.error(f"Background: Error syncing {entity_type} (id={entity_id}): {e}")
+    finally:
+        # CRITICAL: Always close the database session to return connection to pool
+        if db is not None:
+            try:
+                db.close()
+            except Exception as e:
+                logger.error(f"Error closing database session: {e}")
 
 
 def sync_to_meilisearch_after_insert(mapper, connection, target):

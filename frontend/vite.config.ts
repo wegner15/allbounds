@@ -30,7 +30,7 @@ export default defineConfig({
     allowedHosts: ['localhost', 'dev.allboundtravel.com', 'allboundtravel.com'],
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:8005',
         changeOrigin: true,
         secure: false,
       },

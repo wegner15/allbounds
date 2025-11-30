@@ -1,8 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Lato:wght@300;400;700&display=swap');
+/* Leaflet CSS for OpenStreetMap - must be first */
+@import 'leaflet/dist/leaflet.css';
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Lato:wght@300;400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Image loading shimmer animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+}
 
 /* Custom scrollbar hiding */
 .scrollbar-hide {
@@ -13,19 +30,156 @@
   display: none;  /* Safari and Chrome */
 }
 
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
 @layer base {
   html {
-    font-family: 'Lato', sans-serif;
-    color: theme('colors.charcoal');
+    font-family: 'Inter', 'Lato', sans-serif;
+    color: theme('colors.gray.900');
     background-color: theme('colors.paper');
+  }
+  
+  body {
+    @apply antialiased;
   }
   
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    color: theme('colors.charcoal');
   }
   
   h1 {
-    font-family: 'Playfair Display', serif;
+    @apply text-4xl md:text-5xl lg:text-6xl;
   }
   
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+  
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+  
+  h4 {
+    @apply text-xl md:text-2xl;
+  }
+  
+  /* Focus styles for accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2;
+  }
+  
+  /* Button focus styles */
+  button:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2;
+  }
+}
+
+@layer components {
+  /* Card styles */
+  .card {
+    @apply bg-white rounded-lg shadow-md overflow-hidden;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+  }
+  
+  /* Button styles */
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-dark text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 hover:shadow-md active:scale-95;
+  }
+  
+  .btn-secondary {
+    @apply bg-accent hover:bg-accent-dark text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 hover:shadow-md active:scale-95;
+  }
+  
+  .btn-outline {
+    @apply border-2 border-primary text-primary hover:bg-primary hover:text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 active:scale-95;
+  }
+  
+  /* Link styles */
+  .link-primary {
+    @apply text-primary hover:text-primary-dark transition-colors duration-200 underline-offset-2 hover:underline;
+  }
+  
+  /* Badge styles */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+  }
+  
+  .badge-primary {
+    @apply bg-primary/10 text-primary border border-primary/20;
+  }
+  
+  .badge-success {
+    @apply bg-success/10 text-success border border-success/20;
+  }
+  
+  .badge-accent {
+    @apply bg-accent/10 text-accent border border-accent/20;
+  }
+  
+  /* Section spacing */
+  .section {
+    @apply py-12 md:py-16 lg:py-20;
+  }
+  
+  .section-container {
+    @apply container mx-auto px-4 md:px-6 lg:px-8;
+  }
+  
+  /* Image hover effect */
+  .image-zoom {
+    @apply transition-transform duration-300 group-hover:scale-110;
+  }
+  
+  /* Skeleton loader */
+  .skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+  
+  .skeleton-shimmer {
+    @apply relative overflow-hidden bg-gray-200;
+  }
+  
+  .skeleton-shimmer::after {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent;
+    animation: shimmer 2s infinite;
+  }
+}
+
+@layer utilities {
+  /* Text utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Gradient overlays */
+  .gradient-overlay-dark {
+    @apply bg-gradient-to-b from-black/30 via-black/40 to-black/60;
+  }
+  
+  .gradient-overlay-light {
+    @apply bg-gradient-to-b from-white/10 via-white/20 to-white/40;
+  }
+  
+  /* Backdrop blur utilities */
+  .backdrop-blur-light {
+    backdrop-filter: blur(8px);
+  }
+  
+  .backdrop-blur-medium {
+    backdrop-filter: blur(12px);
+  }
+  
+  /* Touch-friendly sizing */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
 }

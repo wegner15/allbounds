@@ -177,9 +177,12 @@ export const endpoints = {
     update: (id: number) => `/packages/${id}`,
     delete: (id: number) => `/packages/${id}`,
     bySlug: (slug: string) => `/packages/slug/${slug}`,
+    comprehensiveBySlug: (slug: string) => `/packages/comprehensive/${slug}`,
+    detailsBySlug: (slug: string) => `/packages/details/${slug}`,
     byCountry: (countryId: number) => `/packages/?country_id=${countryId}`,
     byHolidayType: (holidayTypeId: number) => `/packages/?holiday_type_id=${holidayTypeId}`,
     coverImage: (id: number) => `/packages/${id}/cover-image`,
+    similar: (id: number, limit?: number) => `/packages/${id}/similar${limit ? `?limit=${limit}` : ''}`,
   },
   
   // Hotels

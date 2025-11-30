@@ -258,6 +258,163 @@ export interface PackageWithGallery extends Omit<Package, 'gallery_images'> {
   gallery_images: GalleryImage[];
 }
 
+// Comprehensive Package Detail types for tour page redesign
+export interface CountrySummary {
+  id: number;
+  name: string;
+  slug: string;
+  image_id?: string;
+}
+
+export interface HolidayTypeSummary {
+  id: number;
+  name: string;
+  slug: string;
+  icon?: string;
+}
+
+export interface MediaAssetSummary {
+  id: number;
+  image_id?: string;
+  storage_key?: string;
+  file_path?: string;
+  filename?: string;
+  title?: string;
+  caption?: string;
+  alt_text?: string;
+  width?: number;
+  height?: number;
+  order_index?: number;
+}
+
+export interface AmenitySummary {
+  id: number;
+  name: string;
+  icon?: string;
+  category?: string;
+}
+
+export interface HotelSummary {
+  id: number;
+  name: string;
+  slug: string;
+  summary?: string;
+  city?: string;
+  stars?: number;
+  image_id?: string;
+  latitude?: number;
+  longitude?: number;
+  amenities: AmenitySummary[];
+}
+
+export interface AttractionSummary {
+  id: number;
+  name: string;
+  slug: string;
+  summary?: string;
+  description?: string;
+  city?: string;
+  image_id?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+export interface ItineraryActivityDetail {
+  id: number;
+  time?: string;
+  activity_title: string;
+  activity_description?: string;
+  location?: string;
+  duration_hours?: number;
+  is_meal: boolean;
+  meal_type?: string;
+  order_index: number;
+}
+
+export interface ActivitySummary {
+  id: number;
+  name: string;
+  description?: string;
+  duration_minutes?: number;
+}
+
+export interface ItineraryItemDetail {
+  id: number;
+  day_number: number;
+  date?: string;
+  title: string;
+  description?: string;
+  location?: string;
+  latitude?: number;
+  longitude?: number;
+  accommodation_notes?: string;
+  hotels: HotelSummary[];
+  attractions: AttractionSummary[];
+  custom_activities: ItineraryActivityDetail[];
+  linked_activities: ActivitySummary[];
+}
+
+export interface InclusionDetail {
+  id: number;
+  name: string;
+  description?: string;
+  icon?: string;
+  category?: string;
+}
+
+export interface ExclusionDetail {
+  id: number;
+  name: string;
+  description?: string;
+  icon?: string;
+  category?: string;
+}
+
+export interface ReviewDetail {
+  id: number;
+  title?: string;
+  content: string;
+  rating: number;
+  reviewer_name: string;
+  is_approved: boolean;
+  is_featured: boolean;
+  created_at: string;
+}
+
+export interface PriceChartDetail {
+  id: number;
+  title: string;
+  start_date: string;
+  end_date: string;
+  price: number;
+  is_active: boolean;
+}
+
+export interface PackageDetailResponse {
+  id: number;
+  name: string;
+  slug: string;
+  summary?: string;
+  description?: string;
+  duration_days?: number;
+  price?: number;
+  image_id?: string;
+  is_active: boolean;
+  is_featured: boolean;
+  created_at: string;
+  updated_at: string;
+  country: CountrySummary;
+  holiday_types: HolidayTypeSummary[];
+  media_assets: MediaAssetSummary[];
+  itinerary_items: ItineraryItemDetail[];
+  inclusion_items: InclusionDetail[];
+  exclusion_items: ExclusionDetail[];
+  hotels: HotelSummary[];
+  attractions: AttractionSummary[];
+  reviews: ReviewDetail[];
+  price_charts: PriceChartDetail[];
+}
+
 export interface InclusionExclusionItem {
   id: string;
   name: string;

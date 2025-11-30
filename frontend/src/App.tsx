@@ -13,6 +13,7 @@ import Footer from './components/layout/Footer';
 // Import feature pages
 import PackagesPage from './features/packages/PackagesPage';
 import PackageDetailPage from './features/packages/PackageDetailPage';
+import PackageDetailPageNew from './features/packages/PackageDetailPageNew';
 import GroupTripsPage from './features/group-trips/GroupTripsPage';
 import GroupTripDetailPage from './features/group-trips/GroupTripDetailPage';
 import HolidayTypesPage from './features/holiday-types/HolidayTypesPage';
@@ -256,7 +257,8 @@ const router = createBrowserRouter([
       { path: 'regions', element: <RegionsPage /> },
       { path: 'countries', element: <CountriesPage /> },
       { path: 'packages', element: <PackagesPage /> },
-      { path: 'packages/:slug', element: <PackageDetailPage /> },
+      { path: 'packages/:slug', element: <PackageDetailPageNew /> },
+      { path: 'packages-old/:slug', element: <PackageDetailPage /> },
       { path: 'group-trips', element: <GroupTripsPage /> },
       { path: 'group-trips/:slug', element: <GroupTripDetailPage /> },
       { path: 'stays', element: <StaysPage /> },

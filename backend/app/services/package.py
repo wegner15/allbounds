@@ -1,5 +1,4 @@
 from typing import List, Optional, Dict, Any
-from typing import List, Optional, Dict, Any
 from datetime import datetime
 from sqlalchemy.orm import Session, joinedload
 
@@ -100,6 +99,49 @@ class PackageService:
         Retrieve a specific package by slug.
         """
         return db.query(Package).filter(Package.slug == slug, Package.is_active == True).first()
+    
+    def get_comprehensive_package_by_slug(self, db: Session, slug: str) -> Optional[Package]:
+        """
+        Retrieve a package with ALL relationships eagerly loaded for the tour page.
+        This includes: country, holiday_types, media_assets, itinerary_items (with hotels, 
+        attractions, activities), inclusion_items, exclusion_items, hotels, attractions, 
+        reviews, and price_charts.
+        """
+        from app.models.itinerary import ItineraryItem
+        from app.models.hotel import Hotel
+        from app.models.attraction import Attraction
+        from app.models.amenity import Amenity
+        from app.models.activity import Activity
+        
+        package = db.query(Package).options(
+            # Load country
+            joinedload(Package.country),
+            # Load holiday types
+            joinedload(Package.holiday_types),
+            # Load media assets
+            joinedload(Package.media_assets),
+            # Load itinerary items with nested relationships
+            joinedload(Package.itinerary_items).joinedload(ItineraryItem.hotels).joinedload(Hotel.amenities),
+            joinedload(Package.itinerary_items).joinedload(ItineraryItem.attractions),
+            joinedload(Package.itinerary_items).joinedload(ItineraryItem.custom_activities),
+            joinedload(Package.itinerary_items).joinedload(ItineraryItem.linked_activities),
+            # Load inclusions and exclusions
+            joinedload(Package.inclusion_items),
+            joinedload(Package.exclusion_items),
+            # Load hotels with amenities
+            joinedload(Package.hotels).joinedload(Hotel.amenities),
+            # Load attractions
+            joinedload(Package.attractions),
+            # Load reviews (only approved ones)
+            joinedload(Package.reviews),
+            # Load price charts
+            joinedload(Package.price_charts),
+        ).filter(
+            Package.slug == slug,
+            Package.is_active == True
+        ).first()
+        
+        return package
     
     def get_similar_packages(self, db: Session, package_id: int, limit: int = 4) -> List[Package]:
         """

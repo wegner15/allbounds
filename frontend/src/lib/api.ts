@@ -11,7 +11,10 @@ export const queryClient = new QueryClient({
 });
 
 // API base URL - connect to the FastAPI backend
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8005/api/v1';
+// Use production URL if in production mode, otherwise use dev URL
+const API_BASE_URL = import.meta.env.PROD 
+  ? (import.meta.env.VITE_PROD_BASE_URL || 'https://api.allboundtravel.com/api/v1')
+  : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8005/api/v1');
 
 // API client for making requests
 export const apiClient = {

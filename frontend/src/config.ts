@@ -1,5 +1,7 @@
 // API configuration
-export const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+export const API_URL = import.meta.env.PROD 
+  ? (import.meta.env.VITE_PROD_BASE_URL || 'https://api.allboundtravel.com/api/v1')
+  : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8005/api/v1');
 
 // Other global configuration
 export const SITE_NAME = 'AllBounds';

@@ -55,7 +55,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const fetchUserInfo = async () => {
     try {
       // Use the full URL with API prefix
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8005/api/v1';
+      const apiBaseUrl = import.meta.env.PROD 
+  ? (import.meta.env.VITE_PROD_BASE_URL || 'https://api.allboundtravel.com/api/v1')
+  : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8005/api/v1');
       const token = localStorage.getItem('auth_token');
       
       if (!token) {
@@ -95,7 +97,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       // Make the login request
       // We need to use the full URL with API prefix
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8005/api/v1';
+      const apiBaseUrl = import.meta.env.PROD 
+  ? (import.meta.env.VITE_PROD_BASE_URL || 'https://api.allboundtravel.com/api/v1')
+  : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8005/api/v1');
+
       const loginUrl = `${apiBaseUrl}/auth/login`;
       
       const response = await fetch(loginUrl, {
@@ -140,7 +145,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     try {
       // Use the full URL with API prefix
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8005/api/v1';
+      const apiBaseUrl = import.meta.env.PROD 
+        ? (import.meta.env.VITE_PROD_BASE_URL || 'https://api.allboundtravel.com/api/v1')
+        : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8005/api/v1');
       const refreshUrl = `${apiBaseUrl}/auth/refresh`;
       
       const response = await fetch(refreshUrl, {

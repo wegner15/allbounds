@@ -49,6 +49,10 @@ const PackageDetailPageNew: React.FC = () => {
       sections.push({ id: 'attractions', label: 'Attractions' });
     }
 
+    if (packageDetail.itinerary_items && packageDetail.itinerary_items.length > 0) {
+      sections.push({ id: 'map', label: 'Map' });
+    }
+
     if (packageDetail.reviews && packageDetail.reviews.length > 0) {
       sections.push({ id: 'reviews', label: 'Reviews' });
     }
@@ -199,7 +203,7 @@ const PackageDetailPageNew: React.FC = () => {
 
               {/* Itinerary Map Section */}
               {packageDetail.itinerary_items && packageDetail.itinerary_items.length > 0 && (
-                <div className="mb-6 md:mb-8">
+                <div id="map" className="mb-6 md:mb-8 scroll-mt-20">
                   <ItineraryMapLeaflet 
                     itineraryItems={packageDetail.itinerary_items}
                     packageName={packageDetail.name}

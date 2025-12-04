@@ -55,6 +55,8 @@ export interface Country extends BaseModel {
   language?: string;
   population?: number;
   timezone?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 // Country Visit Info types
@@ -77,6 +79,7 @@ export interface CountryWithDetails extends Country {
   attractions: (Attraction & { cover_image?: string | null })[];
   accommodations: Accommodation[];
   hotels: (Hotel & { cover_image?: string | null })[];
+  activities: Activity[];
   visit_info?: CountryVisitInfo;
 }
 
@@ -141,6 +144,10 @@ export interface Attraction extends BaseModel {
   location?: string;
   entry_fee?: number;
   opening_hours?: string;
+  latitude?: number;
+  longitude?: number;
+  city?: string;
+  summary?: string;
 }
 
 // Accommodation types

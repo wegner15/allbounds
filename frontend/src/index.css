@@ -40,10 +40,15 @@ html {
     font-family: 'Inter', 'Lato', sans-serif;
     color: theme('colors.gray.900');
     background-color: theme('colors.paper');
+    /* Support text zoom up to 200% without breaking layout */
+    font-size: 100%;
   }
   
   body {
     @apply antialiased;
+    /* Ensure body can grow with text zoom */
+    min-height: 100vh;
+    overflow-x: hidden;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -68,14 +73,58 @@ html {
     @apply text-xl md:text-2xl;
   }
   
-  /* Focus styles for accessibility */
+  /* Focus styles for accessibility - WCAG 2.1 compliant */
   *:focus-visible {
     @apply outline-none ring-2 ring-primary ring-offset-2;
+    outline: 2px solid theme('colors.primary.DEFAULT');
+    outline-offset: 2px;
   }
   
   /* Button focus styles */
   button:focus-visible {
     @apply outline-none ring-2 ring-primary ring-offset-2;
+    outline: 2px solid theme('colors.primary.DEFAULT');
+    outline-offset: 2px;
+  }
+  
+  /* Link focus styles */
+  a:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2;
+    outline: 2px solid theme('colors.primary.DEFAULT');
+    outline-offset: 2px;
+  }
+  
+  /* Input focus styles */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2;
+    outline: 2px solid theme('colors.primary.DEFAULT');
+    outline-offset: 2px;
+  }
+  
+  /* Skip to content link - hidden by default, visible on focus */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+  
+  .focus\:not-sr-only:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
   }
 }
 
@@ -178,8 +227,45 @@ html {
     backdrop-filter: blur(12px);
   }
   
-  /* Touch-friendly sizing */
+  /* Touch-friendly sizing - WCAG 2.1 Level AAA (44x44px minimum) */
   .touch-target {
     @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* Visually hidden but accessible to screen readers */
+  .visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border-width: 0 !important;
+  }
+  
+  /* Focus visible utility */
+  .focus-visible-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
+  }
+  
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    * {
+      border-color: currentColor;
+    }
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }

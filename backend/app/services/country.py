@@ -152,7 +152,7 @@ class CountryService:
         """
         from sqlalchemy.orm import joinedload
         from app.models.group_trip import GroupTrip, GroupTripDeparture
-        
+        from app.models.activity import Activity
         from app.models.hotel import Hotel
 
         country = db.query(Country).options(
@@ -162,6 +162,7 @@ class CountryService:
             joinedload(Country.attractions),
             joinedload(Country.accommodations),
             joinedload(Country.hotels).joinedload(Hotel.media_assets),
+            joinedload(Country.activities).joinedload(Activity.cover_image),
             joinedload(Country.visit_info)
         ).filter(Country.slug == slug, Country.is_active == True).first()
         
@@ -270,6 +271,19 @@ class CountryService:
                     "is_active": hotel.is_active,
                 }
                 for hotel in country.hotels if hotel.is_active
+            ],
+            "activities": [
+                {
+                    "id": activity.id,
+                    "name": activity.name,
+                    "slug": activity.slug,
+                    "summary": activity.summary,
+                    "description": activity.description,
+                    "image_id": _resolve_media_asset_url(activity.cover_image) if hasattr(activity, 'cover_image') and activity.cover_image else None,
+                    "is_active": activity.is_active,
+                    "is_featured": activity.is_featured,
+                }
+                for activity in country.activities if activity.is_active and activity.is_featured
             ],
             "visit_info": {
                 "id": country.visit_info.id,

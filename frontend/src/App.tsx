@@ -26,6 +26,7 @@ import ContactForm from './components/forms/ContactForm';
 // Import destination pages
 import DestinationsPage from './features/destinations/DestinationsPage';
 import CountryDetailPage from './features/destinations/CountryDetailPage';
+import CountryDetailPageNew from './features/destinations/CountryDetailPageNew';
 import RegionDetailPage from './features/destinations/RegionDetailPage';
 
 // Import auth pages
@@ -252,8 +253,9 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: 'destinations', element: <DestinationsPage /> },
       { path: 'destinations/regions/:slug', element: <RegionDetailPage /> },
-      { path: 'destinations/countries/:slug', element: <CountryDetailPage /> },
-      { path: 'destinations/:slug', element: <CountryDetailPage /> },
+      { path: 'destinations/countries/:slug', element: <CountryDetailPageNew /> },
+      { path: 'destinations/:slug', element: <CountryDetailPageNew /> },
+      { path: 'destinations-old/:slug', element: <CountryDetailPage /> },
       { path: 'regions', element: <RegionsPage /> },
       { path: 'countries', element: <CountriesPage /> },
       { path: 'packages', element: <PackagesPage /> },

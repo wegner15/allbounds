@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MapPin, Clock, DollarSign, ChevronLeft, ChevronRight } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -11,15 +11,29 @@ import ImageCarousel from '../../components/ui/ImageCarousel';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils';
 import 'leaflet/dist/leaflet.css';
 
-// Fix for default markers in react-leaflet
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+// Fix Leaflet icon issue - do this once when component mounts
+let defaultIconFixed = false;
+const fixLeafletDefaultIcon = () => {
+  if (!defaultIconFixed && typeof window !== 'undefined') {
+    try {
+      delete (L.Icon.Default.prototype as any)._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      });
+      defaultIconFixed = true;
+    } catch (e) {
+      console.warn('Failed to fix Leaflet default icon:', e);
+    }
+  }
+};
 
 const AttractionDetailPage: React.FC = () => {
+  // Fix Leaflet icon on mount
+  useEffect(() => {
+    fixLeafletDefaultIcon();
+  }, []);
   const { slug } = useParams<{ slug: string }>();
   const { data: attractionData, isLoading, error } = useAttractionTrips(slug || '');
   const { attraction, packages = [], group_trips = [], total_packages = 0, total_group_trips = 0 } = attractionData || {};

@@ -1,23 +1,34 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, Tooltip } from 'react-leaflet';
-import { Icon } from 'leaflet';
+import L from 'leaflet';
 import type { LatLngExpression } from 'leaflet';
 import { MapPin, Navigation, Hotel as HotelIcon, Landmark } from 'lucide-react';
 import type { ItineraryItemDetail } from '../../lib/types/api';
 import 'leaflet/dist/leaflet.css';
 
-// Fix for default marker icons in Leaflet with Webpack
+// Fix for default marker icons in Leaflet
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
 
-// @ts-ignore
-delete Icon.Default.prototype._getIconUrl;
-Icon.Default.mergeOptions({
-  iconRetinaUrl: iconRetina,
-  iconUrl: icon,
-  shadowUrl: iconShadow,
-});
+// Fix Leaflet icon issue - do this once when component mounts
+let defaultIconFixed = false;
+const fixLeafletDefaultIcon = () => {
+  if (!defaultIconFixed && typeof window !== 'undefined') {
+    try {
+      // @ts-ignore
+      delete L.Icon.Default.prototype._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: iconRetina,
+        iconUrl: icon,
+        shadowUrl: iconShadow,
+      });
+      defaultIconFixed = true;
+    } catch (e) {
+      console.warn('Failed to fix Leaflet default icon:', e);
+    }
+  }
+};
 
 interface ItineraryMapLeafletProps {
   itineraryItems: ItineraryItemDetail[];
@@ -36,6 +47,11 @@ interface MapLocation {
 }
 
 const ItineraryMapLeaflet: React.FC<ItineraryMapLeafletProps> = ({ itineraryItems, packageName }) => {
+  // Fix Leaflet icon on mount
+  useEffect(() => {
+    fixLeafletDefaultIcon();
+  }, []);
+
   // Extract all locations with coordinates
   const { locations, routeCoordinates, center, hasCoordinates } = useMemo(() => {
     const locs: MapLocation[] = [];
@@ -123,7 +139,7 @@ const ItineraryMapLeaflet: React.FC<ItineraryMapLeafletProps> = ({ itineraryItem
 
   // Custom marker icons
   const createCustomIcon = (color: string, number?: number) => {
-    return new Icon({
+    return new L.Icon({
       iconUrl: `data:image/svg+xml;base64,${btoa(`
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="42" viewBox="0 0 32 42">
           <path fill="${color}" d="M16 0C7.2 0 0 7.2 0 16c0 11.2 16 26 16 26s16-14.8 16-26C32 7.2 24.8 0 16 0z"/>

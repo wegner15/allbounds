@@ -1,24 +1,35 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Tooltip } from 'react-leaflet';
-import { Icon } from 'leaflet';
+import L from 'leaflet';
 import type { LatLngExpression } from 'leaflet';
 import { MapPin, Landmark } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { CountryWithDetails } from '../../../lib/types/api';
 import 'leaflet/dist/leaflet.css';
 
-// Fix for default marker icons in Leaflet with Webpack
+// Fix for default marker icons in Leaflet
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
 
-// @ts-ignore
-delete Icon.Default.prototype._getIconUrl;
-Icon.Default.mergeOptions({
-  iconRetinaUrl: iconRetina,
-  iconUrl: icon,
-  shadowUrl: iconShadow,
-});
+// Fix Leaflet icon issue - do this once when component mounts
+let defaultIconFixed = false;
+const fixLeafletDefaultIcon = () => {
+  if (!defaultIconFixed && typeof window !== 'undefined') {
+    try {
+      // @ts-ignore
+      delete L.Icon.Default.prototype._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: iconRetina,
+        iconUrl: icon,
+        shadowUrl: iconShadow,
+      });
+      defaultIconFixed = true;
+    } catch (e) {
+      console.warn('Failed to fix Leaflet default icon:', e);
+    }
+  }
+};
 
 interface MapContentProps {
   country: CountryWithDetails;
@@ -35,6 +46,11 @@ interface MapLocation {
 }
 
 const MapContent: React.FC<MapContentProps> = ({ country }) => {
+  // Fix Leaflet icon on mount
+  useEffect(() => {
+    fixLeafletDefaultIcon();
+  }, []);
+
   // Extract all locations with coordinates
   const { locations, center } = useMemo(() => {
     const locs: MapLocation[] = [];
@@ -83,7 +99,7 @@ const MapContent: React.FC<MapContentProps> = ({ country }) => {
     const size = isCountry ? 40 : 32;
     const height = isCountry ? 52 : 42;
     
-    return new Icon({
+    return new L.Icon({
       iconUrl: `data:image/svg+xml;base64,${btoa(`
         <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${height}" viewBox="0 0 ${size} ${height}">
           <path fill="${color}" d="M${size/2} 0C${size*0.225} 0 0 ${size*0.225} 0 ${size/2}c0 ${size*0.35} ${size/2} ${size*0.8125} ${size/2} ${size*0.8125}s${size/2}-${size*0.4625} ${size/2}-${size*0.8125}C${size} ${size*0.225} ${size*0.775} 0 ${size/2} 0z"/>

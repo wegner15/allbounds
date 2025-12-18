@@ -10,44 +10,42 @@ export default defineConfig({
       '@': resolve(__dirname, 'src'),
     },
   },
+  optimizeDeps: {
+    include: ['leaflet', 'react-leaflet'],
+    exclude: [],
+  },
   build: {
     outDir: 'dist',
-    minify: 'terser',
-    sourcemap: false,
+    minify: false, // Disable minification temporarily to debug
+    sourcemap: true, // Enable source maps
+    commonjsOptions: {
+      // Handle Leaflet's CommonJS modules properly
+      transformMixedEsModules: true,
+      include: [/leaflet/, /node_modules/],
+    },
     rollupOptions: {
       output: {
         manualChunks: (id) => {
           // Vendor chunks for core libraries
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-              return 'vendor-react';
+            // Keep Leaflet completely isolated - don't bundle with anything else
+            if (id.includes('leaflet') && !id.includes('react-leaflet')) {
+              return 'leaflet-core';
             }
-            if (id.includes('@tanstack/react-query')) {
-              return 'vendor-query';
-            }
-            if (id.includes('leaflet') || id.includes('react-leaflet')) {
-              return 'vendor-map';
-            }
-            if (id.includes('lucide-react')) {
-              return 'vendor-icons';
-            }
-            if (id.includes('dompurify') || id.includes('react-helmet')) {
-              return 'vendor-utils';
-            }
-            // Other node_modules
-            return 'vendor-other';
+            // Let Vite handle everything else
+            return undefined;
           }
-          
+
           // Split destination components into separate chunk
           if (id.includes('/features/destinations/components/')) {
             return 'destinations';
           }
-          
+
           // Split tour/package components into separate chunk
           if (id.includes('/features/packages/') || id.includes('/components/tour/')) {
             return 'tours';
           }
-          
+
           // Split admin features into separate chunk
           if (id.includes('/features/admin/')) {
             return 'admin';

@@ -48,11 +48,11 @@ const MainNavigation: React.FC = () => {
     { label: 'BLOG', path: '/blog' },
   ];
 
-    // Fetch regions with countries from API
+  // Fetch regions with countries from API
   const { data: regionsWithCountries, isLoading: isLoadingRegions, error: regionsError } = useRegionsWithCountries();
-  
+
   // Transform API data into the format needed for the dropdown
-  const destinationRegions: DestinationRegion[] = regionsWithCountries ? 
+  const destinationRegions: DestinationRegion[] = regionsWithCountries ?
     regionsWithCountries.map((region: RegionWithCountries) => {
       return {
         name: region.name,
@@ -91,7 +91,7 @@ const MainNavigation: React.FC = () => {
 
   // Fetch holiday types from API
   const { data: holidayTypesData, isLoading: isLoadingHolidayTypes, error: holidayTypesError } = useHolidayTypes();
-  
+
   // Function to determine icon based on holiday type name (fallback)
   const getHolidayTypeIconFallback = (name: string): string => {
     const lowerName = name.toLowerCase();
@@ -119,7 +119,7 @@ const MainNavigation: React.FC = () => {
     // Default icon
     return '✈️';
   };
-  
+
   // Transform API data into the format needed for the dropdown
   const holidayTypeItems: HolidayTypeDisplay[] = holidayTypesData ?
     holidayTypesData.map(type => ({
@@ -148,19 +148,19 @@ const MainNavigation: React.FC = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       // Check if the click is outside the destinations dropdown
-      if (destinationsOpen && 
-          destinationsRef.current && 
-          !destinationsRef.current.contains(event.target as Node) &&
-          !(event.target as Element)?.closest?.('[data-dropdown="destinations"]')
+      if (destinationsOpen &&
+        destinationsRef.current &&
+        !destinationsRef.current.contains(event.target as Node) &&
+        !(event.target as Element)?.closest?.('[data-dropdown="destinations"]')
       ) {
         setDestinationsOpen(false);
       }
-      
+
       // Check if the click is outside the holiday types dropdown
-      if (holidayTypesOpen && 
-          holidayTypesRef.current && 
-          !holidayTypesRef.current.contains(event.target as Node) &&
-          !(event.target as Element)?.closest?.('[data-dropdown="holiday-types"]')
+      if (holidayTypesOpen &&
+        holidayTypesRef.current &&
+        !holidayTypesRef.current.contains(event.target as Node) &&
+        !(event.target as Element)?.closest?.('[data-dropdown="holiday-types"]')
       ) {
         setHolidayTypesOpen(false);
       }
@@ -169,7 +169,7 @@ const MainNavigation: React.FC = () => {
     // Only add the event listener when one of the dropdowns is open
     if (destinationsOpen || holidayTypesOpen) {
       document.addEventListener('mousedown', handleClickOutside);
-      
+
       return () => {
         document.removeEventListener('mousedown', handleClickOutside);
       };
@@ -188,7 +188,7 @@ const MainNavigation: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50">
+    <header className="sticky top-0 z-[1000]">
       {/* Main Navigation Bar */}
       <div className="bg-white shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -224,12 +224,11 @@ const MainNavigation: React.FC = () => {
                     >
                       {item.label}
                       <svg
-                        className={`ml-1 h-4 w-4 transition-transform ${
-                          (item.label === 'DESTINATIONS' && destinationsOpen) || 
-                          (item.label === 'HOLIDAY TYPES' && holidayTypesOpen) 
-                            ? 'rotate-180' 
+                        className={`ml-1 h-4 w-4 transition-transform ${(item.label === 'DESTINATIONS' && destinationsOpen) ||
+                            (item.label === 'HOLIDAY TYPES' && holidayTypesOpen)
+                            ? 'rotate-180'
                             : ''
-                        }`}
+                          }`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -273,9 +272,9 @@ const MainNavigation: React.FC = () => {
                   <span className="md:hidden">Sign In</span>
                 </Link>
               )}
-              
+
               {/* Mobile menu button */}
-              <button 
+              <button
                 className="lg:hidden p-2 rounded-md text-charcoal hover:bg-gray-100 transition-colors"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Toggle menu"
@@ -317,12 +316,11 @@ const MainNavigation: React.FC = () => {
                     >
                       {item.label}
                       <svg
-                        className={`h-5 w-5 transition-transform ${
-                          (item.label === 'DESTINATIONS' && destinationsOpen) || 
-                          (item.label === 'HOLIDAY TYPES' && holidayTypesOpen) 
-                            ? 'rotate-180' 
+                        className={`h-5 w-5 transition-transform ${(item.label === 'DESTINATIONS' && destinationsOpen) ||
+                            (item.label === 'HOLIDAY TYPES' && holidayTypesOpen)
+                            ? 'rotate-180'
                             : ''
-                        }`}
+                          }`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -390,7 +388,7 @@ const MainNavigation: React.FC = () => {
                 )}
               </div>
             ))}
-            
+
             {/* Mobile Contact & Auth */}
             <div className="pt-3 border-t border-gray-200 space-y-2">
               <Link
@@ -426,14 +424,14 @@ const MainNavigation: React.FC = () => {
 
       {/* Destinations Dropdown */}
       {destinationsOpen && !mobileMenuOpen && (
-        <div 
+        <div
           ref={destinationsRef}
           className="hidden lg:block absolute left-0 right-0 bg-white shadow-lg border-t border-gray-200 z-50"
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="mb-4">
-              <Link 
-                to="/destinations" 
+              <Link
+                to="/destinations"
                 className="text-blue-600 hover:underline flex items-center"
                 onClick={() => setDestinationsOpen(false)}
               >
@@ -443,7 +441,7 @@ const MainNavigation: React.FC = () => {
                 All Destinations
               </Link>
             </div>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
               {isLoadingRegions ? (
                 <div className="col-span-6 text-center py-4">Loading destinations...</div>
@@ -456,7 +454,7 @@ const MainNavigation: React.FC = () => {
                     <ul className="space-y-1">
                       {region.countries.map((country) => (
                         <li key={country.slug}>
-                          <Link 
+                          <Link
                             to={`/destinations/${country.slug}`}
                             className="text-sm text-gray-600 hover:text-hover transition-colors"
                             onClick={() => setDestinationsOpen(false)}
@@ -476,21 +474,21 @@ const MainNavigation: React.FC = () => {
 
       {/* Holiday Types Dropdown */}
       {holidayTypesOpen && !mobileMenuOpen && (
-        <div 
+        <div
           ref={holidayTypesRef}
           className="hidden lg:block absolute left-0 right-0 bg-white shadow-lg border-t border-gray-200 z-50"
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="mb-4">
-              <Link 
-                to="/holiday-types" 
+              <Link
+                to="/holiday-types"
                 className="text-blue-600 hover:underline"
                 onClick={() => setHolidayTypesOpen(false)}
               >
                 All Holidays
               </Link>
             </div>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
               {isLoadingHolidayTypes ? (
                 <div className="col-span-5 text-center py-4">Loading holiday types...</div>
@@ -498,7 +496,7 @@ const MainNavigation: React.FC = () => {
                 <div className="col-span-5 text-center py-4 text-red-500">Failed to load holiday types</div>
               ) : (
                 holidayTypeItems.map((type) => (
-                  <Link 
+                  <Link
                     key={type.slug}
                     to={`/holiday-types/${type.slug}`}
                     className="flex items-center space-x-2 text-charcoal hover:text-hover transition-colors"
@@ -513,7 +511,7 @@ const MainNavigation: React.FC = () => {
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
               {travelOptions.map((option) => (
-                <Link 
+                <Link
                   key={option.slug}
                   to={`/${option.slug}`}
                   className="flex items-center space-x-2 text-charcoal hover:text-hover transition-colors"
@@ -524,32 +522,32 @@ const MainNavigation: React.FC = () => {
                 </Link>
               ))}
             </div>
-            
+
             {/* Search Form */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
               <div>
                 <label className="block text-xs text-gray-500 mb-1">Location</label>
-                <input 
-                  type="text" 
-                  placeholder="Where are you going?" 
+                <input
+                  type="text"
+                  placeholder="Where are you going?"
                   className="w-full p-2 border border-gray-300 rounded"
                 />
               </div>
-              
+
               <div className="md:col-span-2">
                 <label className="block text-xs text-gray-500 mb-1">Check in - Check out</label>
                 <div className="flex">
-                  <input 
-                    type="date" 
+                  <input
+                    type="date"
                     className="w-full p-2 border border-gray-300 rounded-l"
                   />
-                  <input 
-                    type="date" 
+                  <input
+                    type="date"
                     className="w-full p-2 border-t border-b border-r border-gray-300 rounded-r"
                   />
                 </div>
               </div>
-              
+
               <div className="flex flex-col">
                 <label className="block text-xs text-gray-500 mb-1">Guests</label>
                 <div className="flex h-full">

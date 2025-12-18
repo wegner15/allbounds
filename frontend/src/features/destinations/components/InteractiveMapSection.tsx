@@ -10,6 +10,12 @@ interface InteractiveMapSectionProps {
 }
 
 const InteractiveMapSection: React.FC<InteractiveMapSectionProps> = ({ country }) => {
+  // TEMPORARY: Disable map in production due to Leaflet bundling issue
+  // TODO: Replace with Mapbox GL JS or fix Leaflet bundling
+  if (import.meta.env.PROD) {
+    return null;
+  }
+  
   // Check if country exists and has coordinates
   if (!country) {
     return null;

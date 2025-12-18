@@ -42,28 +42,37 @@ const Footer: React.FC<FooterProps> = ({
   const dynamicSections = React.useMemo(() => {
     const newSections = [...sections];
 
-    // Update Destinations section
+    // Update Destinations section - show only featured destinations, limited to 8
     const destinationsIndex = newSections.findIndex(section => section.title === 'Destinations');
     if (destinationsIndex !== -1 && regionsWithCountries) {
-      const destinationLinks = regionsWithCountries.flatMap(region =>
-        region.countries.map(country => ({
-          label: country.name,
-          path: `/destinations/${country.slug}`
-        }))
-      );
+      const destinationLinks = regionsWithCountries
+        .flatMap(region =>
+          region.countries
+            .filter(country => country.is_featured) // Only featured countries
+            .map(country => ({
+              label: country.name,
+              path: `/destinations/${country.slug}`
+            }))
+        )
+        .slice(0, 8); // Limit to 8 featured destinations
+
       newSections[destinationsIndex] = {
         ...newSections[destinationsIndex],
         links: destinationLinks
       };
     }
 
-    // Update Holiday Types section
+    // Update Holiday Types section - show only featured types, limited to 10
     const holidayTypesIndex = newSections.findIndex(section => section.title === 'Holiday Types');
     if (holidayTypesIndex !== -1 && holidayTypesData) {
-      const holidayTypeLinks = holidayTypesData.map(type => ({
-        label: type.name,
-        path: `/holiday-types/${type.slug}`
-      }));
+      const holidayTypeLinks = holidayTypesData
+        .filter(type => type.is_featured) // Only featured holiday types
+        .slice(0, 10) // Limit to 10 featured types
+        .map(type => ({
+          label: type.name,
+          path: `/holiday-types/${type.slug}`
+        }));
+
       newSections[holidayTypesIndex] = {
         ...newSections[holidayTypesIndex],
         links: holidayTypeLinks

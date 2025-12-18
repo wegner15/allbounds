@@ -26,6 +26,7 @@ export interface CountryInRegion {
   description: string;
   image_id?: string;
   is_active: boolean;
+  is_featured?: boolean;
 }
 
 // Region with countries type
@@ -234,6 +235,7 @@ export interface HolidayType extends BaseModel {
   image_id?: string;
   icon?: string;
   is_active: boolean;
+  is_featured?: boolean;
 }
 
 // Package types

@@ -2,65 +2,70 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
-import { 
-  Users, 
-  Search, 
-  MapPin, 
-  Calendar,
-  Plane,
+import {
+  Search,
   Hotel as HotelIcon,
   Compass,
-  Map
+  Map as MapIcon,
+  Palmtree,
+  Plane,
+  Briefcase,
+  Calendar,
+  Users
 } from 'lucide-react';
-import Button from '../../../../components/ui/Button';
 import LocationSearchInput from '../../../../components/ui/LocationSearchInput';
 import DateRangePicker from '../../../../components/ui/DateRangePicker';
-
-interface LocationOption {
-  label: string;
-  value: string;
-}
+import GuestsInput, { type GuestConfig } from '../../../../components/ui/GuestsInput';
+import HeroSearchInput, { type SearchResult } from './components/HeroSearchInput';
+import ActivityTypeSelector from './components/ActivityTypeSelector';
+import { apiClient } from '../../../../lib/api';
 
 interface TabConfig {
   id: string;
   label: string;
   icon: React.ReactNode;
-  fields: ('location' | 'dates' | 'guests' | 'destination' | 'activity')[];
+  fields: ('location' | 'dates' | 'guests' | 'activiy_types')[];
 }
 
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('tours');
-  const [location, setLocation] = useState<LocationOption | null>(null);
+  const [activeTab, setActiveTab] = useState('tours'); // Default to Tours
+
+  // Search State
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [location, setLocation] = useState<any | null>(null); // For legacy LocationSearchInput fallback
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [queryText, setQueryText] = useState('');
+  const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
+
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
-  const [guests, setGuests] = useState('2');
-  const [destination, setDestination] = useState<LocationOption | null>(null);
-  const [activity, setActivity] = useState('');
+  const [guests, setGuests] = useState<GuestConfig>({ adults: 2, children: 0, rooms: 1 });
+  const [activityTypes, setActivityTypes] = useState<string[]>([]);
 
   const tabs: TabConfig[] = [
     {
       id: 'tours',
       label: 'Tours',
       icon: <Compass className="w-4 h-4" />,
-      fields: ['destination', 'dates', 'guests']
+      fields: ['location', 'dates', 'guests']
     },
     {
-      id: 'group-trips',
+      id: 'group_trips',
       label: 'Group Trips',
-      icon: <Users className="w-4 h-4" />,
-      fields: ['destination', 'dates']
+      icon: <MapIcon className="w-4 h-4" />,
+      fields: ['location', 'dates', 'guests']
     },
     {
       id: 'packages',
       label: 'Packages',
-      icon: <Map className="w-4 h-4" />,
-      fields: ['destination', 'dates', 'guests']
+      icon: <Briefcase className="w-4 h-4" />,
+      fields: ['location', 'dates', 'guests']
     },
     {
-      id: 'things-to-do',
+      id: 'things_to_do',
       label: 'Things To Do',
-      icon: <Compass className="w-4 h-4" />,
-      fields: ['location', 'activity']
+      icon: <Palmtree className="w-4 h-4" />,
+      fields: ['location', 'dates', 'activiy_types']
     },
     {
       id: 'hotels',
@@ -78,191 +83,244 @@ const HeroSection: React.FC = () => {
 
   const activeTabConfig = tabs.find(tab => tab.id === activeTab) || tabs[0];
 
+  const handleLiveSearch = async (query: string): Promise<SearchResult[]> => {
+    if (!query || query.length < 2) return [];
+
+    try {
+      // Call global search to get results from all indices
+      const response = await apiClient.post<any>('/search/', {
+        query: query,
+        limit: 5
+      });
+
+      const hits: SearchResult[] = [];
+      if (response.data?.results) {
+        Object.entries(response.data.results).forEach(([indexName, idx]: [string, any]) => {
+          if (idx.hits && Array.isArray(idx.hits)) {
+            // Filter hits based on active tab
+            let shouldInclude = false;
+
+            // Logic: Map tabs to indices
+            // Tours -> packages, group_trips
+            // Group Trips -> group_trips
+            // Packages -> packages
+            // Things To Do -> activities, attractions
+            // Hotels -> accommodations
+            // Flights -> none (for now)
+
+            if (activeTab === 'tours' && (indexName === 'packages' || indexName === 'group_trips')) shouldInclude = true;
+            if (activeTab === 'group_trips' && indexName === 'group_trips') shouldInclude = true;
+            if (activeTab === 'packages' && indexName === 'packages') shouldInclude = true;
+            if (activeTab === 'things_to_do' && (indexName === 'activities' || indexName === 'attractions')) shouldInclude = true;
+            if (activeTab === 'hotels' && indexName === 'accommodations') shouldInclude = true;
+
+            // Always include destinations (regions/countries) for "Where" suggestions
+            if (indexName === 'regions' || indexName === 'countries') shouldInclude = true;
+
+            if (shouldInclude) {
+              const mappedHits = idx.hits.map((hit: any) => ({
+                id: hit.id.toString(),
+                title: hit.name || hit.title,
+                description: hit.location || hit.city || hit.country?.name || hit.description?.substring(0, 50) + '...',
+                image: hit.image_url || hit.cover_image,
+                type: indexName === 'packages' ? 'package' :
+                  indexName === 'group_trips' ? 'trip' :
+                    indexName === 'accommodations' ? 'stay' :
+                      indexName === 'activities' ? 'activity' :
+                        indexName === 'attractions' ? 'attraction' :
+                          indexName === 'countries' ? 'country' : 'region',
+                url: hit.slug ? `/${indexName === 'packages' ? 'tours' : indexName}/${hit.slug}` : '#'
+              }));
+              hits.push(...mappedHits);
+            }
+          }
+        });
+      }
+
+      return hits;
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
+  };
+
+  const onResultSelect = (result: SearchResult) => {
+    setSelectedResult(result);
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const searchParams = new URLSearchParams();
-    
-    // Add search query based on active fields
-    if (activeTabConfig.fields.includes('destination') && destination) {
-      searchParams.append('q', destination.value);
-    } else if (activeTabConfig.fields.includes('location') && location) {
+
+    // Query/Location
+    if (selectedResult) {
+      searchParams.append('q', selectedResult.title);
+    } else if (location && location.value) {
       searchParams.append('q', location.value);
-    } else if (activeTabConfig.fields.includes('activity') && activity) {
-      searchParams.append('q', activity);
+    } else if (queryText) {
+      searchParams.append('q', queryText);
     }
-    
-    searchParams.append('type', activeTab);
-    
+
+    // Dates
     if (dateRange?.from) searchParams.append('from', format(dateRange.from, 'yyyy-MM-dd'));
     if (dateRange?.to) searchParams.append('to', format(dateRange.to, 'yyyy-MM-dd'));
-    if (guests && activeTabConfig.fields.includes('guests')) searchParams.append('guests', guests);
 
-    navigate(`/search?${searchParams.toString()}`);
-  };
+    // Guests
+    if (activeTabConfig.fields.includes('guests')) {
+      searchParams.append('adults', guests.adults.toString());
+      searchParams.append('children', guests.children.toString());
+      searchParams.append('rooms', guests.rooms.toString());
+    }
 
-  const renderSearchFields = () => {
-    const fields = activeTabConfig.fields;
-    const fieldCount = fields.length;
-    const gridCols = fieldCount === 4 ? 'md:grid-cols-4' : fieldCount === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2';
+    // Activity Types
+    if (activeTab === 'things_to_do' && activityTypes.length > 0) {
+      searchParams.append('types', activityTypes.join(','));
+    }
 
-    return (
-      <div className={`grid grid-cols-1 ${gridCols} gap-4 items-end`}>
-        {fields.includes('destination') && (
-          <div className="text-left">
-            <label className="block text-sm font-lato font-semibold text-charcoal mb-2">
-              <MapPin className="w-4 h-4 inline mr-1" />
-              Destination
-            </label>
-            <LocationSearchInput
-              value={destination}
-              onChange={setDestination}
-              variant="light"
-            />
-          </div>
-        )}
-
-        {fields.includes('location') && (
-          <div className="text-left">
-            <label className="block text-sm font-lato font-semibold text-charcoal mb-2">
-              <MapPin className="w-4 h-4 inline mr-1" />
-              Location
-            </label>
-            <LocationSearchInput
-              value={location}
-              onChange={setLocation}
-              variant="light"
-            />
-          </div>
-        )}
-
-        {fields.includes('activity') && (
-          <div className="text-left">
-            <label className="block text-sm font-lato font-semibold text-charcoal mb-2">
-              <Compass className="w-4 h-4 inline mr-1" />
-              Activity
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="What do you want to do?"
-                className="w-full px-4 py-3 border-2 border-teal/30 rounded-lg focus:outline-none focus:border-teal bg-white text-charcoal placeholder-charcoal/50 font-lato transition-colors"
-                value={activity}
-                onChange={(e) => setActivity(e.target.value)}
-              />
-            </div>
-          </div>
-        )}
-
-        {fields.includes('dates') && (
-          <div className="text-left">
-            <label className="block text-sm font-lato font-semibold text-charcoal mb-2">
-              <Calendar className="w-4 h-4 inline mr-1" />
-              {activeTab === 'hotels' ? 'Check in - Check out' : 'Travel Dates'}
-            </label>
-            <DateRangePicker range={dateRange} setRange={setDateRange} variant="light" />
-          </div>
-        )}
-
-        {fields.includes('guests') && (
-          <div className="text-left">
-            <label className="block text-sm font-lato font-semibold text-charcoal mb-2">
-              <Users className="w-4 h-4 inline mr-1" />
-              Guests
-            </label>
-            <div className="relative">
-              <input
-                type="number"
-                min="1"
-                placeholder="Number of guests"
-                className="w-full px-4 py-3 border-2 border-teal/30 rounded-lg focus:outline-none focus:border-teal bg-white text-charcoal placeholder-charcoal/50 font-lato transition-colors"
-                value={guests}
-                onChange={(e) => setGuests(e.target.value)}
-              />
-            </div>
-          </div>
-        )}
-
-        <Button 
-          type="submit" 
-          className="w-full bg-teal hover:bg-teal/90 text-paper py-3 px-6 rounded-lg flex items-center justify-center text-base font-lato font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
-        >
-          <Search className="w-5 h-5 mr-2" />
-          Search
-        </Button>
-      </div>
-    );
+    // Route logic
+    switch (activeTab) {
+      case 'hotels':
+        navigate(`/hotels?${searchParams.toString()}`);
+        break;
+      case 'tours':
+        navigate(`/tours?${searchParams.toString()}`);
+        break;
+      case 'group_trips':
+        navigate(`/group-trips?${searchParams.toString()}`);
+        break;
+      case 'packages':
+        navigate(`/packages?${searchParams.toString()}`);
+        break;
+      case 'things_to_do':
+        navigate(`/activities?${searchParams.toString()}`);
+        break;
+      case 'flights':
+        // Placeholder or external link
+        navigate(`/search?type=flights&${searchParams.toString()}`);
+        break;
+      default:
+        navigate(`/search?${searchParams.toString()}`);
+    }
   };
 
   return (
-    <div className="relative h-[600px] bg-charcoal overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')`
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-charcoal/60 via-charcoal/50 to-charcoal/70"></div>
+    <div className="relative h-[650px] bg-charcoal">
+      {/* Background with advanced overlay */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80"
+          alt="Travel Hero"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/40 to-transparent opacity-90"></div>
+        <div className="absolute inset-0 bg-black/20"></div>
       </div>
 
-      {/* Content */}
-      <div className="relative z-[100] container mx-auto px-4 h-full flex flex-col justify-center items-center">
-        {/* Hero Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-6xl font-playfair font-bold text-paper mb-4 leading-tight drop-shadow-lg">
+      <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center items-center pt-16">
+
+        {/* Headline */}
+        <div className="text-center mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-playfair font-bold text-white mb-6 leading-tight drop-shadow-xl tracking-wide">
             Discover Your Next Adventure
           </h1>
-          <p className="text-lg md:text-xl text-paper/90 font-lato max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-gray-200 font-lato max-w-2xl mx-auto font-light leading-relaxed">
             Perfect timing for ideal destinations - explore the world with confidence
           </p>
         </div>
 
-        {/* Search Card */}
-        <form 
-          onSubmit={handleSearch} 
-          className="relative bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-2xl w-full max-w-5xl border border-teal/20"
-        >
+        {/* Search Component Container */}
+        <div className="w-full max-w-5xl animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
+
           {/* Tabs */}
-          <div className="flex flex-wrap gap-2 mb-6 pb-4 border-b border-teal/20">
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                type="button"
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-lato font-semibold transition-all duration-200 ${
-                  activeTab === tab.id
-                    ? 'bg-teal text-paper shadow-md'
-                    : 'bg-paper/50 text-charcoal hover:bg-paper hover:shadow-sm'
-                }`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-            ))}
+          <div className="flex justify-center mb-6 overflow-x-auto">
+            <div className="inline-flex bg-black/30 backdrop-blur-md p-1 rounded-full border border-white/10 whitespace-nowrap">
+              {tabs.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`
+                    flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium transition-all duration-300
+                    ${activeTab === tab.id
+                      ? 'bg-white text-charcoal shadow-lg scale-105'
+                      : 'text-white hover:bg-white/10'
+                    }
+                  `}
+                >
+                  {tab.icon}
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Dynamic Search Fields */}
-          {renderSearchFields()}
-        </form>
+          {/* Unified Search Bar */}
+          <form
+            onSubmit={handleSearch}
+            className="bg-white rounded-2xl p-4 shadow-xl flex flex-col md:flex-row items-center gap-4 relative group"
+          >
+            {/* Location / Search Section */}
+            <div className="flex-1 w-full md:w-auto relative border border-gray-100 rounded-xl px-4 py-3 hover:border-gray-300 transition-colors bg-gray-50/50">
+              <label className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+                <MapIcon className="w-4 h-4 text-teal" />
+                Destination
+              </label>
+              <HeroSearchInput
+                placeholder="Where are you going?"
+                onSearch={handleLiveSearch}
+                onResultSelect={onResultSelect}
+                className="w-full"
+              />
+            </div>
 
-        {/* Quick Links */}
-        <div className="mt-6 text-center">
-          <p className="text-paper/80 text-sm font-lato mb-2">Popular searches:</p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {['Safari Tours', 'Beach Holidays', 'Cultural Trips', 'Adventure Travel'].map((term) => (
+            {/* Dates Section */}
+            <div className="flex-1 w-full md:w-auto relative border border-gray-100 rounded-xl px-4 py-3 hover:border-gray-300 transition-colors bg-gray-50/50">
+              <label className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+                <Calendar className="w-4 h-4 text-teal" />
+                {activeTab === 'things_to_do' ? 'When' : 'Travel Dates'}
+              </label>
+              <div className="w-full h-[24px]">
+                <DateRangePicker
+                  range={dateRange}
+                  setRange={setDateRange}
+                  variant="transparent"
+                  className="h-full"
+                />
+              </div>
+            </div>
+
+            {/* Third Section: Guests or Activity Type */}
+            <div className="flex-1 w-full md:w-auto relative border border-gray-100 rounded-xl px-4 py-3 hover:border-gray-300 transition-colors bg-gray-50/50">
+              <label className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+                <Users className="w-4 h-4 text-teal" />
+                {activeTabConfig.fields.includes('guests') ? 'Guests' : 'Type'}
+              </label>
+
+              {activeTabConfig.fields.includes('guests') ? (
+                <GuestsInput
+                  value={guests}
+                  onChange={setGuests}
+                  showRooms={activeTab === 'hotels'}
+                />
+              ) : (
+                <ActivityTypeSelector
+                  selectedTypes={activityTypes}
+                  onChange={setActivityTypes}
+                />
+              )}
+            </div>
+
+            {/* Search Button */}
+            <div className="md:w-auto w-full">
               <button
-                key={term}
-                onClick={() => {
-                  const searchParams = new URLSearchParams();
-                  searchParams.append('q', term);
-                  navigate(`/search?${searchParams.toString()}`);
-                }}
-                className="px-3 py-1 bg-paper/20 hover:bg-paper/30 text-paper text-xs font-lato rounded-full transition-colors backdrop-blur-sm"
+                type="submit"
+                className="w-full md:w-auto bg-teal hover:bg-teal-dark text-white rounded-xl px-8 py-4 shadow-lg hover:shadow-xl transition-all duration-300 font-bold text-lg flex items-center justify-center gap-2 h-full min-h-[50px]"
               >
-                {term}
+                <Search className="w-5 h-5" />
+                Search
               </button>
-            ))}
-          </div>
+            </div>
+
+          </form>
         </div>
       </div>
     </div>

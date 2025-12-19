@@ -8,10 +8,11 @@ import { Calendar } from 'lucide-react';
 interface DateRangePickerProps {
   range: DateRange | undefined;
   setRange: (range: DateRange | undefined) => void;
-  variant?: 'dark' | 'light';
+  variant?: 'dark' | 'light' | 'transparent';
+  className?: string;
 }
 
-const DateRangePicker: React.FC<DateRangePickerProps> = ({ range, setRange, variant = 'dark' }) => {
+const DateRangePicker: React.FC<DateRangePickerProps> = ({ range, setRange, variant = 'dark', className = '' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -39,6 +40,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({ range, setRange, vari
   }, [isOpen]);
 
   const isDark = variant === 'dark';
+  const isTransparent = variant === 'transparent';
 
   let footer = <p className={`text-sm p-2 ${isDark ? 'text-gray-300' : 'text-charcoal/70'}`}>Please pick the first day.</p>;
   if (range?.from) {
@@ -55,12 +57,12 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({ range, setRange, vari
 
   const displayValue = range?.from
     ? range.to
-      ? `${format(range.from, 'LLL dd, y')} - ${format(range.to, 'LLL dd, y')}`
-      : format(range.from, 'LLL dd, y')
-    : 'Select dates';
+      ? `${format(range.from, 'MMM dd')} - ${format(range.to, 'MMM dd')}`
+      : format(range.from, 'MMM dd')
+    : 'Add dates';
 
   const pickerContent = isOpen ? (
-    <div 
+    <div
       className="fixed z-[9999] bg-white rounded-lg border-2 border-teal/30 shadow-2xl"
       style={{
         top: `${position.top}px`,
@@ -84,22 +86,26 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({ range, setRange, vari
 
   return (
     <>
-      <div className="relative" ref={wrapperRef}>
-        <div 
-          className={`flex items-center cursor-pointer ${
-            isDark 
-              ? 'border-b border-white/30 py-1' 
-              : 'px-4 py-3 border-2 border-teal/30 rounded-lg hover:border-teal transition-colors bg-white'
-          }`}
+      <div className={`relative ${className} h-full`} ref={wrapperRef}>
+        <div
+          className={`flex items-center cursor-pointer h-full transition-colors ${isDark
+              ? 'border-b border-white/30 py-1'
+              : isTransparent
+                ? 'bg-transparent'
+                : 'px-4 py-3 border border-gray-200 rounded-lg hover:border-teal bg-white'
+            }`}
           onClick={() => setIsOpen(!isOpen)}
         >
-          <Calendar className={`w-4 h-4 mr-2 ${isDark ? 'text-gray-200' : 'text-charcoal'}`} />
-          <div className={`w-full bg-transparent focus:outline-none ${
-            range?.from 
-              ? (isDark ? 'text-white' : 'text-charcoal') 
-              : (isDark ? 'text-gray-300' : 'text-charcoal/50')
-          }`}>
-            {displayValue}
+          <Calendar className={`w-5 h-5 mr-3 flex-shrink-0 ${isDark ? 'text-gray-200' : 'text-teal'}`} />
+
+          <div className="flex flex-col items-start overflow-hidden">
+
+            <div className={`text-base font-bold truncate w-full text-left ${range?.from
+                ? (isDark ? 'text-white' : 'text-charcoal')
+                : (isDark ? 'text-gray-300' : 'text-gray-400')
+              }`}>
+              {displayValue}
+            </div>
           </div>
         </div>
       </div>

@@ -12,7 +12,7 @@ export const queryClient = new QueryClient({
 
 // API base URL - connect to the FastAPI backend
 // Use production URL if in production mode, otherwise use dev URL
-const API_BASE_URL = import.meta.env.PROD 
+const API_BASE_URL = import.meta.env.PROD
   ? (import.meta.env.VITE_PROD_BASE_URL || 'https://api.allboundtravel.com/api/v1')
   : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8005/api/v1');
 
@@ -24,32 +24,32 @@ export const apiClient = {
     data?: unknown
   ): Promise<T> {
     // Prevent duplicate /api/v1 path segments
-    const normalizedEndpoint = endpoint.startsWith('/api/v1') 
-      ? endpoint.replace(/^\/api\/v1/, '') 
+    const normalizedEndpoint = endpoint.startsWith('/api/v1')
+      ? endpoint.replace(/^\/api\/v1/, '')
       : endpoint;
-    
+
     // Ensure we don't have double slashes between base URL and endpoint
     const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
     const endpointPath = normalizedEndpoint.startsWith('/') ? normalizedEndpoint : `/${normalizedEndpoint}`;
     const url = `${baseUrl}${endpointPath}`;
-    
+
     // Debug logging
     console.log(`API Request: ${method} ${url}`, data);
-    
+
     const headers: HeadersInit = {};
-    
+
     // Add auth token if available
     const token = localStorage.getItem('auth_token');
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
-    
+
     const config: RequestInit = {
       method,
       headers,
       credentials: 'include',
     };
-    
+
     // Handle FormData separately from JSON data
     if (data instanceof FormData) {
       // Don't set Content-Type for FormData (browser will set it with boundary)
@@ -59,10 +59,10 @@ export const apiClient = {
       headers['Accept'] = 'application/json';
       config.body = JSON.stringify(data);
     }
-    
+
     try {
       const response = await fetch(url, config);
-      
+
       // Handle HTTP errors
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -71,10 +71,10 @@ export const apiClient = {
           statusText: response.statusText,
           errorData
         });
-        
+
         // Format FastAPI validation errors for better readability
         let errorMessage = `API error: ${response.status} ${response.statusText}`;
-        
+
         if (errorData.detail) {
           if (Array.isArray(errorData.detail)) {
             // Format FastAPI validation errors
@@ -89,15 +89,15 @@ export const apiClient = {
             errorMessage = errorData.detail;
           }
         }
-        
+
         throw new Error(errorMessage);
       }
-      
+
       // Handle empty responses
       if (response.status === 204) {
         return {} as T;
       }
-      
+
       // Parse JSON response
       return await response.json();
     } catch (error) {
@@ -105,20 +105,20 @@ export const apiClient = {
       throw error;
     }
   },
-  
+
   // Convenience methods
   async get<T>(endpoint: string): Promise<T> {
     return this.request(endpoint, 'GET') as Promise<T>;
   },
-  
+
   async post<T>(endpoint: string, data: unknown): Promise<T> {
     return this.request(endpoint, 'POST', data) as Promise<T>;
   },
-  
+
   async put<T>(endpoint: string, data: unknown): Promise<T> {
     return this.request(endpoint, 'PUT', data) as Promise<T>;
   },
-  
+
   async delete<T>(endpoint: string): Promise<T> {
     return this.request(endpoint, 'DELETE') as Promise<T>;
   },
@@ -138,7 +138,7 @@ export const endpoints = {
     detailWithCountries: (id: number) => `/regions/${id}/with-countries`,
     bySlugWithCountries: (slug: string) => `/regions/slug/${slug}/with-countries`,
   },
-  
+
   // Cloudflare Images
   cloudflareImages: {
     directUpload: () => '/cloudflare/images/direct-upload',
@@ -151,7 +151,7 @@ export const endpoints = {
     variant: (id: string) => `/cloudflare/images/variants/${id}`,
     signedUrl: () => '/cloudflare/images/signed-url',
   },
-  
+
   // Countries
   countries: {
     list: () => '/countries/',
@@ -170,7 +170,7 @@ export const endpoints = {
     visitInfo: (countryId: number) => `/countries/${countryId}/visit-info`,
     updateVisitInfo: (countryId: number) => `/countries/${countryId}/visit-info`,
   },
-  
+
   // Packages
   packages: {
     list: () => '/packages/',
@@ -187,7 +187,7 @@ export const endpoints = {
     coverImage: (id: number) => `/packages/${id}/cover-image`,
     similar: (id: number, limit?: number) => `/packages/${id}/similar${limit ? `?limit=${limit}` : ''}`,
   },
-  
+
   // Hotels
   hotels: {
     list: () => '/hotels/',
@@ -220,8 +220,8 @@ export const endpoints = {
     byHolidayType: (holidayTypeId: number) => `/group-trips/?holiday_type_id=${holidayTypeId}`,
     departures: (groupTripId: number) => `/group-trips/${groupTripId}/departures`,
   },
-  
-  
+
+
   // Accommodations
   accommodations: {
     list: () => '/accommodations/',
@@ -229,7 +229,7 @@ export const endpoints = {
     bySlug: (slug: string) => `/accommodations/slug/${slug}`,
     byCountry: (countryId: number) => `/accommodations/?country_id=${countryId}`,
   },
-  
+
   // Activities
   activities: {
     list: () => '/activities/',
@@ -241,7 +241,7 @@ export const endpoints = {
     update: (id: number) => `/activities/${id}`,
     delete: (id: number) => `/activities/${id}`,
   },
-  
+
   // Attractions
   attractions: {
     list: () => '/attractions/',
@@ -254,7 +254,7 @@ export const endpoints = {
     trips: (id: number) => `/attractions/${id}/trips`,
     tripsBySlug: (slug: string) => `/attractions/slug/${slug}/trips`,
   },
-  
+
   // Holiday Types
   holidayTypes: {
     list: () => '/holiday-types/',
@@ -265,7 +265,7 @@ export const endpoints = {
     bySlug: (slug: string) => `/holiday-types/slug/${slug}`,
     coverImage: (id: number) => `/holiday-types/${id}/cover-image`,
   },
-  
+
   // Reviews
   reviews: {
     list: () => '/reviews/',
@@ -278,7 +278,7 @@ export const endpoints = {
     bySlug: (slug: string) => `/blog/slug/${slug}`,
     byTag: (tag: string) => `/blog/?tag=${tag}`,
   },
-  
+
   // Newsletter
   newsletter: {
     subscribe: () => '/newsletter/subscribe',
@@ -301,20 +301,20 @@ export const endpoints = {
   stats: {
     get: () => '/stats/',
   },
-  
+
   // Media
   media: {
     list: () => '/media/',
     detail: (id: string) => `/media/${id}`,
     upload: () => '/media/upload/',
   },
-  
+
   // Authentication
   auth: {
     login: () => '/auth/login',
     refreshToken: () => '/auth/refresh',
   },
-  
+
   // Users
   users: {
     list: () => '/users/',

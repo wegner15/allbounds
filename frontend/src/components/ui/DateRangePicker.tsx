@@ -71,8 +71,12 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({ range, setRange, vari
     >
       <DayPicker
         mode="range"
+        defaultMonth={new Date()}
         selected={range}
-        onSelect={setRange}
+        onSelect={(newRange) => {
+          // If user deselects or something weird happens, handle it
+          setRange(newRange);
+        }}
         footer={footer}
         className="bg-white text-charcoal"
         classNames={{
@@ -80,6 +84,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({ range, setRange, vari
           day_range_middle: 'bg-teal/30 text-charcoal',
           day_today: 'font-bold text-teal',
         }}
+        fromDate={new Date()}
       />
     </div>
   ) : null;
@@ -89,10 +94,10 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({ range, setRange, vari
       <div className={`relative ${className} h-full`} ref={wrapperRef}>
         <div
           className={`flex items-center cursor-pointer h-full transition-colors ${isDark
-              ? 'border-b border-white/30 py-1'
-              : isTransparent
-                ? 'bg-transparent'
-                : 'px-4 py-3 border border-gray-200 rounded-lg hover:border-teal bg-white'
+            ? 'border-b border-white/30 py-1'
+            : isTransparent
+              ? 'bg-transparent'
+              : 'px-4 py-3 border border-gray-200 rounded-lg hover:border-teal bg-white'
             }`}
           onClick={() => setIsOpen(!isOpen)}
         >
@@ -101,8 +106,8 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({ range, setRange, vari
           <div className="flex flex-col items-start overflow-hidden">
 
             <div className={`text-base font-bold truncate w-full text-left ${range?.from
-                ? (isDark ? 'text-white' : 'text-charcoal')
-                : (isDark ? 'text-gray-300' : 'text-gray-400')
+              ? (isDark ? 'text-white' : 'text-charcoal')
+              : (isDark ? 'text-gray-300' : 'text-gray-400')
               }`}>
               {displayValue}
             </div>

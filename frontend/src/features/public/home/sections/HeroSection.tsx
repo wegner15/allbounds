@@ -131,7 +131,14 @@ const HeroSection: React.FC = () => {
                       indexName === 'activities' ? 'activity' :
                         indexName === 'attractions' ? 'attraction' :
                           indexName === 'countries' ? 'country' : 'region',
-                url: hit.slug ? `/${indexName === 'packages' ? 'tours' : indexName}/${hit.slug}` : '#'
+                url: hit.slug ? `/${indexName === 'packages' ? 'packages' :
+                    indexName === 'group_trips' ? 'group-trips' :
+                      indexName === 'accommodations' ? 'hotels' :
+                        indexName === 'countries' ? 'destinations/countries' :
+                          indexName === 'regions' ? 'destinations/regions' :
+                            indexName === 'attractions' ? 'attractions' :
+                              indexName // Default fallback
+                  }/${hit.slug}` : '#'
               }));
               hits.push(...mappedHits);
             }
@@ -147,7 +154,12 @@ const HeroSection: React.FC = () => {
   };
 
   const onResultSelect = (result: SearchResult) => {
-    setSelectedResult(result);
+    // Navigate immediately to the result page
+    if (result.url && result.url !== '#') {
+      navigate(result.url);
+    } else {
+      setSelectedResult(result);
+    }
   };
 
   const handleSearch = (e: React.FormEvent) => {

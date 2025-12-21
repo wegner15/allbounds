@@ -125,7 +125,6 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({ range, setRange, vari
         fromDate={startOfDay(new Date())}
         showOutsideDays
         classNames={{
-          days: "mt-2",
           day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-gray-100 rounded-full transition-all duration-200",
           day_range_start: "rounded-l-full rounded-r-none",
           day_range_end: "rounded-r-full rounded-l-none",

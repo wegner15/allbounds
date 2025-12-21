@@ -28,6 +28,17 @@ const ActivitiesSection = lazy(() => import('./components/ActivitiesSection'));
 const SocialSharingCard = lazy(() => import('./components/SocialSharingCard'));
 const RelatedDestinationsSection = lazy(() => import('./components/RelatedDestinationsSection'));
 
+// Tabs Component
+import Tabs from '../../components/ui/Tabs';
+
+// Tab Components
+import AboutTab from './tabs/AboutTab';
+import PackagesTab from './tabs/PackagesTab';
+import GroupTripsTab from './tabs/GroupTripsTab';
+import AttractionsTab from './tabs/AttractionsTab';
+import HotelsTab from './tabs/HotelsTab';
+import ActivitiesTab from './tabs/ActivitiesTab';
+
 // Loading fallback component for lazy loaded sections
 const SectionLoader: React.FC = () => (
   <div className="bg-white rounded-lg shadow-sm p-6 md:p-8 animate-pulse">
@@ -44,11 +55,11 @@ const CountryDetailPageNew: React.FC = () => {
 
   // Fetch country details with all related data using custom hook
   // Retry logic (2 retries) is configured in the useCountryDetails hook
-  const { 
-    data: country, 
-    isLoading, 
+  const {
+    data: country,
+    isLoading,
     error,
-    refetch 
+    refetch
   } = useCountryDetails(slug || '');
 
   // Loading state
@@ -59,7 +70,7 @@ const CountryDetailPageNew: React.FC = () => {
   // Error states
   if (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
+
     // Check for 404 error
     if (errorMessage.includes('404') || errorMessage.includes('not found')) {
       return (
@@ -103,10 +114,10 @@ const CountryDetailPageNew: React.FC = () => {
 
   // Prepare SEO data
   const pageTitle = `${country.name} | AllBounds Vacations`;
-  const pageDescription = country.description 
+  const pageDescription = country.description
     ? country.description.replace(/<[^>]*>/g, '').substring(0, 160)
     : `Discover ${country.name} with AllBounds Vacations. Explore packages, group trips, attractions, and hotels.`;
-  const pageImage = country.image_id 
+  const pageImage = country.image_id
     ? getImageUrlWithFallback(country.image_id, IMAGE_VARIANTS.LARGE)
     : undefined;
 
@@ -129,19 +140,19 @@ const CountryDetailPageNew: React.FC = () => {
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
-        
+
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         {pageImage && <meta property="og:image" content={pageImage} />}
-        
+
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
         {pageImage && <meta name="twitter:image" content={pageImage} />}
-        
+
         {/* Canonical URL */}
         <link rel="canonical" href={`${window.location.origin}/destinations/${country.slug}`} />
       </Helmet>
@@ -155,7 +166,7 @@ const CountryDetailPageNew: React.FC = () => {
       </a>
 
       {/* Breadcrumb Navigation */}
-      <Breadcrumb 
+      <Breadcrumb
         items={breadcrumbItems}
         currentPage={country.name}
       />
@@ -164,99 +175,62 @@ const CountryDetailPageNew: React.FC = () => {
       <DestinationHeroSection country={country} />
 
       {/* CTA Banner - Full Width */}
-      <CTABanner 
+      <CTABanner
         countrySlug={country.slug}
         countryName={country.name}
       />
 
-      {/* Overview Section - Full Width */}
-      <div className="bg-white py-6 md:py-8 lg:py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-7xl mx-auto">
-            <DestinationOverviewSection country={country} />
-          </div>
+      {/* Main Content Area - Tabs */}
+      <main id="main-content" className="bg-gray-50 flex-grow">
+        <div className="container mx-auto px-4 py-8">
+          <Tabs
+            className="bg-transparent"
+            tabs={[
+              {
+                id: 'about',
+                label: `About ${country.name}`,
+                content: (
+                  <AboutTab
+                    country={country}
+                    pageDescription={pageDescription}
+                    pageImage={pageImage}
+                  />
+                )
+              },
+              {
+                id: 'packages',
+                label: 'Travel Packages',
+                content: <PackagesTab countryId={country.id} />
+              },
+              {
+                id: 'group-trips',
+                label: 'Group Trips',
+                content: <GroupTripsTab countryId={country.id} />
+              },
+              {
+                id: 'attractions',
+                label: 'Attractions',
+                content: <AttractionsTab countryName={country.name} />
+              },
+              {
+                id: 'hotels',
+                label: 'Hotels',
+                content: <HotelsTab countryId={country.id} />
+              },
+              {
+                id: 'activities',
+                label: 'Activities',
+                content: <ActivitiesTab countryName={country.name} />
+              },
+            ]}
+          />
         </div>
-      </div>
 
-      {/* Main Content Area - Full Width Sections */}
-      <main id="main-content" className="bg-gray-50 py-6 md:py-8 lg:py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
-            {/* Best Time to Visit Section */}
-            <BestTimeToVisitSection visitInfo={country.visit_info} />
-                {/* Interactive Map Section - Lazy loaded */}
-                <Suspense fallback={<SectionLoader />}>
-                  <InteractiveMapSection country={country} />
-                </Suspense>
-
-                {/* Packages Section - Lazy loaded */}
-                {country.packages && country.packages.length > 0 && (
-                  <Suspense fallback={<SectionLoader />}>
-                    <PackagesSection 
-                      packages={country.packages}
-                      countrySlug={country.slug}
-                      countryName={country.name}
-                    />
-                  </Suspense>
-                )}
-
-                {/* Group Trips Section - Lazy loaded */}
-                {country.group_trips && country.group_trips.length > 0 && (
-                  <Suspense fallback={<SectionLoader />}>
-                    <GroupTripsSection 
-                      groupTrips={country.group_trips}
-                      countrySlug={country.slug}
-                      countryName={country.name}
-                    />
-                  </Suspense>
-                )}
-
-                {/* Attractions Section - Lazy loaded */}
-                {country.attractions && country.attractions.length > 0 && (
-                  <Suspense fallback={<SectionLoader />}>
-                    <AttractionsSection 
-                      attractions={country.attractions}
-                      countrySlug={country.slug}
-                      countryName={country.name}
-                    />
-                  </Suspense>
-                )}
-
-                {/* Hotels Section - Lazy loaded */}
-                {country.hotels && country.hotels.length > 0 && (
-                  <Suspense fallback={<SectionLoader />}>
-                    <HotelsSection 
-                      hotels={country.hotels}
-                      countrySlug={country.slug}
-                      countryName={country.name}
-                    />
-                  </Suspense>
-                )}
-
-                {/* Activities Section - Lazy loaded */}
-                {country.activities && country.activities.length > 0 && (
-                  <Suspense fallback={<SectionLoader />}>
-                    <ActivitiesSection 
-                      activities={country.activities}
-                      countryName={country.name}
-                    />
-                  </Suspense>
-                )}
-
-            {/* Social Sharing Section - Lazy loaded */}
-            <Suspense fallback={<SectionLoader />}>
-              <SocialSharingCard 
-                countryName={country.name}
-                description={pageDescription}
-                imageUrl={pageImage}
-              />
-            </Suspense>
-
-            {/* Related Destinations Section - Lazy loaded */}
-            <Suspense fallback={<SectionLoader />}>
-              <RelatedDestinationsSection country={country} />
-            </Suspense>
-          </div>
+        {/* Related Destinations Section - Fixed at bottom */}
+        <div className="container mx-auto px-4 pb-12">
+          <Suspense fallback={<SectionLoader />}>
+            <RelatedDestinationsSection country={country} />
+          </Suspense>
         </div>
       </main>
     </DestinationErrorBoundary>

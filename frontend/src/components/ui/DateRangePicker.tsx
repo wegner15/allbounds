@@ -57,8 +57,10 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({ range, setRange, vari
 
   const displayValue = range?.from
     ? range.to
-      ? `${format(range.from, 'MMM dd')} - ${format(range.to, 'MMM dd')}`
-      : format(range.from, 'MMM dd')
+      ? format(range.from, 'MMM dd') === format(range.to, 'MMM dd')
+        ? format(range.from, 'MMM dd') // Same day
+        : `${format(range.from, 'MMM dd')} - ${format(range.to, 'MMM dd')}` // Different days
+      : format(range.from, 'MMM dd') // Only start date selected
     : 'Add dates';
 
   const pickerContent = isOpen ? (

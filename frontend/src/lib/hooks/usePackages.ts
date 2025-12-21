@@ -108,7 +108,7 @@ export const useRecommendedPackages = (countryId: number, currentPackageId: numb
   return useQuery({
     queryKey: ['packages', 'recommended', countryId, currentPackageId, limit],
     queryFn: async () => {
-      const packages = await apiClient.get<Package[]>(`/api/v1/packages?country_id=${countryId}&limit=${limit + 1}`);
+      const packages = await apiClient.get<Package[]>(`${endpoints.packages.list()}?country_id=${countryId}&limit=${limit + 1}`);
       // Filter out current package
       return packages.filter(pkg => pkg.id !== currentPackageId).slice(0, limit);
     },
@@ -142,7 +142,7 @@ export const usePackageDetailsById = (id: number) => {
 // Hook for creating a new package (admin only)
 export const useCreatePackage = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (packageData: Omit<Package, 'id' | 'created_at' | 'updated_at' | 'country' | 'holiday_types'>) => {
       return apiClient.post<Package>(endpoints.packages.list(), packageData);

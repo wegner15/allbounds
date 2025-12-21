@@ -94,8 +94,10 @@ const HeroSection: React.FC = () => {
       });
 
       const hits: SearchResult[] = [];
-      if (response.data?.results) {
-        Object.entries(response.data.results).forEach(([indexName, idx]: [string, any]) => {
+      const results = response.results || response.data?.results;
+
+      if (results) {
+        Object.entries(results).forEach(([indexName, idx]: [string, any]) => {
           if (idx.hits && Array.isArray(idx.hits)) {
             // Filter hits based on active tab
             let shouldInclude = false;

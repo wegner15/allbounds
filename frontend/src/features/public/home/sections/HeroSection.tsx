@@ -39,6 +39,11 @@ const HeroSection: React.FC = () => {
   const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+
+  const handleDateRangeSelect = (range: DateRange | undefined) => {
+    console.log('HeroSection: Date Range Selected:', range);
+    setDateRange(range);
+  };
   const [guests, setGuests] = useState<GuestConfig>({ adults: 2, children: 0, rooms: 1 });
   const [activityTypes, setActivityTypes] = useState<string[]>([]);
 
@@ -132,12 +137,12 @@ const HeroSection: React.FC = () => {
                         indexName === 'attractions' ? 'attraction' :
                           indexName === 'countries' ? 'country' : 'region',
                 url: hit.slug ? `/${indexName === 'packages' ? 'packages' :
-                    indexName === 'group_trips' ? 'group-trips' :
-                      indexName === 'accommodations' ? 'hotels' :
-                        indexName === 'countries' ? 'destinations/countries' :
-                          indexName === 'regions' ? 'destinations/regions' :
-                            indexName === 'attractions' ? 'attractions' :
-                              indexName // Default fallback
+                  indexName === 'group_trips' ? 'group-trips' :
+                    indexName === 'accommodations' ? 'hotels' :
+                      indexName === 'countries' ? 'destinations/countries' :
+                        indexName === 'regions' ? 'destinations/regions' :
+                          indexName === 'attractions' ? 'attractions' :
+                            indexName // Default fallback
                   }/${hit.slug}` : '#'
               }));
               hits.push(...mappedHits);
@@ -295,7 +300,7 @@ const HeroSection: React.FC = () => {
               <div className="w-full h-[24px]">
                 <DateRangePicker
                   range={dateRange}
-                  setRange={setDateRange}
+                  setRange={handleDateRangeSelect}
                   variant="transparent"
                   className="h-full"
                 />

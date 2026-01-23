@@ -28,7 +28,7 @@ const HotelsTab: React.FC<HotelsTabProps> = ({ countryId }) => {
     const countryHotels = hotels?.filter(hotel => hotel.country_id === countryId && hotel.is_active) || [];
 
     return (
-        <div className="py-6">
+        <div>{/* removed py-6 since sections handle spacing */}
             <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Stay at the Best Hotels</h2>
             <PaginatedGrid
                 items={countryHotels}

@@ -27,7 +27,7 @@ const GroupTripsTab: React.FC<GroupTripsTabProps> = ({ countryId }) => {
     const activeTrips = groupTrips?.filter(trip => trip.is_active) || [];
 
     return (
-        <div className="py-6">
+        <div>{/* removed py-6 since sections handle spacing */}
             <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Join our Group Trips</h2>
             <PaginatedGrid
                 items={activeTrips}

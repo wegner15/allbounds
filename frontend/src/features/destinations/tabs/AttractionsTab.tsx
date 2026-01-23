@@ -27,7 +27,7 @@ const AttractionsTab: React.FC<AttractionsTabProps> = ({ countryName }) => {
     const activeAttractions = attractions?.filter(attr => attr.is_active) || []; // Assuming API handles country filter, but safety filter for active.
 
     return (
-        <div className="py-6">
+        <div>{/* removed py-6 since sections handle spacing */}
             <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Must-See Attractions</h2>
             <PaginatedGrid
                 items={activeAttractions}

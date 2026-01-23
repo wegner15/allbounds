@@ -28,8 +28,8 @@ const ActivitiesSection = lazy(() => import('./components/ActivitiesSection'));
 const SocialSharingCard = lazy(() => import('./components/SocialSharingCard'));
 const RelatedDestinationsSection = lazy(() => import('./components/RelatedDestinationsSection'));
 
-// Tabs Component
-import Tabs from '../../components/ui/Tabs';
+// Section Navigation Component
+import SectionNavigation from '../../components/ui/SectionNavigation';
 
 // Tab Components
 import AboutTab from './tabs/AboutTab';
@@ -180,57 +180,61 @@ const CountryDetailPageNew: React.FC = () => {
         countryName={country.name}
       />
 
-      {/* Main Content Area - Tabs */}
+      {/* Main Content Area - Scrollable Sections */}
       <main id="main-content" className="bg-gray-50 flex-grow">
-        <div className="container mx-auto px-4 py-8">
-          <Tabs
-            className="bg-transparent"
-            tabs={[
-              {
-                id: 'about',
-                label: `About ${country.name}`,
-                content: (
-                  <AboutTab
-                    country={country}
-                    pageDescription={pageDescription}
-                    pageImage={pageImage}
-                  />
-                )
-              },
-              {
-                id: 'packages',
-                label: 'Travel Packages',
-                content: <PackagesTab countryId={country.id} />
-              },
-              {
-                id: 'group-trips',
-                label: 'Group Trips',
-                content: <GroupTripsTab countryId={country.id} />
-              },
-              {
-                id: 'attractions',
-                label: 'Attractions',
-                content: <AttractionsTab countryName={country.name} />
-              },
-              {
-                id: 'hotels',
-                label: 'Hotels',
-                content: <HotelsTab countryId={country.id} />
-              },
-              {
-                id: 'activities',
-                label: 'Activities',
-                content: <ActivitiesTab countryName={country.name} />
-              },
-            ]}
-          />
-        </div>
+        {/* Section Navigation */}
+        <SectionNavigation
+          sections={[
+            { id: 'about', label: `About ${country.name}` },
+            { id: 'packages', label: 'Travel Packages' },
+            { id: 'group-trips', label: 'Group Trips' },
+            { id: 'attractions', label: 'Attractions' },
+            { id: 'hotels', label: 'Hotels' },
+            { id: 'activities', label: 'Activities' },
+          ]}
+        />
 
-        {/* Related Destinations Section - Fixed at bottom */}
-        <div className="container mx-auto px-4 pb-12">
-          <Suspense fallback={<SectionLoader />}>
-            <RelatedDestinationsSection country={country} />
-          </Suspense>
+        <div className="container mx-auto px-4 py-8">
+          {/* About Section */}
+          <section id="about" className="scroll-mt-24 mb-12">
+            <AboutTab
+              country={country}
+              pageDescription={pageDescription}
+              pageImage={pageImage}
+            />
+          </section>
+
+          {/* Packages Section */}
+          <section id="packages" className="scroll-mt-24 mb-12">
+            <PackagesTab countryId={country.id} />
+          </section>
+
+          {/* Group Trips Section */}
+          <section id="group-trips" className="scroll-mt-24 mb-12">
+            <GroupTripsTab countryId={country.id} />
+          </section>
+
+          {/* Attractions Section */}
+          <section id="attractions" className="scroll-mt-24 mb-12">
+            <AttractionsTab countryName={country.name} />
+          </section>
+
+          {/* Hotels Section */}
+          <section id="hotels" className="scroll-mt-24 mb-12">
+            <HotelsTab countryId={country.id} />
+          </section>
+
+          {/* Activities Section */}
+          <section id="activities" className="scroll-mt-24 mb-12">
+            <ActivitiesTab countryName={country.name} />
+          </section>
+
+          {/* Related Destinations Section */}
+          <section className="mt-16">
+            <Suspense fallback={<SectionLoader />}>
+              <RelatedDestinationsSection country={country} />
+            </Suspense>
+          </section>
         </div>
       </main>
     </DestinationErrorBoundary>

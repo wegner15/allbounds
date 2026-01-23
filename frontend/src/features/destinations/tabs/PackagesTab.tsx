@@ -27,7 +27,7 @@ const PackagesTab: React.FC<PackagesTabProps> = ({ countryId }) => {
     const activePackages = packages?.filter(pkg => pkg.is_active) || [];
 
     return (
-        <div className="py-6">
+        <div>{/* removed py-6 since sections handle spacing */}
             <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Explore our Packages</h2>
             <PaginatedGrid
                 items={activePackages}

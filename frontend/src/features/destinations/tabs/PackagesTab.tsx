@@ -46,7 +46,7 @@ const PackagesTab: React.FC<PackagesTabProps> = ({ countryId, preview = false, d
                         to={`/destinations/${destinationSlug}/packages`}
                         className="inline-flex items-center px-6 py-3 border border-teal-600 text-teal-600 font-semibold rounded-lg hover:bg-teal-600 hover:text-white transition-colors duration-200"
                     >
-                        READ MORE PACKAGES
+                        Show More Packages
                     </Link>
                 </div>
             )}

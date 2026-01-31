@@ -39,6 +39,17 @@ const getCountryHighlights = (countryName: string, holidayTypeName: string) => {
 
 
 
+// Helper to strip HTML tags from a string
+const stripHtml = (html: string) => {
+  return html.replace(/<[^>]*>?/gm, '');
+};
+
+// Helper to truncate text to a specific length
+const truncateText = (text: string, limit: number) => {
+  if (text.length <= limit) return text;
+  return text.slice(0, limit).trim() + '...';
+};
+
 // Holiday type highlights based on type
 const getHolidayHighlights = (holidayTypeName: string) => {
   const lowerName = holidayTypeName.toLowerCase();
@@ -106,7 +117,7 @@ const HolidayTypeDetailPage: React.FC = () => {
 
   // Get highlights for this holiday type
   const highlights = holidayType ? getHolidayHighlights(holidayType.name) : [];
-  
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -121,7 +132,7 @@ const HolidayTypeDetailPage: React.FC = () => {
       </div>
     );
   }
-  
+
   if (error || !holidayType) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -134,7 +145,7 @@ const HolidayTypeDetailPage: React.FC = () => {
       </div>
     );
   }
-  
+
   return (
     <>
       <Helmet>
@@ -202,7 +213,7 @@ const HolidayTypeDetailPage: React.FC = () => {
               </div>
             </div>
 
-            <div 
+            <div
               className="text-lg md:text-xl text-white/90 max-w-2xl mb-8 leading-relaxed line-clamp-3"
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(holidayType.description || '') }}
             />
@@ -319,8 +330,8 @@ const HolidayTypeDetailPage: React.FC = () => {
                         <h3 className="text-3xl font-playfair font-medium mb-3 group-hover:text-teal transition-colors">
                           {destination.name}
                         </h3>
-                        <p className="text-white/90 mb-4 leading-relaxed">
-                          {destination.description || `Experience ${holidayType.name.toLowerCase()} in ${destination.name}`}
+                        <p className="text-white/90 mb-4 leading-relaxed line-clamp-3">
+                          {truncateText(stripHtml(destination.description || ''), 180) || `Experience ${holidayType.name.toLowerCase()} in ${destination.name}`}
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {getCountryHighlights(destination.name, holidayType.name).map((highlight, index) => (
@@ -404,7 +415,7 @@ const HolidayTypeDetailPage: React.FC = () => {
                         </div>
                       </div>
 
-                      <div 
+                      <div
                         className="text-gray-600 mb-4 line-clamp-2"
                         dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pkg.summary || pkg.description || '') }}
                       />
@@ -499,7 +510,7 @@ const HolidayTypeDetailPage: React.FC = () => {
                         {trip.name}
                       </h3>
 
-                      <div 
+                      <div
                         className="text-gray-600 mb-4 line-clamp-2"
                         dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trip.description || '') }}
                       />

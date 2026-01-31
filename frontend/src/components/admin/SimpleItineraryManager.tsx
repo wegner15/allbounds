@@ -397,37 +397,6 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
               </div>
             </div>
 
-            {/* Activities Multi-Select */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Activities
-              </label>
-              <div className="border border-gray-300 rounded-md p-2 max-h-40 overflow-y-auto">
-                {activities.length === 0 ? (
-                  <p className="text-sm text-gray-500">Loading activities...</p>
-                ) : (
-                  activities.map((activity) => (
-                    <label key={activity.id} className="flex items-center space-x-2 py-1">
-                      <input
-                        type="checkbox"
-                        checked={newDayLinkedActivityIds.includes(activity.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setNewDayLinkedActivityIds([...newDayLinkedActivityIds, activity.id]);
-                          } else {
-                            setNewDayLinkedActivityIds(newDayLinkedActivityIds.filter(id => id !== activity.id));
-                          }
-                        }}
-                        className="rounded border-gray-300 text-teal focus:ring-teal"
-                      />
-                      <span className="text-sm text-gray-700">
-                        {activity.name}
-                      </span>
-                    </label>
-                  ))
-                )}
-              </div>
-            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -503,9 +472,6 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
                   {/* Hotels */}
                   {item.hotels && item.hotels.length > 0 && (
                     <div className="mb-6">
-                      <h3 className="text-lg font-medium text-gray-900 mb-4">
-                        {editingItemId ? 'Edit Day' : 'Add New Day'}
-                      </h3>
                       <div className="space-y-1">
                         {item.hotels.map((hotel) => (
                           <div key={hotel.id} className="flex items-center text-sm text-gray-600">
@@ -575,22 +541,6 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
                     </div>
                   )}
 
-                  {/* Linked Activities */}
-                  {item.linked_activities && item.linked_activities.length > 0 && (
-                    <div className="mt-3">
-                      <h5 className="text-sm font-medium text-gray-700 mb-2">Linked Activities:</h5>
-                      <div className="space-y-1">
-                        {item.linked_activities.map((activity) => (
-                          <div key={activity.id} className="flex items-center text-sm text-gray-600">
-                            <svg className="h-4 w-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                            <span className="font-medium">{activity.name}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
 
                   {/* Custom Activities */}
                   {item.custom_activities && item.custom_activities.length > 0 && (

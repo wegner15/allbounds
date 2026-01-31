@@ -28,6 +28,7 @@ import DestinationsPage from './features/destinations/DestinationsPage';
 import CountryDetailPage from './features/destinations/CountryDetailPage';
 import CountryDetailPageNew from './features/destinations/CountryDetailPageNew';
 import RegionDetailPage from './features/destinations/RegionDetailPage';
+import CountryCategoryPage from './features/destinations/CountryCategoryPage';
 
 // Import auth pages
 import LoginPage from './features/auth/LoginPage';
@@ -181,7 +182,7 @@ const MainLayout = () => {
     { label: 'Holiday Types', path: '/holiday-types' },
     { label: 'Blog', path: '/blog' },
   ];
-  
+
   const footerSections = [
     {
       title: 'Destinations',
@@ -209,22 +210,22 @@ const MainLayout = () => {
       ],
     },
   ];
-  
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header navigationItems={navigationItems} />
       <main className="flex-grow">
         <Outlet />
       </main>
-      <Footer 
+      <Footer
         logo="/logo/main_logo.png"
-        sections={footerSections} 
+        sections={footerSections}
         socialLinks={{
           facebook: 'https://facebook.com',
           twitter: 'https://twitter.com',
           instagram: 'https://instagram.com',
           youtube: 'https://youtube.com',
-        }} 
+        }}
       />
     </div>
   );
@@ -255,6 +256,7 @@ const router = createBrowserRouter([
       { path: 'destinations/regions/:slug', element: <RegionDetailPage /> },
       { path: 'destinations/countries/:slug', element: <CountryDetailPageNew /> },
       { path: 'destinations/:slug', element: <CountryDetailPageNew /> },
+      { path: 'destinations/:slug/:category', element: <CountryCategoryPage /> },
       { path: 'destinations-old/:slug', element: <CountryDetailPage /> },
       { path: 'regions', element: <RegionsPage /> },
       { path: 'countries', element: <CountriesPage /> },
@@ -273,9 +275,9 @@ const router = createBrowserRouter([
       { path: 'holiday-types/:slug', element: <HolidayTypeDetailPage /> },
       { path: 'blog', element: <BlogListPage /> },
       { path: 'blog/:slug', element: <BlogDetailPage /> },
-       { path: 'about-us', element: <ContentPage /> },
-       { path: 'contact-us', element: <ContactUsPage /> },
-       { path: 'careers', element: <ContentPage /> },
+      { path: 'about-us', element: <ContentPage /> },
+      { path: 'contact-us', element: <ContactUsPage /> },
+      { path: 'careers', element: <ContentPage /> },
       { path: 'terms', element: <ContentPage /> },
       { path: 'privacy', element: <ContentPage /> },
       { path: 'search', element: <SearchPage /> },
@@ -354,18 +356,18 @@ const router = createBrowserRouter([
       { path: 'packages', element: <PackagesListPage /> },
       { path: 'packages/new', element: <CreatePackagePage /> },
       { path: 'packages/:id/edit', element: <EditPackagePage /> },
-       // Newsletter subscribers
-       { path: 'newsletter', element: <SubscriberList /> },
-        // Booking management routes
-        { path: 'bookings/packages', element: <PackageBookingsPage /> },
-        { path: 'bookings/group-trips', element: <GroupTripBookingsPage /> },
-        { path: 'bookings/inquiries', element: <GeneralInquiriesPage /> },
-        // Content management routes
-        { path: 'content', element: <ContentListPage /> },
-        { path: 'content/create', element: <ContentForm /> },
-        { path: 'content/edit/:id', element: <ContentForm /> },
-        // Other admin routes
-        { path: 'preview/:type/:id', element: <AdminPreviewPage /> },
+      // Newsletter subscribers
+      { path: 'newsletter', element: <SubscriberList /> },
+      // Booking management routes
+      { path: 'bookings/packages', element: <PackageBookingsPage /> },
+      { path: 'bookings/group-trips', element: <GroupTripBookingsPage /> },
+      { path: 'bookings/inquiries', element: <GeneralInquiriesPage /> },
+      // Content management routes
+      { path: 'content', element: <ContentListPage /> },
+      { path: 'content/create', element: <ContentForm /> },
+      { path: 'content/edit/:id', element: <ContentForm /> },
+      // Other admin routes
+      { path: 'preview/:type/:id', element: <AdminPreviewPage /> },
     ],
   },
 ]);

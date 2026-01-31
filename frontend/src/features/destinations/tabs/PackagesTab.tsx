@@ -2,12 +2,15 @@ import React from 'react';
 import { usePackages } from '../../../lib/hooks/usePackages';
 import PaginatedGrid from '../components/PaginatedGrid';
 import PackageCard from '../components/PackageCard';
+import { Link } from 'react-router-dom';
 
 interface PackagesTabProps {
     countryId: number;
+    preview?: boolean;
+    destinationSlug?: string;
 }
 
-const PackagesTab: React.FC<PackagesTabProps> = ({ countryId }) => {
+const PackagesTab: React.FC<PackagesTabProps> = ({ countryId, preview = false, destinationSlug }) => {
     const { data: packages, isLoading, error } = usePackages({ country_id: countryId });
 
     if (isLoading) {
@@ -30,10 +33,23 @@ const PackagesTab: React.FC<PackagesTabProps> = ({ countryId }) => {
         <div>{/* removed py-6 since sections handle spacing */}
             <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Explore our Packages</h2>
             <PaginatedGrid
-                items={activePackages}
+                items={preview ? activePackages.slice(0, 8) : activePackages}
                 renderItem={(pkg) => <PackageCard package={pkg} />}
                 emptyMessage="No packages available for this destination yet."
+                itemsPerPage={preview ? 8 : 9}
+                showPagination={!preview}
             />
+
+            {preview && activePackages.length > 8 && destinationSlug && (
+                <div className="mt-8 text-center">
+                    <Link
+                        to={`/destinations/${destinationSlug}/packages`}
+                        className="inline-flex items-center px-6 py-3 border border-teal-600 text-teal-600 font-semibold rounded-lg hover:bg-teal-600 hover:text-white transition-colors duration-200"
+                    >
+                        READ MORE PACKAGES
+                    </Link>
+                </div>
+            )}
         </div>
     );
 };

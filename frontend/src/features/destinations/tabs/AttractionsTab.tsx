@@ -2,12 +2,15 @@ import React from 'react';
 import { useAttractions } from '../../../lib/hooks/useAttractions';
 import PaginatedGrid from '../components/PaginatedGrid';
 import AttractionCard from '../components/AttractionCard';
+import { Link } from 'react-router-dom';
 
 interface AttractionsTabProps {
-    countryName: string; // useAttractions uses country name string currently
+    countryName: string;
+    preview?: boolean;
+    destinationSlug?: string;
 }
 
-const AttractionsTab: React.FC<AttractionsTabProps> = ({ countryName }) => {
+const AttractionsTab: React.FC<AttractionsTabProps> = ({ countryName, preview = false, destinationSlug }) => {
     const { data: attractions, isLoading, error } = useAttractions({ country: countryName });
 
     if (isLoading) {
@@ -30,10 +33,23 @@ const AttractionsTab: React.FC<AttractionsTabProps> = ({ countryName }) => {
         <div>{/* removed py-6 since sections handle spacing */}
             <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Must-See Attractions</h2>
             <PaginatedGrid
-                items={activeAttractions}
+                items={preview ? activeAttractions.slice(0, 8) : activeAttractions}
                 renderItem={(attr) => <AttractionCard attraction={attr as any} />}
                 emptyMessage="No attractions listed for this destination yet."
+                itemsPerPage={preview ? 8 : 9}
+                showPagination={!preview}
             />
+
+            {preview && activeAttractions.length > 8 && destinationSlug && (
+                <div className="mt-8 text-center">
+                    <Link
+                        to={`/destinations/${destinationSlug}/attractions`}
+                        className="inline-flex items-center px-6 py-3 border border-teal-600 text-teal-600 font-semibold rounded-lg hover:bg-teal-600 hover:text-white transition-colors duration-200"
+                    >
+                        READ MORE ATTRACTIONS
+                    </Link>
+                </div>
+            )}
         </div>
     );
 };

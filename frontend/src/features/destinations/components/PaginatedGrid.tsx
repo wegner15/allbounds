@@ -7,6 +7,7 @@ interface PaginatedGridProps<T> {
     itemsPerPage?: number;
     emptyMessage?: string;
     gridClassName?: string;
+    showPagination?: boolean;
 }
 
 const PaginatedGrid = <T,>({
@@ -14,7 +15,8 @@ const PaginatedGrid = <T,>({
     renderItem,
     itemsPerPage = 9,
     emptyMessage = "No items found.",
-    gridClassName = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+    gridClassName = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
+    showPagination = true
 }: PaginatedGridProps<T>) => {
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -52,15 +54,15 @@ const PaginatedGrid = <T,>({
                 ))}
             </div>
 
-            {totalPages > 1 && (
+            {showPagination && totalPages > 1 && (
                 <div className="mt-8 flex justify-center">
                     <nav className="flex items-center space-x-2">
                         <button
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
                             className={`p-2 rounded-lg border ${currentPage === 1
-                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200'
-                                    : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200'
+                                : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'
                                 }`}
                             aria-label="Previous Page"
                         >
@@ -76,8 +78,8 @@ const PaginatedGrid = <T,>({
                                         key={page}
                                         onClick={() => handlePageChange(page)}
                                         className={`px-3 py-1 rounded-lg border text-sm font-medium transition-colors ${currentPage === page
-                                                ? 'bg-teal-600 text-white border-teal-600'
-                                                : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'
+                                            ? 'bg-teal-600 text-white border-teal-600'
+                                            : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'
                                             }`}
                                     >
                                         {page}
@@ -90,8 +92,8 @@ const PaginatedGrid = <T,>({
                             onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === totalPages}
                             className={`p-2 rounded-lg border ${currentPage === totalPages
-                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200'
-                                    : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200'
+                                : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'
                                 }`}
                             aria-label="Next Page"
                         >

@@ -2,12 +2,15 @@ import React from 'react';
 import { useHotels } from '../../../lib/hooks/useHotels';
 import PaginatedGrid from '../components/PaginatedGrid';
 import HotelCard from '../components/HotelCard';
+import { Link } from 'react-router-dom';
 
 interface HotelsTabProps {
     countryId: number;
+    preview?: boolean;
+    destinationSlug?: string;
 }
 
-const HotelsTab: React.FC<HotelsTabProps> = ({ countryId }) => {
+const HotelsTab: React.FC<HotelsTabProps> = ({ countryId, preview = false, destinationSlug }) => {
     // Client-side filtering as useHotels fetches all
     const { data: hotels, isLoading, error } = useHotels();
 
@@ -31,10 +34,23 @@ const HotelsTab: React.FC<HotelsTabProps> = ({ countryId }) => {
         <div>{/* removed py-6 since sections handle spacing */}
             <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Stay at the Best Hotels</h2>
             <PaginatedGrid
-                items={countryHotels}
+                items={preview ? countryHotels.slice(0, 8) : countryHotels}
                 renderItem={(hotel) => <HotelCard hotel={hotel as any} />}
                 emptyMessage="No hotels listed for this destination yet."
+                itemsPerPage={preview ? 8 : 9}
+                showPagination={!preview}
             />
+
+            {preview && countryHotels.length > 8 && destinationSlug && (
+                <div className="mt-8 text-center">
+                    <Link
+                        to={`/destinations/${destinationSlug}/hotels`}
+                        className="inline-flex items-center px-6 py-3 border border-teal-600 text-teal-600 font-semibold rounded-lg hover:bg-teal-600 hover:text-white transition-colors duration-200"
+                    >
+                        READ MORE HOTELS
+                    </Link>
+                </div>
+            )}
         </div>
     );
 };

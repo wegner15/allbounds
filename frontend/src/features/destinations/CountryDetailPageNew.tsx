@@ -206,27 +206,27 @@ const CountryDetailPageNew: React.FC = () => {
 
           {/* Packages Section */}
           <section id="packages" className="scroll-mt-24 mb-12">
-            <PackagesTab countryId={country.id} />
+            <PackagesTab countryId={country.id} preview={true} destinationSlug={country.slug} />
           </section>
 
           {/* Group Trips Section */}
           <section id="group-trips" className="scroll-mt-24 mb-12">
-            <GroupTripsTab countryId={country.id} />
+            <GroupTripsTab countryId={country.id} preview={true} destinationSlug={country.slug} />
           </section>
 
           {/* Attractions Section */}
           <section id="attractions" className="scroll-mt-24 mb-12">
-            <AttractionsTab countryName={country.name} />
+            <AttractionsTab countryName={country.name} preview={true} destinationSlug={country.slug} />
           </section>
 
           {/* Hotels Section */}
           <section id="hotels" className="scroll-mt-24 mb-12">
-            <HotelsTab countryId={country.id} />
+            <HotelsTab countryId={country.id} preview={true} destinationSlug={country.slug} />
           </section>
 
           {/* Activities Section */}
           <section id="activities" className="scroll-mt-24 mb-12">
-            <ActivitiesTab countryName={country.name} />
+            <ActivitiesTab countryName={country.name} preview={true} destinationSlug={country.slug} />
           </section>
 
           {/* Related Destinations Section */}

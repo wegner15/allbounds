@@ -2,12 +2,15 @@ import React from 'react';
 import { useActivities } from '../../../lib/hooks/useActivities';
 import PaginatedGrid from '../components/PaginatedGrid';
 import ActivityCard from '../components/ActivityCard';
+import { Link } from 'react-router-dom';
 
 interface ActivitiesTabProps {
-    countryName: string; // Activity API doesn't seem to have country filter in the hook definition easily accessible without checking backend, relying on client filter
+    countryName: string;
+    preview?: boolean;
+    destinationSlug?: string;
 }
 
-const ActivitiesTab: React.FC<ActivitiesTabProps> = ({ countryName }) => {
+const ActivitiesTab: React.FC<ActivitiesTabProps> = ({ countryName, preview = false, destinationSlug }) => {
     // useActivities fetches all list.
     const { data: activityResponse, isLoading, error } = useActivities();
 
@@ -52,10 +55,23 @@ const ActivitiesTab: React.FC<ActivitiesTabProps> = ({ countryName }) => {
         <div>{/* removed py-6 since sections handle spacing */}
             <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Exciting Activities</h2>
             <PaginatedGrid
-                items={countryActivities}
+                items={preview ? countryActivities.slice(0, 8) : countryActivities}
                 renderItem={(act: any) => <ActivityCard activity={act} />}
                 emptyMessage="No activities listed for this destination yet."
+                itemsPerPage={preview ? 8 : 9}
+                showPagination={!preview}
             />
+
+            {preview && countryActivities.length > 8 && destinationSlug && (
+                <div className="mt-8 text-center">
+                    <Link
+                        to={`/destinations/${destinationSlug}/activities`}
+                        className="inline-flex items-center px-6 py-3 border border-teal-600 text-teal-600 font-semibold rounded-lg hover:bg-teal-600 hover:text-white transition-colors duration-200"
+                    >
+                        READ MORE ACTIVITIES
+                    </Link>
+                </div>
+            )}
         </div>
     );
 };

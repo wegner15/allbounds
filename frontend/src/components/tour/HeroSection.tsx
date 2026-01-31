@@ -195,6 +195,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({ packageData, onBookNowClick }
 
           {/* Quick Info Bar */}
           <div className="flex flex-wrap items-center gap-4 md:gap-6 text-white animate-fade-in">
+            {/* Country */}
+            <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/20 transition-all duration-200 hover:bg-white/20">
+              <MapPinIcon className="w-5 h-5 text-white/90" />
+              <span className="text-sm md:text-base font-medium">
+                {packageData.country.name}
+              </span>
+            </div>
+
             {/* Duration */}
             {packageData.duration_days && (
               <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/20 transition-all duration-200 hover:bg-white/20">
@@ -214,14 +222,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ packageData, onBookNowClick }
                 </span>
               </div>
             )}
-
-            {/* Country */}
-            <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/20 transition-all duration-200 hover:bg-white/20">
-              <MapPinIcon className="w-5 h-5 text-white/90" />
-              <span className="text-sm md:text-base font-medium">
-                {packageData.country.name}
-              </span>
-            </div>
           </div>
         </div>
       </div>

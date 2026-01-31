@@ -150,8 +150,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ packageData, onBookNowClick }
                     key={index}
                     onClick={() => goToSlide(index)}
                     className={`h-2 rounded-full transition-all duration-300 ${index === currentImageIndex
-                        ? 'bg-white w-8 shadow-md'
-                        : 'bg-white/50 hover:bg-white/75 w-2'
+                      ? 'bg-white w-8 shadow-md'
+                      : 'bg-white/50 hover:bg-white/75 w-2'
                       }`}
                     aria-label={`Go to image ${index + 1}`}
                   />
@@ -185,7 +185,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ packageData, onBookNowClick }
       <div className="relative h-full flex flex-col justify-end z-10">
 
         {/* Hero Content */}
-        <div className="container mx-auto px-4 pb-6 md:pb-12">
+        <div className="max-w-[1600px] mx-auto px-4 pb-6 md:pb-12">
 
           {/* Tour Title */}
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-playfair font-bold text-white mb-3 md:mb-4 leading-tight animate-slide-up drop-shadow-lg">

@@ -12,8 +12,8 @@ interface StickyNavigationProps {
   packageName?: string;
 }
 
-const StickyNavigation: React.FC<StickyNavigationProps> = ({ 
-  sections, 
+const StickyNavigation: React.FC<StickyNavigationProps> = ({
+  sections,
   offset = 100,
   onBookNow,
   packageName
@@ -83,11 +83,10 @@ const StickyNavigation: React.FC<StickyNavigationProps> = ({
   return (
     <div
       ref={navRef}
-      className={`sticky top-16 lg:top-20 z-40 bg-white border-b border-gray-200 transition-all duration-300 ${
-        isSticky ? 'shadow-lg' : 'shadow-sm'
-      }`}
+      className={`sticky top-16 lg:top-20 z-40 bg-white border-b border-gray-200 transition-all duration-300 ${isSticky ? 'shadow-lg' : 'shadow-sm'
+        }`}
     >
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4">
           {/* Package Name (Left) - Hidden on mobile */}
           {packageName && isSticky && (
@@ -105,11 +104,10 @@ const StickyNavigation: React.FC<StickyNavigationProps> = ({
                 <button
                   key={section.id}
                   onClick={() => scrollToSection(section.id)}
-                  className={`flex-shrink-0 px-3 py-2 text-sm font-semibold transition-all duration-200 relative whitespace-nowrap ${
-                    activeSection === section.id
+                  className={`flex-shrink-0 px-3 py-2 text-sm font-semibold transition-all duration-200 relative whitespace-nowrap ${activeSection === section.id
                       ? 'text-primary'
                       : 'text-gray-600 hover:text-charcoal'
-                  }`}
+                    }`}
                 >
                   {section.label}
                   {activeSection === section.id && (

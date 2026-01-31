@@ -154,7 +154,7 @@ const PackageDetailPageNew: React.FC = () => {
 
         {/* Package Context Section (Breadcrumbs, Tags, Summary) */}
         <div className="bg-white border-b border-gray-200">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
+          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
             <div className="mb-4">
               <Breadcrumb
                 items={[
@@ -207,7 +207,7 @@ const PackageDetailPageNew: React.FC = () => {
         )}
 
         {/* Main Content - Two Column Layout */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 pb-24 lg:pb-8">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 pb-24 lg:pb-8">
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
             {/* Left Column - Main Content */}
             <main className="flex-1 lg:w-2/3 min-w-0" role="main" aria-label="Tour package details">
@@ -283,7 +283,7 @@ const PackageDetailPageNew: React.FC = () => {
 
         {/* Mobile Floating CTA Button - Optimized touch targets */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 sm:p-4 shadow-lg z-40 safe-area-inset-bottom">
-          <div className="flex gap-2 sm:gap-3 max-w-screen-sm mx-auto">
+          <div className="flex gap-2 sm:gap-3 max-w-screen-md mx-auto">
             <button
               onClick={() => setShowBookingForm(true)}
               className="flex-1 bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold py-3.5 px-4 sm:px-6 rounded-lg transition-colors touch-manipulation min-h-[48px]"

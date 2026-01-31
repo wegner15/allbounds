@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-import { 
-  CalendarIcon, 
-  CurrencyDollarIcon, 
-  MapPinIcon 
+import {
+  CalendarIcon,
+  CurrencyDollarIcon,
+  MapPinIcon
 } from '@heroicons/react/24/solid';
 import Breadcrumb from '../layout/Breadcrumb';
 import OptimizedImage from '../ui/OptimizedImage';
 import { getResponsiveImageSizes } from '../../utils/imageUtils';
-import type { 
-  PackageDetailResponse, 
-  MediaAssetSummary, 
-  HolidayTypeSummary 
+import type {
+  PackageDetailResponse,
+  MediaAssetSummary,
+  HolidayTypeSummary
 } from '../../lib/types/api';
 
 interface HeroSectionProps {
@@ -26,14 +26,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({ packageData, onBookNowClick }
   const images: MediaAssetSummary[] = packageData.media_assets && packageData.media_assets.length > 0
     ? packageData.media_assets
     : packageData.image_id
-    ? [{
+      ? [{
         id: 0,
         image_id: packageData.image_id,
         title: packageData.name,
         alt_text: packageData.name,
         order_index: 0
       }]
-    : [];
+      : [];
 
   const hasMultipleImages = images.length > 1;
 
@@ -43,7 +43,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ packageData, onBookNowClick }
       const activePrices = packageData.price_charts
         .filter(chart => chart.is_active)
         .map(chart => chart.price);
-      
+
       if (activePrices.length > 0) {
         return Math.min(...activePrices);
       }
@@ -82,16 +82,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({ packageData, onBookNowClick }
         {images.length > 0 ? (
           <>
             {/* Sliding container */}
-            <div 
+            <div
               className="flex h-full transition-transform duration-1000 ease-out"
-              style={{ 
+              style={{
                 transform: `translateX(-${currentImageIndex * 100}%)`,
               }}
             >
               {images.map((image, index) => {
                 // Get image ID from either image_id or storage_key
                 const imageId = image.image_id || image.storage_key;
-                
+
                 return (
                   <div
                     key={imageId || index}
@@ -108,7 +108,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ packageData, onBookNowClick }
                       showSkeleton={index === 0}
                       sizes={getResponsiveImageSizes('hero')}
                     />
-                    
+
                     {/* Image Caption */}
                     {image.caption && (
                       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 md:p-6">
@@ -121,7 +121,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ packageData, onBookNowClick }
                 );
               })}
             </div>
-            
+
             {/* Navigation Arrows */}
             {hasMultipleImages && (
               <>
@@ -149,11 +149,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ packageData, onBookNowClick }
                   <button
                     key={index}
                     onClick={() => goToSlide(index)}
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      index === currentImageIndex 
-                        ? 'bg-white w-8 shadow-md' 
+                    className={`h-2 rounded-full transition-all duration-300 ${index === currentImageIndex
+                        ? 'bg-white w-8 shadow-md'
                         : 'bg-white/50 hover:bg-white/75 w-2'
-                    }`}
+                      }`}
                     aria-label={`Go to image ${index + 1}`}
                   />
                 ))}
@@ -183,55 +182,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({ packageData, onBookNowClick }
       <div className="absolute inset-0 gradient-overlay-dark" />
 
       {/* Content Container */}
-      <div className="relative h-full flex flex-col justify-between z-10">
-        {/* Breadcrumb Navigation */}
-        <div className="container mx-auto px-4 pt-4 md:pt-6">
-          <Breadcrumb
-            items={[
-              { label: 'Packages', path: '/packages' },
-              { label: packageData.country.name, path: `/countries/${packageData.country.slug}` },
-              { label: packageData.name }
-            ]}
-            variant="dark"
-          />
-        </div>
+      <div className="relative h-full flex flex-col justify-end z-10">
 
         {/* Hero Content */}
         <div className="container mx-auto px-4 pb-6 md:pb-12">
-          {/* Featured Badge & Holiday Type Tags */}
-          <div className="flex flex-wrap gap-2 mb-4 animate-fade-in">
-            {packageData.is_featured && (
-              <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs md:text-sm font-bold bg-gradient-to-r from-yellow-400 to-amber-500 text-gray-900 border-2 border-yellow-300 shadow-lg animate-pulse">
-                <i className="fas fa-star mr-2" />
-                Featured Tour
-              </span>
-            )}
-            {packageData.holiday_types && packageData.holiday_types.length > 0 && (
-              <>
-                {packageData.holiday_types.map((type: HolidayTypeSummary) => (
-                  <span
-                    key={type.id}
-                    className="inline-flex items-center px-3 py-1.5 rounded-full text-xs md:text-sm font-medium bg-white/20 backdrop-blur-sm text-white border border-white/30 transition-all duration-200 hover:bg-white/30 hover:scale-105"
-                  >
-                    {type.icon && <i className={`fas fa-${type.icon} mr-2`} />}
-                    {type.name}
-                  </span>
-                ))}
-              </>
-            )}
-          </div>
 
           {/* Tour Title */}
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-playfair font-bold text-white mb-3 md:mb-4 leading-tight animate-slide-up drop-shadow-lg">
             {packageData.name}
           </h1>
 
-          {/* Summary */}
-          {packageData.summary && (
-            <p className="text-base md:text-lg text-white/95 mb-4 md:mb-6 max-w-3xl leading-relaxed animate-slide-up drop-shadow-md">
-              {packageData.summary}
-            </p>
-          )}
 
           {/* Quick Info Bar */}
           <div className="flex flex-wrap items-center gap-4 md:gap-6 text-white animate-fade-in">

@@ -9,6 +9,8 @@ import ErrorDisplay from '../../components/tour/ErrorDisplay';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils';
 import PackageBookingForm from '../../components/forms/PackageBookingForm';
 import InquiryForm from '../../components/forms/InquiryForm';
+import Breadcrumb from '../../components/layout/Breadcrumb';
+import type { HolidayTypeSummary } from '../../lib/types/api';
 
 const PackageDetailPageNew: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -17,7 +19,7 @@ const PackageDetailPageNew: React.FC = () => {
 
   // Fetch comprehensive package details
   const { data: packageDetail, isLoading, error, refetch } = useComprehensivePackageBySlug(slug!);
-  
+
   // Fetch recommended packages from the same country
   const { data: recommendedPackages } = useRecommendedPackages(
     packageDetail?.country?.id || 0,
@@ -28,7 +30,7 @@ const PackageDetailPageNew: React.FC = () => {
   // Define navigation sections based on available data
   const navigationSections = useMemo(() => {
     if (!packageDetail) return [];
-    
+
     const sections = [
       { id: 'overview', label: 'Overview' }
     ];
@@ -69,11 +71,11 @@ const PackageDetailPageNew: React.FC = () => {
   if (error) {
     // Determine error type
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    const isNetworkError = errorMessage.toLowerCase().includes('network') || 
-                          errorMessage.toLowerCase().includes('fetch');
-    const isNotFound = errorMessage.toLowerCase().includes('404') || 
-                      errorMessage.toLowerCase().includes('not found');
-    
+    const isNetworkError = errorMessage.toLowerCase().includes('network') ||
+      errorMessage.toLowerCase().includes('fetch');
+    const isNotFound = errorMessage.toLowerCase().includes('404') ||
+      errorMessage.toLowerCase().includes('not found');
+
     return (
       <ErrorDisplay
         type={isNetworkError ? 'network' : isNotFound ? 'notfound' : 'server'}
@@ -103,19 +105,19 @@ const PackageDetailPageNew: React.FC = () => {
         {/* Primary Meta Tags */}
         <title>{packageDetail.name} | AllBounds Vacations</title>
         <meta name="title" content={`${packageDetail.name} | AllBounds Vacations`} />
-        <meta 
-          name="description" 
-          content={packageDetail.summary || packageDetail.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `Explore ${packageDetail.name} - ${packageDetail.duration_days} days in ${packageDetail.country.name}`} 
+        <meta
+          name="description"
+          content={packageDetail.summary || packageDetail.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `Explore ${packageDetail.name} - ${packageDetail.duration_days} days in ${packageDetail.country.name}`}
         />
         <meta name="keywords" content={`${packageDetail.name}, ${packageDetail.country.name}, tour package, travel, vacation, ${packageDetail.holiday_types?.map(ht => ht.name).join(', ')}`} />
-        
+
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={window.location.href} />
         <meta property="og:title" content={`${packageDetail.name} | AllBounds Vacations`} />
-        <meta 
-          property="og:description" 
-          content={packageDetail.summary || packageDetail.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `Explore ${packageDetail.name}`} 
+        <meta
+          property="og:description"
+          content={packageDetail.summary || packageDetail.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `Explore ${packageDetail.name}`}
         />
         {packageDetail.image_id && (
           <meta property="og:image" content={getImageUrlWithFallback(packageDetail.image_id, IMAGE_VARIANTS.LARGE)} />
@@ -123,19 +125,19 @@ const PackageDetailPageNew: React.FC = () => {
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:site_name" content="AllBounds Vacations" />
-        
+
         {/* Twitter */}
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:url" content={window.location.href} />
         <meta property="twitter:title" content={`${packageDetail.name} | AllBounds Vacations`} />
-        <meta 
-          property="twitter:description" 
-          content={packageDetail.summary || packageDetail.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `Explore ${packageDetail.name}`} 
+        <meta
+          property="twitter:description"
+          content={packageDetail.summary || packageDetail.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `Explore ${packageDetail.name}`}
         />
         {packageDetail.image_id && (
           <meta property="twitter:image" content={getImageUrlWithFallback(packageDetail.image_id, IMAGE_VARIANTS.LARGE)} />
         )}
-        
+
         {/* Additional SEO Tags */}
         <meta name="robots" content="index, follow" />
         <meta name="language" content="English" />
@@ -145,15 +147,59 @@ const PackageDetailPageNew: React.FC = () => {
 
       <div className="min-h-screen bg-gray-50">
         {/* Hero Section - Full Width */}
-        <HeroSection 
-          packageData={packageDetail} 
+        <HeroSection
+          packageData={packageDetail}
           onBookNowClick={() => setShowBookingForm(true)}
         />
 
+        {/* Package Context Section (Breadcrumbs, Tags, Summary) */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
+            <div className="mb-4">
+              <Breadcrumb
+                items={[
+                  { label: 'Packages', path: '/packages' },
+                  { label: packageDetail.country.name, path: `/countries/${packageDetail.country.slug}` },
+                  { label: packageDetail.name }
+                ]}
+                variant="light"
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-2 mb-4">
+              {packageDetail.is_featured && (
+                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                  <i className="fas fa-star mr-2" />
+                  Featured Tour
+                </span>
+              )}
+              {packageDetail.holiday_types && packageDetail.holiday_types.length > 0 && (
+                <>
+                  {packageDetail.holiday_types.map((type: HolidayTypeSummary) => (
+                    <span
+                      key={type.id}
+                      className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200"
+                    >
+                      {type.icon && <i className={`fas fa-${type.icon} mr-2`} />}
+                      {type.name}
+                    </span>
+                  ))}
+                </>
+              )}
+            </div>
+
+            {packageDetail.summary && (
+              <p className="text-gray-600 text-base md:text-lg max-w-4xl leading-relaxed">
+                {packageDetail.summary}
+              </p>
+            )}
+          </div>
+        </div>
+
         {/* Sticky Navigation */}
         {navigationSections.length > 0 && (
-          <StickyNavigation 
-            sections={navigationSections} 
+          <StickyNavigation
+            sections={navigationSections}
             offset={80}
             onBookNow={() => setShowBookingForm(true)}
             packageName={packageDetail.name}
@@ -180,9 +226,9 @@ const PackageDetailPageNew: React.FC = () => {
               {/* Inclusions/Exclusions Section */}
               {(packageDetail.inclusion_items?.length > 0 || packageDetail.exclusion_items?.length > 0) && (
                 <div className="mb-6 md:mb-8">
-                  <InclusionsExclusionsSection 
-                    inclusions={packageDetail.inclusion_items || []} 
-                    exclusions={packageDetail.exclusion_items || []} 
+                  <InclusionsExclusionsSection
+                    inclusions={packageDetail.inclusion_items || []}
+                    exclusions={packageDetail.exclusion_items || []}
                   />
                 </div>
               )}
@@ -204,7 +250,7 @@ const PackageDetailPageNew: React.FC = () => {
               {/* Itinerary Map Section */}
               {packageDetail.itinerary_items && packageDetail.itinerary_items.length > 0 && (
                 <div id="map" className="mb-6 md:mb-8 scroll-mt-20">
-                  <ItineraryMapLeaflet 
+                  <ItineraryMapLeaflet
                     itineraryItems={packageDetail.itinerary_items}
                     packageName={packageDetail.name}
                   />
@@ -255,7 +301,7 @@ const PackageDetailPageNew: React.FC = () => {
 
         {/* Recommended Tours Section */}
         {recommendedPackages && recommendedPackages.length > 0 && (
-          <RecommendedTours 
+          <RecommendedTours
             tours={recommendedPackages}
             title="Similar Tours You Might Like"
             subtitle={`Explore more amazing tours in ${packageDetail.country.name}`}

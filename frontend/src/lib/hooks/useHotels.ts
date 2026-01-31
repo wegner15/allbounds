@@ -66,11 +66,14 @@ export interface HotelRelationships {
 }
 
 // Hook for fetching hotels
-export const useHotels = () => {
+export const useHotels = (countryId?: number) => {
   return useQuery<Hotel[]>({
-    queryKey: ['hotels'],
+    queryKey: ['hotels', countryId],
     queryFn: async () => {
-      const response = await apiClient.get<Hotel[]>(endpoints.hotels.list());
+      const endpoint = countryId
+        ? endpoints.hotels.byCountry(countryId)
+        : endpoints.hotels.list();
+      const response = await apiClient.get<Hotel[]>(endpoint);
       return response;
     }
   });
@@ -133,7 +136,7 @@ export const useCreateHotel = () => {
 // Hook for updating a hotel
 export const useUpdateHotel = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ id, ...hotel }: HotelUpdateInput & { id: number }) => {
       const response = await apiClient.put(`/hotels/${id}`, hotel);
@@ -149,7 +152,7 @@ export const useUpdateHotel = () => {
 // Hook for deleting a hotel
 export const useDeleteHotel = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (id: number) => {
       const response = await apiClient.delete(`/hotels/${id}`);
@@ -176,7 +179,7 @@ export const useHotelRelationships = (id: number) => {
 // Hook for assigning a package to a hotel
 export const useAssignPackageToHotel = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ hotelId, packageId }: { hotelId: number; packageId: number }) => {
       const response = await apiClient.post(`/hotels/${hotelId}/packages/${packageId}`, {});
@@ -191,7 +194,7 @@ export const useAssignPackageToHotel = () => {
 // Hook for removing a package from a hotel
 export const useRemovePackageFromHotel = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ hotelId, packageId }: { hotelId: number; packageId: number }) => {
       const response = await apiClient.delete(`/hotels/${hotelId}/packages/${packageId}`);
@@ -206,7 +209,7 @@ export const useRemovePackageFromHotel = () => {
 // Hook for assigning a group trip to a hotel
 export const useAssignGroupTripToHotel = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ hotelId, groupTripId }: { hotelId: number; groupTripId: number }) => {
       const response = await apiClient.post(`/hotels/${hotelId}/group-trips/${groupTripId}`, {});
@@ -221,7 +224,7 @@ export const useAssignGroupTripToHotel = () => {
 // Hook for removing a group trip from a hotel
 export const useRemoveGroupTripFromHotel = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ hotelId, groupTripId }: { hotelId: number; groupTripId: number }) => {
       const response = await apiClient.delete(`/hotels/${hotelId}/group-trips/${groupTripId}`);

@@ -20,7 +20,7 @@ const API_BASE_URL = import.meta.env.PROD
 export const apiClient = {
   async request<T>(
     endpoint: string,
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' = 'GET',
     data?: unknown
   ): Promise<T> {
     // Prevent duplicate /api/v1 path segments
@@ -119,6 +119,10 @@ export const apiClient = {
     return this.request(endpoint, 'PUT', data) as Promise<T>;
   },
 
+  async patch<T>(endpoint: string, data: unknown): Promise<T> {
+    return this.request(endpoint, 'PATCH', data) as Promise<T>;
+  },
+
   async delete<T>(endpoint: string): Promise<T> {
     return this.request(endpoint, 'DELETE') as Promise<T>;
   },
@@ -198,6 +202,7 @@ export const endpoints = {
     delete: (id: number) => `/hotels/${id}`,
     bySlug: (slug: string) => `/hotels/slug/${slug}`,
     detailsBySlug: (slug: string) => `/hotels/details/${slug}`,
+    byCountry: (countryId: number) => `/hotels/?country_id=${countryId}`,
     relationships: (id: number) => `/hotels/${id}/relationships`,
     assignPackage: (hotelId: number, packageId: number) => `/hotels/${hotelId}/packages/${packageId}`,
     removePackage: (hotelId: number, packageId: number) => `/hotels/${hotelId}/packages/${packageId}`,

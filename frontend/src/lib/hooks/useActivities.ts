@@ -2,10 +2,15 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient, endpoints } from '../api';
 import type { ActivityResponse } from '../types/api';
 
-export const useActivities = () => {
+export const useActivities = (countryId?: number) => {
   return useQuery<ActivityResponse[]>({
-    queryKey: ['activities'],
-    queryFn: () => apiClient.get(endpoints.activities.list()),
+    queryKey: ['activities', countryId],
+    queryFn: () => {
+      const endpoint = countryId
+        ? endpoints.activities.byCountry(countryId)
+        : endpoints.activities.list();
+      return apiClient.get(endpoint);
+    },
   });
 };
 

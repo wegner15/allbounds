@@ -50,15 +50,15 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
   const { data: holidayTypes, isLoading: isLoadingHolidayTypes } = useHolidayTypes();
   const { data: inclusions, isLoading: isLoadingInclusions } = useInclusions();
   const { data: exclusions, isLoading: isLoadingExclusions } = useExclusions();
-  
+
   const createPackageMutation = useCreatePackage();
   const updatePackageMutation = useUpdatePackage(packageData?.id);
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [coverImageId, setCoverImageId] = useState<number | null>(null);
-  
+
   // Initialize form with default values or existing package data
   const {
     register,
@@ -71,37 +71,37 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
     resolver: zodResolver(packageSchema),
     defaultValues: isEdit && packageData
       ? {
-          name: packageData.name,
-          slug: packageData.slug,
-          description: packageData.description,
-          summary: packageData.summary || '',
-          price: packageData.price,
-          duration_days: packageData.duration_days,
-          country_id: packageData.country_id,
-          holiday_type_ids: packageData.holiday_types?.map((ht: any) => ht.id) || [],
-          inclusion_ids: packageData.inclusion_items?.map((item: any) => item.id) || [],
-          exclusion_ids: packageData.exclusion_items?.map((item: any) => item.id) || [],
-          image_id: packageData.image_id || '',
-          is_active: packageData.is_active,
-          is_featured: packageData.is_featured,
-        }
+        name: packageData.name,
+        slug: packageData.slug,
+        description: packageData.description,
+        summary: packageData.summary || '',
+        price: packageData.price,
+        duration_days: packageData.duration_days,
+        country_id: packageData.country_id,
+        holiday_type_ids: packageData.holiday_types?.map((ht: any) => ht.id) || [],
+        inclusion_ids: packageData.inclusion_items?.map((item: any) => item.id) || [],
+        exclusion_ids: packageData.exclusion_items?.map((item: any) => item.id) || [],
+        image_id: packageData.image_id || '',
+        is_active: packageData.is_active,
+        is_featured: packageData.is_featured,
+      }
       : {
-          name: '',
-          slug: '',
-          description: '',
-          summary: '',
-          price: 0,
-          duration_days: 1,
-          country_id: 0,
-          holiday_type_ids: [],
-          inclusion_ids: [],
-          exclusion_ids: [],
-          image_id: '',
-          is_active: true,
-          is_featured: false,
-        },
+        name: '',
+        slug: '',
+        description: '',
+        summary: '',
+        price: 0,
+        duration_days: 1,
+        country_id: 0,
+        holiday_type_ids: [],
+        inclusion_ids: [],
+        exclusion_ids: [],
+        image_id: '',
+        is_active: true,
+        is_featured: false,
+      },
   });
-  
+
   // Initialize form values and gallery images from existing package data
   useEffect(() => {
     if (isEdit && packageData) {
@@ -110,7 +110,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       console.log('PackageForm: Holiday types:', packageData.holiday_types);
       console.log('PackageForm: Inclusions:', packageData.inclusion_items);
       console.log('PackageForm: Exclusions:', packageData.exclusion_items);
-      
+
       // Update form values when packageData is loaded
       setValue('name', packageData.name || '');
       setValue('slug', packageData.slug || '');
@@ -125,26 +125,26 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       setValue('image_id', packageData.image_id || '');
       setValue('is_active', packageData.is_active ?? true);
       setValue('is_featured', packageData.is_featured ?? false);
-      
+
       console.log('PackageForm: Set country_id to:', packageData.country_id);
       console.log('PackageForm: Set holiday_type_ids to:', packageData.holiday_types?.map((ht: any) => ht.id) || []);
       console.log('PackageForm: Set inclusion_ids to:', packageData.inclusion_items?.map((item: any) => item.id) || []);
       console.log('PackageForm: Set exclusion_ids to:', packageData.exclusion_items?.map((item: any) => item.id) || []);
-      
+
       // Initialize gallery images
       if (packageData.gallery_images) {
         setGalleryImages(packageData.gallery_images);
       }
-      
-       // Initialize cover image
-       if (packageData.image_id) {
-         setCoverImageId(parseInt(packageData.image_id));
-       } else if (packageData.cover_image) {
-         const imageId = typeof packageData.cover_image === 'string'
-           ? null // We'll need to handle URL to ID conversion if needed
-           : packageData.cover_image;
-         setCoverImageId(imageId);
-       }
+
+      // Initialize cover image
+      if (packageData.image_id) {
+        setCoverImageId(parseInt(packageData.image_id));
+      } else if (packageData.cover_image) {
+        const imageId = typeof packageData.cover_image === 'string'
+          ? null // We'll need to handle URL to ID conversion if needed
+          : packageData.cover_image;
+        setCoverImageId(imageId);
+      }
     }
   }, [isEdit, packageData, setValue]);
 
@@ -159,33 +159,33 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       setValue('slug', generatedSlug);
     }
   }, [name, setValue, isEdit]);
-  
+
   const onSubmit = async (formData: PackageFormData) => {
     setIsSubmitting(true);
     setServerError(null);
-    
+
     try {
-        // Prepare the data for submission
-        const packageData = {
-          ...formData,
-          // Ensure is_featured is included from the form state
-          is_featured: watch('is_featured'),
-          // Use the form's image_id (which is now properly set by the ImageSelector)
-          image_id: formData.image_id || undefined
-        };
-      
+      // Prepare the data for submission
+      const packageData = {
+        ...formData,
+        // Ensure is_featured is included from the form state
+        is_featured: watch('is_featured'),
+        // Use the form's image_id (which is now properly set by the ImageSelector)
+        image_id: formData.image_id || undefined
+      };
+
       console.log('Submitting package with data:', packageData);
-      
-       if (isEdit) {
-         await updatePackageMutation.mutateAsync(packageData);
-        
+
+      if (isEdit) {
+        await updatePackageMutation.mutateAsync(packageData);
+
         // Update inclusions and exclusions
         try {
           console.log('Updating inclusions:', formData.inclusion_ids);
           await apiClient.post(`/api/v1/packages/${packageId}/inclusions`, {
             inclusion_ids: formData.inclusion_ids || []
           });
-          
+
           console.log('Updating exclusions:', formData.exclusion_ids);
           await apiClient.post(`/api/v1/packages/${packageId}/exclusions`, {
             exclusion_ids: formData.exclusion_ids || []
@@ -193,12 +193,12 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
         } catch (error) {
           console.error('Error updating inclusions/exclusions:', error);
         }
-       } else {
-         const newPackage = await createPackageMutation.mutateAsync(packageData);
+      } else {
+        const newPackage = await createPackageMutation.mutateAsync(packageData);
 
-         // The cover image is already set via the image_id in the package data
-         // No additional API call needed for new packages
-        
+        // The cover image is already set via the image_id in the package data
+        // No additional API call needed for new packages
+
         // Add inclusions and exclusions for the new package
         if (newPackage?.id) {
           try {
@@ -206,7 +206,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
             await apiClient.post(`/api/v1/packages/${newPackage.id}/inclusions`, {
               inclusion_ids: formData.inclusion_ids || []
             });
-            
+
             console.log('Adding exclusions to new package:', formData.exclusion_ids);
             await apiClient.post(`/api/v1/packages/${newPackage.id}/exclusions`, {
               exclusion_ids: formData.exclusion_ids || []
@@ -216,7 +216,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
           }
         }
       }
-      
+
       navigate('/admin/packages');
     } catch (error) {
       console.error('Error saving package:', error);
@@ -225,7 +225,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       setIsSubmitting(false);
     }
   };
-  
+
   if (isLoadingCountries || isLoadingHolidayTypes) {
     return (
       <div className="text-center py-12">
@@ -234,10 +234,10 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       </div>
     );
   }
-  
+
   // Type-safe form submission handler
   const handleFormSubmit = handleSubmit(onSubmit);
-  
+
   return (
     <form onSubmit={handleFormSubmit} className="space-y-8">
       {serverError && (
@@ -250,7 +250,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
           </div>
         </div>
       )}
-      
+
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
           <h3 className="text-lg font-medium text-gray-900">
@@ -277,8 +277,8 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                 id="name"
                 placeholder="e.g. Safari Adventure"
                 className={`block w-full px-4 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200 
-                  ${errors.name 
-                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500' 
+                  ${errors.name
+                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
                     : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
                 `}
                 {...register('name')}
@@ -297,7 +297,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
               <p className="mt-2 text-xs text-gray-500">Enter a clear, descriptive name for this package</p>
             )}
           </div>
-          
+
           {/* Package slug */}
           <div className="sm:col-span-4">
             <div className="flex justify-between items-center">
@@ -317,8 +317,8 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                 id="slug"
                 placeholder="safari-adventure"
                 className={`block w-full pl-24 pr-10 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200 
-                  ${errors.slug 
-                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500' 
+                  ${errors.slug
+                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
                     : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
                 `}
                 {...register('slug')}
@@ -339,7 +339,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
               </p>
             )}
           </div>
-          
+
           {/* Description */}
           <div className="sm:col-span-6">
             <Controller
@@ -359,39 +359,39 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                 />
               )}
             />
-           </div>
+          </div>
 
-           {/* Summary */}
-           <div className="sm:col-span-6">
-             <div className="flex justify-between items-center">
-               <label htmlFor="summary" className="block text-sm font-semibold text-gray-800">
-                 Summary
-               </label>
-               <span className="text-xs text-gray-500 font-medium">
-                 {watch('summary')?.length || 0}/255 characters
-               </span>
-             </div>
-             <div className="mt-2">
-               <textarea
-                 id="summary"
-                 rows={3}
-                 placeholder="Write a concise summary that will appear in cards and previews..."
-                 className={`block w-full px-4 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200
+          {/* Summary */}
+          <div className="sm:col-span-6">
+            <div className="flex justify-between items-center">
+              <label htmlFor="summary" className="block text-sm font-semibold text-gray-800">
+                Summary
+              </label>
+              <span className="text-xs text-gray-500 font-medium">
+                {watch('summary')?.length || 0}/255 characters
+              </span>
+            </div>
+            <div className="mt-2">
+              <textarea
+                id="summary"
+                rows={3}
+                placeholder="Write a concise summary that will appear in cards and previews..."
+                className={`block w-full px-4 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200
                    ${errors.summary
-                     ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
-                     : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
+                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
+                    : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
                  `}
-                 {...register('summary')}
-               />
-               {errors.summary ? (
-                 <p className="mt-2 text-sm text-red-600 font-medium">{errors.summary.message}</p>
-               ) : (
-                 <p className="mt-2 text-xs text-gray-500">A brief summary for card displays and search results</p>
-               )}
-             </div>
-           </div>
+                {...register('summary')}
+              />
+              {errors.summary ? (
+                <p className="mt-2 text-sm text-red-600 font-medium">{errors.summary.message}</p>
+              ) : (
+                <p className="mt-2 text-xs text-gray-500">A brief summary for card displays and search results</p>
+              )}
+            </div>
+          </div>
 
-           {/* Price */}
+          {/* Price */}
           <div className="sm:col-span-2">
             <div className="flex justify-between items-center">
               <label htmlFor="price" className="block text-sm font-semibold text-gray-800">
@@ -409,8 +409,8 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                 step="0.01"
                 placeholder="0.00"
                 className={`block w-full pl-8 pr-12 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200
-                  ${errors.price 
-                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500' 
+                  ${errors.price
+                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
                     : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
                 `}
                 {...register('price', { valueAsNumber: true })}
@@ -434,7 +434,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
               </p>
             )}
           </div>
-          
+
           {/* Duration */}
           <div className="sm:col-span-2">
             <div className="flex justify-between items-center">
@@ -449,8 +449,8 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                 min="1"
                 placeholder="e.g. 7"
                 className={`block w-full pl-4 pr-12 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200
-                  ${errors.duration_days 
-                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500' 
+                  ${errors.duration_days
+                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
                     : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
                 `}
                 {...register('duration_days', { valueAsNumber: true })}
@@ -474,7 +474,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
               </p>
             )}
           </div>
-          
+
           {/* Country */}
           <div className="sm:col-span-3">
             <div className="flex justify-between items-center">
@@ -491,8 +491,8 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
               <select
                 id="country_id"
                 className={`block w-full pl-11 pr-10 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset appearance-none bg-none transition-all duration-200
-                  ${errors.country_id 
-                    ? 'ring-red-300 text-red-900 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500' 
+                  ${errors.country_id
+                    ? 'ring-red-300 text-red-900 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
                     : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
                 `}
                 {...register('country_id', { valueAsNumber: true })}
@@ -530,7 +530,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
               </p>
             )}
           </div>
-          
+
           {/* Holiday Types */}
           <div className="sm:col-span-6">
             <div className="flex justify-between items-center">
@@ -550,7 +550,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                     {holidayTypes?.map((type) => {
                       const checkboxId = `holiday-type-${type.id}`;
                       const isChecked = (field.value || []).includes(type.id);
-                      
+
                       return (
                         <div key={type.id} className="relative flex items-start">
                           <div className="flex h-6 items-center">
@@ -593,7 +593,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
               Holiday types help categorize packages and improve discoverability
             </p>
           </div>
-          
+
           {/* Package Image */}
           <div className="sm:col-span-6">
             <div className="flex justify-between items-center">
@@ -605,39 +605,39 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
               <div className="mb-3">
                 <p className="text-sm text-gray-700">Upload or select an image for this package:</p>
               </div>
-               <ImageSelector
-                 initialImageId={watch('image_id')}
-                 onImageSelected={(imageId) => {
-                   console.log('Package image selected:', imageId);
+              <ImageSelector
+                initialImageId={watch('image_id')}
+                onImageSelected={(imageId) => {
+                  console.log('Package image selected:', imageId);
 
-                   // Update the form value
-                   setValue('image_id', imageId);
+                  // Update the form value
+                  setValue('image_id', imageId);
 
-                   // Update the cover image state for both create and edit
-                   setCoverImageId(imageId ? parseInt(imageId) : null);
+                  // Update the cover image state for both create and edit
+                  setCoverImageId(imageId ? parseInt(imageId) : null);
 
-                   // If we're editing an existing package, update the cover image immediately
-                   if (isEdit && packageId && imageId) {
-                     console.log('Immediately updating package cover image to:', imageId);
-                     apiClient.post(`/api/v1/packages/${packageId}/cover-image`, {
-                       image_id: imageId
-                     })
-                     .then(response => {
-                       console.log('Package cover image updated successfully:', response);
+                  // If we're editing an existing package, update the cover image immediately
+                  if (isEdit && packageId && imageId) {
+                    console.log('Immediately updating package cover image to:', imageId);
+                    apiClient.post(`/api/v1/packages/${packageId}/cover-image`, {
+                      image_id: imageId
+                    })
+                      .then(response => {
+                        console.log('Package cover image updated successfully:', response);
 
-                       // Force refresh the form data
-                       if (packageData) {
-                         packageData.image_id = imageId;
-                       }
-                     })
-                     .catch(error => {
-                       console.error('Error updating package cover image:', error);
-                     });
-                   } else if (!isEdit && imageId) {
-                     // For new packages, store the image ID to be used when creating the package
-                     console.log('Storing image ID for new package:', imageId);
-                   }
-                 }}
+                        // Force refresh the form data
+                        if (packageData) {
+                          packageData.image_id = imageId;
+                        }
+                      })
+                      .catch(error => {
+                        console.error('Error updating package cover image:', error);
+                      });
+                  } else if (!isEdit && imageId) {
+                    // For new packages, store the image ID to be used when creating the package
+                    console.log('Storing image ID for new package:', imageId);
+                  }
+                }}
                 variant="thumbnail"
                 className="mt-2"
               />
@@ -654,7 +654,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
               Choose a high-quality image that represents this package. Recommended size: 1200x800 pixels.
             </p>
           </div>
-          
+
           {/* Inclusions */}
           <div className="sm:col-span-6">
             <div className="flex justify-between items-center">
@@ -674,7 +674,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                     {inclusions?.map((inclusion) => {
                       const checkboxId = `inclusion-${inclusion.id}`;
                       const isChecked = (field.value || []).includes(inclusion.id);
-                      
+
                       return (
                         <div key={inclusion.id} className="relative flex items-start">
                           <div className="flex h-6 items-center">
@@ -740,7 +740,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                     {exclusions?.map((exclusion) => {
                       const checkboxId = `exclusion-${exclusion.id}`;
                       const isChecked = (field.value || []).includes(exclusion.id);
-                      
+
                       return (
                         <div key={exclusion.id} className="relative flex items-start">
                           <div className="flex h-6 items-center">
@@ -843,6 +843,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                 <SimpleItineraryManager
                   entityType="package"
                   entityId={packageData.id}
+                  countryId={watch('country_id')}
                 />
               </div>
               <p className="mt-2 text-xs text-gray-500">
@@ -850,7 +851,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
               </p>
             </div>
           )}
-          
+
           {/* Status */}
           <div className="sm:col-span-6">
             <div className="flex justify-between items-center">
@@ -922,31 +923,31 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                       className={`${watch('is_active') ? 'translate-x-7' : 'translate-x-0'}
                         pointer-events-none inline-block h-6 w-6 rounded-full bg-white shadow
                         transform ring-0 transition ease-in-out duration-200 flex items-center justify-center`}
-                     >
-                       {watch('is_active') ? (
-                         <svg className="h-3 w-3 text-teal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                         </svg>
-                       ) : (
-                         <svg className="h-3 w-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                           <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                         </svg>
-                       )}
-                     </span>
-                   </button>
-                   {/* Hidden input to register the is_active field */}
-                   <input
-                     type="checkbox"
-                     className="hidden"
-                     {...register('is_active')}
-                   />
-                 </div>
-               </div>
+                    >
+                      {watch('is_active') ? (
+                        <svg className="h-3 w-3 text-teal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      ) : (
+                        <svg className="h-3 w-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </span>
+                  </button>
+                  {/* Hidden input to register the is_active field */}
+                  <input
+                    type="checkbox"
+                    className="hidden"
+                    {...register('is_active')}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      
+
       {/* Form actions */}
       <div className="sticky bottom-0 bg-white shadow-md px-8 py-5 border-t border-gray-200 z-10">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
@@ -960,7 +961,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
             </svg>
             Back to Packages
           </button>
-          
+
           <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-500">
               {isSubmitting ? 'Saving changes...' : 'Ready to save'}
@@ -986,15 +987,15 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                   {isEdit ? 'Update Package' : 'Create Package'}
                 </>
               )}
-                   </button>
-                   {/* Hidden input to register the is_featured field */}
-                   <input
-                     type="checkbox"
-                     className="hidden"
-                     {...register('is_featured')}
-                   />
-                 </div>
-               </div>
+            </button>
+            {/* Hidden input to register the is_featured field */}
+            <input
+              type="checkbox"
+              className="hidden"
+              {...register('is_featured')}
+            />
+          </div>
+        </div>
       </div>
     </form>
   );

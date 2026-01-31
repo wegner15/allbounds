@@ -9,12 +9,14 @@ import { useActivities } from '../../lib/hooks/useActivities';
 interface SimpleItineraryManagerProps {
   entityType: EntityType;
   entityId: number;
+  countryId?: number;
   readonly?: boolean;
 }
 
 export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
   entityType,
   entityId,
+  countryId,
   readonly = false
 }) => {
   const [isAddingDay, setIsAddingDay] = useState(false);
@@ -33,9 +35,9 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
   const createItem = useCreateItineraryItem();
   const updateItem = useUpdateItineraryItem();
   const deleteItem = useDeleteItineraryItem();
-  const { data: hotels = [] } = useHotels();
-  const { data: attractions = [] } = useAttractions();
-  const { data: activities = [] } = useActivities();
+  const { data: hotels = [] } = useHotels(countryId);
+  const { data: attractions = [] } = useAttractions(countryId ? { country: countryId.toString() } : undefined);
+  const { data: activities = [] } = useActivities(countryId);
 
   const handleEditDay = (item: ItineraryItem) => {
     setEditingItemId(item.id);
@@ -113,7 +115,7 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
 
     try {
       const nextDayNumber = itinerary ? itinerary.items.length + 1 : 1;
-      
+
       await createItem.mutateAsync({
         entity_type: entityType,
         entity_id: entityId,
@@ -141,7 +143,7 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
       setNewDayLinkedActivityIds([]);
       setNewDayAccommodationNotes('');
       setIsAddingDay(false);
-      
+
       console.log('Successfully created itinerary day');
     } catch (error) {
       console.error('Failed to create itinerary day:', error);
@@ -244,10 +246,10 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
                 initialLocation={
                   newDayLatitude && newDayLongitude
                     ? {
-                        latitude: parseFloat(newDayLatitude),
-                        longitude: parseFloat(newDayLongitude),
-                        address: newDayLocation,
-                      }
+                      latitude: parseFloat(newDayLatitude),
+                      longitude: parseFloat(newDayLongitude),
+                      address: newDayLocation,
+                    }
                     : undefined
                 }
                 onLocationSelect={(location) => {
@@ -446,7 +448,7 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
                 disabled={createItem.isPending || updateItem.isPending}
                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-teal hover:bg-teal-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal disabled:opacity-50"
               >
-                {editingItemId 
+                {editingItemId
                   ? (updateItem.isPending ? 'Updating...' : 'Update Day')
                   : (createItem.isPending ? 'Adding...' : 'Add Day')
                 }
@@ -497,7 +499,7 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
                       {item.location}
                     </p>
                   )}
-                  
+
                   {/* Hotels */}
                   {item.hotels && item.hotels.length > 0 && (
                     <div className="mb-6">
@@ -524,7 +526,7 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
                       </div>
                     </div>
                   )}
-                  
+
                   {/* Attractions */}
                   {item.attractions && item.attractions.length > 0 && (
                     <div className="mt-3">
@@ -564,7 +566,7 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
                       </div>
                     </div>
                   )}
-                  
+
                   {/* Accommodation Notes */}
                   {item.accommodation_notes && (
                     <div className="mt-3">
@@ -572,7 +574,7 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
                       <p className="text-sm text-gray-600">{item.accommodation_notes}</p>
                     </div>
                   )}
-                  
+
                   {/* Linked Activities */}
                   {item.linked_activities && item.linked_activities.length > 0 && (
                     <div className="mt-3">
@@ -612,7 +614,7 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
                     </div>
                   )}
                 </div>
-                
+
                 {!readonly && (
                   <div className="flex space-x-2">
                     <button

@@ -45,7 +45,7 @@ class MediaAssetResponse(MediaAssetBase):
                 cf_id = self.file_path
                 
             if cf_id:
-                self.url = f"{cloudflare_settings.delivery_url}/{cf_id}/public"
+                self.url = f"{cloudflare_settings.delivery_url}/{cf_id}/medium"
             elif self.file_path and self.file_path.startswith("http"):
                 self.url = self.file_path
                 

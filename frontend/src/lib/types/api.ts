@@ -107,9 +107,11 @@ export interface Activity extends BaseModel {
   summary?: string;
   slug: string;
   image_url?: string;
+  image_id?: string;
   is_active: boolean;
   is_featured: boolean;
   countries: Country[];
+  cover_image?: MediaAsset;
 }
 
 export interface ActivityResponse extends Activity {

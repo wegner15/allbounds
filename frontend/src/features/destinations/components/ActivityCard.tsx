@@ -9,8 +9,11 @@ interface ActivityCardProps {
 }
 
 const ActivityCard: React.FC<ActivityCardProps> = React.memo(({ activity }) => {
-  // Use image_id which backend now populates with the resolved URL
-  const imageId = (activity as any).image_id;
+  // Robust image identification: 
+  // 1. Check for manually resolved image_id (from country detail endpoints)
+  // 2. Check for cover_image.url (from activities list endpoint)
+  // 3. Fallback to image_url (legacy)
+  const imageId = (activity as any).image_id || activity.cover_image?.url || activity.image_url;
 
   return (
     <article className="group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105">

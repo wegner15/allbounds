@@ -144,6 +144,7 @@ def get_country_by_slug(
     return CountryWithRegionResponse.from_orm(country)
 
 @router.get("/slug/{slug}/details", response_model=Any)
+@cache_endpoint(expire=3600)  # Cache for 1 hour
 def get_country_details_by_slug(
     slug: str,
     db: Session = Depends(get_db),

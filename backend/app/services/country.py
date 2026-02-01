@@ -150,20 +150,21 @@ class CountryService:
         """
         Retrieve a specific country by slug with all related destinations data.
         """
-        from sqlalchemy.orm import joinedload
+        from sqlalchemy.orm import selectinload
         from app.models.group_trip import GroupTrip, GroupTripDeparture
         from app.models.activity import Activity
         from app.models.hotel import Hotel
 
         country = db.query(Country).options(
-            joinedload(Country.region),
-            joinedload(Country.packages),
-            joinedload(Country.group_trips).joinedload(GroupTrip.departures),
-            joinedload(Country.attractions),
-            joinedload(Country.accommodations),
-            joinedload(Country.hotels).joinedload(Hotel.media_assets),
-            joinedload(Country.activities).joinedload(Activity.cover_image),
-            joinedload(Country.visit_info)
+            selectinload(Country.region),
+            selectinload(Country.packages),
+            selectinload(Country.group_trips).selectinload(GroupTrip.departures),
+            selectinload(Country.attractions),
+            selectinload(Country.accommodations),
+            selectinload(Country.hotels).selectinload(Hotel.media_assets),
+            selectinload(Country.hotels).selectinload(Hotel.amenities),
+            selectinload(Country.activities).selectinload(Activity.cover_image),
+            selectinload(Country.visit_info)
         ).filter(Country.slug == slug, Country.is_active == True).first()
         
         if not country:
@@ -301,19 +302,20 @@ class CountryService:
         """
         Retrieve all countries with detailed related data for trending destinations.
         """
-        from sqlalchemy.orm import joinedload
+        from sqlalchemy.orm import selectinload
         from app.models.group_trip import GroupTrip, GroupTripDeparture
 
         from app.models.hotel import Hotel
 
         countries = db.query(Country).options(
-            joinedload(Country.region),
-            joinedload(Country.packages),
-            joinedload(Country.group_trips).joinedload(GroupTrip.departures),
-            joinedload(Country.attractions),
-            joinedload(Country.accommodations),
-            joinedload(Country.hotels).joinedload(Hotel.media_assets),
-            joinedload(Country.visit_info)
+            selectinload(Country.region),
+            selectinload(Country.packages),
+            selectinload(Country.group_trips).selectinload(GroupTrip.departures),
+            selectinload(Country.attractions),
+            selectinload(Country.accommodations),
+            selectinload(Country.hotels).selectinload(Hotel.media_assets),
+            selectinload(Country.hotels).selectinload(Hotel.amenities),
+            selectinload(Country.visit_info)
         ).filter(Country.is_active == True).offset(skip).limit(limit).all()
 
         result = []

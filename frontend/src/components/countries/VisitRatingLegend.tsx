@@ -4,7 +4,7 @@ import type { VisitRating } from '../../lib/types/country';
 const VisitRatingLegend: React.FC = () => {
   const ratings: { rating: VisitRating; color: string; description: string }[] = [
     { rating: 'excellent', color: 'bg-green-500', description: 'Ideal conditions, perfect time to visit' },
-    { rating: 'good', color: 'bg-blue-500', description: 'Good conditions, recommended time to visit' },
+    { rating: 'good', color: 'bg-primary', description: 'Good conditions, recommended time to visit' },
     { rating: 'fair', color: 'bg-yellow-500', description: 'Average conditions, can be considered' },
     { rating: 'poor', color: 'bg-orange-500', description: 'Less favorable conditions' },
     { rating: 'discouraged', color: 'bg-red-500', description: 'Not recommended, unfavorable conditions' },

@@ -24,7 +24,7 @@ const MonthlyVisitRating: React.FC<MonthlyVisitRatingProps> = ({ ratings }) => {
       case 'excellent':
         return 'bg-green-500 text-white';
       case 'good':
-        return 'bg-blue-500 text-white';
+        return 'bg-primary text-white';
       case 'fair':
         return 'bg-yellow-500 text-gray-800';
       case 'poor':
@@ -43,8 +43,8 @@ const MonthlyVisitRating: React.FC<MonthlyVisitRatingProps> = ({ ratings }) => {
         {allMonths.map(month => {
           const rating = ratingsByMonth[month];
           return (
-            <div 
-              key={month} 
+            <div
+              key={month}
               className={`rounded-lg p-3 text-center ${getRatingStyle(rating)}`}
               title={rating ? `${month}: ${rating}` : `${month}: No data`}
             >

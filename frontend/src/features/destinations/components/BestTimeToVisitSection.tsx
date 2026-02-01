@@ -17,7 +17,7 @@ const getRatingColor = (rating: string): string => {
     case 'excellent':
       return 'bg-green-500 hover:bg-green-600 text-white';
     case 'good':
-      return 'bg-teal-500 hover:bg-teal-600 text-white';
+      return 'bg-primary hover:bg-primary-dark text-white';
     case 'fair':
       return 'bg-yellow-400 hover:bg-yellow-500 text-gray-900';
     case 'poor':
@@ -32,7 +32,7 @@ const getRatingColor = (rating: string): string => {
 // Rating legend data
 const RATING_LEGEND = [
   { rating: 'excellent', color: 'bg-green-500', label: 'Excellent', description: 'Perfect time to visit' },
-  { rating: 'good', color: 'bg-teal-500', label: 'Good', description: 'Great conditions' },
+  { rating: 'good', color: 'bg-primary', label: 'Good', description: 'Great conditions' },
   { rating: 'fair', color: 'bg-yellow-400', label: 'Fair', description: 'Acceptable conditions' },
   { rating: 'poor', color: 'bg-gray-400', label: 'Poor', description: 'Less favorable' },
 ];
@@ -82,7 +82,7 @@ const BestTimeToVisitSection: React.FC<BestTimeToVisitSectionProps> = React.memo
               <div className="text-sm font-semibold mb-1">
                 {month.substring(0, 3)}
               </div>
-              
+
               {/* Rating label */}
               <div className="text-xs capitalize opacity-90">
                 {rating === 'unknown' ? 'N/A' : rating}
@@ -98,7 +98,10 @@ const BestTimeToVisitSection: React.FC<BestTimeToVisitSectionProps> = React.memo
                   shadow-lg
                 ">
                   <div className="font-semibold mb-1">{month}</div>
-                  <div className="text-left">{notes}</div>
+                  <div
+                    className="text-left prose prose-invert prose-xs"
+                    dangerouslySetInnerHTML={{ __html: notes }}
+                  />
                   {/* Arrow */}
                   <div className="
                     absolute top-full left-1/2 transform -translate-x-1/2
@@ -133,9 +136,10 @@ const BestTimeToVisitSection: React.FC<BestTimeToVisitSectionProps> = React.memo
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             Travel Tips
           </h3>
-          <p className="text-gray-700 leading-relaxed">
-            {visitInfo.general_notes}
-          </p>
+          <div
+            className="text-gray-700 leading-relaxed prose prose-sm max-w-none"
+            dangerouslySetInnerHTML={{ __html: visitInfo.general_notes }}
+          />
         </div>
       )}
     </section>

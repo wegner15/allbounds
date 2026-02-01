@@ -37,7 +37,7 @@ const CountryCategoryPage: React.FC = () => {
             case 'group-trips': return <GroupTripsTab countryId={country.id} preview={false} />;
             case 'attractions': return <AttractionsTab countryName={country.name} preview={false} />;
             case 'hotels': return <HotelsTab countryId={country.id} preview={false} />;
-            case 'activities': return <ActivitiesTab countryName={country.name} preview={false} />;
+            case 'activities': return <ActivitiesTab countryId={country.id} preview={false} />;
             default: return <div>Category not found.</div>;
         }
     };

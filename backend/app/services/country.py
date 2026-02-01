@@ -284,7 +284,7 @@ class CountryService:
                     "is_active": activity.is_active,
                     "is_featured": activity.is_featured,
                 }
-                for activity in country.activities if activity.is_active and activity.is_featured
+                for activity in country.activities if activity.is_active
             ],
             "visit_info": {
                 "id": country.visit_info.id,
@@ -313,8 +313,8 @@ class CountryService:
             selectinload(Country.group_trips).selectinload(GroupTrip.departures),
             selectinload(Country.attractions),
             selectinload(Country.accommodations),
-            selectinload(Country.hotels).selectinload(Hotel.media_assets),
             selectinload(Country.hotels).selectinload(Hotel.amenities),
+            selectinload(Country.activities).selectinload(Activity.cover_image),
             selectinload(Country.visit_info)
         ).filter(Country.is_active == True).offset(skip).limit(limit).all()
 
@@ -406,6 +406,19 @@ class CountryService:
                         "amenities": acc.amenities,
                     }
                     for acc in country.accommodations if acc.is_active
+                ],
+                "activities": [
+                    {
+                        "id": activity.id,
+                        "name": activity.name,
+                        "slug": activity.slug,
+                        "summary": activity.summary,
+                        "description": activity.description,
+                        "image_id": _resolve_media_asset_url(activity.cover_image) if hasattr(activity, 'cover_image') and activity.cover_image else None,
+                        "is_active": activity.is_active,
+                        "is_featured": activity.is_featured,
+                    }
+                    for activity in country.activities if activity.is_active
                 ],
                 "hotels": [
                     {

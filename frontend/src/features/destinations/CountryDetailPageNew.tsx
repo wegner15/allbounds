@@ -226,7 +226,7 @@ const CountryDetailPageNew: React.FC = () => {
 
           {/* Activities Section */}
           <section id="activities" className="scroll-mt-24 mb-12">
-            <ActivitiesTab countryName={country.name} preview={true} destinationSlug={country.slug} />
+            <ActivitiesTab countryId={country.id} preview={true} destinationSlug={country.slug} />
           </section>
 
           {/* Related Destinations Section */}

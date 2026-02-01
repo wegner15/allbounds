@@ -5,19 +5,13 @@ import ActivityCard from '../components/ActivityCard';
 import { Link } from 'react-router-dom';
 
 interface ActivitiesTabProps {
-    countryName: string;
+    countryId: number;
     preview?: boolean;
     destinationSlug?: string;
 }
 
-const ActivitiesTab: React.FC<ActivitiesTabProps> = ({ countryName, preview = false, destinationSlug }) => {
-    // useActivities fetches all list.
-    const { data: activityResponse, isLoading, error } = useActivities();
-
-    // Note: useActivities returns ActivityResponse[] but usually backend returns just Activity[] or wrapper. 
-    // Let's assume it returns standard array or we'll need to adjust.
-    // Checking useActivities.ts -> returns ActivityResponse[].
-    // Checking ActivityCard -> expects 'activity'.
+const ActivitiesTab: React.FC<ActivitiesTabProps> = ({ countryId, preview = false, destinationSlug }) => {
+    const { data: activities, isLoading, error } = useActivities(countryId);
 
     if (isLoading) {
         return (
@@ -33,36 +27,20 @@ const ActivitiesTab: React.FC<ActivitiesTabProps> = ({ countryName, preview = fa
         return <div className="text-red-500 py-8">Failed to load activities.</div>;
     }
 
-    // Filter safely.
-    // Assuming ActivityResponse has a country field or location that matches.
-    // If not, we might need to rely on 'countryName' matching 'location' or similar. 
-    // Let's assume there's a country relationship or string. 
-    // If useActivities returns detailed objects with country.
-
-    // Actually, checking ActivityCard usage in CountryDetailPageNew...
-    // It passes `activities={country.activities}`.
-    // Since we want *all* activities and sticking to the pattern, we might need a dedicated `byCountry` hook or filter.
-    // The generic `useActivities` hook returns *all*.
-    // Client side filter:
-    const activities = Array.isArray(activityResponse) ? activityResponse : [];
-    const countryActivities = activities.filter((act: any) =>
-        // Robust matching: check country object or direct string
-        (act.country?.name === countryName) ||
-        (act.location?.includes(countryName))
-    );
+    const activeActivities = activities?.filter((act: any) => act.is_active) || [];
 
     return (
         <div>{/* removed py-6 since sections handle spacing */}
             <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Exciting Activities</h2>
             <PaginatedGrid
-                items={preview ? countryActivities.slice(0, 8) : countryActivities}
+                items={preview ? activeActivities.slice(0, 8) : activeActivities}
                 renderItem={(act: any) => <ActivityCard activity={act} />}
                 emptyMessage="No activities listed for this destination yet."
                 itemsPerPage={preview ? 8 : 9}
                 showPagination={!preview}
             />
 
-            {preview && countryActivities.length > 8 && destinationSlug && (
+            {preview && activeActivities.length > 8 && destinationSlug && (
                 <div className="mt-8 text-center">
                     <Link
                         to={`/destinations/${destinationSlug}/activities`}

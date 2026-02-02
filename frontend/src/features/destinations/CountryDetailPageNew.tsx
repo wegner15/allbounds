@@ -244,14 +244,6 @@ const CountryDetailPageNew: React.FC = () => {
             </div>
           </section>
 
-          {/* CTA Banner - Moved to bottom */}
-          <div className="mb-12">
-            <CTABanner
-              countrySlug={country.slug}
-              countryName={country.name}
-            />
-          </div>
-
           {/* Share Destination */}
           <section className="mb-16 max-w-2xl mx-auto">
             <Suspense fallback={<div className="h-40 bg-gray-100 rounded-lg animate-pulse" />}>

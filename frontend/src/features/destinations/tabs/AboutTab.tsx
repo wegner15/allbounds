@@ -2,11 +2,10 @@ import React, { lazy, Suspense } from 'react';
 import type { CountryWithDetails } from '../../../lib/types/api';
 import DestinationOverviewSection from '../components/DestinationOverviewSection';
 import BestTimeToVisitSection from '../components/BestTimeToVisitSection';
+import CTABanner from '../components/CTABanner';
 
 // Lazy loaded components
 const InteractiveMapSection = lazy(() => import('../components/InteractiveMapSection'));
-const SocialSharingCard = lazy(() => import('../components/SocialSharingCard'));
-const RelatedDestinationsSection = lazy(() => import('../components/RelatedDestinationsSection'));
 
 interface AboutTabProps {
     country: CountryWithDetails;
@@ -40,14 +39,11 @@ const AboutTab: React.FC<AboutTabProps> = ({ country, pageDescription, pageImage
                 <InteractiveMapSection country={country} />
             </Suspense>
 
-            {/* Social Sharing Section */}
-            <Suspense fallback={<SectionLoader />}>
-                <SocialSharingCard
-                    countryName={country.name}
-                    description={pageDescription}
-                    imageUrl={pageImage}
-                />
-            </Suspense>
+            {/* CTA Banner - Ready to Explore */}
+            <CTABanner
+                countrySlug={country.slug}
+                countryName={country.name}
+            />
 
         </div>
     );

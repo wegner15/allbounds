@@ -28,7 +28,7 @@ class Package(Base):
     slug = Column(String(100), unique=True, index=True, nullable=False)
     is_active = Column(Boolean, default=True)
     is_featured = Column(Boolean, default=False)
-    is_deal = Column(Boolean, default=False)
+    is_deal = Column(Boolean, nullable=False, default=False, server_default=func.false())
     is_published = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

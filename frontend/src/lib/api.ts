@@ -182,6 +182,7 @@ export const endpoints = {
     featured: () => '/packages/featured',
     detail: (id: number) => `/packages/${id}`,
     update: (id: number) => `/packages/${id}`,
+    patch: (id: number) => `/packages/${id}`,
     delete: (id: number) => `/packages/${id}`,
     bySlug: (slug: string) => `/packages/slug/${slug}`,
     comprehensiveBySlug: (slug: string) => `/packages/comprehensive/${slug}`,

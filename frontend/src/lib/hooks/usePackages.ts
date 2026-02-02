@@ -172,6 +172,24 @@ export const useUpdatePackage = (id: number) => {
   });
 };
 
+// Hook for partially updating a package (e.g. toggles)
+export const usePatchPackage = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<Package> }) => {
+      return apiClient.patch<Package>(endpoints.packages.patch(id), data);
+    },
+    onSuccess: (data, variables) => {
+      queryClient.setQueryData(['package', variables.id], data);
+      // Invalidate all packages queries to refresh lists
+      queryClient.invalidateQueries({ queryKey: ['packages'], exact: false });
+      // Also invalidate package details queries
+      queryClient.invalidateQueries({ queryKey: ['package-details'], exact: false });
+    },
+  });
+};
+
 // Hook for deleting a package (admin only)
 export const useDeletePackage = () => {
   const queryClient = useQueryClient();

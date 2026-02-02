@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useDeletePackage, usePackages } from '../../../lib/hooks/usePackages';
+import { useDeletePackage, usePackages, usePatchPackage } from '../../../lib/hooks/usePackages';
 import CloudflareImage from '../../../components/ui/CloudflareImage';
 
 const PackagesListPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { data: packages, isLoading, error } = usePackages();
   const deletePackage = useDeletePackage();
+  const patchPackage = usePatchPackage();
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
 
   // Filter packages based on search query
-  const filteredPackages = packages?.filter(pkg => 
+  const filteredPackages = packages?.filter(pkg =>
     pkg.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     pkg.country?.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -102,8 +103,14 @@ const PackagesListPage: React.FC = () => {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Duration
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Active
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Featured
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Deal
                   </th>
                   <th scope="col" className="relative px-6 py-3">
                     <span className="sr-only">Actions</span>
@@ -113,17 +120,17 @@ const PackagesListPage: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredPackages.map((pkg) => (
                   <tr key={pkg.id}>
-                     <td className="px-6 py-4 whitespace-nowrap">
-                       <div className="flex items-center">
-                         <div className="flex-shrink-0 h-10 w-10">
-                           <CloudflareImage
-                             imageId={pkg.image_id || ''}
-                             variant="medium"
-                             alt={pkg.name}
-                             className="h-10 w-10 rounded-md object-cover"
-                             placeholder="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=40&h=40&q=80"
-                           />
-                         </div>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10">
+                          <CloudflareImage
+                            imageId={pkg.image_id || ''}
+                            variant="medium"
+                            alt={pkg.name}
+                            className="h-10 w-10 rounded-md object-cover"
+                            placeholder="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=40&h=40&q=80"
+                          />
+                        </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{pkg.name}</div>
                           <div className="text-sm text-gray-500">{pkg.slug}</div>
@@ -140,12 +147,69 @@ const PackagesListPage: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{pkg.duration_days} days</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        pkg.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {pkg.is_active ? 'Active' : 'Draft'}
-                      </span>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <button
+                        type="button"
+                        onClick={() => patchPackage.mutate({ id: pkg.id, data: { is_active: !pkg.is_active } })}
+                        disabled={patchPackage.isPending}
+                        className={`${pkg.is_active ? 'bg-teal' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal focus:ring-offset-2`}
+                      >
+                        <span className="sr-only">Toggle active status</span>
+                        <span className={`${pkg.is_active ? 'translate-x-5' : 'translate-x-0'} pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}>
+                          <span className={`${pkg.is_active ? 'opacity-0 duration-100 ease-out' : 'opacity-100 duration-200 ease-in'} absolute inset-0 flex h-full w-full items-center justify-center transition-opacity`} aria-hidden="true">
+                            <svg className="h-3 w-3 text-gray-400" fill="none" viewBox="0 0 12 12">
+                              <path d="M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </span>
+                          <span className={`${pkg.is_active ? 'opacity-100 duration-200 ease-in' : 'opacity-0 duration-100 ease-out'} absolute inset-0 flex h-full w-full items-center justify-center transition-opacity`} aria-hidden="true">
+                            <svg className="h-3 w-3 text-teal" fill="currentColor" viewBox="0 0 12 12">
+                              <path d="M3.707 5.293a1 1 0 00-1.414 1.414l1.414-1.414zM5 8l-.707.707a1 1 0 001.414 0L5 8zm4.707-3.293a1 1 0 00-1.414-1.414l1.414 1.414zm-7.414 2l2 2 1.414-1.414-2-2-1.414 1.414zm3.414 2l4-4-1.414-1.414-4 4 1.414 1.414z" />
+                            </svg>
+                          </span>
+                        </span>
+                      </button>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <button
+                        type="button"
+                        onClick={() => patchPackage.mutate({ id: pkg.id, data: { is_featured: !pkg.is_featured } })}
+                        disabled={patchPackage.isPending}
+                        className={`${pkg.is_featured ? 'bg-yellow-500' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2`}
+                      >
+                        <span className="sr-only">Toggle featured status</span>
+                        <span className={`${pkg.is_featured ? 'translate-x-5' : 'translate-x-0'} pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}>
+                          <span className={`${pkg.is_featured ? 'opacity-0 duration-100 ease-out' : 'opacity-100 duration-200 ease-in'} absolute inset-0 flex h-full w-full items-center justify-center transition-opacity`} aria-hidden="true">
+                            <svg className="h-3 w-3 text-gray-400" fill="none" viewBox="0 0 12 12">
+                              <path d="M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </span>
+                          <span className={`${pkg.is_featured ? 'opacity-100 duration-200 ease-in' : 'opacity-0 duration-100 ease-out'} absolute inset-0 flex h-full w-full items-center justify-center transition-opacity`} aria-hidden="true">
+                            <svg className="h-3 w-3 text-yellow-500" fill="currentColor" viewBox="0 0 12 12">
+                              <path d="M3.707 5.293a1 1 0 00-1.414 1.414l1.414-1.414zM5 8l-.707.707a1 1 0 001.414 0L5 8zm4.707-3.293a1 1 0 00-1.414-1.414l1.414 1.414zm-7.414 2l2 2 1.414-1.414-2-2-1.414 1.414zm3.414 2l4-4-1.414-1.414-4 4 1.414 1.414z" />
+                            </svg>
+                          </span>
+                        </span>
+                      </button>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <button
+                        type="button"
+                        onClick={() => patchPackage.mutate({ id: pkg.id, data: { is_deal: !pkg.is_deal } })}
+                        disabled={patchPackage.isPending}
+                        className={`${pkg.is_deal ? 'bg-red-500' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2`}
+                      >
+                        <span className="sr-only">Toggle deal status</span>
+                        <span className={`${pkg.is_deal ? 'translate-x-5' : 'translate-x-0'} pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}>
+                          <span className={`${pkg.is_deal ? 'opacity-0 duration-100 ease-out' : 'opacity-100 duration-200 ease-in'} absolute inset-0 flex h-full w-full items-center justify-center transition-opacity`} aria-hidden="true">
+                            <svg className="h-3 w-3 text-gray-400" fill="none" viewBox="0 0 12 12">
+                              <path d="M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </span>
+                          <span className={`${pkg.is_deal ? 'opacity-100 duration-200 ease-in' : 'opacity-0 duration-100 ease-out'} absolute inset-0 flex h-full w-full items-center justify-center transition-opacity`} aria-hidden="true">
+                            <span className="text-[10px]">🔥</span>
+                          </span>
+                        </span>
+                      </button>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-4">

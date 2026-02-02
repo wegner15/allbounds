@@ -397,6 +397,12 @@ class PackageService:
         db.commit()
         db.refresh(db_package)
         return db_package
+
+    def patch_package(self, db: Session, package_id: int, package_update: PackageUpdate) -> Optional[Package]:
+        """
+        Partially update an existing package.
+        """
+        return self.update_package(db, package_id, package_update)
     
     def delete_package(self, db: Session, package_id: int) -> bool:
         """

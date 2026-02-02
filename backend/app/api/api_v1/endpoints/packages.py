@@ -208,6 +208,23 @@ def update_package(
     package = package_service.update_package(db, package_id=package_id, package_update=package_in)
     return package
 
+@router.patch("/{package_id}", response_model=PackageResponse)
+def patch_package(
+    *,
+    db: Session = Depends(get_db),
+    package_id: int,
+    package_in: PackageUpdate,
+    current_user: User = Depends(has_permission("content:update")),
+) -> Any:
+    """
+    Partially update a package.
+    """
+    package = package_service.get_package(db, package_id=package_id)
+    if package is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Package not found")
+    package = package_service.patch_package(db, package_id=package_id, package_update=package_in)
+    return package
+
 @router.delete("/{package_id}", response_model=PackageResponse)
 def delete_package(
     *,

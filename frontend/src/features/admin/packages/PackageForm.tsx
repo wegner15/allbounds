@@ -56,7 +56,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
   const { data: blogs, isLoading: isLoadingBlogs } = useBlogs(true);
 
   const createPackageMutation = useCreatePackage();
-  const updatePackageMutation = useUpdatePackage(packageData?.id);
+  const updatePackageMutation = useUpdatePackage(packageData?.id || (packageId ? parseInt(packageId) : 0));
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -249,8 +249,33 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
   // Type-safe form submission handler
   const handleFormSubmit = handleSubmit(onSubmit);
 
+  // Debug form errors
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      console.log('Form validation errors:', errors);
+    }
+  }, [errors]);
+
   return (
     <form onSubmit={handleFormSubmit} className="space-y-8">
+      {Object.keys(errors).length > 0 && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg relative">
+          <div className="flex items-center mb-2">
+            <svg className="h-5 w-5 text-red-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <span className="font-bold">Please fix the following validation errors:</span>
+          </div>
+          <ul className="list-disc list-inside text-sm">
+            {Object.entries(errors).map(([key, error]: [string, any]) => (
+              <li key={key}>
+                <span className="capitalize font-medium">{key.replace('_', ' ')}</span>: {error.message}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {serverError && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg relative">
           <div className="flex items-center">

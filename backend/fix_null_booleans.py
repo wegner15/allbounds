@@ -26,6 +26,7 @@ def fix_null_booleans():
         ("packages", "is_featured", False),
         ("packages", "is_active", True),
         ("packages", "is_published", False),
+        ("packages", "is_deal", False),
         
         # Group Trips
         ("group_trips", "is_featured", False),

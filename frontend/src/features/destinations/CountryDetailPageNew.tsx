@@ -191,9 +191,7 @@ const CountryDetailPageNew: React.FC = () => {
             { id: 'attractions', label: 'Attractions' },
             { id: 'hotels', label: 'Hotels' },
             { id: 'activities', label: 'Activities' },
-            ...(country.packages?.some(pkg => pkg.is_deal)
-              ? [{ id: 'deals', label: 'Deals' }]
-              : []),
+            { id: 'deals', label: 'Deals' },
             { id: 'blog', label: 'Blog' },
           ]}
         />

@@ -9,7 +9,7 @@ interface DestinationHeroSectionProps {
 
 const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo(({ country }) => {
   return (
-    <section 
+    <section
       className="relative w-full h-[500px] md:h-[600px] lg:h-[700px] overflow-hidden"
       aria-label={`${country.name} destination hero`}
     >
@@ -52,20 +52,45 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
       {/* Gradient Overlay for Text Readability */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
 
-      {/* Content Container */}
-      <div className="relative h-full flex items-end z-10">
-        <div className="container mx-auto px-4 pb-8 md:pb-12">
-          {/* Destination Name - H1 for proper heading hierarchy */}
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-playfair font-bold text-white mb-3 md:mb-4 leading-tight drop-shadow-lg animate-slide-up">
-            {country.name}
+      {/* Content Container - Centered Overlay Card */}
+      <div className="relative h-full flex items-center justify-center z-10 px-4">
+        <div className="bg-black/60 backdrop-blur-[2px] rounded-lg p-8 md:p-12 max-w-4xl w-full text-center text-white shadow-2xl border border-white/10">
+          {/* Destination Name */}
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-playfair font-bold mb-4 md:mb-6 leading-tight drop-shadow-lg">
+            Luxury {country.name} Holidays
           </h1>
 
           {/* Summary/Description */}
-          {country.summary && (
-            <p className="text-base md:text-lg lg:text-xl text-white/95 max-w-3xl leading-relaxed drop-shadow-md animate-fade-in line-clamp-3">
-              {country.summary}
-            </p>
-          )}
+          <div className="mb-8 md:mb-10">
+            {country.summary ? (
+              <p className="text-lg md:text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+                {country.summary}
+              </p>
+            ) : (
+              <p className="text-lg md:text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+                There is no question too small. Start planning your dream trip by talking to our Destination Specialists.
+              </p>
+            )}
+          </div>
+
+          {/* Call to Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+            <a
+              href="#planning"
+              className="px-8 py-3 border-2 border-white text-white font-semibold tracking-wider hover:bg-white hover:text-black transition-all duration-300 uppercase text-sm md:text-base rounded-sm min-w-[160px]"
+            >
+              Start Planning
+            </a>
+
+            <span className="text-white/80 font-serif italic text-lg">-or-</span>
+
+            <a
+              href="tel:+1234567890"
+              className="px-8 py-3 bg-teal hover:bg-teal-dark text-white font-semibold tracking-wider transition-all duration-300 uppercase text-sm md:text-base rounded-sm shadow-lg min-w-[160px]"
+            >
+              Call Us Now
+            </a>
+          </div>
         </div>
       </div>
     </section>

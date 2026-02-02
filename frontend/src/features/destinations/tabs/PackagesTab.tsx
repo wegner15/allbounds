@@ -42,7 +42,15 @@ const PackagesTab: React.FC<PackagesTabProps> = ({
     }
 
     if (isDealsOnly && displayPackages.length === 0) {
-        return null; // Don't show the section if there are no deals
+        return (
+            <div>
+                <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">{title || "Hot Deals"}</h2>
+                <div className="bg-gray-50 rounded-lg p-8 text-center border border-gray-200">
+                    <p className="text-gray-600 text-lg">There are currently no special deals available for this destination.</p>
+                    <p className="text-gray-500 mt-2">Check back later or browse our regular packages below.</p>
+                </div>
+            </div>
+        );
     }
 
     const sectionTitle = title || (isDealsOnly ? "Hot Deals" : "Explore our Packages");

@@ -174,12 +174,6 @@ const CountryDetailPageNew: React.FC = () => {
       {/* Hero Section */}
       <DestinationHeroSection country={country} />
 
-      {/* CTA Banner - Full Width */}
-      <CTABanner
-        countrySlug={country.slug}
-        countryName={country.name}
-      />
-
       {/* Main Content Area - Scrollable Sections */}
       <main id="main-content" className="bg-gray-50 flex-grow">
         {/* Section Navigation */}
@@ -248,6 +242,25 @@ const CountryDetailPageNew: React.FC = () => {
               <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Latest from our Blog</h2>
               <div className="text-gray-600">Coming soon... Discover travel stories and tips for {country.name}.</div>
             </div>
+          </section>
+
+          {/* CTA Banner - Moved to bottom */}
+          <div className="mb-12">
+            <CTABanner
+              countrySlug={country.slug}
+              countryName={country.name}
+            />
+          </div>
+
+          {/* Share Destination */}
+          <section className="mb-16 max-w-2xl mx-auto">
+            <Suspense fallback={<div className="h-40 bg-gray-100 rounded-lg animate-pulse" />}>
+              <SocialSharingCard
+                countryName={country.name}
+                description={pageDescription}
+                imageUrl={pageImage}
+              />
+            </Suspense>
           </section>
 
           {/* Related Destinations Section */}

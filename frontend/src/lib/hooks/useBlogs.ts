@@ -16,6 +16,8 @@ export interface BlogPost {
   updated_at: string;
   published_at?: string;
   tags: Tag[];
+  package_ids?: number[];
+  packages?: any[];
 }
 
 export interface Tag {
@@ -31,6 +33,7 @@ export interface BlogPostCreateInput {
   cover_image_id?: string;
   tags?: string[];
   slug?: string;
+  package_ids?: number[];
 }
 
 export interface BlogPostUpdateInput {
@@ -41,6 +44,7 @@ export interface BlogPostUpdateInput {
   tags?: string[];
   is_published?: boolean;
   is_active?: boolean;
+  package_ids?: number[];
 }
 
 // Hook for fetching all blog posts
@@ -95,7 +99,7 @@ export const useBlog = (id: number) => {
 // Hook for creating a new blog post
 export const useCreateBlog = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (data: BlogPostCreateInput) => {
       const response = await apiClient.post('/blog/', data);
@@ -110,7 +114,7 @@ export const useCreateBlog = () => {
 // Hook for updating a blog post
 export const useUpdateBlog = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: BlogPostUpdateInput }) => {
       const response = await apiClient.put(`/blog/${id}`, data);
@@ -126,7 +130,7 @@ export const useUpdateBlog = () => {
 // Hook for deleting a blog post
 export const useDeleteBlog = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (id: number) => {
       const response = await apiClient.delete(`/blog/${id}`);
@@ -141,7 +145,7 @@ export const useDeleteBlog = () => {
 // Hook for publishing a blog post
 export const usePublishBlog = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (id: number) => {
       const response = await apiClient.post(`/blog/${id}/publish`, {});

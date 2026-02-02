@@ -27,6 +27,7 @@ class BlogPostBase(BaseModel):
 # Schema for creating a new Blog Post
 class BlogPostCreate(BlogPostBase):
     slug: Optional[str] = Field(None, description="URL-friendly slug for the blog post")
+    package_ids: Optional[List[int]] = Field(default_factory=list, description="IDs of packages to link to this blog post")
 
 # Schema for updating a Blog Post
 class BlogPostUpdate(BaseModel):
@@ -37,6 +38,7 @@ class BlogPostUpdate(BaseModel):
     tags: Optional[List[str]] = Field(None, description="Tags for the blog post")
     is_published: Optional[bool] = Field(None, description="Whether the blog post is published")
     is_active: Optional[bool] = Field(None, description="Whether the blog post is active")
+    package_ids: Optional[List[int]] = Field(None, description="IDs of packages to link to this blog post")
 
 # Schema for Blog Post response
 class BlogPostResponse(BlogPostBase):
@@ -51,6 +53,8 @@ class BlogPostResponse(BlogPostBase):
     published_at: Optional[datetime] = None
     cover_image_url: Optional[str] = Field(None, description="Generated cover image URL")
     tags: List[TagResponse] = []
+    # Use any to avoid circular imports, but in practice it will be PackageListResponse or similar
+    packages: List[Any] = []
     
     @field_validator('is_published', 'is_active', 'is_featured', mode='before')
     @classmethod

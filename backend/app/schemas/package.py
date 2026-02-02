@@ -19,6 +19,7 @@ class PackageBase(BaseModel):
     inclusions: Optional[str] = Field(None, description="What's included in the package")
     exclusions: Optional[str] = Field(None, description="What's excluded from the package")
     image_id: Optional[str] = Field(None, description="Cloudflare image ID for the package thumbnail")
+    is_deal: Optional[bool] = Field(False, description="Whether the package is marked as a special deal")
     
 # Schema for creating a new Package
 class PackageCreate(PackageBase):
@@ -27,6 +28,7 @@ class PackageCreate(PackageBase):
     holiday_type_ids: Optional[List[int]] = Field(default_factory=list, description="List of holiday type IDs to associate with this package")
     inclusion_ids: Optional[List[int]] = Field(default_factory=list, description="List of inclusion IDs to associate with this package")
     exclusion_ids: Optional[List[int]] = Field(default_factory=list, description="List of exclusion IDs to associate with this package")
+    blog_post_ids: Optional[List[int]] = Field(default_factory=list, description="List of blog post IDs to associate with this package")
 
 # Schema for updating a Package
 class PackageUpdate(BaseModel):
@@ -42,10 +44,12 @@ class PackageUpdate(BaseModel):
     image_id: Optional[str] = Field(None, description="Cloudflare image ID for the package thumbnail")
     is_active: Optional[bool] = Field(None, description="Whether the package is active")
     is_featured: Optional[bool] = Field(None, description="Whether the package is featured")
+    is_deal: Optional[bool] = Field(None, description="Whether the package is a special deal")
     published_at: Optional[datetime] = Field(None, description="When the package was published")
     holiday_type_ids: Optional[List[int]] = Field(None, description="List of holiday type IDs to associate with this package")
     inclusion_ids: Optional[List[int]] = Field(None, description="List of inclusion IDs to associate with this package")
     exclusion_ids: Optional[List[int]] = Field(None, description="List of exclusion IDs to associate with this package")
+    blog_post_ids: Optional[List[int]] = Field(None, description="List of blog post IDs to associate with this package")
 
 # Schema for Package response
 class PackageResponse(PackageBase):
@@ -53,15 +57,17 @@ class PackageResponse(PackageBase):
     slug: str = Field(..., description="URL-friendly slug for the package", example="kenya-safari-adventure")
     is_active: bool = Field(..., description="Whether the package is active")
     is_featured: bool = Field(..., description="Whether the package is featured")
+    is_deal: bool = Field(False, description="Whether the package is a special deal")
     is_published: bool = Field(..., description="Whether the package is published")
     created_at: datetime
     updated_at: datetime
     published_at: Optional[datetime] = None
+    blog_posts: List[Any] = []
     # REMOVED: holiday_types, inclusion_items, exclusion_items to prevent circular loading
     # These cause exponential memory growth due to bidirectional relationships
     # Use dedicated endpoints to fetch these if needed
     
-    @field_validator('is_active', 'is_featured', 'is_published', mode='before')
+    @field_validator('is_active', 'is_featured', 'is_deal', 'is_published', mode='before')
     @classmethod
     def validate_boolean_fields(cls, v):
         """Convert None to False for boolean fields"""
@@ -89,6 +95,7 @@ class PackageListResponse(BaseModel):
     slug: str
     is_active: bool
     is_featured: bool
+    is_deal: bool
     created_at: datetime
     country: CountryResponse  # Only load country, not all relationships
     

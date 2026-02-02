@@ -13,6 +13,14 @@ blog_post_tags = Table(
     Column("tag_id", Integer, ForeignKey("tags.id"), primary_key=True)
 )
 
+# Many-to-Many relationship table between BlogPost and Package (Tour)
+blog_post_packages = Table(
+    "blog_post_packages",
+    Base.metadata,
+    Column("blog_post_id", Integer, ForeignKey("blog_posts.id"), primary_key=True),
+    Column("package_id", Integer, ForeignKey("packages.id"), primary_key=True)
+)
+
 class BlogPost(Base):
     __tablename__ = "blog_posts"
 
@@ -35,6 +43,7 @@ class BlogPost(Base):
     author = relationship("User", overlaps="blog_posts")
     tags = relationship("Tag", secondary=blog_post_tags, overlaps="blog_posts")
     media_assets = relationship("MediaAsset", secondary="blog_post_media", overlaps="blog_posts")
+    packages = relationship("Package", secondary=blog_post_packages, back_populates="blog_posts")
     seo_meta = relationship("SeoMeta", uselist=False)
     
     @property

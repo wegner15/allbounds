@@ -92,7 +92,8 @@ def create_blog_post(
         author_id=current_user.id,
         cover_image_id=blog_post_in.cover_image_id,
         slug=slug,
-        tags=blog_post_in.tags
+        tags=blog_post_in.tags,
+        package_ids=blog_post_in.package_ids
     )
 
     # Create audit log
@@ -129,7 +130,8 @@ def update_blog_post(
         cover_image_id=blog_post_in.cover_image_id,
         tags=blog_post_in.tags,
         is_published=blog_post_in.is_published,
-        is_active=blog_post_in.is_active
+        is_active=blog_post_in.is_active,
+        package_ids=blog_post_in.package_ids
     )
 
     # Create audit log

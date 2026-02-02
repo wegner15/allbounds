@@ -8,15 +8,23 @@ interface PackagesTabProps {
     countryId: number;
     preview?: boolean;
     destinationSlug?: string;
+    isDealsOnly?: boolean;
+    title?: string;
 }
 
-const PackagesTab: React.FC<PackagesTabProps> = ({ countryId, preview = false, destinationSlug }) => {
+const PackagesTab: React.FC<PackagesTabProps> = ({
+    countryId,
+    preview = false,
+    destinationSlug,
+    isDealsOnly = false,
+    title
+}) => {
     const { data: packages, isLoading, error } = usePackages({ country_id: countryId });
 
     if (isLoading) {
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
-                {[...Array(6)].map((_, i) => (
+                {[...Array(preview ? 3 : 6)].map((_, i) => (
                     <div key={i} className="bg-gray-200 rounded-xl h-96"></div>
                 ))}
             </div>
@@ -27,20 +35,30 @@ const PackagesTab: React.FC<PackagesTabProps> = ({ countryId, preview = false, d
         return <div className="text-red-500 py-8">Failed to load packages.</div>;
     }
 
-    const activePackages = packages?.filter(pkg => pkg.is_active) || [];
+    let displayPackages = packages?.filter(pkg => pkg.is_active) || [];
+
+    if (isDealsOnly) {
+        displayPackages = displayPackages.filter(pkg => pkg.is_deal);
+    }
+
+    if (isDealsOnly && displayPackages.length === 0) {
+        return null; // Don't show the section if there are no deals
+    }
+
+    const sectionTitle = title || (isDealsOnly ? "Hot Deals" : "Explore our Packages");
 
     return (
         <div>{/* removed py-6 since sections handle spacing */}
-            <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Explore our Packages</h2>
+            <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">{sectionTitle}</h2>
             <PaginatedGrid
-                items={preview ? activePackages.slice(0, 8) : activePackages}
-                renderItem={(pkg) => <PackageCard package={pkg} />}
+                items={preview ? displayPackages.slice(0, 8) : displayPackages}
+                renderItem={(pkg: any) => <PackageCard package={pkg} />}
                 emptyMessage="No packages available for this destination yet."
                 itemsPerPage={preview ? 8 : 9}
                 showPagination={!preview}
             />
 
-            {preview && activePackages.length > 8 && destinationSlug && (
+            {preview && displayPackages.length > 8 && destinationSlug && (
                 <div className="mt-8 text-center">
                     <Link
                         to={`/destinations/${destinationSlug}/packages`}

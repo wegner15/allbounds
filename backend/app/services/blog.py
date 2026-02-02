@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 
 from app.models.blog import BlogPost, Tag
+from app.models.package import Package
 from app.utils.slug import create_slug
 
 class BlogService:
@@ -54,7 +55,8 @@ class BlogService:
         cover_image_id: Optional[str] = None,
         tags: Optional[List[str]] = None,
         slug: Optional[str] = None,
-        is_published: bool = False
+        is_published: bool = False,
+        package_ids: Optional[List[int]] = None
     ) -> BlogPost:
         """
         Create a new blog post.
@@ -84,6 +86,11 @@ class BlogService:
                     db.add(tag)
                 # Add tag to blog post
                 db_blog_post.tags.append(tag)
+
+        # Handle packages
+        if package_ids:
+            packages = db.query(Package).filter(Package.id.in_(package_ids)).all()
+            db_blog_post.packages.extend(packages)
         
         # Set published_at if post is published
         if is_published:
@@ -104,7 +111,8 @@ class BlogService:
         cover_image_id: Optional[str] = None,
         tags: Optional[List[str]] = None,
         is_published: Optional[bool] = None,
-        is_active: Optional[bool] = None
+        is_active: Optional[bool] = None,
+        package_ids: Optional[List[int]] = None
     ) -> Optional[BlogPost]:
         """
         Update a blog post.
@@ -143,6 +151,13 @@ class BlogService:
                 db_blog_post.published_at = datetime.utcnow()
         if is_active is not None:
             db_blog_post.is_active = is_active
+            
+        if package_ids is not None:
+            # Clear existing packages
+            db_blog_post.packages = []
+            if package_ids:
+                packages = db.query(Package).filter(Package.id.in_(package_ids)).all()
+                db_blog_post.packages.extend(packages)
             
         db.commit()
         db.refresh(db_blog_post)

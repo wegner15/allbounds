@@ -28,6 +28,7 @@ class Package(Base):
     slug = Column(String(100), unique=True, index=True, nullable=False)
     is_active = Column(Boolean, default=True)
     is_featured = Column(Boolean, default=False)
+    is_deal = Column(Boolean, default=False)
     is_published = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
@@ -57,3 +58,6 @@ class Package(Base):
     
     # Relationship with Price Charts
     price_charts = relationship("PackagePriceChart", back_populates="package", cascade="all, delete-orphan")
+    
+    # Relationship with Blog Posts
+    blog_posts = relationship("BlogPost", secondary="blog_post_packages", back_populates="packages", lazy='noload')

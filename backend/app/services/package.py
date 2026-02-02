@@ -6,6 +6,7 @@ from app.models.package import Package
 from app.models.media import MediaAsset
 from app.models.holiday_type import HolidayType
 from app.models.inclusion_exclusion import Inclusion, Exclusion
+from app.models.blog import BlogPost
 from app.schemas.package import PackageCreate, PackageUpdate
 from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
 from app.core.cloudflare_config import cloudflare_settings
@@ -329,6 +330,11 @@ class PackageService:
         if package_create.exclusion_ids:
             exclusions = db.query(Exclusion).filter(Exclusion.id.in_(package_create.exclusion_ids)).all()
             db_package.exclusion_items.extend(exclusions)
+            
+        # Handle blog posts
+        if package_create.blog_post_ids:
+            blog_posts = db.query(BlogPost).filter(BlogPost.id.in_(package_create.blog_post_ids)).all()
+            db_package.blog_posts.extend(blog_posts)
         
         db.commit()
         db.refresh(db_package)
@@ -370,6 +376,15 @@ class PackageService:
                 if exclusion_ids:
                     exclusions = db.query(Exclusion).filter(Exclusion.id.in_(exclusion_ids)).all()
                     db_package.exclusion_items.extend(exclusions)
+
+        # Handle blog posts separately
+        if 'blog_post_ids' in update_data:
+            blog_post_ids = update_data.pop('blog_post_ids')
+            if blog_post_ids is not None:
+                db_package.blog_posts.clear()
+                if blog_post_ids:
+                    blog_posts = db.query(BlogPost).filter(BlogPost.id.in_(blog_post_ids)).all()
+                    db_package.blog_posts.extend(blog_posts)
         
         # Safely update slug if name changed
         update_data = update_slug_if_name_changed(

@@ -191,6 +191,10 @@ const CountryDetailPageNew: React.FC = () => {
             { id: 'attractions', label: 'Attractions' },
             { id: 'hotels', label: 'Hotels' },
             { id: 'activities', label: 'Activities' },
+            ...(country.packages?.some(pkg => pkg.is_deal)
+              ? [{ id: 'deals', label: 'Deals' }]
+              : []),
+            { id: 'blog', label: 'Blog' },
           ]}
         />
 
@@ -227,6 +231,25 @@ const CountryDetailPageNew: React.FC = () => {
           {/* Activities Section */}
           <section id="activities" className="scroll-mt-24 mb-12">
             <ActivitiesTab countryId={country.id} preview={true} destinationSlug={country.slug} />
+          </section>
+
+          {/* Hot Deals Section */}
+          <section id="deals" className="scroll-mt-24 mb-12">
+            <PackagesTab
+              countryId={country.id}
+              preview={true}
+              destinationSlug={country.slug}
+              isDealsOnly={true}
+              title="Deals"
+            />
+          </section>
+
+          {/* Blog Section */}
+          <section id="blog" className="scroll-mt-24 mb-12">
+            <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
+              <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Latest from our Blog</h2>
+              <div className="text-gray-600">Coming soon... Discover travel stories and tips for {country.name}.</div>
+            </div>
           </section>
 
           {/* Related Destinations Section */}

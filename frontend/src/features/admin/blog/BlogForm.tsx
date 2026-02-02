@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import BlogInlineEditor from '../../../components/ui/BlogInlineEditor';
 import ImageSelector from '../../../components/ui/ImageSelector';
 import type { BlogPost, BlogPostCreateInput, BlogPostUpdateInput } from '../../../lib/hooks/useBlogs';
+import { usePackages } from '../../../lib/hooks/usePackages';
 
 interface BlogFormProps {
   initialData?: BlogPost;
@@ -12,13 +13,15 @@ interface BlogFormProps {
 
 const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading }) => {
   const navigate = useNavigate();
+  const { data: packages, isLoading: isLoadingPackages } = usePackages();
   const [formData, setFormData] = useState({
     title: '',
     content: '',
     summary: '',
     cover_image_id: '',
     tags: [] as string[],
-    slug: ''
+    slug: '',
+    package_ids: [] as number[]
   });
   const [newTag, setNewTag] = useState('');
   const [isEditing, setIsEditing] = useState(true);
@@ -33,6 +36,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading })
         content: initialData.content || '',
         cover_image_id: initialData.cover_image_id || '',
         tags: initialData.tags?.map(tag => tag.name) || [],
+        package_ids: initialData.package_ids || initialData.packages?.map(p => p.id) || [],
       };
       setFormData(newFormData);
     }
@@ -117,66 +121,66 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading })
               </p>
             </div>
 
-             {/* Summary */}
-             <div>
-               <label htmlFor="summary" className="block text-sm font-semibold text-gray-900 mb-3">
-                 Post Summary
-               </label>
-               <textarea
-                 id="summary"
-                 name="summary"
-                 value={formData.summary}
-                 onChange={handleChange}
-                 placeholder="Write a compelling summary that will appear in previews and search results..."
-                 rows={4}
-                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical transition-colors placeholder-gray-400"
-               />
-               <p className="mt-2 text-sm text-gray-500">
-                 A good summary helps readers understand what your post is about and improves SEO.
-               </p>
-             </div>
+            {/* Summary */}
+            <div>
+              <label htmlFor="summary" className="block text-sm font-semibold text-gray-900 mb-3">
+                Post Summary
+              </label>
+              <textarea
+                id="summary"
+                name="summary"
+                value={formData.summary}
+                onChange={handleChange}
+                placeholder="Write a compelling summary that will appear in previews and search results..."
+                rows={4}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical transition-colors placeholder-gray-400"
+              />
+              <p className="mt-2 text-sm text-gray-500">
+                A good summary helps readers understand what your post is about and improves SEO.
+              </p>
+            </div>
 
-             {/* Cover Image */}
-             <div>
-               <label className="block text-sm font-semibold text-gray-900 mb-3">
-                 Cover Image
-               </label>
-               <ImageSelector
-                 initialImageId={formData.cover_image_id}
-                 onImageSelected={(imageId) => {
-                   setFormData(prev => ({
-                     ...prev,
-                     cover_image_id: imageId
-                   }));
-                 }}
-                 label="Select Cover Image"
-                 helperText="Choose an eye-catching image that represents your blog post."
-               />
-               {formData.cover_image_id && (
-                 <p className="mt-2 text-sm text-gray-600">
-                   Cover image selected (ID: {formData.cover_image_id})
-                 </p>
-               )}
-             </div>
-          </div>
-
-           {/* Content Editor Section */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-              <BlogInlineEditor
-                title={formData.title}
-                content={formData.content}
-                onTitleChange={(title) => {
+            {/* Cover Image */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-3">
+                Cover Image
+              </label>
+              <ImageSelector
+                initialImageId={formData.cover_image_id}
+                onImageSelected={(imageId) => {
                   setFormData(prev => ({
                     ...prev,
-                    title,
-                    slug: !initialData ? generateSlug(title) : prev.slug
+                    cover_image_id: imageId
                   }));
                 }}
-                onContentChange={(content) => setFormData(prev => ({ ...prev, content }))}
-                isEditing={isEditing}
-                onEditToggle={() => setIsEditing(!isEditing)}
+                label="Select Cover Image"
+                helperText="Choose an eye-catching image that represents your blog post."
               />
+              {formData.cover_image_id && (
+                <p className="mt-2 text-sm text-gray-600">
+                  Cover image selected (ID: {formData.cover_image_id})
+                </p>
+              )}
             </div>
+          </div>
+
+          {/* Content Editor Section */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+            <BlogInlineEditor
+              title={formData.title}
+              content={formData.content}
+              onTitleChange={(title) => {
+                setFormData(prev => ({
+                  ...prev,
+                  title,
+                  slug: !initialData ? generateSlug(title) : prev.slug
+                }));
+              }}
+              onContentChange={(content) => setFormData(prev => ({ ...prev, content }))}
+              isEditing={isEditing}
+              onEditToggle={() => setIsEditing(!isEditing)}
+            />
+          </div>
 
           {/* Tags Section */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
@@ -188,7 +192,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading })
                 Add relevant tags to help readers discover your content.
               </p>
             </div>
-            
+
             <div className="flex gap-3 mb-4">
               <input
                 type="text"
@@ -211,7 +215,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading })
                 Add Tag
               </button>
             </div>
-            
+
             {/* Display tags */}
             {formData.tags.length > 0 && (
               <div className="flex flex-wrap gap-3">
@@ -233,6 +237,69 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading })
                   </span>
                 ))}
               </div>
+            )}
+          </div>
+
+          {/* Related Tours Section */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-gray-900 mb-2">
+                Related Tours
+              </label>
+              <p className="text-sm text-gray-600">
+                Link relevant tours to this blog post to help readers find travel packages.
+              </p>
+            </div>
+
+            {isLoadingPackages ? (
+              <div className="flex items-center space-x-2 text-sm text-gray-500">
+                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-charcoal"></div>
+                <span>Loading tours...</span>
+              </div>
+            ) : packages && packages.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {packages.map((pkg) => {
+                  const checkboxId = `package-${pkg.id}`;
+                  const isChecked = formData.package_ids.includes(pkg.id);
+
+                  return (
+                    <div key={pkg.id} className="relative flex items-start p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors">
+                      <div className="flex h-6 items-center">
+                        <input
+                          id={checkboxId}
+                          type="checkbox"
+                          className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-offset-0"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            const currentPackages = formData.package_ids;
+                            if (e.target.checked) {
+                              setFormData(prev => ({
+                                ...prev,
+                                package_ids: [...currentPackages, pkg.id]
+                              }));
+                            } else {
+                              setFormData(prev => ({
+                                ...prev,
+                                package_ids: currentPackages.filter(id => id !== pkg.id)
+                              }));
+                            }
+                          }}
+                        />
+                      </div>
+                      <div className="ml-3 text-sm leading-6">
+                        <label htmlFor={checkboxId} className="font-medium text-gray-900 cursor-pointer flex flex-col">
+                          <span>{pkg.name}</span>
+                          <span className="text-xs text-gray-500">
+                            {pkg.duration_days} days • Starting from ${pkg.price}
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic">No tours found.</p>
             )}
           </div>
 

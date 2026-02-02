@@ -254,11 +254,14 @@ export interface Package extends BaseModel {
   image_id?: string;
   is_active: boolean;
   is_featured: boolean;
+  is_deal: boolean;
   inclusions?: InclusionExclusionItem[];
   exclusions?: InclusionExclusionItem[];
   itinerary?: PackageItineraryDay[];
   holiday_types: HolidayType[];
   gallery_images?: MediaAsset[];
+  blog_post_ids?: number[];
+  blog_posts?: BlogPost[];
   rating?: number;
   review_count?: number;
 }
@@ -412,6 +415,7 @@ export interface PackageDetailResponse {
   image_id?: string;
   is_active: boolean;
   is_featured: boolean;
+  is_deal: boolean;
   created_at: string;
   updated_at: string;
   country: CountrySummary;
@@ -424,6 +428,7 @@ export interface PackageDetailResponse {
   attractions: AttractionSummary[];
   reviews: ReviewDetail[];
   price_charts: PriceChartDetail[];
+  blog_posts: BlogPost[];
 }
 
 export interface InclusionExclusionItem {
@@ -510,6 +515,8 @@ export interface BlogPost extends BaseModel {
   author?: User;
   published_at?: string;
   tags: Tag[];
+  package_ids?: number[];
+  packages?: Package[];
 }
 
 export interface Tag extends BaseModel {

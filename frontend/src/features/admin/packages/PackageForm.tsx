@@ -9,6 +9,7 @@ import { useHolidayTypes } from '../../../lib/hooks/useHolidayTypes';
 import { useCreatePackage, useUpdatePackage } from '../../../lib/hooks/usePackages';
 import { useInclusions } from '../../../lib/hooks/useInclusions';
 import { useExclusions } from '../../../lib/hooks/useExclusions';
+import { useBlogs } from '../../../lib/hooks/useBlogs';
 import ImageSelector from '../../../components/ui/ImageSelector';
 import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
 import GalleryManager from '../../../components/admin/GalleryManager';
@@ -30,9 +31,11 @@ const packageSchema = z.object({
   holiday_type_ids: z.array(z.number()).min(1, 'Please select at least one holiday type'),
   inclusion_ids: z.array(z.number()).optional(),
   exclusion_ids: z.array(z.number()).optional(),
+  blog_post_ids: z.array(z.number()).optional(),
   image_id: z.string().optional(),
   is_active: z.boolean(),
   is_featured: z.boolean(),
+  is_deal: z.boolean(),
 });
 
 type PackageFormData = z.infer<typeof packageSchema>;
@@ -50,6 +53,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
   const { data: holidayTypes, isLoading: isLoadingHolidayTypes } = useHolidayTypes();
   const { data: inclusions, isLoading: isLoadingInclusions } = useInclusions();
   const { data: exclusions, isLoading: isLoadingExclusions } = useExclusions();
+  const { data: blogs, isLoading: isLoadingBlogs } = useBlogs(true);
 
   const createPackageMutation = useCreatePackage();
   const updatePackageMutation = useUpdatePackage(packageData?.id);
@@ -81,9 +85,11 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
         holiday_type_ids: packageData.holiday_types?.map((ht: any) => ht.id) || [],
         inclusion_ids: packageData.inclusion_items?.map((item: any) => item.id) || [],
         exclusion_ids: packageData.exclusion_items?.map((item: any) => item.id) || [],
+        blog_post_ids: packageData.blog_posts?.map((blog: any) => blog.id) || [],
         image_id: packageData.image_id || '',
         is_active: packageData.is_active,
         is_featured: packageData.is_featured,
+        is_deal: packageData.is_deal || false,
       }
       : {
         name: '',
@@ -96,9 +102,11 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
         holiday_type_ids: [],
         inclusion_ids: [],
         exclusion_ids: [],
+        blog_post_ids: [],
         image_id: '',
         is_active: true,
         is_featured: false,
+        is_deal: false,
       },
   });
 
@@ -122,9 +130,11 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       setValue('holiday_type_ids', packageData.holiday_types?.map((ht: any) => ht.id) || []);
       setValue('inclusion_ids', packageData.inclusion_items?.map((item: any) => item.id) || []);
       setValue('exclusion_ids', packageData.exclusion_items?.map((item: any) => item.id) || []);
+      setValue('blog_post_ids', packageData.blog_posts?.map((blog: any) => blog.id) || []);
       setValue('image_id', packageData.image_id || '');
       setValue('is_active', packageData.is_active ?? true);
       setValue('is_featured', packageData.is_featured ?? false);
+      setValue('is_deal', packageData.is_deal ?? false);
 
       console.log('PackageForm: Set country_id to:', packageData.country_id);
       console.log('PackageForm: Set holiday_type_ids to:', packageData.holiday_types?.map((ht: any) => ht.id) || []);
@@ -168,8 +178,9 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       // Prepare the data for submission
       const packageData = {
         ...formData,
-        // Ensure is_featured is included from the form state
+        // Ensure boolean fields are included from the form state
         is_featured: watch('is_featured'),
+        is_deal: watch('is_deal'),
         // Use the form's image_id (which is now properly set by the ImageSelector)
         image_id: formData.image_id || undefined
       };
@@ -787,6 +798,80 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
             </p>
           </div>
 
+          {/* Blog Posts */}
+          <div className="sm:col-span-6">
+            <div className="flex justify-between items-center">
+              <label className="block text-sm font-semibold text-gray-800">
+                Related Blog Posts
+              </label>
+            </div>
+            <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
+              <div className="mb-3">
+                <p className="text-sm text-gray-700">Select blog posts to link to this package:</p>
+              </div>
+              {isLoadingBlogs ? (
+                <div className="flex items-center space-x-2 text-sm text-gray-500">
+                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-charcoal"></div>
+                  <span>Loading blogs...</span>
+                </div>
+              ) : blogs && blogs.length > 0 ? (
+                <Controller
+                  name="blog_post_ids"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                      {blogs.map((blog) => {
+                        const checkboxId = `blog-post-${blog.id}`;
+                        const isChecked = (field.value || []).includes(blog.id);
+
+                        return (
+                          <div key={blog.id} className="relative flex items-start p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors">
+                            <div className="flex h-6 items-center">
+                              <input
+                                id={checkboxId}
+                                type="checkbox"
+                                className="h-5 w-5 rounded border-gray-300 text-teal focus:ring-teal focus:ring-offset-0"
+                                checked={isChecked}
+                                onChange={(e) => {
+                                  const currentBlogs = field.value || [];
+                                  if (e.target.checked) {
+                                    field.onChange([...currentBlogs, blog.id]);
+                                  } else {
+                                    field.onChange(currentBlogs.filter((id) => id !== blog.id));
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div className="ml-3 text-sm leading-6">
+                              <label htmlFor={checkboxId} className="font-medium text-gray-900 cursor-pointer flex flex-col">
+                                <span>{blog.title}</span>
+                                {blog.published_at && (
+                                  <span className="text-xs text-gray-500">
+                                    Published: {new Date(blog.published_at).toLocaleDateString()}
+                                  </span>
+                                )}
+                                {!blog.is_published && (
+                                  <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 w-fit">
+                                    Draft
+                                  </span>
+                                )}
+                              </label>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                />
+              ) : (
+                <p className="text-sm text-gray-500 italic">No blog posts found.</p>
+              )}
+            </div>
+            <p className="mt-2 text-xs text-gray-500">
+              Linked blog posts will be displayed as related content on the tour page
+            </p>
+          </div>
+
           {/* Price Charts */}
           <div className="sm:col-span-6">
             <div className="flex justify-between items-center">
@@ -896,6 +981,49 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                       )}
                     </span>
                   </button>
+                </div>
+              </div>
+
+              {/* Deal Status */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-medium text-gray-800">Special Deal</h3>
+                  <p className="text-sm text-gray-500 mt-1">Mark this package as a "Hot Deal" to show it in the Deals section</p>
+                </div>
+                <div className="flex items-center bg-gray-50 px-4 py-2 rounded-lg">
+                  <span className={`mr-3 text-sm font-medium ${watch('is_deal') ? 'text-red-600' : 'text-gray-500'}`}>
+                    {watch('is_deal') ? 'Hot Deal 🔥' : 'Regular Package'}
+                  </span>
+                  <button
+                    type="button"
+                    className={`${watch('is_deal') ? 'bg-red-600' : 'bg-gray-300'}
+                      relative inline-flex flex-shrink-0 h-7 w-14 border-2 border-transparent rounded-full
+                      cursor-pointer transition-all ease-in-out duration-200 focus:outline-none focus:ring-2
+                      focus:ring-offset-2 focus:ring-red-500 shadow-sm`}
+                    onClick={() => setValue('is_deal', !watch('is_deal'))}
+                  >
+                    <span className="sr-only">Toggle deal status</span>
+                    <span
+                      aria-hidden="true"
+                      className={`${watch('is_deal') ? 'translate-x-7' : 'translate-x-0'}
+                        pointer-events-none inline-block h-6 w-6 rounded-full bg-white shadow
+                        transform ring-0 transition ease-in-out duration-200 flex items-center justify-center`}
+                    >
+                      {watch('is_deal') ? (
+                        <span className="text-[10px]">🔥</span>
+                      ) : (
+                        <svg className="h-3 w-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </span>
+                  </button>
+                  {/* Hidden input to register the is_deal field */}
+                  <input
+                    type="checkbox"
+                    className="hidden"
+                    {...register('is_deal')}
+                  />
                 </div>
               </div>
 

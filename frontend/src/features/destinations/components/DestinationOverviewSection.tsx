@@ -135,66 +135,60 @@ const DestinationOverviewSection: React.FC<DestinationOverviewSectionProps> = Re
         {/* Right Column: Gallery Preview */}
         {mediaAssets.length > 0 && (
           <div className="lg:col-span-5">
-            <div className="grid grid-cols-2 gap-3 h-full max-h-[600px] overflow-hidden rounded-2xl">
-              {mediaAssets.slice(0, 4).map((asset, index) => (
-                <div
-                  key={asset.id}
-                  className={`relative overflow-hidden cursor-pointer group shadow-sm transition-all duration-300 ${index === 0 && mediaAssets.length > 1 ? 'col-span-2 row-span-2 aspect-[4/3]' : 'aspect-square'
-                    }`}
-                  onClick={() => handleOpenLightbox(index)}
-                >
-                  <img
-                    src={getThumbnailUrl(asset)}
-                    alt={asset.alt_text || `${country.name} gallery image ${index + 1}`}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                    {isVideo(asset) ? (
-                      <div className="w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
-                        <PlayIcon className="w-5 h-5 text-primary-600 ml-1" />
-                      </div>
-                    ) : (
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                        </svg>
-                      </div>
-                    )}
+            <div className="grid grid-cols-2 gap-3 h-full max-h-[500px] md:max-h-[600px] overflow-hidden rounded-2xl">
+              {mediaAssets.slice(0, 4).map((asset, index) => {
+                let gridClasses = "relative overflow-hidden cursor-pointer group shadow-sm transition-all duration-300 ";
 
-                    {index === 3 && mediaAssets.length > 4 && (
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white font-bold text-xl">
-                        +{mediaAssets.length - 4}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
+                if (mediaAssets.length === 1) {
+                  gridClasses += "col-span-2 row-span-2 aspect-[4/3]";
+                } else if (mediaAssets.length === 2) {
+                  gridClasses += "col-span-1 aspect-square";
+                } else {
+                  // 3 or more images: First is tall, others are square
+                  if (index === 0) {
+                    gridClasses += "row-span-2 col-span-1 h-full min-h-[300px]";
+                  } else {
+                    gridClasses += "col-span-1 aspect-square";
+                  }
+                }
 
-              {/* If only one image, make it full height */}
-              {mediaAssets.length === 1 && (
-                <div
-                  key={mediaAssets[0].id}
-                  className="relative overflow-hidden cursor-pointer group shadow-sm transition-all duration-300 col-span-2 row-span-2 aspect-[4/3] rounded-2xl"
-                  onClick={() => handleOpenLightbox(0)}
-                >
-                  <img
-                    src={getThumbnailUrl(mediaAssets[0])}
-                    alt={mediaAssets[0].alt_text || country.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                    {isVideo(mediaAssets[0]) && (
-                      <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
-                        <PlayIcon className="w-6 h-6 text-primary-600 ml-1" />
-                      </div>
-                    )}
+                return (
+                  <div
+                    key={asset.id}
+                    className={gridClasses}
+                    onClick={() => handleOpenLightbox(index)}
+                  >
+                    <img
+                      src={getThumbnailUrl(asset)}
+                      alt={asset.alt_text || `${country.name} gallery image ${index + 1}`}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                      {isVideo(asset) ? (
+                        <div className="w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+                          <PlayIcon className="w-5 h-5 text-primary-600 ml-1" />
+                        </div>
+                      ) : (
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                          </svg>
+                        </div>
+                      )}
+
+                      {index === 3 && mediaAssets.length > 4 && (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white font-bold text-xl">
+                          +{mediaAssets.length - 4}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })}
             </div>
 
             <p className="mt-3 text-sm text-gray-500 text-center italic">
-              Click any image to view gallery
+              {mediaAssets.length > 1 ? `Click any image to view all ${mediaAssets.length} images` : 'Click to view full image'}
             </p>
           </div>
         )}

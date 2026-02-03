@@ -65,6 +65,7 @@ class HotelService:
                 "description": hotel.description,
                 "slug": hotel.slug,
                 "country_id": hotel.country_id,
+                "hotel_type_id": hotel.hotel_type_id,
                 "country": {
                     "id": hotel.country.id,
                     "name": hotel.country.name,
@@ -120,7 +121,9 @@ class HotelService:
                 "name": hotel.name,
                 "summary": hotel.summary,
                 "description": hotel.description,
+                "description": hotel.description,
                 "slug": hotel.slug,
+                "hotel_type_id": hotel.hotel_type_id,
                 "stars": hotel.stars,
                 "address": hotel.address,
                 "city": hotel.city,
@@ -172,6 +175,7 @@ class HotelService:
                 "description": hotel.description,
                 "slug": hotel.slug,
                 "country_id": hotel.country_id,
+                "hotel_type_id": hotel.hotel_type_id,
                 "country": {
                     "id": hotel.country.id,
                     "name": hotel.country.name,

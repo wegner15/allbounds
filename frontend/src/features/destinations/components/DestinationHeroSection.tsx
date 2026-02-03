@@ -54,20 +54,20 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
 
       {/* Content Container - Centered Overlay Card */}
       <div className="relative h-full flex items-center justify-center z-10 px-4">
-        <div className="bg-black/60 backdrop-blur-[2px] rounded-lg p-8 md:p-12 max-w-4xl w-full text-center text-white shadow-2xl border border-white/10">
+        <div className="bg-black/40 backdrop-blur-[2px] rounded-lg p-8 md:p-12 max-w-4xl w-full text-center text-white shadow-2xl border border-white/10">
           {/* Destination Name */}
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-playfair font-bold mb-4 md:mb-6 leading-tight drop-shadow-lg">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-playfair font-bold mb-4 md:mb-6 leading-tight drop-shadow-lg text-white">
             Luxury {country.name} Holidays
           </h1>
 
           {/* Summary/Description */}
           <div className="mb-8 md:mb-10">
             {country.summary ? (
-              <p className="text-lg md:text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+              <p className="text-lg md:text-xl text-white max-w-3xl mx-auto leading-relaxed drop-shadow-md">
                 {country.summary}
               </p>
             ) : (
-              <p className="text-lg md:text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+              <p className="text-lg md:text-xl text-white max-w-3xl mx-auto leading-relaxed drop-shadow-md">
                 There is no question too small. Start planning your dream trip by talking to our Destination Specialists.
               </p>
             )}

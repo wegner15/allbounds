@@ -199,6 +199,15 @@ const CountryDetailPageNew: React.FC = () => {
               pageImage={pageImage}
             />
           </section>
+        </div>
+
+        {/* CTA Banner - Full Width */}
+        <CTABanner
+          countrySlug={country.slug}
+          countryName={country.name}
+        />
+
+        <div className="container mx-auto px-4 py-8">
 
           {/* Packages Section */}
           <section id="packages" className="scroll-mt-24 mb-12">

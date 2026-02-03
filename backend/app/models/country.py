@@ -20,6 +20,7 @@ class Country(Base):
 
     # Relationships
     region = relationship("Region", back_populates="countries")
+    media_assets = relationship("MediaAsset", secondary="country_media", back_populates="countries")
     # CRITICAL: lazy='noload' prevents circular loading when accessing country.packages
     attractions = relationship("Attraction", back_populates="country", lazy='noload')
     accommodations = relationship("Accommodation", back_populates="country", lazy='noload')

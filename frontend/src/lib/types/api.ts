@@ -56,8 +56,21 @@ export interface Country extends BaseModel {
   language?: string;
   population?: number;
   timezone?: string;
-  latitude?: number;
   longitude?: number;
+  media_assets?: MediaAsset[];
+}
+
+export interface CountryCreate {
+  name: string;
+  description?: string;
+  summary?: string;
+  region_id: number;
+  image_id?: string;
+  media_asset_ids?: number[];
+}
+
+export interface CountryUpdate extends Partial<CountryCreate> {
+  is_active?: boolean;
 }
 
 // Country Visit Info types
@@ -82,6 +95,7 @@ export interface CountryWithDetails extends Country {
   hotels: (Hotel & { cover_image?: string | null })[];
   activities: Activity[];
   visit_info?: CountryVisitInfo;
+  media_assets: MediaAsset[];
 }
 
 // Group trip with departures for country details

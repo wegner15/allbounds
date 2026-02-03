@@ -12,6 +12,8 @@ import FormSelect from '../../../components/ui/FormSelect';
 import Button from '../../../components/ui/Button';
 import ImageSelector from '../../../components/ui/ImageSelector';
 import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
+import GalleryManager from '../../../components/admin/GalleryManager';
+import type { GalleryImage } from '../../../lib/types/api';
 
 // Form validation schema
 const countrySchema = z.object({
@@ -35,44 +37,46 @@ interface CountryFormProps {
 const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }) => {
   const navigate = useNavigate();
   const { data: regions, isLoading: isLoadingRegions } = useRegions();
-  
+
   const createCountryMutation = useCreateCountry();
   const updateCountryMutation = useUpdateCountry(countryData?.id);
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
-  
-   // Initialize form with default values or existing country data
-   const {
-     register,
-     handleSubmit,
-     setValue,
-     watch,
-     control,
-     formState: { errors },
-   } = useForm<CountryFormData>({
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [coverImageId, setCoverImageId] = useState<number | null>(null);
+
+  // Initialize form with default values or existing country data
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    control,
+    formState: { errors },
+  } = useForm<CountryFormData>({
     resolver: zodResolver(countrySchema),
     defaultValues: isEdit && countryData
       ? {
-          name: countryData.name,
-          slug: countryData.slug,
-          description: countryData.description,
-          summary: countryData.summary || '',
-          region_id: countryData.region_id,
-          image_id: countryData.image_id || '',
-          is_active: countryData.is_active,
-        }
+        name: countryData.name,
+        slug: countryData.slug,
+        description: countryData.description,
+        summary: countryData.summary || '',
+        region_id: countryData.region_id,
+        image_id: countryData.image_id || '',
+        is_active: countryData.is_active,
+      }
       : {
-          name: '',
-          slug: '',
-          description: '',
-          summary: '',
-          region_id: 0,
-          image_id: '',
-          is_active: true,
-        },
+        name: '',
+        slug: '',
+        description: '',
+        summary: '',
+        region_id: 0,
+        image_id: '',
+        is_active: true,
+      },
   });
-  
+
   // Auto-generate slug from name
   const name = watch('name');
   useEffect(() => {
@@ -84,19 +88,36 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
       setValue('slug', generatedSlug);
     }
   }, [name, setValue, isEdit]);
-  
+
+  // Initialize gallery images and cover image from existing country data
+  useEffect(() => {
+    if (isEdit && countryData) {
+      if (countryData.media_assets) {
+        setGalleryImages(countryData.media_assets);
+      }
+      if (countryData.image_id) {
+        setCoverImageId(parseInt(countryData.image_id));
+      }
+    }
+  }, [isEdit, countryData]);
+
   const onSubmit = async (data: CountryFormData) => {
     setIsSubmitting(true);
     setServerError(null);
 
     try {
+      const finalData = {
+        ...data,
+        media_asset_ids: galleryImages.map(img => img.id)
+      };
+
       if (isEdit) {
-        await updateCountryMutation.mutateAsync(data);
+        await updateCountryMutation.mutateAsync(finalData);
         // For edit, navigate immediately since we know the data is updated
         navigate('/admin/destinations');
       } else {
         // For create, wait a bit to ensure the list refreshes with the new data
-        await createCountryMutation.mutateAsync(data);
+        await createCountryMutation.mutateAsync(finalData);
         // Add a small delay to ensure query invalidation completes
         setTimeout(() => {
           navigate('/admin/destinations');
@@ -109,7 +130,7 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
       setIsSubmitting(false);
     }
   };
-  
+
   if (isLoadingRegions) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -120,10 +141,10 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
       </div>
     );
   }
-  
+
   // Type-safe form submission handler
   const handleFormSubmit = handleSubmit(onSubmit);
-  
+
   return (
     <form onSubmit={handleFormSubmit} className="space-y-8">
       {serverError && (
@@ -140,7 +161,7 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
           </div>
         </div>
       )}
-      
+
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
           <h3 className="text-lg font-medium text-gray-900">
@@ -150,7 +171,7 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
             {isEdit ? 'Update the country information below' : 'Fill in the details to add a new country'}
           </p>
         </div>
-        
+
         <div className="p-6 space-y-6">
           <div className="grid grid-cols-1 gap-y-6 gap-x-6 sm:grid-cols-6">
             {/* Name */}
@@ -168,7 +189,7 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
                 />
               </FormGroup>
             </div>
-            
+
             {/* Slug */}
             <div className="sm:col-span-3">
               <FormGroup>
@@ -185,7 +206,7 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
                 />
               </FormGroup>
             </div>
-            
+
             {/* Region selector */}
             <div className="sm:col-span-3">
               <FormGroup>
@@ -206,7 +227,7 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
                 </FormSelect>
               </FormGroup>
             </div>
-            
+
             {/* Image Upload */}
             <div className="sm:col-span-3">
               <FormGroup>
@@ -218,46 +239,45 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
                 />
               </FormGroup>
             </div>
-            
-              {/* Description */}
-              <div className="sm:col-span-6">
-                <Controller
-                  name="description"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <TinyMCEEditor
-                      value={field.value}
-                      onChange={field.onChange}
-                      label="Description"
-                      placeholder="Provide a detailed description of the country, including key attractions, geography, and cultural highlights..."
-                      height={300}
-                      error={fieldState.error?.message}
-                      required
-                    />
-                  )}
+
+            {/* Description */}
+            <div className="sm:col-span-6">
+              <Controller
+                name="description"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <TinyMCEEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                    label="Description"
+                    placeholder="Provide a detailed description of the country, including key attractions, geography, and cultural highlights..."
+                    height={300}
+                    error={fieldState.error?.message}
+                    required
+                  />
+                )}
+              />
+            </div>
+
+            {/* Summary */}
+            <div className="sm:col-span-6">
+              <FormGroup>
+                <FormTextarea
+                  id="summary"
+                  label="Summary"
+                  error={errors.summary}
+                  fullWidth
+                  variant="filled"
+                  rows={3}
+                  placeholder="Brief summary for cards and previews..."
+                  helperText="A concise summary that appears in country cards and search results (max 255 characters)"
+                  {...register('summary')}
                 />
-              </div>
-
-             {/* Summary */}
-             <div className="sm:col-span-6">
-               <FormGroup>
-                 <FormTextarea
-                   id="summary"
-                   label="Summary"
-                   error={errors.summary}
-                   fullWidth
-                   variant="filled"
-                   rows={3}
-                   placeholder="Brief summary for cards and previews..."
-                   helperText="A concise summary that appears in country cards and search results (max 255 characters)"
-                   {...register('summary')}
-                 />
-               </FormGroup>
-              </div>
+              </FormGroup>
+            </div>
 
 
-
-             {/* Status */}
+            {/* Status */}
             <div className="sm:col-span-6">
               <FormGroup>
                 <FormCheckbox
@@ -267,10 +287,31 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
                 />
               </FormGroup>
             </div>
+
+            {/* Gallery Manager */}
+            <div className="sm:col-span-6">
+              <div className="border-t border-gray-200 pt-6 mt-6">
+                <h4 className="text-md font-medium text-gray-900 mb-4">Country Gallery</h4>
+                <p className="text-sm text-gray-500 mb-4">
+                  Manage images and videos for this country. The first image will be set as the cover by default.
+                </p>
+                <GalleryManager
+                  entityType="country"
+                  entityId={countryData?.id}
+                  images={galleryImages}
+                  coverImageId={coverImageId}
+                  onImagesChange={setGalleryImages}
+                  onCoverImageChange={(imageId) => {
+                    setCoverImageId(imageId);
+                    if (imageId) setValue('image_id', imageId.toString());
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      
+
       {/* Form actions */}
       <div className="flex justify-end space-x-4">
         <Button

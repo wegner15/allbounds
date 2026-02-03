@@ -3,7 +3,7 @@ import { apiClient } from '../../lib/api';
 import type { GalleryImage } from '../../lib/types/api';
 
 interface GalleryManagerProps {
-  entityType: 'hotel' | 'package' | 'group_trip' | 'attraction' | 'holiday_type';
+  entityType: 'hotel' | 'package' | 'group_trip' | 'attraction' | 'holiday_type' | 'country';
   entityId?: number;
   images: GalleryImage[];
   coverImageId?: number | null;
@@ -28,7 +28,7 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
   useEffect(() => {
     const fetchImages = async () => {
       if (!entityId) return;
-      
+
       setIsLoading(true);
       try {
         const response = await apiClient.get<GalleryImage[]>(`/api/v1/media/?entity_type=${entityType}&entity_id=${entityId}`);
@@ -56,9 +56,9 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
     setIsUploading(true);
     setError(null);
     setSuccess(null);
-    
+
     let uploadedCount = 0;
-    
+
     for (const file of Array.from(files)) {
       try {
         const formData = new FormData();
@@ -72,17 +72,17 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
 
         // Add to images list
         onImagesChange([...images, response]);
-        
+
         // Set as cover image if it's the first image
         if (images.length === 0 && !coverImageId) {
           // Set as cover image locally
           onCoverImageChange(response.id);
-          
+
           // Also update the cover image on the server if we have entity info
           if (entityId) {
             try {
               console.log(`Setting first uploaded image as cover for ${entityType} ${entityId}:`, response.id);
-              
+
               // Different endpoints for different entity types
               let endpoint = '';
               if (entityType === 'package') {
@@ -95,8 +95,10 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
                 endpoint = `/api/v1/attractions/${entityId}/cover-image`;
               } else if (entityType === 'group_trip') {
                 endpoint = `/api/v1/group-trips/${entityId}/cover-image`;
+              } else if (entityType === 'country') {
+                endpoint = `/api/v1/countries/${entityId}/cover-image`;
               }
-              
+
               if (endpoint) {
                 // Use PUT for hotel and group_trip, POST for others
                 if (entityType === 'hotel' || entityType === 'group_trip') {
@@ -123,12 +125,12 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
         setError(`Failed to upload ${file.name}. Please try again.`);
       }
     }
-    
+
     if (uploadedCount > 0) {
       setSuccess(`Successfully uploaded ${uploadedCount} image${uploadedCount > 1 ? 's' : ''}`);
       setTimeout(() => setSuccess(null), 3000);
     }
-    
+
     setIsUploading(false);
     // Reset input
     event.target.value = '';
@@ -139,12 +141,12 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
       await apiClient.delete(`/api/v1/media/${imageId}`);
       const updatedImages = images.filter(img => img.id !== imageId);
       onImagesChange(updatedImages);
-      
+
       // If removed image was cover, set first remaining as cover
       if (coverImageId === imageId) {
         onCoverImageChange(updatedImages.length > 0 ? updatedImages[0].id : null);
       }
-      
+
       setSuccess('Image removed successfully');
       setTimeout(() => setSuccess(null), 2000);
     } catch (error) {
@@ -156,12 +158,12 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
   const handleSetCover = async (imageId: number) => {
     // Update the local state
     onCoverImageChange(imageId);
-    
+
     // If we have entity info, immediately update the cover image on the server
     if (entityId) {
       try {
         console.log(`Immediately setting cover image for ${entityType} ${entityId} to:`, imageId);
-        
+
         // Different endpoints for different entity types
         let endpoint = '';
         if (entityType === 'package') {
@@ -174,8 +176,10 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
           endpoint = `/api/v1/attractions/${entityId}/cover-image`;
         } else if (entityType === 'group_trip') {
           endpoint = `/api/v1/group-trips/${entityId}/cover-image`;
+        } else if (entityType === 'country') {
+          endpoint = `/api/v1/countries/${entityId}/cover-image`;
         }
-        
+
         if (endpoint) {
           // Use PUT for hotel and group_trip, POST for others
           const response = entityType === 'hotel' || entityType === 'group_trip'
@@ -197,8 +201,8 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
       const updatedImage = await apiClient.put<GalleryImage>(`/api/v1/media/${imageId}`, {
         [field]: value,
       });
-      
-      const updatedImages = images.map(img => 
+
+      const updatedImages = images.map(img =>
         img.id === imageId ? updatedImage : img
       );
       onImagesChange(updatedImages);
@@ -220,7 +224,7 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md flex items-center justify-between">
           <span>{error}</span>
-          <button 
+          <button
             onClick={() => setError(null)}
             className="text-red-500 hover:text-red-700"
           >
@@ -228,11 +232,11 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
           </button>
         </div>
       )}
-      
+
       {success && (
         <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md flex items-center justify-between">
           <span>{success}</span>
-          <button 
+          <button
             onClick={() => setSuccess(null)}
             className="text-green-500 hover:text-green-700"
           >
@@ -247,7 +251,7 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
           type="file"
           id="gallery-upload"
           multiple
-          accept="image/*"
+          accept="image/*,video/*"
           onChange={handleFileUpload}
           className="hidden"
           disabled={!entityId || isUploading}
@@ -268,8 +272,8 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
               />
             </svg>
             <div className="text-gray-600">
-              <p>Click to select images or drag & drop</p>
-              <p className="text-sm text-gray-500">PNG, JPG, WEBP up to 10MB each</p>
+              <p>Click to select media or drag & drop</p>
+              <p className="text-sm text-gray-500">Images and videos up to 50MB each</p>
               {!entityId && (
                 <p className="text-sm text-red-500 mt-2">Save the entity first to upload images</p>
               )}
@@ -284,7 +288,7 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
           <div className="inline-flex items-center">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-500 mr-2"></div>
             <span className="text-gray-600">
-              {isUploading ? 'Uploading images...' : 'Loading images...'}
+              {isUploading ? 'Uploading media...' : 'Loading media...'}
             </span>
           </div>
         </div>
@@ -303,7 +307,7 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
                     alt={image.alt_text || ''}
                     className="w-full h-48 object-cover"
                   />
-                  
+
                   {/* Cover Badge */}
                   {coverImageId === image.id && (
                     <div className="absolute top-2 left-2 bg-teal-500 text-white px-2 py-1 rounded text-xs font-medium">

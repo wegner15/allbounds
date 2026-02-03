@@ -26,6 +26,7 @@ const AttractionsSection = lazy(() => import('./components/AttractionsSection'))
 const HotelsSection = lazy(() => import('./components/HotelsSection'));
 const ActivitiesSection = lazy(() => import('./components/ActivitiesSection'));
 const SocialSharingCard = lazy(() => import('./components/SocialSharingCard'));
+const CountryGallerySection = lazy(() => import('./components/CountryGallerySection'));
 const RelatedDestinationsSection = lazy(() => import('./components/RelatedDestinationsSection'));
 
 // Section Navigation Component
@@ -187,6 +188,8 @@ const CountryDetailPageNew: React.FC = () => {
             { id: 'activities', label: 'Activities' },
             { id: 'deals', label: 'Deals' },
             { id: 'blog', label: 'Blog' },
+            { id: 'gallery', label: 'Gallery' },
+            { id: 'share', label: 'Share' },
           ]}
         />
 
@@ -254,17 +257,26 @@ const CountryDetailPageNew: React.FC = () => {
           </section>
         </div>
 
+        {/* Gallery Section */}
+        <section id="gallery" className="scroll-mt-24">
+          <Suspense fallback={<SectionLoader />}>
+            <CountryGallerySection
+              countryName={country.name}
+              mediaAssets={country.media_assets}
+            />
+          </Suspense>
+        </section>
+
         {/* Share Destination - Full Width */}
-        <section className="bg-gray-50 py-12">
-          <div className="container mx-auto px-4">
-            <Suspense fallback={<div className="h-40 bg-gray-100 rounded-lg animate-pulse" />}>
-              <SocialSharingCard
-                countryName={country.name}
-                description={pageDescription}
-                imageUrl={pageImage}
-              />
-            </Suspense>
-          </div>
+        <section id="share" className="scroll-mt-24">
+          <Suspense fallback={<div className="h-40 bg-gray-100 animate-pulse" />}>
+            <SocialSharingCard
+              countryName={country.name}
+              description={pageDescription}
+              imageUrl={pageImage}
+              variant="banner"
+            />
+          </Suspense>
         </section>
 
         <div className="container mx-auto px-4">

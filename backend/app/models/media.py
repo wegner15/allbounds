@@ -5,6 +5,13 @@ from sqlalchemy.orm import relationship
 from app.db.database import Base
 
 # Many-to-Many relationship tables for media assets
+country_media = Table(
+    "country_media",
+    Base.metadata,
+    Column("country_id", Integer, ForeignKey("countries.id"), primary_key=True),
+    Column("media_asset_id", Integer, ForeignKey("media_assets.id"), primary_key=True)
+)
+
 attraction_media = Table(
     "attraction_media",
     Base.metadata,
@@ -74,4 +81,5 @@ class MediaAsset(Base):
     activities = relationship("Activity", secondary="activity_media", back_populates="media_assets")
     packages = relationship("Package", secondary=package_media)
     group_trips = relationship("GroupTrip", secondary=group_trip_media)
+    countries = relationship("Country", secondary=country_media, back_populates="media_assets")
     blog_posts = relationship("BlogPost", secondary=blog_post_media, overlaps="media_assets")

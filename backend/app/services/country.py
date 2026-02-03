@@ -164,6 +164,7 @@ class CountryService:
             selectinload(Country.hotels).selectinload(Hotel.media_assets),
             selectinload(Country.hotels).selectinload(Hotel.amenities),
             selectinload(Country.activities).selectinload(Activity.cover_image),
+            selectinload(Country.media_assets),
             selectinload(Country.visit_info)
         ).filter(Country.slug == slug, Country.is_active == True).first()
         
@@ -294,6 +295,19 @@ class CountryService:
                 "created_at": country.visit_info.created_at.isoformat() if hasattr(country.visit_info, 'created_at') else None,
                 "updated_at": country.visit_info.updated_at.isoformat() if hasattr(country.visit_info, 'updated_at') else None,
             } if country.visit_info else None,
+            "media_assets": [
+                {
+                    "id": asset.id,
+                    "filename": asset.filename,
+                    "file_path": asset.file_path,
+                    "storage_key": asset.storage_key,
+                    "content_type": asset.content_type,
+                    "url": _resolve_media_asset_url(asset),
+                    "title": asset.title,
+                    "alt_text": asset.alt_text,
+                }
+                for asset in getattr(country, "media_assets", []) if asset.is_active
+            ],
         }
         
         return country_dict
@@ -471,6 +485,13 @@ class CountryService:
             slug=slug,
         )
         db.add(db_country)
+        
+        # Handle media assets
+        if country_create.media_asset_ids:
+            from app.models.media import MediaAsset
+            media_assets = db.query(MediaAsset).filter(MediaAsset.id.in_(country_create.media_asset_ids)).all()
+            db_country.media_assets = media_assets
+            
         db.commit()
         db.refresh(db_country)
         return db_country
@@ -491,7 +512,15 @@ class CountryService:
         )
         
         for key, value in update_data.items():
-            setattr(db_country, key, value)
+            if key == "media_asset_ids":
+                from app.models.media import MediaAsset
+                if value is not None:
+                    media_assets = db.query(MediaAsset).filter(MediaAsset.id.in_(value)).all()
+                    db_country.media_assets = media_assets
+                else:
+                    db_country.media_assets = []
+            else:
+                setattr(db_country, key, value)
         
         db.commit()
         db.refresh(db_country)

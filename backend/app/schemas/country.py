@@ -36,6 +36,7 @@ class CountryResponse(CountryBase):
     is_active: bool = Field(..., description="Whether the country is active")
     created_at: datetime
     updated_at: datetime
+    package_count: Optional[int] = 0
     media_assets: List[MediaAssetResponse] = Field(default_factory=list)
     
     class Config:

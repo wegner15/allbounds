@@ -7,6 +7,7 @@ from app.db.database import get_db
 from app.core.redis_cache import cache_endpoint
 from app.models.user import User
 from app.schemas.country import CountryResponse, CountryCreate, CountryUpdate, CountryWithRegionResponse
+from app.schemas.region import RegionResponse
 from app.schemas.country_visit_info import CountryVisitInfo, CountryVisitInfoCreate, CountryVisitInfoUpdate
 from app.services.country import country_service
 from app.services.country_visit_info import country_visit_info_service
@@ -14,21 +15,22 @@ from app.auth.dependencies import get_current_user, has_permission
 
 router = APIRouter()
 
-@router.get("/", response_model=List[CountryResponse])
-@router.get("", response_model=List[CountryResponse])
+@router.get("/", response_model=List[CountryWithRegionResponse])
+@router.get("", response_model=List[CountryWithRegionResponse])
 def get_countries(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
 ) -> Any:
     """
-    Retrieve all countries (basic data only).
+    Retrieve all countries (including region data).
     """
     countries = country_service.get_countries(db, skip=skip, limit=limit)
     
-    # CRITICAL: Manually construct Pydantic objects to avoid ANY lazy-loading
+    # CRITICAL: Manually construct Pydantic objects to avoid ANY lazy-loading issues
+    # and include the region data
     return [
-        CountryResponse(
+        CountryWithRegionResponse(
             id=c.id,
             name=c.name,
             description=c.description,
@@ -38,12 +40,24 @@ def get_countries(
             slug=c.slug,
             is_active=c.is_active,
             created_at=c.created_at,
-            updated_at=c.updated_at
+            updated_at=c.updated_at,
+            package_count=len([p for p in c.packages if p.is_active]) if hasattr(c, 'packages') and c.packages else 0,
+            region=RegionResponse(
+                id=c.region.id,
+                name=c.region.name,
+                description=c.region.description,
+                summary=c.region.summary,
+                image_id=c.region.image_id,
+                slug=c.region.slug,
+                is_active=c.region.is_active,
+                created_at=c.region.created_at,
+                updated_at=c.region.updated_at
+            ) if c.region else None
         )
         for c in countries
     ]
 
-@router.get("/region/{region_id}", response_model=List[CountryResponse])
+@router.get("/region/{region_id}", response_model=List[CountryWithRegionResponse])
 def get_countries_by_region(
     region_id: int,
     db: Session = Depends(get_db),
@@ -54,9 +68,9 @@ def get_countries_by_region(
     Retrieve countries by region ID.
     """
     countries = country_service.get_countries_by_region(db, region_id=region_id, skip=skip, limit=limit)
-    return [CountryResponse.from_orm(country) for country in countries]
+    return [CountryWithRegionResponse.from_orm(country) for country in countries]
 
-@router.get("/by-holiday-type/{holiday_type_slug}", response_model=List[CountryResponse])
+@router.get("/by-holiday-type/{holiday_type_slug}", response_model=List[CountryWithRegionResponse])
 def get_countries_by_holiday_type(
     holiday_type_slug: str,
     db: Session = Depends(get_db),
@@ -67,9 +81,9 @@ def get_countries_by_holiday_type(
     Retrieve countries that have packages with the specified holiday type.
     """
     countries = country_service.get_countries_by_holiday_type(db, holiday_type_slug=holiday_type_slug, skip=skip, limit=limit)
-    return [CountryResponse.from_orm(country) for country in countries]
+    return [CountryWithRegionResponse.from_orm(country) for country in countries]
 
-@router.get("/with-hotels", response_model=List[CountryResponse])
+@router.get("/with-hotels", response_model=List[CountryWithRegionResponse])
 def get_countries_with_hotels(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -79,9 +93,9 @@ def get_countries_with_hotels(
     Retrieve countries that have active hotels.
     """
     countries = country_service.get_countries_with_hotels(db, skip=skip, limit=limit)
-    return [CountryResponse.from_orm(country) for country in countries]
+    return [CountryWithRegionResponse.from_orm(country) for country in countries]
 
-@router.get("/with-packages", response_model=List[CountryResponse])
+@router.get("/with-packages", response_model=List[CountryWithRegionResponse])
 def get_countries_with_packages(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -91,9 +105,9 @@ def get_countries_with_packages(
     Retrieve countries that have active packages.
     """
     countries = country_service.get_countries_with_packages(db, skip=skip, limit=limit)
-    return [CountryResponse.from_orm(country) for country in countries]
+    return [CountryWithRegionResponse.from_orm(country) for country in countries]
 
-@router.get("/with-activities", response_model=List[CountryResponse])
+@router.get("/with-activities", response_model=List[CountryWithRegionResponse])
 def get_countries_with_activities(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -103,9 +117,9 @@ def get_countries_with_activities(
     Retrieve countries that have active activities.
     """
     countries = country_service.get_countries_with_activities(db, skip=skip, limit=limit)
-    return [CountryResponse.from_orm(country) for country in countries]
+    return [CountryWithRegionResponse.from_orm(country) for country in countries]
 
-@router.get("/with-attractions", response_model=List[CountryResponse])
+@router.get("/with-attractions", response_model=List[CountryWithRegionResponse])
 def get_countries_with_attractions(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -115,7 +129,7 @@ def get_countries_with_attractions(
     Retrieve countries that have active attractions.
     """
     countries = country_service.get_countries_with_attractions(db, skip=skip, limit=limit)
-    return [CountryResponse.from_orm(country) for country in countries]
+    return [CountryWithRegionResponse.from_orm(country) for country in countries]
 
 @router.get("/{country_id}", response_model=CountryWithRegionResponse)
 def get_country(

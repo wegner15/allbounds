@@ -54,13 +54,19 @@ class CountryService:
         """
         Retrieve all countries with pagination.
         """
-        return db.query(Country).filter(Country.is_active == True).offset(skip).limit(limit).all()
+        from sqlalchemy.orm import selectinload
+        return db.query(Country).options(
+            selectinload(Country.packages)
+        ).filter(Country.is_active == True).offset(skip).limit(limit).all()
     
     def get_countries_by_region(self, db: Session, region_id: int, skip: int = 0, limit: int = 100) -> List[Country]:
         """
         Retrieve all countries for a specific region with pagination.
         """
-        return db.query(Country).filter(
+        from sqlalchemy.orm import selectinload
+        return db.query(Country).options(
+            selectinload(Country.packages)
+        ).filter(
             Country.region_id == region_id,
             Country.is_active == True
         ).offset(skip).limit(limit).all()

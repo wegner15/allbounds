@@ -58,6 +58,7 @@ export interface Country extends BaseModel {
   timezone?: string;
   latitude?: number;
   longitude?: number;
+  package_count?: number;
   media_assets?: MediaAsset[];
 }
 

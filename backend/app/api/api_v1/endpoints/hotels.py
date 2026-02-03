@@ -35,7 +35,7 @@ def get_hotels(
     else:
         hotels = hotel_service.get_hotels(db, skip=skip, limit=limit, recommended=recommended, country=country)
     # CRITICAL: Serialize to Pydantic to prevent lazy-loading
-    return [HotelResponse.from_orm(hotel) for hotel in hotels]
+    return [HotelWithCountryResponse(**hotel) for hotel in hotels]
 
 @router.get("/featured")
 def get_featured_hotels(
@@ -48,7 +48,7 @@ def get_featured_hotels(
     """
     hotels = hotel_service.get_featured_hotels(db, skip=skip, limit=limit)
     # CRITICAL: Serialize to Pydantic to prevent lazy-loading
-    return [HotelResponse.from_orm(hotel) for hotel in hotels]
+    return [HotelWithCountryResponse(**hotel) for hotel in hotels]
 
 @router.get("/country/{country_id}")
 def get_hotels_by_country(
@@ -62,7 +62,7 @@ def get_hotels_by_country(
     """
     hotels = hotel_service.get_hotels_by_country(db, country_id=country_id, skip=skip, limit=limit)
     # CRITICAL: Serialize to Pydantic to prevent lazy-loading
-    return [HotelResponse.from_orm(hotel) for hotel in hotels]
+    return [HotelWithCountryResponse(**hotel) for hotel in hotels]
 
 @router.get("/{hotel_id}", response_model=HotelWithCountryResponse)
 def get_hotel(

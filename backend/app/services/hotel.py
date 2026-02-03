@@ -92,6 +92,7 @@ class HotelService:
         Hotels are ordered by creation date (newest first).
         """
         hotels = db.query(Hotel).options(
+            joinedload(Hotel.country),
             joinedload(Hotel.media_assets)
         ).filter(
             Hotel.country_id == country_id,
@@ -128,6 +129,12 @@ class HotelService:
                 "address": hotel.address,
                 "city": hotel.city,
                 "price_category": hotel.price_category,
+                "country_id": hotel.country_id,
+                "country": {
+                    "id": hotel.country.id,
+                    "name": hotel.country.name,
+                    "slug": hotel.country.slug,
+                } if hotel.country else None,
                 "cover_image": cover_image_url,
                 "is_active": hotel.is_active,
                 "created_at": hotel.created_at,

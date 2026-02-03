@@ -67,9 +67,20 @@ class HotelResponse(HotelBase):
 
     model_config = ConfigDict(from_attributes=True, extra='ignore')
 
+# Simplified Country schema for Hotel responses
+class HotelCountryResponse(BaseModel):
+    id: int
+    name: str
+    slug: str
+    # Optional fields to maintain compatibility with CountryResponse when needed
+    region_id: Optional[int] = None
+    is_active: Optional[bool] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
 # Schema for Hotel with Country details
 class HotelWithCountryResponse(HotelResponse):
-    country: CountryResponse
+    country: HotelCountryResponse
     hotel_type: Optional[HotelTypeResponse] = None
     amenities: List[AmenityResponse] = Field(default_factory=list, description="List of amenities associated with the hotel")
     amenity_ids: Optional[List[int]] = Field(default=None, description="List of amenity IDs for form editing")

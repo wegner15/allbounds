@@ -160,7 +160,7 @@ const HotelListPage: React.FC = () => {
             >
               All Hotels
             </button>
-            {hotelTypes?.map((type) => (
+            {hotelTypes?.filter(type => filteredHotels.some(h => h.hotel_type_id === type.id)).map((type) => (
               <button
                 key={type.id}
                 onClick={() => {
@@ -177,10 +177,30 @@ const HotelListPage: React.FC = () => {
                 }}
                 className="px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center gap-2"
               >
-                {/* Find an icon based on type name or use generic */}
                 <span>{type.name}</span>
               </button>
             ))}
+
+            {/* Tag for Other Accommodations if any exist */}
+            {filteredHotels.some(h => !h.hotel_type_id) && (
+              <button
+                onClick={() => {
+                  const element = document.getElementById('type-other');
+                  if (element) {
+                    const headerOffset = 140;
+                    const elementPosition = element.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    window.scrollTo({
+                      top: offsetPosition,
+                      behavior: "smooth"
+                    });
+                  }
+                }}
+                className="px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center gap-2"
+              >
+                <span>Other Accommodations</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

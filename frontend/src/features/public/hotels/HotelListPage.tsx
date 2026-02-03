@@ -8,7 +8,7 @@ import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUti
 const HotelListPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
-  const [priceRange, setPriceRange] = useState('');
+  const [minStars, setMinStars] = useState<number | ''>('');
   const { data: hotels, isLoading, error } = useHotels();
   const { data: hotelTypes, isLoading: isLoadingTypes } = useHotelTypes();
 
@@ -19,15 +19,12 @@ const HotelListPage: React.FC = () => {
 
     const matchesCountry = !selectedCountry || hotel.country?.name === selectedCountry;
 
-    const matchesPrice = !priceRange ||
-      (priceRange === 'budget' && hotel.price_category === 'Budget') ||
-      (priceRange === 'mid' && hotel.price_category === 'Mid-range') ||
-      (priceRange === 'luxury' && hotel.price_category === 'Luxury');
+    const matchesStars = !minStars || (hotel.stars && hotel.stars >= Number(minStars));
 
-    return matchesSearch && matchesCountry && matchesPrice;
+    return matchesSearch && matchesCountry && matchesStars;
   }) || [];
 
-  const countries = Array.from(new Set(hotels?.map(hotel => hotel.country?.name).filter(Boolean))) || [];
+  const countries = Array.from(new Set(hotels?.map(hotel => hotel.country?.name).filter(Boolean).sort())) || [];
 
 
   const renderStars = (rating: number) => {
@@ -128,16 +125,18 @@ const HotelListPage: React.FC = () => {
               ))}
             </select>
 
-            {/* Price Range Filter */}
+            {/* Star Rating Filter */}
             <select
-              value={priceRange}
-              onChange={(e) => setPriceRange(e.target.value)}
+              value={minStars}
+              onChange={(e) => setMinStars(e.target.value ? Number(e.target.value) : '')}
               className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">All Prices</option>
-              <option value="budget">Budget (Under $100)</option>
-              <option value="mid">Mid-range ($100-$300)</option>
-              <option value="luxury">Luxury ($300+)</option>
+              <option value="">All Ratings</option>
+              <option value="5">5 stars</option>
+              <option value="4">4+ stars</option>
+              <option value="3">3+ stars</option>
+              <option value="2">2+ stars</option>
+              <option value="1">1+ star</option>
             </select>
 
             {/* Results Count */}

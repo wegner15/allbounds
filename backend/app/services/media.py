@@ -27,6 +27,8 @@ class MediaService:
             from app.models.package import Package
             from app.models.group_trip import GroupTrip
             from app.models.attraction import Attraction
+            from app.models.country import Country
+            from app.models.media import country_media
             
             if entity_type == 'hotel':
                 return db.query(MediaAsset).join(
@@ -57,6 +59,14 @@ class MediaService:
                     attraction_media, MediaAsset.id == attraction_media.c.media_asset_id
                 ).filter(
                     attraction_media.c.attraction_id == entity_id,
+                    MediaAsset.is_active == True
+                ).offset(skip).limit(limit).all()
+                
+            elif entity_type == 'country':
+                return db.query(MediaAsset).join(
+                    country_media, MediaAsset.id == country_media.c.media_asset_id
+                ).filter(
+                    country_media.c.country_id == entity_id,
                     MediaAsset.is_active == True
                 ).offset(skip).limit(limit).all()
         
@@ -333,7 +343,7 @@ class MediaService:
             True if association was successful, False otherwise
         """
         from app.models.hotel import hotel_media
-        from app.models.media import package_media, group_trip_media, attraction_media
+        from app.models.media import package_media, group_trip_media, attraction_media, country_media
         
         try:
             if entity_type == 'hotel':
@@ -397,6 +407,21 @@ class MediaService:
                     db.execute(
                         attraction_media.insert().values(
                             attraction_id=entity_id,
+                            media_asset_id=media_id
+                        )
+                    )
+            elif entity_type == 'country':
+                existing = db.execute(
+                    country_media.select().where(
+                        country_media.c.country_id == entity_id,
+                        country_media.c.media_asset_id == media_id
+                    )
+                ).first()
+                
+                if not existing:
+                    db.execute(
+                        country_media.insert().values(
+                            country_id=entity_id,
                             media_asset_id=media_id
                         )
                     )

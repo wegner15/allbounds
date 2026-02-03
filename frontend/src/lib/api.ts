@@ -212,6 +212,16 @@ export const endpoints = {
     setCoverImage: (id: number) => `/hotels/${id}/cover-image`,
   },
 
+  // Hotel Types
+  hotelTypes: {
+    list: () => '/hotel-types/',
+    create: () => '/hotel-types/',
+    detail: (id: number) => `/hotel-types/${id}`,
+    update: (id: number) => `/hotel-types/${id}`,
+    delete: (id: number) => `/hotel-types/${id}`,
+    bySlug: (slug: string) => `/hotel-types/slug/${slug}`,
+  },
+
   // Group Trips
   groupTrips: {
     list: () => '/group-trips/',

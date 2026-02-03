@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { useHotels } from '../../../lib/hooks/useHotels';
+import { useHotelTypes } from '../../../lib/hooks/useHotelTypes';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 
 const HotelListPage: React.FC = () => {
@@ -9,19 +10,20 @@ const HotelListPage: React.FC = () => {
   const [selectedCountry, setSelectedCountry] = useState('');
   const [priceRange, setPriceRange] = useState('');
   const { data: hotels, isLoading, error } = useHotels();
+  const { data: hotelTypes, isLoading: isLoadingTypes } = useHotelTypes();
 
   const filteredHotels = hotels?.filter(hotel => {
     const matchesSearch = hotel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         hotel.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         hotel.city?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+      hotel.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      hotel.city?.toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesCountry = !selectedCountry || hotel.country?.name === selectedCountry;
-    
-    const matchesPrice = !priceRange || 
+
+    const matchesPrice = !priceRange ||
       (priceRange === 'budget' && hotel.price_category === 'Budget') ||
       (priceRange === 'mid' && hotel.price_category === 'Mid-range') ||
       (priceRange === 'luxury' && hotel.price_category === 'Luxury');
-    
+
     return matchesSearch && matchesCountry && matchesPrice;
   }) || [];
 
@@ -146,9 +148,59 @@ const HotelListPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Hotels Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {filteredHotels.length === 0 ? (
+      {/* Hotel Type Navigation */}
+      <div className="bg-white border-b border-gray-200 sticky top-[73px] z-10 shadow-sm overflow-x-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex space-x-2 min-w-max pb-1">
+            <button
+              onClick={() => {
+                document.getElementById('all-hotels')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+              className="px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              All Hotels
+            </button>
+            {hotelTypes?.map((type) => (
+              <button
+                key={type.id}
+                onClick={() => {
+                  const element = document.getElementById(`type-${type.id}`);
+                  if (element) {
+                    const headerOffset = 140; // Approx height of sticky headers
+                    const elementPosition = element.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    window.scrollTo({
+                      top: offsetPosition,
+                      behavior: "smooth"
+                    });
+                  }
+                }}
+                className="px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center gap-2"
+              >
+                {/* Find an icon based on type name or use generic */}
+                <span>{type.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Hotels List - Grouped by Type */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="all-hotels">
+        {isLoading || isLoadingTypes ? (
+          <div className="animate-pulse space-y-12">
+            {[1, 2].map((i) => (
+              <div key={i}>
+                <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {[...Array(3)].map((_, j) => (
+                    <div key={j} className="h-64 bg-gray-200 rounded-xl"></div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredHotels.length === 0 ? (
           <div className="text-center py-12">
             <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -157,73 +209,131 @@ const HotelListPage: React.FC = () => {
             <p className="text-gray-500">Try adjusting your search criteria.</p>
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredHotels.map((hotel) => (
-              <div key={hotel.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
-                {/* Hotel Image */}
-                <div className="h-48 relative overflow-hidden">
-                  <img
-                    src={getImageUrlWithFallback(hotel.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')}
-                    alt={hotel.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+          <div className="space-y-16">
+            {hotelTypes?.map((type) => {
+              const typeHotels = filteredHotels.filter(h => h.hotel_type_id === type.id);
+              if (typeHotels.length === 0) return null;
 
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
-                      <Link 
-                        to={`/hotels/${hotel.id}`}
-                        className="hover:text-blue-600 transition-colors"
-                      >
-                        {hotel.name}
-                      </Link>
-                    </h3>
-                    {hotel.stars && (
-                      <div className="flex items-center ml-2">
-                        {renderStars(hotel.stars)}
+              return (
+                <div key={type.id} id={`type-${type.id}`} className="scroll-mt-40">
+                  <div className="flex items-center gap-3 mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">{type.name}</h2>
+                    <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
+                      {typeHotels.length}
+                    </span>
+                  </div>
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {typeHotels.map((hotel) => (
+                      <div key={hotel.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden group">
+                        {/* Hotel Image */}
+                        <div className="h-56 relative overflow-hidden">
+                          <img
+                            src={getImageUrlWithFallback(hotel.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')}
+                            alt={hotel.name}
+                            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                          />
+                          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-semibold text-gray-800 shadow-sm">
+                            {hotel.price_category || 'Hotel'}
+                          </div>
+                        </div>
+
+                        <div className="p-5">
+                          <div className="flex items-start justify-between mb-2">
+                            <h3 className="text-lg font-bold text-gray-900 line-clamp-1 group-hover:text-teal-600 transition-colors">
+                              <Link to={`/hotels/${hotel.id}`}>
+                                {hotel.name}
+                              </Link>
+                            </h3>
+                          </div>
+
+                          <div className="flex items-center mb-3">
+                            {hotel.stars && (
+                              <div className="flex mr-3">
+                                {renderStars(hotel.stars)}
+                              </div>
+                            )}
+                            {hotel.city && (
+                              <span className="text-sm text-gray-500 truncate flex items-center">
+                                <svg className="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                {hotel.city}
+                              </span>
+                            )}
+                          </div>
+
+                          {hotel.description && (
+                            <div
+                              className="text-gray-600 text-sm mb-4 line-clamp-2"
+                              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(hotel.description) }}
+                            />
+                          )}
+
+                          <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                            <div className="text-xs text-gray-500">
+                              {hotel.check_in_time && <span>In: {hotel.check_in_time}</span>}
+                            </div>
+                            <Link
+                              to={`/hotels/${hotel.id}`}
+                              className="text-teal-600 font-semibold text-sm hover:text-teal-700 flex items-center"
+                            >
+                              Details
+                              <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </Link>
+                          </div>
+                        </div>
                       </div>
-                    )}
+                    ))}
                   </div>
+                </div>
+              );
+            })}
 
-                  {hotel.city && (
-                    <div className="flex items-center text-sm text-gray-500 mb-3">
-                      <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      {hotel.city}
-                      {hotel.country && `, ${hotel.country.name}`}
+            {/* Hotels without type */}
+            {filteredHotels.some(h => !h.hotel_type_id) && (
+              <div id="type-other" className="scroll-mt-40">
+                <div className="flex items-center gap-3 mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">Other Accommodations</h2>
+                  <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
+                    {filteredHotels.filter(h => !h.hotel_type_id).length}
+                  </span>
+                </div>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredHotels.filter(h => !h.hotel_type_id).map((hotel) => (
+                    <div key={hotel.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden group">
+                      {/* Hotel Image (Same generic card structure) */}
+                      <div className="h-56 relative overflow-hidden">
+                        <img
+                          src={getImageUrlWithFallback(hotel.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')}
+                          alt={hotel.name}
+                          className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                      <div className="p-5">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="text-lg font-bold text-gray-900 line-clamp-1 group-hover:text-teal-600 transition-colors">
+                            <Link to={`/hotels/${hotel.id}`}>{hotel.name}</Link>
+                          </h3>
+                        </div>
+                        <div className="flex items-center mb-3">
+                          {hotel.stars && <div className="flex mr-3">{renderStars(hotel.stars)}</div>}
+                          {hotel.city && <span className="text-sm text-gray-500 truncate">{hotel.city}</span>}
+                        </div>
+                        <Link
+                          to={`/hotels/${hotel.id}`}
+                          className="mt-2 text-teal-600 font-semibold text-sm hover:text-teal-700 flex items-center"
+                        >
+                          View Details
+                        </Link>
+                      </div>
                     </div>
-                  )}
-
-                  {hotel.description && (
-                    <div
-                      className="text-gray-600 text-sm mb-4 line-clamp-2"
-                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(hotel.description) }}
-                    />
-                  )}
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4 text-xs text-gray-500">
-                      {hotel.check_in_time && (
-                        <span>Check-in: {hotel.check_in_time}</span>
-                      )}
-                      {hotel.check_out_time && (
-                        <span>Check-out: {hotel.check_out_time}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <Link
-                    to={`/hotels/${hotel.id}`}
-                    className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg font-medium transition-colors inline-block"
-                  >
-                    View Details
-                  </Link>
+                  ))}
                 </div>
               </div>
-            ))}
+            )}
           </div>
         )}
       </div>

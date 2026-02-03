@@ -154,12 +154,23 @@ export interface Attraction extends BaseModel {
 }
 
 // Accommodation types
+// Hotel Type
+export interface HotelType extends BaseModel {
+  name: string;
+  slug: string;
+  description?: string;
+  is_active: boolean;
+}
+
+// Accommodation types (keeping existing)
 export interface Accommodation extends BaseModel {
   name: string;
   description: string;
   slug: string;
   country_id: number;
   country: Country;
+  hotel_type_id?: number;
+  hotel_type?: HotelType;
   image_url?: string;
   image_id?: string;
   is_active: boolean;
@@ -167,7 +178,20 @@ export interface Accommodation extends BaseModel {
   stars?: number;
   price_per_night?: number;
   amenities?: string[];
+  city?: string;
+  price_category?: string;
+  check_in_time?: string;
+  check_out_time?: string;
+  latitude?: number;
+  longitude?: number;
 }
+
+// Hotel alias if needed, or update if it exists.
+// Based on previous search, I didn't see distinct `interface Hotel` but it was usage in `CountryWithDetails`.
+// Let's assume Accommodation is the main one or aliases exist.
+// Actually, `CountryWithDetails` uses `Hotel`.
+// Hotel alias removed in favor of explicit interface below
+
 
 // Gallery image type
 export interface GalleryImage {
@@ -202,6 +226,7 @@ export type AmenityUpdate = Partial<AmenityCreate> & {
 };
 
 // Hotel types
+// Hotel types
 export interface Hotel extends BaseModel {
   name: string;
   summary?: string;
@@ -209,6 +234,8 @@ export interface Hotel extends BaseModel {
   slug: string;
   country_id?: number;
   country?: Country;
+  hotel_type_id?: number;
+  hotel_type?: HotelType;
   image_url?: string;
   image_id?: string;
   is_active: boolean;
@@ -218,6 +245,10 @@ export interface Hotel extends BaseModel {
   price_category?: string;
   amenities?: Amenity[];
   amenity_ids?: number[];
+  check_in_time?: string;
+  check_out_time?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 // Hotel with gallery

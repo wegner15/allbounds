@@ -252,9 +252,11 @@ const CountryDetailPageNew: React.FC = () => {
               <div className="text-gray-600">Coming soon... Discover travel stories and tips for {country.name}.</div>
             </div>
           </section>
+        </div>
 
-          {/* Share Destination */}
-          <section className="mb-16 max-w-2xl mx-auto">
+        {/* Share Destination - Full Width */}
+        <section className="bg-gray-50 py-12">
+          <div className="container mx-auto px-4">
             <Suspense fallback={<div className="h-40 bg-gray-100 rounded-lg animate-pulse" />}>
               <SocialSharingCard
                 countryName={country.name}
@@ -262,8 +264,10 @@ const CountryDetailPageNew: React.FC = () => {
                 imageUrl={pageImage}
               />
             </Suspense>
-          </section>
+          </div>
+        </section>
 
+        <div className="container mx-auto px-4">
           {/* Related Destinations Section */}
           <section className="mt-16">
             <Suspense fallback={<SectionLoader />}>

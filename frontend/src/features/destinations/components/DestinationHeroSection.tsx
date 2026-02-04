@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import OptimizedImage from '../../../components/ui/OptimizedImage';
 import { getResponsiveImageSizes } from '../../../utils/imageUtils';
 import type { CountryWithDetails } from '../../../lib/types/api';
@@ -75,17 +76,17 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
 
           {/* Call to Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
-            <a
-              href="#planning"
+            <Link
+              to="/contact-us"
               className="px-8 py-3 border-2 border-white text-white font-semibold tracking-wider hover:bg-white hover:text-black transition-all duration-300 uppercase text-sm md:text-base rounded-sm min-w-[160px]"
             >
               Start Planning
-            </a>
+            </Link>
 
             <span className="text-white/80 font-serif italic text-lg">-or-</span>
 
             <a
-              href="tel:+1234567890"
+              href="tel:+256782594008"
               className="px-8 py-3 bg-teal hover:bg-teal-dark text-white font-semibold tracking-wider transition-all duration-300 uppercase text-sm md:text-base rounded-sm shadow-lg min-w-[160px]"
             >
               Call Us Now

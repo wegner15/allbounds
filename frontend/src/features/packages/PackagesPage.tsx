@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 
 // Components
@@ -43,7 +43,7 @@ const PackagesPage: React.FC = () => {
   const [selectedHolidayType, setSelectedHolidayType] = useState('All');
   const [selectedPriceRange, setSelectedPriceRange] = useState('All');
   const [selectedDuration, setSelectedDuration] = useState('All');
-  
+
   // Fetch data from API
   const { data: packagesData, isLoading: isLoadingPackages, error: packagesError } = usePackages();
   const { data: featuredPackagesData, isLoading: isLoadingFeaturedPackages } = useFeaturedPackages(10);
@@ -52,6 +52,9 @@ const PackagesPage: React.FC = () => {
 
   // State for hero packages (featured or latest)
   const [heroPackages, setHeroPackages] = useState([]);
+
+  // URL Search Params
+  const [searchParams] = useSearchParams();
 
   // Determine hero packages: featured first, then latest
   useEffect(() => {
@@ -65,61 +68,91 @@ const PackagesPage: React.FC = () => {
       setHeroPackages(latestPackages);
     }
   }, [featuredPackagesData, packagesData]);
-  
+
+  // Sync URL params with state
+  useEffect(() => {
+    // Country filter
+    const countryParam = searchParams.get('country');
+    if (countryParam && countriesData) {
+      const match = countriesData.find(c => c.name.toLowerCase() === countryParam.toLowerCase());
+      if (match) {
+        setSelectedCountry(match.name);
+      } else if (countryParam.toLowerCase() === 'all') {
+        setSelectedCountry('All');
+      }
+    }
+
+    // Holiday Type filter
+    const holidayTypeParam = searchParams.get('holidayType');
+    if (holidayTypeParam && holidayTypesData) {
+      // Check against holidayTypesData or holidayTypeOptions
+      // Holiday param might be slug or name. Let's check name first, then slug.
+      const match = holidayTypesData.find(ht =>
+        ht.name.toLowerCase() === holidayTypeParam.toLowerCase() ||
+        ht.slug === holidayTypeParam /* slug is usually lowercase */
+      );
+      if (match) {
+        setSelectedHolidayType(match.name);
+      } else if (holidayTypeParam.toLowerCase() === 'all') {
+        setSelectedHolidayType('All');
+      }
+    }
+  }, [searchParams, countriesData, holidayTypesData]);
+
   // Prepare filter options from API data
-  const countryOptions = !isLoadingCountries && countriesData 
+  const countryOptions = !isLoadingCountries && countriesData
     ? ['All', ...countriesData.map(country => country.name)]
     : ['All'];
-    
+
   const holidayTypeOptions = !isLoadingHolidayTypes && holidayTypesData
     ? ['All', ...holidayTypesData.map(type => type.name)]
     : ['All'];
-  
+
   // Pagination
   const packagesPerPage = 6;
   const packages = packagesData || [];
   const totalPackages = packages.length;
   const totalPages = Math.ceil(totalPackages / packagesPerPage);
-  
+
   // Apply filters
   const filteredPackages = packages.filter(pkg => {
     // Country filter
     if (selectedCountry !== 'All' && pkg.country?.name !== selectedCountry) return false;
-    
+
     // Holiday type filter
     if (selectedHolidayType !== 'All') {
       const packageHolidayTypes = pkg.holiday_types?.map(ht => ht.name) || [];
       if (!packageHolidayTypes.includes(selectedHolidayType)) return false;
     }
-    
+
     // Price range filter
     if (selectedPriceRange !== 'All') {
       const [min, max] = selectedPriceRange
         .replace('$', '')
         .split('-')
         .map(val => val === '+' ? Infinity : parseInt(val));
-      
+
       if (pkg.price < min || pkg.price > max) return false;
     }
-    
+
     // Duration filter
     if (selectedDuration !== 'All') {
       const [min, max] = selectedDuration
         .split(' ')[0]
         .split('-')
         .map(val => val === '+' ? Infinity : parseInt(val));
-      
+
       if (pkg.duration_days < min || pkg.duration_days > max) return false;
     }
-    
+
     return true;
   });
-  
+
   // Get current packages
   const indexOfLastPackage = currentPage * packagesPerPage;
   const indexOfFirstPackage = indexOfLastPackage - packagesPerPage;
   const currentPackages = filteredPackages.slice(indexOfFirstPackage, indexOfLastPackage);
-  
+
   // Change page
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -134,10 +167,10 @@ const PackagesPage: React.FC = () => {
     setSelectedDuration('All');
     setCurrentPage(1);
   };
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
-      
+
       {/* Hero Section - Package Carousel */}
       <PackageCarousel
         packages={heroPackages}
@@ -146,7 +179,7 @@ const PackagesPage: React.FC = () => {
         autoPlay={true}
         autoPlayInterval={6000}
       />
-      
+
       <div className="container mx-auto px-4 py-8">
         {/* Filters */}
         <div className="bg-gradient-to-r from-white to-gray-50 border border-gray-200 rounded-xl shadow-lg p-6 mb-8">
@@ -319,7 +352,7 @@ const PackagesPage: React.FC = () => {
             </div>
           )}
         </div>
-        
+
         {/* Results */}
         <div className="mt-8">
           {isLoadingPackages ? (
@@ -334,7 +367,7 @@ const PackagesPage: React.FC = () => {
           ) : (
             <>
               <p className="text-gray-600 mb-4">{filteredPackages.length} packages found</p>
-              
+
               {filteredPackages.length === 0 ? (
                 <div className="text-center py-12">
                   <p>No packages match your filters. Try adjusting your criteria.</p>
@@ -347,11 +380,11 @@ const PackagesPage: React.FC = () => {
                   {currentPackages.map(pkg => (
                     <div key={pkg.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                       <Link to={`/packages/${pkg.slug}`}>
-                         <img
-                           src={getImageUrlWithFallback(pkg.image_id, IMAGE_VARIANTS.MEDIUM)}
-                           alt={pkg.name}
-                           className="w-full h-64 object-cover"
-                         />
+                        <img
+                          src={getImageUrlWithFallback(pkg.image_id, IMAGE_VARIANTS.MEDIUM)}
+                          alt={pkg.name}
+                          className="w-full h-64 object-cover"
+                        />
                       </Link>
                       <div className="p-4">
                         <div className="flex items-center justify-between mb-3">
@@ -402,7 +435,7 @@ const PackagesPage: React.FC = () => {
                   ))}
                 </div>
               )}
-              
+
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="mt-8 flex justify-center">
@@ -410,11 +443,10 @@ const PackagesPage: React.FC = () => {
                     <button
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1}
-                      className={`px-3 py-1 rounded-l border ${
-                        currentPage === 1 
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                          : 'bg-white text-charcoal hover:bg-gray-50'
-                      }`}
+                      className={`px-3 py-1 rounded-l border ${currentPage === 1
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-white text-charcoal hover:bg-gray-50'
+                        }`}
                     >
                       Previous
                     </button>
@@ -422,11 +454,10 @@ const PackagesPage: React.FC = () => {
                       <button
                         key={i}
                         onClick={() => handlePageChange(i + 1)}
-                        className={`px-3 py-1 border-t border-b ${
-                          currentPage === i + 1
-                            ? 'bg-charcoal text-white'
-                            : 'bg-white text-charcoal hover:bg-gray-50'
-                        }`}
+                        className={`px-3 py-1 border-t border-b ${currentPage === i + 1
+                          ? 'bg-charcoal text-white'
+                          : 'bg-white text-charcoal hover:bg-gray-50'
+                          }`}
                       >
                         {i + 1}
                       </button>
@@ -434,11 +465,10 @@ const PackagesPage: React.FC = () => {
                     <button
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === totalPages}
-                      className={`px-3 py-1 rounded-r border ${
-                        currentPage === totalPages
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          : 'bg-white text-charcoal hover:bg-gray-50'
-                      }`}
+                      className={`px-3 py-1 rounded-r border ${currentPage === totalPages
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-white text-charcoal hover:bg-gray-50'
+                        }`}
                     >
                       Next
                     </button>

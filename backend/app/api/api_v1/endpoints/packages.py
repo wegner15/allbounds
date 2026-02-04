@@ -27,6 +27,7 @@ def get_packages(
     order_by: str = "created_at",
     order: str = "desc",
     popular: bool = Query(False, description="Get popular (featured) packages"),
+    country_id: int = Query(None, description="Filter by country ID"),
     country: str = Query(None, description="Filter by country name"),
     holiday_type: str = Query(None, description="Filter by holiday type slug"),
 ) -> Any:
@@ -44,6 +45,8 @@ def get_packages(
             packages = package_service.get_packages_by_holiday_type(db, holiday_type_id=holiday_type_obj.id, skip=skip, limit=limit)
         else:
             packages = []
+    elif country_id:
+        packages = package_service.get_packages_by_country(db, country_id=country_id, skip=skip, limit=limit)
     elif country:
         # Find country by name and get packages for that country
         from app.models.country import Country

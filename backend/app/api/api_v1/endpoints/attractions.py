@@ -27,18 +27,22 @@ def get_attractions(
     search: Optional[str] = Query(None, description="Full-text search over attraction name, summary, description, city, address"),
     country: Optional[str] = Query(None, description="Filter by country slug or name"),
     category: Optional[str] = Query(None, description="Filter by attraction category"),
+    country_id: int = Query(None, description="Filter by country ID"),
 ) -> Any:
     """
     Retrieve all attractions optionally filtered by search, country, and category.
     """
-    attractions = attraction_service.get_attractions(
-        db,
-        skip=skip,
-        limit=limit,
-        search=search,
-        country=country,
-        category=category,
-    )
+    if country_id:
+        attractions = attraction_service.get_attractions_by_country(db, country_id=country_id, skip=skip, limit=limit)
+    else:
+        attractions = attraction_service.get_attractions(
+            db,
+            skip=skip,
+            limit=limit,
+            search=search,
+            country=country,
+            category=category,
+        )
     # CRITICAL: Serialize to Pydantic to prevent lazy-loading
     return [AttractionResponse.from_orm(attraction) for attraction in attractions]
 

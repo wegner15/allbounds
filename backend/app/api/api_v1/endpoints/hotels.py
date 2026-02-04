@@ -26,12 +26,15 @@ def get_hotels(
     recommended: bool = Query(None, description="Filter for recommended hotels"),
     featured: bool = Query(None, description="Filter for featured hotels"),
     country: str = Query(None, description="Filter by country name"),
+    country_id: int = Query(None, description="Filter by country ID"),
 ) -> Any:
     """
     Retrieve all hotels with optional filtering.
     """
     if featured is not None and featured:
         hotels = hotel_service.get_featured_hotels(db, skip=skip, limit=limit)
+    elif country_id:
+        hotels = hotel_service.get_hotels_by_country(db, country_id=country_id, skip=skip, limit=limit)
     else:
         hotels = hotel_service.get_hotels(db, skip=skip, limit=limit, recommended=recommended, country=country)
     # CRITICAL: Serialize to Pydantic to prevent lazy-loading

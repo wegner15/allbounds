@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { MapPin } from 'lucide-react';
@@ -13,8 +13,20 @@ const DestinationOverviewSection: React.FC<DestinationOverviewSectionProps> = Re
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedAssetIndex, setSelectedAssetIndex] = useState<number | null>(null);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
 
   const mediaAssets = country.media_assets || [];
+
+  // Auto-advance carousel
+  useEffect(() => {
+    if (mediaAssets.length <= 1 || isHovered) return;
+
+    const interval = setInterval(() => {
+      setCurrentSlideIndex((prev) => (prev + 1) % mediaAssets.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [mediaAssets.length, isHovered]);
 
   // Calculate word count for description
   const getWordCount = (html: string): number => {
@@ -149,7 +161,11 @@ const DestinationOverviewSection: React.FC<DestinationOverviewSectionProps> = Re
 
         {mediaAssets.length > 0 && (
           <div className="lg:col-span-5">
-            <div className="relative overflow-hidden rounded-2xl h-[400px] md:h-[500px] group shadow-lg">
+            <div
+              className="relative overflow-hidden rounded-2xl h-[400px] md:h-[500px] group shadow-lg"
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+            >
               {/* Carousel Image */}
               <div
                 className="w-full h-full cursor-pointer relative"
@@ -212,8 +228,8 @@ const DestinationOverviewSection: React.FC<DestinationOverviewSectionProps> = Re
                           goToSlide(index);
                         }}
                         className={`transition-all duration-300 rounded-full shadow-sm ${index === currentSlideIndex
-                            ? 'w-8 h-2 bg-white'
-                            : 'w-2 h-2 bg-white/50 hover:bg-white/80'
+                          ? 'w-8 h-2 bg-white'
+                          : 'w-2 h-2 bg-white/50 hover:bg-white/80'
                           }`}
                         aria-label={`Go to slide ${index + 1}`}
                       />

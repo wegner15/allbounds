@@ -12,6 +12,7 @@ interface DestinationOverviewSectionProps {
 const DestinationOverviewSection: React.FC<DestinationOverviewSectionProps> = React.memo(({ country }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedAssetIndex, setSelectedAssetIndex] = useState<number | null>(null);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   const mediaAssets = country.media_assets || [];
 
@@ -54,6 +55,20 @@ const DestinationOverviewSection: React.FC<DestinationOverviewSectionProps> = Re
     if (selectedAssetIndex !== null) {
       setSelectedAssetIndex((selectedAssetIndex + 1) % mediaAssets.length);
     }
+  };
+
+  const handleCarouselPrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentSlideIndex((prev) => (prev - 1 + mediaAssets.length) % mediaAssets.length);
+  };
+
+  const handleCarouselNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentSlideIndex((prev) => (prev + 1) % mediaAssets.length);
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentSlideIndex(index);
   };
 
   const isVideo = (asset: MediaAsset) => {
@@ -132,63 +147,84 @@ const DestinationOverviewSection: React.FC<DestinationOverviewSectionProps> = Re
           )}
         </div>
 
-        {/* Right Column: Gallery Preview */}
         {mediaAssets.length > 0 && (
           <div className="lg:col-span-5">
-            <div className="grid grid-cols-2 gap-3 h-full max-h-[500px] md:max-h-[600px] overflow-hidden rounded-2xl">
-              {mediaAssets.slice(0, 4).map((asset, index) => {
-                let gridClasses = "relative overflow-hidden cursor-pointer group shadow-sm transition-all duration-300 ";
+            <div className="relative overflow-hidden rounded-2xl h-[400px] md:h-[500px] group shadow-lg">
+              {/* Carousel Image */}
+              <div
+                className="w-full h-full cursor-pointer relative"
+                onClick={() => handleOpenLightbox(currentSlideIndex)}
+              >
+                <img
+                  src={getThumbnailUrl(mediaAssets[currentSlideIndex])}
+                  alt={mediaAssets[currentSlideIndex].alt_text || `${country.name} gallery image ${currentSlideIndex + 1}`}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
 
-                if (mediaAssets.length === 1) {
-                  gridClasses += "col-span-2 row-span-2 aspect-[4/3]";
-                } else if (mediaAssets.length === 2) {
-                  gridClasses += "col-span-1 aspect-square";
-                } else {
-                  // 3 or more images: First is tall, others are square
-                  if (index === 0) {
-                    gridClasses += "row-span-2 col-span-1 h-full min-h-[300px]";
-                  } else {
-                    gridClasses += "col-span-1 aspect-square";
-                  }
-                }
-
-                return (
-                  <div
-                    key={asset.id}
-                    className={gridClasses}
-                    onClick={() => handleOpenLightbox(index)}
-                  >
-                    <img
-                      src={getThumbnailUrl(asset)}
-                      alt={asset.alt_text || `${country.name} gallery image ${index + 1}`}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                      {isVideo(asset) ? (
-                        <div className="w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
-                          <PlayIcon className="w-5 h-5 text-primary-600 ml-1" />
-                        </div>
-                      ) : (
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                          </svg>
-                        </div>
-                      )}
-
-                      {index === 3 && mediaAssets.length > 4 && (
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white font-bold text-xl">
-                          +{mediaAssets.length - 4}
-                        </div>
-                      )}
+                {/* Overlay with matching rounded corners */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                  {isVideo(mediaAssets[currentSlideIndex]) ? (
+                    <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+                      <PlayIcon className="w-8 h-8 text-primary-600 ml-1" />
                     </div>
+                  ) : (
+                    <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-90 group-hover:scale-100">
+                      <div className="bg-black/50 p-3 rounded-full backdrop-blur-sm">
+                        <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                        </svg>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Image Count Badge */}
+                <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-xs font-medium border border-white/10 z-10">
+                  {currentSlideIndex + 1} / {mediaAssets.length}
+                </div>
+              </div>
+
+              {/* Navigation Arrows */}
+              {mediaAssets.length > 1 && (
+                <>
+                  <button
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-gray-900 rounded-full shadow-lg flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 transform -translate-x-4 group-hover:translate-x-0 z-20"
+                    onClick={handleCarouselPrev}
+                    aria-label="Previous image"
+                  >
+                    <ChevronLeftIcon className="w-5 h-5" />
+                  </button>
+                  <button
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-gray-900 rounded-full shadow-lg flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 z-20"
+                    onClick={handleCarouselNext}
+                    aria-label="Next image"
+                  >
+                    <ChevronRightIcon className="w-5 h-5" />
+                  </button>
+
+                  {/* Dots Indicator */}
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-20">
+                    {mediaAssets.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          goToSlide(index);
+                        }}
+                        className={`transition-all duration-300 rounded-full shadow-sm ${index === currentSlideIndex
+                            ? 'w-8 h-2 bg-white'
+                            : 'w-2 h-2 bg-white/50 hover:bg-white/80'
+                          }`}
+                        aria-label={`Go to slide ${index + 1}`}
+                      />
+                    ))}
                   </div>
-                );
-              })}
+                </>
+              )}
             </div>
 
             <p className="mt-3 text-sm text-gray-500 text-center italic">
-              {mediaAssets.length > 1 ? `Click any image to view all ${mediaAssets.length} images` : 'Click to view full image'}
+              {mediaAssets.length > 1 ? `Browse ${mediaAssets.length} photos and videos` : 'Click to view full size'}
             </p>
           </div>
         )}

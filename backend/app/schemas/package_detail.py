@@ -64,6 +64,7 @@ class HotelSummary(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     image_id: Optional[str] = None
+    image_url: Optional[str] = None
     amenities: List[AmenitySummary] = []
     
     class Config:

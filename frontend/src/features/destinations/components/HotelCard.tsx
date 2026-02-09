@@ -12,7 +12,7 @@ interface HotelCardProps {
 
 const HotelCard: React.FC<HotelCardProps> = React.memo(({ hotel }) => {
   // Sanitize and truncate description
-  const sanitizedDescription = hotel.summary || hotel.description 
+  const sanitizedDescription = hotel.summary || hotel.description
     ? DOMPurify.sanitize(hotel.summary || hotel.description || '')
     : '';
 
@@ -41,9 +41,9 @@ const HotelCard: React.FC<HotelCardProps> = React.memo(({ hotel }) => {
       >
         {/* Image */}
         <div className="relative w-full h-48 overflow-hidden bg-gray-200">
-          {hotel.image_id ? (
+          {hotel.image_id || hotel.image_url ? (
             <OptimizedImage
-              imageId={hotel.image_id}
+              imageId={hotel.image_id || hotel.image_url}
               alt={`${hotel.name} hotel in ${hotel.city || 'destination'}`}
               variant="medium"
               className="w-full h-full transition-transform duration-300 group-hover:scale-110"
@@ -56,14 +56,14 @@ const HotelCard: React.FC<HotelCardProps> = React.memo(({ hotel }) => {
               <Building2 className="w-12 h-12 text-white opacity-50" aria-hidden="true" />
             </div>
           )}
-          
+
           {/* Price Category Badge */}
           {hotel.price_category && (
             <div className="absolute top-3 right-3 bg-white text-gray-900 text-sm font-semibold px-3 py-1 rounded-full shadow-md" role="status" aria-label={`Price category: ${hotel.price_category}`}>
               {getPriceCategoryDisplay(hotel.price_category)}
             </div>
           )}
-      </div>
+        </div>
 
         {/* Content */}
         <div className="p-4 flex flex-col flex-grow">
@@ -79,11 +79,10 @@ const HotelCard: React.FC<HotelCardProps> = React.memo(({ hotel }) => {
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-4 h-4 ${
-                      i < hotel.stars! 
-                        ? 'text-yellow-400 fill-yellow-400' 
+                    className={`w-4 h-4 ${i < hotel.stars!
+                        ? 'text-yellow-400 fill-yellow-400'
                         : 'text-gray-300'
-                    }`}
+                      }`}
                     aria-hidden="true"
                   />
                 ))}

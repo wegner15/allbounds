@@ -123,6 +123,7 @@ class PackageService:
             joinedload(Package.media_assets),
             # Load itinerary items with nested relationships
             joinedload(Package.itinerary_items).joinedload(ItineraryItem.hotels).joinedload(Hotel.amenities),
+            joinedload(Package.itinerary_items).joinedload(ItineraryItem.hotels).joinedload(Hotel.media_assets),
             joinedload(Package.itinerary_items).joinedload(ItineraryItem.attractions),
             joinedload(Package.itinerary_items).joinedload(ItineraryItem.custom_activities),
             joinedload(Package.itinerary_items).joinedload(ItineraryItem.linked_activities),
@@ -131,6 +132,7 @@ class PackageService:
             joinedload(Package.exclusion_items),
             # Load hotels with amenities
             joinedload(Package.hotels).joinedload(Hotel.amenities),
+            joinedload(Package.hotels).joinedload(Hotel.media_assets),
             # Load attractions
             joinedload(Package.attractions),
             # Load reviews (only approved ones)
@@ -141,6 +143,35 @@ class PackageService:
             Package.slug == slug,
             Package.is_active == True
         ).first()
+        
+        if package:
+            # Helper to set image_url on hotel objects
+            def set_hotel_image_url(hotel):
+                image_url = None
+                if hotel.image_id:
+                    image_url = self._get_cloudflare_image_url(hotel.image_id)
+                elif hotel.media_assets:
+                    for media in hotel.media_assets:
+                        if media.is_active:
+                            if media.storage_key:
+                                image_url = self._get_cloudflare_image_url(media.storage_key)
+                                break
+                            elif media.file_path and media.file_path.startswith("cloudflare://") and media.storage_key:
+                                image_url = self._get_cloudflare_image_url(media.storage_key)
+                                break
+                setattr(hotel, 'image_url', image_url)
+
+            # Populate image_url for itinerary hotels
+            if package.itinerary_items:
+                for item in package.itinerary_items:
+                    if item.hotels:
+                        for hotel in item.hotels:
+                            set_hotel_image_url(hotel)
+            
+            # Populate image_url for package hotels
+            if package.hotels:
+                for hotel in package.hotels:
+                    set_hotel_image_url(hotel)
         
         return package
     

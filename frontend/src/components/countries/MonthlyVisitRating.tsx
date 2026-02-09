@@ -18,21 +18,21 @@ const MonthlyVisitRating: React.FC<MonthlyVisitRatingProps> = ({ ratings }) => {
     return acc;
   }, {} as Record<string, VisitRating>);
 
-  // Get color and text based on rating
+  // Get color based on rating
   const getRatingStyle = (rating: VisitRating | undefined) => {
     switch (rating) {
       case 'excellent':
-        return 'bg-green-500 text-white';
+        return { backgroundColor: '#91b5a9', color: '#ffffff' };
       case 'good':
-        return 'bg-primary text-white';
+        return { backgroundColor: '#abad98', color: '#ffffff' };
       case 'fair':
-        return 'bg-yellow-500 text-gray-800';
+        return { backgroundColor: '#eeca80', color: '#ffffff' };
       case 'poor':
-        return 'bg-orange-500 text-white';
+        return { backgroundColor: '#9d683c', color: '#ffffff' };
       case 'discouraged':
-        return 'bg-red-500 text-white';
+        return { backgroundColor: '#ef4444', color: '#ffffff' }; // Keeping red for discouraged
       default:
-        return 'bg-gray-200 text-gray-600';
+        return { backgroundColor: '#e5e7eb', color: '#4b5563' }; // gray-200 and gray-600
     }
   };
 
@@ -42,10 +42,12 @@ const MonthlyVisitRating: React.FC<MonthlyVisitRatingProps> = ({ ratings }) => {
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
         {allMonths.map(month => {
           const rating = ratingsByMonth[month];
+          const style = getRatingStyle(rating);
           return (
             <div
               key={month}
-              className={`rounded-lg p-3 text-center ${getRatingStyle(rating)}`}
+              className="rounded-lg p-3 text-center"
+              style={style}
               title={rating ? `${month}: ${rating}` : `${month}: No data`}
             >
               <div className="text-sm font-medium">{month.substring(0, 3)}</div>

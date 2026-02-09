@@ -363,6 +363,7 @@ export interface HotelSummary {
   city?: string;
   stars?: number;
   image_id?: string;
+  image_url?: string;
   latitude?: number;
   longitude?: number;
   amenities: AmenitySummary[];

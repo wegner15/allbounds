@@ -2,18 +2,18 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import OptimizedImage from '../ui/OptimizedImage';
 import { getResponsiveImageSizes } from '../../utils/imageUtils';
-import type { 
-  ItineraryItemDetail, 
-  HotelSummary, 
-  AttractionSummary, 
-  ItineraryActivityDetail 
+import type {
+  ItineraryItemDetail,
+  HotelSummary,
+  AttractionSummary,
+  ItineraryActivityDetail
 } from '../../lib/types/api';
-import { 
-  ChevronDown, 
-  ChevronUp, 
-  MapPin, 
-  Coffee, 
-  Utensils, 
+import {
+  ChevronDown,
+  ChevronUp,
+  MapPin,
+  Coffee,
+  Utensils,
   Moon,
   Clock
 } from 'lucide-react';
@@ -29,15 +29,15 @@ const ItineraryDayCard: React.FC<ItineraryDayCardProps> = ({
   isExpanded,
   onToggle,
 }) => {
-  const { 
-    day_number, 
-    title, 
-    location, 
-    description, 
+  const {
+    day_number,
+    title,
+    location,
+    description,
     custom_activities,
-    hotels, 
-    attractions, 
-    accommodation_notes 
+    hotels,
+    attractions,
+    accommodation_notes
   } = itineraryItem;
 
   // Group activities by meal type
@@ -64,9 +64,9 @@ const ItineraryDayCard: React.FC<ItineraryDayCardProps> = ({
               <h3 className="text-base sm:text-lg md:text-xl font-semibold text-charcoal truncate font-playfair">{title}</h3>
               {itineraryItem.date && (
                 <p className="text-xs text-gray-500 mt-0.5">
-                  {new Date(itineraryItem.date).toLocaleDateString('en-US', { 
-                    weekday: 'short', 
-                    month: 'short', 
+                  {new Date(itineraryItem.date).toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
                     day: 'numeric',
                     year: 'numeric'
                   })}
@@ -74,7 +74,7 @@ const ItineraryDayCard: React.FC<ItineraryDayCardProps> = ({
               )}
             </div>
           </div>
-          
+
           {location && (
             <div className="flex items-center gap-1.5 sm:gap-2 text-gray-600 ml-10 sm:ml-13">
               <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
@@ -212,10 +212,10 @@ const HotelItem: React.FC<{ hotel: HotelSummary }> = ({ hotel }) => {
       to={`/hotels/${hotel.slug}`}
       className="group flex gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-xl hover:shadow-md active:shadow-sm transition-all duration-200 touch-manipulation min-h-[60px] border border-gray-200 hover:border-primary/30"
     >
-      {hotel.image_id && (
+      {(hotel.image_id || hotel.image_url) && (
         <div className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden shadow-sm">
           <OptimizedImage
-            imageId={hotel.image_id}
+            imageId={hotel.image_id || hotel.image_url}
             alt={hotel.name}
             variant="thumbnail"
             className="w-full h-full transition-transform duration-300 group-hover:scale-110"

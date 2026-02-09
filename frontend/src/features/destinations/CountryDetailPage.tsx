@@ -18,7 +18,7 @@ import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils'
 
 const CountryDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  
+
   // Fetch country details with all related data
   const { data: country, isLoading, error } = useQuery<CountryWithDetails>({
     queryKey: ['country-details', slug],
@@ -35,8 +35,8 @@ const CountryDetailPage: React.FC = () => {
     }
 
     return [...country.hotels].sort((a, b) => {
-      const bHasImage = Boolean(b.cover_image || b.image_id);
-      const aHasImage = Boolean(a.cover_image || a.image_id);
+      const bHasImage = Boolean(b.cover_image || b.image_id || b.image_url);
+      const aHasImage = Boolean(a.cover_image || a.image_id || a.image_url);
       if (bHasImage === aHasImage) {
         return 0;
       }
@@ -100,7 +100,7 @@ const CountryDetailPage: React.FC = () => {
           <div className="absolute bottom-0 left-0 right-0 p-8">
             <div className="container mx-auto">
               <h1 className="text-4xl md:text-6xl font-playfair text-white mb-4">{country.name}</h1>
-              <div 
+              <div
                 className="text-xl text-white/90 max-w-2xl line-clamp-3"
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(country.description || '') }}
               />
@@ -124,11 +124,11 @@ const CountryDetailPage: React.FC = () => {
               {/* Country Overview */}
               <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
                 <h2 className="text-2xl font-playfair text-charcoal mb-4">About {country.name}</h2>
-                <div 
+                <div
                   className="text-gray-700 leading-relaxed mb-6 prose prose-lg max-w-none"
                   dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(country.description || '') }}
                 />
-                
+
                 {/* Quick Facts */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {country.capital && (
@@ -157,7 +157,7 @@ const CountryDetailPage: React.FC = () => {
                   )}
                 </div>
               </div>
-              
+
               {/* Best Time to Visit */}
               {country.visit_info ? (
                 <CountryVisitInfo visitInfo={country.visit_info} />
@@ -190,7 +190,7 @@ const CountryDetailPage: React.FC = () => {
                             <h3 className="font-semibold text-charcoal group-hover:text-hover transition-colors mb-1">
                               {pkg.name}
                             </h3>
-                            <div 
+                            <div
                               className="text-sm text-gray-600 mb-2 line-clamp-2"
                               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pkg.description || '') }}
                             />
@@ -228,11 +228,11 @@ const CountryDetailPage: React.FC = () => {
                             <h3 className="font-semibold text-charcoal group-hover:text-hover transition-colors mb-1">
                               {trip.name}
                             </h3>
-                            <div 
+                            <div
                               className="text-sm text-gray-600 mb-2 line-clamp-2"
                               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trip.description || '') }}
                             />
-                            
+
                             {/* Trip Details */}
                             <div className="space-y-1 mb-2">
                               <div className="flex items-center text-xs text-gray-500">
@@ -250,13 +250,13 @@ const CountryDetailPage: React.FC = () => {
                                 </div>
                               )}
                             </div>
-                            
+
                             <div className="flex justify-between items-center">
                               {trip.departures && trip.departures.length > 0 ? (
                                 <span className="text-xs text-teal font-medium">
-                                  Next: {new Date(trip.departures[0].start_date).toLocaleDateString('en-US', { 
-                                    month: 'short', 
-                                    day: 'numeric' 
+                                  Next: {new Date(trip.departures[0].start_date).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric'
                                   })}
                                 </span>
                               ) : (
@@ -318,7 +318,7 @@ const CountryDetailPage: React.FC = () => {
                       <Link key={hotel.id} to={`/hotels/${hotel.slug}`} className="group">
                         <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                           <img
-                            src={getImageUrlWithFallback(hotel.cover_image || hotel.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=80')}
+                            src={getImageUrlWithFallback(hotel.cover_image || hotel.image_id || hotel.image_url, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=80')}
                             alt={hotel.name}
                             className="w-full h-32 object-cover"
                           />
@@ -335,14 +335,14 @@ const CountryDetailPage: React.FC = () => {
                                 </div>
                               )}
                             </div>
-                            
+
                             {hotel.summary && (
                               <div
                                 className="text-sm text-gray-600 mb-2 line-clamp-2"
                                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(hotel.summary) }}
                               />
                             )}
-                            
+
                             <div className="space-y-1 mb-2">
                               {hotel.city && (
                                 <div className="flex items-center text-xs text-gray-500">
@@ -362,7 +362,7 @@ const CountryDetailPage: React.FC = () => {
                                 </div>
                               )}
                             </div>
-                            
+
                             {hotel.amenities && hotel.amenities.length > 0 && (
                               <div className="flex flex-wrap gap-1 mb-2">
                                 {hotel.amenities.slice(0, 3).map((amenity, index) => (
@@ -375,7 +375,7 @@ const CountryDetailPage: React.FC = () => {
                                 )}
                               </div>
                             )}
-                            
+
                             <div className="flex justify-between items-center mt-3">
                               <span className="text-sm text-teal font-medium">View Details</span>
                               <span className="text-xs text-gray-400">Book Now</span>

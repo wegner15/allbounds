@@ -62,7 +62,7 @@ const SimilarGroupTrips: React.FC<SimilarGroupTripsProps> = ({ groupTripId, limi
             <div className="p-4">
               <div className="flex items-center text-sm text-gray-600 mb-2">
                 <MapPin className="w-4 h-4 mr-1" />
-                <span>{trip.country.name}</span>
+                <span>{trip.country?.name || 'Unknown Country'}</span>
               </div>
 
               <div className="flex items-center justify-between text-sm text-gray-600 mb-3">

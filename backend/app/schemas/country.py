@@ -14,6 +14,7 @@ class CountryBase(BaseModel):
     region_id: int = Field(..., description="ID of the region this country belongs to")
     image_id: Optional[str] = Field(None, description="Cloudflare Images ID for the country image")
     media_asset_ids: Optional[List[int]] = Field(None, description="List of IDs for the country's gallery")
+    faqs: Optional[List[dict]] = Field(None, description="List of FAQs ({question: str, answer: str})")
     
 # Schema for creating a new Country
 class CountryCreate(CountryBase):
@@ -27,6 +28,7 @@ class CountryUpdate(BaseModel):
     region_id: Optional[int] = Field(None, description="ID of the region this country belongs to")
     image_id: Optional[str] = Field(None, description="Cloudflare Images ID for the country image")
     media_asset_ids: Optional[List[int]] = Field(None, description="List of IDs for the country's gallery")
+    faqs: Optional[List[dict]] = Field(None, description="List of FAQs")
     is_active: Optional[bool] = Field(None, description="Whether the country is active")
 
 # Schema for Country response

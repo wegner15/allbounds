@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
@@ -25,6 +25,10 @@ const countrySchema = z.object({
   region_id: z.number().min(1, 'Please select a region'),
   image_id: z.string(),
   is_active: z.boolean(),
+  faqs: z.array(z.object({
+    question: z.string().min(1, 'Question is required'),
+    answer: z.string().min(1, 'Answer is required'),
+  })).optional(),
 });
 
 type CountryFormData = z.infer<typeof countrySchema>;
@@ -65,6 +69,7 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
         region_id: countryData.region_id,
         image_id: countryData.image_id || '',
         is_active: countryData.is_active,
+        faqs: countryData.faqs || [],
       }
       : {
         name: '',
@@ -75,6 +80,11 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
         image_id: '',
         is_active: true,
       },
+  });
+
+  const { fields: faqFields, append: appendFaq, remove: removeFaq } = useFieldArray({
+    control,
+    name: 'faqs',
   });
 
   // Auto-generate slug from name
@@ -286,6 +296,71 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
                   {...register('is_active')}
                 />
               </FormGroup>
+            </div>
+
+            {/* FAQs */}
+            <div className="sm:col-span-6">
+              <div className="border-t border-gray-200 pt-6 mt-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-md font-medium text-gray-900">Frequently Asked Questions</h4>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => appendFaq({ question: '', answer: '' })}
+                  >
+                    Add FAQ
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  {faqFields.map((field, index) => (
+                    <div key={field.id} className="bg-gray-50 p-4 rounded-lg border border-gray-200 relative">
+                      <button
+                        type="button"
+                        onClick={() => removeFaq(index)}
+                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                      >
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                      <div className="grid grid-cols-1 gap-4">
+                        <FormGroup>
+                          <FormInput
+                            id={`faqs.${index}.question`}
+                            label="Question"
+                            error={errors.faqs?.[index]?.question}
+                            fullWidth
+                            variant="filled"
+                            placeholder="e.g. What is the best time to visit?"
+                            {...register(`faqs.${index}.question`)}
+                          />
+                        </FormGroup>
+                        <div className="form-group">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Answer</label>
+                          <Controller
+                            name={`faqs.${index}.answer`}
+                            control={control}
+                            render={({ field, fieldState }) => (
+                              <TinyMCEEditor
+                                value={field.value}
+                                onChange={field.onChange}
+                                label=""
+                                placeholder="Provide a detailed answer..."
+                                height={200}
+                                error={fieldState.error?.message}
+                              />
+                            )}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {faqFields.length === 0 && (
+                    <p className="text-sm text-gray-500 italic text-center py-4">No FAQs added yet.</p>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Gallery Manager */}

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey, JSON
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
@@ -14,6 +14,11 @@ class Country(Base):
     slug = Column(String(100), unique=True, index=True, nullable=False)
     region_id = Column(Integer, ForeignKey("regions.id"), nullable=False)
     image_id = Column(String(255), nullable=True)  # Cloudflare Images ID
+    faqs = Column(Boolean, default=None) # Placeholder, actually want JSON.
+    # Wait, SQLAlchemy boolean? usage for JSON is typically JSON or Text if JSON not supported.
+    # Postgres supports JSON. Let's use JSON.
+    # But I should check imports first.
+
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

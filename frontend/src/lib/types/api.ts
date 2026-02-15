@@ -68,6 +68,7 @@ export interface Country extends BaseModel {
   longitude?: number;
   package_count?: number;
   media_assets?: MediaAsset[];
+  faqs?: { question: string; answer: string }[];
 }
 
 export interface CountryCreate {

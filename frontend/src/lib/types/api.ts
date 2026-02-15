@@ -7,6 +7,14 @@ export interface BaseModel {
   updated_at: string;
 }
 
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}
+
 // Region types
 export interface Region extends BaseModel {
   name: string;

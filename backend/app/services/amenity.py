@@ -6,14 +6,22 @@ from app.schemas.amenity import AmenityCreate, AmenityUpdate
 
 
 class AmenityService:
-    def get_amenities(self, db: Session, skip: int = 0, limit: int = 100, include_inactive: bool = False) -> List[Amenity]:
+    def get_amenities(self, db: Session, skip: int = 0, limit: int = 100, include_inactive: bool = False) -> tuple[List[Amenity], int]:
         """
-        Retrieve all amenities with pagination.
+        Retrieve all amenities with pagination, sorted by newest first.
         """
         query = db.query(Amenity)
         if not include_inactive:
             query = query.filter(Amenity.is_active == True)
-        return query.offset(skip).limit(limit).all()
+        
+        # Count total
+        total = query.count()
+        
+        # Sort by created_at desc (newest first)
+        query = query.order_by(Amenity.created_at.desc())
+        
+        items = query.offset(skip).limit(limit).all()
+        return items, total
     
     def get_amenity(self, db: Session, amenity_id: int) -> Optional[Amenity]:
         """

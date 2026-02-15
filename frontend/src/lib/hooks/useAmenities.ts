@@ -1,19 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../api';
-import type { Amenity, AmenityCreate, AmenityUpdate } from '../types/api';
+import type { Amenity, AmenityCreate, AmenityUpdate, PaginatedResponse } from '../types/api';
 
 const AMENITIES_KEY = 'amenities';
 
 // Fetch all amenities
-export function useAmenities(includeInactive = false) {
+export function useAmenities(page = 1, limit = 10, includeInactive = false) {
   return useQuery({
-    queryKey: [AMENITIES_KEY, includeInactive],
+    queryKey: [AMENITIES_KEY, page, limit, includeInactive],
     queryFn: async () => {
       const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('limit', limit.toString());
       if (includeInactive) {
         params.append('include_inactive', 'true');
       }
-      const response = await apiClient.get<Amenity[]>(`/amenities?${params.toString()}`);
+      const response = await apiClient.get<PaginatedResponse<Amenity>>(`/amenities?${params.toString()}`);
       return response;
     },
   });

@@ -21,8 +21,11 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
   const navigate = useNavigate();
   const { data: countries } = useCountries();
   const { data: hotelTypes } = useHotelTypes();
-  const { data: amenities } = useAmenities();
-  
+  // For the form, we want to fetch as many amenities as possible to display them all
+  // Use a large limit for now. Ideally we'd have a non-paginated endpoint or "all" param.
+  const { data: amenitiesData } = useAmenities(1, 100);
+  const amenities = amenitiesData?.items || [];
+
   const [formData, setFormData] = useState<HotelCreateInput & { is_active?: boolean; is_featured?: boolean }>({
     name: '',
     country_id: 0,
@@ -46,9 +49,9 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
         country,
         ...rest
       } = initialData;
-      
+
       setFormData(rest);
-      
+
       // Load existing gallery images
       if (id) {
         fetchGalleryImages(id);
@@ -60,7 +63,7 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
     try {
       const response = await apiClient.get<GalleryImage[]>(`/api/v1/media?entity_type=hotel&entity_id=${hotelId}`);
       setGalleryImages(response);
-      
+
       // Set cover image if hotel has image_id
       if (initialData?.image_id) {
         setCoverImageId(parseInt(initialData.image_id));
@@ -72,7 +75,7 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: type === 'number' ? parseFloat(value) || 0 : value
@@ -81,7 +84,7 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: checked
@@ -107,7 +110,7 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
 
   const handleAmenitiesChange = (amenityId: number, checked: boolean) => {
     const currentAmenityIds = formData.amenity_ids || [];
-    
+
     setFormData(prev => ({
       ...prev,
       amenity_ids: checked
@@ -261,17 +264,17 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
           initialLocation={
             formData.latitude && formData.longitude
               ? {
-                  latitude: formData.latitude,
-                  longitude: formData.longitude,
-                  address: formData.address,
-                  city: formData.city,
-                }
+                latitude: formData.latitude,
+                longitude: formData.longitude,
+                address: formData.address,
+                city: formData.city,
+              }
               : undefined
           }
           onLocationSelect={handleLocationSelect}
           height="350px"
         />
-        
+
         {/* Display selected coordinates */}
         {formData.latitude && formData.longitude && (
           <div className="mt-4 p-3 bg-gray-50 rounded-md">
@@ -430,9 +433,8 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
         <button
           type="submit"
           disabled={isLoading}
-          className={`px-4 py-2 bg-teal text-white rounded-md hover:bg-teal-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal ${
-            isLoading ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
+          className={`px-4 py-2 bg-teal text-white rounded-md hover:bg-teal-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal ${isLoading ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
         >
           {isLoading ? 'Saving...' : initialData ? 'Update Hotel' : 'Create Hotel'}
         </button>

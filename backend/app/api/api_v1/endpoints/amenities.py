@@ -5,25 +5,36 @@ from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.models.user import User
-from app.schemas.amenity import AmenityResponse, AmenityCreate, AmenityUpdate
+from app.schemas.amenity import AmenityResponse, AmenityCreate, AmenityUpdate, PaginatedAmenityResponse
 from app.services.amenity import amenity_service
 from app.auth.dependencies import get_current_user, has_permission
 
 router = APIRouter()
 
-@router.get("/", response_model=List[AmenityResponse])
-@router.get("", response_model=List[AmenityResponse])  # Explicit route without trailing slash
+@router.get("/", response_model=PaginatedAmenityResponse)
+@router.get("", response_model=PaginatedAmenityResponse)  # Explicit route without trailing slash
 def get_amenities(
     db: Session = Depends(get_db),
-    skip: int = 0,
-    limit: int = 100,
+    page: int = 1,
+    limit: int = 10,  # Default to 10 as requested (implied by "pagination")
     include_inactive: bool = False,
 ) -> Any:
     """
     Retrieve all amenities.
     """
-    amenities = amenity_service.get_amenities(db, skip=skip, limit=limit, include_inactive=include_inactive)
-    return amenities
+    skip = (page - 1) * limit
+    items, total = amenity_service.get_amenities(db, skip=skip, limit=limit, include_inactive=include_inactive)
+    
+    import math
+    pages = math.ceil(total / limit) if limit > 0 else 0
+    
+    return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "size": limit,
+        "pages": pages
+    }
 
 @router.get("/{amenity_id}", response_model=AmenityResponse)
 def get_amenity(

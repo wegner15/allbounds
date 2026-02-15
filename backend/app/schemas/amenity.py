@@ -29,3 +29,11 @@ class AmenityResponse(AmenityBase):
     updated_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class PaginatedAmenityResponse(BaseModel):
+    items: list[AmenityResponse]
+    total: int
+    page: int
+    size: int
+    pages: int

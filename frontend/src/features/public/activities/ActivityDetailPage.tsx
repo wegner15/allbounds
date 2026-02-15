@@ -43,8 +43,8 @@ const ActivityDetailPage: React.FC = () => {
             <div className="relative h-[60vh] min-h-[400px]">
                 {coverImage ? (
                     <OptimizedImage
-                        imageId={activity.image_id || activity.cover_image?.image_id}
-                        src={coverImage}
+                        imageId={activity.image_id || undefined}
+                        fallbackUrl={coverImage}
                         alt={activity.name}
                         className="w-full h-full object-cover"
                         variant="large"

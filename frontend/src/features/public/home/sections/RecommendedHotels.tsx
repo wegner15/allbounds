@@ -64,7 +64,7 @@ const RecommendedHotels: React.FC = () => {
           <h2 className="text-3xl font-bold text-gray-900">Recommended Hotels</h2>
         </div>
         <p className="text-gray-600 text-center max-w-2xl mx-auto mb-8">Exclusive discounts directly from hotels all over the World.</p>
-        
+
         <div className="flex justify-center flex-wrap gap-2 mb-8">
           {countriesLoading ? (
             <div className="flex gap-2">
@@ -76,11 +76,10 @@ const RecommendedHotels: React.FC = () => {
             countries.map(country => (
               <button
                 key={country.id}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeTab === country.name
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === country.name
                     ? 'bg-blue-600 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
                 onClick={() => setActiveTab(country.name)}
               >
                 {country.name}
@@ -90,7 +89,7 @@ const RecommendedHotels: React.FC = () => {
             <div className="text-gray-500 text-sm">No countries with hotels available</div>
           )}
         </div>
-        
+
         <div className="relative mb-8">
           <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide" id="hotels-container">
             {countriesLoading || isLoading ? (
@@ -103,7 +102,7 @@ const RecommendedHotels: React.FC = () => {
               hotels?.map((hotel) => (
                 <Link
                   key={hotel.id}
-                  to={`/hotels/${hotel.slug}`}
+                  to={`/hotels/${hotel.country?.slug || 'unknown'}/${hotel.slug}`}
                   className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 group flex-shrink-0 w-80 border border-gray-100"
                 >
                   <div className="relative">

@@ -10,50 +10,51 @@ import { useSearch, type MeilisearchHit } from '../../lib/hooks/useSearch';
 import Button from '../../components/ui/Button';
 
 // Map index names to display names and routes
-const INDEX_CONFIG: Record<string, { label: string; route: (slug: string) => string }> = {
+// Map index names to display names and routes
+const INDEX_CONFIG: Record<string, { label: string; route: (hit: MeilisearchHit) => string }> = {
   regions: {
     label: 'Regions',
-    route: (slug) => `/destinations/${slug}`
+    route: (hit) => `/destinations/${hit.slug}`
   },
   countries: {
     label: 'Countries',
-    route: (slug) => `/destinations/${slug}`
+    route: (hit) => `/destinations/${hit.slug}`
   },
   packages: {
     label: 'Packages',
-    route: (slug) => `/packages/${slug}`
+    route: (hit) => `/packages/${hit.country?.slug || 'unknown'}/${hit.slug}`
   },
   group_trips: {
     label: 'Group Trips',
-    route: (slug) => `/group-trips/${slug}`
+    route: (hit) => `/group-trips/${hit.slug}`
   },
   activities: {
     label: 'Activities',
-    route: (slug) => `/activities/${slug}`
+    route: (hit) => `/activities/${hit.countries?.[0]?.slug || 'unknown'}/${hit.slug}`
   },
   attractions: {
     label: 'Attractions',
-    route: (slug) => `/attractions/${slug}`
+    route: (hit) => `/attractions/${hit.country?.slug || 'unknown'}/${hit.slug}`
   },
   accommodations: {
     label: 'Accommodations',
-    route: (slug) => `/accommodations/${slug}`
+    route: (hit) => `/hotels/${hit.country?.slug || 'unknown'}/${hit.slug}`
   },
   blog_posts: {
     label: 'Blog Posts',
-    route: (slug) => `/blog/${slug}`
+    route: (hit) => `/blog/${hit.slug}`
   },
   hotel_types: {
     label: 'Hotel Types',
-    route: (slug) => `/hotels/${slug}`
+    route: (hit) => `/hotels/${hit.slug}`
   },
   inclusions: {
     label: 'Inclusions',
-    route: (slug) => `#`
+    route: (hit) => `#`
   },
   exclusions: {
     label: 'Exclusions',
-    route: (slug) => `#`
+    route: (hit) => `#`
   },
 };
 
@@ -63,10 +64,10 @@ const SearchPage: React.FC = () => {
   const query = searchParams.get('q') || '';
   const type = searchParams.get('type') || '';
   const [searchInput, setSearchInput] = useState(query);
-  
+
   // Filter states
   const [selectedType, setSelectedType] = useState(type || 'all');
-  
+
   // Map type from URL to index name
   const getIndexFromType = (type: string): string | undefined => {
     const typeMap: Record<string, string> = {
@@ -79,12 +80,12 @@ const SearchPage: React.FC = () => {
     };
     return type && type !== 'all' ? typeMap[type] : undefined;
   };
-  
+
   const searchIndex = selectedType === 'all' ? undefined : getIndexFromType(selectedType);
-  
+
   // Get search results
   const { data: searchResults, isLoading, error } = useSearch(query, searchIndex);
-  
+
   // Update URL when filters change
   useEffect(() => {
     const params = new URLSearchParams();
@@ -92,7 +93,7 @@ const SearchPage: React.FC = () => {
     if (selectedType !== 'all') params.set('type', selectedType);
     setSearchParams(params);
   }, [query, selectedType, setSearchParams]);
-  
+
   // Handle search form submission
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,7 +103,7 @@ const SearchPage: React.FC = () => {
       setSearchParams(params);
     }
   };
-  
+
   // Get all results from all indexes
   const allResults: Array<{ index: string; hit: MeilisearchHit }> = [];
   if (searchResults?.results) {
@@ -112,10 +113,10 @@ const SearchPage: React.FC = () => {
       });
     });
   }
-  
+
   // Calculate total results
   const totalResults = allResults.length;
-  
+
   // Get image URL for a hit
   const getImageUrl = (hit: MeilisearchHit, index: string): string => {
     // Check for image_id (used by most entities) or cover_image_id (used by blog posts)
@@ -127,29 +128,29 @@ const SearchPage: React.FC = () => {
     const searchTerm = hit.name || hit.title || index;
     return `https://source.unsplash.com/600x400/?${encodeURIComponent(searchTerm)}`;
   };
-  
+
   // Get title for a hit
   const getTitle = (hit: MeilisearchHit): string => {
     return hit.name || hit.title || 'Untitled';
   };
-  
+
   // Get description for a hit
   const getDescription = (hit: MeilisearchHit): string => {
     const text = hit.summary || hit.description || '';
     // Strip HTML tags
     return text.replace(/<[^>]*>/g, '');
   };
-  
+
   // Render result card
   const renderResultCard = (index: string, hit: MeilisearchHit) => {
     const config = INDEX_CONFIG[index];
     if (!config) return null;
-    
+
     const title = getTitle(hit);
     const description = getDescription(hit);
     const imageUrl = getImageUrl(hit, index);
-    const route = config.route(hit.slug);
-    
+    const route = config.route(hit);
+
     return (
       <div key={`${index}-${hit.id}`} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
         <Link to={route}>
@@ -179,7 +180,7 @@ const SearchPage: React.FC = () => {
               {description}
             </p>
           )}
-          
+
           {/* Additional metadata */}
           <div className="flex flex-wrap gap-3 text-xs text-charcoal/60 font-lato mb-4">
             {hit.price && (
@@ -201,7 +202,7 @@ const SearchPage: React.FC = () => {
               </div>
             )}
           </div>
-          
+
           <Link to={route}>
             <Button variant="outline" className="w-full text-sm">
               View Details
@@ -211,14 +212,14 @@ const SearchPage: React.FC = () => {
       </div>
     );
   };
-  
+
   return (
     <div className="bg-paper min-h-screen">
       <Helmet>
         <title>{query ? `Search results for "${query}"` : 'Search'} | AllBounds Vacations</title>
         <meta name="description" content="Search for vacation packages, group trips, destinations, and more." />
       </Helmet>
-      
+
       <div className="container mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="mb-8">
@@ -231,7 +232,7 @@ const SearchPage: React.FC = () => {
             </p>
           )}
         </div>
-        
+
         {/* Search Form */}
         <form onSubmit={handleSearch} className="mb-8">
           <div className="flex flex-col md:flex-row gap-3">
@@ -251,7 +252,7 @@ const SearchPage: React.FC = () => {
             </Button>
           </div>
         </form>
-        
+
         {query && (
           <>
             {/* Filters */}
@@ -278,7 +279,7 @@ const SearchPage: React.FC = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Results */}
             <div>
               {isLoading ? (
@@ -312,12 +313,12 @@ const SearchPage: React.FC = () => {
                       <span className="font-semibold text-charcoal">{totalResults}</span> results found
                     </p>
                   </div>
-                  
+
                   {/* Display results grouped by type */}
                   {Object.entries(searchResults?.results || {}).map(([index, results]) => {
                     const config = INDEX_CONFIG[index];
                     if (!config || results.hits.length === 0) return null;
-                    
+
                     return (
                       <div key={index} className="mb-12">
                         <h2 className="text-2xl font-playfair font-bold text-charcoal mb-6 flex items-center gap-2">
@@ -337,7 +338,7 @@ const SearchPage: React.FC = () => {
             </div>
           </>
         )}
-        
+
         {!query && (
           <div className="text-center py-20">
             <Search className="w-20 h-20 mx-auto text-charcoal/20 mb-4" />

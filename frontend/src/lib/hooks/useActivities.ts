@@ -14,6 +14,14 @@ export const useActivities = (countryId?: number) => {
   });
 };
 
+export const useActivityBySlug = (slug: string) => {
+  return useQuery<ActivityResponse>({
+    queryKey: ['activity', slug],
+    queryFn: () => apiClient.get(endpoints.activities.bySlug(slug)),
+    enabled: !!slug,
+  });
+};
+
 export const useDeleteActivity = () => {
   const queryClient = useQueryClient();
 

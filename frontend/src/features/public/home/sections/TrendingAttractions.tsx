@@ -72,28 +72,27 @@ const TrendingAttractions: React.FC = () => {
           {locations.map(location => (
             <button
               key={location}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                activeTab === location
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === location
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+                }`}
               onClick={() => setActiveTab(location)}
             >
               {location}
             </button>
           ))}
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {isLoading ? renderSkeletons() : error ? (
             <div className="col-span-full text-center text-red-500">Failed to load trending attractions.</div>
           ) : attractions?.map(attraction => (
-            <Link 
-                key={attraction.id} 
-                to={`/attractions/${attraction.slug}`}
-                className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 group block"
+            <Link
+              key={attraction.id}
+              to={`/attractions/${attraction.country?.slug || 'unknown'}/${attraction.slug}`}
+              className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 group block"
             >
-              <img 
+              <img
                 src={getImageUrlWithFallback(attraction.cover_image || attraction.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&w=600&q=80')}
                 alt={attraction.name}
                 className="w-full h-40 object-cover"

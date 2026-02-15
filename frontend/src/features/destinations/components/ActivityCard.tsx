@@ -18,7 +18,7 @@ const ActivityCard: React.FC<ActivityCardProps> = React.memo(({ activity }) => {
   return (
     <article className="group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105">
       <Link
-        to={`/activities/${activity.slug}`}
+        to={`/activities/${activity.countries?.[0]?.slug || 'unknown'}/${activity.slug}`}
         className="block min-h-[44px]"
         aria-label={`View details for ${activity.name} activity`}
       >

@@ -35,7 +35,7 @@ const HotelCard: React.FC<HotelCardProps> = React.memo(({ hotel }) => {
   return (
     <article className="group bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] flex flex-col h-full">
       <Link
-        to={`/hotels/${hotel.slug}`}
+        to={`/hotels/${hotel.country?.slug || 'unknown'}/${hotel.slug}`}
         className="flex flex-col h-full min-h-[44px]"
         aria-label={`View details for ${hotel.name} hotel`}
       >
@@ -80,8 +80,8 @@ const HotelCard: React.FC<HotelCardProps> = React.memo(({ hotel }) => {
                   <Star
                     key={i}
                     className={`w-4 h-4 ${i < hotel.stars!
-                        ? 'text-yellow-400 fill-yellow-400'
-                        : 'text-gray-300'
+                      ? 'text-yellow-400 fill-yellow-400'
+                      : 'text-gray-300'
                       }`}
                     aria-hidden="true"
                   />

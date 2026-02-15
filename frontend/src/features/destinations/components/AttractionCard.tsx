@@ -12,14 +12,14 @@ interface AttractionCardProps {
 
 const AttractionCard: React.FC<AttractionCardProps> = React.memo(({ attraction }) => {
   // Sanitize and truncate description
-  const sanitizedDescription = attraction.summary || attraction.description 
+  const sanitizedDescription = attraction.summary || attraction.description
     ? DOMPurify.sanitize(attraction.summary || attraction.description || '')
     : '';
-  
+
   return (
     <article className="group bg-white rounded-lg border border-gray-200 overflow-hidden transition-all duration-300 hover:border-orange-400 hover:shadow-md flex min-h-[80px]">
       <Link
-        to={`/attractions/${attraction.slug}`}
+        to={`/attractions/${attraction.country?.slug || 'unknown'}/${attraction.slug}`}
         className="flex w-full min-h-[44px]"
         aria-label={`View details for ${attraction.name} attraction`}
       >
@@ -40,7 +40,7 @@ const AttractionCard: React.FC<AttractionCardProps> = React.memo(({ attraction }
               <Landmark className="w-8 h-8 text-white opacity-70" aria-hidden="true" />
             </div>
           )}
-      </div>
+        </div>
 
         {/* Content - Right Side */}
         <div className="flex-1 p-3 md:p-4 min-w-0">

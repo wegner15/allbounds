@@ -9,6 +9,7 @@ import { RichTextDisplay } from '../../components/ui/RichTextDisplay';
 import Button from '../../components/ui/Button';
 import ImageCarousel from '../../components/ui/ImageCarousel';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils';
+import Breadcrumb from '../../components/layout/Breadcrumb';
 import 'leaflet/dist/leaflet.css';
 
 // Fix Leaflet icon issue - do this once when component mounts
@@ -105,15 +106,25 @@ const AttractionDetailPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             {/* Attraction Info */}
             <div>
+              <div className="mb-6">
+                <Breadcrumb
+                  items={[
+                    { label: 'Destinations', path: '/destinations' },
+                    { label: attraction?.country?.name || 'Country', path: `/destinations/${attraction?.country?.slug}` },
+                    { label: 'Attractions', path: `/attractions` },
+                    { label: attraction?.name || 'Attraction' },
+                  ]}
+                />
+              </div>
               <div className="flex items-center text-sm text-gray-600 mb-2">
                 <MapPin className="h-4 w-4 mr-1" />
                 <span>{attraction?.city && `${attraction.city}, `}{attraction?.country?.name}</span>
               </div>
-              
+
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
                 {attraction?.name}
               </h1>
-              
+
               {attraction?.summary && (
                 <div
                   className="text-xl text-gray-600 mb-6"
@@ -129,7 +140,7 @@ const AttractionDetailPage: React.FC = () => {
                     <span>{Math.floor(attraction.duration_minutes / 60)}h {attraction.duration_minutes % 60}m visit</span>
                   </div>
                 )}
-                
+
                 {attraction?.price && (
                   <div className="flex items-center text-gray-600">
                     <DollarSign className="h-5 w-5 mr-2" />
@@ -175,7 +186,7 @@ const AttractionDetailPage: React.FC = () => {
                     Travel Packages ({total_packages})
                   </h2>
                   <div className="flex space-x-2">
-                    <button 
+                    <button
                       onClick={() => {
                         const container = document.getElementById('packages-scroll');
                         if (container) container.scrollLeft -= 300;
@@ -184,7 +195,7 @@ const AttractionDetailPage: React.FC = () => {
                     >
                       <ChevronLeft className="h-5 w-5" />
                     </button>
-                    <button 
+                    <button
                       onClick={() => {
                         const container = document.getElementById('packages-scroll');
                         if (container) container.scrollLeft += 300;
@@ -195,8 +206,8 @@ const AttractionDetailPage: React.FC = () => {
                     </button>
                   </div>
                 </div>
-                
-                <div 
+
+                <div
                   id="packages-scroll"
                   className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4"
                   style={{ scrollBehavior: 'smooth' }}
@@ -234,14 +245,14 @@ const AttractionDetailPage: React.FC = () => {
                             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pkg.summary) }}
                           />
                         )}
-                        
+
                         <div className="flex justify-between items-center mb-2">
                           <div>
                             <span className="font-bold text-lg">From ${pkg?.price}</span>
                             <span className="text-gray-600 text-sm"> / person</span>
                           </div>
                         </div>
-                        
+
                       </div>
                     </div>
                   ))}
@@ -257,7 +268,7 @@ const AttractionDetailPage: React.FC = () => {
                     Group Trips ({total_group_trips})
                   </h2>
                   <div className="flex space-x-2">
-                    <button 
+                    <button
                       onClick={() => {
                         const container = document.getElementById('group-trips-scroll');
                         if (container) container.scrollLeft -= 300;
@@ -266,7 +277,7 @@ const AttractionDetailPage: React.FC = () => {
                     >
                       <ChevronLeft className="h-5 w-5" />
                     </button>
-                    <button 
+                    <button
                       onClick={() => {
                         const container = document.getElementById('group-trips-scroll');
                         if (container) container.scrollLeft += 300;
@@ -277,8 +288,8 @@ const AttractionDetailPage: React.FC = () => {
                     </button>
                   </div>
                 </div>
-                
-                <div 
+
+                <div
                   id="group-trips-scroll"
                   className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4"
                   style={{ scrollBehavior: 'smooth' }}
@@ -287,8 +298,8 @@ const AttractionDetailPage: React.FC = () => {
                     return (
                       <div key={trip.id} className="flex-shrink-0 w-80 bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                         <Link to={`/group-trips/${trip.slug}`}>
-                          <img 
-                            src={getImageUrlWithFallback(trip.cover_image, IMAGE_VARIANTS.MEDIUM, 'https://source.unsplash.com/random/600x400/?group,travel')} 
+                          <img
+                            src={getImageUrlWithFallback(trip.cover_image, IMAGE_VARIANTS.MEDIUM, 'https://source.unsplash.com/random/600x400/?group,travel')}
                             alt={trip.name}
                             className="w-full h-48 object-cover"
                           />
@@ -319,7 +330,7 @@ const AttractionDetailPage: React.FC = () => {
                               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trip.summary) }}
                             />
                           )}
-                          
+
                           {/* Trip Details */}
                           <div className="space-y-2 mb-4">
                             {/* Group Size */}
@@ -335,8 +346,8 @@ const AttractionDetailPage: React.FC = () => {
                             )}
 
                           </div>
-                          
-                          
+
+
                           {/* Price */}
                           <div className="flex justify-between items-start">
                             <div>
@@ -408,10 +419,10 @@ const AttractionDetailPage: React.FC = () => {
                 </div>
               </div>
             )}
-            
+
             <div className="bg-white rounded-lg shadow-sm p-6 sticky top-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Location Details</h3>
-              
+
               <div className="space-y-3">
                 <div className="flex items-start">
                   <MapPin className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />

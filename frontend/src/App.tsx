@@ -104,6 +104,7 @@ import HotelListPage from './features/public/hotels/HotelListPage';
 import HotelDetailPage from './features/public/hotels/HotelDetailPage';
 import AttractionListPage from './features/public/attractions/AttractionListPage';
 import AttractionDetailPage from './features/attractions/AttractionDetailPage';
+import ActivityDetailPage from './features/public/activities/ActivityDetailPage';
 
 // Import admin user management pages
 import UsersListPage from './features/admin/users/UsersListPage';
@@ -268,9 +269,13 @@ const router = createBrowserRouter([
       { path: 'group-trips/:slug', element: <GroupTripDetailPage /> },
       { path: 'stays', element: <StaysPage /> },
       { path: 'hotels', element: <HotelListPage /> },
+      { path: 'hotels/:destination/:slug', element: <HotelDetailPage /> },
       { path: 'hotels/:slug', element: <HotelDetailPage /> },
       { path: 'activities', element: <ActivitiesPage /> },
+      { path: 'activities/:destination/:slug', element: <ActivityDetailPage /> },
+      { path: 'activities/:slug', element: <ActivityDetailPage /> },
       { path: 'attractions', element: <AttractionListPage /> },
+      { path: 'attractions/:destination/:slug', element: <AttractionDetailPage /> },
       { path: 'attractions/:slug', element: <AttractionDetailPage /> },
       { path: 'holiday-types', element: <HolidayTypesPage /> },
       { path: 'holiday-types/:slug', element: <HolidayTypeDetailPage /> },

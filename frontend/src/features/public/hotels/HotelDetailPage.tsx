@@ -4,6 +4,7 @@ import { useHotelBySlug } from '../../../lib/hooks/useHotels';
 import ImageCarousel from '../../../components/ui/ImageCarousel';
 import PackageBookingForm from '../../../components/forms/PackageBookingForm';
 import InquiryForm from '../../../components/forms/InquiryForm';
+import Breadcrumb from '../../../components/layout/Breadcrumb';
 
 const HotelDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -74,38 +75,14 @@ const HotelDetailPage: React.FC = () => {
       {/* Breadcrumb */}
       <div className="border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <nav className="flex" aria-label="Breadcrumb">
-            <ol className="flex items-center space-x-4">
-              <li>
-                <Link to="/" className="text-gray-400 hover:text-gray-500">
-                  <svg className="flex-shrink-0 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                  </svg>
-                  <span className="sr-only">Home</span>
-                </Link>
-              </li>
-              <li>
-                <div className="flex items-center">
-                  <svg className="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <Link to="/hotels" className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
-                    Hotels
-                  </Link>
-                </div>
-              </li>
-              <li>
-                <div className="flex items-center">
-                  <svg className="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="ml-4 text-sm font-medium text-gray-500" aria-current="page">
-                    {hotel.name}
-                  </span>
-                </div>
-              </li>
-            </ol>
-          </nav>
+          <Breadcrumb
+            items={[
+              { label: 'Destinations', path: '/destinations' },
+              { label: hotel?.country?.name || 'Country', path: `/destinations/${hotel?.country?.slug}` },
+              { label: 'Hotels', path: '/hotels' },
+              { label: hotel?.name || 'Hotel' },
+            ]}
+          />
         </div>
       </div>
 
@@ -188,7 +165,7 @@ const HotelDetailPage: React.FC = () => {
                     </div>
                     <p className="text-gray-600">{hotel.check_in_time}</p>
                   </div>
-                  
+
                   {hotel.check_out_time && (
                     <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
                       <div className="flex items-center mb-2">
@@ -264,14 +241,14 @@ const HotelDetailPage: React.FC = () => {
                 </div>
               )}
 
-              <button 
+              <button
                 onClick={() => setShowBookingForm(true)}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors mb-4"
               >
                 Book Now
               </button>
 
-              <button 
+              <button
                 onClick={() => setShowInquiryForm(true)}
                 className="w-full border border-gray-300 hover:border-gray-400 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors mb-6"
               >

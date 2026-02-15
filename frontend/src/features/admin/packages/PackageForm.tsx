@@ -237,14 +237,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
     }
   };
 
-  if (isLoadingCountries || isLoadingHolidayTypes) {
-    return (
-      <div className="text-center py-12">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-charcoal"></div>
-        <p className="mt-2">Loading form data...</p>
-      </div>
-    );
-  }
+
 
   // Type-safe form submission handler
   const handleFormSubmit = handleSubmit(onSubmit);
@@ -255,6 +248,15 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       console.log('Form validation errors:', errors);
     }
   }, [errors]);
+
+  if (isLoadingCountries || isLoadingHolidayTypes) {
+    return (
+      <div className="text-center py-12">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-charcoal"></div>
+        <p className="mt-2">Loading form data...</p>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleFormSubmit} className="space-y-8">

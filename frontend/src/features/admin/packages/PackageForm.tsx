@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -36,6 +36,10 @@ const packageSchema = z.object({
   is_active: z.boolean(),
   is_featured: z.boolean(),
   is_deal: z.boolean(),
+  faqs: z.array(z.object({
+    question: z.string().min(1, 'Question is required'),
+    answer: z.string().min(1, 'Answer is required'),
+  })).optional(),
 });
 
 type PackageFormData = z.infer<typeof packageSchema>;
@@ -90,6 +94,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
         is_active: packageData.is_active,
         is_featured: packageData.is_featured,
         is_deal: packageData.is_deal || false,
+        faqs: packageData.faqs || [],
       }
       : {
         name: '',
@@ -107,6 +112,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
         is_active: true,
         is_featured: false,
         is_deal: false,
+        faqs: [],
       },
   });
 
@@ -135,6 +141,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       setValue('is_active', packageData.is_active ?? true);
       setValue('is_featured', packageData.is_featured ?? false);
       setValue('is_deal', packageData.is_deal ?? false);
+      setValue('faqs', packageData.faqs || []);
 
       console.log('PackageForm: Set country_id to:', packageData.country_id);
       console.log('PackageForm: Set holiday_type_ids to:', packageData.holiday_types?.map((ht: any) => ht.id) || []);
@@ -157,6 +164,12 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       }
     }
   }, [isEdit, packageData, setValue]);
+
+  // FAQ Field Array
+  const { fields: faqFields, append: appendFaq, remove: removeFaq } = useFieldArray({
+    control,
+    name: 'faqs',
+  });
 
   // Auto-generate slug from name
   const name = watch('name');
@@ -963,6 +976,104 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
               </p>
             </div>
           )}
+
+          {/* FAQ Management */}
+          <div className="sm:col-span-6">
+            <div className="flex justify-between items-center">
+              <label className="block text-sm font-semibold text-gray-800">
+                Frequently Asked Questions
+              </label>
+              <button
+                type="button"
+                onClick={() => appendFaq({ question: '', answer: '' })}
+                className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-teal hover:bg-teal-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal"
+              >
+                <svg className="-ml-0.5 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add FAQ
+              </button>
+            </div>
+            <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
+              <div className="mb-3">
+                <p className="text-sm text-gray-700">Add common questions and answers for this package:</p>
+              </div>
+
+              {faqFields.length === 0 ? (
+                <div className="text-center py-6 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                  <p className="text-sm text-gray-500">No FAQs added yet.</p>
+                  <button
+                    type="button"
+                    onClick={() => appendFaq({ question: '', answer: '' })}
+                    className="mt-2 text-sm text-teal hover:text-teal-dark font-medium"
+                  >
+                    Add your first question
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {faqFields.map((field, index) => (
+                    <div key={field.id} className="bg-gray-50 p-4 rounded-lg border border-gray-200 relative group">
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={() => removeFaq(index)}
+                          className="p-1 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-200"
+                        >
+                          <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor={`faqs.${index}.question`} className="block text-xs font-medium text-gray-700 mb-1">
+                            Question {index + 1}
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Is transfer included?"
+                            className="block w-full px-3 py-2 text-sm border-gray-300 rounded-md shadow-sm focus:ring-teal focus:border-teal"
+                            {...register(`faqs.${index}.question` as const)}
+                          />
+                          {errors.faqs?.[index]?.question && (
+                            <p className="mt-1 text-xs text-red-600">{errors.faqs[index]?.question?.message}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Answer
+                          </label>
+                          <Controller
+                            name={`faqs.${index}.answer` as const}
+                            control={control}
+                            render={({ field: controllerField }) => (
+                              <TinyMCEEditor
+                                value={controllerField.value}
+                                onChange={controllerField.onChange}
+                                label=""
+                                placeholder="Enter the answer..."
+                                height={200}
+                                required
+                              />
+                            )}
+                          />
+                          {errors.faqs?.[index]?.answer && (
+                            <p className="mt-1 text-xs text-red-600">{errors.faqs[index]?.answer?.message}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <p className="mt-2 text-xs text-gray-500">
+              FAQs help answer common customer questions and improve conversion rates.
+            </p>
+          </div>
 
           {/* Status */}
           <div className="sm:col-span-6">

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey, Float, Table
+from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey, Float, Table, JSON
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
@@ -24,6 +24,7 @@ class Package(Base):
     itinerary = Column(Text, nullable=True)  # Could be JSON or HTML
     inclusions = Column(Text, nullable=True)
     exclusions = Column(Text, nullable=True)
+    faqs = Column(JSON, nullable=True)  # List of {question: str, answer: str}
     image_id = Column(String(255), nullable=True)  # Cloudflare image ID
     slug = Column(String(100), unique=True, index=True, nullable=False)
     is_active = Column(Boolean, default=True)

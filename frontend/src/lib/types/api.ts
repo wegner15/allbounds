@@ -320,6 +320,7 @@ export interface Package extends BaseModel {
   blog_posts?: BlogPost[];
   rating?: number;
   review_count?: number;
+  faqs?: { question: string; answer: string }[];
 }
 
 // Package with gallery

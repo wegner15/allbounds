@@ -20,6 +20,7 @@ class PackageBase(BaseModel):
     exclusions: Optional[str] = Field(None, description="What's excluded from the package")
     image_id: Optional[str] = Field(None, description="Cloudflare image ID for the package thumbnail")
     is_deal: Optional[bool] = Field(False, description="Whether the package is marked as a special deal")
+    faqs: Optional[List[dict]] = Field(None, description="List of FAQs ({question: str, answer: str})")
     
 # Schema for creating a new Package
 class PackageCreate(PackageBase):
@@ -50,6 +51,7 @@ class PackageUpdate(BaseModel):
     inclusion_ids: Optional[List[int]] = Field(None, description="List of inclusion IDs to associate with this package")
     exclusion_ids: Optional[List[int]] = Field(None, description="List of exclusion IDs to associate with this package")
     blog_post_ids: Optional[List[int]] = Field(None, description="List of blog post IDs to associate with this package")
+    faqs: Optional[List[dict]] = Field(None, description="List of FAQs")
 
 # Schema for Package response
 class PackageResponse(PackageBase):

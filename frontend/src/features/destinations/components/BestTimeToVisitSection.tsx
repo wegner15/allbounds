@@ -76,7 +76,6 @@ const BestTimeToVisitSection: React.FC<BestTimeToVisitSectionProps> = React.memo
                 ${getRatingColor(rating)}
                 group
               `}
-              title={notes || `${month}: ${rating}`}
             >
               {/* Month name */}
               <div className="text-sm font-semibold mb-1">
@@ -95,16 +94,16 @@ const BestTimeToVisitSection: React.FC<BestTimeToVisitSectionProps> = React.memo
                   scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-200 ease-out origin-bottom
                   pointer-events-none group-hover:pointer-events-auto
                   bg-white text-gray-900 text-sm rounded-xl p-4
-                  w-72 z-50
+                  w-96 z-50
                   shadow-xl border border-gray-100
                 ">
                   <div className="font-bold text-gray-900 mb-2 border-b border-gray-100 pb-2 flex items-center justify-between">
                     <span>{month}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${rating === 'excellent' ? 'bg-green-100 text-green-800' :
-                        rating === 'good' ? 'bg-primary/10 text-primary' :
-                          rating === 'fair' ? 'bg-yellow-100 text-yellow-800' :
-                            rating === 'poor' ? 'bg-gray-100 text-gray-800' :
-                              'bg-red-100 text-red-800'
+                      rating === 'good' ? 'bg-primary/10 text-primary' :
+                        rating === 'fair' ? 'bg-yellow-100 text-yellow-800' :
+                          rating === 'poor' ? 'bg-gray-100 text-gray-800' :
+                            'bg-red-100 text-red-800'
                       }`}>
                       {rating}
                     </span>

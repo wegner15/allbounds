@@ -91,21 +91,33 @@ const BestTimeToVisitSection: React.FC<BestTimeToVisitSectionProps> = React.memo
               {/* Tooltip for month-specific notes */}
               {notes && (
                 <div className="
-                  absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2
-                  hidden group-hover:block
-                  bg-gray-900 text-white text-xs rounded-lg py-2 px-3
-                  w-48 z-10
-                  shadow-lg
+                  absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3
+                  scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-200 ease-out origin-bottom
+                  pointer-events-none group-hover:pointer-events-auto
+                  bg-white text-gray-900 text-sm rounded-xl p-4
+                  w-72 z-50
+                  shadow-xl border border-gray-100
                 ">
-                  <div className="font-semibold mb-1">{month}</div>
+                  <div className="font-bold text-gray-900 mb-2 border-b border-gray-100 pb-2 flex items-center justify-between">
+                    <span>{month}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${rating === 'excellent' ? 'bg-green-100 text-green-800' :
+                        rating === 'good' ? 'bg-primary/10 text-primary' :
+                          rating === 'fair' ? 'bg-yellow-100 text-yellow-800' :
+                            rating === 'poor' ? 'bg-gray-100 text-gray-800' :
+                              'bg-red-100 text-red-800'
+                      }`}>
+                      {rating}
+                    </span>
+                  </div>
                   <div
-                    className="text-left prose prose-invert prose-xs"
+                    className="text-left py-1 text-gray-600 leading-relaxed prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0"
                     dangerouslySetInnerHTML={{ __html: notes }}
                   />
                   {/* Arrow */}
                   <div className="
                     absolute top-full left-1/2 transform -translate-x-1/2
-                    border-4 border-transparent border-t-gray-900
+                    border-8 border-transparent border-t-white
+                    drop-shadow-sm
                   "></div>
                 </div>
               )}

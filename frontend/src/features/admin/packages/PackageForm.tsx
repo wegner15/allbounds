@@ -202,11 +202,8 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
 
       if (isEdit) {
         await updatePackageMutation.mutateAsync(packageData);
-
-        // Inclusions and exclusions are handled by the createPackageMutation
-        if (newPackage?.id) {
-          console.log('Package created successfully:', newPackage);
-        }
+      } else {
+        await createPackageMutation.mutateAsync(packageData);
       }
 
       navigate('/admin/packages');

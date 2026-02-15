@@ -7,9 +7,9 @@ import DOMPurify from 'dompurify';
 import { useAttractionTrips } from '../../hooks/useAttractionTrips';
 import { RichTextDisplay } from '../../components/ui/RichTextDisplay';
 import Button from '../../components/ui/Button';
-import ImageCarousel from '../../components/ui/ImageCarousel';
-import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils';
+import GridGallery from '../../components/ui/GridGallery';
 import Breadcrumb from '../../components/layout/Breadcrumb';
+import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils';
 import 'leaflet/dist/leaflet.css';
 
 // Fix Leaflet icon issue - do this once when component mounts
@@ -35,10 +35,10 @@ const AttractionDetailPage: React.FC = () => {
   useEffect(() => {
     fixLeafletDefaultIcon();
   }, []);
+
   const { slug } = useParams<{ slug: string }>();
   const { data: attractionData, isLoading, error } = useAttractionTrips(slug || '');
   const { attraction, packages = [], group_trips = [], total_packages = 0, total_group_trips = 0 } = attractionData || {};
-
 
   // Get all available images for the gallery (memoized to avoid recalculation)
   const getAllImages = useMemo(() => {
@@ -77,7 +77,7 @@ const AttractionDetailPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-teal-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading attraction details...</p>
         </div>
       </div>
@@ -90,7 +90,7 @@ const AttractionDetailPage: React.FC = () => {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Attraction Not Found</h1>
           <p className="text-gray-600 mb-6">The attraction you're looking for doesn't exist or has been removed.</p>
-          <Link to="/" className="text-blue-600 hover:text-blue-800">
+          <Link to="/" className="text-teal-600 hover:text-teal-800">
             Return to Home
           </Link>
         </div>
@@ -100,72 +100,56 @@ const AttractionDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="relative bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            {/* Attraction Info */}
-            <div>
-              <div className="mb-6">
-                <Breadcrumb
-                  items={[
-                    { label: 'Destinations', path: '/destinations' },
-                    { label: attraction?.country?.name || 'Country', path: `/destinations/${attraction?.country?.slug}` },
-                    { label: 'Attractions', path: `/attractions` },
-                    { label: attraction?.name || 'Attraction' },
-                  ]}
-                />
-              </div>
-              <div className="flex items-center text-sm text-gray-600 mb-2">
-                <MapPin className="h-4 w-4 mr-1" />
-                <span>{attraction?.city && `${attraction.city}, `}{attraction?.country?.name}</span>
-              </div>
-
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                {attraction?.name}
-              </h1>
-
-              {attraction?.summary && (
-                <div
-                  className="text-xl text-gray-600 mb-6"
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(attraction.summary) }}
-                />
-              )}
-
-              {/* Quick Info */}
-              <div className="flex flex-wrap gap-4 mb-6">
-                {attraction?.duration_minutes && (
-                  <div className="flex items-center text-gray-600">
-                    <Clock className="h-5 w-5 mr-2" />
-                    <span>{Math.floor(attraction.duration_minutes / 60)}h {attraction.duration_minutes % 60}m visit</span>
-                  </div>
-                )}
-
-                {attraction?.price && (
-                  <div className="flex items-center text-gray-600">
-                    <DollarSign className="h-5 w-5 mr-2" />
-                    <span>From ${attraction.price}</span>
-                  </div>
-                )}
-              </div>
-
-              {attraction?.opening_hours && (
-                <div className="bg-blue-50 p-4 rounded-lg mb-6">
-                  <h3 className="font-semibold text-gray-900 mb-2">Opening Hours</h3>
-                  <p className="text-gray-700">{attraction.opening_hours}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Attraction Image Gallery */}
-            <div className="lg:order-first">
-              <ImageCarousel images={getAllImages} className="rounded-lg overflow-hidden shadow-lg" autoPlay={true} showThumbnails={false} />
-            </div>
-          </div>
+      {/* Breadcrumb Section */}
+      <div className="bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <Breadcrumb
+            items={[
+              { label: 'Destinations', path: '/destinations' },
+              { label: attraction?.country?.name || 'Country', path: `/destinations/${attraction?.country?.slug}` },
+              { label: 'Attractions', path: `/attractions` },
+              { label: attraction?.name || 'Attraction' },
+            ]}
+          />
         </div>
       </div>
 
-      {/* Content Section */}
+      {/* Hero Section - Header & Gallery */}
+      <div className="bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-playfair">
+              {attraction?.name}
+            </h1>
+
+            <div className="flex flex-wrap items-center gap-6 text-gray-600">
+              <div className="flex items-center">
+                <MapPin className="h-5 w-5 mr-2 text-teal-600" />
+                <span>{attraction?.city && `${attraction.city}, `}{attraction?.country?.name}</span>
+              </div>
+
+              {attraction?.duration_minutes && (
+                <div className="flex items-center">
+                  <Clock className="h-5 w-5 mr-2 text-teal-600" />
+                  <span>{Math.floor(attraction.duration_minutes / 60)}h {attraction.duration_minutes % 60}m visit</span>
+                </div>
+              )}
+
+              {attraction?.price !== undefined && (
+                <div className="flex items-center">
+                  <DollarSign className="h-5 w-5 mr-2 text-teal-600" />
+                  <span className="font-semibold text-gray-900">From ${attraction.price}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Grid Gallery */}
+          <GridGallery images={getAllImages} className="mb-8" />
+        </div>
+      </div>
+
+      {/* Content Section (Rest of the page) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}

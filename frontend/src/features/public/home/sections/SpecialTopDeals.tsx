@@ -52,13 +52,13 @@ const SpecialTopDeals: React.FC = () => {
             </svg>
           </Link>
         </div>
-        
+
         <div className="relative">
           <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide" id="special-deals-container">
             {isLoading ? renderSkeletons() : deals?.map(deal => (
               <Link
                 key={deal.id}
-                to={`/packages/${deal.slug}`}
+                to={`/packages/${deal.country?.slug || 'unknown'}/${deal.slug}`}
                 className="relative flex-shrink-0 w-80 h-96 rounded-lg overflow-hidden group cursor-pointer block"
               >
                 <img
@@ -67,15 +67,15 @@ const SpecialTopDeals: React.FC = () => {
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
-                 <div className="p-4">
-                     <h3 className="text-white font-semibold text-lg">{deal.name}</h3>
-                     <FromPriceDisplay
-                       packageId={deal.id}
-                       basePrice={deal.price}
-                       currency="$"
-                       className="text-white/80 text-sm"
-                     />
-                   </div>
+                  <div className="p-4">
+                    <h3 className="text-white font-semibold text-lg">{deal.name}</h3>
+                    <FromPriceDisplay
+                      packageId={deal.id}
+                      basePrice={deal.price}
+                      currency="$"
+                      className="text-white/80 text-sm"
+                    />
+                  </div>
                 </div>
               </Link>
             ))}

@@ -157,7 +157,7 @@ const PackageCarousel: React.FC<PackageCarouselProps> = ({
 
               {/* CTA Button */}
               <Link
-                to={`/packages/${currentPackage.slug}`}
+                to={`/packages/${currentPackage.country?.slug || 'unknown'}/${currentPackage.slug}`}
                 className="inline-flex items-center px-6 py-3 bg-teal hover:bg-teal-dark text-white font-medium rounded-lg transition-colors duration-200"
               >
                 View Package Details
@@ -196,9 +196,8 @@ const PackageCarousel: React.FC<PackageCarouselProps> = ({
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`w-3 h-3 rounded-full transition-colors ${
-                  index === currentIndex ? 'bg-white' : 'bg-white/50'
-                }`}
+                className={`w-3 h-3 rounded-full transition-colors ${index === currentIndex ? 'bg-white' : 'bg-white/50'
+                  }`}
                 aria-label={`Go to package ${index + 1}`}
               />
             ))}

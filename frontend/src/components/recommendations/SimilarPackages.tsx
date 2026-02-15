@@ -40,7 +40,7 @@ const SimilarPackages: React.FC<SimilarPackagesProps> = ({ packageId, limit = 4 
         {similarPackages.map((pkg) => (
           <Link
             key={pkg.id}
-            to={`/packages/${pkg.slug}`}
+            to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}`}
             className="group bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
           >
             <div className="relative h-48 overflow-hidden">

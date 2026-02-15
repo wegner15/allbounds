@@ -261,6 +261,7 @@ const router = createBrowserRouter([
       { path: 'regions', element: <RegionsPage /> },
       { path: 'countries', element: <CountriesPage /> },
       { path: 'packages', element: <PackagesPage /> },
+      { path: 'packages/:destination/:slug', element: <PackageDetailPageNew /> },
       { path: 'packages/:slug', element: <PackageDetailPageNew /> },
       { path: 'packages-old/:slug', element: <PackageDetailPage /> },
       { path: 'group-trips', element: <GroupTripsPage /> },

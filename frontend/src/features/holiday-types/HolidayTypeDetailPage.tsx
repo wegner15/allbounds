@@ -316,7 +316,7 @@ const HolidayTypeDetailPage: React.FC = () => {
                 {featuredDestinations.map((destination) => (
                   <Link
                     key={destination.id}
-                    to={`/countries/${destination.slug}`}
+                    to={`/destinations/${destination.slug}`}
                     className="group block overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
                   >
                     <div className="relative h-80">
@@ -383,7 +383,7 @@ const HolidayTypeDetailPage: React.FC = () => {
                 {packages.map((pkg) => (
                   <Link
                     key={pkg.id}
-                    to={`/packages/${pkg.slug}`}
+                    to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}`}
                     className="group block bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden"
                   >
                     <div className="relative h-64">

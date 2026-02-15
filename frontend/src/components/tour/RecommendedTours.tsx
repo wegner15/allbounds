@@ -11,8 +11,8 @@ interface RecommendedToursProps {
   subtitle?: string;
 }
 
-const RecommendedTours: React.FC<RecommendedToursProps> = ({ 
-  tours, 
+const RecommendedTours: React.FC<RecommendedToursProps> = ({
+  tours,
   title = "You Might Also Like",
   subtitle = "Discover more amazing tours in this destination"
 }) => {
@@ -38,7 +38,7 @@ const RecommendedTours: React.FC<RecommendedToursProps> = ({
           {tours.map((tour) => (
             <Link
               key={tour.id}
-              to={`/packages/${tour.slug}`}
+              to={`/packages/${tour.country?.slug || 'unknown'}/${tour.slug}`}
               className="group bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 border border-gray-100 hover:border-primary/30 animate-fade-in"
             >
               {/* Tour Image */}
@@ -54,7 +54,7 @@ const RecommendedTours: React.FC<RecommendedToursProps> = ({
                   showSkeleton={true}
                   sizes={getResponsiveImageSizes('card')}
                 />
-                
+
                 {/* Featured Badge */}
                 {tour.is_featured && (
                   <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-400 to-amber-500 text-gray-900 px-3 py-1 rounded-full text-xs font-bold shadow-lg">
@@ -62,7 +62,7 @@ const RecommendedTours: React.FC<RecommendedToursProps> = ({
                     Featured
                   </div>
                 )}
-                
+
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
@@ -83,7 +83,7 @@ const RecommendedTours: React.FC<RecommendedToursProps> = ({
                       <span className="truncate">{tour.country.name}</span>
                     </div>
                   )}
-                  
+
                   {/* Duration */}
                   {tour.duration_days && (
                     <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -91,7 +91,7 @@ const RecommendedTours: React.FC<RecommendedToursProps> = ({
                       <span>{tour.duration_days} {tour.duration_days === 1 ? 'Day' : 'Days'}</span>
                     </div>
                   )}
-                  
+
                   {/* Price */}
                   {tour.price && tour.price > 0 && (
                     <div className="flex items-center gap-2 text-sm font-semibold text-success">

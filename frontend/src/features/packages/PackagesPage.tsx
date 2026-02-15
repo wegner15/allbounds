@@ -379,7 +379,7 @@ const PackagesPage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {currentPackages.map(pkg => (
                     <div key={pkg.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                      <Link to={`/packages/${pkg.slug}`}>
+                      <Link to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}`}>
                         <img
                           src={getImageUrlWithFallback(pkg.image_id, IMAGE_VARIANTS.MEDIUM)}
                           alt={pkg.name}
@@ -403,7 +403,7 @@ const PackagesPage: React.FC = () => {
                             </span>
                           )}
                         </div>
-                        <Link to={`/packages/${pkg.slug}`} className="block">
+                        <Link to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}`} className="block">
                           <h3 className="text-lg font-medium text-charcoal hover:text-hover transition-colors mb-2">
                             {pkg.name}
                           </h3>

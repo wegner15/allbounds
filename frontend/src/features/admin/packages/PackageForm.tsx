@@ -203,41 +203,9 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       if (isEdit) {
         await updatePackageMutation.mutateAsync(packageData);
 
-        // Update inclusions and exclusions
-        try {
-          console.log('Updating inclusions:', formData.inclusion_ids);
-          await apiClient.post(`/api/v1/packages/${packageId}/inclusions`, {
-            inclusion_ids: formData.inclusion_ids || []
-          });
-
-          console.log('Updating exclusions:', formData.exclusion_ids);
-          await apiClient.post(`/api/v1/packages/${packageId}/exclusions`, {
-            exclusion_ids: formData.exclusion_ids || []
-          });
-        } catch (error) {
-          console.error('Error updating inclusions/exclusions:', error);
-        }
-      } else {
-        const newPackage = await createPackageMutation.mutateAsync(packageData);
-
-        // The cover image is already set via the image_id in the package data
-        // No additional API call needed for new packages
-
-        // Add inclusions and exclusions for the new package
+        // Inclusions and exclusions are handled by the createPackageMutation
         if (newPackage?.id) {
-          try {
-            console.log('Adding inclusions to new package:', formData.inclusion_ids);
-            await apiClient.post(`/api/v1/packages/${newPackage.id}/inclusions`, {
-              inclusion_ids: formData.inclusion_ids || []
-            });
-
-            console.log('Adding exclusions to new package:', formData.exclusion_ids);
-            await apiClient.post(`/api/v1/packages/${newPackage.id}/exclusions`, {
-              exclusion_ids: formData.exclusion_ids || []
-            });
-          } catch (error) {
-            console.error('Error adding inclusions/exclusions to new package:', error);
-          }
+          console.log('Package created successfully:', newPackage);
         }
       }
 

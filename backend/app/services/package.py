@@ -385,36 +385,66 @@ class PackageService:
         if 'holiday_type_ids' in update_data:
             holiday_type_ids = update_data.pop('holiday_type_ids')
             if holiday_type_ids is not None:
-                db_package.holiday_types.clear()
-                if holiday_type_ids:
-                    holiday_types = db.query(HolidayType).filter(HolidayType.id.in_(holiday_type_ids)).all()
+                current_ids = {ht.id for ht in db_package.holiday_types}
+                new_ids = set(holiday_type_ids)
+                
+                # Remove ones that correspond to IDs not in the new list
+                to_remove = [ht for ht in db_package.holiday_types if ht.id not in new_ids]
+                for ht in to_remove:
+                    db_package.holiday_types.remove(ht)
+                
+                # Add ones that are in the new list but not in the current list
+                to_add_ids = new_ids - current_ids
+                if to_add_ids:
+                    holiday_types = db.query(HolidayType).filter(HolidayType.id.in_(to_add_ids)).all()
                     db_package.holiday_types.extend(holiday_types)
                     
         # Handle inclusions separately
         if 'inclusion_ids' in update_data:
             inclusion_ids = update_data.pop('inclusion_ids')
             if inclusion_ids is not None:
-                db_package.inclusion_items.clear()
-                if inclusion_ids:
-                    inclusions = db.query(Inclusion).filter(Inclusion.id.in_(inclusion_ids)).all()
+                current_ids = {item.id for item in db_package.inclusion_items}
+                new_ids = set(inclusion_ids)
+                
+                to_remove = [item for item in db_package.inclusion_items if item.id not in new_ids]
+                for item in to_remove:
+                    db_package.inclusion_items.remove(item)
+                
+                to_add_ids = new_ids - current_ids
+                if to_add_ids:
+                    inclusions = db.query(Inclusion).filter(Inclusion.id.in_(to_add_ids)).all()
                     db_package.inclusion_items.extend(inclusions)
                     
         # Handle exclusions separately
         if 'exclusion_ids' in update_data:
             exclusion_ids = update_data.pop('exclusion_ids')
             if exclusion_ids is not None:
-                db_package.exclusion_items.clear()
-                if exclusion_ids:
-                    exclusions = db.query(Exclusion).filter(Exclusion.id.in_(exclusion_ids)).all()
+                current_ids = {item.id for item in db_package.exclusion_items}
+                new_ids = set(exclusion_ids)
+                
+                to_remove = [item for item in db_package.exclusion_items if item.id not in new_ids]
+                for item in to_remove:
+                    db_package.exclusion_items.remove(item)
+                    
+                to_add_ids = new_ids - current_ids
+                if to_add_ids:
+                    exclusions = db.query(Exclusion).filter(Exclusion.id.in_(to_add_ids)).all()
                     db_package.exclusion_items.extend(exclusions)
 
         # Handle blog posts separately
         if 'blog_post_ids' in update_data:
             blog_post_ids = update_data.pop('blog_post_ids')
             if blog_post_ids is not None:
-                db_package.blog_posts.clear()
-                if blog_post_ids:
-                    blog_posts = db.query(BlogPost).filter(BlogPost.id.in_(blog_post_ids)).all()
+                current_ids = {blog.id for blog in db_package.blog_posts}
+                new_ids = set(blog_post_ids)
+                
+                to_remove = [blog for blog in db_package.blog_posts if blog.id not in new_ids]
+                for blog in to_remove:
+                    db_package.blog_posts.remove(blog)
+                    
+                to_add_ids = new_ids - current_ids
+                if to_add_ids:
+                    blog_posts = db.query(BlogPost).filter(BlogPost.id.in_(to_add_ids)).all()
                     db_package.blog_posts.extend(blog_posts)
         
         # Safely update slug if name changed

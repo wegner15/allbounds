@@ -105,6 +105,7 @@ import HotelDetailPage from './features/public/hotels/HotelDetailPage';
 import AttractionListPage from './features/public/attractions/AttractionListPage';
 import AttractionDetailPage from './features/attractions/AttractionDetailPage';
 import ActivityDetailPage from './features/public/activities/ActivityDetailPage';
+import PaymentPlansPage from './features/public/content/PaymentPlansPage';
 
 // Import admin user management pages
 import UsersListPage from './features/admin/users/UsersListPage';
@@ -289,6 +290,7 @@ const router = createBrowserRouter([
       { path: 'careers', element: <ContentPage /> },
       { path: 'terms', element: <ContentPage /> },
       { path: 'privacy', element: <ContentPage /> },
+      { path: 'payment-plans', element: <PaymentPlansPage /> },
       { path: 'search', element: <SearchPage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'unauthorized', element: <UnauthorizedPage /> },

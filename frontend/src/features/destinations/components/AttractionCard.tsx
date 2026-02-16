@@ -24,12 +24,12 @@ const AttractionCard: React.FC<AttractionCardProps> = React.memo(({ attraction }
         aria-label={`View details for ${attraction.name} attraction`}
       >
         {/* Image - Left Side */}
-        <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 overflow-hidden bg-gray-200">
-          {(attraction.image_id || attraction.cover_image) ? (
+        <div className="relative w-24 sm:w-32 flex-shrink-0 overflow-hidden bg-gray-200">
+          {(attraction.image_id || attraction.cover_image || attraction.image_url) ? (
             <OptimizedImage
-              imageId={attraction.image_id || attraction.cover_image}
+              imageId={attraction.image_id || attraction.cover_image || attraction.image_url}
               alt={`${attraction.name} attraction`}
-              variant="thumbnail"
+              variant="medium"
               className="w-full h-full transition-transform duration-300 group-hover:scale-110"
               objectFit="cover"
               loading="lazy"

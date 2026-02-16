@@ -25,9 +25,9 @@ const AttractionCard: React.FC<AttractionCardProps> = React.memo(({ attraction }
       >
         {/* Image - Left Side */}
         <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 overflow-hidden bg-gray-200">
-          {attraction.image_id ? (
+          {(attraction.image_id || attraction.cover_image) ? (
             <OptimizedImage
-              imageId={attraction.image_id}
+              imageId={attraction.image_id || attraction.cover_image}
               alt={`${attraction.name} attraction`}
               variant="thumbnail"
               className="w-full h-full transition-transform duration-300 group-hover:scale-110"

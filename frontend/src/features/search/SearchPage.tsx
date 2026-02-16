@@ -119,10 +119,16 @@ const SearchPage: React.FC = () => {
 
   // Get image URL for a hit
   const getImageUrl = (hit: MeilisearchHit, index: string): string => {
-    // Check for image_id (used by most entities) or cover_image_id (used by blog posts)
-    const imageId = hit.image_id || hit.cover_image_id;
+    // Check for image_id, cover_image (attractions), or cover_image_id (blog posts)
+    const imageId = hit.image_id || hit.cover_image || hit.cover_image_id;
     if (imageId) {
-      return `https://imagedelivery.net/4J4CgzUI_LpQRpA_N1TErQ/${imageId}/medium`;
+      if (typeof imageId === 'string' && imageId.startsWith('http')) {
+        return imageId;
+      }
+      const normalizedId = typeof imageId === 'string' && imageId.startsWith('cloudflare://')
+        ? imageId.replace('cloudflare://', '')
+        : imageId;
+      return `https://imagedelivery.net/4J4CgzUI_LpQRpA_N1TErQ/${normalizedId}/medium`;
     }
     // Fallback to Unsplash based on type
     const searchTerm = hit.name || hit.title || index;

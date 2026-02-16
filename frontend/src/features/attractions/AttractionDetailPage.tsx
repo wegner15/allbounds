@@ -58,14 +58,15 @@ const AttractionDetailPage: React.FC = () => {
       images.push(...attraction.gallery_images.map(img => ({ ...img, filename: img.file_path })));
     }
 
-    if (attraction.cover_image) {
-      const coverImageUrl = getImageUrlWithFallback(attraction.cover_image, IMAGE_VARIANTS.LARGE);
-      if (!images.some(img => img.file_path === coverImageUrl)) {
+    const mainImageSource = attraction.image_id || attraction.cover_image;
+    if (mainImageSource) {
+      const mainImageUrl = getImageUrlWithFallback(mainImageSource, IMAGE_VARIANTS.LARGE);
+      if (!images.some(img => img.file_path === mainImageUrl)) {
         images.unshift({
           id: 0, // Placeholder ID
-          file_path: coverImageUrl,
-          filename: coverImageUrl,
-          alt_text: `${attraction.name} Cover Image`,
+          file_path: mainImageUrl,
+          filename: mainImageUrl,
+          alt_text: `${attraction.name} Main Image`,
         });
       }
     }

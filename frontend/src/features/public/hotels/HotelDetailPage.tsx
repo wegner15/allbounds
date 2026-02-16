@@ -7,6 +7,7 @@ import Breadcrumb from '../../../components/layout/Breadcrumb';
 import GridGallery from '../../../components/ui/GridGallery';
 import SimilarHotels from '../../../components/recommendations/SimilarHotels';
 import { MapPin, Star, Clock, DollarSign } from 'lucide-react';
+import { TextDisplay } from '../../../components/ui/RichTextDisplay';
 
 const HotelDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -128,9 +129,7 @@ const HotelDetailPage: React.FC = () => {
             {hotel.description && (
               <div className="bg-white rounded-2xl shadow-sm p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">About This Hotel</h2>
-                <p className="text-gray-600 leading-relaxed whitespace-pre-line">
-                  {hotel.description}
-                </p>
+                <TextDisplay content={hotel.description} />
               </div>
             )}
 

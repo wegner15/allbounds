@@ -53,9 +53,9 @@ const GridGallery: React.FC<GridGalleryProps> = ({ images, className = "" }) => 
 
     return (
         <div className={`grid-gallery ${className}`}>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6 md:gap-8">
                 {/* Top Grid Section */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[400px] md:h-[500px]">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[400px] md:h-[500px] mb-2">
                     {/* Main Featured Image */}
                     <div
                         className="md:col-span-2 relative group cursor-pointer overflow-hidden rounded-2xl"
@@ -93,7 +93,7 @@ const GridGallery: React.FC<GridGalleryProps> = ({ images, className = "" }) => 
 
                 {/* Bottom Row Section */}
                 {bottomImages.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mt-2">
                         {bottomImages.map((img, idx) => {
                             const overallIndex = idx + 3;
                             const isLast = idx === 4 && remainingCount > 0;

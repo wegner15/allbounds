@@ -1,6 +1,6 @@
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.models.package import Package
 from app.models.media import MediaAsset
@@ -375,7 +375,12 @@ class PackageService:
         """
         Update an existing package.
         """
-        db_package = db.query(Package).filter(Package.id == package_id).first()
+        db_package = db.query(Package).options(
+            selectinload(Package.holiday_types),
+            selectinload(Package.inclusion_items),
+            selectinload(Package.exclusion_items),
+            selectinload(Package.blog_posts)
+        ).filter(Package.id == package_id).first()
         if not db_package:
             return None
         

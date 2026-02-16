@@ -63,9 +63,11 @@ const ActivityDetailPage: React.FC = () => {
                                     { label: 'Destinations', path: '/destinations' },
                                     // Assuming activity has at least one country, use the first one for breadcrumb
                                     ...(activity.countries && activity.countries.length > 0
-                                        ? [{ label: activity.countries[0].name, path: `/destinations/${activity.countries[0].slug}` }]
+                                        ? [
+                                            { label: activity.countries[0].name, path: `/destinations/${activity.countries[0].slug}` },
+                                            { label: `${activity.countries[0].name} Activities`, path: `/destinations/${activity.countries[0].slug}/activities` }
+                                        ]
                                         : []),
-                                    { label: 'Activities', path: '/activities' },
                                     { label: activity.name }
                                 ]}
                                 variant="dark"

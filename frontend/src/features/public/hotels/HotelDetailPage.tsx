@@ -5,6 +5,7 @@ import PackageBookingForm from '../../../components/forms/PackageBookingForm';
 import InquiryForm from '../../../components/forms/InquiryForm';
 import Breadcrumb from '../../../components/layout/Breadcrumb';
 import GridGallery from '../../../components/ui/GridGallery';
+import SimilarHotels from '../../../components/recommendations/SimilarHotels';
 import { MapPin, Star, Clock, DollarSign } from 'lucide-react';
 
 const HotelDetailPage: React.FC = () => {
@@ -69,7 +70,7 @@ const HotelDetailPage: React.FC = () => {
             items={[
               { label: 'Destinations', path: '/destinations' },
               { label: hotel?.country?.name || 'Country', path: `/destinations/${hotel?.country?.slug}` },
-              { label: 'Hotels', path: '/hotels' },
+              { label: `${hotel?.country?.name || ''} Hotels`, path: `/destinations/${hotel?.country?.slug}/hotels` },
               { label: hotel?.name || 'Hotel' },
             ]}
           />
@@ -237,6 +238,11 @@ const HotelDetailPage: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Similar Hotels Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <SimilarHotels countryId={hotel.country_id!} currentHotelId={hotel.id} />
       </div>
 
       {/* Booking Form Modal */}

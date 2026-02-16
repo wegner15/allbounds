@@ -107,7 +107,7 @@ const AttractionDetailPage: React.FC = () => {
             items={[
               { label: 'Destinations', path: '/destinations' },
               { label: attraction?.country?.name || 'Country', path: `/destinations/${attraction?.country?.slug}` },
-              { label: 'Attractions', path: `/attractions` },
+              { label: `${attraction?.country?.name || ''} Attractions`, path: `/destinations/${attraction?.country?.slug}/attractions` },
               { label: attraction?.name || 'Attraction' },
             ]}
           />

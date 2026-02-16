@@ -19,7 +19,7 @@ const AttractionCard: React.FC<AttractionCardProps> = React.memo(({ attraction }
   return (
     <article className="group bg-white rounded-lg border border-gray-200 overflow-hidden transition-all duration-300 hover:border-orange-400 hover:shadow-md flex min-h-[80px]">
       <Link
-        to={`/attractions/${attraction.country?.slug || 'unknown'}/${attraction.slug}`}
+        to={`/destinations/${attraction.country?.slug || 'unknown'}/attractions/${attraction.slug}`}
         className="flex w-full min-h-[44px]"
         aria-label={`View details for ${attraction.name} attraction`}
       >

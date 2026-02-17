@@ -151,25 +151,45 @@ class ActivityService:
         
         # Update media assets if provided
         if media_asset_ids is not None:
-            # Clear existing media assets
-            db_activity.media_assets.clear()
+            # Get current media IDs
+            current_media_ids = {media.id for media in db_activity.media_assets}
+            new_media_ids = set(media_asset_ids)
             
-            # Add new media assets
-            for media_id in media_asset_ids:
-                db_media = db.query(MediaAsset).filter(MediaAsset.id == media_id).first()
-                if db_media:
-                    db_activity.media_assets.append(db_media)
+            # IDs to remove
+            ids_to_remove = current_media_ids - new_media_ids
+            if ids_to_remove:
+                for media in db_activity.media_assets[:]:
+                    if media.id in ids_to_remove:
+                        db_activity.media_assets.remove(media)
+            
+            # IDs to add
+            ids_to_add = new_media_ids - current_media_ids
+            if ids_to_add:
+                for media_id in ids_to_add:
+                    db_media = db.query(MediaAsset).filter(MediaAsset.id == media_id).first()
+                    if db_media:
+                        db_activity.media_assets.append(db_media)
         
         # Update countries if provided
         if country_ids is not None:
-            # Clear existing countries
-            db_activity.countries.clear()
+            # Get current country IDs
+            current_country_ids = {country.id for country in db_activity.countries}
+            new_country_ids = set(country_ids)
             
-            # Add new countries
-            for country_id in country_ids:
-                db_country = db.query(Country).filter(Country.id == country_id).first()
-                if db_country:
-                    db_activity.countries.append(db_country)
+            # IDs to remove
+            ids_to_remove = current_country_ids - new_country_ids
+            if ids_to_remove:
+                for country in db_activity.countries[:]:
+                    if country.id in ids_to_remove:
+                        db_activity.countries.remove(country)
+            
+            # IDs to add
+            ids_to_add = new_country_ids - current_country_ids
+            if ids_to_add:
+                for country_id in ids_to_add:
+                    db_country = db.query(Country).filter(Country.id == country_id).first()
+                    if db_country:
+                        db_activity.countries.append(db_country)
         
         db.commit()
         db.refresh(db_activity)

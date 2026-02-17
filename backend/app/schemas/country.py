@@ -44,6 +44,17 @@ class CountryResponse(CountryBase):
     class Config:
         from_attributes = True
 
+# Schema for minimal Country response (to avoid recursion and heavy payloads)
+class CountryMinResponse(BaseModel):
+    id: int
+    name: str = Field(..., description="Name of the country")
+    slug: str = Field(..., description="URL-friendly slug for the country")
+    is_active: bool = Field(..., description="Whether the country is active")
+    image_id: Optional[str] = Field(None, description="Cloudflare Images ID for the country image")
+    
+    class Config:
+        from_attributes = True
+
 # Schema for Country with Region details
 class CountryWithRegionResponse(CountryResponse):
     region: RegionResponse

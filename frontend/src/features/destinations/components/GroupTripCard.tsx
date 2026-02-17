@@ -126,13 +126,13 @@ const GroupTripCard: React.FC<GroupTripCardProps> = React.memo(({ groupTrip }) =
 
           {/* Footer - Duration and Price */}
           <div className="flex items-end justify-between pt-4 mt-auto border-t border-gray-100">
-            <div className="flex items-center bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-              <Clock className="w-4 h-4 mr-1.5 text-gray-500 flex-shrink-0" />
-              <span className="text-sm font-semibold text-gray-700">{groupTrip.duration_days} Days</span>
+            <div className="flex items-center bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-100 shadow-sm">
+              <Clock className="w-4 h-4 mr-1.5 text-orange-600 flex-shrink-0" />
+              <span className="text-sm font-bold text-orange-800">{groupTrip.duration_days} Days</span>
             </div>
             <div className="text-right">
-              <div className="text-[10px] uppercase tracking-wider text-gray-500 font-medium mb-0.5">From</div>
-              <div className="text-xl font-bold text-gray-900 leading-none">
+              <div className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-0.5">Starting From</div>
+              <div className="text-2xl font-bold text-teal-600 leading-none tracking-tight">
                 ${(nextDeparture?.price || groupTrip.price).toLocaleString()}
               </div>
             </div>

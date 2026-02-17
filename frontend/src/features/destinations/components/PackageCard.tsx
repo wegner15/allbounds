@@ -57,44 +57,44 @@ const PackageCard: React.FC<PackageCardProps> = React.memo(({ package: pkg }) =>
         </div>
 
         {/* Content */}
-        <div className="p-3 md:p-4 flex flex-col flex-grow">
+        <div className="p-4 flex flex-col flex-grow">
           {/* Country and Holiday Type */}
-          <div className="flex items-center justify-between mb-2 gap-2">
+          <div className="flex items-center justify-between mb-3 gap-2">
             {pkg.country && (
-              <div className="flex items-center text-xs md:text-sm text-gray-600">
-                <MapPin className="w-3 h-3 md:w-4 md:h-4 mr-1 text-teal-500 flex-shrink-0" />
-                <span className="font-medium truncate">{pkg.country.name}</span>
+              <div className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                <MapPin className="w-3.5 h-3.5 mr-1 text-teal-600 flex-shrink-0" />
+                <span className="truncate max-w-[120px]">{pkg.country.name}</span>
               </div>
             )}
             {pkg.holiday_types && pkg.holiday_types.length > 0 && (
-              <span className="inline-block bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full font-medium flex-shrink-0">
+              <span className="inline-block bg-teal-50 text-teal-700 text-xs px-2.5 py-1 rounded-full font-medium flex-shrink-0 border border-teal-100">
                 {pkg.holiday_types[0].name}
               </span>
             )}
           </div>
 
           {/* Package Name - H3 for proper heading hierarchy */}
-          <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-teal-600 transition-colors">
+          <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-teal-600 transition-colors leading-tight">
             {pkg.name}
           </h3>
 
           {/* Description */}
           {sanitizedDescription && (
             <div
-              className="text-xs md:text-sm text-gray-600 mb-3 md:mb-4 line-clamp-2 flex-grow"
+              className="text-sm text-gray-600 mb-4 line-clamp-2 flex-grow leading-relaxed"
               dangerouslySetInnerHTML={{ __html: sanitizedDescription }}
             />
           )}
 
           {/* Footer - Duration and Price */}
-          <div className="flex items-center justify-between pt-2 md:pt-3 border-t border-gray-100 mt-auto">
-            <div className="flex items-center text-xs md:text-sm text-gray-600">
-              <Clock className="w-3 h-3 md:w-4 md:h-4 mr-1 text-gray-400 flex-shrink-0" />
-              <span>{pkg.duration_days} {pkg.duration_days === 1 ? 'day' : 'days'}</span>
+          <div className="flex items-end justify-between pt-4 mt-auto border-t border-gray-100">
+            <div className="flex items-center bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+              <Clock className="w-4 h-4 mr-1.5 text-gray-500 flex-shrink-0" />
+              <span className="text-sm font-semibold text-gray-700">{pkg.duration_days} Days</span>
             </div>
             <div className="text-right">
-              <div className="text-xs text-gray-500">From</div>
-              <div className="text-base md:text-lg font-bold text-teal-600">
+              <div className="text-[10px] uppercase tracking-wider text-gray-500 font-medium mb-0.5">From</div>
+              <div className="text-xl font-bold text-gray-900 leading-none">
                 ${pkg.price.toLocaleString()}
               </div>
             </div>

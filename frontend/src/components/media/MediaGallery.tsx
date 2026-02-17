@@ -17,7 +17,6 @@ const MediaGallery: React.FC<MediaGalleryProps> = ({ selectedIds, onAdd, onRemov
   });
 
   const selectedMedia = media?.filter(asset => selectedIds.includes(asset.id)) || [];
-  const availableMedia = media?.filter(asset => !selectedIds.includes(asset.id)) || [];
 
   return (
     <div>
@@ -26,9 +25,9 @@ const MediaGallery: React.FC<MediaGalleryProps> = ({ selectedIds, onAdd, onRemov
         {selectedMedia.map(asset => (
           <div key={asset.id} className="relative border-2 rounded-lg overflow-hidden">
             <img src={asset.file_path} alt={asset.alt_text || asset.filename} className="w-full h-32 object-cover" />
-            <Button 
-              size="sm" 
-              variant="outline" 
+            <Button
+              size="sm"
+              variant="outline"
               className="absolute top-1 right-1"
               onClick={() => onRemove(asset.id)}
             >
@@ -36,24 +35,11 @@ const MediaGallery: React.FC<MediaGalleryProps> = ({ selectedIds, onAdd, onRemov
             </Button>
           </div>
         ))}
-      </div>
-
-      <h3 className="text-lg font-medium text-gray-900 mb-2">Available Media</h3>
-      <div className="grid grid-cols-4 gap-4 p-4 border rounded-lg max-h-96 overflow-y-auto">
-        {isLoading && <p>Loading media...</p>}
-        {error && <p className="text-red-500">Failed to load media</p>}
-        {availableMedia.map(asset => (
-          <div 
-            key={asset.id} 
-            className="relative border-2 rounded-lg overflow-hidden cursor-pointer border-transparent"
-            onClick={() => onAdd(asset)}
-          >
-            <img src={asset.file_path} alt={asset.alt_text || asset.filename} className="w-full h-32 object-cover" />
-            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 truncate">
-              {asset.filename}
-            </div>
+        {selectedMedia.length === 0 && (
+          <div className="col-span-4 text-center text-gray-500 py-8">
+            No media selected. Use the "Upload New Media" button above to add images.
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

@@ -33,14 +33,14 @@ const AttractionsTab: React.FC<AttractionsTabProps> = ({ countryName, preview = 
         <div>{/* removed py-6 since sections handle spacing */}
             <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Must-See Attractions</h2>
             <PaginatedGrid
-                items={preview ? activeAttractions.slice(0, 8) : activeAttractions}
+                items={preview ? activeAttractions.slice(0, 9) : activeAttractions}
                 renderItem={(attr) => <AttractionCard attraction={attr as any} />}
                 emptyMessage="No attractions listed for this destination yet."
-                itemsPerPage={preview ? 8 : 9}
+                itemsPerPage={preview ? 9 : 9}
                 showPagination={!preview}
             />
 
-            {preview && activeAttractions.length > 8 && destinationSlug && (
+            {preview && activeAttractions.length > 9 && destinationSlug && (
                 <div className="mt-8 text-center">
                     <Link
                         to={`/destinations/${destinationSlug}/attractions`}

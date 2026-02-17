@@ -59,14 +59,14 @@ const PackagesTab: React.FC<PackagesTabProps> = ({
         <div>{/* removed py-6 since sections handle spacing */}
             <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">{sectionTitle}</h2>
             <PaginatedGrid
-                items={preview ? displayPackages.slice(0, 8) : displayPackages}
+                items={preview ? displayPackages.slice(0, 9) : displayPackages}
                 renderItem={(pkg: any) => <PackageCard package={pkg} />}
                 emptyMessage="No packages available for this destination yet."
-                itemsPerPage={preview ? 8 : 9}
+                itemsPerPage={preview ? 9 : 9}
                 showPagination={!preview}
             />
 
-            {preview && displayPackages.length > 8 && destinationSlug && (
+            {preview && displayPackages.length > 9 && destinationSlug && (
                 <div className="mt-8 text-center">
                     <Link
                         to={`/destinations/${destinationSlug}/packages`}

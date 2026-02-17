@@ -15,13 +15,13 @@ const MONTH_NAMES = [
 const getRatingColor = (rating: string): string => {
   switch (rating) {
     case 'excellent':
-      return 'bg-green-500 hover:bg-green-600 text-white';
+      return 'bg-[#91b5a9] hover:opacity-90 text-white';
     case 'good':
-      return 'bg-primary hover:bg-primary-dark text-white';
+      return 'bg-[#abad98] hover:opacity-90 text-white';
     case 'fair':
-      return 'bg-yellow-400 hover:bg-yellow-500 text-gray-900';
+      return 'bg-[#eeca80] hover:opacity-90 text-white';
     case 'poor':
-      return 'bg-gray-400 hover:bg-gray-500 text-white';
+      return 'bg-[#9d683c] hover:opacity-90 text-white';
     case 'discouraged':
       return 'bg-red-500 hover:bg-red-600 text-white';
     default:
@@ -31,10 +31,10 @@ const getRatingColor = (rating: string): string => {
 
 // Rating legend data
 const RATING_LEGEND = [
-  { rating: 'excellent', color: 'bg-green-500', label: 'Excellent', description: 'Perfect time to visit' },
-  { rating: 'good', color: 'bg-primary', label: 'Good', description: 'Great conditions' },
-  { rating: 'fair', color: 'bg-yellow-400', label: 'Fair', description: 'Acceptable conditions' },
-  { rating: 'poor', color: 'bg-gray-400', label: 'Poor', description: 'Less favorable' },
+  { rating: 'excellent', color: 'bg-[#91b5a9]', label: 'Excellent', description: 'Perfect time to visit' },
+  { rating: 'good', color: 'bg-[#abad98]', label: 'Good', description: 'Great conditions' },
+  { rating: 'fair', color: 'bg-[#eeca80]', label: 'Fair', description: 'Acceptable conditions' },
+  { rating: 'poor', color: 'bg-[#9d683c]', label: 'Poor', description: 'Less favorable' },
 ];
 
 const BestTimeToVisitSection: React.FC<BestTimeToVisitSectionProps> = React.memo(({ visitInfo }) => {
@@ -99,10 +99,10 @@ const BestTimeToVisitSection: React.FC<BestTimeToVisitSectionProps> = React.memo
                 ">
                   <div className="font-bold text-gray-900 mb-2 border-b border-gray-100 pb-2 flex items-center justify-between">
                     <span>{month}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${rating === 'excellent' ? 'bg-green-100 text-green-800' :
-                      rating === 'good' ? 'bg-primary/10 text-primary' :
-                        rating === 'fair' ? 'bg-yellow-100 text-yellow-800' :
-                          rating === 'poor' ? 'bg-gray-100 text-gray-800' :
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${rating === 'excellent' ? 'bg-[#91b5a9]/20 text-[#91b5a9]' :
+                      rating === 'good' ? 'bg-[#abad98]/20 text-[#abad98]' :
+                        rating === 'fair' ? 'bg-[#eeca80]/20 text-[#eeca80]' :
+                          rating === 'poor' ? 'bg-[#9d683c]/20 text-[#9d683c]' :
                             'bg-red-100 text-red-800'
                       }`}>
                       {rating}

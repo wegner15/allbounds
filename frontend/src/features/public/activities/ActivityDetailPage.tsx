@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useActivityBySlug, useActivityTrips } from '../../../lib/hooks/useActivities';
 import { Helmet } from 'react-helmet-async';
@@ -25,6 +25,7 @@ const ActivityDetailPage: React.FC = () => {
     }, [activity]);
 
     // Build gallery images from media_assets + cover_image
+    // media_assets objects have a direct `url` field (full Cloudflare delivery URL)
     const getAllImages = () => {
         if (!activity) return [];
 
@@ -37,32 +38,32 @@ const ActivityDetailPage: React.FC = () => {
             file_path: string;
         }> = [];
 
-        // Add gallery images from media_assets
-        const activityResponse = activity as any; // ActivityResponse has media_assets
-        if (activityResponse.media_assets && activityResponse.media_assets.length > 0) {
-            activityResponse.media_assets.forEach((asset: any) => {
-                const url = getImageUrlWithFallback(asset.id || asset.image_id, IMAGE_VARIANTS.LARGE) || asset.url || asset.file_path;
-                if (url) {
-                    images.push({
-                        id: asset.id,
-                        filename: url,
-                        file_path: url,
-                        alt_text: asset.alt_text || activity.name,
-                        title: asset.title,
-                        caption: asset.caption,
-                    });
-                }
-            });
-        }
-
-        // Add cover image if not already included
+        // Add cover image first
         const coverUrl = activity.cover_image?.url || (activity as any).image_url;
-        if (coverUrl && !images.some(img => img.file_path === coverUrl)) {
-            images.unshift({
-                id: 0,
+        if (coverUrl) {
+            images.push({
+                id: activity.cover_image?.id ?? 0,
                 filename: coverUrl,
                 file_path: coverUrl,
                 alt_text: `${activity.name} Cover Image`,
+            });
+        }
+
+        // Add gallery images from media_assets — use asset.url directly (Cloudflare URL)
+        const activityResponse = activity as any;
+        if (activityResponse.media_assets && activityResponse.media_assets.length > 0) {
+            activityResponse.media_assets.forEach((asset: any) => {
+                const url = asset.url; // direct Cloudflare delivery URL
+                if (url && !images.some(img => img.file_path === url)) {
+                    images.push({
+                        id: asset.id,
+                        filename: asset.filename || url,
+                        file_path: url,
+                        alt_text: asset.alt_text || activity.name,
+                        title: asset.title || undefined,
+                        caption: asset.caption || undefined,
+                    });
+                }
             });
         }
 
@@ -417,8 +418,8 @@ const ActivityDetailPage: React.FC = () => {
                             {/* Status badge */}
                             <div className="mb-6">
                                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${activity.is_active
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-gray-100 text-gray-600'
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-gray-100 text-gray-600'
                                     }`}>
                                     {activity.is_active ? '✓ Available' : 'Currently Unavailable'}
                                 </span>

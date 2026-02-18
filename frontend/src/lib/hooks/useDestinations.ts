@@ -134,7 +134,7 @@ export const useCountriesByHolidayType = (holidayTypeSlug: string, options?: { s
 // Hook for creating a new region (admin only)
 export const useCreateRegion = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (region: Omit<Region, 'id' | 'created_at' | 'updated_at'>) => {
       return apiClient.post<Region>(endpoints.regions.list(), region);
@@ -148,7 +148,7 @@ export const useCreateRegion = () => {
 // Hook for updating a region (admin only)
 export const useUpdateRegion = (id: number) => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (region: Partial<Region>) => {
       return apiClient.put<Region>(endpoints.regions.detail(id), region);
@@ -163,7 +163,7 @@ export const useUpdateRegion = (id: number) => {
 // Hook for creating a new country (admin only)
 export const useCreateCountry = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (country: Omit<Country, 'id' | 'created_at' | 'updated_at' | 'region'>) => {
       return apiClient.post<Country>(endpoints.countries.list(), country);
@@ -187,6 +187,8 @@ export const useUpdateCountry = (id: number) => {
       queryClient.setQueryData(['country', id], data);
       queryClient.invalidateQueries({ queryKey: ['countries'] });
       queryClient.invalidateQueries({ queryKey: ['countries', 'region', data.region_id] });
+      // Also invalidate the country-details cache used by the destination page
+      queryClient.invalidateQueries({ queryKey: ['country-details'] });
     },
   });
 };

@@ -17,6 +17,7 @@ import DestinationHeroSection from './components/DestinationHeroSection';
 import CTABanner from './components/CTABanner';
 import DestinationOverviewSection from './components/DestinationOverviewSection';
 import BestTimeToVisitSection from './components/BestTimeToVisitSection';
+import Accordion from '../../components/ui/Accordion';
 
 // Lazy loaded components (below the fold) - Code splitting for better initial load
 const InteractiveMapSection = lazy(() => import('./components/InteractiveMapSection'));
@@ -187,6 +188,7 @@ const CountryDetailPageNew: React.FC = () => {
             { id: 'activities', label: 'Activities' },
             { id: 'deals', label: 'Deals' },
             { id: 'blog', label: 'Blog' },
+            { id: 'faq', label: 'FAQs' },
             { id: 'share', label: 'Share' },
           ]}
         />
@@ -253,9 +255,26 @@ const CountryDetailPageNew: React.FC = () => {
               <div className="text-gray-600">Coming soon... Discover travel stories and tips for {country.name}.</div>
             </div>
           </section>
+
+          {/* FAQ Section */}
+          <section id="faq" className="scroll-mt-24 mb-12">
+            <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
+              <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
+              {country.faqs && country.faqs.length > 0 ? (
+                <Accordion
+                  items={country.faqs.map((faq, index) => ({
+                    id: index,
+                    title: faq.question,
+                    content: faq.answer
+                  }))}
+                />
+              ) : (
+                <p className="text-gray-500 text-sm">No FAQs found for this destination yet.</p>
+              )}
+            </div>
+          </section>
+
         </div>
-
-
 
         {/* Share Destination - Full Width */}
         <section id="share" className="scroll-mt-24">

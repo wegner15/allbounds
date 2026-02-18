@@ -14,7 +14,7 @@ class Country(Base):
     slug = Column(String(100), unique=True, index=True, nullable=False)
     region_id = Column(Integer, ForeignKey("regions.id"), nullable=False)
     image_id = Column(String(255), nullable=True)  # Cloudflare Images ID
-    faqs = Column(Boolean, default=None) # Placeholder, actually want JSON.
+    faqs = Column(JSON, nullable=True)
     # Wait, SQLAlchemy boolean? usage for JSON is typically JSON or Text if JSON not supported.
     # Postgres supports JSON. Let's use JSON.
     # But I should check imports first.

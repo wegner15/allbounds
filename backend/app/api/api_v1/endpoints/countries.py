@@ -37,6 +37,7 @@ def get_countries(
             summary=c.summary,
             region_id=c.region_id,
             image_id=c.image_id,
+            faqs=c.faqs,
             slug=c.slug,
             is_active=c.is_active,
             created_at=c.created_at,

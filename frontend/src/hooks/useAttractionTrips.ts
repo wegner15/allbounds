@@ -58,6 +58,20 @@ export interface AttractionTripsResponse {
       slug: string;
     };
   }>;
+  activities: Array<{
+    id: number;
+    name: string;
+    slug: string;
+    summary?: string;
+    cover_image?: {
+      url: string;
+    };
+    countries: Array<{
+      id: number;
+      name: string;
+      slug: string;
+    }>;
+  }>;
   total_packages: number;
   total_group_trips: number;
 }

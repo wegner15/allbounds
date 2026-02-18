@@ -364,10 +364,14 @@ def get_trips_by_attraction(
     # Get group trips that include this attraction  
     group_trips = [GroupTripWithCountryResponse.from_orm(group_trip) for group_trip in attraction.group_trips[skip:skip+limit]]
     
+    # Get activities associated with this attraction
+    activities = [ActivityResponse.from_orm(activity) for activity in attraction.activities]
+    
     return {
         "attraction": AttractionWithCountryResponse.from_orm(attraction),
         "packages": packages,
         "group_trips": group_trips,
+        "activities": activities,
         "total_packages": len(attraction.packages),
         "total_group_trips": len(attraction.group_trips)
     }
@@ -417,10 +421,14 @@ def get_trips_by_attraction_slug(
     # Get group trips that include this attraction  
     group_trips = [GroupTripWithCountryResponse.from_orm(group_trip) for group_trip in attraction.group_trips[skip:skip+limit]]
     
+    # Get activities associated with this attraction
+    activities = [ActivityResponse.from_orm(activity) for activity in attraction.activities]
+    
     return {
         "attraction": AttractionWithCountryResponse.from_orm(attraction),
         "packages": packages,
         "group_trips": group_trips,
+        "activities": activities,
         "total_packages": len(attraction.packages),
         "total_group_trips": len(attraction.group_trips)
     }

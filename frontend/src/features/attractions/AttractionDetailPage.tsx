@@ -10,6 +10,7 @@ import Button from '../../components/ui/Button';
 import GridGallery from '../../components/ui/GridGallery';
 import Breadcrumb from '../../components/layout/Breadcrumb';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils';
+import ActivityCard from '../destinations/components/ActivityCard';
 import 'leaflet/dist/leaflet.css';
 
 // Fix Leaflet icon issue - do this once when component mounts
@@ -38,7 +39,14 @@ const AttractionDetailPage: React.FC = () => {
 
   const { slug } = useParams<{ slug: string }>();
   const { data: attractionData, isLoading, error } = useAttractionTrips(slug || '');
-  const { attraction, packages = [], group_trips = [], total_packages = 0, total_group_trips = 0 } = attractionData || {};
+  const {
+    attraction,
+    packages = [],
+    group_trips = [],
+    activities = [],
+    total_packages = 0,
+    total_group_trips = 0
+  } = attractionData || {};
 
   // Get all available images for the gallery (memoized to avoid recalculation)
   const getAllImages = useMemo(() => {
@@ -160,6 +168,18 @@ const AttractionDetailPage: React.FC = () => {
               <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">About This Attraction</h2>
                 <RichTextDisplay content={attraction.description} />
+              </div>
+            )}
+
+            {/* Related Activities Section */}
+            {activities?.length > 0 && (
+              <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Activities</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {activities.map((activity) => (
+                    <ActivityCard key={activity.id} activity={activity as any} />
+                  ))}
+                </div>
               </div>
             )}
 

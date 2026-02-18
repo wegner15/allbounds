@@ -259,7 +259,7 @@ const HotelListPage: React.FC = () => {
                         <div className="p-5">
                           <div className="flex items-start justify-between mb-2">
                             <h3 className="text-lg font-bold text-gray-900 line-clamp-1 group-hover:text-teal-600 transition-colors">
-                              <Link to={`/hotels/${hotel.id}`}>
+                              <Link to={`/hotels/${hotel.slug}`}>
                                 {hotel.name}
                               </Link>
                             </h3>
@@ -294,7 +294,7 @@ const HotelListPage: React.FC = () => {
                               {hotel.check_in_time && <span>In: {hotel.check_in_time}</span>}
                             </div>
                             <Link
-                              to={`/hotels/${hotel.id}`}
+                              to={`/hotels/${hotel.slug}`}
                               className="text-teal-600 font-semibold text-sm hover:text-teal-700 flex items-center"
                             >
                               Details
@@ -334,7 +334,7 @@ const HotelListPage: React.FC = () => {
                       <div className="p-5">
                         <div className="flex items-start justify-between mb-2">
                           <h3 className="text-lg font-bold text-gray-900 line-clamp-1 group-hover:text-teal-600 transition-colors">
-                            <Link to={`/hotels/${hotel.id}`}>{hotel.name}</Link>
+                            <Link to={`/hotels/${hotel.slug}`}>{hotel.name}</Link>
                           </h3>
                         </div>
                         <div className="flex items-center mb-3">
@@ -342,7 +342,7 @@ const HotelListPage: React.FC = () => {
                           {hotel.city && <span className="text-sm text-gray-500 truncate">{hotel.city}</span>}
                         </div>
                         <Link
-                          to={`/hotels/${hotel.id}`}
+                          to={`/hotels/${hotel.slug}`}
                           className="mt-2 text-teal-600 font-semibold text-sm hover:text-teal-700 flex items-center"
                         >
                           View Details

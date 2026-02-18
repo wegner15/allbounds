@@ -6,7 +6,7 @@ import DOMPurify from 'dompurify';
 import GridGallery from '../../../components/ui/GridGallery';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 import FromPriceDisplay from '../../../components/ui/FromPriceDisplay';
-import { MapPin, Clock, Users, Calendar, ArrowLeft, DollarSign } from 'lucide-react';
+import { MapPin, Clock, Users, Calendar, ArrowLeft, DollarSign, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 
 const ActivityDetailPage: React.FC = () => {
@@ -432,7 +432,6 @@ const ActivityDetailPage: React.FC = () => {
                                 </div>
                             )}
 
-                            {/* Status badge */}
                             <div className="mb-6">
                                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${activity.is_active
                                     ? 'bg-green-100 text-green-800'
@@ -446,29 +445,27 @@ const ActivityDetailPage: React.FC = () => {
                                     </span>
                                 )}
                             </div>
+                        </div>
 
-                            <button className="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium py-3 px-4 rounded-lg transition-colors mb-3">
-                                Book This Activity
-                            </button>
+                        {/* Booking / Contact CTA */}
+                        <div className="bg-white rounded-xl shadow-sm p-6 mt-6 border border-gray-100 sticky top-[280px]">
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Book This Activity</h3>
+                            <p className="text-gray-600 mb-6 text-sm">
+                                Interested in this activity? Contact us to customize your perfect trip including {activity.name}.
+                            </p>
 
-                            <button className="w-full border border-gray-300 hover:border-gray-400 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors mb-6">
-                                Add to Itinerary
-                            </button>
+                            <Link
+                                to="/contact"
+                                className="w-full flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow transition-all"
+                            >
+                                <Mail className="w-5 h-5 mr-2" />
+                                Contact Us
+                            </Link>
 
-                            <div className="text-sm text-gray-600 space-y-2">
-                                <p>✓ Expert local guides</p>
-                                <p>✓ Small group sizes</p>
-                                <p>✓ Flexible booking</p>
-                            </div>
-
-                            <div className="mt-6 pt-6 border-t border-gray-200">
-                                <h3 className="font-medium text-gray-900 mb-2">Need help planning?</h3>
-                                <p className="text-sm text-gray-600 mb-3">
-                                    Get personalized recommendations and travel tips for this activity.
-                                </p>
-                                <Link to="/contact" className="text-teal-600 hover:text-teal-700 text-sm font-medium">
-                                    Contact us →
-                                </Link>
+                            <div className="mt-4 text-center">
+                                <span className="text-xs text-gray-500">
+                                    Need help planning? Our experts are here for you.
+                                </span>
                             </div>
                         </div>
                     </div>

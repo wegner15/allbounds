@@ -71,7 +71,7 @@ def get_activity(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Activity not found")
     return activity
 
-@router.get("/by-slug/{slug}", response_model=ActivityResponse)
+@router.get("/slug/{slug}", response_model=ActivityResponse)
 def get_activity_by_slug(
     slug: str,
     db: Session = Depends(get_db),

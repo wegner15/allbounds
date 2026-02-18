@@ -389,9 +389,9 @@ const CountryDetailPage: React.FC = () => {
                 </div>
               )}
               {/* FAQ Section */}
-              {country.faqs && country.faqs.length > 0 && (
-                <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-                  <h2 className="text-2xl font-playfair text-charcoal mb-6">Frequently Asked Questions</h2>
+              <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+                <h2 className="text-2xl font-playfair text-charcoal mb-6">Frequently Asked Questions</h2>
+                {country.faqs && country.faqs.length > 0 ? (
                   <Accordion
                     items={country.faqs.map((faq, index) => ({
                       id: index,
@@ -399,8 +399,11 @@ const CountryDetailPage: React.FC = () => {
                       content: faq.answer
                     }))}
                   />
-                </div>
-              )}
+                ) : (
+                  <p className="text-gray-500 text-sm">No FAQs found for this destination yet.</p>
+                )}
+              </div>
+
             </div>
 
             {/* Sidebar */}

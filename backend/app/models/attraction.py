@@ -55,6 +55,10 @@ class Attraction(Base):
     itinerary_activities = relationship("ItineraryActivity", back_populates="attraction")
     itinerary_items = relationship("ItineraryItem", secondary="itinerary_attractions", back_populates="attractions")
     
+    # Relationship with Activities
+    # lazy='select' (default) is fine, or 'joined' if we always want them.
+    activities = relationship("Activity", secondary="attraction_activities", back_populates="attractions")
+
     @property
     def computed_cover_image(self) -> str:
         """
@@ -65,5 +69,13 @@ class Attraction(Base):
             from app.core.cloudflare_config import cloudflare_settings
             return f"{cloudflare_settings.delivery_url}/{self.image_id}/medium"
         return self.cover_image
+
+# Association table for attraction-activity
+attraction_activities = Table(
+    "attraction_activities",
+    Base.metadata,
+    Column("attraction_id", Integer, ForeignKey("attractions.id"), primary_key=True),
+    Column("activity_id", Integer, ForeignKey("activities.id"), primary_key=True)
+)
 
 # Note: attraction_media table is defined in media.py

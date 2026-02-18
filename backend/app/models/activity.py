@@ -42,4 +42,5 @@ class Activity(Base):
         "MediaAsset", secondary=activity_media, back_populates="activities"
     )
     itinerary_items = relationship("ItineraryItem", secondary="itinerary_item_activities", back_populates="linked_activities")
+    attractions = relationship("Attraction", secondary="attraction_activities", back_populates="activities")
 

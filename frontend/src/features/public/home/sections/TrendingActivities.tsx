@@ -73,56 +73,58 @@ const TrendingActivities: React.FC = () => {
           {locations.map(location => (
             <button
               key={location}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                activeTab === location
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === location
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
               onClick={() => setActiveTab(location)}
             >
               {location}
             </button>
           ))}
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {isLoading ? renderSkeletons() : error ? (
             <div className="col-span-full text-center text-red-500">Failed to load trending activities.</div>
           ) : !activities || activities.length === 0 ? (
             <div className="col-span-full text-center text-gray-500">No trending activities found for {activeTab}.</div>
           ) : activities.map(activity => (
-            <div key={activity.id} className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 group">
+            <Link
+              key={activity.id}
+              to={`/destinations/${activity.countries?.[0]?.slug || 'unknown'}/activities/${activity.slug}`}
+              className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 group block"
+            >
               <div className="relative">
-                <img 
+                <img
                   src={
-                    activity.cover_image?.storage_key 
+                    activity.cover_image?.storage_key
                       ? `${import.meta.env.VITE_CLOUDFLARE_IMAGES_DELIVERY_URL}/${activity.cover_image.storage_key}/medium`
                       : activity.image_url || 'https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&w=600&q=80'
                   }
                   alt={activity.name}
                   className="w-full h-48 object-cover"
                 />
-                {/* Placeholder for tags */}
-                <button className="absolute top-3 right-3 bg-white/80 p-2 rounded-full text-gray-600 hover:text-red-500 hover:bg-white transition-colors">
+                <button className="absolute top-3 right-3 bg-white/80 p-2 rounded-full text-gray-600 hover:text-red-500 hover:bg-white transition-colors" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
                   <Heart className="w-5 h-5" />
                 </button>
               </div>
-               <div className="p-4">
-                 <h3 className="font-bold text-lg text-gray-800 truncate group-hover:text-blue-600 transition-colors mb-2">{activity.name}</h3>
-                 <p className="text-sm text-gray-600 mb-3 line-clamp-2">{activity.summary || activity.countries?.map(c => c.name).join(', ') || 'No description available'}</p>
+              <div className="p-4">
+                <h3 className="font-bold text-lg text-gray-800 truncate group-hover:text-blue-600 transition-colors mb-2">{activity.name}</h3>
+                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{activity.summary || activity.countries?.map(c => c.name).join(', ') || 'No description available'}</p>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center text-sm text-gray-600">
-                      <Clock className="w-4 h-4 mr-1" />
-                      <span>{activity.duration || 'N/A'}</span>
+                    <Clock className="w-4 h-4 mr-1" />
+                    <span>{activity.duration || 'N/A'}</span>
                   </div>
                   <div className="flex items-center text-sm text-gray-600">
-                      <Star className="w-4 h-4 mr-1 text-yellow-400 fill-current" />
-                      <span className="font-bold mr-1">{activity.rating || 'N/A'}</span>
-                      <span>({activity.review_count || 0} reviews)</span>
+                    <Star className="w-4 h-4 mr-1 text-yellow-400 fill-current" />
+                    <span className="font-bold mr-1">{activity.rating || 'N/A'}</span>
+                    <span>({activity.review_count || 0} reviews)</span>
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 

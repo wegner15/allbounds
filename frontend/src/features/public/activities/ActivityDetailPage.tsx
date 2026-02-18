@@ -3,10 +3,10 @@ import { useParams, Link } from 'react-router-dom';
 import { useActivityBySlug, useActivityTrips } from '../../../lib/hooks/useActivities';
 import { Helmet } from 'react-helmet-async';
 import DOMPurify from 'dompurify';
-import ImageCarousel from '../../../components/ui/ImageCarousel';
+import GridGallery from '../../../components/ui/GridGallery';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 import FromPriceDisplay from '../../../components/ui/FromPriceDisplay';
-import { MapPin, Clock, Users, Calendar, ArrowLeft } from 'lucide-react';
+import { MapPin, Clock, Users, Calendar, ArrowLeft, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 
 const ActivityDetailPage: React.FC = () => {
@@ -14,15 +14,7 @@ const ActivityDetailPage: React.FC = () => {
     const { data: activity, isLoading, error } = useActivityBySlug(slug || '');
     const { data: trips } = useActivityTrips(slug || '');
 
-    // Keyboard navigation for gallery
-    useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (!activity) return;
-            // ImageCarousel handles its own internal navigation
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [activity]);
+    // Keyboard navigation is handled by GridGallery's Lightbox
 
     // Build gallery images from media_assets + cover_image
     // media_assets objects have a direct `url` field (full Cloudflare delivery URL)
@@ -178,12 +170,48 @@ const ActivityDetailPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Image Gallery Carousel */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <ImageCarousel
-                    images={allImages}
-                    className="rounded-2xl overflow-hidden shadow-2xl h-[480px]"
-                />
+            {/* Hero Section - Header & Gallery */}
+            <div className="bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="mb-8">
+                        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-playfair">
+                            {activity.name}
+                        </h1>
+
+                        <div className="flex flex-wrap items-center gap-6 text-gray-600">
+                            {activity.countries && activity.countries.length > 0 && (
+                                <div className="flex items-center">
+                                    <MapPin className="h-5 w-5 mr-2 text-teal-600" />
+                                    <span>{activity.countries.map(c => c.name).join(', ')}</span>
+                                </div>
+                            )}
+
+                            {(activity as any).duration_minutes && (
+                                <div className="flex items-center">
+                                    <Clock className="h-5 w-5 mr-2 text-teal-600" />
+                                    <span>
+                                        {Math.floor((activity as any).duration_minutes / 60) > 0 ? `${Math.floor((activity as any).duration_minutes / 60)}h ` : ''}
+                                        {(activity as any).duration_minutes % 60 > 0 ? `${(activity as any).duration_minutes % 60}m` : ''}
+                                        {(activity as any).duration_minutes ? ' duration' : ''}
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* Calculate "From Price" based on available packages */}
+                            {trips && trips.packages && trips.packages.length > 0 && (
+                                <div className="flex items-center">
+                                    <DollarSign className="h-5 w-5 mr-2 text-teal-600" />
+                                    <span className="font-semibold text-gray-900">
+                                        From ${Math.min(...trips.packages.map(p => p.price))}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Grid Gallery */}
+                    <GridGallery images={allImages} className="mb-8" />
+                </div>
             </div>
 
             {/* Content */}
@@ -192,25 +220,14 @@ const ActivityDetailPage: React.FC = () => {
 
                     {/* Main Content */}
                     <div className="lg:col-span-2">
-                        {/* Header */}
-                        <div className="mb-8">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-4 font-playfair">
-                                {activity.name}
-                            </h1>
-
-                            {activity.countries && activity.countries.length > 0 && (
-                                <div className="flex items-center text-gray-600 mb-4">
-                                    <MapPin className="w-5 h-5 mr-2 text-teal-600" />
-                                    {activity.countries.map(c => c.name).join(', ')}
-                                </div>
-                            )}
-
-                            {activity.summary && (
+                        {/* Summary / Description */}
+                        {activity.summary && (
+                            <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
                                 <p className="text-lg text-gray-600 leading-relaxed">
                                     {activity.summary}
                                 </p>
-                            )}
-                        </div>
+                            </div>
+                        )}
 
                         {/* Description */}
                         {activity.description && (

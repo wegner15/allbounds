@@ -6,6 +6,7 @@ import DOMPurify from 'dompurify';
 import GridGallery from '../../../components/ui/GridGallery';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 import FromPriceDisplay from '../../../components/ui/FromPriceDisplay';
+import Button from '../../../components/ui/Button';
 import { MapPin, Clock, Users, Calendar, ArrowLeft, DollarSign, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -454,12 +455,11 @@ const ActivityDetailPage: React.FC = () => {
                                 Interested in this activity? Contact us to customize your perfect trip including {activity.name}.
                             </p>
 
-                            <Link
-                                to="/contact"
-                                className="w-full flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow transition-all"
-                            >
-                                <Mail className="w-5 h-5 mr-2" />
-                                Contact Us
+                            <Link to="/contact" className="block w-full">
+                                <Button variant="primary" className="w-full flex items-center justify-center">
+                                    <Mail className="w-5 h-5 mr-2" />
+                                    Contact Us
+                                </Button>
                             </Link>
 
                             <div className="mt-4 text-center">

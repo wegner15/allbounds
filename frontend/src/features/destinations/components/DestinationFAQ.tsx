@@ -36,7 +36,7 @@ const DestinationFAQ: React.FC<DestinationFAQProps> = ({ faqs }) => {
     return (
         <div className="relative px-4" role="list" aria-label="Destination FAQs">
             {/* Timeline Line - Hidden on mobile, visible on tablet and up */}
-            <div className="hidden md:block absolute left-8 top-0 bottom-0 w-1 bg-gradient-to-b from-teal-500 via-teal-300 to-teal-500/30 rounded-full shadow-sm"
+            <div className="hidden md:block absolute left-8 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary-light to-primary/30 rounded-full shadow-sm"
                 style={{ height: 'calc(100% - 2rem)' }}
             />
 
@@ -45,7 +45,7 @@ const DestinationFAQ: React.FC<DestinationFAQProps> = ({ faqs }) => {
                 {faqs.map((faq, index) => (
                     <article key={index} className="relative" role="listitem">
                         {/* Timeline Dot - Hidden on mobile */}
-                        <div className="hidden md:block absolute left-8 top-8 w-5 h-5 -ml-2.5 rounded-full bg-gradient-to-br from-teal-500 to-teal-700 border-4 border-white shadow-lg z-10" />
+                        <div className="hidden md:block absolute left-8 top-8 w-5 h-5 -ml-2.5 rounded-full bg-gradient-to-br from-primary to-primary-dark border-4 border-white shadow-lg z-10" />
 
                         {/* FAQ Card with left margin for timeline on desktop */}
                         <div className="md:ml-20">
@@ -59,7 +59,7 @@ const DestinationFAQ: React.FC<DestinationFAQProps> = ({ faqs }) => {
 
                         {/* Optional: Add connector line between items */}
                         {index < faqs.length - 1 && (
-                            <div className="hidden md:block absolute left-8 w-0.5 bg-teal-300 opacity-50"
+                            <div className="hidden md:block absolute left-8 w-0.5 bg-primary/30 opacity-50"
                                 style={{
                                     top: 'calc(100% - 1rem)',
                                     height: '2rem',
@@ -89,8 +89,8 @@ const DestinationFAQItem: React.FC<DestinationFAQItemProps> = ({
 }) => {
     return (
         <div className={`
-            bg-white rounded-xl shadow-md overflow-hidden border transition-all duration-300
-            ${isExpanded ? 'border-teal-500 ring-1 ring-teal-500 shadow-lg' : 'border-gray-200 hover:shadow-xl hover:border-teal-500/30'}
+            bg-white rounded-xl shadow-md overflow-hidden border transition-all duration-300 animate-fade-in
+            ${isExpanded ? 'border-primary ring-1 ring-primary/20 shadow-lg' : 'border-gray-200 hover:shadow-xl hover:border-primary/30'}
         `}>
             {/* Header - Always Visible */}
             <button
@@ -102,14 +102,14 @@ const DestinationFAQItem: React.FC<DestinationFAQItemProps> = ({
                     <div className="flex items-center gap-2 sm:gap-3">
                         <span className={`
                             inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full text-white font-bold text-sm flex-shrink-0 shadow-md transition-all duration-300
-                            ${isExpanded ? 'bg-teal-600 scale-110' : 'bg-gradient-to-br from-teal-500 to-teal-700'}
+                            ${isExpanded ? 'bg-primary scale-110' : 'bg-gradient-to-br from-primary to-primary-dark'}
                         `}>
                             {index + 1}
                         </span>
                         <div className="flex-1 min-w-0">
                             <h3 className={`
                                 text-base sm:text-lg md:text-xl font-bold font-playfair leading-tight mb-1 transition-colors duration-200
-                                ${isExpanded ? 'text-teal-900' : 'text-charcoal group-hover:text-teal-700'}
+                                ${isExpanded ? 'text-charcoal' : 'text-charcoal group-hover:text-primary'}
                             `}>
                                 {faq.question}
                             </h3>
@@ -119,7 +119,7 @@ const DestinationFAQItem: React.FC<DestinationFAQItemProps> = ({
 
                 <div className="ml-3 sm:ml-4 flex-shrink-0 flex items-center">
                     {isExpanded ? (
-                        <ChevronUp className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600 transition-transform duration-200" />
+                        <ChevronUp className="w-5 h-5 sm:w-6 sm:h-6 text-primary transition-transform duration-200" />
                     ) : (
                         <ChevronDown className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 transition-transform duration-200" />
                     )}

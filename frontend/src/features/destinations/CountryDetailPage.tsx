@@ -8,7 +8,6 @@ import DOMPurify from 'dompurify';
 import Breadcrumb from '../../components/layout/Breadcrumb';
 import Button from '../../components/ui/Button';
 import CountryVisitInfo from '../../components/countries/CountryVisitInfo';
-import Accordion from '../../components/ui/Accordion';
 import DestinationFAQ from './components/DestinationFAQ';
 
 // API

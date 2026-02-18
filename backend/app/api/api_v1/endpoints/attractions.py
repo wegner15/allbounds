@@ -10,6 +10,7 @@ from app.models.user import User
 from app.schemas.attraction import AttractionResponse, AttractionCreate, AttractionUpdate, AttractionWithCountryResponse, AttractionWithRelationshipsResponse
 from app.schemas.package import PackageWithCountryResponse
 from app.schemas.group_trip import GroupTripWithCountryResponse
+from app.schemas.activity import ActivityResponse
 from app.services.attraction import attraction_service
 from app.auth.dependencies import get_current_user, has_permission
 

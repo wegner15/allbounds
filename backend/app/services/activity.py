@@ -279,4 +279,47 @@ class ActivityService:
         
         return db_activity
 
+    def get_activity_trips(self, db: Session, activity_id: int) -> dict:
+        """
+        Retrieve all packages and group trips that include this activity in their itinerary.
+        """
+        from app.models.itinerary import ItineraryItem, EntityType
+        from app.models.package import Package
+        from app.models.group_trip import GroupTrip
+
+        # Get all itinerary items that link to this activity
+        itinerary_items = db.query(ItineraryItem).filter(
+            ItineraryItem.linked_activities.any(id=activity_id)
+        ).all()
+
+        package_ids = set()
+        group_trip_ids = set()
+
+        for item in itinerary_items:
+            if item.entity_type == EntityType.PACKAGE:
+                package_ids.add(item.entity_id)
+            elif item.entity_type == EntityType.GROUP_TRIP:
+                group_trip_ids.add(item.entity_id)
+
+        packages = []
+        if package_ids:
+            packages = db.query(Package).filter(
+                Package.id.in_(package_ids),
+                Package.is_active == True
+            ).options(joinedload(Package.country)).all()
+
+        group_trips = []
+        if group_trip_ids:
+            group_trips = db.query(GroupTrip).filter(
+                GroupTrip.id.in_(group_trip_ids),
+                GroupTrip.is_active == True
+            ).options(joinedload(GroupTrip.country)).all()
+
+        return {
+            "packages": packages,
+            "group_trips": group_trips,
+            "total_packages": len(packages),
+            "total_group_trips": len(group_trips)
+        }
+
 activity_service = ActivityService()

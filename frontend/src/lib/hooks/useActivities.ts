@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient, endpoints } from '../api';
-import type { ActivityResponse } from '../types/api';
+import type { ActivityResponse, ActivityTripsResponse } from '../types/api';
 
 export const useActivities = (countryId?: number) => {
   return useQuery<ActivityResponse[]>({
@@ -18,6 +18,14 @@ export const useActivityBySlug = (slug: string) => {
   return useQuery<ActivityResponse>({
     queryKey: ['activity', slug],
     queryFn: () => apiClient.get(endpoints.activities.bySlug(slug)),
+    enabled: !!slug,
+  });
+};
+
+export const useActivityTrips = (slug: string) => {
+  return useQuery<ActivityTripsResponse>({
+    queryKey: ['activity-trips', slug],
+    queryFn: () => apiClient.get(endpoints.activities.trips(slug)),
     enabled: !!slug,
   });
 };

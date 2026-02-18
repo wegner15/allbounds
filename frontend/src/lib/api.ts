@@ -252,6 +252,7 @@ export const endpoints = {
     featured: () => '/activities/featured',
     detail: (id: number) => `/activities/${id}`,
     bySlug: (slug: string) => `/activities/slug/${slug}`,
+    trips: (slug: string) => `/activities/slug/${slug}/trips`,
     byCountry: (countryId: number) => `/activities/?country_id=${countryId}`,
     create: () => '/activities/',
     update: (id: number) => `/activities/${id}`,

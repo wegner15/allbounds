@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional, List
+from typing import Optional, List, Any
 from datetime import datetime
 
 from .media import MediaAssetResponse
@@ -50,3 +50,10 @@ class ActivityResponse(ActivityBase):
     
     class Config:
         from_attributes = True
+
+# Schema for Activity with its associated trips (Packages and Group Trips)
+class ActivityTripsResponse(BaseModel):
+    packages: List[Any] = [] # Use Any to avoid circular imports, or import inside
+    group_trips: List[Any] = []
+    total_packages: int = 0
+    total_group_trips: int = 0

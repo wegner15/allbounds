@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.core.redis_cache import cache_endpoint
 from app.models.user import User
-from app.schemas.activity import ActivityResponse, ActivityCreate, ActivityUpdate
+from app.schemas.activity import ActivityResponse, ActivityCreate, ActivityUpdate, ActivityTripsResponse
 from app.services.activity import activity_service
 from app.auth.dependencies import get_current_user, has_permission
 
@@ -83,6 +83,54 @@ def get_activity_by_slug(
     if activity is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Activity not found")
     return activity
+
+@router.get("/{activity_id}/trips", response_model=ActivityTripsResponse)
+def get_activity_trips(
+    activity_id: int,
+    db: Session = Depends(get_db),
+) -> Any:
+    """
+    Retrieve all packages and group trips that include this activity.
+    """
+    from app.schemas.package import PackageListResponse
+    from app.schemas.group_trip import GroupTripResponse
+
+    activity = activity_service.get_activity(db, activity_id=activity_id)
+    if activity is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Activity not found")
+    
+    trips = activity_service.get_activity_trips(db, activity_id=activity_id)
+    
+    return {
+        "packages": [PackageListResponse.from_orm(p) for p in trips["packages"]],
+        "group_trips": [GroupTripResponse.from_orm(gt) for gt in trips["group_trips"]],
+        "total_packages": trips["total_packages"],
+        "total_group_trips": trips["total_group_trips"]
+    }
+
+@router.get("/slug/{slug}/trips", response_model=ActivityTripsResponse)
+def get_activity_trips_by_slug(
+    slug: str,
+    db: Session = Depends(get_db),
+) -> Any:
+    """
+    Retrieve all packages and group trips that include this activity by slug.
+    """
+    from app.schemas.package import PackageListResponse
+    from app.schemas.group_trip import GroupTripResponse
+
+    activity = activity_service.get_activity_by_slug(db, slug=slug)
+    if activity is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Activity not found")
+    
+    trips = activity_service.get_activity_trips(db, activity_id=activity.id)
+    
+    return {
+        "packages": [PackageListResponse.from_orm(p) for p in trips["packages"]],
+        "group_trips": [GroupTripResponse.from_orm(gt) for gt in trips["group_trips"]],
+        "total_packages": trips["total_packages"],
+        "total_group_trips": trips["total_group_trips"]
+    }
 
 @router.post("/", response_model=ActivityResponse)
 def create_activity(

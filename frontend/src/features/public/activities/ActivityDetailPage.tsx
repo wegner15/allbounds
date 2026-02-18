@@ -1,15 +1,19 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useActivityBySlug } from '../../../lib/hooks/useActivities';
+import { useActivityBySlug, useActivityTrips } from '../../../lib/hooks/useActivities';
 import { Helmet } from 'react-helmet-async';
 import DOMPurify from 'dompurify';
 import OptimizedImage from '../../../components/ui/OptimizedImage';
 import Breadcrumb from '../../../components/layout/Breadcrumb';
-import { MapPin, Clock } from 'lucide-react';
+import { MapPin, Clock, Users, Calendar } from 'lucide-react';
+import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
+import FromPriceDisplay from '../../../components/ui/FromPriceDisplay';
+import { format } from 'date-fns';
 
 const ActivityDetailPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
     const { data: activity, isLoading, error } = useActivityBySlug(slug || '');
+    const { data: trips, isLoading: tripsLoading } = useActivityTrips(slug || '');
 
     if (isLoading) {
         return (
@@ -120,6 +124,140 @@ const ActivityDetailPage: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Recommended Tours Section */}
+            {trips && (trips.packages.length > 0 || trips.group_trips.length > 0) && (
+                <div className="container mx-auto px-4 py-12 border-t border-gray-200">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-8 font-playfair">Recommended Tours including {activity.name}</h2>
+
+                    {/* Holiday Packages */}
+                    {trips.packages.length > 0 && (
+                        <div className="mb-16">
+                            <h3 className="text-2xl font-bold text-charcoal mb-8 flex items-center">
+                                <span className="w-8 h-8 bg-teal-100 text-teal-600 rounded-lg flex items-center justify-center mr-3">
+                                    <MapPin className="w-5 h-5" />
+                                </span>
+                                Holiday Packages
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {trips.packages.map(pkg => (
+                                    <div key={pkg.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col h-full border border-gray-100">
+                                        <Link to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}`} className="relative h-64 overflow-hidden group">
+                                            <img
+                                                src={getImageUrlWithFallback(pkg.image_id, IMAGE_VARIANTS.MEDIUM)}
+                                                alt={pkg.name}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                            />
+                                            {pkg.holiday_types && pkg.holiday_types.length > 0 && (
+                                                <div className="absolute top-4 left-4">
+                                                    <span className="bg-white/90 backdrop-blur-sm text-teal-600 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm font-inter">
+                                                        {pkg.holiday_types[0].name}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </Link>
+                                        <div className="p-6 flex flex-col flex-grow">
+                                            <div className="flex items-center text-sm text-teal-600 font-semibold mb-2">
+                                                <MapPin className="w-4 h-4 mr-1" />
+                                                {pkg.country?.name}
+                                            </div>
+                                            <Link to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}`}>
+                                                <h4 className="text-xl font-bold text-gray-900 mb-3 hover:text-teal-600 transition-colors line-clamp-1 font-playfair">
+                                                    {pkg.name}
+                                                </h4>
+                                            </Link>
+                                            <div
+                                                className="text-gray-600 text-sm mb-6 line-clamp-2 h-10"
+                                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pkg.summary || pkg.description || '') }}
+                                            />
+                                            <div className="mt-auto flex items-center justify-between pt-6 border-t border-gray-100">
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs text-gray-500 font-medium font-inter uppercase tracking-wider">From</span>
+                                                    <FromPriceDisplay packageId={pkg.id} basePrice={pkg.price} className="text-xl font-bold text-charcoal font-inter" />
+                                                </div>
+                                                <div className="flex items-center text-gray-500 text-sm font-medium font-inter">
+                                                    <Clock className="w-4 h-4 mr-1.5 text-teal-500" />
+                                                    {pkg.duration_days} Days
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Group Trips */}
+                    {trips.group_trips.length > 0 && (
+                        <div>
+                            <h3 className="text-2xl font-bold text-charcoal mb-8 flex items-center">
+                                <span className="w-8 h-8 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center mr-3">
+                                    <Users className="w-5 h-5" />
+                                </span>
+                                Scheduled Group Trips
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {trips.group_trips.map(trip => (
+                                    <div key={trip.id} className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col md:flex-row h-full border border-gray-100 hover:shadow-2xl transition-all duration-300">
+                                        <Link to={`/group-trips/${trip.slug}`} className="md:w-2/5 relative overflow-hidden group">
+                                            <img
+                                                src={getImageUrlWithFallback(trip.image_id, IMAGE_VARIANTS.MEDIUM)}
+                                                alt={trip.name}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 min-h-[250px]"
+                                            />
+                                            <div className="absolute top-4 left-4">
+                                                <span className="bg-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg font-inter uppercase">
+                                                    Group Tour
+                                                </span>
+                                            </div>
+                                        </Link>
+                                        <div className="p-8 md:w-3/5 flex flex-col">
+                                            <div className="flex items-center text-sm text-amber-600 font-semibold mb-2">
+                                                <MapPin className="w-4 h-4 mr-1" />
+                                                {trip.country?.name}
+                                            </div>
+                                            <Link to={`/group-trips/${trip.slug}`}>
+                                                <h4 className="text-2xl font-bold text-charcoal mb-4 hover:text-amber-600 transition-colors line-clamp-1 font-playfair">
+                                                    {trip.name}
+                                                </h4>
+                                            </Link>
+
+                                            <div className="space-y-4 mb-8">
+                                                {trip.departures && trip.departures.length > 0 && (
+                                                    <div className="flex items-center text-sm text-gray-700 bg-amber-50/50 p-3 rounded-xl border border-amber-100/50">
+                                                        <Calendar className="w-5 h-5 mr-3 text-amber-500" />
+                                                        <div>
+                                                            <span className="block text-xs text-gray-500 font-medium font-inter">Next Departure</span>
+                                                            <span className="font-bold font-inter">{format(new Date(trip.departures[0].start_date), 'MMM d, yyyy')}</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                <div className="flex items-center text-sm text-gray-600">
+                                                    <Users className="w-5 h-5 mr-3 text-gray-400" />
+                                                    <span className="font-inter">Up to {trip.max_participants || 12} people</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-auto flex items-center justify-between pt-6 border-t border-gray-100 font-inter">
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs text-gray-500 font-medium uppercase tracking-wider">From</span>
+                                                    <span className="text-2xl font-black text-charcoal">${trip.price}</span>
+                                                </div>
+                                                <Link
+                                                    to={`/group-trips/${trip.slug}`}
+                                                    className="bg-charcoal hover:bg-hover text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-gray-200"
+                                                >
+                                                    View Details
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };

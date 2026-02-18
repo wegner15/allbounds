@@ -145,6 +145,13 @@ export interface ActivityResponse extends Activity {
   cover_image?: MediaAsset;
 }
 
+export interface ActivityTripsResponse {
+  packages: Package[];
+  group_trips: GroupTrip[];
+  total_packages: number;
+  total_group_trips: number;
+}
+
 export interface ActivityCreate {
   name: string;
   description?: string;

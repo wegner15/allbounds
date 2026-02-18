@@ -23,7 +23,7 @@ class AttractionService:
         """
         query = (
             db.query(Attraction)
-            .options(joinedload(Attraction.country))
+            .options(joinedload(Attraction.country), joinedload(Attraction.activities))
             .filter(Attraction.is_active == True)
         )
 
@@ -245,6 +245,38 @@ class AttractionService:
             return False
             
         attraction.group_trips.remove(group_trip)
+        db.commit()
+        return True
+
+    def assign_activity(self, db: Session, attraction_id: int, activity_id: int) -> bool:
+        """
+        Assign an activity to an attraction.
+        """
+        from app.models.activity import Activity
+        
+        attraction = db.query(Attraction).filter(Attraction.id == attraction_id).first()
+        activity = db.query(Activity).filter(Activity.id == activity_id).first()
+        
+        if not attraction or not activity:
+            return False
+            
+        attraction.activities.append(activity)
+        db.commit()
+        return True
+    
+    def remove_activity(self, db: Session, attraction_id: int, activity_id: int) -> bool:
+        """
+        Remove an activity from an attraction.
+        """
+        from app.models.activity import Activity
+        
+        attraction = db.query(Attraction).filter(Attraction.id == attraction_id).first()
+        activity = db.query(Activity).filter(Activity.id == activity_id).first()
+        
+        if not attraction or not activity or activity not in attraction.activities:
+            return False
+            
+        attraction.activities.remove(activity)
         db.commit()
         return True
 

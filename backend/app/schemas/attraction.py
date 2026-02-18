@@ -4,6 +4,7 @@ from datetime import datetime
 
 # Import at the top level to avoid Pydantic 2.x issues
 from app.schemas.country import CountryResponse
+from app.schemas.activity import ActivityResponse
 
 # Gallery image schema for attractions
 class GalleryImageResponse(BaseModel):
@@ -80,13 +81,14 @@ class AttractionResponse(AttractionBase):
         return v
     
     gallery_images: Optional[List[GalleryImageResponse]] = Field(None, description="Gallery images")
+    activities: List[ActivityResponse] = Field([], description="Activities associated with the attraction")
     
     class Config:
         from_attributes = True
 
 # Schema for Attraction with Country details
 class AttractionWithCountryResponse(AttractionResponse):
-    country: CountryResponse
+    country: CountryResponse 
     
     class Config:
         from_attributes = True
@@ -95,6 +97,7 @@ class AttractionWithCountryResponse(AttractionResponse):
 class AttractionWithRelationshipsResponse(AttractionWithCountryResponse):
     package_ids: Optional[List[int]] = Field(None, description="IDs of packages associated with this attraction")
     group_trip_ids: Optional[List[int]] = Field(None, description="IDs of group trips associated with this attraction")
+    activity_ids: Optional[List[int]] = Field(None, description="IDs of activities associated with this attraction")
     
     class Config:
         from_attributes = True

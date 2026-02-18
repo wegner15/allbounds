@@ -1,34 +1,41 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { 
-  useAttraction, 
+import {
+  useAttraction,
   useAttractionRelationships,
-  useAssignPackageToAttraction, 
+  useAssignPackageToAttraction,
   useRemovePackageFromAttraction,
   useAssignGroupTripToAttraction,
-  useRemoveGroupTripFromAttraction
+  useRemoveGroupTripFromAttraction,
+  useAssignActivityToAttraction,
+  useRemoveActivityFromAttraction
 } from '../../../lib/hooks/useAttractions';
 import { usePackages } from '../../../lib/hooks/usePackages';
 import { useGroupTrips } from '../../../lib/hooks/useGroupTrips';
+import { useActivities } from '../../../lib/hooks/useActivities';
 
 const AttractionRelationshipsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const attractionId = parseInt(id || '0');
   const navigate = useNavigate();
-  
+
   const [selectedPackageId, setSelectedPackageId] = useState<number | ''>('');
   const [selectedGroupTripId, setSelectedGroupTripId] = useState<number | ''>('');
-  
+  const [selectedActivityId, setSelectedActivityId] = useState<number | ''>('');
+
   const { data: attraction, isLoading: isLoadingAttraction } = useAttraction(attractionId);
   const { data: relationships, isLoading: isLoadingRelationships, refetch } = useAttractionRelationships(attractionId);
   const { data: allPackages, isLoading: isLoadingPackages } = usePackages();
   const { data: allGroupTrips, isLoading: isLoadingGroupTrips } = useGroupTrips();
-  
+  const { data: allActivities, isLoading: isLoadingActivities } = useActivities();
+
   const { mutate: assignPackage, isPending: isAssigningPackage } = useAssignPackageToAttraction();
   const { mutate: removePackage, isPending: isRemovingPackage } = useRemovePackageFromAttraction();
   const { mutate: assignGroupTrip, isPending: isAssigningGroupTrip } = useAssignGroupTripToAttraction();
   const { mutate: removeGroupTrip, isPending: isRemovingGroupTrip } = useRemoveGroupTripFromAttraction();
+  const { mutate: assignActivity, isPending: isAssigningActivity } = useAssignActivityToAttraction();
+  const { mutate: removeActivity, isPending: isRemovingActivity } = useRemoveActivityFromAttraction();
 
   if (isLoadingAttraction || isLoadingRelationships || isLoadingPackages || isLoadingGroupTrips) {
     return (
@@ -97,6 +104,31 @@ const AttractionRelationshipsPage: React.FC = () => {
     );
   };
 
+  const handleAssignActivity = () => {
+    if (selectedActivityId !== '') {
+      assignActivity(
+        { attractionId, activityId: Number(selectedActivityId) },
+        {
+          onSuccess: () => {
+            refetch();
+            setSelectedActivityId('');
+          }
+        }
+      );
+    }
+  };
+
+  const handleRemoveActivity = (activityId: number) => {
+    removeActivity(
+      { attractionId, activityId },
+      {
+        onSuccess: () => {
+          refetch();
+        }
+      }
+    );
+  };
+
   // Filter out packages that are already assigned to the attraction
   const unassignedPackages = allPackages?.filter(
     pkg => !relationships.package_ids?.includes(pkg.id)
@@ -105,6 +137,11 @@ const AttractionRelationshipsPage: React.FC = () => {
   // Filter out group trips that are already assigned to the attraction
   const unassignedGroupTrips = allGroupTrips?.filter(
     trip => !relationships.group_trip_ids?.includes(trip.id)
+  );
+
+  // Filter out activities that are already assigned to the attraction
+  const unassignedActivities = allActivities?.filter(
+    activity => !relationships.activity_ids?.includes(activity.id)
   );
 
   // Find the assigned package and group trip details
@@ -116,12 +153,16 @@ const AttractionRelationshipsPage: React.FC = () => {
     trip => relationships.group_trip_ids?.includes(trip.id)
   );
 
+  const assignedActivities = allActivities?.filter(
+    activity => relationships.activity_ids?.includes(activity.id)
+  );
+
   return (
     <div className="space-y-6">
       <Helmet>
         <title>Attraction Relationships | AllBounds Admin</title>
       </Helmet>
-      
+
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">
           Attraction Relationships: {attraction.name}
@@ -138,7 +179,7 @@ const AttractionRelationshipsPage: React.FC = () => {
         {/* Package Relationships */}
         <div className="bg-white shadow-md rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Associated Packages</h2>
-          
+
           <div className="mb-6">
             <div className="flex space-x-2">
               <select
@@ -156,9 +197,8 @@ const AttractionRelationshipsPage: React.FC = () => {
               <button
                 onClick={handleAssignPackage}
                 disabled={!selectedPackageId || isAssigningPackage}
-                className={`bg-teal hover:bg-teal-dark text-white py-2 px-4 rounded-md ${
-                  !selectedPackageId || isAssigningPackage ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                className={`bg-teal hover:bg-teal-dark text-white py-2 px-4 rounded-md ${!selectedPackageId || isAssigningPackage ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
               >
                 {isAssigningPackage ? 'Adding...' : 'Add'}
               </button>
@@ -188,7 +228,7 @@ const AttractionRelationshipsPage: React.FC = () => {
         {/* Group Trip Relationships */}
         <div className="bg-white shadow-md rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Associated Group Trips</h2>
-          
+
           <div className="mb-6">
             <div className="flex space-x-2">
               <select
@@ -206,9 +246,8 @@ const AttractionRelationshipsPage: React.FC = () => {
               <button
                 onClick={handleAssignGroupTrip}
                 disabled={!selectedGroupTripId || isAssigningGroupTrip}
-                className={`bg-teal hover:bg-teal-dark text-white py-2 px-4 rounded-md ${
-                  !selectedGroupTripId || isAssigningGroupTrip ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                className={`bg-teal hover:bg-teal-dark text-white py-2 px-4 rounded-md ${!selectedGroupTripId || isAssigningGroupTrip ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
               >
                 {isAssigningGroupTrip ? 'Adding...' : 'Add'}
               </button>
@@ -225,6 +264,55 @@ const AttractionRelationshipsPage: React.FC = () => {
                   <button
                     onClick={() => handleRemoveGroupTrip(trip.id)}
                     disabled={isRemovingGroupTrip}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Activity Relationships */}
+        <div className="bg-white shadow-md rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">Associated Activities</h2>
+
+          <div className="mb-6">
+            <div className="flex space-x-2">
+              <select
+                value={selectedActivityId}
+                onChange={(e) => setSelectedActivityId(Number(e.target.value) || '')}
+                className="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
+              >
+                <option value="">Select an activity to add...</option>
+                {unassignedActivities?.map(activity => (
+                  <option key={activity.id} value={activity.id}>
+                    {activity.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={handleAssignActivity}
+                disabled={!selectedActivityId || isAssigningActivity}
+                className={`bg-teal hover:bg-teal-dark text-white py-2 px-4 rounded-md ${!selectedActivityId || isAssigningActivity ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+              >
+                {isAssigningActivity ? 'Adding...' : 'Add'}
+              </button>
+            </div>
+          </div>
+
+          {assignedActivities?.length === 0 ? (
+            <p className="text-gray-500 italic">No activities assigned to this attraction.</p>
+          ) : (
+            <ul className="divide-y divide-gray-200">
+              {assignedActivities?.map(activity => (
+                <li key={activity.id} className="py-3 flex justify-between items-center">
+                  <span>{activity.name}</span>
+                  <button
+                    onClick={() => handleRemoveActivity(activity.id)}
+                    disabled={isRemovingActivity}
                     className="text-red-600 hover:text-red-800"
                   >
                     Remove

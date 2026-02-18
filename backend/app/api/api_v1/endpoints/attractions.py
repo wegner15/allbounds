@@ -218,6 +218,7 @@ def get_attraction_with_relationships(
     response = AttractionWithRelationshipsResponse.from_orm(attraction)
     response.package_ids = [package.id for package in attraction.packages]
     response.group_trip_ids = [group_trip.id for group_trip in attraction.group_trips]
+    response.activity_ids = [activity.id for activity in attraction.activities]
     
     return response
 
@@ -284,6 +285,39 @@ def remove_group_trip_from_attraction(
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Attraction, group trip, or relationship not found")
     return {"status": "success", "message": f"Group trip {group_trip_id} removed from attraction {attraction_id}"}
+
+@router.post("/{attraction_id}/activities/{activity_id}", response_model=dict)
+def assign_activity_to_attraction(
+    *,
+    db: Session = Depends(get_db),
+    attraction_id: int,
+    activity_id: int,
+    current_user: User = Depends(has_permission("content:update")),
+) -> Any:
+    """
+    Assign an activity to an attraction.
+    """
+    success = attraction_service.assign_activity(db, attraction_id=attraction_id, activity_id=activity_id)
+    if not success:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Attraction or activity not found")
+    return {"status": "success", "message": f"Activity {activity_id} assigned to attraction {attraction_id}"}
+
+
+@router.delete("/{attraction_id}/activities/{activity_id}", response_model=dict)
+def remove_activity_from_attraction(
+    *,
+    db: Session = Depends(get_db),
+    attraction_id: int,
+    activity_id: int,
+    current_user: User = Depends(has_permission("content:update")),
+) -> Any:
+    """
+    Remove an activity from an attraction.
+    """
+    success = attraction_service.remove_activity(db, attraction_id=attraction_id, activity_id=activity_id)
+    if not success:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Attraction, activity, or relationship not found")
+    return {"status": "success", "message": f"Activity {activity_id} removed from attraction {attraction_id}"}
 
 @router.get("/{attraction_id}/trips", response_model=dict)
 def get_trips_by_attraction(

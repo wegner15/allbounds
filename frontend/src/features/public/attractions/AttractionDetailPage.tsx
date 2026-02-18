@@ -8,7 +8,7 @@ import ImageCarousel from '../../../components/ui/ImageCarousel';
 const AttractionDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { data: attraction, isLoading, error } = useAttraction(parseInt(id!));
-  const { data: activities } = useActivities(attraction?.country_id);
+  const { data: countryActivities } = useActivities(attraction?.country_id);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   // Keyboard navigation for gallery
@@ -258,11 +258,15 @@ const AttractionDetailPage: React.FC = () => {
 
 
             {/* Related Activities */}
-            {activities && activities.length > 0 && attraction.country && (
+            {((attraction.activities && attraction.activities.length > 0) || (countryActivities && countryActivities.length > 0)) && attraction.country && (
               <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Activities in {attraction.country.name}</h2>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                  {attraction.activities && attraction.activities.length > 0
+                    ? `Activities at ${attraction.name}`
+                    : `Activities in ${attraction.country.name}`}
+                </h2>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {activities.slice(0, 4).map((activity) => (
+                  {(attraction.activities && attraction.activities.length > 0 ? attraction.activities : (countryActivities || [])).slice(0, 4).map((activity) => (
                     <Link key={activity.id} to={`/activities/${activity.slug}`} className="group block">
                       <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
                         <h3 className="font-medium text-gray-900 group-hover:text-teal-600 mb-1">{activity.name}</h3>

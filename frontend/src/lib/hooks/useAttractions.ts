@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient, type UseQueryOptions } from '@tanstack/react-query';
 import { apiClient } from '../api';
 
+import type { ActivityResponse } from '../types/api';
+
 export interface Attraction {
   id: number;
   name: string;
@@ -29,6 +31,7 @@ export interface Attraction {
     alt_text?: string;
     caption?: string;
   }>;
+  activities?: ActivityResponse[];
   slug: string;
   is_active: boolean;
   created_at: string;
@@ -58,6 +61,7 @@ export interface AttractionUpdateInput extends Partial<AttractionCreateInput> {
 export interface AttractionRelationships {
   package_ids: number[];
   group_trip_ids: number[];
+  activity_ids: number[];
 }
 
 export interface AttractionsQueryParams {
@@ -137,7 +141,7 @@ export const useAttraction = (id: number) => {
 // Hook for creating a new attraction
 export const useCreateAttraction = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (attraction: AttractionCreateInput) => {
       const response = await apiClient.post('/attractions/', attraction);
@@ -152,7 +156,7 @@ export const useCreateAttraction = () => {
 // Hook for updating an attraction
 export const useUpdateAttraction = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ id, ...attraction }: AttractionUpdateInput & { id: number }) => {
       const response = await apiClient.put(`/attractions/${id}`, attraction);
@@ -168,7 +172,7 @@ export const useUpdateAttraction = () => {
 // Hook for deleting an attraction
 export const useDeleteAttraction = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (id: number) => {
       const response = await apiClient.delete(`/attractions/${id}`);
@@ -195,7 +199,7 @@ export const useAttractionRelationships = (id: number) => {
 // Hook for assigning a package to an attraction
 export const useAssignPackageToAttraction = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ attractionId, packageId }: { attractionId: number; packageId: number }) => {
       const response = await apiClient.post(`/attractions/${attractionId}/packages/${packageId}`, {});
@@ -210,7 +214,7 @@ export const useAssignPackageToAttraction = () => {
 // Hook for removing a package from an attraction
 export const useRemovePackageFromAttraction = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ attractionId, packageId }: { attractionId: number; packageId: number }) => {
       const response = await apiClient.delete(`/attractions/${attractionId}/packages/${packageId}`);
@@ -225,7 +229,7 @@ export const useRemovePackageFromAttraction = () => {
 // Hook for assigning a group trip to an attraction
 export const useAssignGroupTripToAttraction = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ attractionId, groupTripId }: { attractionId: number; groupTripId: number }) => {
       const response = await apiClient.post(`/attractions/${attractionId}/group-trips/${groupTripId}`, {});
@@ -240,10 +244,40 @@ export const useAssignGroupTripToAttraction = () => {
 // Hook for removing a group trip from an attraction
 export const useRemoveGroupTripFromAttraction = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ attractionId, groupTripId }: { attractionId: number; groupTripId: number }) => {
       const response = await apiClient.delete(`/attractions/${attractionId}/group-trips/${groupTripId}`);
+      return response;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['attractions', variables.attractionId, 'relationships'] });
+    },
+  });
+};
+
+// Hook for assigning an activity to an attraction
+export const useAssignActivityToAttraction = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ attractionId, activityId }: { attractionId: number; activityId: number }) => {
+      const response = await apiClient.post(`/attractions/${attractionId}/activities/${activityId}`, {});
+      return response;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['attractions', variables.attractionId, 'relationships'] });
+    },
+  });
+};
+
+// Hook for removing an activity from an attraction
+export const useRemoveActivityFromAttraction = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ attractionId, activityId }: { attractionId: number; activityId: number }) => {
+      const response = await apiClient.delete(`/attractions/${attractionId}/activities/${activityId}`);
       return response;
     },
     onSuccess: (_, variables) => {

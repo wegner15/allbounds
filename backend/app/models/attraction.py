@@ -67,7 +67,8 @@ class Attraction(Base):
     activities = relationship("Activity", secondary="attraction_activities", back_populates="attractions")
     
     # Relationship with Hotels
-    hotels = relationship("Hotel", secondary=hotel_attractions, back_populates="attractions")
+    # CRITICAL: lazy='noload' prevents querying hotel_attractions on every Attraction serialization
+    hotels = relationship("Hotel", secondary=hotel_attractions, back_populates="attractions", lazy='noload')
 
     @property
     def computed_cover_image(self) -> str:

@@ -74,4 +74,6 @@ class Hotel(Base):
     itinerary_items = relationship("ItineraryItem", secondary="itinerary_hotels", back_populates="hotels")
     
     # Relationship with Attractions
-    attractions = relationship("Attraction", secondary="hotel_attractions", back_populates="hotels")
+    # CRITICAL: lazy='noload' prevents circular loading and avoids querying hotel_attractions
+    # on every Hotel ORM serialization (same pattern as packages and group_trips)
+    attractions = relationship("Attraction", secondary="hotel_attractions", back_populates="hotels", lazy='noload')

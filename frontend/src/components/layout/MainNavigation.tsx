@@ -216,8 +216,8 @@ const MainNavigation: React.FC = () => {
               {/* Contact Info */}
               <div className="hidden md:flex flex-col items-end mr-4">
                 <span className="text-xs text-gray-500 font-medium">Call us today from 09:00 - 17:30</span>
-                <a href="tel:02039663630" className="text-xl lg:text-2xl font-bold text-charcoal hover:text-primary transition-colors">
-                  020 3966 3630
+                <a href="tel:+256782594008" className="text-xl lg:text-2xl font-bold text-charcoal hover:text-primary transition-colors">
+                  +(256) 782 594 008
                 </a>
               </div>
 

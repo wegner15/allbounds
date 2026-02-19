@@ -139,11 +139,18 @@ const RegionDetailPage: React.FC = () => {
 
         <div className="container mx-auto px-4 py-8">
           <Breadcrumb
-            items={[
-              { label: 'Destinations', path: '/destinations' },
-              { label: 'Regions', path: '/regions' },
-              { label: region.name },
-            ]}
+            items={
+              window.location.pathname.startsWith('/regions/')
+                ? [
+                  { label: 'Regions', path: '/regions' },
+                  { label: region.name },
+                ]
+                : [
+                  { label: 'Destinations', path: '/destinations' },
+                  { label: 'Regions', path: '/regions' },
+                  { label: region.name },
+                ]
+            }
             className="mb-8"
           />
 

@@ -257,6 +257,7 @@ const router = createBrowserRouter([
       { path: 'destinations/:slug/:category', element: <CountryCategoryPage /> },
       { path: 'destinations-old/:slug', element: <CountryDetailPage /> },
       { path: 'regions', element: <RegionsPage /> },
+      { path: 'regions/:slug', element: <RegionDetailPage /> },
       { path: 'countries', element: <CountriesPage /> },
       { path: 'packages', element: <PackagesPage /> },
       { path: 'packages/:destination/:slug', element: <PackageDetailPageNew /> },

@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.db.database import get_db
 from app.core.redis_cache import cache_endpoint
+from app.models.hotel import Hotel
 from app.models.user import User
 from app.schemas.hotel import HotelResponse, HotelCreate, HotelUpdate, HotelWithCountryResponse, HotelWithRelationshipsResponse
 from app.services.hotel import hotel_service

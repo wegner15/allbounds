@@ -188,90 +188,53 @@ const MainNavigation: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-[1000]">
-      {/* Main Navigation Bar */}
-      <div className="bg-white shadow-sm">
+    <header className="sticky top-0 z-[1000] bg-white w-full border-b border-gray-100">
+      {/* Top Tier: Logo, Contact, CTA */}
+      <div className="border-b border-gray-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 lg:h-20">
+          <div className="flex items-center justify-between h-20 lg:h-24">
             {/* Logo */}
             <Link to="/" className="flex items-center flex-shrink-0">
               <div className="flex items-center">
                 <img
                   src="/logo/main_logo.png"
                   alt="AllBounds Vacations"
-                  className="h-8 sm:h-10 w-auto"
+                  className="h-10 sm:h-12 w-auto"
                   onError={(e) => {
-                    // Fallback if logo image is not available
                     const target = e.currentTarget as HTMLImageElement;
                     target.style.display = 'none';
                     const sibling = target.nextElementSibling as HTMLElement;
                     if (sibling) sibling.style.display = 'block';
                   }}
                 />
-                <span className="hidden text-xl font-bold text-charcoal ml-2">AllBounds Vacations</span>
+                <span className="hidden text-2xl font-bold text-charcoal ml-2">AllBounds Vacations</span>
               </div>
             </Link>
 
-            {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center space-x-2 xl:space-x-6">
-              {navItems.map((item) => (
-                <div key={item.path} className="relative">
-                  {item.hasDropdown ? (
-                    <button
-                      className="flex items-center text-sm xl:text-base font-medium text-charcoal hover:text-hover transition-colors whitespace-nowrap px-2"
-                      onClick={item.label === 'DESTINATIONS' ? toggleDestinations : toggleHolidayTypes}
-                      data-dropdown={item.label === 'DESTINATIONS' ? 'destinations' : 'holiday-types'}
-                    >
-                      {item.label}
-                      <svg
-                        className={`ml-1 h-4 w-4 transition-transform ${(item.label === 'DESTINATIONS' && destinationsOpen) ||
-                            (item.label === 'HOLIDAY TYPES' && holidayTypesOpen)
-                            ? 'rotate-180'
-                            : ''
-                          }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                  ) : (
-                    <Link
-                      to={item.path}
-                      className="text-sm xl:text-base font-medium text-charcoal hover:text-hover transition-colors whitespace-nowrap px-2"
-                    >
-                      {item.label}
-                    </Link>
-                  )}
-                </div>
-              ))}
-            </nav>
+            {/* Right Side: Contact, Wishlist, CTA */}
+            <div className="flex items-center space-x-6">
+              {/* Contact Info */}
+              <div className="hidden md:flex flex-col items-end mr-4">
+                <span className="text-xs text-gray-500 font-medium">Call us today from 09:00 - 17:30</span>
+                <a href="tel:02039663630" className="text-xl lg:text-2xl font-bold text-charcoal hover:text-primary transition-colors">
+                  020 3966 3630
+                </a>
+              </div>
 
-            {/* Right Side Buttons */}
-            <div className="flex items-center space-x-2 sm:space-x-3">
+              {/* Wishlist Icon */}
+              <button className="text-charcoal-light hover:text-primary transition-colors" aria-label="Wishlist">
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </button>
+
+              {/* CTA Button */}
               <Link
-                to="/contact-us"
-                className="hidden md:inline-flex items-center px-3 lg:px-4 py-2 bg-[#0a1f44] text-white text-xs lg:text-sm font-medium rounded hover:bg-opacity-90 transition-colors whitespace-nowrap"
+                to="/start-planning"
+                className="hidden sm:flex items-center px-6 py-3 bg-primary text-white text-sm font-bold rounded uppercase tracking-wider hover:bg-primary-dark transition-all transform hover:scale-[1.02] shadow-sm"
               >
-                Contact Us
+                Start Planning
               </Link>
-              {user ? (
-                <button
-                  onClick={handleLogout}
-                  className="hidden sm:inline-flex items-center px-3 lg:px-4 py-2 border border-gray-300 text-xs lg:text-sm font-medium rounded text-charcoal bg-white hover:bg-gray-50 transition-colors whitespace-nowrap"
-                >
-                  Logout
-                </button>
-              ) : (
-                <Link
-                  to="/login"
-                  className="hidden sm:inline-flex items-center px-3 lg:px-4 py-2 border border-gray-300 text-xs lg:text-sm font-medium rounded text-charcoal bg-white hover:bg-gray-50 transition-colors whitespace-nowrap"
-                >
-                  <span className="hidden md:inline">Sign In / Register</span>
-                  <span className="md:hidden">Sign In</span>
-                </Link>
-              )}
 
               {/* Mobile menu button */}
               <button
@@ -289,6 +252,71 @@ const MainNavigation: React.FC = () => {
                   </svg>
                 )}
               </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Tier: Navigation Links & Search */}
+      <div className="hidden lg:block bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14">
+            {/* Navigation Links */}
+            <nav className="flex items-center space-x-1 xl:space-x-4">
+              {navItems.map((item) => (
+                <div key={item.path} className="relative group">
+                  {item.hasDropdown ? (
+                    <button
+                      className="flex items-center py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-4 border-b-2 border-transparent hover:border-primary"
+                      onClick={item.label === 'DESTINATIONS' ? toggleDestinations : toggleHolidayTypes}
+                      data-dropdown={item.label === 'DESTINATIONS' ? 'destinations' : 'holiday-types'}
+                    >
+                      {item.label}
+                      <svg
+                        className={`ml-1.5 h-3.5 w-3.5 transition-transform ${(item.label === 'DESTINATIONS' && destinationsOpen) ||
+                          (item.label === 'HOLIDAY TYPES' && holidayTypesOpen)
+                          ? 'rotate-180'
+                          : ''
+                          }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      className="inline-block py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-4 border-b-2 border-transparent hover:border-primary"
+                    >
+                      {item.label}
+                    </Link>
+                  )}
+                </div>
+              ))}
+              <Link to="/reviews" className="inline-block py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-4 border-b-2 border-transparent hover:border-primary">
+                REVIEWS
+              </Link>
+              <Link to="/about-us" className="inline-block py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-4 border-b-2 border-transparent hover:border-primary">
+                ABOUT US
+              </Link>
+            </nav>
+
+            {/* Search Bar */}
+            <div className="flex-1 max-w-sm ml-8">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Explore your world"
+                  className="w-full bg-gray-100 border-none rounded-full py-2 pl-4 pr-10 text-sm focus:ring-1 focus:ring-primary focus:bg-white transition-all"
+                />
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -317,9 +345,9 @@ const MainNavigation: React.FC = () => {
                       {item.label}
                       <svg
                         className={`h-5 w-5 transition-transform ${(item.label === 'DESTINATIONS' && destinationsOpen) ||
-                            (item.label === 'HOLIDAY TYPES' && holidayTypesOpen)
-                            ? 'rotate-180'
-                            : ''
+                          (item.label === 'HOLIDAY TYPES' && holidayTypesOpen)
+                          ? 'rotate-180'
+                          : ''
                           }`}
                         fill="none"
                         stroke="currentColor"
@@ -390,28 +418,36 @@ const MainNavigation: React.FC = () => {
             ))}
 
             {/* Mobile Contact & Auth */}
-            <div className="pt-3 border-t border-gray-200 space-y-2">
+            <div className="pt-4 border-t border-gray-100 space-y-4">
+              <div className="flex flex-col items-center space-y-2">
+                <span className="text-xs text-gray-500 font-medium">Call us today from 09:00 - 17:30</span>
+                <a href="tel:02039663630" className="text-xl font-bold text-charcoal">
+                  020 3966 3630
+                </a>
+              </div>
+
               <Link
-                to="/contact-us"
-                className="block w-full text-center px-4 py-2 bg-[#0a1f44] text-white text-sm font-medium rounded hover:bg-opacity-90 transition-colors"
+                to="/start-planning"
+                className="block w-full text-center px-6 py-3 bg-primary text-white text-sm font-bold rounded uppercase tracking-wider hover:bg-primary-dark transition-colors shadow-sm"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Contact Us
+                Start Planning
               </Link>
+
               {user ? (
                 <button
                   onClick={() => {
                     handleLogout();
                     setMobileMenuOpen(false);
                   }}
-                  className="block w-full text-center px-4 py-2 border border-gray-300 text-sm font-medium rounded text-charcoal bg-white hover:bg-gray-50 transition-colors"
+                  className="block w-full text-center px-4 py-2 border border-gray-200 text-sm font-medium rounded text-charcoal bg-white hover:bg-gray-50 transition-colors"
                 >
                   Logout
                 </button>
               ) : (
                 <Link
                   to="/login"
-                  className="block w-full text-center px-4 py-2 border border-gray-300 text-sm font-medium rounded text-charcoal bg-white hover:bg-gray-50 transition-colors"
+                  className="block w-full text-center px-4 py-2 border border-gray-200 text-sm font-medium rounded text-charcoal bg-white hover:bg-gray-50 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Sign In / Register

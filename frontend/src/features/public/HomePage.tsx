@@ -1,5 +1,6 @@
 import React from 'react';
 import HeroSection from './home/sections/HeroSection';
+import ThreeStepsSection from './home/sections/ThreeStepsSection';
 import SpecialTopDeals from './home/sections/SpecialTopDeals';
 import HolidayByType from './home/sections/HolidayByType';
 import TopTrendingDestinations from './home/sections/TopTrendingDestinations';
@@ -17,6 +18,7 @@ const HomePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
       <HeroSection />
+      <ThreeStepsSection />
       <SpecialTopDeals />
       <HolidayByType />
       <TopTrendingDestinations />

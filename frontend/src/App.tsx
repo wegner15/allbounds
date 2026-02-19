@@ -29,6 +29,7 @@ import CountryDetailPage from './features/destinations/CountryDetailPage';
 import CountryDetailPageNew from './features/destinations/CountryDetailPageNew';
 import RegionDetailPage from './features/destinations/RegionDetailPage';
 import CountryCategoryPage from './features/destinations/CountryCategoryPage';
+import RegionsPage from './features/destinations/RegionsPage';
 
 // Import auth pages
 import LoginPage from './features/auth/LoginPage';
@@ -126,12 +127,7 @@ import HomePage from './features/public/HomePage';
 import SearchPage from './features/search/SearchPage';
 
 // Placeholder pages for routes we haven't fully implemented yet
-const RegionsPage = () => (
-  <div>
-    <h1 className="text-4xl font-playfair mb-6">Explore Regions</h1>
-    <p className="text-lg mb-4">Discover our curated collection of regions around the world.</p>
-  </div>
-);
+
 
 const CountriesPage = () => (
   <div>

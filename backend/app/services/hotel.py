@@ -22,9 +22,13 @@ class HotelService:
         Retrieve all hotels with pagination and optional filtering, including cover images.
         Hotels are ordered by creation date (newest first).
         """
+        # NOTE: We intentionally do NOT joinedload media_assets here.
+        # The list view only needs the primary image_id (already on the hotel row).
+        # Loading all gallery media assets for every hotel in a list was very expensive.
+        # We DO joinedload amenities to prevent N+1 queries (one query per hotel).
         query = db.query(Hotel).options(
             joinedload(Hotel.country),
-            joinedload(Hotel.media_assets)
+            joinedload(Hotel.amenities)
         ).filter(Hotel.is_active == True)
 
         if recommended is not None and recommended:
@@ -43,20 +47,8 @@ class HotelService:
         # Format hotels with cover images
         result = []
         for hotel in hotels:
-            # Get cover image
-            cover_image_url = None
-            if hotel.image_id:
-                cover_image_url = self._get_cloudflare_image_url(hotel.image_id)
-            else:
-                # Fallback to first gallery image
-                for media in hotel.media_assets:
-                    if media.is_active:
-                        if media.file_path.startswith("cloudflare://") and media.storage_key:
-                            cover_image_url = self._get_cloudflare_image_url(media.storage_key)
-                            break
-                        elif media.storage_key:
-                            cover_image_url = self._get_cloudflare_image_url(media.storage_key)
-                            break
+            # Use image_id directly — avoid loading media_assets for the list view
+            cover_image_url = self._get_cloudflare_image_url(hotel.image_id) if hotel.image_id else None
 
             hotel_data = {
                 "id": hotel.id,
@@ -72,13 +64,13 @@ class HotelService:
                     "slug": hotel.country.slug,
                 } if hotel.country else None,
                 "image_id": hotel.image_id,
-                "image_url": cover_image_url,  # Add this for backward compatibility
+                "image_url": cover_image_url,
                 "is_active": hotel.is_active,
                 "address": hotel.address,
                 "city": hotel.city,
                 "stars": hotel.stars,
                 "price_category": hotel.price_category,
-                "amenity_ids": [amenity.id for amenity in hotel.amenities] if hotel.amenities else [],
+                "amenity_ids": [amenity.id for amenity in hotel.amenities],
                 "created_at": hotel.created_at,
                 "updated_at": hotel.updated_at,
             }
@@ -93,35 +85,21 @@ class HotelService:
         """
         hotels = db.query(Hotel).options(
             joinedload(Hotel.country),
-            joinedload(Hotel.media_assets)
+            joinedload(Hotel.amenities)
         ).filter(
             Hotel.country_id == country_id,
             Hotel.is_active == True
         ).order_by(Hotel.created_at.desc()).offset(skip).limit(limit).all()
         
-        # Format hotels with cover images
+        # Format hotels — use image_id only, no media_assets loading
         result = []
         for hotel in hotels:
-            # Get cover image
-            cover_image_url = None
-            if hotel.image_id:
-                cover_image_url = self._get_cloudflare_image_url(hotel.image_id)
-            else:
-                # Fallback to first gallery image
-                for media in hotel.media_assets:
-                    if media.is_active:
-                        if media.file_path.startswith("cloudflare://") and media.storage_key:
-                            cover_image_url = self._get_cloudflare_image_url(media.storage_key)
-                            break
-                        elif media.storage_key:
-                            cover_image_url = self._get_cloudflare_image_url(media.storage_key)
-                            break
+            cover_image_url = self._get_cloudflare_image_url(hotel.image_id) if hotel.image_id else None
             
             hotel_data = {
                 "id": hotel.id,
                 "name": hotel.name,
                 "summary": hotel.summary,
-                "description": hotel.description,
                 "description": hotel.description,
                 "slug": hotel.slug,
                 "hotel_type_id": hotel.hotel_type_id,
@@ -151,29 +129,16 @@ class HotelService:
         """
         hotels = db.query(Hotel).options(
             joinedload(Hotel.country),
-            joinedload(Hotel.media_assets)
+            joinedload(Hotel.amenities)
         ).filter(
             Hotel.is_active == True,
             Hotel.is_featured == True
         ).order_by(Hotel.created_at.desc()).offset(skip).limit(limit).all()
         
-        # Format hotels with cover images
+        # Format hotels — use image_id only, no media_assets loading
         result = []
         for hotel in hotels:
-            # Get cover image
-            cover_image_url = None
-            if hotel.image_id:
-                cover_image_url = self._get_cloudflare_image_url(hotel.image_id)
-            else:
-                # Fallback to first gallery image
-                for media in hotel.media_assets:
-                    if media.is_active:
-                        if media.file_path.startswith("cloudflare://") and media.storage_key:
-                            cover_image_url = self._get_cloudflare_image_url(media.storage_key)
-                            break
-                        elif media.storage_key:
-                            cover_image_url = self._get_cloudflare_image_url(media.storage_key)
-                            break
+            cover_image_url = self._get_cloudflare_image_url(hotel.image_id) if hotel.image_id else None
             
             hotel_data = {
                 "id": hotel.id,
@@ -196,7 +161,7 @@ class HotelService:
                 "city": hotel.city,
                 "stars": hotel.stars,
                 "price_category": hotel.price_category,
-                "amenity_ids": [amenity.id for amenity in hotel.amenities] if hotel.amenities else [],
+                "amenity_ids": [amenity.id for amenity in hotel.amenities],
                 "created_at": hotel.created_at,
                 "updated_at": hotel.updated_at,
             }

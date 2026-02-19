@@ -235,15 +235,15 @@ const HeroSection: React.FC = () => {
         <div className="absolute inset-0 bg-black/20"></div>
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center items-center pt-16">
+      <div className="relative z-10 max-w-[1600px] mx-auto px-4 h-full flex flex-col justify-center items-center pt-16">
 
         {/* Headline */}
         <div className="text-center mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-playfair font-bold text-white mb-6 leading-tight drop-shadow-xl tracking-wide">
-            Discover Your Next Adventure
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-playfair font-bold text-white mb-6 leading-tight drop-shadow-xl tracking-wide">
+            Your Dream Holiday. Designed. Booked. Perfected.
           </h1>
-          <p className="text-lg md:text-xl text-gray-200 font-lato max-w-2xl mx-auto font-light leading-relaxed">
-            Perfect timing for ideal destinations - explore the world with confidence
+          <p className="text-lg md:text-xl text-gray-200 font-lato max-w-3xl mx-auto font-light leading-relaxed">
+            Luxury Safaris, Family Holidays, Beach Escapes & Group Trips – All in One Place.
           </p>
         </div>
 

@@ -20,10 +20,10 @@ const ThreeStepsSection: React.FC = () => {
     ];
 
     return (
-        <section className="bg-primary py-12 lg:py-16 text-white overflow-hidden">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-12 lg:mb-16">
-                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-playfair font-bold leading-tight">
+        <section className="bg-primary py-8 lg:py-12 text-white overflow-hidden">
+            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-10 lg:mb-12">
+                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-playfair font-bold leading-tight max-w-4xl mx-auto">
                         Three Simple Steps to Your Perfect Tailor-Made Holiday
                     </h2>
                 </div>
@@ -33,15 +33,15 @@ const ThreeStepsSection: React.FC = () => {
                         <div key={step.number} className="relative px-6 lg:px-12 flex flex-col items-center text-center group">
                             {/* Divider for desktop */}
                             {index < steps.length - 1 && (
-                                <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 h-24 w-px bg-white/20" />
+                                <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 h-16 w-px bg-white/20" />
                             )}
 
-                            <div className="mb-6">
-                                <h3 className="text-2xl lg:text-3xl font-playfair font-bold mb-4 flex items-baseline justify-center gap-2">
-                                    <span className="text-white/80 tabular-nums">{step.number}.</span>
+                            <div className="mb-4">
+                                <h3 className="text-xl lg:text-2xl font-playfair font-bold mb-3 flex items-baseline justify-center gap-2">
+                                    <span className="text-white/80 tabular-nums text-lg lg:text-xl font-sans">{step.number}.</span>
                                     {step.title}
                                 </h3>
-                                <p className="text-lg text-white/90 leading-relaxed font-lato max-w-sm mx-auto">
+                                <p className="text-base text-white/90 leading-relaxed font-lato max-w-sm mx-auto">
                                     {step.description}
                                 </p>
                             </div>

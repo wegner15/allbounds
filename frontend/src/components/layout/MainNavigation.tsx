@@ -191,7 +191,7 @@ const MainNavigation: React.FC = () => {
     <header className="sticky top-0 z-[1000] bg-white w-full border-b border-gray-100">
       {/* Top Tier: Logo, Contact, CTA */}
       <div className="border-b border-gray-50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1600px] mx-auto px-4 lg:px-6">
           <div className="flex items-center justify-between h-20 lg:h-24">
             {/* Logo */}
             <Link to="/" className="flex items-center flex-shrink-0">
@@ -259,21 +259,21 @@ const MainNavigation: React.FC = () => {
 
       {/* Bottom Tier: Navigation Links & Search */}
       <div className="hidden lg:block bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1600px] mx-auto px-4 lg:px-6">
           <div className="flex items-center justify-between h-14">
             {/* Navigation Links */}
-            <nav className="flex items-center space-x-1 xl:space-x-4">
+            <nav className="flex items-center space-x-0 xl:space-x-1">
               {navItems.map((item) => (
                 <div key={item.path} className="relative group">
                   {item.hasDropdown ? (
                     <button
-                      className="flex items-center py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-4 border-b-2 border-transparent hover:border-primary"
+                      className="flex items-center py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-3 xl:px-4 border-b-2 border-transparent hover:border-primary"
                       onClick={item.label === 'DESTINATIONS' ? toggleDestinations : toggleHolidayTypes}
                       data-dropdown={item.label === 'DESTINATIONS' ? 'destinations' : 'holiday-types'}
                     >
                       {item.label}
                       <svg
-                        className={`ml-1.5 h-3.5 w-3.5 transition-transform ${(item.label === 'DESTINATIONS' && destinationsOpen) ||
+                        className={`ml-1 h-3 w-3 transition-transform ${(item.label === 'DESTINATIONS' && destinationsOpen) ||
                           (item.label === 'HOLIDAY TYPES' && holidayTypesOpen)
                           ? 'rotate-180'
                           : ''
@@ -288,17 +288,17 @@ const MainNavigation: React.FC = () => {
                   ) : (
                     <Link
                       to={item.path}
-                      className="inline-block py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-4 border-b-2 border-transparent hover:border-primary"
+                      className="inline-block py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-3 xl:px-4 border-b-2 border-transparent hover:border-primary"
                     >
                       {item.label}
                     </Link>
                   )}
                 </div>
               ))}
-              <Link to="/reviews" className="inline-block py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-4 border-b-2 border-transparent hover:border-primary">
+              <Link to="/reviews" className="inline-block py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-3 xl:px-4 border-b-2 border-transparent hover:border-primary">
                 REVIEWS
               </Link>
-              <Link to="/about-us" className="inline-block py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-4 border-b-2 border-transparent hover:border-primary">
+              <Link to="/about-us" className="inline-block py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-3 xl:px-4 border-b-2 border-transparent hover:border-primary">
                 ABOUT US
               </Link>
             </nav>

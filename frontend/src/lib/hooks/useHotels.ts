@@ -1,6 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient, endpoints } from '../api';
 
+export interface Amenity {
+  id: number;
+  name: string;
+  icon?: string;
+  category?: string;
+  description?: string;
+}
+
 export interface Hotel {
   id: number;
   name: string;
@@ -104,6 +112,7 @@ export interface HotelDetails extends Hotel {
     height?: number;
     file_path: string;
   }>;
+  amenities?: Amenity[];
 }
 
 // Hook for fetching hotel details by slug

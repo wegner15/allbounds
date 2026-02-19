@@ -178,6 +178,52 @@ const HotelDetailPage: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Amenities Section */}
+            {hotel.amenities && hotel.amenities.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 font-playfair">Hotel Amenities</h2>
+
+                {/* Categorize amenities */}
+                {Object.entries(
+                  hotel.amenities.reduce((acc, amenity) => {
+                    const category = amenity.category || 'General';
+                    if (!acc[category]) acc[category] = [];
+                    acc[category].push(amenity);
+                    return acc;
+                  }, {} as Record<string, typeof hotel.amenities>)
+                ).map(([category, items]) => (
+                  <div key={category} className="mb-8 last:mb-0">
+                    <h3 className="text-lg font-bold text-gray-800 mb-4 border-l-4 border-blue-500 pl-3">
+                      {category}
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {items.map((amenity) => (
+                        <div
+                          key={amenity.id}
+                          className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group hover:bg-white hover:shadow-md transition-all duration-300"
+                        >
+                          <div className="bg-blue-100 p-2 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                            {/* Icon fallback logic */}
+                            {amenity.name.toLowerCase().includes('wifi') ? <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" /></svg> :
+                              amenity.name.toLowerCase().includes('pool') ? <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 16V8a2 2 0 00-1.45-1.92l-4-1A2 2 0 0013.1 6.32l-3.3 3.3a2 2 0 01-1.4.58H5a2 2 0 00-2 2v2a2 2 0 002 2h2.8a2 2 0 011.4.58l3.3 3.3a2 2 0 002.45.24l4-1A2 2 0 0021 16z" /></svg> :
+                                amenity.name.toLowerCase().includes('restaurant') || amenity.name.toLowerCase().includes('dining') ? <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.168.477 4.253 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.168.477-4.253 1.253" /></svg> :
+                                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                            }
+                          </div>
+                          <div>
+                            <span className="text-sm font-semibold text-gray-900 block">{amenity.name}</span>
+                            {amenity.description && (
+                              <span className="text-xs text-gray-500 line-clamp-1">{amenity.description}</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}

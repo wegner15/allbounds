@@ -225,7 +225,8 @@ class HotelService:
         hotel = db.query(Hotel).options(
             joinedload(Hotel.media_assets),
             joinedload(Hotel.country),
-            joinedload(Hotel.hotel_type)
+            joinedload(Hotel.hotel_type),
+            joinedload(Hotel.amenities)
         ).filter(Hotel.slug == slug, Hotel.is_active == True).first()
         
         if not hotel:
@@ -275,6 +276,15 @@ class HotelService:
             "address": hotel.address,
             "city": hotel.city,
             "price_category": hotel.price_category,
+            "amenities": [
+                {
+                    "id": amenity.id,
+                    "name": amenity.name,
+                    "icon": amenity.icon,
+                    "category": amenity.category,
+                    "description": amenity.description
+                } for amenity in hotel.amenities if amenity.is_active
+            ] if hotel.amenities else [],
             "amenity_ids": [amenity.id for amenity in hotel.amenities] if hotel.amenities else [],
             "check_in_time": hotel.check_in_time,
             "check_out_time": hotel.check_out_time,

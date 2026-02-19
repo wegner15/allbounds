@@ -386,18 +386,18 @@ const RegionDetailPage: React.FC = () => {
               {/* Quick Actions */}
               <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <h3 className="text-lg font-semibold text-charcoal mb-4">Explore {region.name}</h3>
-                <div className="space-y-3">
-                  <Link to={`/packages?region=${region.slug}`}>
+                <div className="space-y-4">
+                  <Link to={`/packages?region=${region.slug}`} className="block">
                     <Button variant="primary" className="w-full">
                       View All Packages
                     </Button>
                   </Link>
-                  <Link to={`/group-trips?region=${region.slug}`}>
+                  <Link to={`/group-trips?region=${region.slug}`} className="block">
                     <Button variant="outline" className="w-full">
                       Join Group Adventures
                     </Button>
                   </Link>
-                  <Link to="/contact">
+                  <Link to="/contact" className="block">
                     <Button variant="outline" className="w-full">
                       Plan Custom Trip
                     </Button>

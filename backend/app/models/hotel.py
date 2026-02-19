@@ -72,3 +72,6 @@ class Hotel(Base):
     
     # Relationship with Itinerary
     itinerary_items = relationship("ItineraryItem", secondary="itinerary_hotels", back_populates="hotels")
+    
+    # Relationship with Attractions
+    attractions = relationship("Attraction", secondary="hotel_attractions", back_populates="hotels")

@@ -6,6 +6,21 @@ from datetime import datetime
 from app.schemas.country import CountryResponse
 from app.schemas.activity import ActivityResponse
 
+# Simplified hotel schema for use in attraction responses (avoids circular imports)
+class SimplifiedHotelResponse(BaseModel):
+    id: int
+    name: str
+    slug: str
+    stars: Optional[float] = None
+    city: Optional[str] = None
+    price_category: Optional[str] = None
+    image_url: Optional[str] = None
+    cover_image: Optional[str] = None
+    country_id: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+
 # Gallery image schema for attractions
 class GalleryImageResponse(BaseModel):
     id: int
@@ -82,6 +97,7 @@ class AttractionResponse(AttractionBase):
     
     gallery_images: Optional[List[GalleryImageResponse]] = Field(None, description="Gallery images")
     activities: List[ActivityResponse] = Field([], description="Activities associated with the attraction")
+    hotels: List[SimplifiedHotelResponse] = Field([], description="Hotels associated with the attraction")
     
     class Config:
         from_attributes = True
@@ -98,6 +114,7 @@ class AttractionWithRelationshipsResponse(AttractionWithCountryResponse):
     package_ids: Optional[List[int]] = Field(None, description="IDs of packages associated with this attraction")
     group_trip_ids: Optional[List[int]] = Field(None, description="IDs of group trips associated with this attraction")
     activity_ids: Optional[List[int]] = Field(None, description="IDs of activities associated with this attraction")
+    hotel_ids: Optional[List[int]] = Field(None, description="IDs of hotels associated with this attraction")
     
     class Config:
         from_attributes = True

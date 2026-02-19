@@ -19,6 +19,13 @@ group_trip_attractions = Table(
     Column("attraction_id", Integer, ForeignKey("attractions.id"), primary_key=True)
 )
 
+hotel_attractions = Table(
+    "hotel_attractions",
+    Base.metadata,
+    Column("hotel_id", Integer, ForeignKey("hotels.id"), primary_key=True),
+    Column("attraction_id", Integer, ForeignKey("attractions.id"), primary_key=True)
+)
+
 class Attraction(Base):
     __tablename__ = "attractions"
 
@@ -58,6 +65,9 @@ class Attraction(Base):
     # Relationship with Activities
     # lazy='select' (default) is fine, or 'joined' if we always want them.
     activities = relationship("Activity", secondary="attraction_activities", back_populates="attractions")
+    
+    # Relationship with Hotels
+    hotels = relationship("Hotel", secondary=hotel_attractions, back_populates="attractions")
 
     @property
     def computed_cover_image(self) -> str:

@@ -280,4 +280,39 @@ class AttractionService:
         db.commit()
         return True
 
+    def assign_hotel(self, db: Session, attraction_id: int, hotel_id: int) -> bool:
+        """
+        Assign a hotel to an attraction.
+        """
+        from app.models.hotel import Hotel
+        
+        attraction = db.query(Attraction).filter(Attraction.id == attraction_id).first()
+        hotel = db.query(Hotel).filter(Hotel.id == hotel_id).first()
+        
+        if not attraction or not hotel:
+            return False
+        
+        if hotel in attraction.hotels:
+            return True  # Already linked
+            
+        attraction.hotels.append(hotel)
+        db.commit()
+        return True
+    
+    def remove_hotel(self, db: Session, attraction_id: int, hotel_id: int) -> bool:
+        """
+        Remove a hotel from an attraction.
+        """
+        from app.models.hotel import Hotel
+        
+        attraction = db.query(Attraction).filter(Attraction.id == attraction_id).first()
+        hotel = db.query(Hotel).filter(Hotel.id == hotel_id).first()
+        
+        if not attraction or not hotel or hotel not in attraction.hotels:
+            return False
+            
+        attraction.hotels.remove(hotel)
+        db.commit()
+        return True
+
 attraction_service = AttractionService()

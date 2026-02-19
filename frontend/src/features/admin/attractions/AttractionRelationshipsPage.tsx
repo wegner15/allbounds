@@ -9,11 +9,14 @@ import {
   useAssignGroupTripToAttraction,
   useRemoveGroupTripFromAttraction,
   useAssignActivityToAttraction,
-  useRemoveActivityFromAttraction
+  useRemoveActivityFromAttraction,
+  useAssignHotelToAttraction,
+  useRemoveHotelFromAttraction,
 } from '../../../lib/hooks/useAttractions';
 import { usePackages } from '../../../lib/hooks/usePackages';
 import { useGroupTrips } from '../../../lib/hooks/useGroupTrips';
 import { useActivities } from '../../../lib/hooks/useActivities';
+import { useHotels } from '../../../lib/hooks/useHotels';
 
 const AttractionRelationshipsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,12 +26,14 @@ const AttractionRelationshipsPage: React.FC = () => {
   const [selectedPackageId, setSelectedPackageId] = useState<number | ''>('');
   const [selectedGroupTripId, setSelectedGroupTripId] = useState<number | ''>('');
   const [selectedActivityId, setSelectedActivityId] = useState<number | ''>('');
+  const [selectedHotelId, setSelectedHotelId] = useState<number | ''>('');
 
   const { data: attraction, isLoading: isLoadingAttraction } = useAttraction(attractionId);
   const { data: relationships, isLoading: isLoadingRelationships, refetch } = useAttractionRelationships(attractionId);
   const { data: allPackages, isLoading: isLoadingPackages } = usePackages();
   const { data: allGroupTrips, isLoading: isLoadingGroupTrips } = useGroupTrips();
   const { data: allActivities, isLoading: isLoadingActivities } = useActivities();
+  const { data: allHotels, isLoading: isLoadingHotels } = useHotels();
 
   const { mutate: assignPackage, isPending: isAssigningPackage } = useAssignPackageToAttraction();
   const { mutate: removePackage, isPending: isRemovingPackage } = useRemovePackageFromAttraction();
@@ -36,6 +41,8 @@ const AttractionRelationshipsPage: React.FC = () => {
   const { mutate: removeGroupTrip, isPending: isRemovingGroupTrip } = useRemoveGroupTripFromAttraction();
   const { mutate: assignActivity, isPending: isAssigningActivity } = useAssignActivityToAttraction();
   const { mutate: removeActivity, isPending: isRemovingActivity } = useRemoveActivityFromAttraction();
+  const { mutate: assignHotel, isPending: isAssigningHotel } = useAssignHotelToAttraction();
+  const { mutate: removeHotel, isPending: isRemovingHotel } = useRemoveHotelFromAttraction();
 
   if (isLoadingAttraction || isLoadingRelationships || isLoadingPackages || isLoadingGroupTrips) {
     return (
@@ -129,6 +136,31 @@ const AttractionRelationshipsPage: React.FC = () => {
     );
   };
 
+  const handleAssignHotel = () => {
+    if (selectedHotelId !== '') {
+      assignHotel(
+        { attractionId, hotelId: Number(selectedHotelId) },
+        {
+          onSuccess: () => {
+            refetch();
+            setSelectedHotelId('');
+          }
+        }
+      );
+    }
+  };
+
+  const handleRemoveHotel = (hotelId: number) => {
+    removeHotel(
+      { attractionId, hotelId },
+      {
+        onSuccess: () => {
+          refetch();
+        }
+      }
+    );
+  };
+
   // Filter out packages that are already assigned to the attraction
   const unassignedPackages = allPackages?.filter(
     pkg => !relationships.package_ids?.includes(pkg.id)
@@ -144,6 +176,11 @@ const AttractionRelationshipsPage: React.FC = () => {
     activity => !relationships.activity_ids?.includes(activity.id)
   );
 
+  // Filter out hotels that are already assigned to the attraction
+  const unassignedHotels = allHotels?.filter(
+    hotel => !relationships.hotel_ids?.includes(hotel.id)
+  );
+
   // Find the assigned package and group trip details
   const assignedPackages = allPackages?.filter(
     pkg => relationships.package_ids?.includes(pkg.id)
@@ -156,6 +193,14 @@ const AttractionRelationshipsPage: React.FC = () => {
   const assignedActivities = allActivities?.filter(
     activity => relationships.activity_ids?.includes(activity.id)
   );
+
+  const assignedHotels = allHotels?.filter(
+    hotel => relationships.hotel_ids?.includes(hotel.id)
+  );
+
+  const selectorClass = "flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent";
+  const addButtonClass = (disabled: boolean) =>
+    `bg-teal hover:bg-teal-dark text-white py-2 px-4 rounded-md ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`;
 
   return (
     <div className="space-y-6">
@@ -179,13 +224,12 @@ const AttractionRelationshipsPage: React.FC = () => {
         {/* Package Relationships */}
         <div className="bg-white shadow-md rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Associated Packages</h2>
-
           <div className="mb-6">
             <div className="flex space-x-2">
               <select
                 value={selectedPackageId}
                 onChange={(e) => setSelectedPackageId(Number(e.target.value) || '')}
-                className="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
+                className={selectorClass}
               >
                 <option value="">Select a package to add...</option>
                 {unassignedPackages?.map(pkg => (
@@ -197,14 +241,12 @@ const AttractionRelationshipsPage: React.FC = () => {
               <button
                 onClick={handleAssignPackage}
                 disabled={!selectedPackageId || isAssigningPackage}
-                className={`bg-teal hover:bg-teal-dark text-white py-2 px-4 rounded-md ${!selectedPackageId || isAssigningPackage ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                className={addButtonClass(!selectedPackageId || isAssigningPackage)}
               >
                 {isAssigningPackage ? 'Adding...' : 'Add'}
               </button>
             </div>
           </div>
-
           {assignedPackages?.length === 0 ? (
             <p className="text-gray-500 italic">No packages assigned to this attraction.</p>
           ) : (
@@ -228,13 +270,12 @@ const AttractionRelationshipsPage: React.FC = () => {
         {/* Group Trip Relationships */}
         <div className="bg-white shadow-md rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Associated Group Trips</h2>
-
           <div className="mb-6">
             <div className="flex space-x-2">
               <select
                 value={selectedGroupTripId}
                 onChange={(e) => setSelectedGroupTripId(Number(e.target.value) || '')}
-                className="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
+                className={selectorClass}
               >
                 <option value="">Select a group trip to add...</option>
                 {unassignedGroupTrips?.map(trip => (
@@ -246,14 +287,12 @@ const AttractionRelationshipsPage: React.FC = () => {
               <button
                 onClick={handleAssignGroupTrip}
                 disabled={!selectedGroupTripId || isAssigningGroupTrip}
-                className={`bg-teal hover:bg-teal-dark text-white py-2 px-4 rounded-md ${!selectedGroupTripId || isAssigningGroupTrip ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                className={addButtonClass(!selectedGroupTripId || isAssigningGroupTrip)}
               >
                 {isAssigningGroupTrip ? 'Adding...' : 'Add'}
               </button>
             </div>
           </div>
-
           {assignedGroupTrips?.length === 0 ? (
             <p className="text-gray-500 italic">No group trips assigned to this attraction.</p>
           ) : (
@@ -277,13 +316,12 @@ const AttractionRelationshipsPage: React.FC = () => {
         {/* Activity Relationships */}
         <div className="bg-white shadow-md rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Associated Activities</h2>
-
           <div className="mb-6">
             <div className="flex space-x-2">
               <select
                 value={selectedActivityId}
                 onChange={(e) => setSelectedActivityId(Number(e.target.value) || '')}
-                className="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
+                className={selectorClass}
               >
                 <option value="">Select an activity to add...</option>
                 {unassignedActivities?.map(activity => (
@@ -295,14 +333,12 @@ const AttractionRelationshipsPage: React.FC = () => {
               <button
                 onClick={handleAssignActivity}
                 disabled={!selectedActivityId || isAssigningActivity}
-                className={`bg-teal hover:bg-teal-dark text-white py-2 px-4 rounded-md ${!selectedActivityId || isAssigningActivity ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                className={addButtonClass(!selectedActivityId || isAssigningActivity)}
               >
                 {isAssigningActivity ? 'Adding...' : 'Add'}
               </button>
             </div>
           </div>
-
           {assignedActivities?.length === 0 ? (
             <p className="text-gray-500 italic">No activities assigned to this attraction.</p>
           ) : (
@@ -313,6 +349,59 @@ const AttractionRelationshipsPage: React.FC = () => {
                   <button
                     onClick={() => handleRemoveActivity(activity.id)}
                     disabled={isRemovingActivity}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Hotel Relationships */}
+        <div className="bg-white shadow-md rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">Associated Hotels</h2>
+          <div className="mb-6">
+            <div className="flex space-x-2">
+              <select
+                value={selectedHotelId}
+                onChange={(e) => setSelectedHotelId(Number(e.target.value) || '')}
+                className={selectorClass}
+                disabled={isLoadingHotels}
+              >
+                <option value="">Select a hotel to add...</option>
+                {unassignedHotels?.map(hotel => (
+                  <option key={hotel.id} value={hotel.id}>
+                    {hotel.name}{hotel.city ? ` (${hotel.city})` : ''}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={handleAssignHotel}
+                disabled={!selectedHotelId || isAssigningHotel}
+                className={addButtonClass(!selectedHotelId || isAssigningHotel)}
+              >
+                {isAssigningHotel ? 'Adding...' : 'Add'}
+              </button>
+            </div>
+          </div>
+          {assignedHotels?.length === 0 ? (
+            <p className="text-gray-500 italic">No hotels assigned to this attraction.</p>
+          ) : (
+            <ul className="divide-y divide-gray-200">
+              {assignedHotels?.map(hotel => (
+                <li key={hotel.id} className="py-3 flex justify-between items-center">
+                  <div>
+                    <span className="font-medium">{hotel.name}</span>
+                    {hotel.city && <span className="text-sm text-gray-500 ml-2">({hotel.city})</span>}
+                    {hotel.stars && (
+                      <span className="text-xs text-yellow-500 ml-2">{'★'.repeat(hotel.stars)}</span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => handleRemoveHotel(hotel.id)}
+                    disabled={isRemovingHotel}
                     className="text-red-600 hover:text-red-800"
                   >
                     Remove

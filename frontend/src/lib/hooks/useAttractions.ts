@@ -32,6 +32,17 @@ export interface Attraction {
     caption?: string;
   }>;
   activities?: ActivityResponse[];
+  hotels?: Array<{
+    id: number;
+    name: string;
+    slug: string;
+    stars?: number;
+    city?: string;
+    price_category?: string;
+    cover_image?: string;
+    image_url?: string;
+    country_id?: number;
+  }>;
   slug: string;
   is_active: boolean;
   created_at: string;
@@ -62,6 +73,7 @@ export interface AttractionRelationships {
   package_ids: number[];
   group_trip_ids: number[];
   activity_ids: number[];
+  hotel_ids: number[];
 }
 
 export interface AttractionsQueryParams {
@@ -278,6 +290,36 @@ export const useRemoveActivityFromAttraction = () => {
   return useMutation({
     mutationFn: async ({ attractionId, activityId }: { attractionId: number; activityId: number }) => {
       const response = await apiClient.delete(`/attractions/${attractionId}/activities/${activityId}`);
+      return response;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['attractions', variables.attractionId, 'relationships'] });
+    },
+  });
+};
+
+// Hook for assigning a hotel to an attraction
+export const useAssignHotelToAttraction = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ attractionId, hotelId }: { attractionId: number; hotelId: number }) => {
+      const response = await apiClient.post(`/attractions/${attractionId}/hotels/${hotelId}`, {});
+      return response;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['attractions', variables.attractionId, 'relationships'] });
+    },
+  });
+};
+
+// Hook for removing a hotel from an attraction
+export const useRemoveHotelFromAttraction = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ attractionId, hotelId }: { attractionId: number; hotelId: number }) => {
+      const response = await apiClient.delete(`/attractions/${attractionId}/hotels/${hotelId}`);
       return response;
     },
     onSuccess: (_, variables) => {

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.core.redis_cache import cache_endpoint
 from app.models.user import User
-from app.schemas.attraction import AttractionResponse, AttractionCreate, AttractionUpdate, AttractionWithCountryResponse, AttractionWithRelationshipsResponse
+from app.schemas.attraction import AttractionResponse, AttractionCreate, AttractionUpdate, AttractionWithCountryResponse, AttractionWithRelationshipsResponse, SimplifiedHotelResponse
 from app.schemas.package import PackageWithCountryResponse
 from app.schemas.group_trip import GroupTripWithCountryResponse
 from app.schemas.activity import ActivityResponse
@@ -220,6 +220,7 @@ def get_attraction_with_relationships(
     response.package_ids = [package.id for package in attraction.packages]
     response.group_trip_ids = [group_trip.id for group_trip in attraction.group_trips]
     response.activity_ids = [activity.id for activity in attraction.activities]
+    response.hotel_ids = [hotel.id for hotel in attraction.hotels]
     
     return response
 
@@ -320,6 +321,38 @@ def remove_activity_from_attraction(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Attraction, activity, or relationship not found")
     return {"status": "success", "message": f"Activity {activity_id} removed from attraction {attraction_id}"}
 
+@router.post("/{attraction_id}/hotels/{hotel_id}", response_model=dict)
+def assign_hotel_to_attraction(
+    *,
+    db: Session = Depends(get_db),
+    attraction_id: int,
+    hotel_id: int,
+    current_user: User = Depends(has_permission("content:update")),
+) -> Any:
+    """
+    Assign a hotel to an attraction.
+    """
+    success = attraction_service.assign_hotel(db, attraction_id=attraction_id, hotel_id=hotel_id)
+    if not success:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Attraction or hotel not found")
+    return {"status": "success", "message": f"Hotel {hotel_id} assigned to attraction {attraction_id}"}
+
+@router.delete("/{attraction_id}/hotels/{hotel_id}", response_model=dict)
+def remove_hotel_from_attraction(
+    *,
+    db: Session = Depends(get_db),
+    attraction_id: int,
+    hotel_id: int,
+    current_user: User = Depends(has_permission("content:update")),
+) -> Any:
+    """
+    Remove a hotel from an attraction.
+    """
+    success = attraction_service.remove_hotel(db, attraction_id=attraction_id, hotel_id=hotel_id)
+    if not success:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Attraction, hotel, or relationship not found")
+    return {"status": "success", "message": f"Hotel {hotel_id} removed from attraction {attraction_id}"}
+
 @router.get("/{attraction_id}/trips", response_model=dict)
 def get_trips_by_attraction(
     attraction_id: int,
@@ -368,11 +401,15 @@ def get_trips_by_attraction(
     # Get activities associated with this attraction
     activities = [ActivityResponse.from_orm(activity) for activity in attraction.activities]
     
+    # Get hotels associated with this attraction
+    hotels = [SimplifiedHotelResponse.model_validate(hotel) for hotel in attraction.hotels]
+    
     return {
         "attraction": AttractionWithCountryResponse.from_orm(attraction),
         "packages": packages,
         "group_trips": group_trips,
         "activities": activities,
+        "hotels": hotels,
         "total_packages": len(attraction.packages),
         "total_group_trips": len(attraction.group_trips)
     }
@@ -425,11 +462,15 @@ def get_trips_by_attraction_slug(
     # Get activities associated with this attraction
     activities = [ActivityResponse.from_orm(activity) for activity in attraction.activities]
     
+    # Get hotels associated with this attraction
+    hotels = [SimplifiedHotelResponse.model_validate(hotel) for hotel in attraction.hotels]
+    
     return {
         "attraction": AttractionWithCountryResponse.from_orm(attraction),
         "packages": packages,
         "group_trips": group_trips,
         "activities": activities,
+        "hotels": hotels,
         "total_packages": len(attraction.packages),
         "total_group_trips": len(attraction.group_trips)
     }

@@ -29,7 +29,7 @@ interface TabConfig {
 
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('tours'); // Default to Tours
+  const [activeTab, setActiveTab] = useState('safaris'); // Default to Safaris
 
   // Search State
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -49,8 +49,8 @@ const HeroSection: React.FC = () => {
 
   const tabs: TabConfig[] = [
     {
-      id: 'tours',
-      label: 'Tours',
+      id: 'safaris',
+      label: 'Safaris',
       icon: <Compass className="w-4 h-4" />,
       fields: ['location', 'dates', 'guests']
     },
@@ -108,14 +108,14 @@ const HeroSection: React.FC = () => {
             let shouldInclude = false;
 
             // Logic: Map tabs to indices
-            // Tours -> packages, group_trips
+            // Safaris -> packages, group_trips
             // Group Trips -> group_trips
             // Packages -> packages
             // Things To Do -> activities, attractions
             // Hotels -> accommodations
             // Flights -> none (for now)
 
-            if (activeTab === 'tours' && (indexName === 'packages' || indexName === 'group_trips')) shouldInclude = true;
+            if (activeTab === 'safaris' && (indexName === 'packages' || indexName === 'group_trips')) shouldInclude = true;
             if (activeTab === 'group_trips' && indexName === 'group_trips') shouldInclude = true;
             if (activeTab === 'packages' && indexName === 'packages') shouldInclude = true;
             if (activeTab === 'things_to_do' && (indexName === 'activities' || indexName === 'attractions')) shouldInclude = true;
@@ -201,8 +201,9 @@ const HeroSection: React.FC = () => {
       case 'hotels':
         navigate(`/hotels?${searchParams.toString()}`);
         break;
-      case 'tours':
-        navigate(`/tours?${searchParams.toString()}`);
+      case 'safaris':
+        // Specifically route to Africa Region Page for Safaris as per user request
+        navigate(`/destinations/africa?${searchParams.toString()}`);
         break;
       case 'group_trips':
         navigate(`/group-trips?${searchParams.toString()}`);
@@ -214,8 +215,7 @@ const HeroSection: React.FC = () => {
         navigate(`/activities?${searchParams.toString()}`);
         break;
       case 'flights':
-        // Placeholder or external link
-        navigate(`/search?type=flights&${searchParams.toString()}`);
+        navigate(`/flights?${searchParams.toString()}`);
         break;
       default:
         navigate(`/search?${searchParams.toString()}`);

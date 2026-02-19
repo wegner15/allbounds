@@ -125,6 +125,7 @@ import ContentForm from './features/admin/content/ContentForm';
 
 import HomePage from './features/public/HomePage';
 import SearchPage from './features/search/SearchPage';
+import FlightBookingPage from './features/public/flights/FlightBookingPage';
 
 // Placeholder pages for routes we haven't fully implemented yet
 
@@ -288,6 +289,7 @@ const router = createBrowserRouter([
       { path: 'terms', element: <ContentPage /> },
       { path: 'privacy', element: <ContentPage /> },
       { path: 'payment-plans', element: <PaymentPlansPage /> },
+      { path: 'flights', element: <FlightBookingPage /> },
       { path: 'search', element: <SearchPage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'unauthorized', element: <UnauthorizedPage /> },

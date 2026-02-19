@@ -230,7 +230,7 @@ const MainNavigation: React.FC = () => {
 
               {/* CTA Button */}
               <Link
-                to="/start-planning"
+                to="/contact-us"
                 className="hidden sm:flex items-center px-6 py-3 bg-primary text-white text-sm font-bold rounded uppercase tracking-wider hover:bg-primary-dark transition-all transform hover:scale-[1.02] shadow-sm"
               >
                 Start Planning
@@ -427,7 +427,7 @@ const MainNavigation: React.FC = () => {
               </div>
 
               <Link
-                to="/start-planning"
+                to="/contact-us"
                 className="block w-full text-center px-6 py-3 bg-primary text-white text-sm font-bold rounded uppercase tracking-wider hover:bg-primary-dark transition-colors shadow-sm"
                 onClick={() => setMobileMenuOpen(false)}
               >

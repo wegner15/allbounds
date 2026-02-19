@@ -1,7 +1,7 @@
 from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.db.database import get_db
 from app.core.redis_cache import cache_endpoint
@@ -164,11 +164,19 @@ def get_hotel_with_relationships(
     if hotel is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hotel not found")
     
-    # Convert relationships to IDs for the response
-    response = HotelWithRelationshipsResponse.model_validate(hotel)
-    response.package_ids = [package.id for package in hotel.packages]
-    response.group_trip_ids = [group_trip.id for group_trip in hotel.group_trips]
-    
+    # Use model_validate with from_attributes=True for Pydantic v2 ORM serialization
+    response = HotelWithRelationshipsResponse.model_validate(hotel, from_attributes=True)
+
+    # Explicitly load packages and group_trips using joinedload since Hotel.packages
+    # and Hotel.group_trips use lazy='noload' to prevent circular loading
+    hotel_with_rels = db.query(Hotel).options(
+        joinedload(Hotel.packages),
+        joinedload(Hotel.group_trips),
+    ).filter(Hotel.id == hotel_id).first()
+
+    response.package_ids = [p.id for p in hotel_with_rels.packages] if hotel_with_rels else []
+    response.group_trip_ids = [gt.id for gt in hotel_with_rels.group_trips] if hotel_with_rels else []
+
     return response
 
 @router.post("/{hotel_id}/packages/{package_id}", response_model=dict)

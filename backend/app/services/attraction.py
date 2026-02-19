@@ -82,15 +82,33 @@ class AttractionService:
     
     def get_attraction(self, db: Session, attraction_id: int) -> Optional[Attraction]:
         """
-        Retrieve a specific attraction by ID.
+        Retrieve a specific attraction by ID with details.
         """
-        return db.query(Attraction).filter(Attraction.id == attraction_id, Attraction.is_active == True).first()
+        return (
+            db.query(Attraction)
+            .options(
+                joinedload(Attraction.country),
+                joinedload(Attraction.activities),
+                joinedload(Attraction.hotels),  # Explicitly load hotels
+            )
+            .filter(Attraction.id == attraction_id, Attraction.is_active == True)
+            .first()
+        )
     
     def get_attraction_by_slug(self, db: Session, slug: str) -> Optional[Attraction]:
         """
-        Retrieve a specific attraction by slug.
+        Retrieve a specific attraction by slug with details.
         """
-        return db.query(Attraction).filter(Attraction.slug == slug, Attraction.is_active == True).first()
+        return (
+            db.query(Attraction)
+            .options(
+                joinedload(Attraction.country),
+                joinedload(Attraction.activities),
+                joinedload(Attraction.hotels),  # Explicitly load hotels
+            )
+            .filter(Attraction.slug == slug, Attraction.is_active == True)
+            .first()
+        )
     
     def create_attraction(self, db: Session, attraction_create: AttractionCreate) -> Attraction:
         """

@@ -17,6 +17,19 @@ class SimplifiedHotelResponse(BaseModel):
     image_url: Optional[str] = None
     cover_image: Optional[str] = None
     country_id: Optional[int] = None
+    image_id: Optional[str] = None  # Added image_id to schema so it can be used for computation
+
+    @field_validator('cover_image', 'image_url', mode='before')
+    @classmethod
+    def compute_cover_image(cls, v, info):
+        """Generate cover_image URL from image_id if available"""
+        # Get the model instance from validation context
+        if hasattr(info, 'data') and 'image_id' in info.data:
+            image_id = info.data.get('image_id')
+            if image_id:
+                from app.core.cloudflare_config import cloudflare_settings
+                return f"{cloudflare_settings.delivery_url}/{image_id}/medium"
+        return v
 
     class Config:
         from_attributes = True

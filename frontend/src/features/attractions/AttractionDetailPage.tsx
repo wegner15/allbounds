@@ -44,6 +44,7 @@ const AttractionDetailPage: React.FC = () => {
     packages = [],
     group_trips = [],
     activities = [],
+    hotels = [],
     total_packages = 0,
     total_group_trips = 0
   } = attractionData || {};
@@ -376,6 +377,64 @@ const AttractionDetailPage: React.FC = () => {
                       </div>
                     );
                   })}
+                </div>
+              </div>
+            )}
+
+            {/* Nearby Hotels */}
+            {hotels && hotels.length > 0 && (
+              <div className="mb-12">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                  <span className="bg-teal-100 text-teal-800 p-2 rounded-lg mr-3">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </span>
+                  Nearby Hotels
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {hotels.map((hotel) => (
+                    <Link
+                      key={hotel.id}
+                      to={`/hotels/${hotel.slug}`}
+                      className="group block bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-all duration-300"
+                    >
+                      {/* Hotel image */}
+                      <div className="h-48 overflow-hidden relative">
+                        <img
+                          src={getImageUrlWithFallback(hotel.cover_image || hotel.image_url, IMAGE_VARIANTS.MEDIUM)}
+                          alt={hotel.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        {hotel.stars && (
+                          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm">
+                            <span className="text-yellow-500 font-bold">★ {hotel.stars}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-semibold text-lg text-gray-900 group-hover:text-teal-600 transition-colors mb-2 line-clamp-1">
+                          {hotel.name}
+                        </h3>
+                        <div className="flex items-center justify-between text-sm text-gray-600">
+                          {hotel.city && (
+                            <span className="flex items-center gap-1">
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                              {hotel.city}
+                            </span>
+                          )}
+                          {hotel.price_category && (
+                            <span className="bg-gray-100 px-2 py-1 rounded text-xs font-medium uppercase tracking-wide">
+                              {hotel.price_category}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
               </div>
             )}

@@ -72,6 +72,17 @@ export interface AttractionTripsResponse {
       slug: string;
     }>;
   }>;
+  hotels: Array<{
+    id: number;
+    name: string;
+    slug: string;
+    stars?: number;
+    city?: string;
+    price_category?: string;
+    cover_image?: string;
+    image_url?: string;
+    country_id?: number;
+  }>;
   total_packages: number;
   total_group_trips: number;
 }

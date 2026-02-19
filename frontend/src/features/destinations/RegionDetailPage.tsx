@@ -130,7 +130,10 @@ const RegionDetailPage: React.FC = () => {
               <h1 className="text-4xl md:text-6xl font-playfair text-white mb-4">{region.name}</h1>
               {region.description && (
                 <div className="text-lg md:text-xl text-white max-w-2xl line-clamp-3 bg-black/30 backdrop-blur-sm p-6 rounded-lg border border-white/10 shadow-lg">
-                  <TextDisplay content={region.description} />
+                  <TextDisplay
+                    content={region.description}
+                    className="[&_p]:!text-white [&_h1]:!text-white [&_h2]:!text-white [&_h3]:!text-white [&_li]:!text-white [&_strong]:!text-white [&_span]:!text-white text-white"
+                  />
                 </div>
               )}
             </div>

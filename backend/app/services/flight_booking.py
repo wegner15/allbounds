@@ -3,6 +3,7 @@ from typing import List, Optional
 from app.models.flight_booking import FlightBooking, FlightPassenger
 from app.schemas.flight_booking import FlightBookingCreate, FlightBookingUpdate
 from app.services.email import email_service
+from app.core.config import settings
 
 class FlightBookingService:
     def get(self, db: Session, id: int) -> Optional[FlightBooking]:
@@ -97,7 +98,7 @@ class FlightBookingService:
                 content_html=admin_content_html,
                 call_to_action={"url": "https://allboundtravel.com/admin/bookings/flights", "text": "View in Dashboard"}
             )
-            email_service.send_email("bookings@allboundvacations.com", admin_subject, final_admin_html)
+            email_service.send_email(settings.ADMIN_EMAIL, admin_subject, final_admin_html)
 
             # Confirm with Customer
             cust_subject = "Flight Request Received | Allbound Vacations"

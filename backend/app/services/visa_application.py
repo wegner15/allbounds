@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.models.visa_application import VisaApplication, ApplicationStatus
 from app.schemas.visa_application import VisaApplicationCreate, VisaApplicationUpdate
 from app.services.email import email_service
+from app.core.config import settings
 
 class VisaApplicationService:
     def get_applications(
@@ -80,7 +81,7 @@ class VisaApplicationService:
         )
 
         email_service.send_email(
-            to_email="bookings@allboundvacations.com",
+            to_email=settings.ADMIN_EMAIL,
             subject=subject,
             html_content=final_html
         )

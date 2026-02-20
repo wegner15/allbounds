@@ -5,6 +5,7 @@ from sqlalchemy import and_
 from app.models.booking import Booking, BookingTraveler
 from app.schemas.booking import BookingCreate, BookingUpdate, InquiryCreate, InquiryUpdate
 from app.services.email import email_service
+from app.core.config import settings
 
 
 class BookingService:
@@ -58,38 +59,64 @@ class BookingService:
         db.commit()
         db.refresh(db_booking)
         
-        # Send email notification to admin
+        # Send email notification to admin and confirmation to customer
         try:
-            booking_type_display = booking.booking_type.replace('_', ' ').title()
-            subject = f"New {booking_type_display} Request - {booking.contact_name}"
-            content_html = f"""
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Type:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking_type_display}</td></tr>
-                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Item:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.entity_slug}</td></tr>
-                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Client Name:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.contact_name}</td></tr>
-                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Email:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.contact_email}</td></tr>
-                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Phone:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.contact_phone}</td></tr>
-                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Country:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.country_of_origin}</td></tr>
-                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Passengers:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.number_of_adults} Adults, {booking.number_of_children} Children</td></tr>
-                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Special Requests:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.special_requests or 'None'}</td></tr>
-            </table>
-            """
-            
-            final_html = email_service.generate_html_email(
-                title="New Booking Request",
-                content_html=content_html,
-                call_to_action={"url": "https://allboundtravel.com/admin/bookings/packages", "text": "View in Dashboard"}
-            )
-            
-            email_service.send_email(
-                to_email="bookings@allboundvacations.com",
-                subject=subject,
-                html_content=final_html
-            )
+            self._send_admin_notification(db_booking)
+            self._send_customer_confirmation(db_booking)
         except Exception as e:
-            print(f"Failed to send booking notification email: {e}")
+            print(f"Failed to send booking notification emails: {e}")
             
         return db_booking
+
+    def _send_admin_notification(self, booking: Booking):
+        booking_type_display = booking.booking_type.replace('_', ' ').title()
+        subject = f"New {booking_type_display} Request - {booking.contact_name}"
+        content_html = f"""
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee; width: 30%;"><strong>Type:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking_type_display}</td></tr>
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Item:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.entity_slug}</td></tr>
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Client Name:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.contact_name}</td></tr>
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Email:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.contact_email}</td></tr>
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Phone:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.contact_phone}</td></tr>
+            <tr><td style="padding: 10px; border-bottom: 10px solid #eee;"><strong>Country:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.country_of_origin}</td></tr>
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Passengers:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.number_of_adults} Adults, {booking.number_of_children} Children</td></tr>
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Special Requests:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.special_requests or 'None'}</td></tr>
+        </table>
+        """
+        
+        final_html = email_service.generate_html_email(
+            title="New Booking Request",
+            content_html=content_html,
+            call_to_action={"url": f"https://allboundtravel.com/admin/bookings/{booking.booking_type}s", "text": "View in Dashboard"}
+        )
+        
+        email_service.send_email(
+            to_email=settings.ADMIN_EMAIL,
+            subject=subject,
+            html_content=final_html
+        )
+
+    def _send_customer_confirmation(self, booking: Booking):
+        booking_type_display = booking.booking_type.replace('_', ' ').title()
+        subject = f"Your {booking_type_display} Request - Allbound Vacations"
+        
+        content_html = f"""
+        <p style="font-size: 16px;">Dear {booking.contact_name},</p>
+        <p>Thank you for your interest in our <strong>{booking_type_display}</strong>: {booking.entity_slug.replace('-', ' ').title()}.</p>
+        <p>We have received your request and our travel experts are reviewing the details. We will contact you shortly to finalize your booking and provide next steps.</p>
+        <p>If you have any immediate questions, feel free to reply to this email or call us at +254 700 000 000.</p>
+        """
+        
+        final_html = email_service.generate_html_email(
+            title="Booking Request Received",
+            content_html=content_html
+        )
+        
+        email_service.send_email(
+            to_email=booking.contact_email,
+            subject=subject,
+            html_content=final_html
+        )
 
     def update_booking(self, db: Session, booking_id: int, booking_update: BookingUpdate) -> Optional[Booking]:
         """Update a booking."""
@@ -148,38 +175,63 @@ class InquiryService:
         db.commit()
         db.refresh(db_inquiry)
         
-        # Send email notification to admin
+        # Send email notification to admin and confirmation to customer
         try:
-            subject = f"New General Inquiry - {inquiry.subject}"
-            content_html = f"""
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-                <tr><td style="padding: 10px; border-bottom: 1px solid #eee; width: 30%;"><strong>Name:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{inquiry.name}</td></tr>
-                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Email:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{inquiry.email}</td></tr>
-                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Phone:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{inquiry.phone or 'Not provided'}</td></tr>
-                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Country:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{inquiry.country_of_origin or 'Not provided'}</td></tr>
-                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Subject:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{inquiry.subject}</td></tr>
-            </table>
-            <div style="background-color: #f9fafb; padding: 15px; border-radius: 6px; border-left: 4px solid #008080; margin-top: 20px;">
-                <h3 style="margin-top: 0;font-size: 14px;color: #4b5563;">Message:</h3>
-                <p style="white-space: pre-wrap; margin-bottom: 0;">{inquiry.message}</p>
-            </div>
-            """
-            
-            final_html = email_service.generate_html_email(
-                title="New Website Inquiry",
-                content_html=content_html,
-                call_to_action={"url": "https://allboundtravel.com/admin/bookings/inquiries", "text": "View Inquiry"}
-            )
-            
-            email_service.send_email(
-                to_email="bookings@allboundvacations.com",
-                subject=subject,
-                html_content=final_html
-            )
+            self._send_admin_notification(db_inquiry)
+            self._send_customer_confirmation(db_inquiry)
         except Exception as e:
-            print(f"Failed to send inquiry notification email: {e}")
+            print(f"Failed to send inquiry notification emails: {e}")
             
         return db_inquiry
+
+    def _send_admin_notification(self, inquiry: Inquiry):
+        subject = f"New General Inquiry - {inquiry.subject}"
+        content_html = f"""
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee; width: 30%;"><strong>Name:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{inquiry.name}</td></tr>
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Email:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{inquiry.email}</td></tr>
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Phone:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{inquiry.phone or 'Not provided'}</td></tr>
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Country:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{inquiry.country_of_origin or 'Not provided'}</td></tr>
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Subject:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{inquiry.subject}</td></tr>
+        </table>
+        <div style="background-color: #f9fafb; padding: 15px; border-radius: 6px; border-left: 4px solid #008080; margin-top: 20px;">
+            <h3 style="margin-top: 0;font-size: 14px;color: #4b5563;">Message:</h3>
+            <p style="white-space: pre-wrap; margin-bottom: 0;">{inquiry.message}</p>
+        </div>
+        """
+        
+        final_html = email_service.generate_html_email(
+            title="New Website Inquiry",
+            content_html=content_html,
+            call_to_action={"url": "https://allboundtravel.com/admin/bookings/inquiries", "text": "View Inquiry"}
+        )
+        
+        email_service.send_email(
+            to_email=settings.ADMIN_EMAIL,
+            subject=subject,
+            html_content=final_html
+        )
+
+    def _send_customer_confirmation(self, inquiry: Inquiry):
+        subject = f"We have received your inquiry: {inquiry.subject}"
+        
+        content_html = f"""
+        <p style="font-size: 16px;">Dear {inquiry.name},</p>
+        <p>Thank you for contacting Allbound Vacations. We have received your inquiry regarding <strong>"{inquiry.subject}"</strong>.</p>
+        <p>One of our travel consultants will review your message and get back to you as soon as possible (usually within 24 hours).</p>
+        <p>In the meantime, feel free to explore our <a href="https://allboundvacations.com/safaris" style="color: #008080;">latest safari packages</a>.</p>
+        """
+        
+        final_html = email_service.generate_html_email(
+            title="Thank You for Contacting Us",
+            content_html=content_html
+        )
+        
+        email_service.send_email(
+            to_email=inquiry.email,
+            subject=subject,
+            html_content=final_html
+        )
 
     def update_inquiry(self, db: Session, inquiry_id: int, inquiry_update: InquiryUpdate) -> Optional[Inquiry]:
         """Update an inquiry."""

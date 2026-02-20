@@ -29,6 +29,7 @@ from app.api.api_v1.endpoints import (
     stats,
     visa_applications,
     flight_bookings,
+    email_logs,
 )
 
 api_router = APIRouter()
@@ -66,3 +67,4 @@ api_router.include_router(package_price_charts.router, prefix="", tags=["Package
 api_router.include_router(bookings.router, prefix="/bookings", tags=["Bookings"])
 api_router.include_router(visa_applications.router, prefix="/visa-applications", tags=["Visa Applications"])
 api_router.include_router(flight_bookings.router, prefix="/flight-bookings", tags=["Flight Bookings"])
+api_router.include_router(email_logs.router, prefix="/email-logs", tags=["Logs"])

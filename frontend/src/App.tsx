@@ -133,6 +133,9 @@ import VisaApplicationPage from './features/public/visa/VisaApplicationPage';
 // Import Admin Settings
 import AdminSettingsPage from './features/admin/settings/AdminSettingsPage';
 
+// Import Admin Logs
+import EmailLogsPage from './features/admin/logs/EmailLogsPage';
+
 // Placeholder pages for routes we haven't fully implemented yet
 
 
@@ -389,6 +392,7 @@ const router = createBrowserRouter([
       { path: 'content/edit/:id', element: <ContentForm /> },
       // Other admin routes
       { path: 'settings', element: <AdminSettingsPage /> },
+      { path: 'logs/email', element: <EmailLogsPage /> },
       { path: 'preview/:type/:id', element: <AdminPreviewPage /> },
     ],
   },

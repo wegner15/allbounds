@@ -18,7 +18,7 @@ interface AdminLayoutProps {
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dashboard' }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['Destinations', 'Holiday Types', 'Group Trips', 'Hotels', 'Hotel Types', 'Attractions', 'Activities', 'Blog', 'Content', 'Users', 'Newsletter', 'Settings']));
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['Destinations', 'Holiday Types', 'Group Trips', 'Hotels', 'Hotel Types', 'Attractions', 'Activities', 'Blog', 'Content', 'Users', 'Newsletter', 'Logs', 'Settings']));
   const location = useLocation();
   const { user, handleLogout } = useAuthHook();
 
@@ -58,6 +58,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
     { name: 'Content', href: '/admin/content', icon: 'document-text' },
     { name: 'Users', href: '/admin/users', icon: 'user-group' },
     { name: 'Newsletter', href: '/admin/newsletter', icon: 'mail' },
+    {
+      name: 'Logs',
+      href: '#',
+      icon: 'document-text',
+      subItems: [
+        { name: 'Email Logs', href: '/admin/logs/email' }
+      ]
+    },
     { name: 'Settings', href: '/admin/settings', icon: 'cog' },
   ];
 
@@ -227,8 +235,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
                         <button
                           onClick={() => toggleExpanded(item.name)}
                           className={`group flex items-center w-full px-2 py-2 text-base font-medium rounded-md ${isActive(item.href)
-                              ? 'bg-teal text-white'
-                              : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                            ? 'bg-teal text-white'
+                            : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                             }`}
                         >
                           <div className="mr-4 flex-shrink-0 h-6 w-6">
@@ -248,8 +256,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
                         <Link
                           to={item.href}
                           className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${isActive(item.href)
-                              ? 'bg-teal text-white'
-                              : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                            ? 'bg-teal text-white'
+                            : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                             }`}
                         >
                           <div className="mr-4 flex-shrink-0 h-6 w-6">
@@ -266,8 +274,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
                               key={subItem.name}
                               to={subItem.href}
                               className={`group flex items-center px-2 py-1 text-sm font-medium rounded-md ${location.pathname === subItem.href
-                                  ? 'bg-gray-700 text-white'
-                                  : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                                ? 'bg-gray-700 text-white'
+                                : 'text-gray-400 hover:bg-gray-700 hover:text-white'
                                 }`}
                             >
                               {subItem.name}
@@ -325,8 +333,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
                       <button
                         onClick={() => toggleExpanded(item.name)}
                         className={`group flex items-center w-full px-2 py-2 text-sm font-medium rounded-md ${isActive(item.href)
-                            ? 'bg-teal text-white'
-                            : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                          ? 'bg-teal text-white'
+                          : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                           }`}
                       >
                         <div className="mr-3 flex-shrink-0 h-6 w-6">
@@ -346,8 +354,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
                       <Link
                         to={item.href}
                         className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${isActive(item.href)
-                            ? 'bg-teal text-white'
-                            : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                          ? 'bg-teal text-white'
+                          : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                           }`}
                       >
                         <div className="mr-3 flex-shrink-0 h-6 w-6">
@@ -364,8 +372,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
                             key={subItem.name}
                             to={subItem.href}
                             className={`group flex items-center px-2 py-1 text-xs font-medium rounded-md ${location.pathname === subItem.href
-                                ? 'bg-gray-700 text-white'
-                                : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                              ? 'bg-gray-700 text-white'
+                              : 'text-gray-400 hover:bg-gray-700 hover:text-white'
                               }`}
                           >
                             {subItem.name}

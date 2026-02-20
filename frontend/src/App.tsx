@@ -129,6 +129,7 @@ import HomePage from './features/public/HomePage';
 import SearchPage from './features/search/SearchPage';
 import FlightBookingPage from './features/public/flights/FlightBookingPage';
 import VisaApplicationPage from './features/public/visa/VisaApplicationPage';
+import AboutUsPage from './features/public/about/AboutUsPage';
 
 // Import Admin Settings
 import AdminSettingsPage from './features/admin/settings/AdminSettingsPage';
@@ -294,7 +295,7 @@ const router = createBrowserRouter([
       { path: 'holiday-types/:slug', element: <HolidayTypeDetailPage /> },
       { path: 'blog', element: <BlogListPage /> },
       { path: 'blog/:slug', element: <BlogDetailPage /> },
-      { path: 'about-us', element: <ContentPage /> },
+      { path: 'about-us', element: <AboutUsPage /> },
       { path: 'contact-us', element: <ContactUsPage /> },
       { path: 'careers', element: <ContentPage /> },
       { path: 'terms', element: <ContentPage /> },

@@ -121,7 +121,7 @@ const ContactUsCard: React.FC<ContactUsCardProps> = ({ hideFeatures = false }) =
               <div className="group">
                 <div className="relative h-80 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300">
                   <img
-                    src="https://images.unsplash.com/photo-1602002418082-a4443e081dd1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    src="/group-trip-card-bg.jpeg"
                     alt="Group Trips"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />

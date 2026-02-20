@@ -42,6 +42,7 @@ class Settings(BaseSettings):
     # API Email settings (Zoho ZeptoMail)
     ZEPTO_API_KEY: Optional[str] = os.getenv("ZEPTO_MAIL_API_KEY")
     ADMIN_EMAIL: str = os.getenv("ADMIN_EMAIL", "bookings@allboundvacations.com")
+    CONTACT_PHONE: str = os.getenv("CONTACT_PHONE", "+(256) 782 594 008")
 
     # Cloudflare Images settings
     CLOUDFLARE_IMAGES_DELIVERY_URL: Optional[str] = os.getenv("CLOUDFLARE_IMAGES_DELIVERY_URL")

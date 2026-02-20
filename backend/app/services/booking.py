@@ -104,7 +104,7 @@ class BookingService:
         <p style="font-size: 16px;">Dear {booking.contact_name},</p>
         <p>Thank you for your interest in our <strong>{booking_type_display}</strong>: {booking.entity_slug.replace('-', ' ').title()}.</p>
         <p>We have received your request and our travel experts are reviewing the details. We will contact you shortly to finalize your booking and provide next steps.</p>
-        <p>If you have any immediate questions, feel free to reply to this email or call us at +254 700 000 000.</p>
+        <p>If you have any immediate questions, feel free to reply to this email or call us at {settings.CONTACT_PHONE}.</p>
         """
         
         final_html = email_service.generate_html_email(

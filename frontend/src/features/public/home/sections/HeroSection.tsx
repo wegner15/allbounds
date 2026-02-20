@@ -225,7 +225,9 @@ const HeroSection: React.FC = () => {
   const heroImages = [
     '/home-heros/hero1.jpeg',
     '/home-heros/hero2.webp',
-    '/home-heros/hero3.webp'
+    '/home-heros/hero3.webp',
+    '/home-heros/hero4.jpeg',
+    '/home-heros/hero5.jpeg',
   ];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 

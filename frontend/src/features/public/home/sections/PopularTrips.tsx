@@ -53,7 +53,7 @@ const PopularTrips: React.FC = () => {
           </div>
           <p className="text-gray-600 text-center max-w-2xl mx-auto mb-8">Exclusive discounts on popular tours all over the World.</p>
           <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         </div>
       </div>
@@ -87,8 +87,8 @@ const PopularTrips: React.FC = () => {
             <button
               key={location}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === location
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-primary text-white shadow-md'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               onClick={() => setActiveTab(location)}
             >
@@ -115,7 +115,7 @@ const PopularTrips: React.FC = () => {
                   </button>
                 </div>
                 <div className="p-4">
-                  <h3 className="font-bold text-lg text-gray-800 truncate h-6 group-hover:text-blue-600 transition-colors">{trip.name}</h3>
+                  <h3 className="font-bold text-lg text-gray-800 truncate h-6 group-hover:text-primary transition-colors">{trip.name}</h3>
                   <div
                     className="text-sm text-gray-600 mb-2 h-8 line-clamp-2"
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trip.summary || trip.country.name) }}
@@ -163,7 +163,7 @@ const PopularTrips: React.FC = () => {
         <div className="text-center">
           <Link
             to="/packages"
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
+            className="inline-flex items-center text-primary hover:text-primary-dark font-medium"
           >
             More
             <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

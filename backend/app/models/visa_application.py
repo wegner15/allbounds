@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Date, Text, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 import enum
-from app.db.base_class import Base
+from app.db.database import Base
 
 class VisaType(str, enum.Enum):
     TOURIST = "tourist"

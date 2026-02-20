@@ -1,4 +1,4 @@
-import { api } from '../../lib/api';
+import { apiClient } from '../../lib/api';
 
 export interface VisaApplicationCreate {
     destination_country: string
@@ -23,6 +23,6 @@ export interface VisaApplicationCreate {
 }
 
 export const submitVisaApplication = async (data: VisaApplicationCreate) => {
-    const response = await api.post('/visa-applications/', data);
-    return response.data;
+    const response = await apiClient.post<any>('/visa-applications/', data);
+    return response;
 };

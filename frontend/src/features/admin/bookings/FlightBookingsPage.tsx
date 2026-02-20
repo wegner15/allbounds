@@ -7,10 +7,8 @@ import { apiClient } from '../../../lib/api';
 
 interface FlightPassenger {
     id: number;
-    title: string;
-    first_name: string;
-    last_name: string;
-    date_of_birth: string;
+    full_name: string;
+    dob: string;
     passport_number?: string;
     passport_expiry?: string;
     passenger_type: string;
@@ -18,12 +16,12 @@ interface FlightPassenger {
 
 interface FlightBooking {
     id: number;
-    full_name: string;
-    email: string;
-    phone: string;
+    contact_name: string;
+    contact_email: string;
+    contact_phone: string;
     trip_type: string;
-    origin: string;
-    destination: string;
+    departure_city: string;
+    destination_city: string;
     departure_date: string;
     return_date?: string;
     travel_class: string;
@@ -122,17 +120,17 @@ const FlightBookingsPage: React.FC = () => {
                                                 <div className="flex items-center">
                                                     <div>
                                                         <div className="text-sm font-medium text-gray-900">
-                                                            {booking.full_name}
+                                                            {booking.contact_name}
                                                         </div>
                                                         <div className="text-sm text-gray-500">
-                                                            {booking.email}
+                                                            {booking.contact_email}
                                                         </div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="text-sm text-gray-900">
-                                                    {booking.origin} &rarr; {booking.destination}
+                                                    {booking.departure_city} &rarr; {booking.destination_city}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
@@ -197,15 +195,15 @@ const FlightBookingsPage: React.FC = () => {
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded">
                                         <div>
                                             <label className="block text-xs font-medium text-gray-500">Full Name</label>
-                                            <p className="mt-1 text-sm text-gray-900">{selectedBooking.full_name}</p>
+                                            <p className="mt-1 text-sm text-gray-900">{selectedBooking.contact_name}</p>
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-500">Email</label>
-                                            <p className="mt-1 text-sm text-gray-900">{selectedBooking.email}</p>
+                                            <p className="mt-1 text-sm text-gray-900">{selectedBooking.contact_email}</p>
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-500">Phone</label>
-                                            <p className="mt-1 text-sm text-gray-900">{selectedBooking.phone || 'Not provided'}</p>
+                                            <p className="mt-1 text-sm text-gray-900">{selectedBooking.contact_phone || 'Not provided'}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -223,11 +221,11 @@ const FlightBookingsPage: React.FC = () => {
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-500">Origin</label>
-                                            <p className="mt-1 text-sm text-gray-900">{selectedBooking.origin}</p>
+                                            <p className="mt-1 text-sm text-gray-900">{selectedBooking.departure_city}</p>
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-500">Destination</label>
-                                            <p className="mt-1 text-sm text-gray-900">{selectedBooking.destination}</p>
+                                            <p className="mt-1 text-sm text-gray-900">{selectedBooking.destination_city}</p>
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-500">Departure Date</label>
@@ -259,8 +257,8 @@ const FlightBookingsPage: React.FC = () => {
                                                     selectedBooking.passengers.map((p) => (
                                                         <tr key={p.id}>
                                                             <td className="px-4 py-2 whitespace-nowrap">{p.passenger_type}</td>
-                                                            <td className="px-4 py-2 whitespace-nowrap">{p.title} {p.first_name} {p.last_name}</td>
-                                                            <td className="px-4 py-2 whitespace-nowrap">{p.date_of_birth}</td>
+                                                            <td className="px-4 py-2 whitespace-nowrap">{p.full_name}</td>
+                                                            <td className="px-4 py-2 whitespace-nowrap">{p.dob}</td>
                                                             <td className="px-4 py-2 whitespace-nowrap">{p.passport_number || '-'}</td>
                                                         </tr>
                                                     ))

@@ -31,7 +31,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
       subItems: [
         { name: 'Package Bookings', href: '/admin/bookings/packages' },
         { name: 'Group Trip Bookings', href: '/admin/bookings/group-trips' },
-        { name: 'General Inquiries', href: '/admin/bookings/inquiries' }
+        { name: 'General Inquiries', href: '/admin/bookings/inquiries' },
+        { name: 'Visa Applications', href: '/admin/bookings/visa-applications' },
+        { name: 'Flight Bookings', href: '/admin/bookings/flights' }
       ]
     },
     { name: 'Destinations', href: '/admin/destinations', icon: 'globe' },
@@ -219,65 +221,62 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
                   </Link>
                 </div>
                 <nav className="mt-5 px-2 space-y-1">
-                   {navigation.map((item) => (
-                     <div key={item.name}>
-                       {item.subItems ? (
-                         <button
-                           onClick={() => toggleExpanded(item.name)}
-                           className={`group flex items-center w-full px-2 py-2 text-base font-medium rounded-md ${
-                             isActive(item.href)
-                               ? 'bg-teal text-white'
-                               : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                           }`}
-                         >
-                           <div className="mr-4 flex-shrink-0 h-6 w-6">
-                             {renderIcon(item.icon)}
-                           </div>
-                           {item.name}
-                           <svg
-                             xmlns="http://www.w3.org/2000/svg"
-                             className={`ml-auto h-5 w-5 transition-transform ${expandedItems.has(item.name) ? 'rotate-180' : ''}`}
-                             viewBox="0 0 20 20"
-                             fill="currentColor"
-                           >
-                             <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                           </svg>
-                         </button>
-                       ) : (
-                         <Link
-                           to={item.href}
-                           className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${
-                             isActive(item.href)
-                               ? 'bg-teal text-white'
-                               : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                           }`}
-                         >
-                           <div className="mr-4 flex-shrink-0 h-6 w-6">
-                             {renderIcon(item.icon)}
-                           </div>
-                           {item.name}
-                         </Link>
-                       )}
+                  {navigation.map((item) => (
+                    <div key={item.name}>
+                      {item.subItems ? (
+                        <button
+                          onClick={() => toggleExpanded(item.name)}
+                          className={`group flex items-center w-full px-2 py-2 text-base font-medium rounded-md ${isActive(item.href)
+                              ? 'bg-teal text-white'
+                              : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                            }`}
+                        >
+                          <div className="mr-4 flex-shrink-0 h-6 w-6">
+                            {renderIcon(item.icon)}
+                          </div>
+                          {item.name}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className={`ml-auto h-5 w-5 transition-transform ${expandedItems.has(item.name) ? 'rotate-180' : ''}`}
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        </button>
+                      ) : (
+                        <Link
+                          to={item.href}
+                          className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${isActive(item.href)
+                              ? 'bg-teal text-white'
+                              : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                            }`}
+                        >
+                          <div className="mr-4 flex-shrink-0 h-6 w-6">
+                            {renderIcon(item.icon)}
+                          </div>
+                          {item.name}
+                        </Link>
+                      )}
 
-                       {item.subItems && expandedItems.has(item.name) && (
-                         <div className="ml-8 mt-1 space-y-1">
-                           {item.subItems.map((subItem) => (
-                             <Link
-                               key={subItem.name}
-                               to={subItem.href}
-                               className={`group flex items-center px-2 py-1 text-sm font-medium rounded-md ${
-                                 location.pathname === subItem.href
-                                   ? 'bg-gray-700 text-white'
-                                   : 'text-gray-400 hover:bg-gray-700 hover:text-white'
-                               }`}
-                             >
-                               {subItem.name}
-                             </Link>
-                           ))}
-                         </div>
-                       )}
-                     </div>
-                   ))}
+                      {item.subItems && expandedItems.has(item.name) && (
+                        <div className="ml-8 mt-1 space-y-1">
+                          {item.subItems.map((subItem) => (
+                            <Link
+                              key={subItem.name}
+                              to={subItem.href}
+                              className={`group flex items-center px-2 py-1 text-sm font-medium rounded-md ${location.pathname === subItem.href
+                                  ? 'bg-gray-700 text-white'
+                                  : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                                }`}
+                            >
+                              {subItem.name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </nav>
               </div>
 
@@ -320,65 +319,62 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
                 </Link>
               </div>
               <nav className="mt-5 flex-1 px-2 space-y-1">
-                 {navigation.map((item) => (
-                   <div key={item.name}>
-                     {item.subItems ? (
-                       <button
-                         onClick={() => toggleExpanded(item.name)}
-                         className={`group flex items-center w-full px-2 py-2 text-sm font-medium rounded-md ${
-                           isActive(item.href)
-                             ? 'bg-teal text-white'
-                             : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                         }`}
-                       >
-                         <div className="mr-3 flex-shrink-0 h-6 w-6">
-                           {renderIcon(item.icon)}
-                         </div>
-                         {item.name}
-                         <svg
-                           xmlns="http://www.w3.org/2000/svg"
-                           className={`ml-auto h-4 w-4 transition-transform ${expandedItems.has(item.name) ? 'rotate-180' : ''}`}
-                           viewBox="0 0 20 20"
-                           fill="currentColor"
-                         >
-                           <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                         </svg>
-                       </button>
-                     ) : (
-                       <Link
-                         to={item.href}
-                         className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                           isActive(item.href)
-                             ? 'bg-teal text-white'
-                             : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                         }`}
-                       >
-                         <div className="mr-3 flex-shrink-0 h-6 w-6">
-                           {renderIcon(item.icon)}
-                         </div>
-                         {item.name}
-                       </Link>
-                     )}
+                {navigation.map((item) => (
+                  <div key={item.name}>
+                    {item.subItems ? (
+                      <button
+                        onClick={() => toggleExpanded(item.name)}
+                        className={`group flex items-center w-full px-2 py-2 text-sm font-medium rounded-md ${isActive(item.href)
+                            ? 'bg-teal text-white'
+                            : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                          }`}
+                      >
+                        <div className="mr-3 flex-shrink-0 h-6 w-6">
+                          {renderIcon(item.icon)}
+                        </div>
+                        {item.name}
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className={`ml-auto h-4 w-4 transition-transform ${expandedItems.has(item.name) ? 'rotate-180' : ''}`}
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    ) : (
+                      <Link
+                        to={item.href}
+                        className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${isActive(item.href)
+                            ? 'bg-teal text-white'
+                            : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                          }`}
+                      >
+                        <div className="mr-3 flex-shrink-0 h-6 w-6">
+                          {renderIcon(item.icon)}
+                        </div>
+                        {item.name}
+                      </Link>
+                    )}
 
-                     {item.subItems && expandedItems.has(item.name) && (
-                       <div className="ml-7 mt-1 space-y-1">
-                         {item.subItems.map((subItem) => (
-                           <Link
-                             key={subItem.name}
-                             to={subItem.href}
-                             className={`group flex items-center px-2 py-1 text-xs font-medium rounded-md ${
-                               location.pathname === subItem.href
-                                 ? 'bg-gray-700 text-white'
-                                 : 'text-gray-400 hover:bg-gray-700 hover:text-white'
-                             }`}
-                           >
-                             {subItem.name}
-                           </Link>
-                         ))}
-                       </div>
-                     )}
-                   </div>
-                 ))}
+                    {item.subItems && expandedItems.has(item.name) && (
+                      <div className="ml-7 mt-1 space-y-1">
+                        {item.subItems.map((subItem) => (
+                          <Link
+                            key={subItem.name}
+                            to={subItem.href}
+                            className={`group flex items-center px-2 py-1 text-xs font-medium rounded-md ${location.pathname === subItem.href
+                                ? 'bg-gray-700 text-white'
+                                : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                              }`}
+                          >
+                            {subItem.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </nav>
             </div>
             <div className="flex-shrink-0 flex border-t border-gray-700 p-4">

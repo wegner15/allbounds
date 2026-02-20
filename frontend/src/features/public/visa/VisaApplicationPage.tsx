@@ -12,14 +12,26 @@ const VisaApplicationPage: React.FC = () => {
                 <meta name="description" content="Get expert assistance with your visa application. We offer a 97% approval rate for tourist, business, student, and work visas." />
             </Helmet>
 
-            <div className="min-h-screen bg-gray-50 pt-24 pb-16">
+            <div className="min-h-screen bg-gray-50 pb-16">
                 {/* Hero Section */}
-                <div className="bg-charcoal text-white py-16 md:py-24 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-primary/10"></div>
-                    <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl">
-                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-playfair font-bold mb-6">Expert Visa Assistance</h1>
-                        <p className="text-lg md:text-xl text-gray-300">
-                            Simplify your travel preparations. Our dedicated visa experts will guide you through the process, ensuring your application is flawless and submitted on time.
+                <div className="relative h-[400px] md:h-[500px] bg-charcoal overflow-hidden flex items-center justify-center">
+                    <img
+                        src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80"
+                        alt="Passport and Visa"
+                        className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/60 to-transparent"></div>
+
+                    <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl mt-10">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white mb-6">
+                            <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                            <span className="text-sm font-medium tracking-wide uppercase">Fast & Reliable Service</span>
+                        </div>
+                        <h1 className="text-4xl md:text-5xl lg:text-7xl font-playfair font-bold mb-6 text-white drop-shadow-lg">
+                            Expert Visa Assistance
+                        </h1>
+                        <p className="text-lg md:text-2xl text-gray-200 font-lato max-w-3xl mx-auto drop-shadow-md">
+                            Simplify your travel preparations. Our dedicated experts guide you through the process, ensuring a flawless application.
                         </p>
                     </div>
                 </div>

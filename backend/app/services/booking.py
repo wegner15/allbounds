@@ -62,22 +62,29 @@ class BookingService:
         try:
             booking_type_display = booking.booking_type.replace('_', ' ').title()
             subject = f"New {booking_type_display} Request - {booking.contact_name}"
-            html_content = f"""
-            <h2>New Booking Request</h2>
-            <p><strong>Type:</strong> {booking_type_display}</p>
-            <p><strong>Item:</strong> {booking.entity_slug}</p>
-            <p><strong>Name:</strong> {booking.contact_name}</p>
-            <p><strong>Email:</strong> {booking.contact_email}</p>
-            <p><strong>Phone:</strong> {booking.contact_phone}</p>
-            <p><strong>Country:</strong> {booking.country_of_origin}</p>
-            <p><strong>Adults:</strong> {booking.number_of_adults} | <strong>Children:</strong> {booking.number_of_children}</p>
-            <p><strong>Special Requests:</strong> {booking.special_requests or 'None'}</p>
-            <p>Log in to the <a href="https://allboundtravel.com/admin">Admin Dashboard</a> to view details.</p>
+            content_html = f"""
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Type:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking_type_display}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Item:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.entity_slug}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Client Name:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.contact_name}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Email:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.contact_email}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Phone:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.contact_phone}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Country:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.country_of_origin}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Passengers:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.number_of_adults} Adults, {booking.number_of_children} Children</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Special Requests:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.special_requests or 'None'}</td></tr>
+            </table>
             """
+            
+            final_html = email_service.generate_html_email(
+                title="New Booking Request",
+                content_html=content_html,
+                call_to_action={"url": "https://allboundtravel.com/admin/bookings/packages", "text": "View in Dashboard"}
+            )
+            
             email_service.send_email(
-                to_email="info@sh.co.ke",
+                to_email="bookings@allboundvacations.com",
                 subject=subject,
-                html_content=html_content
+                html_content=final_html
             )
         except Exception as e:
             print(f"Failed to send booking notification email: {e}")
@@ -144,20 +151,30 @@ class InquiryService:
         # Send email notification to admin
         try:
             subject = f"New General Inquiry - {inquiry.subject}"
-            html_content = f"""
-            <h2>New Website Inquiry</h2>
-            <p><strong>Name:</strong> {inquiry.name}</p>
-            <p><strong>Email:</strong> {inquiry.email}</p>
-            <p><strong>Phone:</strong> {inquiry.phone or 'Not provided'}</p>
-            <p><strong>Country:</strong> {inquiry.country_of_origin or 'Not provided'}</p>
-            <p><strong>Subject:</strong> {inquiry.subject}</p>
-            <p><strong>Message:</strong><br>{inquiry.message}</p>
-            <p>Log in to the <a href="https://admin.allboundtravel.com">Admin Dashboard</a> to reply.</p>
+            content_html = f"""
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee; width: 30%;"><strong>Name:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{inquiry.name}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Email:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{inquiry.email}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Phone:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{inquiry.phone or 'Not provided'}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Country:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{inquiry.country_of_origin or 'Not provided'}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Subject:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{inquiry.subject}</td></tr>
+            </table>
+            <div style="background-color: #f9fafb; padding: 15px; border-radius: 6px; border-left: 4px solid #008080; margin-top: 20px;">
+                <h3 style="margin-top: 0;font-size: 14px;color: #4b5563;">Message:</h3>
+                <p style="white-space: pre-wrap; margin-bottom: 0;">{inquiry.message}</p>
+            </div>
             """
+            
+            final_html = email_service.generate_html_email(
+                title="New Website Inquiry",
+                content_html=content_html,
+                call_to_action={"url": "https://allboundtravel.com/admin/bookings/inquiries", "text": "View Inquiry"}
+            )
+            
             email_service.send_email(
-                to_email="info@allboundtravel.com",
+                to_email="bookings@allboundvacations.com",
                 subject=subject,
-                html_content=html_content
+                html_content=final_html
             )
         except Exception as e:
             print(f"Failed to send inquiry notification email: {e}")

@@ -1,4 +1,5 @@
 import requests
+from datetime import datetime
 from app.core.config import settings
 from app.db.database import SessionLocal
 from app.models.email_log import EmailLog
@@ -58,6 +59,50 @@ class EmailService:
             print(f"Failed to save email log: {e}")
         finally:
             db.close()
+
+    def generate_html_email(self, title: str, content_html: str, call_to_action: dict = None) -> str:
+        """
+        Generates a professionally styled HTML email template.
+        call_to_action should be a dict with 'url' and 'text'.
+        """
+        cta_html = ""
+        if call_to_action:
+            cta_html = f"""
+            <div style="text-align: center; margin-top: 35px; margin-bottom: 20px;">
+                <a href="{call_to_action['url']}" style="display: inline-block; padding: 14px 28px; background-color: #008080; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">{call_to_action['text']}</a>
+            </div>
+            """
+            
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <meta charset="utf-8">
+        </head>
+        <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; margin: 0; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                <div style="background-color: #008080; padding: 25px 20px; text-align: center;">
+                    <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: 0.5px;">Allbound Vacations</h1>
+                </div>
+                
+                <div style="padding: 35px 30px; color: #374151; line-height: 1.6; font-size: 15px;">
+                    <h2 style="color: #111827; font-size: 22px; margin-top: 0; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #f3f4f6;">
+                        {title}
+                    </h2>
+                    
+                    {content_html}
+                    
+                    {cta_html}
+                </div>
+                
+                <div style="background-color: #f9fafb; padding: 20px; text-align: center; font-size: 13px; color: #6b7280; border-top: 1px solid #e5e7eb;">
+                    &copy; {(datetime.now().year if 'datetime' in globals() else 2026)} Allbound Vacations. All rights reserved.<br>
+                    This is an automated notification, please do not reply directly to this email.
+                </div>
+            </div>
+        </body>
+        </html>
+        """
 
 email_service = EmailService()
 

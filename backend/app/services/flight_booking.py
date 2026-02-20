@@ -79,26 +79,38 @@ class FlightBookingService:
         try:
             # Notify Admins
             admin_subject = f"New Flight Request | {booking.trip_type.name} | {booking.contact_name}"
-            admin_content = f"""
-            <h2>New Flight Request Received</h2>
-            <p><strong>Contact:</strong> {booking.contact_name} ({booking.contact_email} / {booking.contact_phone})</p>
-            <p><strong>Route:</strong> {booking.departure_city} to {booking.destination_city}</p>
-            <p><strong>Dates:</strong> {booking.departure_date} to {booking.return_date or 'N/A'}</p>
-            <p><strong>Purpose:</strong> {booking.purpose.value}</p>
-            <p><strong>Passengers:</strong> {booking.adults} Adults, {booking.children} Ch, {booking.infants} Inf</p>
-            <p><strong>Services:</strong> {booking.add_on_services}</p>
+            admin_content_html = f"""
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee; width: 30%;"><strong>Contact Name:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.contact_name}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Email:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.contact_email}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Phone:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.contact_phone}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Route:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.departure_city} to {booking.destination_city}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Dates:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.departure_date} to {booking.return_date or 'N/A'}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Purpose:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.purpose.value}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Passengers:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.adults} Adults, {booking.children} Ch, {booking.infants} Inf</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Services:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.add_on_services}</td></tr>
+            </table>
             """
-            email_service.send_email("info@allboundtravel.com", admin_subject, admin_content)
+            
+            final_admin_html = email_service.generate_html_email(
+                title="New Flight Request Received",
+                content_html=admin_content_html,
+                call_to_action={"url": "https://allboundtravel.com/admin/bookings/flights", "text": "View in Dashboard"}
+            )
+            email_service.send_email("bookings@allboundvacations.com", admin_subject, final_admin_html)
 
             # Confirm with Customer
             cust_subject = "Flight Request Received | Allbound Vacations"
-            cust_content = f"""
-            <h2>Thank You, {booking.contact_name}!</h2>
-            <p>We have successfully received your flight request for {booking.destination_city}.</p>
+            cust_content_html = f"""
+            <p style="font-size: 16px;">We have successfully received your flight request for <strong>{booking.destination_city}</strong>.</p>
             <p>Our flight specialists are currently reviewing your details. 
-            In the meantime, feel free to contact us via info@allboundtravel.com if you have any questions.</p>
+            In the meantime, feel free to contact us via <a href="mailto:bookings@allboundvacations.com" style="color: #008080;">bookings@allboundvacations.com</a> if you have any questions.</p>
             """
-            email_service.send_email(booking.contact_email, cust_subject, cust_content)
+            final_cust_html = email_service.generate_html_email(
+                title=f"Thank You, {booking.contact_name}!",
+                content_html=cust_content_html
+            )
+            email_service.send_email(booking.contact_email, cust_subject, final_cust_html)
         except Exception as e:
             print(f"Failed to send flight emails: {e}")
 

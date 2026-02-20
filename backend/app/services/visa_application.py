@@ -62,55 +62,71 @@ class VisaApplicationService:
 
     def _send_admin_notification(self, application: VisaApplication):
         subject = f"New Visa Application - {application.destination_country} ({application.visa_type.value.capitalize()})"
-        html_content = f"""
-        <h2>New Visa Application Received</h2>
-        <p><strong>Applicant:</strong> {application.full_name}</p>
-        <p><strong>Destination:</strong> {application.destination_country}</p>
-        <p><strong>Nationality:</strong> {application.nationality}</p>
-        <p><strong>Travel Dates:</strong> {application.travel_from_date} to {application.travel_to_date}</p>
-        <p><strong>Email:</strong> {application.email}</p>
-        <p><strong>Phone:</strong> {application.phone}</p>
-        <p><a href="https://admin.allboundtravel.com/visas/{application.id}">View Full Application in Admin Panel</a></p>
+        content_html = f"""
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee; width: 30%;"><strong>Applicant:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{application.full_name}</td></tr>
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Destination:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{application.destination_country}</td></tr>
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Nationality:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{application.nationality}</td></tr>
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Travel Dates:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{application.travel_from_date} to {application.travel_to_date}</td></tr>
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Email:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{application.email}</td></tr>
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Phone:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{application.phone}</td></tr>
+        </table>
         """
-        # Sending to the default info email (update as needed)
+        
+        final_html = email_service.generate_html_email(
+            title="New Visa Application Received",
+            content_html=content_html,
+            call_to_action={"url": f"https://allboundtravel.com/admin/bookings/visa-applications", "text": "View in Dashboard"}
+        )
+
         email_service.send_email(
-            to_email="info@allboundtravel.com",
+            to_email="bookings@allboundvacations.com",
             subject=subject,
-            html_content=html_content
+            html_content=final_html
         )
         
     def _send_customer_confirmation(self, application: VisaApplication):
         subject = f"Your Visa Application to {application.destination_country} has been received"
-        html_content = f"""
-        <h2>Visa Application Received</h2>
-        <p>Dear {application.full_name},</p>
-        <p>Thank you for submitting your visa application for {application.destination_country} with Allbound Vacations.</p>
+        content_html = f"""
+        <p style="font-size: 16px;">Dear {application.full_name},</p>
+        <p>Thank you for submitting your visa application for <strong>{application.destination_country}</strong> with Allbound Vacations.</p>
         <p>Our visa experts are reviewing your details and will contact you shortly regarding the next steps.</p>
-        <br>
-        <p>Best regards,<br>The Allbound Vacations Team</p>
         """
-        email_service.send_email(
-            to_email=application.email,
-            subject=subject,
-            html_content=html_content
+        
+        final_html = email_service.generate_html_email(
+            title="Visa Application Received",
+            content_html=content_html
         )
-
-    def _send_status_update(self, application: VisaApplication):
-        subject = f"Update on your Visa Application to {application.destination_country}"
-        html_content = f"""
-        <h2>Visa Application Status Update</h2>
-        <p>Dear {application.full_name},</p>
-        <p>The status of your visa application for {application.destination_country} has been updated to: <strong>{application.status.value.upper()}</strong></p>
-        """
-        if application.admin_notes:
-            html_content += f"<p><strong>Message from our team:</strong> {application.admin_notes}</p>"
-            
-        html_content += "<br><p>Best regards,<br>The Allbound Vacations Team</p>"
         
         email_service.send_email(
             to_email=application.email,
             subject=subject,
-            html_content=html_content
+            html_content=final_html
+        )
+
+    def _send_status_update(self, application: VisaApplication):
+        subject = f"Update on your Visa Application to {application.destination_country}"
+        content_html = f"""
+        <p style="font-size: 16px;">Dear {application.full_name},</p>
+        <p>The status of your visa application for {application.destination_country} has been updated to: <strong style="color: #008080;">{application.status.value.upper()}</strong></p>
+        """
+        if application.admin_notes:
+            content_html += f"""
+            <div style="background-color: #f9fafb; padding: 15px; border-radius: 6px; border-left: 4px solid #008080; margin-top: 20px;">
+                <h3 style="margin-top: 0;font-size: 14px;color: #4b5563;">Message from our team:</h3>
+                <p style="white-space: pre-wrap; margin-bottom: 0;">{application.admin_notes}</p>
+            </div>
+            """
+            
+        final_html = email_service.generate_html_email(
+            title="Visa Application Status Update",
+            content_html=content_html
+        )
+        
+        email_service.send_email(
+            to_email=application.email,
+            subject=subject,
+            html_content=final_html
         )
 
 visa_application_service = VisaApplicationService()

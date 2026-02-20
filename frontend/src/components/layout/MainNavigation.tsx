@@ -47,6 +47,7 @@ const MainNavigation: React.FC = () => {
     { label: 'GROUP TRIPS', path: '/group-trips' },
     { label: 'BLOG', path: '/blog' },
     { label: 'VISA APPLICATION', path: '/visa-application' },
+    { label: 'FLIGHT BOOKING', path: '/flights' },
   ];
 
   // Fetch regions with countries from API
@@ -296,9 +297,6 @@ const MainNavigation: React.FC = () => {
                   )}
                 </div>
               ))}
-              <Link to="/reviews" className="inline-block py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-3 xl:px-4 border-b-2 border-transparent hover:border-primary">
-                REVIEWS
-              </Link>
               <Link to="/about-us" className="inline-block py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-3 xl:px-4 border-b-2 border-transparent hover:border-primary">
                 ABOUT US
               </Link>

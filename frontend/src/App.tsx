@@ -197,6 +197,8 @@ const MainLayout = () => {
       links: [
         { label: 'About Us', path: '/about-us' },
         { label: 'Contact Us', path: '/contact-us' },
+        { label: 'Visa Application', path: '/visa-application' },
+        { label: 'Flight Booking', path: '/flights' },
         { label: 'Careers', path: '/careers' },
         { label: 'Terms & Conditions', path: '/terms' },
         { label: 'Privacy Policy', path: '/privacy' },

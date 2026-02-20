@@ -38,7 +38,7 @@ export const useHolidayTypeBySlug = (slug: string) => {
 // Hook for creating a new holiday type (admin only)
 export const useCreateHolidayType = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (holidayType: Omit<HolidayType, 'id' | 'created_at' | 'updated_at'>) => {
       return apiClient.post<HolidayType>(endpoints.holidayTypes.list(), holidayType);
@@ -53,7 +53,7 @@ export const useCreateHolidayType = () => {
 // Hook for updating a holiday type (admin only)
 export const useUpdateHolidayType = (id: number) => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (holidayType: Partial<HolidayType>) => {
       return apiClient.put<HolidayType>(endpoints.holidayTypes.detail(id), holidayType);
@@ -70,10 +70,25 @@ export const useUpdateHolidayType = (id: number) => {
 // Hook for deleting a holiday type (admin only)
 export const useDeleteHolidayType = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (id: number) => {
       return apiClient.delete<HolidayType>(endpoints.holidayTypes.detail(id));
+    },
+    onSuccess: () => {
+      // Invalidate the holiday types list query to refetch the data
+      queryClient.invalidateQueries({ queryKey: ['holidayTypes'] });
+    },
+  });
+};
+
+// Hook for reordering holiday types (admin only)
+export const useReorderHolidayTypes = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (orders: { id: number, order_index: number }[]) => {
+      return apiClient.patch('/holiday-types/reorder', { orders });
     },
     onSuccess: () => {
       // Invalidate the holiday types list query to refetch the data

@@ -18,6 +18,10 @@ class HolidayTypeService:
         query = db.query(HolidayType)
         if active_only:
             query = query.filter(HolidayType.is_active == True)
+        
+        # Sort by order_index, then name
+        query = query.order_by(HolidayType.order_index.asc(), HolidayType.name.asc())
+        
         return query.offset(skip).limit(limit).all()
 
     def get_holiday_type(
@@ -47,7 +51,8 @@ class HolidayTypeService:
         description: Optional[str] = None,
         slug: Optional[str] = None,
         image_id: Optional[str] = None,
-        icon: Optional[str] = None
+        icon: Optional[str] = None,
+        order_index: int = 0
     ) -> HolidayType:
         """
         Create a new holiday type.
@@ -60,7 +65,8 @@ class HolidayTypeService:
             description=description,
             slug=slug,
             image_id=image_id,
-            icon=icon
+            icon=icon,
+            order_index=order_index
         )
         db.add(db_holiday_type)
         db.commit()
@@ -75,7 +81,8 @@ class HolidayTypeService:
         description: Optional[str] = None,
         is_active: Optional[bool] = None,
         image_id: Optional[str] = None,
-        icon: Optional[str] = None
+        icon: Optional[str] = None,
+        order_index: Optional[int] = None
     ) -> Optional[HolidayType]:
         """
         Update a holiday type.
@@ -94,6 +101,8 @@ class HolidayTypeService:
             db_holiday_type.image_id = image_id
         if icon is not None:
             db_holiday_type.icon = icon
+        if order_index is not None:
+            db_holiday_type.order_index = order_index
 
         db.commit()
         db.refresh(db_holiday_type)
@@ -115,5 +124,26 @@ class HolidayTypeService:
         db.commit()
         db.refresh(db_holiday_type)
         return db_holiday_type
+
+    def reorder_holiday_types(
+        self,
+        db: Session,
+        orders: List[dict]
+    ) -> bool:
+        """
+        Update order_index for multiple holiday types in bulk.
+        Expects a list of dictionaries like: [{"id": 1, "order_index": 0}, ...]
+        """
+        try:
+            for item in orders:
+                db_item = db.query(HolidayType).filter(HolidayType.id == item["id"]).first()
+                if db_item:
+                    db_item.order_index = item["order_index"]
+            db.commit()
+            return True
+        except Exception as e:
+            db.rollback()
+            print(f"Error reordering holiday types: {e}")
+            return False
 
 holiday_type_service = HolidayTypeService()

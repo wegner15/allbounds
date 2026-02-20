@@ -29,6 +29,7 @@ const holidayTypeSchema = z.object({
     .max(10, 'Icon cannot exceed 10 characters')
     .optional(),
   is_active: z.boolean(),
+  order_index: z.number(),
 });
 
 type HolidayTypeFormData = z.infer<typeof holidayTypeSchema>;
@@ -40,13 +41,13 @@ interface HolidayTypeFormProps {
 
 const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEdit = false }) => {
   const navigate = useNavigate();
-  
+
   const createHolidayTypeMutation = useCreateHolidayType();
   const updateHolidayTypeMutation = useUpdateHolidayType(holidayTypeData?.id);
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
-  
+
   // Initialize form with default values or existing holiday type data
   const {
     register,
@@ -58,23 +59,25 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
     resolver: zodResolver(holidayTypeSchema),
     defaultValues: isEdit && holidayTypeData
       ? {
-          name: holidayTypeData.name,
-          slug: holidayTypeData.slug,
-          description: holidayTypeData.description,
-          image_id: holidayTypeData.image_id || '',
-          icon: holidayTypeData.icon || '',
-          is_active: holidayTypeData.is_active,
-        }
+        name: holidayTypeData.name,
+        slug: holidayTypeData.slug,
+        description: holidayTypeData.description,
+        image_id: holidayTypeData.image_id || '',
+        icon: holidayTypeData.icon || '',
+        is_active: holidayTypeData.is_active,
+        order_index: holidayTypeData.order_index || 0,
+      }
       : {
-          name: '',
-          slug: '',
-          description: '',
-          image_id: '',
-          icon: '',
-          is_active: true,
-        },
+        name: '',
+        slug: '',
+        description: '',
+        image_id: '',
+        icon: '',
+        is_active: true,
+        order_index: 0,
+      },
   });
-  
+
   // Auto-generate slug from name
   const name = watch('name');
   useEffect(() => {
@@ -86,18 +89,18 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
       setValue('slug', generatedSlug);
     }
   }, [name, setValue, isEdit]);
-  
+
   const onSubmit = async (formData: HolidayTypeFormData) => {
     setIsSubmitting(true);
     setServerError(null);
-    
+
     try {
       console.log('Submitting holiday type with data:', formData);
-      
+
       if (isEdit && holidayTypeData?.id) {
         // Update the holiday type
         await updateHolidayTypeMutation.mutateAsync(formData);
-        
+
         // Make a separate API call to set the cover image
         if (formData.image_id) {
           try {
@@ -113,7 +116,7 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
       } else {
         // Create a new holiday type
         const newHolidayType = await createHolidayTypeMutation.mutateAsync(formData);
-        
+
         // If we have a cover image and the holiday type was created successfully, set the cover image
         if (formData.image_id && newHolidayType?.id) {
           try {
@@ -127,7 +130,7 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
           }
         }
       }
-      
+
       navigate('/admin/holiday-types');
     } catch (error) {
       console.error('Error saving holiday type:', error);
@@ -136,13 +139,13 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
       setIsSubmitting(false);
     }
   };
-  
+
   // Type-safe form submission handler
   const handleFormSubmit = handleSubmit(onSubmit);
-  
+
   return (
-    <form 
-      onSubmit={handleFormSubmit} 
+    <form
+      onSubmit={handleFormSubmit}
       className="space-y-6"
     >
       {serverError && (
@@ -150,7 +153,7 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
           {serverError}
         </div>
       )}
-      
+
       <div className="bg-white shadow rounded-lg overflow-hidden">
         <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
           <h3 className="text-lg font-medium text-gray-900">
@@ -177,8 +180,8 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
                 id="name"
                 placeholder="e.g. Beach Holiday"
                 className={`block w-full px-4 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200 
-                  ${errors.name 
-                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500' 
+                  ${errors.name
+                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
                     : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
                 `}
                 {...register('name')}
@@ -197,7 +200,7 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
               <p className="mt-2 text-xs text-gray-500">Enter a clear, descriptive name for this holiday type</p>
             )}
           </div>
-          
+
           {/* Slug */}
           <div className="sm:col-span-4">
             <div className="flex justify-between items-center">
@@ -217,8 +220,8 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
                 id="slug"
                 placeholder="beach-holiday"
                 className={`block w-full pl-32 pr-10 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200 
-                  ${errors.slug 
-                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500' 
+                  ${errors.slug
+                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
                     : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
                 `}
                 {...register('slug')}
@@ -239,7 +242,7 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
               </p>
             )}
           </div>
-          
+
           {/* Description */}
           <div className="sm:col-span-6">
             <div className="flex justify-between items-center">
@@ -256,8 +259,8 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
                 rows={6}
                 placeholder="Provide a detailed description of this holiday type..."
                 className={`block w-full px-4 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200
-                  ${errors.description 
-                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500' 
+                  ${errors.description
+                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
                     : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
                 `}
                 {...register('description')}
@@ -269,22 +272,22 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
                 Describe the holiday type in detail. Include key features, experiences, and what makes it unique.
               </p>
             </div>
-           </div>
+          </div>
 
-           {/* Icon */}
-           <div className="sm:col-span-6">
-             <IconSelector
-               selectedIcon={watch('icon')}
-               onIconSelect={(icon) => setValue('icon', icon)}
-               label="Holiday Type Icon (Optional)"
-               helperText="Choose an icon to visually represent this holiday type"
-             />
-             {errors.icon && (
-               <p className="mt-4 text-sm text-red-600 font-medium">{errors.icon.message}</p>
-             )}
-           </div>
+          {/* Icon */}
+          <div className="sm:col-span-6">
+            <IconSelector
+              selectedIcon={watch('icon')}
+              onIconSelect={(icon) => setValue('icon', icon)}
+              label="Holiday Type Icon (Optional)"
+              helperText="Choose an icon to visually represent this holiday type"
+            />
+            {errors.icon && (
+              <p className="mt-4 text-sm text-red-600 font-medium">{errors.icon.message}</p>
+            )}
+          </div>
 
-           {/* Image Upload */}
+          {/* Image Upload */}
           <div className="sm:col-span-6">
             <div className="flex justify-between items-center">
               <label className="block text-sm font-semibold text-gray-800">
@@ -301,27 +304,27 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
                 initialImageId={watch('image_id')}
                 onImageSelected={(imageId) => {
                   console.log('Holiday type image selected:', imageId);
-                  
+
                   // Update the form value
                   setValue('image_id', imageId);
-                  
+
                   // If we're editing an existing holiday type, update the cover image immediately
                   if (isEdit && holidayTypeData?.id && imageId) {
                     console.log('Immediately updating cover image to:', imageId);
                     apiClient.post(`/api/v1/holiday-types/${holidayTypeData.id}/cover-image`, {
                       image_id: imageId
                     })
-                    .then(response => {
-                      console.log('Cover image updated successfully:', response);
-                      
-                      // Force refresh the form data
-                      if (holidayTypeData) {
-                        holidayTypeData.image_id = imageId;
-                      }
-                    })
-                    .catch(error => {
-                      console.error('Error updating cover image:', error);
-                    });
+                      .then(response => {
+                        console.log('Cover image updated successfully:', response);
+
+                        // Force refresh the form data
+                        if (holidayTypeData) {
+                          holidayTypeData.image_id = imageId;
+                        }
+                      })
+                      .catch(error => {
+                        console.error('Error updating cover image:', error);
+                      });
                   } else if (!isEdit && imageId) {
                     // For new holiday types, just store the image ID to be used when creating the holiday type
                     console.log('Storing image ID for new holiday type:', imageId);
@@ -344,7 +347,7 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
               )}
             </div>
           </div>
-          
+
           {/* Status */}
           <div className="sm:col-span-6">
             <div className="flex justify-between items-center">
@@ -394,7 +397,7 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
           </div>
         </div>
       </div>
-      
+
       {/* Form actions */}
       <div className="sticky bottom-0 bg-white shadow-md px-8 py-5 border-t border-gray-200 z-10">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
@@ -408,7 +411,7 @@ const HolidayTypeForm: React.FC<HolidayTypeFormProps> = ({ holidayTypeData, isEd
             </svg>
             Back to Holiday Types
           </button>
-          
+
           <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-500">
               {isSubmitting ? 'Saving changes...' : 'Ready to save'}

@@ -15,6 +15,13 @@ from app.utils.slug import create_slug
 class SetCoverImageRequest(BaseModel):
     image_id: str
 
+class ReorderItem(BaseModel):
+    id: int
+    order_index: int
+
+class ReorderRequest(BaseModel):
+    orders: List[ReorderItem]
+
 router = APIRouter()
 
 @router.get("/", response_model=List[HolidayTypeResponse])
@@ -86,7 +93,8 @@ def create_holiday_type(
         description=holiday_type_in.description,
         slug=slug,
         image_id=holiday_type_in.image_id,
-        icon=holiday_type_in.icon
+        icon=holiday_type_in.icon,
+        order_index=holiday_type_in.order_index or 0
     )
     return holiday_type
 
@@ -111,7 +119,8 @@ def update_holiday_type(
         description=holiday_type_in.description,
         is_active=holiday_type_in.is_active,
         image_id=holiday_type_in.image_id,
-        icon=holiday_type_in.icon
+        icon=holiday_type_in.icon,
+        order_index=holiday_type_in.order_index
     )
     return holiday_type
 
@@ -164,3 +173,24 @@ def set_holiday_type_cover_image(
     
     logger.info(f"Cover image set successfully for holiday type {holiday_type_id}")
     return updated_holiday_type
+
+
+@router.patch("/reorder", status_code=status.HTTP_200_OK)
+def reorder_holiday_types(
+    request: ReorderRequest,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_active_superuser)
+):
+    """
+    Reorder holiday types in bulk.
+    """
+    success = holiday_type_service.reorder_holiday_types(
+        db=db,
+        orders=[item.dict() for item in request.orders]
+    )
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to reorder holiday types"
+        )
+    return {"message": "Holiday types reordered successfully"}

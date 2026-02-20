@@ -299,6 +299,7 @@ export interface HolidayType extends BaseModel {
   image_url?: string;
   image_id?: string;
   icon?: string;
+  order_index: number;
   is_active: boolean;
   is_featured?: boolean;
 }

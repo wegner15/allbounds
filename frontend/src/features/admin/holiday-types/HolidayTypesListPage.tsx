@@ -1,13 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useDeleteHolidayType, useHolidayTypes } from '../../../lib/hooks/useHolidayTypes';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import type { DropResult } from '@hello-pangea/dnd';
+import { GripVertical, Save, RefreshCw } from 'lucide-react';
+import { useDeleteHolidayType, useHolidayTypes, useReorderHolidayTypes } from '../../../lib/hooks/useHolidayTypes';
 import CloudflareImage from '../../../components/ui/CloudflareImage';
+import type { HolidayType } from '../../../lib/types/api';
 
 const HolidayTypesListPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { data: holidayTypes, isLoading, error } = useHolidayTypes();
   const deleteHolidayType = useDeleteHolidayType();
+  const reorderHolidayTypes = useReorderHolidayTypes();
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+
+  // Local state for draggable items
+  const [orderedItems, setOrderedItems] = useState<HolidayType[]>([]);
+  const [hasOrderChanged, setHasOrderChanged] = useState(false);
+
+  // Sync with API data when it loads
+  useEffect(() => {
+    if (holidayTypes) {
+      setOrderedItems(holidayTypes);
+      setHasOrderChanged(false);
+    }
+  }, [holidayTypes]);
 
   const handleDelete = async (id: number) => {
     try {
@@ -18,12 +35,40 @@ const HolidayTypesListPage: React.FC = () => {
       alert('Failed to delete holiday type. Please try again.');
     }
   };
-  
+
+  const onDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+
+    const items = Array.from(orderedItems);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    setOrderedItems(items);
+    setHasOrderChanged(true);
+  };
+
+  const handleSaveOrder = async () => {
+    try {
+      const orders = orderedItems.map((item, index) => ({
+        id: item.id,
+        order_index: index,
+      }));
+      await reorderHolidayTypes.mutateAsync(orders);
+      setHasOrderChanged(false);
+    } catch (err) {
+      console.error('Failed to save order:', err);
+      alert('Failed to save order. Please try again.');
+    }
+  };
+
   // Filter holiday types based on search query
-  const filteredHolidayTypes = holidayTypes?.filter(type => 
+  const filteredHolidayTypes = orderedItems?.filter(type =>
     type.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     type.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Disable reordering if searching
+  const isReorderingEnabled = !searchQuery;
 
   return (
     <>
@@ -34,7 +79,21 @@ const HolidayTypesListPage: React.FC = () => {
             Manage holiday types for your travel offerings
           </p>
         </div>
-        <div className="mt-4 sm:mt-0">
+        <div className="mt-4 sm:mt-0 flex space-x-3">
+          {hasOrderChanged && (
+            <button
+              onClick={handleSaveOrder}
+              disabled={reorderHolidayTypes.isPending}
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              {reorderHolidayTypes.isPending ? (
+                <RefreshCw className="animate-spin -ml-1 mr-2 h-5 w-5" />
+              ) : (
+                <Save className="-ml-1 mr-2 h-5 w-5" />
+              )}
+              Save Order
+            </button>
+          )}
           <Link
             to="/admin/holiday-types/new"
             className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-teal hover:bg-teal-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal"
@@ -87,93 +146,124 @@ const HolidayTypesListPage: React.FC = () => {
           </div>
         ) : filteredHolidayTypes && filteredHolidayTypes.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Holiday Type
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Packages
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th scope="col" className="relative px-6 py-3">
-                    <span className="sr-only">Actions</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredHolidayTypes.map((holidayType) => (
-                  <tr key={holidayType.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 rounded-md overflow-hidden">
-                          {holidayType.image_id ? (
-                            <CloudflareImage
-                              imageId={holidayType.image_id}
-                              variant="thumbnail"
-                              alt={holidayType.name}
-                              className="h-10 w-10"
-                              objectFit="cover"
-                              placeholder="https://source.unsplash.com/random/100x100/?holiday"
-                            />
-                          ) : (
-                            <img
-                              className="h-10 w-10 object-cover"
-                              src="https://source.unsplash.com/random/100x100/?holiday"
-                              alt={holidayType.name}
-                            />
-                          )}
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{holidayType.name}</div>
-                          <div className="text-sm text-gray-500">{holidayType.slug}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {(holidayType as any).package_count || 0} packages
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        holidayType.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {holidayType.is_active ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end space-x-4">
-                        <Link
-                          to={`/admin/holiday-types/${holidayType.id}/edit`}
-                          className="text-teal hover:text-teal-dark"
-                        >
-                          Edit
-                        </Link>
-                        <Link
-                          to={`/holiday-types/${holidayType.slug}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gray-600 hover:text-gray-900"
-                        >
-                          View
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={() => setDeleteConfirmId(holidayType.id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
+            <DragDropContext onDragEnd={onDragEnd}>
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    {isReorderingEnabled && <th scope="col" className="w-10"></th>}
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Holiday Type
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Packages
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th scope="col" className="relative px-6 py-3">
+                      <span className="sr-only">Actions</span>
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <Droppable droppableId="holiday-types" isDropDisabled={!isReorderingEnabled}>
+                  {(provided) => (
+                    <tbody
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                      className="bg-white divide-y divide-gray-200"
+                    >
+                      {filteredHolidayTypes.map((holidayType, index) => (
+                        <Draggable
+                          key={holidayType.id}
+                          draggableId={holidayType.id.toString()}
+                          index={index}
+                          isDragDisabled={!isReorderingEnabled}
+                        >
+                          {(provided, snapshot) => (
+                            <tr
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className={snapshot.isDragging ? 'bg-gray-50' : ''}
+                            >
+                              {isReorderingEnabled && (
+                                <td className="pl-4">
+                                  <div {...provided.dragHandleProps} className="text-gray-400 hover:text-gray-600 cursor-grab">
+                                    <GripVertical className="h-5 w-5" />
+                                  </div>
+                                </td>
+                              )}
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  <div className="flex-shrink-0 h-10 w-10 rounded-md overflow-hidden">
+                                    {holidayType.image_id ? (
+                                      <CloudflareImage
+                                        imageId={holidayType.image_id}
+                                        variant="thumbnail"
+                                        alt={holidayType.name}
+                                        className="h-10 w-10"
+                                        objectFit="cover"
+                                        placeholder="https://source.unsplash.com/random/100x100/?holiday"
+                                      />
+                                    ) : (
+                                      <img
+                                        className="h-10 w-10 object-cover"
+                                        src="https://source.unsplash.com/random/100x100/?holiday"
+                                        alt={holidayType.name}
+                                      />
+                                    )}
+                                  </div>
+                                  <div className="ml-4">
+                                    <div className="text-sm font-medium text-gray-900">{holidayType.name}</div>
+                                    <div className="text-sm text-gray-500">{holidayType.slug}</div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-900">
+                                  {(holidayType as any).package_count || 0} packages
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${holidayType.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                                  }}`}>
+                                  {holidayType.is_active ? 'Active' : 'Inactive'}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div className="flex items-center justify-end space-x-4">
+                                  <Link
+                                    to={`/admin/holiday-types/${holidayType.id}/edit`}
+                                    className="text-teal hover:text-teal-dark"
+                                  >
+                                    Edit
+                                  </Link>
+                                  <Link
+                                    to={`/holiday-types/${holidayType.slug}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-gray-600 hover:text-gray-900"
+                                  >
+                                    View
+                                  </Link>
+                                  <button
+                                    type="button"
+                                    onClick={() => setDeleteConfirmId(holidayType.id)}
+                                    className="text-red-600 hover:text-red-800"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </tbody>
+                  )}
+                </Droppable>
+              </table>
+            </DragDropContext>
           </div>
         ) : (
           <div className="text-center py-12">

@@ -68,7 +68,7 @@ const ContactUsCard: React.FC<ContactUsCardProps> = ({ hideFeatures = false }) =
             {/* Social Media Card */}
             <div className="group h-full">
               <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-primary/30 overflow-hidden h-full flex flex-col">
-                <div className="p-6 bg-primary/5">
+                <div className="p-6 bg-primary/10">
                   <div className="flex items-center justify-center w-12 h-12 rounded-full mb-4 bg-white shadow-sm">
                     <Mail className="w-5 h-5 text-primary" />
                   </div>
@@ -141,7 +141,7 @@ const ContactUsCard: React.FC<ContactUsCardProps> = ({ hideFeatures = false }) =
                     <p className="text-gray-200 mb-6 text-lg font-lato">Join like-minded travelers on unforgettable adventures</p>
                     <a
                       href="/group-trips"
-                      className="inline-flex items-center px-6 py-3 text-charcoal rounded-lg font-bold shadow-lg transition-colors duration-200 bg-butter hover:bg-butter/90 font-lato"
+                      className="inline-flex items-center px-6 py-3 text-white rounded-lg font-bold shadow-lg transition-colors duration-200 bg-primary hover:bg-primary-dark font-lato"
                     >
                       Explore Experiences
                       <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -177,7 +177,7 @@ const ContactUsCard: React.FC<ContactUsCardProps> = ({ hideFeatures = false }) =
                     <p className="text-gray-200 mb-6 text-lg font-lato">Flexible payment plans to make your dreams affordable</p>
                     <a
                       href="/payment-plans"
-                      className="inline-flex items-center px-6 py-3 text-charcoal rounded-lg font-bold shadow-lg transition-colors duration-200 bg-butter hover:bg-butter/90 font-lato"
+                      className="inline-flex items-center px-6 py-3 text-white rounded-lg font-bold shadow-lg transition-colors duration-200 bg-primary hover:bg-primary-dark font-lato"
                     >
                       Learn More
                       <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -4,6 +4,7 @@ from sqlalchemy import and_
 
 from app.models.booking import Booking, BookingTraveler
 from app.schemas.booking import BookingCreate, BookingUpdate, InquiryCreate, InquiryUpdate
+from app.services.email import email_service
 
 
 class BookingService:
@@ -56,6 +57,31 @@ class BookingService:
 
         db.commit()
         db.refresh(db_booking)
+        
+        # Send email notification to admin
+        try:
+            booking_type_display = booking.booking_type.replace('_', ' ').title()
+            subject = f"New {booking_type_display} Request - {booking.contact_name}"
+            html_content = f"""
+            <h2>New Booking Request</h2>
+            <p><strong>Type:</strong> {booking_type_display}</p>
+            <p><strong>Item:</strong> {booking.entity_slug}</p>
+            <p><strong>Name:</strong> {booking.contact_name}</p>
+            <p><strong>Email:</strong> {booking.contact_email}</p>
+            <p><strong>Phone:</strong> {booking.contact_phone}</p>
+            <p><strong>Country:</strong> {booking.country_of_origin}</p>
+            <p><strong>Adults:</strong> {booking.number_of_adults} | <strong>Children:</strong> {booking.number_of_children}</p>
+            <p><strong>Special Requests:</strong> {booking.special_requests or 'None'}</p>
+            <p>Log in to the <a href="https://allboundtravel.com/admin">Admin Dashboard</a> to view details.</p>
+            """
+            email_service.send_email(
+                to_email="info@sh.co.ke",
+                subject=subject,
+                html_content=html_content
+            )
+        except Exception as e:
+            print(f"Failed to send booking notification email: {e}")
+            
         return db_booking
 
     def update_booking(self, db: Session, booking_id: int, booking_update: BookingUpdate) -> Optional[Booking]:
@@ -114,6 +140,28 @@ class InquiryService:
         db.add(db_inquiry)
         db.commit()
         db.refresh(db_inquiry)
+        
+        # Send email notification to admin
+        try:
+            subject = f"New General Inquiry - {inquiry.subject}"
+            html_content = f"""
+            <h2>New Website Inquiry</h2>
+            <p><strong>Name:</strong> {inquiry.name}</p>
+            <p><strong>Email:</strong> {inquiry.email}</p>
+            <p><strong>Phone:</strong> {inquiry.phone or 'Not provided'}</p>
+            <p><strong>Country:</strong> {inquiry.country_of_origin or 'Not provided'}</p>
+            <p><strong>Subject:</strong> {inquiry.subject}</p>
+            <p><strong>Message:</strong><br>{inquiry.message}</p>
+            <p>Log in to the <a href="https://admin.allboundtravel.com">Admin Dashboard</a> to reply.</p>
+            """
+            email_service.send_email(
+                to_email="info@allboundtravel.com",
+                subject=subject,
+                html_content=html_content
+            )
+        except Exception as e:
+            print(f"Failed to send inquiry notification email: {e}")
+            
         return db_inquiry
 
     def update_inquiry(self, db: Session, inquiry_id: int, inquiry_update: InquiryUpdate) -> Optional[Inquiry]:

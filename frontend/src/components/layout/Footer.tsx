@@ -58,12 +58,11 @@ const Footer: React.FC<FooterProps> = ({
       };
     }
 
-    // Update Holiday Types section - show only featured types, limited to 7
+    // Update Holiday Types section - show a few types, limited to 7
     const holidayTypesIndex = newSections.findIndex(section => section.title === 'Holiday Types');
     if (holidayTypesIndex !== -1 && holidayTypesData) {
       const holidayTypeLinks = holidayTypesData
-        .filter(type => type.is_featured) // Only featured holiday types
-        .slice(0, 7) // Limit to 7 featured types
+        .slice(0, 7) // Limit to 7 types
         .map(type => ({
           label: type.name,
           path: `/holiday-types/${type.slug}`

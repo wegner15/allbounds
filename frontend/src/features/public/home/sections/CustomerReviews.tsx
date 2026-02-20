@@ -63,45 +63,55 @@ const CustomerReviews: React.FC = () => {
               <>
                 <div className="relative h-48 overflow-hidden">
                   {reviews.map((review, index) => (
-                      <div 
-                          key={review.id}
-                          className={`absolute w-full transition-opacity duration-500 ease-in-out ${
-                              index === activeIndex ? 'opacity-100' : 'opacity-0'
-                          }`}
-                      >
-                          <div className="flex items-start">
-                              <img 
-                                  src={`https://i.pravatar.cc/150?u=${review.author_email}`}
-                                  alt={review.author_name}
-                                  className="w-16 h-16 rounded-full mr-6"
-                              />
-                              <div>
-                                  <p className="text-gray-700 text-lg italic mb-4">"{review.content}"</p>
-                                  <p className="font-bold text-gray-900">{review.author_name}</p>
-                                  {/* Placeholder for author title/location */}
-                              </div>
-                          </div>
+                    <div
+                      key={review.id}
+                      className={`absolute w-full transition-opacity duration-500 ease-in-out ${index === activeIndex ? 'opacity-100' : 'opacity-0'
+                        }`}
+                    >
+                      <div className="flex items-start">
+                        <img
+                          src={`https://i.pravatar.cc/150?u=${review.author_email}`}
+                          alt={review.author_name}
+                          className="w-16 h-16 rounded-full mr-6"
+                        />
+                        <div>
+                          <p className="text-gray-700 text-lg italic mb-4">"{review.content}"</p>
+                          <p className="font-bold text-gray-900">{review.author_name}</p>
+                          {/* Placeholder for author title/location */}
+                        </div>
                       </div>
+                    </div>
                   ))}
                 </div>
                 <div className="flex items-center mt-6">
-                    <span className="text-gray-700 font-bold mr-4">
-                        {String(activeIndex + 1).padStart(2, '0')}
-                    </span>
-                    <div className="w-full bg-gray-200 rounded-full h-1">
-                        <div 
-                            className="bg-blue-600 h-1 rounded-full transition-all duration-500 ease-in-out"
-                            style={{ width: `${((activeIndex + 1) / reviews.length) * 100}%` }}
-                        ></div>
-                    </div>
-                    <span className="text-gray-500 ml-4">
-                        {String(reviews.length).padStart(2, '0')}
-                    </span>
+                  <span className="text-gray-700 font-bold mr-4">
+                    {String(activeIndex + 1).padStart(2, '0')}
+                  </span>
+                  <div className="w-full bg-gray-200 rounded-full h-1">
+                    <div
+                      className="bg-blue-600 h-1 rounded-full transition-all duration-500 ease-in-out"
+                      style={{ width: `${((activeIndex + 1) / reviews.length) * 100}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-gray-500 ml-4">
+                    {String(reviews.length).padStart(2, '0')}
+                  </span>
                 </div>
               </>
-            ) : (
-              <div className="text-center text-gray-500">No customer reviews yet.</div>
-            )}
+            ) : null}
+
+            {/* Google Maps Embed */}
+            <div className="w-full h-[450px] rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31918.03417945577!2d32.58649129999999!3d0.32464905!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xc44b42ea4b0f5e9%3A0xd0e25229f50a628a!2sAllbound%20Vacations!5e0!3m2!1sen!2sug!4v1771579239812!5m2!1sen!2sug"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen={true}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
+            </div>
           </div>
         </div>
       </div>

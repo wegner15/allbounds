@@ -28,6 +28,7 @@ from app.api.api_v1.endpoints import (
     bookings,
     stats,
     visa_applications,
+    flight_bookings,
 )
 
 api_router = APIRouter()
@@ -64,3 +65,4 @@ api_router.include_router(itinerary.router, prefix="/itinerary", tags=["Itinerar
 api_router.include_router(package_price_charts.router, prefix="", tags=["Package Price Charts"])
 api_router.include_router(bookings.router, prefix="/bookings", tags=["Bookings"])
 api_router.include_router(visa_applications.router, prefix="/visa-applications", tags=["Visa Applications"])
+api_router.include_router(flight_bookings.router, prefix="/flight-bookings", tags=["Flight Bookings"])

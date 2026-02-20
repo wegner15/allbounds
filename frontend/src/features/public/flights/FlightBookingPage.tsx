@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Plane, Calendar, MapPin, Users, ArrowRight } from 'lucide-react';
+import FlightBookingForm from './components/FlightBookingForm';
 
 const FlightBookingPage: React.FC = () => {
+    const [isSuccess, setIsSuccess] = useState(false);
+
     return (
         <div className="min-h-screen bg-white">
             {/* Hero Section */}
@@ -24,7 +27,7 @@ const FlightBookingPage: React.FC = () => {
 
             {/* Booking Form Container */}
             <div className="container mx-auto px-4 -mt-24 relative z-10 pb-20">
-                <div className="bg-white rounded-2xl shadow-2xl p-6 lg:p-10">
+                <div className="bg-white rounded-2xl shadow-2xl p-6 lg:p-10 mb-8">
                     <div className="flex items-center gap-3 mb-8 pb-4 border-b border-gray-100">
                         <div className="bg-primary/10 p-3 rounded-xl">
                             <Plane className="w-6 h-6 text-primary" />
@@ -35,79 +38,25 @@ const FlightBookingPage: React.FC = () => {
                         </div>
                     </div>
 
-                    <form className="space-y-8">
-                        {/* Trip Type */}
-                        <div className="flex flex-wrap gap-4">
-                            <button type="button" className="px-6 py-2 rounded-full font-medium bg-primary text-white">Round Trip</button>
-                            <button type="button" className="px-6 py-2 rounded-full font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">One Way</button>
-                            <button type="button" className="px-6 py-2 rounded-full font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">Multi-city</button>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {/* From */}
-                            <div className="space-y-2">
-                                <label className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    <MapPin className="w-4 h-4 text-primary" />
-                                    Leaving From
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="City or Airport"
-                                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none"
-                                />
+                    {isSuccess ? (
+                        <div className="text-center py-16">
+                            <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
                             </div>
-
-                            {/* To */}
-                            <div className="space-y-2">
-                                <label className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    <MapPin className="w-4 h-4 text-primary" />
-                                    Going To
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="City or Airport"
-                                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none"
-                                />
-                            </div>
-
-                            {/* Dates */}
-                            <div className="space-y-2">
-                                <label className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    <Calendar className="w-4 h-4 text-primary" />
-                                    Dates
-                                </label>
-                                <input
-                                    type="date"
-                                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none"
-                                />
-                            </div>
-
-                            {/* Passengers */}
-                            <div className="space-y-2">
-                                <label className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    <Users className="w-4 h-4 text-primary" />
-                                    Passengers
-                                </label>
-                                <select className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none appearance-none">
-                                    <option>1 Adult, Economy</option>
-                                    <option>2 Adults, Economy</option>
-                                    <option>1 Adult, Business</option>
-                                    <option>2 Adults, Business</option>
-                                    <option>Family (2+2), Economy</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className="flex justify-end pt-4">
+                            <h2 className="text-3xl font-playfair font-bold text-charcoal mb-4">Request Received!</h2>
+                            <p className="text-gray-600 mb-8 max-w-lg mx-auto">
+                                Thank you for submitting your flight booking request. Our agents will process your itinerary and contact you shortly.
+                            </p>
                             <button
-                                type="submit"
-                                className="bg-primary hover:bg-primary-dark text-white px-10 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-3"
+                                onClick={() => setIsSuccess(false)}
+                                className="inline-block bg-primary text-white font-bold py-3 px-8 rounded-xl hover:bg-primary-dark transition-colors duration-300"
                             >
-                                Search Flights
-                                <ArrowRight className="w-5 h-5" />
+                                Book Another Flight
                             </button>
                         </div>
-                    </form>
+                    ) : (
+                        <FlightBookingForm onSuccess={() => setIsSuccess(true)} />
+                    )}
                 </div>
 
                 {/* Why Book With Us */}

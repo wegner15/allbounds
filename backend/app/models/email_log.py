@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, func, JSON
-from app.db.base_class import Base
+from app.db.database import Base
 
 class EmailLog(Base):
     __tablename__ = "email_logs"

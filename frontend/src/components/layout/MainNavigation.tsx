@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useRegionsWithCountries } from '../../lib/hooks/useDestinations';
 import { useHolidayTypes } from '../../lib/hooks/useHolidayTypes';
 import { useAuth } from '../../lib/contexts/AuthContext';
@@ -31,8 +31,19 @@ const MainNavigation: React.FC = () => {
   const [destinationsOpen, setDestinationsOpen] = useState(false);
   const [holidayTypesOpen, setHolidayTypesOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const destinationsRef = useRef<HTMLDivElement>(null);
   const holidayTypesRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}&type=tours`);
+      setSearchQuery(''); // Clear after search
+      setMobileMenuOpen(false); // Close mobile menu if applicable
+    }
+  };
 
   // Auth hooks
   const { user } = useAuth();
@@ -304,18 +315,20 @@ const MainNavigation: React.FC = () => {
 
             {/* Search Bar */}
             <div className="flex-1 max-w-sm ml-8">
-              <div className="relative">
+              <form onSubmit={handleSearchSubmit} className="relative">
                 <input
                   type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Explore your world"
                   className="w-full bg-gray-100 border-none rounded-full py-2 pl-4 pr-10 text-sm focus:ring-1 focus:ring-primary focus:bg-white transition-all"
                 />
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <button type="submit" className="absolute inset-y-0 right-0 flex items-center pr-3 hover:text-primary transition-colors">
                   <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
-                </div>
-              </div>
+                </button>
+              </form>
             </div>
           </div>
         </div>

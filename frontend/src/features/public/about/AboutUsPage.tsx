@@ -70,7 +70,7 @@ const AboutUsPage: React.FC = () => {
             </section>
 
             {/* Why Choose Us Section */}
-            <section className="py-20 bg-gray-50 border-t border-gray-100">
+            <section className="py-20 bg-gray-100 border-t border-gray-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16 max-w-4xl mx-auto">
                         <h2 className="text-4xl md:text-5xl font-playfair font-bold text-charcoal mb-6">Why Choose Us</h2>
@@ -185,6 +185,9 @@ const AboutUsPage: React.FC = () => {
                     </a>
                 </div>
             </section>
+
+            {/* Empty White Separator */}
+            <div className="w-full h-12 bg-white"></div>
 
             {/* Three Steps Section */}
             <ThreeStepsSection />

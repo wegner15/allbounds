@@ -46,6 +46,7 @@ const MainNavigation: React.FC = () => {
     { label: 'PACKAGES', path: '/packages' },
     { label: 'GROUP TRIPS', path: '/group-trips' },
     { label: 'BLOG', path: '/blog' },
+    { label: 'VISA APPLICATION', path: '/visa-application' },
   ];
 
   // Fetch regions with countries from API

@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import ThreeStepsSection from '../home/sections/ThreeStepsSection';
+import ContactUsCard from '../home/sections/ContactUsCard';
 
 const AboutUsPage: React.FC = () => {
     return (
@@ -173,6 +175,45 @@ const AboutUsPage: React.FC = () => {
                     </div>
                 </div>
             </section>
+
+            {/* Dual Promotional Sections */}
+            <section className="grid grid-cols-1 md:grid-cols-2">
+                {/* Let's Chat */}
+                <div className="bg-primary py-20 px-8 text-center text-white flex flex-col items-center justify-center">
+                    <h2 className="text-4xl md:text-5xl font-playfair font-bold mb-6">Let's Chat</h2>
+                    <div className="w-12 h-0.5 bg-white mb-8"></div>
+                    <p className="text-lg leading-relaxed max-w-md mx-auto mb-10 font-lato">
+                        We have answers to all your questions.<br />
+                        Start planning your dream trip by talking to our Destination Specialists
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center w-full max-w-md">
+                        <a href="tel:+256782594008" className="border border-white hover:bg-white hover:text-primary transition-colors py-3 px-8 rounded font-bold tracking-widest text-sm flex-1">
+                            CALL NOW
+                        </a>
+                        <Link to="/contact-us" className="border border-white hover:bg-white hover:text-primary transition-colors py-3 px-8 rounded font-bold tracking-widest text-sm flex-1">
+                            START PLANNING
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Newsletter Signup */}
+                <div className="bg-charcoal py-20 px-8 text-center text-white flex flex-col items-center justify-center">
+                    <h2 className="text-4xl md:text-5xl font-playfair font-bold mb-6">Sign up for our newsletter</h2>
+                    <div className="w-12 h-0.5 bg-white mb-8"></div>
+                    <p className="text-lg leading-relaxed max-w-md mx-auto mb-10 font-lato">
+                        Receive the latest travel inspiration and destination news.
+                    </p>
+                    <a href="#newsletter" className="border border-white/30 hover:bg-white hover:text-charcoal transition-colors py-3 px-12 rounded font-bold tracking-widest text-sm">
+                        SIGNUP
+                    </a>
+                </div>
+            </section>
+
+            {/* Three Steps Section */}
+            <ThreeStepsSection />
+
+            {/* 24/7 Customer Support Section */}
+            <ContactUsCard hideFeatures={true} />
 
         </div>
     );

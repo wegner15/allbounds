@@ -1,7 +1,11 @@
 import React from 'react';
 import { Phone, Mail, Facebook, Twitter, Instagram, Linkedin, Clock, MessageCircle } from 'lucide-react';
 
-const ContactUsCard: React.FC = () => {
+interface ContactUsCardProps {
+  hideFeatures?: boolean;
+}
+
+const ContactUsCard: React.FC<ContactUsCardProps> = ({ hideFeatures = false }) => {
   return (
     <>
       <section className="py-16 bg-gray-50">
@@ -109,82 +113,84 @@ const ContactUsCard: React.FC = () => {
         </div>
       </section>
 
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          {/* Feature Cards border-gray-100 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="group">
-              <div className="relative h-80 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300">
-                <img
-                  src="https://images.unsplash.com/photo-1602002418082-a4443e081dd1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                  alt="Group Trips"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-charcoal/90 via-charcoal/40 to-transparent"></div>
+      {!hideFeatures && (
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            {/* Feature Cards border-gray-100 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="group">
+                <div className="relative h-80 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300">
+                  <img
+                    src="https://images.unsplash.com/photo-1602002418082-a4443e081dd1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    alt="Group Trips"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal/90 via-charcoal/40 to-transparent"></div>
 
-                {/* Badge */}
-                <div className="absolute top-6 left-6">
-                  <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold text-white shadow-lg bg-primary font-lato tracking-wide uppercase">
-                    <Clock className="w-3 h-3 mr-2" />
-                    Scheduled Departure
-                  </span>
-                </div>
+                  {/* Badge */}
+                  <div className="absolute top-6 left-6">
+                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold text-white shadow-lg bg-primary font-lato tracking-wide uppercase">
+                      <Clock className="w-3 h-3 mr-2" />
+                      Scheduled Departure
+                    </span>
+                  </div>
 
-                {/* Content */}
-                <div className="absolute bottom-0 left-0 right-0 p-8 z-10">
-                  <h3 className="text-3xl font-bold text-white mb-3 font-playfair drop-shadow-md">Group Trips</h3>
-                  <p className="text-gray-200 mb-6 text-lg font-lato">Join like-minded travelers on unforgettable adventures</p>
-                  <a
-                    href="/group-trips"
-                    className="inline-flex items-center px-6 py-3 text-white rounded-lg font-bold shadow-lg transition-colors duration-200 bg-primary hover:bg-primary-dark font-lato"
-                  >
-                    Explore Experiences
-                    <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </a>
+                  {/* Content */}
+                  <div className="absolute bottom-0 left-0 right-0 p-8 z-10">
+                    <h3 className="text-3xl font-bold text-white mb-3 font-playfair drop-shadow-md">Group Trips</h3>
+                    <p className="text-gray-200 mb-6 text-lg font-lato">Join like-minded travelers on unforgettable adventures</p>
+                    <a
+                      href="/group-trips"
+                      className="inline-flex items-center px-6 py-3 text-white rounded-lg font-bold shadow-lg transition-colors duration-200 bg-primary hover:bg-primary-dark font-lato"
+                    >
+                      Explore Experiences
+                      <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </a>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="group">
-              <div className="relative h-80 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300">
-                <img
-                  src="https://images.unsplash.com/photo-1540541338287-41700207dee6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                  alt="Flexible Payment"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-charcoal/90 via-charcoal/40 to-transparent"></div>
+              <div className="group">
+                <div className="relative h-80 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300">
+                  <img
+                    src="https://images.unsplash.com/photo-1540541338287-41700207dee6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    alt="Flexible Payment"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal/90 via-charcoal/40 to-transparent"></div>
 
-                {/* Badge */}
-                <div className="absolute top-6 left-6">
-                  <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold text-white shadow-lg bg-primary font-lato tracking-wide uppercase">
-                    <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                    </svg>
-                    Flexi Pay
-                  </span>
-                </div>
+                  {/* Badge */}
+                  <div className="absolute top-6 left-6">
+                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold text-white shadow-lg bg-primary font-lato tracking-wide uppercase">
+                      <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      </svg>
+                      Flexi Pay
+                    </span>
+                  </div>
 
-                {/* Content */}
-                <div className="absolute bottom-0 left-0 right-0 p-8 z-10">
-                  <h3 className="text-3xl font-bold text-white mb-3 font-playfair drop-shadow-md">Book Now, Pay Later!</h3>
-                  <p className="text-gray-200 mb-6 text-lg font-lato">Flexible payment plans to make your dreams affordable</p>
-                  <a
-                    href="/payment-plans"
-                    className="inline-flex items-center px-6 py-3 text-white rounded-lg font-bold shadow-lg transition-colors duration-200 bg-primary hover:bg-primary-dark font-lato"
-                  >
-                    Learn More
-                    <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </a>
+                  {/* Content */}
+                  <div className="absolute bottom-0 left-0 right-0 p-8 z-10">
+                    <h3 className="text-3xl font-bold text-white mb-3 font-playfair drop-shadow-md">Book Now, Pay Later!</h3>
+                    <p className="text-gray-200 mb-6 text-lg font-lato">Flexible payment plans to make your dreams affordable</p>
+                    <a
+                      href="/payment-plans"
+                      className="inline-flex items-center px-6 py-3 text-white rounded-lg font-bold shadow-lg transition-colors duration-200 bg-primary hover:bg-primary-dark font-lato"
+                    >
+                      Learn More
+                      <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </>
   );
 };

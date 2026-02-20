@@ -485,7 +485,7 @@ const MainNavigation: React.FC = () => {
               ) : (
                 destinationRegions.map((region) => (
                   <div key={region.name} className="mb-4">
-                    <h3 className="font-medium text-charcoal mb-2">{region.name}</h3>
+                    <h3 className="text-lg font-bold text-charcoal mb-2">{region.name}</h3>
                     <ul className="space-y-1">
                       {region.countries.map((country) => (
                         <li key={country.slug}>

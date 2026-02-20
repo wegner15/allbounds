@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useSubmitVisaApplication } from '../../../../lib/hooks/useVisaApplications';
-import { useCountries } from '../../../../lib/hooks/useDestinations';
+import countriesData from 'world-countries';
 
 interface VisaFormProps {
     onSuccess: () => void;
 }
 
 const VisaForm: React.FC<VisaFormProps> = ({ onSuccess }) => {
-    const { data: countries } = useCountries();
     const submitVisa = useSubmitVisaApplication();
+
+    // Sort countries alphabetically by common name
+    const allWorldCountries = [...countriesData].sort((a, b) =>
+        a.name.common.localeCompare(b.name.common)
+    );
 
     const [formData, setFormData] = useState({
         destination_country: '',
@@ -64,8 +68,6 @@ const VisaForm: React.FC<VisaFormProps> = ({ onSuccess }) => {
         });
     };
 
-    const activeCountries = countries?.filter(c => c.is_active) || [];
-
     return (
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 p-8">
             <h3 className="text-2xl font-playfair font-bold text-charcoal mb-6 border-b pb-4">Visa Application Details</h3>
@@ -91,8 +93,10 @@ const VisaForm: React.FC<VisaFormProps> = ({ onSuccess }) => {
                                 className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-50 text-gray-700"
                             >
                                 <option value="">Select Destination</option>
-                                {activeCountries.map(country => (
-                                    <option key={country.id} value={country.name}>{country.name}</option>
+                                {allWorldCountries.map(country => (
+                                    <option key={country.cca3} value={country.name.common}>
+                                        {country.name.common}
+                                    </option>
                                 ))}
                             </select>
                         </div>

@@ -129,7 +129,7 @@ const ContactUsCard: React.FC<ContactUsCardProps> = ({ hideFeatures = false }) =
 
                   {/* Badge */}
                   <div className="absolute top-6 left-6">
-                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold text-white shadow-lg bg-primary font-lato tracking-wide uppercase">
+                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold text-charcoal shadow-lg bg-butter font-lato tracking-wide uppercase">
                       <Clock className="w-3 h-3 mr-2" />
                       Scheduled Departure
                     </span>
@@ -141,7 +141,7 @@ const ContactUsCard: React.FC<ContactUsCardProps> = ({ hideFeatures = false }) =
                     <p className="text-gray-200 mb-6 text-lg font-lato">Join like-minded travelers on unforgettable adventures</p>
                     <a
                       href="/group-trips"
-                      className="inline-flex items-center px-6 py-3 text-white rounded-lg font-bold shadow-lg transition-colors duration-200 bg-primary hover:bg-primary-dark font-lato"
+                      className="inline-flex items-center px-6 py-3 text-charcoal rounded-lg font-bold shadow-lg transition-colors duration-200 bg-butter hover:bg-butter/90 font-lato"
                     >
                       Explore Experiences
                       <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,7 +163,7 @@ const ContactUsCard: React.FC<ContactUsCardProps> = ({ hideFeatures = false }) =
 
                   {/* Badge */}
                   <div className="absolute top-6 left-6">
-                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold text-white shadow-lg bg-primary font-lato tracking-wide uppercase">
+                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold text-charcoal shadow-lg bg-butter font-lato tracking-wide uppercase">
                       <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                       </svg>
@@ -177,7 +177,7 @@ const ContactUsCard: React.FC<ContactUsCardProps> = ({ hideFeatures = false }) =
                     <p className="text-gray-200 mb-6 text-lg font-lato">Flexible payment plans to make your dreams affordable</p>
                     <a
                       href="/payment-plans"
-                      className="inline-flex items-center px-6 py-3 text-white rounded-lg font-bold shadow-lg transition-colors duration-200 bg-primary hover:bg-primary-dark font-lato"
+                      className="inline-flex items-center px-6 py-3 text-charcoal rounded-lg font-bold shadow-lg transition-colors duration-200 bg-butter hover:bg-butter/90 font-lato"
                     >
                       Learn More
                       <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

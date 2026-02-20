@@ -41,11 +41,11 @@ const CustomerReviews: React.FC = () => {
             </p>
             <div className="flex items-center space-x-8">
               <div>
-                <p className="text-4xl font-bold text-blue-600">120+</p>
+                <p className="text-4xl font-bold text-primary">120+</p>
                 <p className="text-gray-600">Happy People</p>
               </div>
               <div>
-                <p className="text-4xl font-bold text-blue-600">4.70</p>
+                <p className="text-4xl font-bold text-primary">4.70</p>
                 <div className="flex text-yellow-400">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="w-5 h-5 fill-current" />
@@ -89,7 +89,7 @@ const CustomerReviews: React.FC = () => {
                   </span>
                   <div className="w-full bg-gray-200 rounded-full h-1">
                     <div
-                      className="bg-blue-600 h-1 rounded-full transition-all duration-500 ease-in-out"
+                      className="bg-primary h-1 rounded-full transition-all duration-500 ease-in-out"
                       style={{ width: `${((activeIndex + 1) / reviews.length) * 100}%` }}
                     ></div>
                   </div>

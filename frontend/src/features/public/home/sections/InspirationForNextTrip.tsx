@@ -38,9 +38,9 @@ const InspirationForNextTrip: React.FC = () => {
             <h2 className="text-3xl font-bold text-gray-900">Get inspiration for your next trip</h2>
             <p className="text-gray-600">Travel articles to ignite your wanderlust.</p>
           </div>
-          <Link 
-            to="/blog" 
-            className="text-blue-600 hover:text-blue-800 flex items-center font-medium"
+          <Link
+            to="/blog"
+            className="text-primary hover:text-primary-dark flex items-center font-medium"
           >
             More
             <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,8 +55,8 @@ const InspirationForNextTrip: React.FC = () => {
           {/* Main Articles */}
           <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
             {isLoading ? renderMainSkeletons() : mainArticles.map(article => (
-              <Link 
-                key={article.id} 
+              <Link
+                key={article.id}
                 to={`/blog/${article.slug}`}
                 className="block group"
               >
@@ -67,7 +67,7 @@ const InspirationForNextTrip: React.FC = () => {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                <h3 className="font-bold text-xl text-gray-800 mt-4 group-hover:text-blue-600 transition-colors line-clamp-2">{article.title}</h3>
+                <h3 className="font-bold text-xl text-gray-800 mt-4 group-hover:text-primary transition-colors line-clamp-2">{article.title}</h3>
               </Link>
             ))}
           </div>
@@ -75,8 +75,8 @@ const InspirationForNextTrip: React.FC = () => {
           {/* Side Articles */}
           <div className="space-y-4">
             {isLoading ? renderSideSkeletons() : sideArticles.map(article => (
-              <Link 
-                key={article.id} 
+              <Link
+                key={article.id}
                 to={`/blog/${article.slug}`}
                 className="flex items-center group"
               >
@@ -86,7 +86,7 @@ const InspirationForNextTrip: React.FC = () => {
                   className="w-24 h-24 object-cover rounded-lg mr-4"
                 />
                 <div>
-                  <h4 className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors line-clamp-3">{article.title}</h4>
+                  <h4 className="font-semibold text-gray-800 group-hover:text-primary transition-colors line-clamp-3">{article.title}</h4>
                 </div>
               </Link>
             ))}

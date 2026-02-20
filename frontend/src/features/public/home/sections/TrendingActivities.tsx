@@ -49,7 +49,7 @@ const TrendingActivities: React.FC = () => {
           </div>
           <p className="text-gray-600 text-center max-w-2xl mx-auto mb-8">Exclusive discounts on activities all over the World.</p>
           <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         </div>
       </div>
@@ -83,7 +83,7 @@ const TrendingActivities: React.FC = () => {
             <button
               key={location}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === location
-                ? 'bg-blue-600 text-white shadow-md'
+                ? 'bg-primary text-white shadow-md'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               onClick={() => setActiveTab(location)}
@@ -120,7 +120,7 @@ const TrendingActivities: React.FC = () => {
                   </button>
                 </div>
                 <div className="p-4">
-                  <h3 className="font-bold text-lg text-gray-800 truncate group-hover:text-blue-600 transition-colors mb-2">{activity.name}</h3>
+                  <h3 className="font-bold text-lg text-gray-800 truncate group-hover:text-primary transition-colors mb-2">{activity.name}</h3>
                   <p className="text-sm text-gray-600 mb-3 line-clamp-2">{activity.summary || activity.countries?.map(c => c.name).join(', ') || 'No description available'}</p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center text-sm text-gray-600">
@@ -162,7 +162,7 @@ const TrendingActivities: React.FC = () => {
         <div className="text-center">
           <Link
             to="/activities"
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
+            className="inline-flex items-center text-primary hover:text-primary-dark font-medium"
           >
             More
             <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

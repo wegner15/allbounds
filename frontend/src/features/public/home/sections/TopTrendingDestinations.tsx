@@ -83,7 +83,7 @@ const TopTrendingDestinations: React.FC = () => {
         <div className="text-center">
           <Link
             to="/destinations"
-            className="inline-flex items-center gap-2 px-6 py-3 border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-medium rounded-lg transition-all duration-200"
+            className="inline-flex items-center gap-2 px-6 py-3 border-2 border-primary text-primary hover:bg-primary hover:text-white font-medium rounded-lg transition-all duration-200"
           >
             View All
             <ArrowRight className="w-4 h-4" />

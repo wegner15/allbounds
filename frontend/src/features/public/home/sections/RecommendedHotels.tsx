@@ -77,7 +77,7 @@ const RecommendedHotels: React.FC = () => {
               <button
                 key={country.id}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === country.name
-                  ? 'bg-blue-600 text-white shadow-md'
+                  ? 'bg-primary text-white shadow-md'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 onClick={() => setActiveTab(country.name)}
@@ -142,7 +142,7 @@ const RecommendedHotels: React.FC = () => {
                     </div>
                   </div>
                   <div className="p-5">
-                    <h3 className="font-bold text-xl text-gray-800 mb-2 group-hover:text-blue-600 transition-colors line-clamp-1">
+                    <h3 className="font-bold text-xl text-gray-800 mb-2 group-hover:text-primary transition-colors line-clamp-1">
                       {hotel.name}
                     </h3>
                     {hotel.summary ? (
@@ -202,7 +202,7 @@ const RecommendedHotels: React.FC = () => {
         <div className="text-center">
           <Link
             to="/hotels"
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
+            className="inline-flex items-center text-primary hover:text-primary-dark font-medium"
           >
             More
             <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

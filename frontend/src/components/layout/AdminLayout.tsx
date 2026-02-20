@@ -18,7 +18,7 @@ interface AdminLayoutProps {
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dashboard' }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['Destinations', 'Holiday Types', 'Group Trips', 'Hotels', 'Hotel Types', 'Attractions', 'Activities', 'Blog', 'Content', 'Users', 'Newsletter', 'Logs', 'Settings']));
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['Destinations', 'Holiday Types', 'Group Trips', 'Hotels', 'Hotel Types', 'Attractions', 'Activities', 'Blog', 'Content', 'Users', 'Newsletter', 'Settings']));
   const location = useLocation();
   const { user, handleLogout } = useAuthHook();
 
@@ -58,14 +58,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
     { name: 'Content', href: '/admin/content', icon: 'document-text' },
     { name: 'Users', href: '/admin/users', icon: 'user-group' },
     { name: 'Newsletter', href: '/admin/newsletter', icon: 'mail' },
-    {
-      name: 'Logs',
-      href: '#',
-      icon: 'document-text',
-      subItems: [
-        { name: 'Email Logs', href: '/admin/logs/email' }
-      ]
-    },
+    { name: 'Email Logs', href: '/admin/logs/email', icon: 'document-text' },
     { name: 'Settings', href: '/admin/settings', icon: 'cog' },
   ];
 

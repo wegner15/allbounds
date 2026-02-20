@@ -27,7 +27,7 @@ class HolidayTypeUpdate(BaseModel):
 class HolidayTypeResponse(HolidayTypeBase):
     id: int
     slug: str = Field(..., description="URL-friendly slug for the holiday type", example="beach-holiday")
-    order_index: int = Field(0, description="Sort order for the holiday type")
+    order_index: Optional[int] = Field(0, description="Sort order for the holiday type")
     is_active: bool = Field(..., description="Whether the holiday type is active")
     created_at: datetime
     updated_at: datetime

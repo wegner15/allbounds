@@ -47,24 +47,26 @@ const FlightBookingForm: React.FC<FlightFormProps> = ({ onSuccess }) => {
 
     const handlePassengerCountChange = (type: 'adults' | 'children' | 'infants', value: number) => {
         const newValue = Math.max(type === 'adults' ? 1 : 0, value);
-        setPassengers(prev => ({ ...prev, [type]: newValue }));
 
-        // Adjust passenger detail objects count
-        const totalCount = newValue + (type === 'adults' ? 0 : passengers.adults) + (type === 'children' ? 0 : passengers.children) + (type === 'infants' ? 0 : passengers.infants) - passengers[type];
+        setPassengers(prev => {
+            const nextPassengers = { ...prev, [type]: newValue };
+            const totalCount = nextPassengers.adults + nextPassengers.children + nextPassengers.infants;
 
-        setPassengerDetails(prev => {
-            const newArr = [...prev];
-            if (totalCount > newArr.length) {
-                // Add padding
-                for (let i = newArr.length; i < totalCount; i++) {
-                    newArr.push({
-                        full_name: '', dob: '', gender: '', nationality: '', passport_number: '', passport_expiry: '', special_assistance: false, seat_preference: '', meal_preference: '', passenger_type: 'adult',
-                    });
+            setPassengerDetails(prevDetails => {
+                const newArr = [...prevDetails];
+                if (totalCount > newArr.length) {
+                    for (let i = newArr.length; i < totalCount; i++) {
+                        newArr.push({
+                            full_name: '', dob: '', gender: '', nationality: '', passport_number: '', passport_expiry: '', special_assistance: false, seat_preference: '', meal_preference: '', passenger_type: type === 'adults' ? 'adult' : type === 'children' ? 'child' : 'infant',
+                        });
+                    }
+                } else if (totalCount < newArr.length) {
+                    return newArr.slice(0, totalCount);
                 }
-            } else if (totalCount < newArr.length) {
-                return newArr.slice(0, totalCount);
-            }
-            return newArr;
+                return newArr;
+            });
+
+            return nextPassengers;
         });
     };
 
@@ -240,6 +242,14 @@ const FlightBookingForm: React.FC<FlightFormProps> = ({ onSuccess }) => {
                                 <div>
                                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Date of Birth *</label>
                                     <input type="date" required value={passenger.dob} onChange={e => handlePassengerDetailChange(index, 'dob', e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary outline-none" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Passenger Type *</label>
+                                    <select required value={passenger.passenger_type} onChange={e => handlePassengerDetailChange(index, 'passenger_type', e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary outline-none appearance-none">
+                                        <option value="adult">Adult (12+)</option>
+                                        <option value="child">Child (2-11)</option>
+                                        <option value="infant">Infant (0-2)</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nationality</label>

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import NewsletterForm from '../forms/NewsletterForm';
 import { useRegionsWithCountries } from '../../lib/hooks/useDestinations';
 import { useHolidayTypes } from '../../lib/hooks/useHolidayTypes';
+import Newsletter from '../../features/public/home/sections/Newsletter';
 
 export interface FooterLink {
   label: string;
@@ -112,7 +112,8 @@ const Footer: React.FC<FooterProps> = ({
       </div>
 
       {/* Main Dark Footer */}
-      <div className="bg-charcoal py-12 text-gray-300">
+      <Newsletter />
+      <div className="bg-charcoal py-12 text-gray-300 border-t border-gray-700/50">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Logo and About */}
@@ -184,10 +185,6 @@ const Footer: React.FC<FooterProps> = ({
                   </ul>
                 </div>
               ))}
-              {/* Newsletter Form */}
-              <div className="sm:col-span-2 md:col-span-1">
-                <NewsletterForm />
-              </div>
             </div>
           </div>
 

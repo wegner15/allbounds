@@ -12,7 +12,6 @@ import TrendingAttractions from './home/sections/TrendingAttractions';
 import InspirationForNextTrip from './home/sections/InspirationForNextTrip';
 import CustomerReviews from './home/sections/CustomerReviews';
 import WhyChooseUs from './home/sections/WhyChooseUs';
-import Newsletter from './home/sections/Newsletter';
 
 const HomePage: React.FC = () => {
   return (
@@ -30,7 +29,6 @@ const HomePage: React.FC = () => {
       <WhyChooseUs />
       <InspirationForNextTrip />
       <CustomerReviews />
-      <Newsletter />
     </div>
   );
 };

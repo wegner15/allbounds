@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Date, Text, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, Date, Text, ForeignKey, Enum, DateTime
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 import enum
 from app.db.database import Base
 
@@ -41,14 +42,16 @@ class VisaApplication(Base):
     purpose_of_travel = Column(String, nullable=False)
     travel_from_date = Column(Date, nullable=False)
     travel_to_date = Column(Date, nullable=False)
-    accommodation_type = Column(String, nullable=False) # Hotel, Host, Family
+    accommodation_type = Column(String(100), nullable=False) # Hotel, Host, Family
     
     # Optional Flight Reservation
     flight_reservation_id = Column(Integer, ForeignKey("media_assets.id"), nullable=True)
     
-    # Status handling
+    # Status & Timestamps
     status = Column(Enum(ApplicationStatus), default=ApplicationStatus.PENDING, nullable=False)
     admin_notes = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
     # Relationships
     flight_reservation = relationship("MediaAsset", foreign_keys=[flight_reservation_id])

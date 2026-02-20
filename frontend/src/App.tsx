@@ -118,6 +118,8 @@ import SubscriberList from './features/admin/newsletter/SubscriberList';
 import PackageBookingsPage from './features/admin/bookings/PackageBookingsPage';
 import GroupTripBookingsPage from './features/admin/bookings/GroupTripBookingsPage';
 import GeneralInquiriesPage from './features/admin/bookings/GeneralInquiriesPage';
+import VisaApplicationsPage from './features/admin/bookings/VisaApplicationsPage';
+import FlightBookingsPage from './features/admin/bookings/FlightBookingsPage';
 
 // Import admin content pages
 import ContentListPage from './features/admin/content/ContentListPage';
@@ -376,6 +378,8 @@ const router = createBrowserRouter([
       { path: 'bookings/packages', element: <PackageBookingsPage /> },
       { path: 'bookings/group-trips', element: <GroupTripBookingsPage /> },
       { path: 'bookings/inquiries', element: <GeneralInquiriesPage /> },
+      { path: 'bookings/visa-applications', element: <VisaApplicationsPage /> },
+      { path: 'bookings/flights', element: <FlightBookingsPage /> },
       // Content management routes
       { path: 'content', element: <ContentListPage /> },
       { path: 'content/create', element: <ContentForm /> },

@@ -31,6 +31,7 @@ from app.models.booking import Booking, BookingTraveler
 from app.models.inquiry import Inquiry
 from app.models.country_visit_info import CountryVisitInfo
 from app.models.newsletter import NewsletterSubscription
+from app.models.visa_application import VisaApplication
 
 # This ensures all models are imported in the correct order
 __all__ = [
@@ -44,5 +45,5 @@ __all__ = [
     'MediaAsset', 'AuditLog', 'SeoMeta',
     'ItineraryItem', 'ItineraryActivity',
     'Booking', 'BookingTraveler', 'Inquiry',
-    'CountryVisitInfo', 'NewsletterSubscription',
+    'CountryVisitInfo', 'NewsletterSubscription', 'VisaApplication',
 ]

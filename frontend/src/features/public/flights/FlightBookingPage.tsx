@@ -10,7 +10,7 @@ const FlightBookingPage: React.FC = () => {
             {/* Hero Section */}
             <div className="relative h-[400px] bg-charcoal overflow-hidden">
                 <img
-                    src="https://images.unsplash.com/photo-1436491865332-7a61a109c0f3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80"
+                    src="/fly-book-hero.jpeg"
                     alt="Flight Booking"
                     className="w-full h-full object-cover opacity-60"
                 />

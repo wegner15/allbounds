@@ -2,6 +2,8 @@ from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List, Any
 from datetime import datetime
 
+from app.schemas.package import PackageListResponse
+
 # Tag Schema
 class TagBase(BaseModel):
     name: str = Field(..., description="Name of the tag", example="Safari")
@@ -53,8 +55,7 @@ class BlogPostResponse(BlogPostBase):
     published_at: Optional[datetime] = None
     cover_image_url: Optional[str] = Field(None, description="Generated cover image URL")
     tags: List[TagResponse] = []
-    # Use any to avoid circular imports, but in practice it will be PackageListResponse or similar
-    packages: List[Any] = []
+    packages: List[PackageListResponse] = []
     
     @field_validator('is_published', 'is_active', 'is_featured', mode='before')
     @classmethod

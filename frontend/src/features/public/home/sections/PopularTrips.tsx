@@ -86,11 +86,10 @@ const PopularTrips: React.FC = () => {
           {locations.map(location => (
             <button
               key={location}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                activeTab === location
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === location
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+                }`}
               onClick={() => setActiveTab(location)}
             >
               {location}
@@ -102,42 +101,42 @@ const PopularTrips: React.FC = () => {
           <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide mb-8" id="popular-trips-container">
             {isLoading ? renderSkeletons() : error ? (
               <div className="flex-shrink-0 w-80 text-center text-red-500">Failed to load popular trips.</div>
-            ) : trips?.map(trip => (
-            <div key={trip.id} className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 group flex-shrink-0 w-80">
-              <div className="relative">
-                <img
-                  src={getImageUrlWithFallback(trip.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&w=600&q=80')}
-                  alt={trip.name}
-                  className="w-full h-96 object-cover"
-                />
-                {/* Placeholder for tags */}
-                <button className="absolute top-3 right-3 bg-white/80 p-2 rounded-full text-gray-600 hover:text-red-500 hover:bg-white transition-colors">
-                  <Heart className="w-5 h-5" />
-                </button>
-              </div>
-               <div className="p-4">
-                 <h3 className="font-bold text-lg text-gray-800 truncate h-6 group-hover:text-blue-600 transition-colors">{trip.name}</h3>
-                 <div 
-                   className="text-sm text-gray-600 mb-2 h-8 line-clamp-2"
-                   dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trip.summary || trip.country.name) }}
-                 />
-                <div className="flex items-center mb-4">
-                   <div className="flex items-center text-sm text-gray-600">
-                        <Star className="w-4 h-4 mr-1 text-yellow-400 fill-current" />
-                        <span className="font-bold mr-1">{trip.rating || 'N/A'}</span>
-                        <span>({trip.review_count || 0} reviews)</span>
-                    </div>
+            ) : trips?.slice(0, 8).map(trip => (
+              <div key={trip.id} className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 group flex-shrink-0 w-80">
+                <div className="relative">
+                  <img
+                    src={getImageUrlWithFallback(trip.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&w=600&q=80')}
+                    alt={trip.name}
+                    className="w-full h-96 object-cover"
+                  />
+                  {/* Placeholder for tags */}
+                  <button className="absolute top-3 right-3 bg-white/80 p-2 rounded-full text-gray-600 hover:text-red-500 hover:bg-white transition-colors">
+                    <Heart className="w-5 h-5" />
+                  </button>
                 </div>
-                 <div className="text-right">
-                   <FromPriceDisplay
-                     packageId={trip.id}
-                     basePrice={trip.price}
-                     className="text-right"
-                   />
-                 </div>
+                <div className="p-4">
+                  <h3 className="font-bold text-lg text-gray-800 truncate h-6 group-hover:text-blue-600 transition-colors">{trip.name}</h3>
+                  <div
+                    className="text-sm text-gray-600 mb-2 h-8 line-clamp-2"
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trip.summary || trip.country.name) }}
+                  />
+                  <div className="flex items-center mb-4">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Star className="w-4 h-4 mr-1 text-yellow-400 fill-current" />
+                      <span className="font-bold mr-1">{trip.rating || 'N/A'}</span>
+                      <span>({trip.review_count || 0} reviews)</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <FromPriceDisplay
+                      packageId={trip.id}
+                      basePrice={trip.price}
+                      className="text-right"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
           </div>
 
           {/* Navigation Buttons */}

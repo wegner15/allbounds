@@ -77,8 +77,8 @@ const RecommendedHotels: React.FC = () => {
               <button
                 key={country.id}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === country.name
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 onClick={() => setActiveTab(country.name)}
               >
@@ -99,7 +99,7 @@ const RecommendedHotels: React.FC = () => {
                 Failed to load hotels.
               </div>
             ) : (
-              hotels?.map((hotel) => (
+              hotels?.slice(0, 8).map((hotel) => (
                 <Link
                   key={hotel.id}
                   to={`/hotels/${hotel.country?.slug || 'unknown'}/${hotel.slug}`}

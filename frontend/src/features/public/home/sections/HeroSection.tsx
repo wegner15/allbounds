@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
@@ -222,20 +222,39 @@ const HeroSection: React.FC = () => {
     }
   };
 
+  const heroImages = [
+    '/home-heros/hero1.jpeg',
+    '/home-heros/hero2.webp',
+    '/home-heros/hero3.webp'
+  ];
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
+    }, 6000); // Change image every 6 seconds
+
+    return () => clearInterval(interval);
+  }, [heroImages.length]);
+
   return (
     <div className="relative h-[650px] bg-charcoal">
-      {/* Background with advanced overlay */}
+      {/* Background with advanced overlay and crossfade carousel */}
       <div className="absolute inset-0 z-0">
-        <img
-          src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80"
-          alt="Travel Hero"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/40 to-transparent opacity-90"></div>
-        <div className="absolute inset-0 bg-black/20"></div>
+        {heroImages.map((img, index) => (
+          <img
+            key={img}
+            src={img}
+            alt={`Travel Hero ${index + 1}`}
+            className={`absolute w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+              }`}
+          />
+        ))}
+        <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/40 to-transparent opacity-90 z-10"></div>
+        <div className="absolute inset-0 bg-black/20 z-10"></div>
       </div>
 
-      <div className="relative z-10 max-w-[1600px] mx-auto px-4 h-full flex flex-col justify-center items-center pt-16">
+      <div className="relative z-20 max-w-[1600px] mx-auto px-4 h-full flex flex-col justify-center items-center pt-16">
 
         {/* Headline */}
         <div className="text-center mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">

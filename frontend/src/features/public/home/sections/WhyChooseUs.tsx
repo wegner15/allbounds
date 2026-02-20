@@ -36,7 +36,7 @@ const WhyChooseUs: React.FC = () => {
   ];
 
   return (
-    <div className="py-16 bg-gray-50">
+    <div className="py-16 bg-primary/5">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-playfair font-bold text-charcoal">Why Choose Us</h2>

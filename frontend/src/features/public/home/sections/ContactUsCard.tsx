@@ -22,7 +22,7 @@ const ContactUsCard: React.FC = () => {
             {/* Phone Support Card */}
             <div className="group h-full">
               <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-primary/30 overflow-hidden h-full flex flex-col">
-                <div className="p-6 bg-primary/5">
+                <div className="p-6 bg-primary/10">
                   <div className="flex items-center justify-center w-12 h-12 rounded-full mb-4 bg-white shadow-sm">
                     <Phone className="w-6 h-6 text-primary" />
                   </div>
@@ -43,7 +43,7 @@ const ContactUsCard: React.FC = () => {
             {/* Email Support Card */}
             <div className="group h-full">
               <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-primary/30 overflow-hidden h-full flex flex-col">
-                <div className="p-6 bg-primary/5">
+                <div className="p-6 bg-primary/10">
                   <div className="flex items-center justify-center w-12 h-12 rounded-full mb-4 bg-white shadow-sm">
                     <MessageCircle className="w-6 h-6 text-primary" />
                   </div>

@@ -80,7 +80,7 @@ class CountryService:
         return db.query(Country).join(Hotel).filter(
             Country.is_active == True,
             Hotel.is_active == True
-        ).distinct().offset(skip).limit(limit).all()
+        ).group_by(Country.id).offset(skip).limit(limit).all()
 
     def get_countries_with_packages(self, db: Session, skip: int = 0, limit: int = 100) -> List[Country]:
         """
@@ -91,7 +91,7 @@ class CountryService:
         return db.query(Country).join(Package).filter(
             Country.is_active == True,
             Package.is_active == True
-        ).distinct().offset(skip).limit(limit).all()
+        ).group_by(Country.id).offset(skip).limit(limit).all()
 
     def get_countries_with_activities(self, db: Session, skip: int = 0, limit: int = 100) -> List[Country]:
         """
@@ -105,7 +105,7 @@ class CountryService:
             Country.is_active == True,
             Activity.is_active == True,
             Activity.is_featured == True
-        ).distinct().offset(skip).limit(limit).all()
+        ).group_by(Country.id).offset(skip).limit(limit).all()
 
     def get_countries_with_attractions(self, db: Session, skip: int = 0, limit: int = 100) -> List[Country]:
         """
@@ -118,7 +118,7 @@ class CountryService:
         ).filter(
             Country.is_active == True,
             Attraction.is_active == True
-        ).distinct().offset(skip).limit(limit).all()
+        ).group_by(Country.id).offset(skip).limit(limit).all()
 
     def get_countries_by_holiday_type(self, db: Session, holiday_type_slug: str, skip: int = 0, limit: int = 100) -> List[Country]:
         """
@@ -132,7 +132,7 @@ class CountryService:
             Package.is_active == True,
             HolidayType.slug == holiday_type_slug,
             HolidayType.is_active == True
-        ).distinct().offset(skip).limit(limit).all()
+        ).group_by(Country.id).offset(skip).limit(limit).all()
 
     def get_country(self, db: Session, country_id: int) -> Optional[Country]:
         """

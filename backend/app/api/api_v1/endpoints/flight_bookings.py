@@ -11,7 +11,7 @@ router = APIRouter()
 @router.post("/", response_model=FlightBookingResponse, status_code=status.HTTP_201_CREATED)
 def create_flight_booking(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(get_db),
     booking_in: FlightBookingCreate,
 ) -> Any:
     """

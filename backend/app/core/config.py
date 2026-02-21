@@ -65,7 +65,10 @@ class Settings(BaseSettings):
     PROMETHEUS_ENABLED: bool = os.getenv("PROMETHEUS_ENABLED", "true").lower() == "true"
     BACKEND_CORS_ORIGINS: List[str] = [
         origin.strip()
-        for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:8000").split(",")
+        for origin in os.getenv(
+            "CORS_ORIGINS", 
+            "http://localhost:3000,http://localhost:5173,https://allboundvacations.com,https://www.allboundvacations.com"
+        ).split(",")
     ]
 
     class Config:

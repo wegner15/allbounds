@@ -52,14 +52,20 @@ class ActivityService:
             joinedload(Activity.countries)
         ).offset(skip).limit(limit).all()
     
-    def get_featured_activities(self, db: Session, skip: int = 0, limit: int = 100) -> List[Activity]:
+    def get_featured_activities(self, db: Session, skip: int = 0, limit: int = 100, country: Optional[str] = None) -> List[Activity]:
         """
-        Retrieve featured activities with pagination.
+        Retrieve featured activities with pagination, optionally filtered by country.
         """
-        return db.query(Activity).filter(
+        query = db.query(Activity).filter(
             Activity.is_active == True,
             Activity.is_featured == True
-        ).options(
+        )
+
+        if country:
+            from app.models.country import Country
+            query = query.join(Activity.countries).filter(Country.name.ilike(f"%{country}%"))
+
+        return query.options(
             joinedload(Activity.cover_image),
             joinedload(Activity.media_assets),
             joinedload(Activity.countries)

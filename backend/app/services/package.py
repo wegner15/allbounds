@@ -62,16 +62,22 @@ class PackageService:
             Package.is_active == True
         ).offset(skip).limit(limit).all()
     
-    def get_featured_packages(self, db: Session, skip: int = 0, limit: int = 100) -> List[Package]:
+    def get_featured_packages(self, db: Session, skip: int = 0, limit: int = 100, country: Optional[str] = None) -> List[Package]:
         """
-        Retrieve featured packages with pagination.
+        Retrieve featured packages with pagination, optionally filtered by country.
         """
-        return db.query(Package).options(
-            joinedload(Package.country)
-            # Removed joinedload(Package.holiday_types) - causes circular loading
-        ).filter(
+        query = db.query(Package).filter(
             Package.is_active == True,
             Package.is_featured == True
+        )
+
+        if country:
+            from app.models.country import Country
+            query = query.join(Package.country).filter(Country.name.ilike(f"%{country}%"))
+
+        return query.options(
+            joinedload(Package.country)
+            # Removed joinedload(Package.holiday_types) - causes circular loading
         ).offset(skip).limit(limit).all()
 
     def get_packages_by_holiday_type(self, db: Session, holiday_type_id: int, skip: int = 0, limit: int = 100) -> List[Package]:

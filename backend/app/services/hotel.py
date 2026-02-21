@@ -122,18 +122,23 @@ class HotelService:
         
         return result
     
-    def get_featured_hotels(self, db: Session, skip: int = 0, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_featured_hotels(self, db: Session, skip: int = 0, limit: int = 100, country: Optional[str] = None) -> List[Dict[str, Any]]:
         """
-        Retrieve featured hotels with cover images.
+        Retrieve featured hotels with cover images, optionally filtered by country.
         Hotels are ordered by creation date (newest first).
         """
-        hotels = db.query(Hotel).options(
+        query = db.query(Hotel).options(
             joinedload(Hotel.country),
             joinedload(Hotel.amenities)
         ).filter(
             Hotel.is_active == True,
             Hotel.is_featured == True
-        ).order_by(Hotel.created_at.desc()).offset(skip).limit(limit).all()
+        )
+
+        if country:
+            query = query.join(Hotel.country).filter(Country.name.ilike(f"%{country}%"))
+
+        hotels = query.order_by(Hotel.created_at.desc()).offset(skip).limit(limit).all()
         
         # Format hotels — use image_id only, no media_assets loading
         result = []

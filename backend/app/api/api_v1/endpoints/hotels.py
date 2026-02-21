@@ -33,7 +33,7 @@ def get_hotels(
     Retrieve all hotels with optional filtering.
     """
     if featured is not None and featured:
-        hotels = hotel_service.get_featured_hotels(db, skip=skip, limit=limit)
+        hotels = hotel_service.get_featured_hotels(db, skip=skip, limit=limit, country=country)
     elif country_id:
         hotels = hotel_service.get_hotels_by_country(db, country_id=country_id, skip=skip, limit=limit)
     else:
@@ -46,11 +46,12 @@ def get_featured_hotels(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
+    country: str = Query(None, description="Filter featured hotels by country name"),
 ) -> Any:
     """
-    Retrieve featured hotels with cover images.
+    Retrieve featured hotels with cover images, optionally filtered by country.
     """
-    hotels = hotel_service.get_featured_hotels(db, skip=skip, limit=limit)
+    hotels = hotel_service.get_featured_hotels(db, skip=skip, limit=limit, country=country)
     # CRITICAL: Serialize to Pydantic to prevent lazy-loading
     return [HotelWithCountryResponse(**hotel) for hotel in hotels]
 

@@ -56,7 +56,7 @@ def get_packages(
         else:
             packages = []
     elif popular:
-        packages = package_service.get_featured_packages(db, skip=skip, limit=limit)
+        packages = package_service.get_featured_packages(db, skip=skip, limit=limit, country=country)
     else:
         packages = package_service.get_packages(db, skip=skip, limit=limit, order_by=order_by, order=order)
     
@@ -82,11 +82,12 @@ def get_featured_packages(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
+    country: str = Query(None, description="Filter featured packages by country name"),
 ) -> Any:
     """
-    Retrieve featured packages.
+    Retrieve featured packages, optionally filtered by country.
     """
-    packages = package_service.get_featured_packages(db, skip=skip, limit=limit)
+    packages = package_service.get_featured_packages(db, skip=skip, limit=limit, country=country)
     # CRITICAL: Serialize to Pydantic INSIDE endpoint to prevent lazy-loading
     return [PackageWithCountryResponse.from_orm(pkg) for pkg in packages]
 

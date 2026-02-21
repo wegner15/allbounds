@@ -35,7 +35,7 @@ def get_activities(
     elif country_id:
         activities = activity_service.get_activities_by_country(db, country_id=country_id, skip=skip, limit=limit)
     elif featured is not None and featured:
-        activities = activity_service.get_featured_activities(db, skip=skip, limit=limit)
+        activities = activity_service.get_featured_activities(db, skip=skip, limit=limit, country=country)
     else:
         activities = activity_service.get_activities(db, skip=skip, limit=limit)
     # CRITICAL: Serialize to Pydantic to prevent lazy-loading
@@ -51,10 +51,7 @@ def get_featured_activities(
     """
     Retrieve featured activities, optionally filtered by country.
     """
-    if country:
-        activities = activity_service.get_featured_activities_by_country(db, country_name=country, skip=skip, limit=limit)
-    else:
-        activities = activity_service.get_featured_activities(db, skip=skip, limit=limit)
+    activities = activity_service.get_featured_activities(db, skip=skip, limit=limit, country=country)
     # CRITICAL: Serialize to Pydantic to prevent lazy-loading
     return [ActivityResponse.from_orm(activity) for activity in activities]
 

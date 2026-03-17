@@ -212,7 +212,7 @@ class AttractionService:
         """
         from app.models.package import Package
         
-        attraction = db.query(Attraction).filter(Attraction.id == attraction_id).first()
+        attraction = db.query(Attraction).options(joinedload(Attraction.packages)).filter(Attraction.id == attraction_id).first()
         package = db.query(Package).filter(Package.id == package_id).first()
         
         if not attraction or not package:
@@ -228,7 +228,7 @@ class AttractionService:
         """
         from app.models.package import Package
         
-        attraction = db.query(Attraction).filter(Attraction.id == attraction_id).first()
+        attraction = db.query(Attraction).options(joinedload(Attraction.packages)).filter(Attraction.id == attraction_id).first()
         package = db.query(Package).filter(Package.id == package_id).first()
         
         if not attraction or not package or package not in attraction.packages:
@@ -244,7 +244,7 @@ class AttractionService:
         """
         from app.models.group_trip import GroupTrip
         
-        attraction = db.query(Attraction).filter(Attraction.id == attraction_id).first()
+        attraction = db.query(Attraction).options(joinedload(Attraction.group_trips)).filter(Attraction.id == attraction_id).first()
         group_trip = db.query(GroupTrip).filter(GroupTrip.id == group_trip_id).first()
         
         if not attraction or not group_trip:
@@ -260,7 +260,7 @@ class AttractionService:
         """
         from app.models.group_trip import GroupTrip
         
-        attraction = db.query(Attraction).filter(Attraction.id == attraction_id).first()
+        attraction = db.query(Attraction).options(joinedload(Attraction.group_trips)).filter(Attraction.id == attraction_id).first()
         group_trip = db.query(GroupTrip).filter(GroupTrip.id == group_trip_id).first()
         
         if not attraction or not group_trip or group_trip not in attraction.group_trips:
@@ -276,7 +276,7 @@ class AttractionService:
         """
         from app.models.activity import Activity
         
-        attraction = db.query(Attraction).filter(Attraction.id == attraction_id).first()
+        attraction = db.query(Attraction).options(joinedload(Attraction.activities)).filter(Attraction.id == attraction_id).first()
         activity = db.query(Activity).filter(Activity.id == activity_id).first()
         
         if not attraction or not activity:
@@ -292,7 +292,7 @@ class AttractionService:
         """
         from app.models.activity import Activity
         
-        attraction = db.query(Attraction).filter(Attraction.id == attraction_id).first()
+        attraction = db.query(Attraction).options(joinedload(Attraction.activities)).filter(Attraction.id == attraction_id).first()
         activity = db.query(Activity).filter(Activity.id == activity_id).first()
         
         if not attraction or not activity or activity not in attraction.activities:
@@ -308,7 +308,7 @@ class AttractionService:
         """
         from app.models.hotel import Hotel
         
-        attraction = db.query(Attraction).filter(Attraction.id == attraction_id).first()
+        attraction = db.query(Attraction).options(joinedload(Attraction.hotels)).filter(Attraction.id == attraction_id).first()
         hotel = db.query(Hotel).filter(Hotel.id == hotel_id).first()
         
         if not attraction or not hotel:
@@ -327,7 +327,7 @@ class AttractionService:
         """
         from app.models.hotel import Hotel
         
-        attraction = db.query(Attraction).filter(Attraction.id == attraction_id).first()
+        attraction = db.query(Attraction).options(joinedload(Attraction.hotels)).filter(Attraction.id == attraction_id).first()
         hotel = db.query(Hotel).filter(Hotel.id == hotel_id).first()
         
         if not attraction or not hotel or hotel not in attraction.hotels:

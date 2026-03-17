@@ -3,12 +3,15 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useHotels, useDeleteHotel } from '../../../lib/hooks/useHotels';
 import type { Hotel } from '../../../lib/hooks/useHotels';
+import { useCountries } from '../../../lib/hooks/useCountries';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 
 const HotelsListPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCountryId, setSelectedCountryId] = useState<number | undefined>(undefined);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
-  const { data: hotels, isLoading, error } = useHotels();
+  const { data: hotels, isLoading, error } = useHotels(selectedCountryId);
+  const { data: countries } = useCountries();
   const deleteHotel = useDeleteHotel();
 
   // Filter hotels based on search term
@@ -48,14 +51,46 @@ const HotelsListPage: React.FC = () => {
       </div>
 
       <div className="bg-white shadow-md rounded-lg p-6">
-        <div className="mb-6">
+        <div className="mb-6 flex flex-col sm:flex-row gap-3">
           <input
             type="text"
             placeholder="Search hotels..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
+          <div className="relative sm:w-56">
+            <select
+              value={selectedCountryId ?? ''}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSelectedCountryId(val ? Number(val) : undefined);
+                setSearchTerm('');
+              }}
+              className="w-full appearance-none pl-4 pr-10 py-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-teal focus:border-transparent text-gray-700"
+            >
+              <option value="">All Countries</option>
+              {countries?.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            {/* Chevron icon */}
+            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </span>
+          </div>
+          {selectedCountryId && (
+            <button
+              onClick={() => setSelectedCountryId(undefined)}
+              className="sm:w-auto px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md hover:bg-gray-50 whitespace-nowrap"
+            >
+              Clear filter
+            </button>
+          )}
         </div>
 
         {isLoading ? (
@@ -69,7 +104,11 @@ const HotelsListPage: React.FC = () => {
           </div>
         ) : filteredHotels?.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-600">No hotels found{searchTerm ? ' matching your search' : ''}.</p>
+            <p className="text-gray-600">
+              No hotels found
+              {selectedCountryId && countries ? ` in ${countries.find(c => c.id === selectedCountryId)?.name ?? 'selected country'}` : ''}
+              {searchTerm ? ' matching your search' : ''}.
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">

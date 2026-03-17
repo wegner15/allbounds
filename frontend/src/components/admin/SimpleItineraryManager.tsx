@@ -31,13 +31,13 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
   const [newDayLinkedActivityIds, setNewDayLinkedActivityIds] = useState<number[]>([]);
   const [newDayAccommodationNotes, setNewDayAccommodationNotes] = useState('');
 
-  const { data: itinerary, isLoading, error } = useItinerary(entityType, entityId);
+  const { data: itinerary, isLoading: isLoadingItinerary, error } = useItinerary(entityType, entityId);
   const createItem = useCreateItineraryItem();
   const updateItem = useUpdateItineraryItem();
   const deleteItem = useDeleteItineraryItem();
-  const { data: hotels = [] } = useHotels(countryId);
-  const { data: attractions = [] } = useAttractions(countryId ? { country: countryId.toString() } : undefined);
-  const { data: activities = [] } = useActivities(countryId);
+  const { data: hotels = [], isLoading: isLoadingHotels } = useHotels(countryId);
+  const { data: attractions = [], isLoading: isLoadingAttractions } = useAttractions(countryId ? { country_id: countryId } : undefined);
+  const { data: activities = [], isLoading: isLoadingActivities } = useActivities(countryId);
 
   const handleEditDay = (item: ItineraryItem) => {
     setEditingItemId(item.id);
@@ -165,7 +165,7 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
     }
   };
 
-  if (isLoading) {
+  if (isLoadingItinerary) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
         <div className="animate-pulse">
@@ -295,8 +295,10 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
                 Hotels
               </label>
               <div className="border border-gray-300 rounded-md p-2 max-h-40 overflow-y-auto">
-                {hotels.length === 0 ? (
+                {isLoadingHotels ? (
                   <p className="text-sm text-gray-500">Loading hotels...</p>
+                ) : hotels.length === 0 ? (
+                  <p className="text-sm text-gray-500">No hotels found.</p>
                 ) : (
                   hotels.map((hotel) => (
                     <label key={hotel.id} className="flex items-center space-x-2 py-1">
@@ -333,8 +335,10 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
                 Attractions
               </label>
               <div className="border border-gray-300 rounded-md p-2 max-h-40 overflow-y-auto">
-                {attractions.length === 0 ? (
+                {isLoadingAttractions ? (
                   <p className="text-sm text-gray-500">Loading attractions...</p>
+                ) : attractions.length === 0 ? (
+                  <p className="text-sm text-gray-500">No attractions found.</p>
                 ) : (
                   attractions.map((attraction) => (
                     <label key={attraction.id} className="flex items-center space-x-2 py-1">
@@ -371,8 +375,10 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
                 Activities
               </label>
               <div className="border border-gray-300 rounded-md p-2 max-h-40 overflow-y-auto">
-                {activities.length === 0 ? (
+                {isLoadingActivities ? (
                   <p className="text-sm text-gray-500">Loading activities...</p>
+                ) : activities.length === 0 ? (
+                  <p className="text-sm text-gray-500">No activities found.</p>
                 ) : (
                   activities.map((activity) => (
                     <label key={activity.id} className="flex items-center space-x-2 py-1">

@@ -79,6 +79,7 @@ export interface AttractionRelationships {
 export interface AttractionsQueryParams {
   search?: string;
   country?: string;
+  country_id?: number;
   category?: string;
   skip?: number;
   limit?: number;
@@ -95,6 +96,10 @@ const buildAttractionsQueryString = (params?: AttractionsQueryParams) => {
 
   if (params.country) {
     searchParams.set('country', params.country);
+  }
+
+  if (params.country_id !== undefined) {
+    searchParams.set('country_id', params.country_id.toString());
   }
 
   if (params.category) {
@@ -121,6 +126,7 @@ export const useAttractions = <TData = Attraction[]>(
     'attractions',
     params?.search ?? null,
     params?.country ?? null,
+    params?.country_id ?? null,
     params?.category ?? null,
     params?.skip ?? null,
     params?.limit ?? null,

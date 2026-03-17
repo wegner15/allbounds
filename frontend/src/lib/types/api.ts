@@ -395,6 +395,7 @@ export interface AttractionSummary {
   description?: string;
   city?: string;
   image_id?: string;
+  image_url?: string;
   latitude?: number;
   longitude?: number;
 }

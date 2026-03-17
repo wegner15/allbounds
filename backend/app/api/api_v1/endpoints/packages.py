@@ -16,6 +16,9 @@ from app.core.redis_cache import cache_endpoint, invalidate_cache_pattern
 class SetCoverImageRequest(BaseModel):
     image_id: str
 
+class UpdateFaqsRequest(BaseModel):
+    faqs: List[dict]
+
 router = APIRouter()
 
 @router.get("/", response_model=List[PackageListResponse])
@@ -361,4 +364,20 @@ def remove_media_from_package(
     package = package_service.remove_media_from_package(db, package_id=package_id, media_id=media_id)
     if package is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Package or media not found")
+    return package
+
+@router.patch("/{package_id}/faqs", response_model=PackageResponse)
+def update_package_faqs(
+    *,
+    db: Session = Depends(get_db),
+    package_id: int,
+    request: UpdateFaqsRequest,
+    current_user: User = Depends(has_permission("content:update")),
+) -> Any:
+    """
+    Update ONLY the FAQs for a package.
+    """
+    package = package_service.update_package_faqs(db, package_id=package_id, faqs=request.faqs)
+    if package is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Package not found")
     return package

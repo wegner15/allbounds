@@ -262,12 +262,12 @@ const AttractionItem: React.FC<{ attraction: AttractionSummary }> = ({ attractio
   return (
     <Link
       to={`/attractions/${attraction.slug}`}
-      className="group flex gap-2.5 sm:gap-3 p-2.5 sm:p-3 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg hover:shadow-md active:shadow-sm transition-all duration-200 touch-manipulation min-h-[60px] border border-primary/20 hover:border-primary/40"
+      className="group flex gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-xl hover:shadow-md active:shadow-sm transition-all duration-200 touch-manipulation min-h-[60px] border border-gray-200 hover:border-primary/30"
     >
-      {attraction.image_id && (
-        <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden shadow-sm">
+      {(attraction.image_id || attraction.image_url) && (
+        <div className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden shadow-sm">
           <OptimizedImage
-            imageId={attraction.image_id}
+            imageId={attraction.image_id || attraction.image_url}
             alt={attraction.name}
             variant="thumbnail"
             className="w-full h-full transition-transform duration-300 group-hover:scale-110"
@@ -279,13 +279,13 @@ const AttractionItem: React.FC<{ attraction: AttractionSummary }> = ({ attractio
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <h5 className="font-semibold text-charcoal text-xs sm:text-sm line-clamp-2 group-hover:text-primary transition-colors">{attraction.name}</h5>
+        <h5 className="font-semibold text-sm sm:text-base text-charcoal truncate group-hover:text-primary transition-colors">{attraction.name}</h5>
         {attraction.city && (
-          <p className="text-xs text-gray-600 mt-0.5 sm:mt-1 truncate font-medium">{attraction.city}</p>
+          <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1 truncate font-medium">{attraction.city}</p>
         )}
         {attraction.summary && (
           <div 
-            className="text-xs text-gray-600 mt-0.5 sm:mt-1 line-clamp-2 prose prose-sm max-w-none prose-p:my-0" 
+            className="text-xs text-gray-600 mt-1 sm:mt-1.5 line-clamp-2 prose prose-sm max-w-none prose-p:my-0" 
             dangerouslySetInnerHTML={{ __html: attraction.summary }} 
           />
         )}

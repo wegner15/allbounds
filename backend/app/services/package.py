@@ -156,28 +156,45 @@ class PackageService:
                 image_url = None
                 if hotel.image_id:
                     image_url = self._get_cloudflare_image_url(hotel.image_id)
-                elif hotel.media_assets:
+                elif hasattr(hotel, 'media_assets') and hotel.media_assets:
                     for media in hotel.media_assets:
                         if media.is_active:
                             if media.storage_key:
                                 image_url = self._get_cloudflare_image_url(media.storage_key)
                                 break
-                            elif media.file_path and media.file_path.startswith("cloudflare://") and media.storage_key:
+                setattr(hotel, 'image_url', image_url)
+ 
+            # Helper to set image_url on attraction objects
+            def set_attraction_image_url(attraction):
+                image_url = None
+                if attraction.image_id:
+                    image_url = self._get_cloudflare_image_url(attraction.image_id)
+                elif hasattr(attraction, 'media_assets') and attraction.media_assets:
+                    for media in attraction.media_assets:
+                        if media.is_active:
+                            if media.storage_key:
                                 image_url = self._get_cloudflare_image_url(media.storage_key)
                                 break
-                setattr(hotel, 'image_url', image_url)
+                setattr(attraction, 'image_url', image_url)
 
-            # Populate image_url for itinerary hotels
+            # Populate image_url for itinerary hotels and attractions
             if package.itinerary_items:
                 for item in package.itinerary_items:
                     if item.hotels:
                         for hotel in item.hotels:
                             set_hotel_image_url(hotel)
+                    if item.attractions:
+                        for attraction in item.attractions:
+                            set_attraction_image_url(attraction)
             
-            # Populate image_url for package hotels
+            # Populate image_url for package hotels and attractions
             if package.hotels:
                 for hotel in package.hotels:
                     set_hotel_image_url(hotel)
+            
+            if package.attractions:
+                for attraction in package.attractions:
+                    set_attraction_image_url(attraction)
         
         return package
     
@@ -693,6 +710,19 @@ class PackageService:
             db.commit()
             db.refresh(db_package)
         
+        return db_package
+    
+    def update_package_faqs(self, db: Session, package_id: int, faqs: List[Dict[str, str]]) -> Optional[Package]:
+        """
+        Update only the FAQs for a package.
+        """
+        db_package = db.query(Package).filter(Package.id == package_id).first()
+        if not db_package:
+            return None
+        
+        db_package.faqs = faqs
+        db.commit()
+        db.refresh(db_package)
         return db_package
 
 package_service = PackageService()

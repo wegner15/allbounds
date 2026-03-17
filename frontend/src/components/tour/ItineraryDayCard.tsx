@@ -284,7 +284,10 @@ const AttractionItem: React.FC<{ attraction: AttractionSummary }> = ({ attractio
           <p className="text-xs text-gray-600 mt-0.5 sm:mt-1 truncate font-medium">{attraction.city}</p>
         )}
         {attraction.summary && (
-          <p className="text-xs text-gray-600 mt-0.5 sm:mt-1 line-clamp-2">{attraction.summary}</p>
+          <div 
+            className="text-xs text-gray-600 mt-0.5 sm:mt-1 line-clamp-2 prose prose-sm max-w-none prose-p:my-0" 
+            dangerouslySetInnerHTML={{ __html: attraction.summary }} 
+          />
         )}
       </div>
     </Link>

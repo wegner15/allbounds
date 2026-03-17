@@ -52,9 +52,10 @@ const AttractionCard: React.FC<AttractionCardProps> = ({ attraction }) => {
 
         {/* Description - Use summary if available, otherwise description */}
         {(summary || description) && (
-          <p className="text-sm text-gray-600 mb-4 line-clamp-3 leading-relaxed">
-            {summary || description}
-          </p>
+          <div 
+            className="text-sm text-gray-600 mb-4 line-clamp-3 leading-relaxed prose prose-sm max-w-none prose-p:my-0"
+            dangerouslySetInnerHTML={{ __html: summary || description }}
+          />
         )}
 
         {/* Learn More Link */}

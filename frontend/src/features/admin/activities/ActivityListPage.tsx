@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { apiClient, endpoints } from '../../../lib/api';
 import type { ActivityResponse } from '../../../lib/types/api';
 import Button from '../../../components/ui/Button';
 import { getCloudflareImageUrl } from '../../../utils/imageUtils';
-import { useDeleteActivity } from '../../../lib/hooks/useActivities';
+import { useActivities, useDeleteActivity } from '../../../lib/hooks/useActivities';
+import CountryFilterSelect from '../../../components/ui/CountryFilterSelect';
 
 const ActivityListPage: React.FC = () => {
-  const { data: activities, isLoading, error } = useQuery<ActivityResponse[]>({
-    queryKey: ['admin-activities'],
-    queryFn: () => apiClient.get(endpoints.activities.list()),
-  });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCountryId, setSelectedCountryId] = useState<number | undefined>(undefined);
+  const { data: activities, isLoading, error } = useActivities(selectedCountryId);
   const deleteActivity = useDeleteActivity();
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+
+  const filteredActivities = activities?.filter((a: ActivityResponse) =>
+    a.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleDelete = async (id: number) => {
     try {
@@ -39,9 +41,34 @@ const ActivityListPage: React.FC = () => {
           <Button>Create Activity</Button>
         </Link>
       </div>
+
+      {/* Search + Country Filter */}
+      <div className="mb-4 flex flex-col sm:flex-row gap-3">
+        <input
+          type="text"
+          placeholder="Search activities..."
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <CountryFilterSelect
+          value={selectedCountryId}
+          onChange={(id) => { setSelectedCountryId(id); setSearchTerm(''); }}
+          className="sm:w-56"
+        />
+        {selectedCountryId && (
+          <button
+            onClick={() => setSelectedCountryId(undefined)}
+            className="sm:w-auto px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md hover:bg-gray-50 whitespace-nowrap"
+          >
+            Clear filter
+          </button>
+        )}
+      </div>
+
       {isLoading && <p>Loading...</p>}
       {error && <p className="text-red-500">Failed to load activities</p>}
-      {activities && (
+      {filteredActivities !== undefined && (
         <div className="bg-white shadow rounded-lg">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -54,7 +81,7 @@ const ActivityListPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {activities.map(activity => (
+              {filteredActivities!.map(activity => (
                 <tr key={activity.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {(() => {

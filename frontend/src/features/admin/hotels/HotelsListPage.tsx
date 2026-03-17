@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useHotels, useDeleteHotel } from '../../../lib/hooks/useHotels';
 import type { Hotel } from '../../../lib/hooks/useHotels';
 import { useCountries } from '../../../lib/hooks/useCountries';
+import CountryFilterSelect from '../../../components/ui/CountryFilterSelect';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 
 const HotelsListPage: React.FC = () => {
@@ -59,30 +60,11 @@ const HotelsListPage: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <div className="relative sm:w-56">
-            <select
-              value={selectedCountryId ?? ''}
-              onChange={(e) => {
-                const val = e.target.value;
-                setSelectedCountryId(val ? Number(val) : undefined);
-                setSearchTerm('');
-              }}
-              className="w-full appearance-none pl-4 pr-10 py-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-teal focus:border-transparent text-gray-700"
-            >
-              <option value="">All Countries</option>
-              {countries?.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-            {/* Chevron icon */}
-            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </span>
-          </div>
+          <CountryFilterSelect
+            value={selectedCountryId}
+            onChange={(id) => { setSelectedCountryId(id); setSearchTerm(''); }}
+            className="sm:w-56"
+          />
           {selectedCountryId && (
             <button
               onClick={() => setSelectedCountryId(undefined)}

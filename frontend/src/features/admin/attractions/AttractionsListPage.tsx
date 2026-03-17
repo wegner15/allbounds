@@ -3,10 +3,20 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useAttractions, useDeleteAttraction } from '../../../lib/hooks/useAttractions';
 import type { Attraction } from '../../../lib/hooks/useAttractions';
+import { useCountries } from '../../../lib/hooks/useCountries';
+import CountryFilterSelect from '../../../components/ui/CountryFilterSelect';
 
 const AttractionsListPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { data: attractions, isLoading, error } = useAttractions();
+  const [selectedCountryId, setSelectedCountryId] = useState<number | undefined>(undefined);
+  const { data: countries } = useCountries();
+  // Attractions filters by country name string on the backend
+  const selectedCountryName = selectedCountryId
+    ? countries?.find((c) => c.id === selectedCountryId)?.name
+    : undefined;
+  const { data: attractions, isLoading, error } = useAttractions(
+    selectedCountryName ? { country: selectedCountryName } : undefined
+  );
   const deleteAttraction = useDeleteAttraction();
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
 
@@ -47,14 +57,27 @@ const AttractionsListPage: React.FC = () => {
       </div>
 
       <div className="bg-white shadow-md rounded-lg p-6">
-        <div className="mb-6">
+        <div className="mb-6 flex flex-col sm:flex-row gap-3">
           <input
             type="text"
             placeholder="Search attractions..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
+          <CountryFilterSelect
+            value={selectedCountryId}
+            onChange={(id) => { setSelectedCountryId(id); setSearchTerm(''); }}
+            className="sm:w-56"
+          />
+          {selectedCountryId && (
+            <button
+              onClick={() => setSelectedCountryId(undefined)}
+              className="sm:w-auto px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md hover:bg-gray-50 whitespace-nowrap"
+            >
+              Clear filter
+            </button>
+          )}
         </div>
 
         {isLoading ? (
@@ -68,7 +91,11 @@ const AttractionsListPage: React.FC = () => {
           </div>
         ) : filteredAttractions?.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-600">No attractions found{searchTerm ? ' matching your search' : ''}.</p>
+            <p className="text-gray-600">
+              No attractions found
+              {selectedCountryId && countries ? ` in ${countries.find(c => c.id === selectedCountryId)?.name ?? 'selected country'}` : ''}
+              {searchTerm ? ' matching your search' : ''}.
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">

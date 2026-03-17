@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDeletePackage, usePackages, usePatchPackage } from '../../../lib/hooks/usePackages';
 import CloudflareImage from '../../../components/ui/CloudflareImage';
+import CountryFilterSelect from '../../../components/ui/CountryFilterSelect';
 
 const PackagesListPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const { data: packages, isLoading, error } = usePackages();
+  const [selectedCountryId, setSelectedCountryId] = useState<number | undefined>(undefined);
+  const { data: packages, isLoading, error } = usePackages(
+    selectedCountryId ? { country_id: selectedCountryId } : undefined
+  );
   const deletePackage = useDeletePackage();
   const patchPackage = usePatchPackage();
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
@@ -59,9 +63,7 @@ const PackagesListPage: React.FC = () => {
       <div className="bg-white shadow rounded-lg p-4 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-grow">
-            <label htmlFor="search" className="sr-only">
-              Search packages
-            </label>
+            <label htmlFor="search" className="sr-only">Search packages</label>
             <div className="relative rounded-md shadow-sm">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -79,6 +81,19 @@ const PackagesListPage: React.FC = () => {
               />
             </div>
           </div>
+          <CountryFilterSelect
+            value={selectedCountryId}
+            onChange={(id) => { setSelectedCountryId(id); setSearchQuery(''); }}
+            className="md:w-56"
+          />
+          {selectedCountryId && (
+            <button
+              onClick={() => setSelectedCountryId(undefined)}
+              className="md:w-auto px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md hover:bg-gray-50 whitespace-nowrap"
+            >
+              Clear filter
+            </button>
+          )}
         </div>
       </div>
 

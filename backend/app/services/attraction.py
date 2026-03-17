@@ -90,6 +90,8 @@ class AttractionService:
                 joinedload(Attraction.country),
                 joinedload(Attraction.activities),
                 joinedload(Attraction.hotels),  # Explicitly load hotels
+                joinedload(Attraction.packages), # Explicitly load packages
+                joinedload(Attraction.group_trips), # Explicitly load group trips
             )
             .filter(Attraction.id == attraction_id, Attraction.is_active == True)
             .first()
@@ -105,6 +107,8 @@ class AttractionService:
                 joinedload(Attraction.country),
                 joinedload(Attraction.activities),
                 joinedload(Attraction.hotels),  # Explicitly load hotels
+                joinedload(Attraction.packages), # Explicitly load packages
+                joinedload(Attraction.group_trips), # Explicitly load group trips
             )
             .filter(Attraction.slug == slug, Attraction.is_active == True)
             .first()

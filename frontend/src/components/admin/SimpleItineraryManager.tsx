@@ -206,7 +206,7 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
       </div>
 
       {/* Add new day form modal */}
-      <Dialog open={isAddingDay} onOpenChange={(open) => !open && resetForm()}>
+      <Dialog open={isAddingDay} onOpenChange={(open) => !open && resetForm()} className="!max-w-5xl">
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto w-full">
           <DialogHeader>
             <DialogTitle>{editingItemId ? 'Edit Itinerary Day' : 'Add Itinerary Day'}</DialogTitle>

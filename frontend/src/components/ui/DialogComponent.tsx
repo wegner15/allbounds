@@ -4,9 +4,10 @@ interface DialogProps {
   open: boolean;
   onOpenChange?: (open: boolean) => void;
   children: React.ReactNode;
+  className?: string;
 }
 
-const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) => {
+const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children, className = '' }) => {
   if (!open) return null;
 
   const handleBackdropClick = () => {
@@ -15,7 +16,7 @@ const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={handleBackdropClick}>
-      <div className="bg-white rounded-lg shadow-lg max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+      <div className={`bg-white rounded-lg shadow-lg max-w-md w-full ${className}`} onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
     </div>

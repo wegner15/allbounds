@@ -5,6 +5,7 @@ import LocationPicker from '../LocationPicker';
 import { useHotels } from '../../lib/hooks/useHotels';
 import { useAttractions } from '../../lib/hooks/useAttractions';
 import { useActivities } from '../../lib/hooks/useActivities';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/DialogComponent';
 
 interface SimpleItineraryManagerProps {
   entityType: EntityType;
@@ -38,6 +39,20 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
   const { data: hotels = [], isLoading: isLoadingHotels } = useHotels(countryId);
   const { data: attractions = [], isLoading: isLoadingAttractions } = useAttractions(countryId ? { country_id: countryId } : undefined);
   const { data: activities = [], isLoading: isLoadingActivities } = useActivities(countryId);
+
+  const resetForm = () => {
+    setIsAddingDay(false);
+    setEditingItemId(null);
+    setNewDayTitle('');
+    setNewDayDescription('');
+    setNewDayLocation('');
+    setNewDayLatitude('');
+    setNewDayLongitude('');
+    setNewDayHotelIds([]);
+    setNewDayAttractionIds([]);
+    setNewDayLinkedActivityIds([]);
+    setNewDayAccommodationNotes('');
+  };
 
   const handleEditDay = (item: ItineraryItem) => {
     setEditingItemId(item.id);
@@ -76,17 +91,7 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
       });
 
       // Reset form
-      setIsAddingDay(false);
-      setEditingItemId(null);
-      setNewDayTitle('');
-      setNewDayDescription('');
-      setNewDayLocation('');
-      setNewDayLatitude('');
-      setNewDayLongitude('');
-      setNewDayHotelIds([]);
-      setNewDayAttractionIds([]);
-      setNewDayLinkedActivityIds([]);
-      setNewDayAccommodationNotes('');
+      resetForm();
     } catch (error) {
       console.error('Error updating itinerary day:', error);
       alert('Failed to update itinerary day. Please try again.');
@@ -133,16 +138,7 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
       });
 
       // Reset form
-      setNewDayTitle('');
-      setNewDayDescription('');
-      setNewDayLocation('');
-      setNewDayLatitude('');
-      setNewDayLongitude('');
-      setNewDayHotelIds([]);
-      setNewDayAttractionIds([]);
-      setNewDayLinkedActivityIds([]);
-      setNewDayAccommodationNotes('');
-      setIsAddingDay(false);
+      resetForm();
 
       console.log('Successfully created itinerary day');
     } catch (error) {
@@ -209,10 +205,13 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
         )}
       </div>
 
-      {/* Add new day form */}
-      {isAddingDay && (
-        <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-          <div className="space-y-4">
+      {/* Add new day form modal */}
+      <Dialog open={isAddingDay} onOpenChange={(open) => !open && resetForm()}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto w-full">
+          <DialogHeader>
+            <DialogTitle>{editingItemId ? 'Edit Itinerary Day' : 'Add Itinerary Day'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Day Title
@@ -430,27 +429,15 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setIsAddingDay(false);
-                  setEditingItemId(null);
-                  setNewDayTitle('');
-                  setNewDayDescription('');
-                  setNewDayLocation('');
-                  setNewDayLatitude('');
-                  setNewDayLongitude('');
-                  setNewDayHotelIds([]);
-                  setNewDayAttractionIds([]);
-                  setNewDayLinkedActivityIds([]);
-                  setNewDayAccommodationNotes('');
-                }}
+                onClick={resetForm}
                 className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal"
               >
                 Cancel
               </button>
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Existing itinerary days */}
       {itinerary && itinerary.items && itinerary.items.length > 0 ? (

@@ -14,6 +14,7 @@ import ImageSelector from '../../../components/ui/ImageSelector';
 import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
 import GalleryManager from '../../../components/admin/GalleryManager';
 import PriceChartManager from '../../../components/admin/PriceChartManager';
+import { SimpleItineraryManager } from '../../../components/admin/SimpleItineraryManager';
 import type { GalleryImage } from '../../../lib/types/api';
 import ConfirmationModal from '../../../components/ui/ConfirmationModal';
 

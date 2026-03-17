@@ -76,6 +76,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
     message: '',
     variant: 'info',
   });
+  const [faqToDeleteIndex, setFaqToDeleteIndex] = useState<number | null>(null);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [coverImageId, setCoverImageId] = useState<number | null>(null);
 
@@ -206,6 +207,56 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       });
     } finally {
       setIsSavingFaqs(false);
+    }
+  };
+
+  const confirmDeleteFaq = (index: number) => {
+    setFaqToDeleteIndex(index);
+    setModalState({
+      isOpen: true,
+      title: 'Delete FAQ',
+      message: 'Are you sure you want to delete this FAQ? This action cannot be undone and will be saved immediately.',
+      variant: 'danger',
+    });
+  };
+
+  const executeDeleteFaq = async () => {
+    if (faqToDeleteIndex === null) return;
+
+    // Remove from UI
+    removeFaq(faqToDeleteIndex);
+    
+    // Automatically save to backend if editing an existing package
+    if (isEdit && packageId) {
+      setIsSavingFaqs(true);
+      try {
+        // We need to get the FAQs AFTER the removal, but react-hook-form's watch might not have updated immediately in this sync flow.
+        // So we get the current array, remove the item, and send that to backend.
+        const currentFaqs = watch('faqs') || [];
+        const newFaqs = currentFaqs.filter((_, i) => i !== faqToDeleteIndex);
+        
+        await apiClient.patch(`/api/v1/packages/${packageId}/faqs`, { faqs: newFaqs });
+        
+        // Modal will close because we override the onConfirm below
+        setModalState(prev => ({ ...prev, isOpen: false }));
+        
+        // Optionally show success modal, but maybe better to just be quiet on normal deletes to avoid click fatigue
+      } catch (error: any) {
+        console.error('Error deleting FAQ:', error);
+        setModalState({
+          isOpen: true,
+          title: 'Error',
+          message: error.response?.data?.detail || 'Failed to delete FAQ from the database. Please try again.',
+          variant: 'danger',
+        });
+      } finally {
+        setIsSavingFaqs(false);
+        setFaqToDeleteIndex(null);
+      }
+    } else {
+      // If creating new package, just remove from UI and close modal
+      setModalState(prev => ({ ...prev, isOpen: false }));
+      setFaqToDeleteIndex(null);
     }
   };
 
@@ -1045,7 +1096,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           type="button"
-                          onClick={() => removeFaq(index)}
+                          onClick={() => confirmDeleteFaq(index)}
                           className="p-1 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-200"
                         >
                           <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1294,13 +1345,23 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       
       <ConfirmationModal
         isOpen={modalState.isOpen}
-        onClose={() => setModalState(prev => ({ ...prev, isOpen: false }))}
-        onConfirm={() => setModalState(prev => ({ ...prev, isOpen: false }))}
+        onClose={() => {
+          setModalState(prev => ({ ...prev, isOpen: false }));
+          setFaqToDeleteIndex(null);
+        }}
+        onConfirm={() => {
+          if (faqToDeleteIndex !== null) {
+            executeDeleteFaq();
+          } else {
+            setModalState(prev => ({ ...prev, isOpen: false }));
+          }
+        }}
         title={modalState.title}
         message={modalState.message}
         variant={modalState.variant}
-        confirmText="OK"
-        cancelText=""
+        confirmText={faqToDeleteIndex !== null ? 'Delete FAQ' : 'OK'}
+        cancelText={faqToDeleteIndex !== null ? 'Cancel' : ''}
+        isLoading={isSavingFaqs}
       />
     </form>
   );

@@ -60,36 +60,31 @@ const PackagesListPage: React.FC = () => {
       </div>
 
       {/* Search and filters */}
-      <div className="bg-white shadow rounded-lg p-4 mb-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-grow">
-            <label htmlFor="search" className="sr-only">Search packages</label>
-            <div className="relative rounded-md shadow-sm">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <input
-                type="text"
-                name="search"
-                id="search"
-                className="focus:ring-teal focus:border-teal block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
-                placeholder="Search packages by name or destination"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+      <div className="bg-white shadow rounded-lg p-4 sm:p-5 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="relative w-full sm:max-w-md">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
+          <input
+            type="text"
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-gray-50 text-sm placeholder-gray-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal focus:border-teal transition-colors shadow-sm"
+            placeholder="Search packages by name or destination..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col sm:flex-row w-full sm:w-auto items-center gap-3">
           <CountryFilterSelect
             value={selectedCountryId}
             onChange={(id) => { setSelectedCountryId(id); setSearchQuery(''); }}
-            className="md:w-56"
+            className="w-full sm:w-56"
           />
           {selectedCountryId && (
             <button
               onClick={() => setSelectedCountryId(undefined)}
-              className="md:w-auto px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md hover:bg-gray-50 whitespace-nowrap"
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-transparent rounded-md hover:bg-gray-200 transition-colors whitespace-nowrap"
             >
               Clear filter
             </button>

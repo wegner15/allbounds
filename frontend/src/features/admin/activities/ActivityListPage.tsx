@@ -43,27 +43,36 @@ const ActivityListPage: React.FC = () => {
       </div>
 
       {/* Search + Country Filter */}
-      <div className="mb-4 flex flex-col sm:flex-row gap-3">
-        <input
-          type="text"
-          placeholder="Search activities..."
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <CountryFilterSelect
-          value={selectedCountryId}
-          onChange={(id) => { setSelectedCountryId(id); setSearchTerm(''); }}
-          className="sm:w-56"
-        />
-        {selectedCountryId && (
-          <button
-            onClick={() => setSelectedCountryId(undefined)}
-            className="sm:w-auto px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md hover:bg-gray-50 whitespace-nowrap"
-          >
-            Clear filter
-          </button>
-        )}
+      <div className="bg-white shadow rounded-lg p-4 sm:p-5 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="relative w-full sm:max-w-md">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-gray-50 text-sm placeholder-gray-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal focus:border-teal transition-colors shadow-sm"
+            placeholder="Search activities by name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col sm:flex-row w-full sm:w-auto items-center gap-3">
+          <CountryFilterSelect
+            value={selectedCountryId}
+            onChange={(id) => { setSelectedCountryId(id); setSearchTerm(''); }}
+            className="w-full sm:w-56"
+          />
+          {selectedCountryId && (
+            <button
+              onClick={() => setSelectedCountryId(undefined)}
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-transparent rounded-md hover:bg-gray-200 transition-colors whitespace-nowrap"
+            >
+              Clear filter
+            </button>
+          )}
+        </div>
       </div>
 
       {isLoading && <p>Loading...</p>}

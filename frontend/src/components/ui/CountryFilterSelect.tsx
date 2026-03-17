@@ -27,7 +27,7 @@ const CountryFilterSelect: React.FC<CountryFilterSelectProps> = ({
           onChange(val ? Number(val) : undefined);
         }}
         disabled={isLoading}
-        className="w-full appearance-none pl-4 pr-10 py-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-teal focus:border-transparent text-gray-700 disabled:opacity-60"
+        className="block w-full appearance-none pl-3 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white text-sm focus:outline-none focus:ring-1 focus:ring-teal focus:border-teal text-gray-700 hover:border-gray-400 disabled:opacity-60 transition-colors cursor-pointer shadow-sm"
       >
         <option value="">All Countries</option>
         {countries?.map((c) => (

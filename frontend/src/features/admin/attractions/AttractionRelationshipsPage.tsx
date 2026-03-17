@@ -198,7 +198,7 @@ const AttractionRelationshipsPage: React.FC = () => {
     hotel => relationships.hotel_ids?.includes(hotel.id)
   );
 
-  const selectorClass = "flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent";
+  const selectorClass = "flex-grow min-w-0 truncate p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent bg-white";
   const addButtonClass = (disabled: boolean) =>
     `bg-teal hover:bg-teal-dark text-white py-2 px-4 rounded-md ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`;
 

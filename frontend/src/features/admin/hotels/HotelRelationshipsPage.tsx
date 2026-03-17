@@ -144,7 +144,7 @@ const HotelRelationshipsPage: React.FC = () => {
               <select
                 value={selectedPackageId}
                 onChange={(e) => setSelectedPackageId(Number(e.target.value) || '')}
-                className="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
+                className="flex-grow min-w-0 truncate text-ellipsis p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent bg-white text-gray-700"
               >
                 <option value="">Select a package to add...</option>
                 {unassignedPackages?.map(pkg => (
@@ -194,7 +194,7 @@ const HotelRelationshipsPage: React.FC = () => {
               <select
                 value={selectedGroupTripId}
                 onChange={(e) => setSelectedGroupTripId(Number(e.target.value) || '')}
-                className="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
+                className="flex-grow min-w-0 truncate text-ellipsis p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent bg-white text-gray-700"
               >
                 <option value="">Select a group trip to add...</option>
                 {unassignedGroupTrips?.map(trip => (

@@ -14,8 +14,8 @@ import ImageSelector from '../../../components/ui/ImageSelector';
 import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
 import GalleryManager from '../../../components/admin/GalleryManager';
 import PriceChartManager from '../../../components/admin/PriceChartManager';
-import { SimpleItineraryManager } from '../../../components/admin/SimpleItineraryManager';
 import type { GalleryImage } from '../../../lib/types/api';
+import ConfirmationModal from '../../../components/ui/ConfirmationModal';
 
 // Form validation schema
 const packageSchema = z.object({
@@ -65,6 +65,17 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [isSavingFaqs, setIsSavingFaqs] = useState(false);
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    variant: 'info' | 'danger' | 'warning';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    variant: 'info',
+  });
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [coverImageId, setCoverImageId] = useState<number | null>(null);
 
@@ -179,10 +190,20 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
     try {
       const faqs = watch('faqs');
       await apiClient.patch(`/api/v1/packages/${packageId}/faqs`, { faqs });
-      alert('FAQs updated successfully!');
-    } catch (error) {
+      setModalState({
+        isOpen: true,
+        title: 'Success',
+        message: 'FAQs updated successfully!',
+        variant: 'info',
+      });
+    } catch (error: any) {
       console.error('Error updating FAQs:', error);
-      alert('Failed to update FAQs. Please try again.');
+      setModalState({
+        isOpen: true,
+        title: 'Error',
+        message: error.response?.data?.detail || 'Failed to update FAQs. Please try again.',
+        variant: 'danger',
+      });
     } finally {
       setIsSavingFaqs(false);
     }
@@ -1270,6 +1291,17 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
           </div>
         </div>
       </div>
+      
+      <ConfirmationModal
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={() => setModalState(prev => ({ ...prev, isOpen: false }))}
+        title={modalState.title}
+        message={modalState.message}
+        variant={modalState.variant}
+        confirmText="OK"
+        cancelText=""
+      />
     </form>
   );
 };

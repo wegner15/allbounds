@@ -107,8 +107,8 @@ const PackageDetailPageNew: React.FC = () => {
     <>
       <Helmet>
         {/* Primary Meta Tags */}
-        <title>{packageDetail.name} | AllBounds Vacations</title>
-        <meta name="title" content={`${packageDetail.name} | AllBounds Vacations`} />
+        <title>{packageDetail.name} | Allbound Vacations</title>
+        <meta name="title" content={`${packageDetail.name} | Allbound Vacations`} />
         <meta
           name="description"
           content={packageDetail.summary || packageDetail.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `Explore ${packageDetail.name} - ${packageDetail.duration_days} days in ${packageDetail.country.name}`}
@@ -118,7 +118,7 @@ const PackageDetailPageNew: React.FC = () => {
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={window.location.href} />
-        <meta property="og:title" content={`${packageDetail.name} | AllBounds Vacations`} />
+        <meta property="og:title" content={`${packageDetail.name} | Allbound Vacations`} />
         <meta
           property="og:description"
           content={packageDetail.summary || packageDetail.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `Explore ${packageDetail.name}`}
@@ -128,12 +128,12 @@ const PackageDetailPageNew: React.FC = () => {
         )}
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:site_name" content="AllBounds Vacations" />
+        <meta property="og:site_name" content="Allbound Vacations" />
 
         {/* Twitter */}
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:url" content={window.location.href} />
-        <meta property="twitter:title" content={`${packageDetail.name} | AllBounds Vacations`} />
+        <meta property="twitter:title" content={`${packageDetail.name} | Allbound Vacations`} />
         <meta
           property="twitter:description"
           content={packageDetail.summary || packageDetail.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `Explore ${packageDetail.name}`}
@@ -145,7 +145,7 @@ const PackageDetailPageNew: React.FC = () => {
         {/* Additional SEO Tags */}
         <meta name="robots" content="index, follow" />
         <meta name="language" content="English" />
-        <meta name="author" content="AllBounds Vacations" />
+        <meta name="author" content="Allbound Vacations" />
         <link rel="canonical" href={window.location.href} />
       </Helmet>
 
@@ -264,9 +264,9 @@ const PackageDetailPageNew: React.FC = () => {
               {/* Gallery Section */}
               {packageDetail.media_assets && packageDetail.media_assets.length > 0 && (
                 <div className="mb-6 md:mb-8">
-                  <GallerySection 
-                    images={packageDetail.media_assets} 
-                    title={packageDetail.name} 
+                  <GallerySection
+                    images={packageDetail.media_assets}
+                    title={packageDetail.name}
                   />
                 </div>
               )}

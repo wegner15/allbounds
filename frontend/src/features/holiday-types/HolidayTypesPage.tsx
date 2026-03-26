@@ -41,10 +41,10 @@ const HolidayTypesPage: React.FC = () => {
   return (
     <div className="bg-paper min-h-screen">
       <Helmet>
-        <title>Holiday Types | AllBounds Vacations</title>
+        <title>Holiday Types | Allbound Vacations</title>
         <meta name="description" content="Explore our diverse range of holiday types and find your perfect vacation style." />
       </Helmet>
-      
+
       {/* Hero Section */}
       <div className="bg-cover bg-center h-64 md:h-80 flex items-center justify-center" style={{ backgroundImage: 'url(https://source.unsplash.com/random/1600x900/?vacation)' }}>
         <div className="text-center text-white p-4 bg-black bg-opacity-50 rounded">
@@ -52,7 +52,7 @@ const HolidayTypesPage: React.FC = () => {
           <p className="text-lg md:text-xl">Find your perfect vacation style</p>
         </div>
       </div>
-      
+
       <div className="container mx-auto px-4 py-8">
         {isLoading ? (
           <div className="text-center py-12">
@@ -66,15 +66,15 @@ const HolidayTypesPage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {holidayTypes?.map(holidayType => (
-              <Link 
-                key={holidayType.id} 
+              <Link
+                key={holidayType.id}
                 to={`/holiday-types/${holidayType.slug}`}
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
                 <div className="relative h-48">
                   {holidayType.image_id ? (
-                    <CloudflareImage 
-                      imageId={holidayType.image_id} 
+                    <CloudflareImage
+                      imageId={holidayType.image_id}
                       variant="thumbnail"
                       alt={holidayType.name}
                       className="w-full h-full"
@@ -82,18 +82,18 @@ const HolidayTypesPage: React.FC = () => {
                       placeholder={`https://source.unsplash.com/random/600x400/?${holidayType.name.toLowerCase()}`}
                     />
                   ) : (
-                    <img 
-                      src={`https://source.unsplash.com/random/600x400/?${holidayType.name.toLowerCase()}`} 
+                    <img
+                      src={`https://source.unsplash.com/random/600x400/?${holidayType.name.toLowerCase()}`}
                       alt={holidayType.name}
                       className="w-full h-full object-cover"
                     />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
                     <div className="p-4 text-white">
-                       <div className="flex items-center mb-2">
-                         <span className="text-3xl mr-3">{holidayType.icon || getHolidayTypeIconFallback(holidayType.name)}</span>
-                         <h2 className="text-xl font-medium">{holidayType.name}</h2>
-                       </div>
+                      <div className="flex items-center mb-2">
+                        <span className="text-3xl mr-3">{holidayType.icon || getHolidayTypeIconFallback(holidayType.name)}</span>
+                        <h2 className="text-xl font-medium">{holidayType.name}</h2>
+                      </div>
                     </div>
                   </div>
                 </div>

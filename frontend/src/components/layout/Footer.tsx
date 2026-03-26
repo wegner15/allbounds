@@ -115,7 +115,7 @@ const Footer: React.FC<FooterProps> = ({
             <div className="lg:col-span-1">
               <Link to="/" className="inline-block mb-4">
                 {logo ? (
-                  <img src={logo} alt="AllBounds Vacations" className="h-10" />
+                  <img src={logo} alt="AllBound Vacations" className="h-10" />
                 ) : (
                   <h2 className="text-xl font-playfair font-bold text-white tracking-wide">Allbound Vacations</h2>
                 )}

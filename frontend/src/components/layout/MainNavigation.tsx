@@ -209,7 +209,7 @@ const MainNavigation: React.FC = () => {
               <div className="flex items-center">
                 <img
                   src="/logo/main_logo.png"
-                  alt="AllBounds Vacations"
+                  alt="AllBound Vacations"
                   className="h-10 sm:h-12 w-auto"
                   onError={(e) => {
                     const target = e.currentTarget as HTMLImageElement;
@@ -218,7 +218,7 @@ const MainNavigation: React.FC = () => {
                     if (sibling) sibling.style.display = 'block';
                   }}
                 />
-                <span className="hidden text-2xl font-bold text-charcoal ml-2">AllBounds Vacations</span>
+                <span className="hidden text-2xl font-bold text-charcoal ml-2">AllBound Vacations</span>
               </div>
             </Link>
 

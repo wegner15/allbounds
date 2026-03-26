@@ -115,7 +115,7 @@ const ActivityDetailPage: React.FC = () => {
     return (
         <div className="min-h-screen bg-white">
             <Helmet>
-                <title>{activity.name} | AllBounds Vacations</title>
+                <title>{activity.name} | Allbound Vacations</title>
                 <meta name="description" content={activity.summary || activity.description?.substring(0, 160)} />
             </Helmet>
 

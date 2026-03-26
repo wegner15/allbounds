@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  MapIcon, 
-  UserGroupIcon, 
-  PencilSquareIcon 
+import {
+  MapIcon,
+  UserGroupIcon,
+  PencilSquareIcon
 } from '@heroicons/react/24/outline';
 import TravelTipsCard from './TravelTipsCard';
 import SocialSharingCard from './SocialSharingCard';
@@ -13,9 +13,9 @@ interface QuickActionsSidebarProps {
   countryName: string;
 }
 
-const QuickActionsSidebar: React.FC<QuickActionsSidebarProps> = React.memo(({ 
-  countrySlug, 
-  countryName 
+const QuickActionsSidebar: React.FC<QuickActionsSidebarProps> = React.memo(({
+  countrySlug,
+  countryName
 }) => {
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
@@ -73,7 +73,7 @@ const QuickActionsSidebar: React.FC<QuickActionsSidebarProps> = React.memo(({
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Plan Your Trip
             </h3>
-            
+
             <div className="space-y-3">
               {/* Primary CTA - View Packages */}
               <button
@@ -130,7 +130,7 @@ const QuickActionsSidebar: React.FC<QuickActionsSidebarProps> = React.memo(({
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Plan Your Trip
           </h3>
-          
+
           <div className="space-y-3">
             {/* Primary CTA - View Packages */}
             <button
@@ -166,19 +166,18 @@ const QuickActionsSidebar: React.FC<QuickActionsSidebarProps> = React.memo(({
 
         {/* Travel Tips Card - Mobile/Tablet */}
         <TravelTipsCard countryName={countryName} />
-        
+
         {/* Social Sharing Card - Mobile/Tablet */}
-        <SocialSharingCard 
+        <SocialSharingCard
           countryName={countryName}
-          description={`Discover ${countryName} with AllBounds Vacations`}
+          description={`Discover ${countryName} with Allbound Vacations`}
         />
       </div>
 
       {/* Mobile Fixed Bottom Bar - Slide Up Animation */}
-      <div 
-        className={`lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40 transition-transform duration-300 ${
-          isVisible ? 'translate-y-0' : 'translate-y-full'
-        }`}
+      <div
+        className={`lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40 transition-transform duration-300 ${isVisible ? 'translate-y-0' : 'translate-y-full'
+          }`}
         role="navigation"
         aria-label="Quick actions"
       >

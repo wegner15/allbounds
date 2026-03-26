@@ -41,7 +41,7 @@ const PackageDetailPage: React.FC = () => {
   const lowestPrice = priceCharts && priceCharts.length > 0
     ? Math.min(...priceCharts.map(chart => chart.price))
     : packageDetail?.price || 0;
-  
+
   // Add to recently viewed when data is available
   React.useEffect(() => {
     if (packageDetail) {
@@ -54,7 +54,7 @@ const PackageDetailPage: React.FC = () => {
       });
     }
   }, [packageDetail, addRecentlyViewed]);
-  
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -69,7 +69,7 @@ const PackageDetailPage: React.FC = () => {
       </div>
     );
   }
-  
+
   if (error || !packageDetail) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -82,19 +82,19 @@ const PackageDetailPage: React.FC = () => {
       </div>
     );
   }
-  
+
   return (
     <>
       <Helmet>
-        <title>{packageDetail.name} | AllBounds Vacations</title>
+        <title>{packageDetail.name} | Allbound Vacations</title>
         <meta name="description" content={packageDetail.description || ''} />
-        <meta property="og:title" content={`${packageDetail.name} | AllBounds Vacations`} />
+        <meta property="og:title" content={`${packageDetail.name} | Allbound Vacations`} />
         <meta property="og:description" content={packageDetail.description || ''} />
         {packageDetail?.image_id && (
           <meta property="og:image" content={getImageUrlWithFallback(packageDetail.image_id, IMAGE_VARIANTS.LARGE)} />
         )}
       </Helmet>
-      
+
       <div className="container mx-auto px-4 py-8">
         <Breadcrumb
           items={[
@@ -104,156 +104,154 @@ const PackageDetailPage: React.FC = () => {
           ]}
           className="mb-6"
         />
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main content */}
           <div className="lg:col-span-2">
             <h1 className="text-4xl font-playfair text-charcoal mb-4">{packageDetail.name}</h1>
-            
+
             <div className="flex items-center mb-6">
               <div className="text-gray-600">
                 {packageDetail.duration_days && `${packageDetail.duration_days} days`}
                 {lowestPrice > 0 && ` • From $${lowestPrice.toFixed(2)}`}
               </div>
             </div>
-            
-             {/* Hero Image Carousel */}
-             {(packageDetail.gallery_images && packageDetail.gallery_images.length > 0) || packageDetail.cover_image ? (
-               <div className="mb-6">
-                 {packageDetail.gallery_images && packageDetail.gallery_images.length > 0 ? (
-                    <ImageCarousel
-                      images={packageDetail.gallery_images}
-                      autoPlay={true}
-                      showThumbnails={false}
-                      className="h-96 md:h-[28rem]"
+
+            {/* Hero Image Carousel */}
+            {(packageDetail.gallery_images && packageDetail.gallery_images.length > 0) || packageDetail.cover_image ? (
+              <div className="mb-6">
+                {packageDetail.gallery_images && packageDetail.gallery_images.length > 0 ? (
+                  <ImageCarousel
+                    images={packageDetail.gallery_images}
+                    autoPlay={true}
+                    showThumbnails={false}
+                    className="h-96 md:h-[28rem]"
+                  />
+                ) : packageDetail.cover_image ? (
+                  <div className="h-64 md:h-80 bg-gray-200 rounded-lg overflow-hidden">
+                    <img
+                      src={packageDetail.cover_image}
+                      alt={packageDetail.name}
+                      className="w-full h-full object-cover"
                     />
-                 ) : packageDetail.cover_image ? (
-                   <div className="h-64 md:h-80 bg-gray-200 rounded-lg overflow-hidden">
-                     <img
-                       src={packageDetail.cover_image}
-                       alt={packageDetail.name}
-                       className="w-full h-full object-cover"
-                     />
-                   </div>
-                 ) : null}
-               </div>
-             ) : null}
-            
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
             {/* Package Content */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
               <h2 className="text-2xl font-semibold mb-4">Overview</h2>
-              
-               {packageDetail.summary && (
-                 <div className="mb-4">
-                   <div 
-                     className="text-lg text-gray-700 leading-relaxed"
-                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(packageDetail.summary) }}
-                   />
-                 </div>
-               )}
 
-               {packageDetail.description && (
-                 <div className="mb-6">
-                   <TextDisplay content={packageDetail.description} />
-                 </div>
-               )}
-              
-               {/* Inclusions/Exclusions Tabs */}
-               {((packageDetail.inclusions || (packageDetail.inclusions && packageDetail.inclusions.length > 0)) ||
-                 (packageDetail.exclusions || (packageDetail.exclusions && packageDetail.exclusions.length > 0))) && (
-                 <div className="mb-6">
-                   <h3 className="text-xl font-semibold mb-4">Package Details</h3>
+              {packageDetail.summary && (
+                <div className="mb-4">
+                  <div
+                    className="text-lg text-gray-700 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(packageDetail.summary) }}
+                  />
+                </div>
+              )}
 
-                   {/* Tab Navigation */}
-                   <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
-                     {((packageDetail.inclusions || (packageDetail.inclusions && packageDetail.inclusions.length > 0))) && (
-                       <button
-                         onClick={() => setActiveTab('included')}
-                         className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-                           activeTab === 'included'
-                             ? 'bg-white text-green-700 shadow-sm'
-                             : 'text-gray-600 hover:text-gray-900'
-                         }`}
-                       >
-                         What's Included
-                       </button>
-                     )}
-                     {((packageDetail.exclusions || (packageDetail.exclusions && packageDetail.exclusions.length > 0))) && (
-                       <button
-                         onClick={() => setActiveTab('excluded')}
-                         className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-                           activeTab === 'excluded'
-                             ? 'bg-white text-red-700 shadow-sm'
-                             : 'text-gray-600 hover:text-gray-900'
-                         }`}
-                       >
-                         What's Not Included
-                       </button>
-                     )}
-                   </div>
+              {packageDetail.description && (
+                <div className="mb-6">
+                  <TextDisplay content={packageDetail.description} />
+                </div>
+              )}
 
-                   {/* Tab Content */}
-                   {activeTab === 'included' && (
-                     <div>
+              {/* Inclusions/Exclusions Tabs */}
+              {((packageDetail.inclusions || (packageDetail.inclusions && packageDetail.inclusions.length > 0)) ||
+                (packageDetail.exclusions || (packageDetail.exclusions && packageDetail.exclusions.length > 0))) && (
+                  <div className="mb-6">
+                    <h3 className="text-xl font-semibold mb-4">Package Details</h3>
+
+                    {/* Tab Navigation */}
+                    <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
+                      {((packageDetail.inclusions || (packageDetail.inclusions && packageDetail.inclusions.length > 0))) && (
+                        <button
+                          onClick={() => setActiveTab('included')}
+                          className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${activeTab === 'included'
+                              ? 'bg-white text-green-700 shadow-sm'
+                              : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                        >
+                          What's Included
+                        </button>
+                      )}
+                      {((packageDetail.exclusions || (packageDetail.exclusions && packageDetail.exclusions.length > 0))) && (
+                        <button
+                          onClick={() => setActiveTab('excluded')}
+                          className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${activeTab === 'excluded'
+                              ? 'bg-white text-red-700 shadow-sm'
+                              : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                        >
+                          What's Not Included
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Tab Content */}
+                    {activeTab === 'included' && (
+                      <div>
                         {typeof packageDetail.inclusions === 'string' ? (
                           <TextDisplay content={packageDetail.inclusions} />
                         ) : Array.isArray(packageDetail.inclusions) && packageDetail.inclusions.length > 0 ? (
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                           {packageDetail.inclusions.map((item) => (
-                             <div key={item.id} className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                               <div className="flex-shrink-0">
-                                 <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                   <i className={`fas fa-${item.icon} text-green-600 text-sm`}></i>
-                                 </div>
-                               </div>
-                               <div>
-                                 <p className="font-medium text-green-900">{item.name}</p>
-                                 {item.description && (
-                                   <p className="text-sm text-green-700">{item.description}</p>
-                                 )}
-                               </div>
-                             </div>
-                           ))}
-                         </div>
-                       ) : null}
-                     </div>
-                   )}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {packageDetail.inclusions.map((item) => (
+                              <div key={item.id} className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                                <div className="flex-shrink-0">
+                                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i className={`fas fa-${item.icon} text-green-600 text-sm`}></i>
+                                  </div>
+                                </div>
+                                <div>
+                                  <p className="font-medium text-green-900">{item.name}</p>
+                                  {item.description && (
+                                    <p className="text-sm text-green-700">{item.description}</p>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
 
-                   {activeTab === 'excluded' && (
-                     <div>
+                    {activeTab === 'excluded' && (
+                      <div>
                         {typeof packageDetail.exclusions === 'string' ? (
                           <TextDisplay content={packageDetail.exclusions} />
                         ) : Array.isArray(packageDetail.exclusions) && packageDetail.exclusions.length > 0 ? (
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                           {packageDetail.exclusions.map((item) => (
-                             <div key={item.id} className="flex items-center space-x-3 p-3 bg-red-50 rounded-lg border border-red-200">
-                               <div className="flex-shrink-0">
-                                 <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                                   <i className={`fas fa-${item.icon} text-red-600 text-sm`}></i>
-                                 </div>
-                               </div>
-                               <div>
-                                 <p className="font-medium text-red-900">{item.name}</p>
-                                 {item.description && (
-                                   <p className="text-sm text-red-700">{item.description}</p>
-                                 )}
-                               </div>
-                             </div>
-                           ))}
-                         </div>
-                       ) : null}
-                     </div>
-                   )}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {packageDetail.exclusions.map((item) => (
+                              <div key={item.id} className="flex items-center space-x-3 p-3 bg-red-50 rounded-lg border border-red-200">
+                                <div className="flex-shrink-0">
+                                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                                    <i className={`fas fa-${item.icon} text-red-600 text-sm`}></i>
+                                  </div>
+                                </div>
+                                <div>
+                                  <p className="font-medium text-red-900">{item.name}</p>
+                                  {item.description && (
+                                    <p className="text-sm text-red-700">{item.description}</p>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {/* Price Chart Section */}
-                <PriceChartDisplay packageId={packageDetail.id} basePrice={packageDetail.price} />
+              {/* Price Chart Section */}
+              <PriceChartDisplay packageId={packageDetail.id} basePrice={packageDetail.price} />
 
-               {/* Itinerary Section */}
-              <EnhancedItineraryDisplay 
-                entityType="package" 
-                entityId={packageDetail.id} 
+              {/* Itinerary Section */}
+              <EnhancedItineraryDisplay
+                entityType="package"
+                entityId={packageDetail.id}
                 className="mb-6"
               />
 
@@ -280,21 +278,21 @@ const PackageDetailPage: React.FC = () => {
 
             </div>
           </div>
-          
+
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-8">
               <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6 mb-6">
-                 <div className="text-center mb-6">
-                   {lowestPrice > 0 && (
-                     <div className="mb-4">
-                       <span className="text-sm text-gray-500">Starting from</span>
-                       <div className="text-3xl font-bold text-primary">${lowestPrice.toFixed(2)}</div>
-                       <span className="text-sm text-gray-500">per person</span>
-                     </div>
-                   )}
-                 </div>
-                
+                <div className="text-center mb-6">
+                  {lowestPrice > 0 && (
+                    <div className="mb-4">
+                      <span className="text-sm text-gray-500">Starting from</span>
+                      <div className="text-3xl font-bold text-primary">${lowestPrice.toFixed(2)}</div>
+                      <span className="text-sm text-gray-500">per person</span>
+                    </div>
+                  )}
+                </div>
+
                 <div className="space-y-4 mb-6">
                   {packageDetail.duration_days && (
                     <div className="flex items-center justify-between py-2 border-b border-gray-100">
@@ -307,7 +305,7 @@ const PackageDetailPage: React.FC = () => {
                       <span className="text-gray-900">{packageDetail.duration_days} days</span>
                     </div>
                   )}
-                  
+
                   <div className="flex items-center justify-between py-2 border-b border-gray-100">
                     <div className="flex items-center">
                       <svg className="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -318,7 +316,7 @@ const PackageDetailPage: React.FC = () => {
                     </div>
                     <span className="text-gray-900">{packageDetail.country.name}</span>
                   </div>
-                  
+
                   <div className="flex items-center justify-between py-2 border-b border-gray-100">
                     <div className="flex items-center">
                       <svg className="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -328,7 +326,7 @@ const PackageDetailPage: React.FC = () => {
                     </div>
                     <span className="text-gray-900">2-12 people</span>
                   </div>
-                  
+
                   <div className="flex items-center justify-between py-2">
                     <div className="flex items-center">
                       <svg className="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -339,25 +337,25 @@ const PackageDetailPage: React.FC = () => {
                     <span className="text-green-600 font-medium">Available</span>
                   </div>
                 </div>
-                
-                 <Button
-                   variant="primary"
-                   size="lg"
-                   className="w-full mb-3"
-                   onClick={() => setShowBookingForm(true)}
-                 >
-                   Book Now
-                 </Button>
 
-                 <Button
-                   variant="outline"
-                   size="lg"
-                   className="w-full mb-4"
-                   onClick={() => setShowInquiryForm(true)}
-                 >
-                   Send Inquiry
-                 </Button>
-                
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="w-full mb-3"
+                  onClick={() => setShowBookingForm(true)}
+                >
+                  Book Now
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full mb-4"
+                  onClick={() => setShowInquiryForm(true)}
+                >
+                  Send Inquiry
+                </Button>
+
                 <div className="text-center">
                   <p className="text-sm text-gray-500 mb-2">Need help planning?</p>
                   <div className="flex items-center justify-center text-sm text-primary">
@@ -368,7 +366,7 @@ const PackageDetailPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Trust indicators */}
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="font-semibold text-gray-900 mb-3">Why book with us?</h3>

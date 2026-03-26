@@ -114,10 +114,10 @@ const CountryDetailPageNew: React.FC = () => {
   }
 
   // Prepare SEO data
-  const pageTitle = `${country.name} | AllBounds Vacations`;
+  const pageTitle = `${country.name} | AllBound Vacations`;
   const pageDescription = country.description
     ? country.description.replace(/<[^>]*>/g, '').substring(0, 160)
-    : `Discover ${country.name} with AllBounds Vacations. Explore packages, group trips, attractions, and hotels.`;
+    : `Discover ${country.name} with AllBound Vacations. Explore packages, group trips, attractions, and hotels.`;
   const pageImage = country.image_id
     ? getImageUrlWithFallback(country.image_id, IMAGE_VARIANTS.LARGE)
     : undefined;

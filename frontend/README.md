@@ -1,9 +1,9 @@
-# AllBounds Vacations Frontend
+# AllBound Vacations Frontend
 
 > **Version:** v1.0  
 > **Date:** 2025-09-12  
 
-A modern, responsive frontend for AllBounds Vacations - a tour company website featuring destinations, packages, group trips, accommodations, attractions, activities, holiday types, and a blog with a lightweight admin interface.
+A modern, responsive frontend for AllBound Vacations - a tour company website featuring destinations, packages, group trips, accommodations, attractions, activities, holiday types, and a blog with a lightweight admin interface.
 
 ## Tech Stack
 
@@ -76,7 +76,7 @@ npm run deploy
 
 ## Design System
 
-The application uses a custom design system based on the AllBounds Vacations branding guide:
+The application uses a custom design system based on the AllBound Vacations branding guide:
 
 ### Colors
 - Charcoal: #3c4852  

@@ -20,7 +20,7 @@ const RegionsPage: React.FC = () => {
     return (
         <div className="bg-paper min-h-screen">
             <Helmet>
-                <title>Regions | AllBounds Vacations</title>
+                <title>Regions | Allbound Vacations</title>
                 <meta name="description" content="Explore our diverse regions. From the savannas of East Africa to the deserts of North Africa, discover unique destinations." />
             </Helmet>
 

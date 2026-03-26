@@ -18,7 +18,7 @@ import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils'
 
 const HotelDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  
+
   // Fetch hotel details with gallery
   const { data: hotel, isLoading, error } = useQuery<HotelWithGallery>({
     queryKey: ['hotel-details', slug],
@@ -60,10 +60,10 @@ const HotelDetailPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>{hotel.name} | AllBounds Vacations</title>
-        <meta name="description" content={hotel.summary || hotel.description || `Stay at ${hotel.name} with AllBounds Vacations`} />
-        <meta property="og:title" content={`${hotel.name} | AllBounds Vacations`} />
-        <meta property="og:description" content={hotel.summary || hotel.description || `Stay at ${hotel.name} with AllBounds Vacations`} />
+        <title>{hotel.name} | Allbound Vacations</title>
+        <meta name="description" content={hotel.summary || hotel.description || `Stay at ${hotel.name} with Allbound Vacations`} />
+        <meta property="og:title" content={`${hotel.name} | Allbound Vacations`} />
+        <meta property="og:description" content={hotel.summary || hotel.description || `Stay at ${hotel.name} with Allbound Vacations`} />
         {hotel.cover_image && (
           <meta property="og:image" content={getImageUrlWithFallback(hotel.cover_image, IMAGE_VARIANTS.LARGE)} />
         )}
@@ -144,7 +144,7 @@ const HotelDetailPage: React.FC = () => {
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(hotel.description) }}
                   />
                 )}
-                
+
                 {/* Hotel Details */}
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {hotel.address && (
@@ -245,7 +245,7 @@ const HotelDetailPage: React.FC = () => {
                   {hotel.country && (
                     <div className="flex justify-between">
                       <span className="text-gray-600">Country</span>
-                      <Link 
+                      <Link
                         to={`/destinations/${hotel.country.slug}`}
                         className="font-medium text-teal hover:text-hover"
                       >

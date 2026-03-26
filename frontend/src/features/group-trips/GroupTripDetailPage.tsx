@@ -123,9 +123,9 @@ const GroupTripDetailPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>{tripDetail.name} | AllBounds Vacations</title>
+        <title>{tripDetail.name} | Allbound Vacations</title>
         <meta name="description" content={tripDetail.description || ''} />
-        <meta property="og:title" content={`${tripDetail.name} | AllBounds Vacations`} />
+        <meta property="og:title" content={`${tripDetail.name} | Allbound Vacations`} />
         <meta property="og:description" content={tripDetail.description || ''} />
         {tripDetail?.cover_image && (
           <meta property="og:image" content={getImageUrlWithFallback(tripDetail.cover_image, IMAGE_VARIANTS.LARGE)} />
@@ -133,9 +133,8 @@ const GroupTripDetailPage: React.FC = () => {
       </Helmet>
 
       {/* Sticky Trip Info Card */}
-      <div className={`fixed top-20 left-0 right-0 z-45 transition-all duration-300 ${
-        isScrolled ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
-      }`}>
+      <div className={`fixed top-20 left-0 right-0 z-45 transition-all duration-300 ${isScrolled ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+        }`}>
         <div className="bg-white shadow-lg border-b border-gray-200">
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
@@ -250,7 +249,7 @@ const GroupTripDetailPage: React.FC = () => {
         )}
 
 
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main content */}
           <div className="lg:col-span-2">
@@ -267,43 +266,43 @@ const GroupTripDetailPage: React.FC = () => {
                 </div>
               </>
             )}
-            
-            
+
+
             {/* Group Trip Content */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
               <h2 className="text-2xl font-semibold mb-4">Overview</h2>
-              
+
               {tripDetail.description && (
                 <div className="mb-6">
                   <TextDisplay content={tripDetail.description} />
                 </div>
               )}
-              
+
               {tripDetail.inclusions && (
                 <>
                   <h3 className="text-xl font-semibold mb-3">What's Included</h3>
-                   <div className="mb-6">
-                     <TextDisplay content={Array.isArray(tripDetail.inclusions) ? tripDetail.inclusions.join('\n') : tripDetail.inclusions} />
-                   </div>
+                  <div className="mb-6">
+                    <TextDisplay content={Array.isArray(tripDetail.inclusions) ? tripDetail.inclusions.join('\n') : tripDetail.inclusions} />
+                  </div>
                 </>
               )}
-              
+
               {tripDetail.exclusions && (
                 <>
                   <h3 className="text-xl font-semibold mb-3">What's Not Included</h3>
-                   <div className="mb-6">
-                     <TextDisplay content={Array.isArray(tripDetail.exclusions) ? tripDetail.exclusions.join('\n') : tripDetail.exclusions} />
-                   </div>
+                  <div className="mb-6">
+                    <TextDisplay content={Array.isArray(tripDetail.exclusions) ? tripDetail.exclusions.join('\n') : tripDetail.exclusions} />
+                  </div>
                 </>
               )}
-              
-               {/* Itinerary Section */}
-               <EnhancedItineraryDisplay
-                 entityType="group_trip"
-                 entityId={tripDetail.id}
-                 isScrolled={isScrolled}
-                 className="mb-6"
-               />
+
+              {/* Itinerary Section */}
+              <EnhancedItineraryDisplay
+                entityType="group_trip"
+                entityId={tripDetail.id}
+                isScrolled={isScrolled}
+                className="mb-6"
+              />
 
               {tripDetail.itinerary && (
                 <>
@@ -316,12 +315,12 @@ const GroupTripDetailPage: React.FC = () => {
 
             </div>
           </div>
-          
+
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
               <h2 className="text-2xl font-semibold mb-4">Trip Details</h2>
-              
+
               <div className="space-y-4">
                 {tripDetail.duration_days && (
                   <div>
@@ -329,19 +328,19 @@ const GroupTripDetailPage: React.FC = () => {
                     <span className="ml-2">{tripDetail.duration_days} days</span>
                   </div>
                 )}
-                
+
                 {tripDetail.max_participants && (
                   <div>
                     <span className="font-medium text-gray-600">Group Size:</span>
                     <span className="ml-2">Max {tripDetail.max_participants} people</span>
                   </div>
                 )}
-                
+
                 <div>
                   <span className="font-medium text-gray-600">Country:</span>
                   <span className="ml-2">{tripDetail.country.name}</span>
                 </div>
-                
+
                 {tripDetail.price && (
                   <div>
                     <span className="font-medium text-gray-600">Price:</span>
@@ -349,7 +348,7 @@ const GroupTripDetailPage: React.FC = () => {
                     <span className="text-gray-600 text-sm block">per person</span>
                   </div>
                 )}
-                
+
                 {tripDetail.departures && tripDetail.departures.length > 0 && (
                   <div>
                     <span className="font-medium text-gray-600">Departures:</span>
@@ -362,7 +361,7 @@ const GroupTripDetailPage: React.FC = () => {
                     </div>
                   </div>
                 )}
-                
+
                 {tripDetail.holiday_types && tripDetail.holiday_types.length > 0 && (
                   <div>
                     <span className="font-medium text-gray-600">Holiday Types:</span>
@@ -376,15 +375,15 @@ const GroupTripDetailPage: React.FC = () => {
                   </div>
                 )}
               </div>
-              
-               <Button
-                 variant="primary"
-                 size="lg"
-                 className="w-full mt-6"
-                 onClick={() => setShowBookingForm(true)}
-               >
-                 Join This Trip
-               </Button>
+
+              <Button
+                variant="primary"
+                size="lg"
+                className="w-full mt-6"
+                onClick={() => setShowBookingForm(true)}
+              >
+                Join This Trip
+              </Button>
             </div>
           </div>
         </div>

@@ -149,9 +149,9 @@ const HolidayTypeDetailPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>{holidayType.name} Holidays | AllBounds Vacations</title>
+        <title>{holidayType.name} Holidays | Allbound Vacations</title>
         <meta name="description" content={holidayType.description || ''} />
-        <meta property="og:title" content={`${holidayType.name} Holidays | AllBounds Vacations`} />
+        <meta property="og:title" content={`${holidayType.name} Holidays | Allbound Vacations`} />
         <meta property="og:description" content={holidayType.description || ''} />
         <meta property="og:image" content={`https://source.unsplash.com/random/1200x630/?${holidayType.name.toLowerCase()}`} />
       </Helmet>

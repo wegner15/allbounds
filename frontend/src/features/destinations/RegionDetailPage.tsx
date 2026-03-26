@@ -109,10 +109,10 @@ const RegionDetailPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>{region.name} | AllBounds Vacations</title>
-        <meta name="description" content={region.description || `Explore ${region.name} with AllBounds Vacations`} />
-        <meta property="og:title" content={`${region.name} | AllBounds Vacations`} />
-        <meta property="og:description" content={region.description || `Explore ${region.name} with AllBounds Vacations`} />
+        <title>{region.name} | Allbound Vacations</title>
+        <meta name="description" content={region.description || `Explore ${region.name} with Allbound Vacations`} />
+        <meta property="og:title" content={`${region.name} | Allbound Vacations`} />
+        <meta property="og:description" content={region.description || `Explore ${region.name} with Allbound Vacations`} />
         <meta property="og:image" content={getImageUrlWithFallback(region.image_id || region.image_url, IMAGE_VARIANTS.LARGE, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80')} />
       </Helmet>
 

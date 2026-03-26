@@ -222,7 +222,7 @@ const SearchPage: React.FC = () => {
   return (
     <div className="bg-paper min-h-screen">
       <Helmet>
-        <title>{query ? `Search results for "${query}"` : 'Search'} | AllBounds Vacations</title>
+        <title>{query ? `Search results for "${query}"` : 'Search'} | Allbound Vacations</title>
         <meta name="description" content="Search for vacation packages, group trips, destinations, and more." />
       </Helmet>
 

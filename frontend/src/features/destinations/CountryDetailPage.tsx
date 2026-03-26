@@ -76,10 +76,10 @@ const CountryDetailPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>{country.name} | AllBounds Vacations</title>
-        <meta name="description" content={country.description || `Discover ${country.name} with AllBounds Vacations`} />
-        <meta property="og:title" content={`${country.name} | AllBounds Vacations`} />
-        <meta property="og:description" content={country.description || `Discover ${country.name} with AllBounds Vacations`} />
+        <title>{country.name} | AllBound Vacations</title>
+        <meta name="description" content={country.description || `Discover ${country.name} with AllBound Vacations`} />
+        <meta property="og:title" content={`${country.name} | AllBound Vacations`} />
+        <meta property="og:description" content={country.description || `Discover ${country.name} with AllBound Vacations`} />
         {country?.image_id && (
           <meta property="og:image" content={getImageUrlWithFallback(country.image_id, IMAGE_VARIANTS.LARGE)} />
         )}

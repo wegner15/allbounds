@@ -187,7 +187,7 @@ const GroupTripsPage: React.FC = () => {
   return (
     <div className="bg-paper min-h-screen">
       <Helmet>
-        <title>Group Trips | AllBounds Vacations</title>
+        <title>Group Trips | Allbound Vacations</title>
         <meta name="description" content="Join our scheduled group trips to destinations across Africa and beyond." />
       </Helmet>
 

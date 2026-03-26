@@ -56,7 +56,7 @@ const CountryCategoryPage: React.FC = () => {
     return (
         <div className="bg-gray-50 min-h-screen">
             <Helmet>
-                <title>{`${getCategoryLabel()} in ${country.name} | AllBounds Vacations`}</title>
+                <title>{`${getCategoryLabel()} in ${country.name} | AllBound Vacations`}</title>
             </Helmet>
 
             <Breadcrumb

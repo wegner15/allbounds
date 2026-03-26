@@ -24,25 +24,25 @@ const CTABanner: React.FC<CTABannerProps> = ({ countrySlug, countryName }) => {
             </p>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
             {/* Primary CTA - View Packages */}
             <Link
               to={`/packages?country=${countrySlug}`}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-primary font-semibold rounded-lg shadow-lg hover:bg-gray-50 hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-10 py-4 bg-white text-primary font-bold rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-white/50"
               aria-label={`View travel packages for ${countryName}`}
             >
-              <MapIcon className="w-5 h-5" aria-hidden="true" />
-              <span>View Packages</span>
+              <MapIcon className="w-6 h-6" aria-hidden="true" />
+              <span className="text-lg">View Packages</span>
             </Link>
             
             {/* Secondary CTA - Join Group Trips */}
             <Link
               to={`/group-trips?country=${countrySlug}`}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-transparent text-white font-semibold rounded-lg border-2 border-white hover:bg-white hover:text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-10 py-4 bg-transparent text-white font-bold rounded-xl border-2 border-white/80 hover:bg-white hover:text-primary hover:border-white shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-white/30"
               aria-label={`Join group trips to ${countryName}`}
             >
-              <UsersIcon className="w-5 h-5" aria-hidden="true" />
-              <span>Join Group Trips</span>
+              <UsersIcon className="w-6 h-6" aria-hidden="true" />
+              <span className="text-lg">Join Group Trips</span>
             </Link>
           </div>
         </div>

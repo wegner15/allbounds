@@ -224,15 +224,17 @@ const CountryDetailPageNew: React.FC = () => {
               title={`Special Offers in ${country.name}`}
             />
           </section>
+        </div>
 
-          {/* CTA Banner - Full Width */}
-          <div className="-mx-4 md:-mx-8 lg:-mx-12 overflow-hidden">
-            <CTABanner
-              countrySlug={country.slug}
-              countryName={country.name}
-            />
-          </div>
+        {/* CTA Banner - Full Width */}
+        <div className="py-12 md:py-16">
+          <CTABanner
+            countrySlug={country.slug}
+            countryName={country.name}
+          />
+        </div>
 
+        <div className="container mx-auto px-4 pb-12">
           {/* Hotels Section (Where to Stay) */}
           <section id="hotels" className="scroll-mt-24 mb-12">
             <HotelsTab countryId={country.id} preview={true} destinationSlug={country.slug} title={`Where to Stay in ${country.name}`} />

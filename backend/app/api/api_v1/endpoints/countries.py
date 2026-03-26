@@ -282,7 +282,14 @@ def create_country_visit_info(
             detail="Country ID in path does not match the one in request body"
         )
     
-    return country_visit_info_service.create_country_visit_info(db, visit_info)
+    result = country_visit_info_service.create_country_visit_info(db, visit_info)
+    
+    # Invalidate the Redis cache for this country's detail page
+    from app.core.redis_cache import invalidate_cache_pattern
+    invalidate_cache_pattern(f"cache:get_country_details_by_slug:slug={country.slug}")
+    invalidate_cache_pattern("cache:get_country_details_by_slug:*")
+    
+    return result
 
 @router.put("/{country_id}/visit-info", response_model=CountryVisitInfo)
 def update_country_visit_info(
@@ -302,7 +309,14 @@ def update_country_visit_info(
             detail="Country not found"
         )
     
-    return country_visit_info_service.update_country_visit_info(db, country_id, visit_info)
+    result = country_visit_info_service.update_country_visit_info(db, country_id, visit_info)
+    
+    # Invalidate the Redis cache for this country's detail page
+    from app.core.redis_cache import invalidate_cache_pattern
+    invalidate_cache_pattern(f"cache:get_country_details_by_slug:slug={country.slug}")
+    invalidate_cache_pattern("cache:get_country_details_by_slug:*")
+    
+    return result
 
 @router.delete("/{country_id}/visit-info", status_code=status.HTTP_204_NO_CONTENT)
 def delete_country_visit_info(
@@ -327,5 +341,10 @@ def delete_country_visit_info(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Visit information not found for this country"
         )
+    
+    # Invalidate the Redis cache for this country's detail page
+    from app.core.redis_cache import invalidate_cache_pattern
+    invalidate_cache_pattern(f"cache:get_country_details_by_slug:slug={country.slug}")
+    invalidate_cache_pattern("cache:get_country_details_by_slug:*")
     
     return None

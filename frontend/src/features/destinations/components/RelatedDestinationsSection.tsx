@@ -63,7 +63,7 @@ const RelatedDestinationsSection: React.FC<RelatedDestinationsSectionProps> = ({
               id="related-destinations-title"
               className="text-2xl md:text-3xl font-playfair font-bold text-gray-900"
             >
-              Related Destinations
+              Similar Destinations
             </h2>
             <p className="text-sm text-gray-600 mt-1">
               Explore more destinations in {country.region.name}

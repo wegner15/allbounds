@@ -190,6 +190,7 @@ const CountryDetailPageNew: React.FC = () => {
             { id: 'blog', label: 'Blog' },
             { id: 'faq', label: 'FAQs' },
             { id: 'share', label: 'Share' },
+            { id: 'similar', label: 'Similar Destinations' },
           ]}
         />
 
@@ -281,8 +282,8 @@ const CountryDetailPageNew: React.FC = () => {
         </section>
 
         <div className="container mx-auto px-4">
-          {/* Related Destinations Section */}
-          <section className="mt-16">
+          {/* Similar Destinations Section */}
+          <section id="similar" className="scroll-mt-24 mt-16">
             <Suspense fallback={<SectionLoader />}>
               <RelatedDestinationsSection country={country} />
             </Suspense>

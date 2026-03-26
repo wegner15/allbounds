@@ -128,11 +128,17 @@ const BookingSidebar: React.FC<BookingSidebarProps> = ({
           {showPriceChart && priceCharts && priceCharts.length > 0 && (
             <div className="mt-3 p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-lg space-y-2.5 border border-gray-200 animate-slide-down">
               {priceCharts.map((chart) => (
-                <div key={chart.id} className="flex justify-between text-sm items-center">
-                  <span className="text-gray-600 font-medium">
-                    {new Date(chart.start_date).toLocaleDateString()} - {new Date(chart.end_date).toLocaleDateString()}
-                  </span>
-                  <span className="font-bold text-charcoal">${chart.price.toLocaleString()}</span>
+                <div key={chart.id} className="flex justify-between items-start text-sm border-b border-gray-100 last:border-0 pb-2 mb-2 last:pb-0 last:mb-0">
+                  <div className="flex flex-col">
+                    <span className="font-bold text-charcoal">{chart.title}</span>
+                    <span className="text-gray-500 text-xs font-medium">
+                      {new Date(chart.start_date).toLocaleDateString()} - {new Date(chart.end_date).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="block font-bold text-primary">${chart.price.toLocaleString()}</span>
+                    <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Per Person</span>
+                  </div>
                 </div>
               ))}
             </div>

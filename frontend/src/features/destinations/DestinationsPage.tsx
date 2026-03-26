@@ -33,10 +33,10 @@ const DestinationsPage: React.FC = () => {
       {/* Hero Section */}
       <div className="bg-cover bg-center h-80 md:h-96 flex items-center justify-center relative" 
            style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80)' }}>
-        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+        <div className="absolute inset-0 bg-black/50"></div>
         <div className="text-center text-white p-4 relative z-10">
-          <h1 className="text-4xl md:text-5xl font-playfair mb-4">Discover Amazing Destinations</h1>
-          <p className="text-xl md:text-2xl mb-6">Explore the beauty and culture of Africa and beyond</p>
+          <h1 className="text-4xl md:text-6xl font-playfair font-bold text-white mb-4 drop-shadow-xl">Discover Amazing Destinations</h1>
+          <p className="text-xl md:text-2xl mb-8 font-light drop-shadow-md">Explore the beauty and culture of Africa and beyond</p>
           <Link to="/packages">
             <Button variant="primary" size="lg">
               Explore Packages

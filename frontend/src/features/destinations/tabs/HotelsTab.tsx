@@ -35,23 +35,13 @@ const HotelsTab: React.FC<HotelsTabProps> = ({ countryId, preview = false, desti
         <div>{/* removed py-6 since sections handle spacing */}
             <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">{title || "Stay at the Best Hotels"}</h2>
             <PaginatedGrid
-                items={preview ? countryHotels.slice(0, 9) : countryHotels}
+                items={countryHotels}
                 renderItem={(hotel) => <HotelCard hotel={hotel as any} />}
                 emptyMessage="No hotels listed for this destination yet."
-                itemsPerPage={preview ? 9 : 9}
-                showPagination={!preview}
+                itemsPerPage={preview ? 3 : 9}
+                showPagination={true}
+                loadMoreLabel={preview ? "Load More Hotels" : "Load More"}
             />
-
-            {preview && countryHotels.length > 9 && destinationSlug && (
-                <div className="mt-8 text-center">
-                    <Link
-                        to={`/destinations/${destinationSlug}/hotels`}
-                        className="inline-flex items-center px-6 py-3 border border-teal-600 text-teal-600 font-semibold rounded-lg hover:bg-teal-600 hover:text-white transition-colors duration-200"
-                    >
-                        READ MORE HOTELS
-                    </Link>
-                </div>
-            )}
         </div>
     );
 };

@@ -37,10 +37,20 @@ const GroupTripsTab: React.FC<GroupTripsTabProps> = ({ countryId, preview = fals
                 items={activeTrips}
                 renderItem={(trip) => <GroupTripCard groupTrip={trip as any} />}
                 emptyMessage="No group trips scheduled for this destination yet."
-                itemsPerPage={preview ? 9 : 9}
-                showPagination={true}
-                loadMoreLabel={preview ? "Load More Group Trips" : "Load More"}
+                itemsPerPage={preview ? 3 : 9}
+                showPagination={!preview}
             />
+
+            {preview && activeTrips.length > 3 && destinationSlug && (
+                <div className="mt-12 text-center">
+                    <Link
+                        to={`/destinations/${destinationSlug}/group-trips`}
+                        className="inline-flex items-center px-8 py-4 border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all duration-300 shadow-sm hover:shadow-lg active:scale-95 uppercase tracking-wider text-sm"
+                    >
+                        See All Group Trips
+                    </Link>
+                </div>
+            )}
         </div>
     );
 };

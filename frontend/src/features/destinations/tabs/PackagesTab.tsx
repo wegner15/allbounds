@@ -62,10 +62,20 @@ const PackagesTab: React.FC<PackagesTabProps> = ({
                 items={displayPackages}
                 renderItem={(pkg: any) => <PackageCard package={pkg} />}
                 emptyMessage="No packages available for this destination yet."
-                itemsPerPage={preview ? 9 : 9}
-                showPagination={true}
-                loadMoreLabel={preview ? "Load More Packages" : "Load More"}
+                itemsPerPage={preview ? (isDealsOnly ? 3 : 6) : 9}
+                showPagination={!preview}
             />
+
+            {preview && displayPackages.length > (isDealsOnly ? 3 : 6) && destinationSlug && (
+                <div className="mt-12 text-center">
+                    <Link
+                        to={isDealsOnly ? `/destinations/${destinationSlug}/deals` : `/destinations/${destinationSlug}/packages`}
+                        className="inline-flex items-center px-8 py-4 border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all duration-300 shadow-sm hover:shadow-lg active:scale-95 uppercase tracking-wider text-sm"
+                    >
+                        {isDealsOnly ? "See All Deals" : "See All Packages"}
+                    </Link>
+                </div>
+            )}
         </div>
     );
 };

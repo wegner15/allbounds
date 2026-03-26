@@ -38,9 +38,19 @@ const ActivitiesTab: React.FC<ActivitiesTabProps> = ({ countryId, preview = fals
                 renderItem={(act: any) => <ActivityCard activity={act} />}
                 emptyMessage="No activities listed for this destination yet."
                 itemsPerPage={preview ? 4 : 9}
-                showPagination={true}
-                loadMoreLabel={preview ? "Load More Activities" : "Load More"}
+                showPagination={!preview}
             />
+
+            {preview && activeActivities.length > 4 && destinationSlug && (
+                <div className="mt-12 text-center">
+                    <Link
+                        to={`/destinations/${destinationSlug}/activities`}
+                        className="inline-flex items-center px-8 py-4 border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all duration-300 shadow-sm hover:shadow-lg active:scale-95 uppercase tracking-wider text-sm"
+                    >
+                        See All Activities
+                    </Link>
+                </div>
+            )}
         </div>
     );
 };

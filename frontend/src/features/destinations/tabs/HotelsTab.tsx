@@ -39,9 +39,19 @@ const HotelsTab: React.FC<HotelsTabProps> = ({ countryId, preview = false, desti
                 renderItem={(hotel) => <HotelCard hotel={hotel as any} />}
                 emptyMessage="No hotels listed for this destination yet."
                 itemsPerPage={preview ? 3 : 9}
-                showPagination={true}
-                loadMoreLabel={preview ? "Load More Hotels" : "Load More"}
+                showPagination={!preview}
             />
+
+            {preview && countryHotels.length > 3 && destinationSlug && (
+                <div className="mt-12 text-center">
+                    <Link
+                        to={`/destinations/${destinationSlug}/hotels`}
+                        className="inline-flex items-center px-8 py-4 border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all duration-300 shadow-sm hover:shadow-lg active:scale-95 uppercase tracking-wider text-sm"
+                    >
+                        See All Hotels
+                    </Link>
+                </div>
+            )}
         </div>
     );
 };

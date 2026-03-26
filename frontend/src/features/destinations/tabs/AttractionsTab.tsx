@@ -38,9 +38,19 @@ const AttractionsTab: React.FC<AttractionsTabProps> = ({ countryName, preview = 
                 renderItem={(attr) => <AttractionCard attraction={attr as any} />}
                 emptyMessage="No attractions listed for this destination yet."
                 itemsPerPage={preview ? 3 : 9}
-                showPagination={true}
-                loadMoreLabel={preview ? "Load More Attractions" : "Load More"}
+                showPagination={!preview}
             />
+
+            {preview && activeAttractions.length > 3 && destinationSlug && (
+                <div className="mt-12 text-center">
+                    <Link
+                        to={`/destinations/${destinationSlug}/attractions`}
+                        className="inline-flex items-center px-8 py-4 border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all duration-300 shadow-sm hover:shadow-lg active:scale-95 uppercase tracking-wider text-sm"
+                    >
+                        See All Attractions
+                    </Link>
+                </div>
+            )}
         </div>
     );
 };

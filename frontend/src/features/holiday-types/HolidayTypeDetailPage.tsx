@@ -260,7 +260,7 @@ const HolidayTypeDetailPage: React.FC = () => {
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
               <div
-                className="text-xl md:text-2xl text-charcoal leading-relaxed font-playfair italic"
+                className="text-xl md:text-2xl text-charcoal leading-relaxed font-playfair"
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(holidayType.description || '') }}
               />
             </div>
@@ -337,7 +337,7 @@ const HolidayTypeDetailPage: React.FC = () => {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-charcoal/20 to-transparent"></div>
                       <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-                        <h3 className="text-3xl font-playfair font-medium mb-3 group-hover:text-teal transition-colors">
+                        <h3 className="text-3xl md:text-4xl font-playfair font-bold text-white mb-3 group-hover:text-teal transition-colors drop-shadow-md">
                           {destination.name}
                         </h3>
                         <p className="text-white/90 mb-4 leading-relaxed line-clamp-3">

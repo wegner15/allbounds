@@ -213,10 +213,8 @@ const HolidayTypeDetailPage: React.FC = () => {
               </div>
             </div>
 
-            <div
-              className="text-lg md:text-xl text-white/90 max-w-2xl mb-8 leading-relaxed line-clamp-3"
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(holidayType.description || '') }}
-            />
+            {/* Description removed from here to follow the new layout */}
+
 
             <div className="flex flex-wrap gap-4 mb-8">
               <Link
@@ -257,6 +255,18 @@ const HolidayTypeDetailPage: React.FC = () => {
       </div>
 
       <div className="bg-paper">
+        {/* Introduction Section */}
+        <div className="py-16 bg-white border-b border-gray-100">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto text-center">
+              <div
+                className="text-xl md:text-2xl text-charcoal leading-relaxed font-playfair italic"
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(holidayType.description || '') }}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Why Choose This Holiday Type */}
         <div className="py-20">
           <div className="container mx-auto px-4">

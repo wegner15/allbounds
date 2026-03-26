@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from 'react';
 import type { CountryWithDetails } from '../../../lib/types/api';
 import DestinationOverviewSection from '../components/DestinationOverviewSection';
+import WhyVisitSection from '../components/WhyVisitSection';
 import BestTimeToVisitSection from '../components/BestTimeToVisitSection';
 
 // Lazy loaded components
@@ -27,6 +28,9 @@ const AboutTab: React.FC<AboutTabProps> = ({ country, pageDescription, pageImage
         <div className="space-y-6 md:space-y-8">{/* removed py-6 since sections handle spacing */}
             {/* Overview Section */}
             <DestinationOverviewSection country={country} />
+
+            {/* Why Visit Section */}
+            <WhyVisitSection countryName={country.name} />
 
             {/* Best Time to Visit Section */}
             <BestTimeToVisitSection visitInfo={country.visit_info} />

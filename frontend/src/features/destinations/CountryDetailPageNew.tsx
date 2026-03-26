@@ -196,7 +196,7 @@ const CountryDetailPageNew: React.FC = () => {
 
         <div className="container mx-auto px-4 py-8">
           {/* About Section */}
-          <section id="about" className="scroll-mt-24 mb-12">
+          <section id="about" className="scroll-mt-24 mb-20">
             <AboutTab
               country={country}
               pageDescription={pageDescription}
@@ -205,17 +205,17 @@ const CountryDetailPageNew: React.FC = () => {
           </section>
 
           {/* Activities Section (Top Experiences) */}
-          <section id="activities" className="scroll-mt-24 mb-12">
+          <section id="activities" className="scroll-mt-24 mb-20">
             <ActivitiesTab countryId={country.id} preview={true} destinationSlug={country.slug} title={`Top Experiences in ${country.name}`} />
           </section>
 
           {/* Packages Section (Featured Packages) */}
-          <section id="packages" className="scroll-mt-24 mb-12">
+          <section id="packages" className="scroll-mt-24 mb-20">
             <PackagesTab countryId={country.id} preview={true} destinationSlug={country.slug} title={`Featured ${country.name} Packages`} />
           </section>
 
           {/* Hot Deals Section (Special Offers) */}
-          <section id="deals" className="scroll-mt-24 mb-12">
+          <section id="deals" className="scroll-mt-24 mb-20">
             <PackagesTab
               countryId={country.id}
               preview={true}
@@ -227,7 +227,7 @@ const CountryDetailPageNew: React.FC = () => {
         </div>
 
         {/* CTA Banner - Full Width */}
-        <div className="py-12 md:py-16">
+        <div className="py-16 md:py-20">
           <CTABanner
             countrySlug={country.slug}
             countryName={country.name}
@@ -236,22 +236,22 @@ const CountryDetailPageNew: React.FC = () => {
 
         <div className="container mx-auto px-4 pb-12">
           {/* Hotels Section (Where to Stay) */}
-          <section id="hotels" className="scroll-mt-24 mb-12">
+          <section id="hotels" className="scroll-mt-24 mb-20">
             <HotelsTab countryId={country.id} preview={true} destinationSlug={country.slug} title={`Where to Stay in ${country.name}`} />
           </section>
 
           {/* Attractions Section (Must-See Attractions) */}
-          <section id="attractions" className="scroll-mt-24 mb-12">
+          <section id="attractions" className="scroll-mt-24 mb-20">
             <AttractionsTab countryName={country.name} preview={true} destinationSlug={country.slug} title={`Must-See Attractions in ${country.name}`} />
           </section>
 
           {/* Group Trips Section */}
-          <section id="group-trips" className="scroll-mt-24 mb-12">
+          <section id="group-trips" className="scroll-mt-24 mb-20">
             <GroupTripsTab countryId={country.id} preview={true} destinationSlug={country.slug} title={`Group Trips to ${country.name}`} />
           </section>
 
           {/* Blog Section */}
-          <section id="blog" className="scroll-mt-24 mb-12">
+          <section id="blog" className="scroll-mt-24 mb-20">
             <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
               <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Latest from our Blog</h2>
               <div className="text-gray-600">Coming soon... Discover travel stories and tips for {country.name}.</div>
@@ -259,7 +259,7 @@ const CountryDetailPageNew: React.FC = () => {
           </section>
 
           {/* FAQ Section */}
-          <section id="faq" className="scroll-mt-24 mb-12">
+          <section id="faq" className="scroll-mt-24 mb-20">
             <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
               <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-8">Frequently Asked Questions</h2>
               {country.faqs && country.faqs.length > 0 ? (
@@ -285,7 +285,7 @@ const CountryDetailPageNew: React.FC = () => {
 
         <div className="container mx-auto px-4">
           {/* Similar Destinations Section */}
-          <section id="similar" className="scroll-mt-24 mt-16">
+          <section id="similar" className="scroll-mt-24 mt-20">
             <Suspense fallback={<SectionLoader />}>
               <RelatedDestinationsSection country={country} />
             </Suspense>

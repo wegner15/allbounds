@@ -34,23 +34,13 @@ const GroupTripsTab: React.FC<GroupTripsTabProps> = ({ countryId, preview = fals
         <div>{/* removed py-6 since sections handle spacing */}
             <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">{title || "Join our Group Trips"}</h2>
             <PaginatedGrid
-                items={preview ? activeTrips.slice(0, 9) : activeTrips}
+                items={activeTrips}
                 renderItem={(trip) => <GroupTripCard groupTrip={trip as any} />}
                 emptyMessage="No group trips scheduled for this destination yet."
                 itemsPerPage={preview ? 9 : 9}
-                showPagination={!preview}
+                showPagination={true}
+                loadMoreLabel={preview ? "Load More Group Trips" : "Load More"}
             />
-
-            {preview && activeTrips.length > 9 && destinationSlug && (
-                <div className="mt-8 text-center">
-                    <Link
-                        to={`/destinations/${destinationSlug}/group-trips`}
-                        className="inline-flex items-center px-6 py-3 border border-teal-600 text-teal-600 font-semibold rounded-lg hover:bg-teal-600 hover:text-white transition-colors duration-200"
-                    >
-                        READ MORE GROUP TRIPS
-                    </Link>
-                </div>
-            )}
         </div>
     );
 };

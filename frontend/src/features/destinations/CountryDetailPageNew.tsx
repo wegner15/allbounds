@@ -181,12 +181,12 @@ const CountryDetailPageNew: React.FC = () => {
         <SectionNavigation
           sections={[
             { id: 'about', label: `About ${country.name}` },
-            { id: 'packages', label: 'Travel Packages' },
+            { id: 'activities', label: 'Top Experiences' },
+            { id: 'packages', label: 'Featured Packages' },
+            { id: 'deals', label: 'Special Offers' },
+            { id: 'hotels', label: 'Where to Stay' },
+            { id: 'attractions', label: 'Must-See Attractions' },
             { id: 'group-trips', label: 'Group Trips' },
-            { id: 'attractions', label: 'Attractions' },
-            { id: 'hotels', label: 'Hotels' },
-            { id: 'activities', label: 'Activities' },
-            { id: 'deals', label: 'Deals' },
             { id: 'blog', label: 'Blog' },
             { id: 'faq', label: 'FAQs' },
             { id: 'share', label: 'Share' },
@@ -202,50 +202,49 @@ const CountryDetailPageNew: React.FC = () => {
               pageImage={pageImage}
             />
           </section>
-        </div>
 
-        {/* CTA Banner - Full Width */}
-        <CTABanner
-          countrySlug={country.slug}
-          countryName={country.name}
-        />
-
-        <div className="container mx-auto px-4 py-8">
-
-          {/* Packages Section */}
-          <section id="packages" className="scroll-mt-24 mb-12">
-            <PackagesTab countryId={country.id} preview={true} destinationSlug={country.slug} />
-          </section>
-
-          {/* Group Trips Section */}
-          <section id="group-trips" className="scroll-mt-24 mb-12">
-            <GroupTripsTab countryId={country.id} preview={true} destinationSlug={country.slug} />
-          </section>
-
-          {/* Attractions Section */}
-          <section id="attractions" className="scroll-mt-24 mb-12">
-            <AttractionsTab countryName={country.name} preview={true} destinationSlug={country.slug} />
-          </section>
-
-          {/* Hotels Section */}
-          <section id="hotels" className="scroll-mt-24 mb-12">
-            <HotelsTab countryId={country.id} preview={true} destinationSlug={country.slug} />
-          </section>
-
-          {/* Activities Section */}
+          {/* Activities Section (Top Experiences) */}
           <section id="activities" className="scroll-mt-24 mb-12">
-            <ActivitiesTab countryId={country.id} preview={true} destinationSlug={country.slug} />
+            <ActivitiesTab countryId={country.id} preview={true} destinationSlug={country.slug} title={`Top Experiences in ${country.name}`} />
           </section>
 
-          {/* Hot Deals Section */}
+          {/* Packages Section (Featured Packages) */}
+          <section id="packages" className="scroll-mt-24 mb-12">
+            <PackagesTab countryId={country.id} preview={true} destinationSlug={country.slug} title={`Featured ${country.name} Packages`} />
+          </section>
+
+          {/* Hot Deals Section (Special Offers) */}
           <section id="deals" className="scroll-mt-24 mb-12">
             <PackagesTab
               countryId={country.id}
               preview={true}
               destinationSlug={country.slug}
               isDealsOnly={true}
-              title="Deals"
+              title={`Special Offers in ${country.name}`}
             />
+          </section>
+
+          {/* CTA Banner - Full Width */}
+          <div className="-mx-4 md:-mx-8 lg:-mx-12 overflow-hidden">
+            <CTABanner
+              countrySlug={country.slug}
+              countryName={country.name}
+            />
+          </div>
+
+          {/* Hotels Section (Where to Stay) */}
+          <section id="hotels" className="scroll-mt-24 mb-12">
+            <HotelsTab countryId={country.id} preview={true} destinationSlug={country.slug} title={`Where to Stay in ${country.name}`} />
+          </section>
+
+          {/* Attractions Section (Must-See Attractions) */}
+          <section id="attractions" className="scroll-mt-24 mb-12">
+            <AttractionsTab countryName={country.name} preview={true} destinationSlug={country.slug} title={`Must-See Attractions in ${country.name}`} />
+          </section>
+
+          {/* Group Trips Section */}
+          <section id="group-trips" className="scroll-mt-24 mb-12">
+            <GroupTripsTab countryId={country.id} preview={true} destinationSlug={country.slug} title={`Group Trips to ${country.name}`} />
           </section>
 
           {/* Blog Section */}
@@ -267,7 +266,6 @@ const CountryDetailPageNew: React.FC = () => {
               )}
             </div>
           </section>
-
         </div>
 
         {/* Share Destination - Full Width */}

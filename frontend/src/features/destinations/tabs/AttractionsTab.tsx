@@ -8,9 +8,10 @@ interface AttractionsTabProps {
     countryName: string;
     preview?: boolean;
     destinationSlug?: string;
+    title?: string;
 }
 
-const AttractionsTab: React.FC<AttractionsTabProps> = ({ countryName, preview = false, destinationSlug }) => {
+const AttractionsTab: React.FC<AttractionsTabProps> = ({ countryName, preview = false, destinationSlug, title }) => {
     const { data: attractions, isLoading, error } = useAttractions({ country: countryName });
 
     if (isLoading) {
@@ -31,7 +32,7 @@ const AttractionsTab: React.FC<AttractionsTabProps> = ({ countryName, preview = 
 
     return (
         <div>{/* removed py-6 since sections handle spacing */}
-            <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Must-See Attractions</h2>
+            <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">{title || "Must-See Attractions"}</h2>
             <PaginatedGrid
                 items={preview ? activeAttractions.slice(0, 9) : activeAttractions}
                 renderItem={(attr) => <AttractionCard attraction={attr as any} />}

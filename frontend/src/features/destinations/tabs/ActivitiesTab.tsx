@@ -8,9 +8,10 @@ interface ActivitiesTabProps {
     countryId: number;
     preview?: boolean;
     destinationSlug?: string;
+    title?: string;
 }
 
-const ActivitiesTab: React.FC<ActivitiesTabProps> = ({ countryId, preview = false, destinationSlug }) => {
+const ActivitiesTab: React.FC<ActivitiesTabProps> = ({ countryId, preview = false, destinationSlug, title }) => {
     const { data: activities, isLoading, error } = useActivities(countryId);
 
     if (isLoading) {
@@ -31,7 +32,7 @@ const ActivitiesTab: React.FC<ActivitiesTabProps> = ({ countryId, preview = fals
 
     return (
         <div>{/* removed py-6 since sections handle spacing */}
-            <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Exciting Activities</h2>
+            <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">{title || "Exciting Activities"}</h2>
             <PaginatedGrid
                 items={preview ? activeActivities.slice(0, 8) : activeActivities}
                 renderItem={(act: any) => <ActivityCard activity={act} />}

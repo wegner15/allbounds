@@ -8,9 +8,10 @@ interface HotelsTabProps {
     countryId: number;
     preview?: boolean;
     destinationSlug?: string;
+    title?: string;
 }
 
-const HotelsTab: React.FC<HotelsTabProps> = ({ countryId, preview = false, destinationSlug }) => {
+const HotelsTab: React.FC<HotelsTabProps> = ({ countryId, preview = false, destinationSlug, title }) => {
     // Client-side filtering as useHotels fetches all
     const { data: hotels, isLoading, error } = useHotels();
 
@@ -32,7 +33,7 @@ const HotelsTab: React.FC<HotelsTabProps> = ({ countryId, preview = false, desti
 
     return (
         <div>{/* removed py-6 since sections handle spacing */}
-            <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Stay at the Best Hotels</h2>
+            <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">{title || "Stay at the Best Hotels"}</h2>
             <PaginatedGrid
                 items={preview ? countryHotels.slice(0, 9) : countryHotels}
                 renderItem={(hotel) => <HotelCard hotel={hotel as any} />}

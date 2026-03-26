@@ -8,9 +8,10 @@ interface GroupTripsTabProps {
     countryId: number;
     preview?: boolean;
     destinationSlug?: string;
+    title?: string;
 }
 
-const GroupTripsTab: React.FC<GroupTripsTabProps> = ({ countryId, preview = false, destinationSlug }) => {
+const GroupTripsTab: React.FC<GroupTripsTabProps> = ({ countryId, preview = false, destinationSlug, title }) => {
     const { data: groupTrips, isLoading, error } = useGroupTrips({ country_id: countryId });
 
     if (isLoading) {
@@ -31,7 +32,7 @@ const GroupTripsTab: React.FC<GroupTripsTabProps> = ({ countryId, preview = fals
 
     return (
         <div>{/* removed py-6 since sections handle spacing */}
-            <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Join our Group Trips</h2>
+            <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">{title || "Join our Group Trips"}</h2>
             <PaginatedGrid
                 items={preview ? activeTrips.slice(0, 9) : activeTrips}
                 renderItem={(trip) => <GroupTripCard groupTrip={trip as any} />}

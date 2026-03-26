@@ -216,7 +216,8 @@ const MainLayout = () => {
     {
       title: 'Contact Info',
       links: [
-        { label: 'Phone: +(256) 782 594008', path: 'tel:+256782594008' },
+        { label: 'UG: +(256) 782 594 008', path: 'tel:+256782594008' },
+        { label: 'KE: +(254) 723 927 458', path: 'tel:+254723927458' },
         { label: 'Email: bookings@allboundvacations.com', path: 'mailto:bookings@allboundvacations.com' },
       ],
     },

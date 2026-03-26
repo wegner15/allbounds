@@ -55,10 +55,8 @@ const MainNavigation: React.FC = () => {
     { label: 'DESTINATIONS', path: '/destinations', hasDropdown: true },
     { label: 'HOLIDAY TYPES', path: '/holiday-types', hasDropdown: true },
     { label: 'PACKAGES', path: '/packages' },
-    { label: 'GROUP TRIPS', path: '/group-trips' },
     { label: 'BLOG', path: '/blog' },
-    { label: 'VISA APPLICATION', path: '/visa-application' },
-    { label: 'FLIGHT BOOKING', path: '/flights' },
+    { label: 'FLIGHTS', path: '/flights' },
   ];
 
   // Fetch regions with countries from API
@@ -228,10 +226,15 @@ const MainNavigation: React.FC = () => {
             <div className="flex items-center space-x-6">
               {/* Contact Info */}
               <div className="hidden md:flex flex-col items-end mr-4">
-                <span className="text-xs text-gray-500 font-medium">Call us today from 09:00 - 17:30</span>
-                <a href="tel:+256782594008" className="text-xl lg:text-2xl font-bold text-charcoal hover:text-primary transition-colors">
-                  +(256) 782 594 008
-                </a>
+                <span className="text-xs text-gray-500 font-medium text-right">Call us today from 09:00 - 17:30</span>
+                <div className="flex flex-col items-end">
+                  <a href="tel:+256782594008" className="text-base lg:text-lg font-bold text-charcoal hover:text-primary transition-colors leading-tight">
+                    UG: +(256) 782 594 008
+                  </a>
+                  <a href="tel:+254723927458" className="text-base lg:text-lg font-bold text-charcoal hover:text-primary transition-colors leading-tight">
+                    KE: +(254) 723 927 458
+                  </a>
+                </div>
               </div>
 
               {/* Wishlist Icon */}
@@ -308,9 +311,6 @@ const MainNavigation: React.FC = () => {
                   )}
                 </div>
               ))}
-              <Link to="/about-us" className="inline-block py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-3 xl:px-4 border-b-2 border-transparent hover:border-primary">
-                ABOUT US
-              </Link>
             </nav>
 
             {/* Search Bar */}
@@ -433,8 +433,11 @@ const MainNavigation: React.FC = () => {
             <div className="pt-4 border-t border-gray-100 space-y-4">
               <div className="flex flex-col items-center space-y-2">
                 <span className="text-xs text-gray-500 font-medium">Call us today from 09:00 - 17:30</span>
-                <a href="tel:02039663630" className="text-xl font-bold text-charcoal">
-                  020 3966 3630
+                <a href="tel:+256782594008" className="text-lg font-bold text-charcoal">
+                  UG: +(256) 782 594 008
+                </a>
+                <a href="tel:+254723927458" className="text-lg font-bold text-charcoal">
+                  KE: +(254) 723 927 458
                 </a>
               </div>
 

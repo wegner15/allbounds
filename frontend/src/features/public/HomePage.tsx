@@ -12,6 +12,7 @@ import TrendingAttractions from './home/sections/TrendingAttractions';
 import InspirationForNextTrip from './home/sections/InspirationForNextTrip';
 import CustomerReviews from './home/sections/CustomerReviews';
 import WhyChooseUs from './home/sections/WhyChooseUs';
+import GroupTrips from './home/sections/GroupTrips';
 
 const HomePage: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const HomePage: React.FC = () => {
       <HeroSection />
       <ThreeStepsSection />
       <SpecialTopDeals />
+      <GroupTrips />
       <HolidayByType />
       <TopTrendingDestinations />
       <ContactUsCard />

@@ -237,7 +237,7 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
                   </svg>
                 </button>
               ))}
-              <span className="ml-2 text-sm text-gray-600">{formData.stars} stars</span>
+              <span className="ml-2 text-sm text-gray-600">{formData.stars} Star</span>
             </div>
           </div>
 

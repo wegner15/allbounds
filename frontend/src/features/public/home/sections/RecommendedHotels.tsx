@@ -136,7 +136,7 @@ const RecommendedHotels: React.FC = () => {
                           <span className="text-sm font-semibold text-gray-800">{hotel.stars}</span>
                         </div>
                         <span className="text-xs text-gray-600 ml-2">
-                          ({hotel.stars} Stars)
+                          ({hotel.stars} Star)
                         </span>
                       </div>
                     </div>

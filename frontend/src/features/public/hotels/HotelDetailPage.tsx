@@ -90,7 +90,7 @@ const HotelDetailPage: React.FC = () => {
                 <div className="flex items-center gap-1">
                   {renderStars(hotel.stars)}
                   <span className="ml-2 text-sm text-gray-600">
-                    {hotel.stars} star{hotel.stars !== 1 ? 's' : ''}
+                    {hotel.stars} Star
                   </span>
                 </div>
               )}

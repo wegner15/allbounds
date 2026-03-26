@@ -88,7 +88,7 @@ const HotelCard: React.FC<HotelCardProps> = React.memo(({ hotel }) => {
                 ))}
               </div>
               <span className="ml-2 text-sm text-gray-600">
-                {hotel.stars} Star{hotel.stars !== 1 ? 's' : ''}
+                {hotel.stars} Star
               </span>
             </div>
           )}

@@ -132,11 +132,11 @@ const HotelListPage: React.FC = () => {
               className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">All Ratings</option>
-              <option value="5">5 stars</option>
-              <option value="4">4+ stars</option>
-              <option value="3">3+ stars</option>
-              <option value="2">2+ stars</option>
-              <option value="1">1+ star</option>
+              <option value="5">5 Star</option>
+              <option value="4">4+ Star</option>
+              <option value="3">3+ Star</option>
+              <option value="2">2+ Star</option>
+              <option value="1">1+ Star</option>
             </select>
 
             {/* Results Count */}

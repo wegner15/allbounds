@@ -21,6 +21,7 @@ class PackageBase(BaseModel):
     image_id: Optional[str] = Field(None, description="Cloudflare image ID for the package thumbnail")
     is_deal: Optional[bool] = Field(False, description="Whether the package is marked as a special deal")
     faqs: Optional[List[dict]] = Field(None, description="List of FAQs ({question: str, answer: str})")
+    conversion_triggers: Optional[List[str]] = Field(None, description="List of conversion triggers for the package")
     
 # Schema for creating a new Package
 class PackageCreate(PackageBase):
@@ -52,6 +53,7 @@ class PackageUpdate(BaseModel):
     exclusion_ids: Optional[List[int]] = Field(None, description="List of exclusion IDs to associate with this package")
     blog_post_ids: Optional[List[int]] = Field(None, description="List of blog post IDs to associate with this package")
     faqs: Optional[List[dict]] = Field(None, description="List of FAQs")
+    conversion_triggers: Optional[List[str]] = Field(None, description="List of conversion triggers")
 
 # Schema for Package response
 class PackageResponse(PackageBase):

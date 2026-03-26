@@ -14,8 +14,6 @@ import Footer from './components/layout/Footer';
 import PackagesPage from './features/packages/PackagesPage';
 import PackageDetailPage from './features/packages/PackageDetailPage';
 import PackageDetailPageNew from './features/packages/PackageDetailPageNew';
-import GroupTripsPage from './features/group-trips/GroupTripsPage';
-import GroupTripDetailPage from './features/group-trips/GroupTripDetailPage';
 import HolidayTypesPage from './features/holiday-types/HolidayTypesPage';
 import HolidayTypeDetailPage from './features/holiday-types/HolidayTypeDetailPage';
 
@@ -186,7 +184,6 @@ const MainLayout = () => {
   const navigationItems = [
     { label: 'Destinations', path: '/destinations' },
     { label: 'Packages', path: '/packages' },
-    { label: 'Group Trips', path: '/group-trips' },
     { label: 'Stays', path: '/stays' },
     { label: 'Holiday Types', path: '/holiday-types' },
     { label: 'Blog', path: '/blog' },
@@ -277,8 +274,6 @@ const router = createBrowserRouter([
       { path: 'packages/:destination/:slug', element: <PackageDetailPageNew /> },
       { path: 'packages/:slug', element: <PackageDetailPageNew /> },
       { path: 'packages-old/:slug', element: <PackageDetailPage /> },
-      { path: 'group-trips', element: <GroupTripsPage /> },
-      { path: 'group-trips/:slug', element: <GroupTripDetailPage /> },
       { path: 'stays', element: <StaysPage /> },
       { path: 'hotels', element: <HotelListPage /> },
       { path: 'destinations/:destination/hotels/:slug', element: <HotelDetailPage /> },
@@ -335,10 +330,6 @@ const router = createBrowserRouter([
       { path: 'holiday-types', element: <HolidayTypesListPage /> },
       { path: 'holiday-types/new', element: <CreateHolidayTypePage /> },
       { path: 'holiday-types/:id/edit', element: <EditHolidayTypePage /> },
-      // Group trips management routes
-      { path: 'group-trips', element: <GroupTripsListPage /> },
-      { path: 'group-trips/new', element: <CreateGroupTripPage /> },
-      { path: 'group-trips/:id/edit', element: <EditGroupTripPage /> },
       // Hotel management routes
       { path: 'hotels', element: <HotelsListPage /> },
       { path: 'hotels/new', element: <CreateHotelPage /> },
@@ -384,7 +375,6 @@ const router = createBrowserRouter([
       { path: 'newsletter', element: <SubscriberList /> },
       // Booking management routes
       { path: 'bookings/packages', element: <PackageBookingsPage /> },
-      { path: 'bookings/group-trips', element: <GroupTripBookingsPage /> },
       { path: 'bookings/inquiries', element: <GeneralInquiriesPage /> },
       { path: 'bookings/visa-applications', element: <VisaApplicationsPage /> },
       { path: 'bookings/flights', element: <FlightBookingsPage /> },

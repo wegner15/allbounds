@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
@@ -35,6 +35,9 @@ const groupTripSchema = z.object({
   is_active: z.boolean(),
   is_featured: z.boolean(),
   itinerary: z.string().optional(),
+  conversion_triggers: z.array(z.object({
+    value: z.string().min(1, 'Trigger text is required'),
+  })).optional(),
 });
 
 type GroupTripFormData = z.infer<typeof groupTripSchema>;
@@ -115,6 +118,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
           start_date: groupTripData.start_date || '',
           end_date: groupTripData.end_date || '',
           itinerary: groupTripData.itinerary || '',
+          conversion_triggers: groupTripData.conversion_triggers?.map((t: string) => ({ value: t })) || [],
         }
       : {
           name: '',
@@ -134,7 +138,8 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
           is_featured: false,
           start_date: '',
           end_date: '',
-          itinerary: ''
+          itinerary: '',
+          conversion_triggers: []
         }
   });
   
@@ -179,6 +184,12 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
     }
   }, [isEdit, groupTripData]);
 
+  // Conversion Triggers Field Array
+  const { fields: triggerFields, append: appendTrigger, remove: removeTrigger } = useFieldArray({
+    control,
+    name: 'conversion_triggers',
+  });
+
   const onSubmit = async (data: GroupTripFormData) => {
     setIsSubmitting(true);
     setServerError(null);
@@ -204,7 +215,8 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
         is_active: data.is_active,
         is_featured: data.is_featured,
         inclusion_ids: data.inclusion_ids || [],
-        exclusion_ids: data.exclusion_ids || []
+        exclusion_ids: data.exclusion_ids || [],
+        conversion_triggers: data.conversion_triggers?.map(t => t.value) || []
       };
       
       let savedTrip;
@@ -755,6 +767,63 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
                     </div>
                   )}
                 />
+              </div>
+            </div>
+
+            {/* Conversion Triggers Section */}
+            <div className="sm:col-span-6">
+              <div className="bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
+                <div className="mb-3 flex justify-between items-center">
+                  <div>
+                    <h4 className="text-lg font-medium text-gray-900">Conversion Triggers</h4>
+                    <p className="text-sm text-gray-700">Add dynamic triggers to encourage bookings (e.g., "Pay 50% deposit").</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => appendTrigger({ value: '' })}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal hover:bg-teal/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal"
+                  >
+                    <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                    </svg>
+                    Add Trigger
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  {triggerFields.length === 0 ? (
+                    <div className="text-center py-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                      <p className="text-sm text-gray-500 italic">No conversion triggers added yet. Click "Add Trigger" to start.</p>
+                    </div>
+                  ) : (
+                    triggerFields.map((field, index) => (
+                      <div key={field.id} className="flex items-start gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100 group relative">
+                        <div className="flex-grow">
+                          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Trigger Text</label>
+                          <input
+                            {...register(`conversion_triggers.${index}.value`)}
+                            placeholder='e.g. "Pay 50% deposit"'
+                            className={`block w-full px-4 py-2 sm:text-sm border-gray-300 rounded-md shadow-sm focus:ring-teal focus:border-teal bg-white ${
+                              errors.conversion_triggers?.[index]?.value ? 'border-red-300' : ''
+                            }`}
+                          />
+                          {errors.conversion_triggers?.[index]?.value && (
+                            <p className="mt-1 text-xs text-red-600 font-medium">{errors.conversion_triggers[index]?.value?.message}</p>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeTrigger(index)}
+                          className="mt-6 text-gray-400 hover:text-red-500 transition-colors p-2"
+                          aria-label="Remove trigger"
+                        >
+                          <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
 

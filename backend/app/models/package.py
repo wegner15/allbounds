@@ -34,6 +34,7 @@ class Package(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     published_at = Column(DateTime(timezone=True), nullable=True)
+    conversion_triggers = Column(JSON, nullable=True)  # List of strings for conversion triggers
 
     # Relationships
     country = relationship("Country", back_populates="packages")

@@ -329,6 +329,7 @@ export interface Package extends BaseModel {
   rating?: number;
   review_count?: number;
   faqs?: { question: string; answer: string }[];
+  conversion_triggers?: string[];
 }
 
 // Package with gallery
@@ -552,6 +553,7 @@ export interface GroupTrip extends BaseModel {
   max_participants?: number;
   min_participants?: number;
   departures: GroupTripDeparture[];
+  conversion_triggers?: string[];
 }
 
 // Group Trip with gallery

@@ -75,6 +75,16 @@ const SpecialTopDeals: React.FC = () => {
                       currency="$"
                       className="text-white/80 text-sm"
                     />
+                    {deal.conversion_triggers && deal.conversion_triggers.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {deal.conversion_triggers.map((trigger, i) => (
+                          <div key={i} className="flex items-center text-white/90 text-xs font-medium">
+                            <span className="w-1 h-1 bg-teal rounded-full mr-2"></span>
+                            {trigger}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </Link>

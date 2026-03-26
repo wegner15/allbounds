@@ -101,7 +101,7 @@ const PopularTrips: React.FC = () => {
           <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide mb-8" id="popular-trips-container">
             {isLoading ? renderSkeletons() : error ? (
               <div className="flex-shrink-0 w-80 text-center text-red-500">Failed to load popular trips.</div>
-            ) : trips?.slice(0, 8).map(trip => (
+            ) : trips?.slice(0, 8).map((trip: any) => (
               <div key={trip.id} className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 group flex-shrink-0 w-80">
                 <div className="relative">
                   <img
@@ -127,6 +127,17 @@ const PopularTrips: React.FC = () => {
                       <span>({trip.review_count || 0} reviews)</span>
                     </div>
                   </div>
+                  
+                  {trip.conversion_triggers && trip.conversion_triggers.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-4">
+                      {trip.conversion_triggers.map((trigger, i) => (
+                        <span key={i} className="bg-teal/10 text-teal text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-tighter">
+                          {trigger}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
                   <div className="text-right">
                     <FromPriceDisplay
                       packageId={trip.id}

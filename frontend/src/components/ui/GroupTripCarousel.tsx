@@ -196,6 +196,17 @@ const GroupTripCarousel: React.FC<GroupTripCarouselProps> = ({
                 </div>
               </div>
 
+              {/* Conversion Triggers */}
+              {currentTrip.conversion_triggers && currentTrip.conversion_triggers.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {currentTrip.conversion_triggers.map((trigger, i) => (
+                    <div key={i} className="bg-white/10 backdrop-blur-sm border border-white/20 px-3 py-1 rounded text-white text-xs font-semibold uppercase tracking-wider">
+                      {trigger}
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* CTA Button */}
               <Link
                 to={`/group-trips/${currentTrip.slug}`}

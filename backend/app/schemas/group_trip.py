@@ -27,6 +27,7 @@ class GroupTripBase(BaseModel):
     image_id: Optional[str] = Field(None, description="ID of the Cloudflare image for this group trip")
     start_date: Optional[str] = Field(None, description="Start date of the group trip")
     end_date: Optional[str] = Field(None, description="End date of the group trip")
+    conversion_triggers: Optional[List[str]] = Field(None, description="List of conversion triggers for the group trip")
     
 # Schema for creating a new Group Trip
 class GroupTripCreate(GroupTripBase):
@@ -56,6 +57,7 @@ class GroupTripUpdate(BaseModel):
     end_date: Optional[str] = Field(None, description="End date of the group trip")
     inclusion_ids: Optional[List[int]] = Field(None, description="List of inclusion IDs to associate with this group trip")
     exclusion_ids: Optional[List[int]] = Field(None, description="List of exclusion IDs to associate with this group trip")
+    conversion_triggers: Optional[List[str]] = Field(None, description="List of conversion triggers")
 
 
 

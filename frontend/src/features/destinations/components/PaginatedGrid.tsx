@@ -58,7 +58,7 @@ const PaginatedGrid = <T,>({
                 <div className="mt-12 flex justify-center">
                     <button
                         onClick={handleLoadMore}
-                        className="group relative inline-flex items-center gap-2 px-8 py-4 bg-teal-600 text-white font-bold rounded-xl shadow-lg hover:bg-teal-700 hover:shadow-xl transition-all duration-300 active:scale-95"
+                        className="group relative inline-flex items-center gap-3 px-10 py-4 bg-primary text-white font-bold rounded-xl shadow-md hover:shadow-2xl hover:bg-primary-dark hover:-translate-y-0.5 transition-all duration-300 active:scale-95"
                     >
                         <span>{loadMoreLabel}</span>
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

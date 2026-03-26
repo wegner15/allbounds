@@ -22,5 +22,5 @@ class HolidayType(Base):
 
     # Relationships
     # CRITICAL: lazy='noload' prevents circular loading: HolidayType → Package → HolidayType → ...
-    packages = relationship("Package", secondary="package_holiday_types", back_populates="holiday_types", lazy='noload')
-    group_trips = relationship("GroupTrip", secondary=group_trip_holiday_types, back_populates="holiday_types", lazy='noload')
+    packages = relationship("Package", secondary="package_holiday_types", back_populates="holiday_types")
+    group_trips = relationship("GroupTrip", secondary=group_trip_holiday_types, back_populates="holiday_types")

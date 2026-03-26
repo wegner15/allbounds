@@ -61,11 +61,14 @@ class PackageResponse(PackageBase):
     slug: str = Field(..., description="URL-friendly slug for the package", example="kenya-safari-adventure")
     is_active: bool = Field(..., description="Whether the package is active")
     is_featured: bool = Field(..., description="Whether the package is featured")
-    is_deal: bool = Field(False, description="Whether the package is a special deal")
+    is_deal: Optional[bool] = Field(False, description="Whether the package is a special deal")
     is_published: bool = Field(..., description="Whether the package is published")
     created_at: datetime
     updated_at: datetime
     published_at: Optional[datetime] = None
+    holiday_types: List[HolidayTypeResponse] = []
+    inclusion_items: List[InclusionResponse] = []
+    exclusion_items: List[ExclusionResponse] = []
     blog_posts: List[Any] = []
     # REMOVED: holiday_types, inclusion_items, exclusion_items to prevent circular loading
     # These cause exponential memory growth due to bidirectional relationships

@@ -4,6 +4,7 @@ from datetime import datetime, date
 
 # Import at the top level to avoid Pydantic 2.x issues
 from app.schemas.country import CountryResponse
+from app.schemas.holiday_type import HolidayTypeResponse
 from app.schemas.inclusion_exclusion import InclusionResponse, ExclusionResponse
 
 # Forward reference for GroupTripDepartureResponse
@@ -101,6 +102,7 @@ class GroupTripResponse(GroupTripBase):
     created_at: datetime
     updated_at: datetime
     published_at: Optional[datetime] = None
+    holiday_types: List[HolidayTypeResponse] = Field(default_factory=list, description="Holiday types associated with this group trip")
     inclusion_items: List[InclusionResponse] = Field(default_factory=list, description="Inclusions associated with this group trip")
     exclusion_items: List[ExclusionResponse] = Field(default_factory=list, description="Exclusions associated with this group trip")
     departures: List[GroupTripDepartureResponse] = Field(default_factory=list, description="Departures associated with this group trip")

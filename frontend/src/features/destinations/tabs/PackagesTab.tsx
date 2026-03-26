@@ -62,11 +62,11 @@ const PackagesTab: React.FC<PackagesTabProps> = ({
                 items={displayPackages}
                 renderItem={(pkg: any) => <PackageCard package={pkg} />}
                 emptyMessage="No packages available for this destination yet."
-                itemsPerPage={preview ? (isDealsOnly ? 3 : 6) : 9}
+                itemsPerPage={preview ? 9 : 9}
                 showPagination={!preview}
             />
 
-            {preview && displayPackages.length > (isDealsOnly ? 3 : 6) && destinationSlug && (
+            {preview && displayPackages.length > 9 && destinationSlug && (
                 <div className="mt-12 text-center">
                     <Link
                         to={isDealsOnly ? `/destinations/${destinationSlug}/deals` : `/destinations/${destinationSlug}/packages`}

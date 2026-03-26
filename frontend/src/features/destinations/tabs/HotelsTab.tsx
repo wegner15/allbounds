@@ -38,11 +38,11 @@ const HotelsTab: React.FC<HotelsTabProps> = ({ countryId, preview = false, desti
                 items={countryHotels}
                 renderItem={(hotel) => <HotelCard hotel={hotel as any} />}
                 emptyMessage="No hotels listed for this destination yet."
-                itemsPerPage={preview ? 3 : 9}
+                itemsPerPage={preview ? 9 : 9}
                 showPagination={!preview}
             />
 
-            {preview && countryHotels.length > 3 && destinationSlug && (
+            {preview && countryHotels.length > 9 && destinationSlug && (
                 <div className="mt-12 text-center">
                     <Link
                         to={`/destinations/${destinationSlug}/hotels`}

@@ -37,11 +37,11 @@ const ActivitiesTab: React.FC<ActivitiesTabProps> = ({ countryId, preview = fals
                 items={activeActivities}
                 renderItem={(act: any) => <ActivityCard activity={act} />}
                 emptyMessage="No activities listed for this destination yet."
-                itemsPerPage={preview ? 4 : 9}
+                itemsPerPage={preview ? 9 : 9}
                 showPagination={!preview}
             />
 
-            {preview && activeActivities.length > 4 && destinationSlug && (
+            {preview && activeActivities.length > 9 && destinationSlug && (
                 <div className="mt-12 text-center">
                     <Link
                         to={`/destinations/${destinationSlug}/activities`}

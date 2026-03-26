@@ -37,11 +37,11 @@ const AttractionsTab: React.FC<AttractionsTabProps> = ({ countryName, preview = 
                 items={activeAttractions}
                 renderItem={(attr) => <AttractionCard attraction={attr as any} />}
                 emptyMessage="No attractions listed for this destination yet."
-                itemsPerPage={preview ? 3 : 9}
+                itemsPerPage={preview ? 9 : 9}
                 showPagination={!preview}
             />
 
-            {preview && activeAttractions.length > 3 && destinationSlug && (
+            {preview && activeAttractions.length > 9 && destinationSlug && (
                 <div className="mt-12 text-center">
                     <Link
                         to={`/destinations/${destinationSlug}/attractions`}

@@ -53,75 +53,72 @@ const GridGallery: React.FC<GridGalleryProps> = ({ images, className = "" }) => 
 
     return (
         <div className={`grid-gallery ${className}`}>
-            <div className="flex flex-col gap-6 md:gap-8">
-                {/* Top Grid Section */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[400px] md:h-[500px] mb-2">
-                    {/* Main Featured Image */}
-                    <div
-                        className="md:col-span-2 relative group cursor-pointer overflow-hidden rounded-2xl"
-                        onClick={() => handleOpenLightbox(0)}
-                    >
-                        <img
-                            src={featuredImage.file_path}
-                            alt={featuredImage.alt_text || "Featured attraction"}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                    </div>
-
-                    {/* Side Stacked Images */}
-                    <div className="grid grid-rows-2 gap-4 h-full">
-                        {sideImages.map((img, idx) => (
-                            <div
-                                key={img.id || idx + 1}
-                                className="relative group cursor-pointer overflow-hidden rounded-2xl"
-                                onClick={() => handleOpenLightbox(idx + 1)}
-                            >
-                                <img
-                                    src={img.file_path}
-                                    alt={img.alt_text || `Gallery image ${idx + 2}`}
-                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                />
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                            </div>
-                        ))}
-                        {/* If there are fewer than 3 images total, show placeholders or adjust? 
-                For now, we assume attractions have enough images or we just show what we have.
-            */}
-                    </div>
+        <div className="flex flex-col gap-4 md:gap-6">
+            {/* Top Grid Section */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 h-[300px] md:h-[400px] mb-1">
+                {/* Main Featured Image */}
+                <div
+                    className="md:col-span-2 relative group cursor-pointer overflow-hidden rounded-xl"
+                    onClick={() => handleOpenLightbox(0)}
+                >
+                    <img
+                        src={getImageUrlWithFallback(featuredImage.file_path, IMAGE_VARIANTS.MEDIUM)}
+                        alt={featuredImage.alt_text || "Featured attraction"}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                 </div>
 
-                {/* Bottom Row Section */}
-                {bottomImages.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mt-2">
-                        {bottomImages.map((img, idx) => {
-                            const overallIndex = idx + 3;
-                            const isLast = idx === 4 && remainingCount > 0;
-
-                            return (
-                                <div
-                                    key={img.id || overallIndex}
-                                    className="relative aspect-[4/3] group cursor-pointer overflow-hidden rounded-xl"
-                                    onClick={() => handleOpenLightbox(overallIndex)}
-                                >
-                                    <img
-                                        src={img.file_path}
-                                        alt={img.alt_text || `Gallery image ${overallIndex + 1}`}
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                    {isLast ? (
-                                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center transition-colors group-hover:bg-black/60">
-                                            <span className="text-white text-lg font-bold">+{remainingCount} photos</span>
-                                        </div>
-                                    ) : (
-                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
+                {/* Side Stacked Images */}
+                <div className="grid grid-rows-2 gap-3 h-full">
+                    {sideImages.map((img, idx) => (
+                        <div
+                            key={img.id || idx + 1}
+                            className="relative group cursor-pointer overflow-hidden rounded-xl"
+                            onClick={() => handleOpenLightbox(idx + 1)}
+                        >
+                            <img
+                                src={getImageUrlWithFallback(img.file_path, IMAGE_VARIANTS.MEDIUM)}
+                                alt={img.alt_text || `Gallery image ${idx + 2}`}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                        </div>
+                    ))}
+                </div>
             </div>
+
+            {/* Bottom Row Section */}
+            {bottomImages.length > 0 && (
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-1">
+                    {bottomImages.map((img, idx) => {
+                        const overallIndex = idx + 3;
+                        const isLast = idx === 4 && remainingCount > 0;
+
+                        return (
+                            <div
+                                key={img.id || overallIndex}
+                                className="relative aspect-video sm:aspect-square group cursor-pointer overflow-hidden rounded-lg"
+                                onClick={() => handleOpenLightbox(overallIndex)}
+                            >
+                                <img
+                                    src={getImageUrlWithFallback(img.file_path, IMAGE_VARIANTS.THUMBNAIL)}
+                                    alt={img.alt_text || `Gallery image ${overallIndex + 1}`}
+                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                />
+                                {isLast ? (
+                                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center transition-colors group-hover:bg-black/60">
+                                        <span className="text-white text-base font-bold">+{remainingCount} photos</span>
+                                    </div>
+                                ) : (
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
 
             {/* Lightbox Modal */}
             {selectedImageIndex !== null && (

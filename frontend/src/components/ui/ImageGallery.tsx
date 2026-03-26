@@ -65,8 +65,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
   return (
     <div className={`image-gallery ${className}`}>
       {/* Gallery Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-        {images.slice(0, 8).map((image, index) => (
+      <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+        {images.slice(0, 16).map((image, index) => (
           <div
             key={image.id}
             className="relative aspect-square cursor-pointer group overflow-hidden rounded-lg"
@@ -80,10 +80,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300" />
             
             {/* Show count on last visible image if there are more */}
-            {index === 7 && images.length > 8 && (
+            {index === 15 && images.length > 16 && (
               <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
                 <span className="text-white text-lg font-semibold">
-                  +{images.length - 8} more
+                  +{images.length - 16} more
                 </span>
               </div>
             )}

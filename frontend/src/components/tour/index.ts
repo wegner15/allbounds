@@ -12,6 +12,7 @@ export { default as StickyNavigation } from './StickyNavigation';
 export { default as HeroSection } from './HeroSection';
 export { OverviewSection } from './OverviewSection';
 export { default as ReviewsSection } from './ReviewsSection';
+export { default as GallerySection } from './GallerySection';
 
 // Error handling and loading states
 export { default as ErrorDisplay, SectionError, EmptyState } from './ErrorDisplay';

@@ -129,7 +129,6 @@ const ItinerarySection: React.FC<ItinerarySectionProps> = ({ itineraryItems }) =
           </button>
         </div>
 
-        {/* Summary Stats */}
         <div className="mt-8 sm:mt-10 md:mt-12 pt-6 sm:pt-8 border-t border-gray-200 px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
             <div className="text-center bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl p-4 border border-primary/20">
@@ -140,25 +139,19 @@ const ItinerarySection: React.FC<ItinerarySectionProps> = ({ itineraryItems }) =
             </div>
             <div className="text-center bg-gradient-to-br from-accent/10 to-accent/5 rounded-xl p-4 border border-accent/20">
               <div className="text-3xl sm:text-4xl font-bold text-accent mb-1 font-playfair">
-                {sortedItems.reduce((acc, item) => 
-                  acc + (item.custom_activities?.length || 0), 0
-                )}
+                {new Set(sortedItems.flatMap(item => item.custom_activities?.map(a => a.id) || [])).size}
               </div>
               <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Activities</div>
             </div>
             <div className="text-center bg-gradient-to-br from-success/10 to-success/5 rounded-xl p-4 border border-success/20">
               <div className="text-3xl sm:text-4xl font-bold text-success mb-1 font-playfair">
-                {sortedItems.reduce((acc, item) => 
-                  acc + (item.hotels?.length || 0), 0
-                )}
+                {new Set(sortedItems.flatMap(item => item.hotels?.map(h => h.id) || [])).size}
               </div>
               <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Hotels</div>
             </div>
             <div className="text-center bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-xl p-4 border border-purple-500/20">
               <div className="text-3xl sm:text-4xl font-bold text-purple-600 mb-1 font-playfair">
-                {sortedItems.reduce((acc, item) => 
-                  acc + (item.attractions?.length || 0), 0
-                )}
+                {new Set(sortedItems.flatMap(item => item.attractions?.map(a => a.id) || [])).size}
               </div>
               <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Attractions</div>
             </div>

@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useComprehensivePackageBySlug, useRecommendedPackages } from '../../lib/hooks/usePackages';
-import { HeroSection, OverviewSection, ItinerarySection, InclusionsExclusionsSection, HotelsSection, AttractionsSection, ReviewsSection, BookingSidebar, StickyNavigation, RecommendedTours } from '../../components/tour';
+import { HeroSection, OverviewSection, ItinerarySection, InclusionsExclusionsSection, HotelsSection, AttractionsSection, GallerySection, ReviewsSection, BookingSidebar, StickyNavigation, RecommendedTours } from '../../components/tour';
 import ItineraryMapLeaflet from '../../components/tour/ItineraryMapLeaflet';
 import { PackageDetailSkeleton } from '../../components/tour/LoadingSkeletons';
 import ErrorDisplay from '../../components/tour/ErrorDisplay';
@@ -57,6 +57,10 @@ const PackageDetailPageNew: React.FC = () => {
 
     if (packageDetail.reviews && packageDetail.reviews.length > 0) {
       sections.push({ id: 'reviews', label: 'Reviews' });
+    }
+
+    if (packageDetail.media_assets && packageDetail.media_assets.length > 0) {
+      sections.push({ id: 'gallery', label: 'Gallery' });
     }
 
     return sections;
@@ -253,6 +257,16 @@ const PackageDetailPageNew: React.FC = () => {
                   <ItineraryMapLeaflet
                     itineraryItems={packageDetail.itinerary_items}
                     packageName={packageDetail.name}
+                  />
+                </div>
+              )}
+
+              {/* Gallery Section */}
+              {packageDetail.media_assets && packageDetail.media_assets.length > 0 && (
+                <div className="mb-6 md:mb-8">
+                  <GallerySection 
+                    images={packageDetail.media_assets} 
+                    title={packageDetail.name} 
                   />
                 </div>
               )}

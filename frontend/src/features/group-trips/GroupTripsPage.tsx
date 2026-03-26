@@ -156,15 +156,13 @@ const GroupTripsPage: React.FC = () => {
     return true;
   });
 
-  // Get current trips
-  const indexOfLastTrip = currentPage * tripsPerPage;
-  const indexOfFirstTrip = indexOfLastTrip - tripsPerPage;
-  const currentTrips = filteredTrips.slice(indexOfFirstTrip, indexOfLastTrip);
+  // Get current trips (cumulative for "Load More")
+  const currentTrips = filteredTrips.slice(0, currentPage * tripsPerPage);
+  const hasMore = currentTrips.length < filteredTrips.length;
 
-  // Change page
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Load more trips
+  const handleLoadMore = () => {
+    setCurrentPage(prev => prev + 1);
   };
 
   // Reset filters
@@ -467,43 +465,16 @@ const GroupTripsPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="mt-8 flex justify-center">
-                  <nav className="flex items-center">
-                    <button
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className={`px-3 py-1 rounded-l border ${currentPage === 1
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          : 'bg-white text-charcoal hover:bg-gray-50'
-                        }`}
-                    >
-                      Previous
-                    </button>
-                    {[...Array(totalPages)].map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => handlePageChange(i + 1)}
-                        className={`px-3 py-1 border-t border-b ${currentPage === i + 1
-                            ? 'bg-charcoal text-white'
-                            : 'bg-white text-charcoal hover:bg-gray-50'
-                          }`}
-                      >
-                        {i + 1}
-                      </button>
-                    ))}
-                    <button
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className={`px-3 py-1 rounded-r border ${currentPage === totalPages
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          : 'bg-white text-charcoal hover:bg-gray-50'
-                        }`}
-                    >
-                      Next
-                    </button>
-                  </nav>
+              {/* Load More Button */}
+              {hasMore && (
+                <div className="mt-12 flex justify-center">
+                  <Button
+                    onClick={handleLoadMore}
+                    variant="primary"
+                    className="px-10 py-4 text-lg font-bold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
+                  >
+                    Load More Trips
+                  </Button>
                 </div>
               )}
             </>

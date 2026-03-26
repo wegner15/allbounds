@@ -14,6 +14,14 @@ const BlogListPage: React.FC = () => {
      blog.summary?.toLowerCase().includes(searchTerm.toLowerCase()) ||
      blog.tags?.some(tag => tag.name.toLowerCase().includes(searchTerm.toLowerCase())))
   ) || [];
+ 
+  const [visibleCount, setVisibleCount] = useState(6);
+  const currentBlogs = filteredBlogs.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredBlogs.length;
+ 
+  const handleLoadMore = () => {
+    setVisibleCount(prev => prev + 6);
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -115,78 +123,90 @@ const BlogListPage: React.FC = () => {
             </p>
           </div>
         ) : (
-           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
-            {filteredBlogs.map((blog) => (
-              <article key={blog.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
-                {blog.cover_image_id && (
-                  <div className="aspect-w-16 aspect-h-9">
-                    <img
-                      src={getCloudflareImageUrl(blog.cover_image_id, 'medium')}
-                      alt={blog.title}
-                      className="w-full h-48 object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                )}
-                <div className="p-6">
-                  <div className="flex items-center text-sm text-gray-500 mb-3">
-                    <time dateTime={blog.created_at}>
-                      {formatDate(blog.created_at)}
-                    </time>
-                    <span className="mx-2">•</span>
-                    <span>{getReadTime(blog.content)}</span>
-                  </div>
-                  
-                  <h2 className="text-xl font-semibold text-gray-900 mb-3 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                    <Link
-                      to={`/blog/${blog.slug}`}
-                      className="hover:text-blue-600 transition-colors"
-                    >
-                      {blog.title}
-                    </Link>
-                  </h2>
-
-                  {blog.summary && (
-                    <div
-                      className="text-gray-600 mb-4 overflow-hidden"
-                      style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}
-                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.summary) }}
-                    />
-                  )}
-                  
-                  {blog.tags && blog.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {blog.tags.slice(0, 3).map((tag, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                        >
-                          {tag.name}
-                        </span>
-                      ))}
-                      {blog.tags.length > 3 && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          +{blog.tags.length - 3} more
-                        </span>
-                      )}
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
+              {currentBlogs.map((blog) => (
+                <article key={blog.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
+                  {blog.cover_image_id && (
+                    <div className="aspect-w-16 aspect-h-9">
+                      <img
+                        src={getCloudflareImageUrl(blog.cover_image_id, 'medium')}
+                        alt={blog.title}
+                        className="w-full h-48 object-cover"
+                        loading="lazy"
+                      />
                     </div>
                   )}
-                  
-                  <Link
-                    to={`/blog/${blog.slug}`}
-                    className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors"
-                  >
-                    Read more
-                    <svg className="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </Link>
-                </div>
-              </article>
-            ))}
+                  <div className="p-6">
+                    <div className="flex items-center text-sm text-gray-500 mb-3">
+                      <time dateTime={blog.created_at}>
+                        {formatDate(blog.created_at)}
+                      </time>
+                      <span className="mx-2">•</span>
+                      <span>{getReadTime(blog.content)}</span>
+                    </div>
+                    
+                    <h2 className="text-xl font-semibold text-gray-900 mb-3 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                      <Link
+                        to={`/blog/${blog.slug}`}
+                        className="hover:text-blue-600 transition-colors"
+                      >
+                        {blog.title}
+                      </Link>
+                    </h2>
+ 
+                    {blog.summary && (
+                      <div
+                        className="text-gray-600 mb-4 overflow-hidden"
+                        style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.summary) }}
+                      />
+                    )}
+                    
+                    {blog.tags && blog.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {blog.tags.slice(0, 3).map((tag, index) => (
+                          <span
+                            key={index}
+                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                          >
+                            {tag.name}
+                          </span>
+                        ))}
+                        {blog.tags.length > 3 && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            +{blog.tags.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    
+                    <Link
+                      to={`/blog/${blog.slug}`}
+                      className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors"
+                    >
+                      Read more
+                      <svg className="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+ 
+        {/* Load More Button */}
+        {hasMore && (
+          <div className="mt-12 mb-16 flex justify-center">
+            <button
+              onClick={handleLoadMore}
+              className="px-10 py-4 bg-white border-2 border-blue-600 text-blue-600 font-bold rounded-xl shadow-md hover:bg-blue-50 transition-all duration-300 active:scale-95"
+            >
+              Load More Articles
+            </button>
           </div>
         )}
-      </div>
     </div>
   );
 };

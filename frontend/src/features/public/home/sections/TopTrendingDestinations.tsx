@@ -21,7 +21,7 @@ const TopTrendingDestinations: React.FC = () => {
 
   if (error) {
     return (
-      <div className="py-16 bg-white">
+      <div className="py-16 bg-[#f2f2f2]">
         <div className="container mx-auto px-4 text-center">
           <p className="text-red-500">Failed to load trending destinations.</p>
         </div>
@@ -30,7 +30,7 @@ const TopTrendingDestinations: React.FC = () => {
   }
 
   return (
-    <div className="py-16 bg-white">
+    <div className="py-16 bg-[#f2f2f2]">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">

@@ -23,7 +23,7 @@ const ThreeStepsSection: React.FC = () => {
         <section className="bg-primary py-8 lg:py-12 text-white overflow-hidden">
             <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-10 lg:mb-12">
-                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-playfair font-bold leading-tight max-w-4xl mx-auto">
+                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-playfair font-bold leading-tight max-w-4xl mx-auto text-white">
                         Three Simple Steps to Your Perfect Tailor-Made Holiday
                     </h2>
                 </div>
@@ -37,7 +37,7 @@ const ThreeStepsSection: React.FC = () => {
                             )}
 
                             <div className="mb-4">
-                                <h3 className="text-xl lg:text-2xl font-playfair font-bold mb-3 flex items-baseline justify-center gap-2">
+                                <h3 className="text-xl lg:text-2xl font-playfair font-bold mb-3 flex items-baseline justify-center gap-2 text-white">
                                     <span className="text-white/80 tabular-nums text-lg lg:text-xl font-sans">{step.number}.</span>
                                     {step.title}
                                 </h3>

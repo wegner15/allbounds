@@ -19,8 +19,8 @@ const HomePage: React.FC = () => {
       <HeroSection />
       <ThreeStepsSection />
       <SpecialTopDeals />
-      <HolidayByType />
       <TopTrendingDestinations />
+      <HolidayByType />
       <ContactUsCard />
       <RecommendedHotels />
       <PopularTrips />

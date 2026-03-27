@@ -56,8 +56,9 @@ const MainNavigation: React.FC = () => {
     { label: 'DESTINATIONS', path: '/destinations', hasDropdown: true },
     { label: 'HOLIDAY TYPES', path: '/holiday-types', hasDropdown: true },
     { label: 'PACKAGES', path: '/packages' },
-    { label: 'BLOG', path: '/blog' },
     { label: 'FLIGHTS', path: '/flights' },
+    { label: 'BLOG', path: '/blog' },
+    { label: 'ABOUT US', path: '/about-us' },
   ];
 
   // Fetch regions with countries from API

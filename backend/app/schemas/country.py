@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List, ClassVar, Type, Any
 from datetime import datetime
 
@@ -16,6 +16,13 @@ class CountryBase(BaseModel):
     media_asset_ids: Optional[List[int]] = Field(None, description="List of IDs for the country's gallery")
     faqs: Optional[List[dict]] = Field(None, description="List of FAQs ({question: str, description: str})")
     is_favorite: bool = Field(False, description="Whether the country is marked as a favorite")
+    
+    @field_validator("is_favorite", mode="before")
+    @classmethod
+    def validate_is_favorite(cls, v: Any) -> bool:
+        if v is None:
+            return False
+        return bool(v)
     
 # Schema for creating a new Country
 class CountryCreate(CountryBase):
@@ -53,6 +60,7 @@ class CountryMinResponse(BaseModel):
     name: str = Field(..., description="Name of the country")
     slug: str = Field(..., description="URL-friendly slug for the country")
     is_active: bool = Field(..., description="Whether the country is active")
+    is_favorite: bool = Field(False, description="Whether the country is marked as a favorite")
     image_id: Optional[str] = Field(None, description="Cloudflare Images ID for the country image")
     
     class Config:

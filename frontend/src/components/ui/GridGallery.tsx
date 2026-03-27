@@ -59,7 +59,7 @@ const GridGallery: React.FC<GridGalleryProps> = ({ images, className = "" }) => 
             <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3 min-h-0">
                 {/* Main Featured Image */}
                 <div
-                    className="md:col-span-2 relative group cursor-pointer overflow-hidden rounded-xl"
+                    className="md:col-span-2 relative group cursor-pointer overflow-hidden rounded-lg"
                     onClick={() => handleOpenLightbox(0)}
                 >
                     <img
@@ -75,7 +75,7 @@ const GridGallery: React.FC<GridGalleryProps> = ({ images, className = "" }) => 
                     {sideImages.map((img, idx) => (
                         <div
                             key={img.id || idx + 1}
-                            className="relative group cursor-pointer overflow-hidden rounded-xl"
+                            className="relative group cursor-pointer overflow-hidden rounded-lg"
                             onClick={() => handleOpenLightbox(idx + 1)}
                         >
                             <img
@@ -99,7 +99,7 @@ const GridGallery: React.FC<GridGalleryProps> = ({ images, className = "" }) => 
                         return (
                             <div
                                 key={img.id || overallIndex}
-                                className="relative h-full group cursor-pointer overflow-hidden rounded-lg"
+                                className="relative h-full group cursor-pointer overflow-hidden rounded"
                                 onClick={() => handleOpenLightbox(overallIndex)}
                             >
                                 <img

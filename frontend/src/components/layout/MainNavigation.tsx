@@ -32,6 +32,7 @@ const MainNavigation: React.FC = () => {
   const [holidayTypesOpen, setHolidayTypesOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [scrolled, setScrolled] = useState(false);
   const destinationsRef = useRef<HTMLDivElement>(null);
   const holidayTypesRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -155,6 +156,13 @@ const MainNavigation: React.FC = () => {
     { name: 'Blog', slug: 'blog', icon: '📝' },
   ];
 
+  // Scroll listener for compact nav
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -199,9 +207,9 @@ const MainNavigation: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-[1000] bg-white w-full border-b border-gray-100">
-      {/* Top Tier: Logo, Contact, CTA */}
-      <div className="border-b border-gray-50">
+    <header className={`sticky top-0 z-[1000] bg-white w-full border-b border-gray-100 transition-shadow duration-300 ${scrolled ? 'shadow-md' : ''}`}>
+      {/* Top Tier: Logo, Contact, CTA — hidden when scrolled */}
+      <div className={`border-b border-gray-50 overflow-hidden transition-all duration-300 ease-in-out ${scrolled ? 'max-h-0 border-b-0 opacity-0' : 'max-h-32 opacity-100'}`}>
         <div className="max-w-[1600px] mx-auto px-4 lg:px-6">
           <div className="flex items-center justify-between h-20 lg:h-24">
             {/* Logo */}
@@ -273,17 +281,36 @@ const MainNavigation: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom Tier: Navigation Links & Search */}
+      {/* Bottom Tier: Navigation Links & Search — also shows compact logo when scrolled */}
       <div className="hidden lg:block bg-white">
         <div className="max-w-[1600px] mx-auto px-4 lg:px-6">
-          <div className="flex items-center justify-between h-14">
+          <div className={`flex items-center justify-between transition-all duration-300 ${scrolled ? 'h-12' : 'h-14'}`}>
+
+            {/* Compact logo — only visible when scrolled */}
+            {scrolled && (
+              <Link to="/" className="flex items-center flex-shrink-0 mr-6">
+                <img
+                  src="/logo/main_logo.png"
+                  alt="AllBound Vacations"
+                  className="h-7 w-auto"
+                  onError={(e) => {
+                    const target = e.currentTarget as HTMLImageElement;
+                    target.style.display = 'none';
+                    const sibling = target.nextElementSibling as HTMLElement;
+                    if (sibling) sibling.style.display = 'block';
+                  }}
+                />
+                <span className="hidden text-base font-bold text-charcoal ml-2">AllBound</span>
+              </Link>
+            )}
+
             {/* Navigation Links */}
             <nav className="flex items-center space-x-0 xl:space-x-1">
               {navItems.map((item) => (
                 <div key={item.path} className="relative group">
                   {item.hasDropdown ? (
                     <button
-                      className="flex items-center py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-3 xl:px-4 border-b-2 border-transparent hover:border-primary"
+                      className={`flex items-center text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-3 xl:px-4 border-b-2 border-transparent hover:border-primary ${scrolled ? 'py-3' : 'py-4'}`}
                       onClick={item.label === 'DESTINATIONS' ? toggleDestinations : toggleHolidayTypes}
                       data-dropdown={item.label === 'DESTINATIONS' ? 'destinations' : 'holiday-types'}
                     >
@@ -304,7 +331,7 @@ const MainNavigation: React.FC = () => {
                   ) : (
                     <Link
                       to={item.path}
-                      className="inline-block py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-3 xl:px-4 border-b-2 border-transparent hover:border-primary"
+                      className={`inline-block text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-3 xl:px-4 border-b-2 border-transparent hover:border-primary ${scrolled ? 'py-3' : 'py-4'}`}
                     >
                       {item.label}
                     </Link>
@@ -330,6 +357,29 @@ const MainNavigation: React.FC = () => {
                 </button>
               </form>
             </div>
+
+            {/* Compact CTA — visible when scrolled */}
+            {scrolled && (
+              <Link
+                to="/contact-us"
+                className="ml-6 flex items-center px-4 py-2 bg-primary text-white text-xs font-bold rounded uppercase tracking-wider hover:bg-primary-dark transition-all shadow-sm whitespace-nowrap"
+              >
+                Start Planning
+              </Link>
+            )}
+
+            {/* Mobile menu button (scrolled mode) */}
+            {scrolled && (
+              <button
+                className="lg:hidden ml-3 p-2 rounded-md text-charcoal hover:bg-gray-100 transition-colors"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle menu"
+              >
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
       </div>

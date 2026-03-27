@@ -25,6 +25,7 @@ const countrySchema = z.object({
   region_id: z.number().min(1, 'Please select a region'),
   image_id: z.string(),
   is_active: z.boolean(),
+  is_favorite: z.boolean(),
   faqs: z.array(z.object({
     question: z.string().min(1, 'Question is required'),
     answer: z.string().min(1, 'Answer is required'),
@@ -69,6 +70,7 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
         region_id: countryData.region_id,
         image_id: countryData.image_id || '',
         is_active: countryData.is_active,
+        is_favorite: countryData.is_favorite || false,
         faqs: countryData.faqs || [],
       }
       : {
@@ -79,6 +81,7 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
         region_id: 0,
         image_id: '',
         is_active: true,
+        is_favorite: false,
       },
   });
 
@@ -294,6 +297,17 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
                   id="is_active"
                   label="Active (visible on the website)"
                   {...register('is_active')}
+                />
+              </FormGroup>
+            </div>
+
+            {/* Favorite */}
+            <div className="sm:col-span-6">
+              <FormGroup>
+                <FormCheckbox
+                  id="is_favorite"
+                  label="Mark as Top Trending Destination (Pin to Homepage)"
+                  {...register('is_favorite')}
                 />
               </FormGroup>
             </div>

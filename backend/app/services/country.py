@@ -55,9 +55,10 @@ class CountryService:
         Retrieve all countries with pagination.
         """
         from sqlalchemy.orm import selectinload
+        from sqlalchemy import desc
         return db.query(Country).options(
             selectinload(Country.packages)
-        ).filter(Country.is_active == True).offset(skip).limit(limit).all()
+        ).filter(Country.is_active == True).order_by(desc(Country.is_favorite), Country.name).offset(skip).limit(limit).all()
     
     def get_countries_by_region(self, db: Session, region_id: int, skip: int = 0, limit: int = 100) -> List[Country]:
         """
@@ -337,7 +338,7 @@ class CountryService:
             selectinload(Country.hotels).selectinload(Hotel.amenities),
             selectinload(Country.activities).selectinload(Activity.cover_image),
             selectinload(Country.visit_info)
-        ).filter(Country.is_active == True).offset(skip).limit(limit).all()
+        ).filter(Country.is_active == True).order_by(desc(Country.is_favorite), Country.name).offset(skip).limit(limit).all()
 
         result = []
         for country in countries:
@@ -351,6 +352,7 @@ class CountryService:
                 "image_id": country.image_id,
                 "faqs": country.faqs,
                 "is_active": country.is_active,
+                "is_favorite": country.is_favorite,
                 "created_at": country.created_at.isoformat() if country.created_at else None,
                 "updated_at": country.updated_at.isoformat() if country.updated_at else None,
                 "region": {
@@ -492,6 +494,7 @@ class CountryService:
             region_id=country_create.region_id,
             slug=slug,
             faqs=country_create.faqs,
+            is_favorite=country_create.is_favorite,
         )
         db.add(db_country)
         
@@ -528,6 +531,8 @@ class CountryService:
                     db_country.media_assets = media_assets
                 else:
                     db_country.media_assets = []
+            elif key == "is_favorite":
+                db_country.is_favorite = value
             else:
                 setattr(db_country, key, value)
         

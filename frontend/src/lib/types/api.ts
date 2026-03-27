@@ -59,6 +59,7 @@ export interface Country extends BaseModel {
   image_url?: string;
   image_id?: string;
   is_active: boolean;
+  is_favorite: boolean;
   capital?: string;
   currency?: string;
   language?: string;
@@ -78,10 +79,12 @@ export interface CountryCreate {
   region_id: number;
   image_id?: string;
   media_asset_ids?: number[];
+  is_favorite?: boolean;
 }
 
 export interface CountryUpdate extends Partial<CountryCreate> {
   is_active?: boolean;
+  is_favorite?: boolean;
 }
 
 // Country Visit Info types

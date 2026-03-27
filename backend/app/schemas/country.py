@@ -38,7 +38,7 @@ class CountryResponse(CountryBase):
     id: int
     slug: str = Field(..., description="URL-friendly slug for the country", example="kenya")
     is_active: bool = Field(..., description="Whether the country is active")
-    is_favorite: bool = Field(..., description="Whether the country is marked as a favorite")
+    is_favorite: bool = Field(False, description="Whether the country is marked as a favorite")
     created_at: datetime
     updated_at: datetime
     package_count: Optional[int] = 0

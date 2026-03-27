@@ -53,9 +53,10 @@ const GridGallery: React.FC<GridGalleryProps> = ({ images, className = "" }) => 
 
     return (
         <div className={`grid-gallery ${className}`}>
-        <div className="flex flex-col gap-4 md:gap-6">
-            {/* Top Grid Section */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 h-[300px] md:h-[400px] mb-1">
+        {/* Full viewport height minus the sticky nav (top tier ~96px + bottom tier ~56px = 152px = 9.5rem) */}
+        <div className="flex flex-col h-[calc(100vh-9.5rem)] gap-3">
+            {/* Top Grid Section — fills all space above the thumbnail row */}
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3 min-h-0">
                 {/* Main Featured Image */}
                 <div
                     className="md:col-span-2 relative group cursor-pointer overflow-hidden rounded-xl"
@@ -70,7 +71,7 @@ const GridGallery: React.FC<GridGalleryProps> = ({ images, className = "" }) => 
                 </div>
 
                 {/* Side Stacked Images */}
-                <div className="grid grid-rows-2 gap-3 h-full">
+                <div className="grid grid-rows-2 gap-3 min-h-0">
                     {sideImages.map((img, idx) => (
                         <div
                             key={img.id || idx + 1}
@@ -88,9 +89,9 @@ const GridGallery: React.FC<GridGalleryProps> = ({ images, className = "" }) => 
                 </div>
             </div>
 
-            {/* Bottom Row Section */}
+            {/* Bottom Thumbnail Row — fixed height, never overlaps top grid */}
             {bottomImages.length > 0 && (
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-1">
+                <div className="flex-shrink-0 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 h-24">
                     {bottomImages.map((img, idx) => {
                         const overallIndex = idx + 3;
                         const isLast = idx === 4 && remainingCount > 0;
@@ -98,7 +99,7 @@ const GridGallery: React.FC<GridGalleryProps> = ({ images, className = "" }) => 
                         return (
                             <div
                                 key={img.id || overallIndex}
-                                className="relative aspect-video sm:aspect-square group cursor-pointer overflow-hidden rounded-lg"
+                                className="relative h-full group cursor-pointer overflow-hidden rounded-lg"
                                 onClick={() => handleOpenLightbox(overallIndex)}
                             >
                                 <img

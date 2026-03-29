@@ -331,6 +331,7 @@ class CountryService:
         Retrieve all countries with detailed related data for trending destinations.
         """
         from sqlalchemy.orm import selectinload
+        from sqlalchemy import desc
         from app.models.group_trip import GroupTrip, GroupTripDeparture
 
         from app.models.hotel import Hotel

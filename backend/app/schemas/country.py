@@ -45,7 +45,6 @@ class CountryResponse(CountryBase):
     id: int
     slug: str = Field(..., description="URL-friendly slug for the country", example="kenya")
     is_active: bool = Field(..., description="Whether the country is active")
-    is_favorite: bool = Field(False, description="Whether the country is marked as a favorite")
     created_at: datetime
     updated_at: datetime
     package_count: Optional[int] = 0
@@ -62,6 +61,13 @@ class CountryMinResponse(BaseModel):
     is_active: bool = Field(..., description="Whether the country is active")
     is_favorite: bool = Field(False, description="Whether the country is marked as a favorite")
     image_id: Optional[str] = Field(None, description="Cloudflare Images ID for the country image")
+    
+    @field_validator("is_favorite", mode="before")
+    @classmethod
+    def validate_is_favorite(cls, v: Any) -> bool:
+        if v is None:
+            return False
+        return bool(v)
     
     class Config:
         from_attributes = True

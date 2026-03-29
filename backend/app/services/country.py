@@ -334,6 +334,7 @@ class CountryService:
         from app.models.group_trip import GroupTrip, GroupTripDeparture
 
         from app.models.hotel import Hotel
+        from app.models.activity import Activity
 
         query = db.query(Country).options(
             selectinload(Country.region),

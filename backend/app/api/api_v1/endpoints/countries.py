@@ -15,17 +15,22 @@ from app.auth.dependencies import get_current_user, has_permission
 
 router = APIRouter()
 
-@router.get("/", response_model=List[CountryWithRegionResponse])
-@router.get("", response_model=List[CountryWithRegionResponse])
+@router.get("/", response_model=List[Any])
+@router.get("", response_model=List[Any])
 def get_countries(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
+    is_favorite: Optional[bool] = Query(None),
+    details: bool = Query(False),
 ) -> Any:
     """
     Retrieve all countries (including region data).
     """
-    countries = country_service.get_countries(db, skip=skip, limit=limit)
+    if details:
+        return country_service.get_countries_with_details(db, skip=skip, limit=limit, is_favorite=is_favorite)
+        
+    countries = country_service.get_countries(db, skip=skip, limit=limit, is_favorite=is_favorite)
     
     # CRITICAL: Manually construct Pydantic objects to avoid ANY lazy-loading issues
     # and include the region data
@@ -39,6 +44,7 @@ def get_countries(
             image_id=c.image_id,
             faqs=c.faqs,
             slug=c.slug,
+            is_favorite=c.is_favorite,
             is_active=c.is_active,
             created_at=c.created_at,
             updated_at=c.updated_at,

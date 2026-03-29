@@ -50,15 +50,21 @@ def _get_hotel_cover_image(hotel) -> Optional[str]:
     return None
 
 class CountryService:
-    def get_countries(self, db: Session, skip: int = 0, limit: int = 100) -> List[Country]:
+    def get_countries(self, db: Session, skip: int = 0, limit: int = 100, is_favorite: Optional[bool] = None) -> List[Country]:
         """
         Retrieve all countries with pagination.
         """
         from sqlalchemy.orm import selectinload
         from sqlalchemy import desc
-        return db.query(Country).options(
+        
+        query = db.query(Country).options(
             selectinload(Country.packages)
-        ).filter(Country.is_active == True).order_by(desc(Country.is_favorite), Country.name).offset(skip).limit(limit).all()
+        ).filter(Country.is_active == True)
+        
+        if is_favorite is not None:
+            query = query.filter(Country.is_favorite == is_favorite)
+            
+        return query.order_by(desc(Country.is_favorite), Country.name).offset(skip).limit(limit).all()
     
     def get_countries_by_region(self, db: Session, region_id: int, skip: int = 0, limit: int = 100) -> List[Country]:
         """
@@ -320,7 +326,7 @@ class CountryService:
         
         return country_dict
 
-    def get_countries_with_details(self, db: Session, skip: int = 0, limit: int = 100) -> List[dict]:
+    def get_countries_with_details(self, db: Session, skip: int = 0, limit: int = 100, is_favorite: Optional[bool] = None) -> List[dict]:
         """
         Retrieve all countries with detailed related data for trending destinations.
         """
@@ -329,7 +335,7 @@ class CountryService:
 
         from app.models.hotel import Hotel
 
-        countries = db.query(Country).options(
+        query = db.query(Country).options(
             selectinload(Country.region),
             selectinload(Country.packages),
             selectinload(Country.group_trips).selectinload(GroupTrip.departures),
@@ -338,7 +344,12 @@ class CountryService:
             selectinload(Country.hotels).selectinload(Hotel.amenities),
             selectinload(Country.activities).selectinload(Activity.cover_image),
             selectinload(Country.visit_info)
-        ).filter(Country.is_active == True).order_by(desc(Country.is_favorite), Country.name).offset(skip).limit(limit).all()
+        ).filter(Country.is_active == True)
+        
+        if is_favorite is not None:
+            query = query.filter(Country.is_favorite == is_favorite)
+            
+        countries = query.order_by(desc(Country.is_favorite), Country.name).offset(skip).limit(limit).all()
 
         result = []
         for country in countries:

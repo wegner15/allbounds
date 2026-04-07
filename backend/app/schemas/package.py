@@ -69,7 +69,6 @@ class PackageResponse(PackageBase):
     holiday_types: List[HolidayTypeResponse] = []
     inclusion_items: List[InclusionResponse] = []
     exclusion_items: List[ExclusionResponse] = []
-    blog_posts: List[Any] = []
     # REMOVED: holiday_types, inclusion_items, exclusion_items to prevent circular loading
     # These cause exponential memory growth due to bidirectional relationships
     # Use dedicated endpoints to fetch these if needed

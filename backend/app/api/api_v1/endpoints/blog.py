@@ -32,7 +32,7 @@ def read_blog_posts(
         # Default behavior: only published posts
         blog_posts = blog_service.get_blog_posts(db, skip=skip, limit=limit)
     # CRITICAL: Serialize to Pydantic to prevent lazy-loading
-    return [BlogPostResponse.from_orm(post) for post in blog_posts]
+    return [BlogPostResponse.model_validate(post) for post in blog_posts]
 
 @router.get("/{post_id}", response_model=BlogPostResponse)
 def read_blog_post(
@@ -45,7 +45,7 @@ def read_blog_post(
     blog_post = blog_service.get_blog_post(db, post_id=post_id)
     if blog_post is None or not blog_post.is_published or not blog_post.is_active:
         raise HTTPException(status_code=404, detail="Blog post not found")
-    return blog_post
+    return BlogPostResponse.model_validate(blog_post)
 
 @router.get("/slug/{slug}", response_model=BlogPostResponse)
 def read_blog_post_by_slug(
@@ -58,7 +58,7 @@ def read_blog_post_by_slug(
     blog_post = blog_service.get_blog_post_by_slug(db, slug=slug)
     if blog_post is None or not blog_post.is_published or not blog_post.is_active:
         raise HTTPException(status_code=404, detail="Blog post not found")
-    return blog_post
+    return BlogPostResponse.model_validate(blog_post)
 
 @router.post("/", response_model=BlogPostResponse)
 def create_blog_post(
@@ -105,7 +105,7 @@ def create_blog_post(
         entity_id=blog_post.id
     )
 
-    return blog_post
+    return BlogPostResponse.model_validate(blog_post)
 
 @router.put("/{post_id}", response_model=BlogPostResponse)
 def update_blog_post(
@@ -143,7 +143,7 @@ def update_blog_post(
         entity_id=post_id
     )
 
-    return blog_post
+    return BlogPostResponse.model_validate(blog_post)
 
 @router.delete("/{post_id}", response_model=BlogPostResponse)
 def delete_blog_post(
@@ -169,7 +169,7 @@ def delete_blog_post(
         entity_id=post_id
     )
 
-    return blog_post
+    return BlogPostResponse.model_validate(blog_post)
 
 @router.post("/{post_id}/publish", response_model=BlogPostResponse)
 def publish_blog_post(
@@ -195,7 +195,7 @@ def publish_blog_post(
         entity_id=post_id
     )
 
-    return blog_post
+    return BlogPostResponse.model_validate(blog_post)
 
 @router.post("/{post_id}/unpublish", response_model=BlogPostResponse)
 def unpublish_blog_post(
@@ -221,7 +221,7 @@ def unpublish_blog_post(
         entity_id=post_id
     )
 
-    return blog_post
+    return BlogPostResponse.model_validate(blog_post)
 
 @router.post("/{post_id}/feature", response_model=BlogPostResponse)
 def feature_blog_post(
@@ -237,7 +237,7 @@ def feature_blog_post(
         raise HTTPException(status_code=404, detail="Blog post not found")
 
     blog_post = blog_service.feature_blog_post(db, post_id=post_id)
-    return blog_post
+    return BlogPostResponse.model_validate(blog_post)
 
 @router.post("/{post_id}/unfeature", response_model=BlogPostResponse)
 def unfeature_blog_post(
@@ -253,4 +253,4 @@ def unfeature_blog_post(
         raise HTTPException(status_code=404, detail="Blog post not found")
 
     blog_post = blog_service.unfeature_blog_post(db, post_id=post_id)
-    return blog_post
+    return BlogPostResponse.model_validate(blog_post)

@@ -36,7 +36,9 @@ services:
       redis:
         condition: service_healthy
       meilisearch:
-        condition: service_started
+        condition: service_healthy
+      search_indexer:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "curl", "-f", "--max-time", "5", "http://localhost:8000/health"]
       interval: 15s
@@ -44,6 +46,40 @@ services:
       retries: 2
       start_period: 40s
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2 --log-level warning --limit-max-requests 100 --timeout-keep-alive 5
+
+  search_indexer:
+    build: .
+    restart: "no"
+    volumes:
+      - ./:/app
+    environment:
+      - DATABASE_URL=postgresql://allbounds:allbounds@db:5432/allbounds
+      - MEILISEARCH_URL=http://meilisearch:7700
+      - MEILISEARCH_MASTER_KEY=masterKey
+      - REDIS_URL=redis://redis:6379/0
+      - REDIS_CACHE_TTL=300
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - R2_ENDPOINT=
+      - R2_ACCESS_KEY=
+      - R2_SECRET_KEY=
+      - R2_BUCKET_NAME=allbounds
+      - JWT_SECRET_KEY=dev_secret_key_change_in_production
+      - JWT_ALGORITHM=HS256
+      - JWT_ACCESS_TOKEN_EXPIRE_MINUTES=43200
+      - JWT_REFRESH_TOKEN_EXPIRE_DAYS=30
+      - DB_POOL_SIZE=5
+      - DB_MAX_OVERFLOW=10
+      - DB_POOL_RECYCLE=3600
+      - DB_POOL_TIMEOUT=30
+      - DB_CONNECT_TIMEOUT=10
+      - DB_POOL_PRE_PING=true
+    depends_on:
+      db:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+    command: python index_all_data.py
 
   db:
     image: postgres:15-alpine
@@ -112,7 +148,9 @@ services:
       redis:
         condition: service_healthy
       meilisearch:
-        condition: service_started
+        condition: service_healthy
+      search_indexer:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD-SHELL", "celery -A app.celery_app inspect ping -d celery@$$HOSTNAME"]
       interval: 30s

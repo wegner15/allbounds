@@ -23,6 +23,45 @@ class MeilisearchClient:
         self.client = None
         if self.url:
             self.client = meilisearch.Client(self.url, self.master_key)
+
+    def _extract_task_uid(self, task_result: Any) -> Optional[int]:
+        """
+        Extract a Meilisearch task UID from a task response object.
+
+        The Python SDK may return either a TaskInfo object or a dictionary-like
+        payload depending on the operation and version.
+        """
+        if task_result is None:
+            return None
+
+        if isinstance(task_result, dict):
+            for key in ("task_uid", "taskUid", "uid", "task_id", "taskId"):
+                value = task_result.get(key)
+                if value is not None:
+                    return value
+
+        for attr in ("task_uid", "taskUid", "uid", "task_id", "taskId"):
+            value = getattr(task_result, attr, None)
+            if value is not None:
+                return value
+
+        return None
+
+    def _wait_for_task(self, task_result: Any, action: str) -> bool:
+        """
+        Wait for a Meilisearch task to finish before returning success.
+        """
+        task_uid = self._extract_task_uid(task_result)
+        if task_uid is None:
+            logger.warning(f"Meilisearch {action} did not return a task UID")
+            return True
+
+        try:
+            self.client.wait_for_task(task_uid)
+            return True
+        except Exception as e:
+            logger.error(f"Error waiting for Meilisearch task during {action}: {e}")
+            return False
     
     def is_configured(self) -> bool:
         """
@@ -67,8 +106,8 @@ class MeilisearchClient:
             return False
         
         try:
-            self.client.create_index(index_name, {'primaryKey': primary_key})
-            return True
+            task = self.client.create_index(index_name, {'primaryKey': primary_key})
+            return self._wait_for_task(task, f"create_index({index_name})")
         except MeilisearchError as e:
             # If index already exists, consider it a success
             if 'index_already_exists' in str(e):
@@ -91,8 +130,8 @@ class MeilisearchClient:
             return False
         
         try:
-            self.client.delete_index(index_name)
-            return True
+            task = self.client.delete_index(index_name)
+            return self._wait_for_task(task, f"delete_index({index_name})")
         except MeilisearchError as e:
             logger.error(f"Error deleting Meilisearch index: {e}")
             return False
@@ -137,8 +176,8 @@ class MeilisearchClient:
             if not index:
                 return False
             
-            index.add_documents(documents)
-            return True
+            task = index.add_documents(documents)
+            return self._wait_for_task(task, f"add_documents({index_name})")
         except MeilisearchError as e:
             logger.error(f"Error adding documents to Meilisearch: {e}")
             return False
@@ -163,8 +202,8 @@ class MeilisearchClient:
             if not index:
                 return False
             
-            index.update_documents(documents)
-            return True
+            task = index.update_documents(documents)
+            return self._wait_for_task(task, f"update_documents({index_name})")
         except MeilisearchError as e:
             logger.error(f"Error updating documents in Meilisearch: {e}")
             return False
@@ -189,8 +228,8 @@ class MeilisearchClient:
             if not index:
                 return False
             
-            index.delete_document(document_id)
-            return True
+            task = index.delete_document(document_id)
+            return self._wait_for_task(task, f"delete_document({index_name})")
         except MeilisearchError as e:
             logger.error(f"Error deleting document from Meilisearch: {e}")
             return False
@@ -262,8 +301,8 @@ class MeilisearchClient:
                 if not index:
                     return False
             
-            index.update_settings(settings)
-            return True
+            task = index.update_settings(settings)
+            return self._wait_for_task(task, f"update_settings({index_name})")
         except MeilisearchError as e:
             logger.error(f"Error configuring Meilisearch index settings: {e}")
             return False

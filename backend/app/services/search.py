@@ -1,3 +1,4 @@
+import logging
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 
@@ -12,6 +13,8 @@ from app.models.group_trip import GroupTrip
 from app.models.blog import BlogPost
 from app.models.hotel_type import HotelType
 from app.models.inclusion_exclusion import Inclusion, Exclusion
+
+logger = logging.getLogger(__name__)
 
 class SearchService:
     """
@@ -41,8 +44,8 @@ class SearchService:
     # Define searchable attributes for each index
     INDEX_SETTINGS = {
         REGION_INDEX: {
-            'searchableAttributes': ['name', 'description'],
-            'displayedAttributes': ['id', 'name', 'description', 'slug', 'image_id'],
+            'searchableAttributes': ['name', 'summary', 'description'],
+            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'image_id'],
             'sortableAttributes': ['name'],
             'filterableAttributes': ['is_active']
         },
@@ -65,14 +68,14 @@ class SearchService:
             'filterableAttributes': ['is_active']
         },
         COUNTRY_INDEX: {
-            'searchableAttributes': ['name', 'description'],
-            'displayedAttributes': ['id', 'name', 'description', 'slug', 'region_id', 'image_id'],
+            'searchableAttributes': ['name', 'summary', 'description'],
+            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'region_id', 'image_id'],
             'sortableAttributes': ['name'],
             'filterableAttributes': ['is_active', 'region_id']
         },
         ACTIVITY_INDEX: {
-            'searchableAttributes': ['name', 'description'],
-            'displayedAttributes': ['id', 'name', 'description', 'slug'],
+            'searchableAttributes': ['name', 'summary', 'description'],
+            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug'],
             'sortableAttributes': ['name'],
             'filterableAttributes': ['is_active']
         },
@@ -146,6 +149,7 @@ class SearchService:
             documents.append({
                 'id': region.id,
                 'name': region.name,
+                'summary': region.summary,
                 'description': region.description,
                 'slug': region.slug,
                 'image_id': region.image_id,
@@ -171,6 +175,7 @@ class SearchService:
             documents.append({
                 'id': country.id,
                 'name': country.name,
+                'summary': country.summary,
                 'description': country.description,
                 'slug': country.slug,
                 'region_id': country.region_id,
@@ -197,6 +202,7 @@ class SearchService:
             documents.append({
                 'id': activity.id,
                 'name': activity.name,
+                'summary': activity.summary,
                 'description': activity.description,
                 'slug': activity.slug,
                 'is_active': activity.is_active
@@ -441,6 +447,7 @@ class SearchService:
         document = {
             'id': region.id,
             'name': region.name,
+            'summary': region.summary,
             'description': region.description,
             'slug': region.slug,
             'is_active': region.is_active
@@ -461,6 +468,7 @@ class SearchService:
         document = {
             'id': country.id,
             'name': country.name,
+            'summary': country.summary,
             'description': country.description,
             'slug': country.slug,
             'region_id': country.region_id,
@@ -633,6 +641,7 @@ class SearchService:
         document = {
             'id': activity.id,
             'name': activity.name,
+            'summary': activity.summary,
             'description': activity.description,
             'slug': activity.slug,
             'is_active': activity.is_active

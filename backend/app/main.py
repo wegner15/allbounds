@@ -120,15 +120,14 @@ async def startup_event():
     from app.db.database import log_pool_stats
     log_pool_stats()
     
-    # Setup Celery-based Meilisearch sync listeners
-    # TEMPORARILY DISABLED to diagnose connection leak
-    # try:
-    #     from app.db.search_sync_celery import setup_search_sync_listeners
-    #     setup_search_sync_listeners()
-    #     logger.info("Celery-based Meilisearch sync enabled")
-    # except Exception as e:
-    #     logger.warning(f"Failed to setup Meilisearch sync: {e}. Sync will be disabled.")
-    logger.info("Meilisearch auto-sync temporarily disabled for debugging")
+    # Register DB change listeners so inserts/updates/deletes keep Meilisearch in sync.
+    try:
+        from app.db.search_sync import setup_search_sync_listeners
+
+        setup_search_sync_listeners()
+        logger.info("Meilisearch sync listeners enabled")
+    except Exception as e:
+        logger.warning(f"Failed to setup Meilisearch sync listeners: {e}")
     
     # Test Redis connection
     try:

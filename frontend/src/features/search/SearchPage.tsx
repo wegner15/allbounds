@@ -30,11 +30,11 @@ const INDEX_CONFIG: Record<string, { label: string; route: (hit: MeilisearchHit)
   },
   activities: {
     label: 'Activities',
-    route: (hit) => `/activities/${hit.countries?.[0]?.slug || 'unknown'}/${hit.slug}`
+    route: (hit) => `/activities/${hit.country_slug || hit.countries?.[0]?.slug || hit.slug}`
   },
   attractions: {
     label: 'Attractions',
-    route: (hit) => `/attractions/${hit.country?.slug || 'unknown'}/${hit.slug}`
+    route: (hit) => `/attractions/${hit.country_slug || hit.country?.slug || hit.slug}`
   },
   accommodations: {
     label: 'Accommodations',
@@ -119,8 +119,13 @@ const SearchPage: React.FC = () => {
 
   // Get image URL for a hit
   const getImageUrl = (hit: MeilisearchHit, index: string): string => {
+    const directUrl = hit.image_url || hit.cover_image_url;
+    if (directUrl) {
+      return directUrl;
+    }
+
     // Check for image_id, cover_image (attractions), or cover_image_id (blog posts)
-    const imageId = hit.image_id || hit.cover_image || hit.cover_image_id;
+    const imageId = hit.image_id || hit.cover_image_id;
     if (imageId) {
       if (typeof imageId === 'string' && imageId.startsWith('http')) {
         return imageId;
@@ -145,6 +150,26 @@ const SearchPage: React.FC = () => {
     const text = hit.summary || hit.description || '';
     // Strip HTML tags
     return text.replace(/<[^>]*>/g, '');
+  };
+
+  const getLocationText = (hit: MeilisearchHit): string | null => {
+    if (hit.city) {
+      return hit.country_name ? `${hit.city}, ${hit.country_name}` : hit.city;
+    }
+
+    if (hit.country_name) {
+      return hit.country_name;
+    }
+
+    if (hit.country?.name) {
+      return hit.country.name;
+    }
+
+    if (hit.countries?.[0]?.name) {
+      return hit.countries[0].name;
+    }
+
+    return null;
   };
 
   // Render result card
@@ -201,10 +226,10 @@ const SearchPage: React.FC = () => {
                 <span>{hit.duration_days} days</span>
               </div>
             )}
-            {hit.country_id && (
+            {getLocationText(hit) && (
               <div className="flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
-                <span>Destination</span>
+                <span>{getLocationText(hit) || 'Destination'}</span>
               </div>
             )}
           </div>

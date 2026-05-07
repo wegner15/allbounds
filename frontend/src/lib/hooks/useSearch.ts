@@ -11,11 +11,21 @@ export interface MeilisearchHit {
   slug: string;
   is_active?: boolean;
   image_id?: string;
+  image_url?: string;
+  cover_image_url?: string;
   cover_image_id?: string; // Used by blog posts
   country_id?: number;
+  country_name?: string;
+  country_slug?: string;
+  country?: { id?: number; name?: string; slug?: string; image_id?: string } | null;
+  countries?: { id?: number; name?: string; slug?: string; image_id?: string }[] | null;
   region_id?: number;
   price?: number;
   duration_days?: number;
+  city?: string;
+  address?: string;
+  duration_minutes?: number;
+  opening_hours?: string;
   [key: string]: any;
 }
 

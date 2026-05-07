@@ -1,6 +1,6 @@
 import logging
 from typing import List, Dict, Any, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.search.meilisearch import meilisearch_client
 from app.models.region import Region
@@ -27,6 +27,109 @@ class SearchService:
         """
         from app.search.meilisearch import meilisearch_client
         self.meilisearch_client = meilisearch_client
+
+    def _build_country_payload(self, country: Optional[Country]) -> Optional[Dict[str, Any]]:
+        """
+        Build a compact country payload suitable for search results.
+        """
+        if not country:
+            return None
+
+        return {
+            'id': country.id,
+            'name': country.name,
+            'slug': country.slug,
+            'image_id': country.image_id,
+        }
+
+    def _build_country_list_payload(self, countries: Optional[List[Country]]) -> List[Dict[str, Any]]:
+        """
+        Build a compact list of countries for entities linked to multiple destinations.
+        """
+        if not countries:
+            return []
+
+        payloads: List[Dict[str, Any]] = []
+        for country in countries:
+            payload = self._build_country_payload(country)
+            if payload:
+                payloads.append(payload)
+
+        return payloads
+
+    def _resolve_media_image_url(self, media_asset: Any) -> Optional[str]:
+        """
+        Convert a media asset relationship into a usable image URL for search results.
+        """
+        if not media_asset:
+            return None
+
+        url = getattr(media_asset, 'url', None)
+        if url:
+            return url
+
+        storage_key = getattr(media_asset, 'storage_key', None)
+        file_path = getattr(media_asset, 'file_path', None)
+
+        from app.core.cloudflare_config import cloudflare_settings
+
+        if storage_key:
+            return f"{cloudflare_settings.delivery_url}/{storage_key}/medium"
+
+        if isinstance(file_path, str) and file_path:
+            if file_path.startswith("http"):
+                return file_path
+            if file_path.startswith("cloudflare://"):
+                cf_id = file_path.split("cloudflare://", 1)[1]
+                return f"{cloudflare_settings.delivery_url}/{cf_id}/medium"
+
+        return None
+
+    def _resolve_activity_image_url(self, activity: Activity) -> Optional[str]:
+        """
+        Resolve a search-friendly image URL for an activity.
+        """
+        cover_image = getattr(activity, 'cover_image', None)
+        image_url = self._resolve_media_image_url(cover_image)
+        if image_url:
+            return image_url
+
+        cover_image_id = getattr(activity, 'cover_image_id', None)
+        if cover_image_id:
+            from app.db.database import SessionLocal
+            from app.models.media import MediaAsset
+
+            db = SessionLocal()
+            try:
+                media_asset = db.query(MediaAsset).filter(MediaAsset.id == cover_image_id).first()
+                return self._resolve_media_image_url(media_asset)
+            finally:
+                db.close()
+
+        return None
+
+    def _resolve_attraction_image_url(self, attraction: Attraction) -> Optional[str]:
+        """
+        Resolve a search-friendly image URL for an attraction.
+        """
+        # Attraction.image_id is already intended to be a Cloudflare image ID,
+        # but some rows may still carry a full URL or legacy file path.
+        if getattr(attraction, 'image_id', None):
+            image_id = attraction.image_id
+            if isinstance(image_id, str) and image_id.startswith("http"):
+                return image_id
+
+            from app.core.cloudflare_config import cloudflare_settings
+            return f"{cloudflare_settings.delivery_url}/{image_id}/medium"
+
+        legacy_cover = getattr(attraction, 'cover_image', None)
+        if legacy_cover:
+            if isinstance(legacy_cover, str) and legacy_cover.startswith("http"):
+                return legacy_cover
+            from app.core.cloudflare_config import cloudflare_settings
+            return f"{cloudflare_settings.delivery_url}/{legacy_cover}/medium"
+
+        return None
     
     # Define index names for each entity type
     REGION_INDEX = 'regions'
@@ -74,14 +177,14 @@ class SearchService:
             'filterableAttributes': ['is_active', 'region_id']
         },
         ACTIVITY_INDEX: {
-            'searchableAttributes': ['name', 'summary', 'description'],
-            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug'],
+            'searchableAttributes': ['name', 'summary', 'description', 'country_names'],
+            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'image_url', 'cover_image_id', 'country_id', 'country_name', 'country_slug', 'country_image_id', 'country_names', 'country_slugs', 'countries'],
             'sortableAttributes': ['name'],
             'filterableAttributes': ['is_active']
         },
         ATTRACTION_INDEX: {
-            'searchableAttributes': ['name', 'summary', 'description'],
-            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'country_id', 'image_id'],
+            'searchableAttributes': ['name', 'summary', 'description', 'city', 'address', 'country_name'],
+            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'country_id', 'country_name', 'country_slug', 'country_image_id', 'country', 'image_id', 'image_url', 'cover_image', 'city', 'address', 'latitude', 'longitude', 'duration_minutes', 'price', 'opening_hours'],
             'sortableAttributes': ['name'],
             'filterableAttributes': ['is_active', 'country_id']
         },
@@ -195,16 +298,31 @@ class SearchService:
         Returns:
             bool: True if activities were indexed successfully, False otherwise
         """
-        activities = db.query(Activity).filter(Activity.is_active == True).all()
+        activities = db.query(Activity).filter(Activity.is_active == True).options(
+            joinedload(Activity.cover_image),
+            joinedload(Activity.countries),
+        ).all()
         
         documents = []
         for activity in activities:
+            countries = list(activity.countries or [])
+            primary_country = countries[0] if countries else None
+            countries_payload = self._build_country_list_payload(countries)
             documents.append({
                 'id': activity.id,
                 'name': activity.name,
                 'summary': activity.summary,
                 'description': activity.description,
                 'slug': activity.slug,
+                'image_url': self._resolve_activity_image_url(activity),
+                'cover_image_id': activity.cover_image_id,
+                'country_id': primary_country.id if primary_country else None,
+                'country_name': primary_country.name if primary_country else None,
+                'country_slug': primary_country.slug if primary_country else None,
+                'country_image_id': primary_country.image_id if primary_country else None,
+                'country_names': ", ".join([country.name for country in countries if country.name]),
+                'country_slugs': [country.slug for country in countries if country.slug],
+                'countries': countries_payload,
                 'is_active': activity.is_active
             })
         
@@ -220,10 +338,13 @@ class SearchService:
         Returns:
             bool: True if attractions were indexed successfully, False otherwise
         """
-        attractions = db.query(Attraction).filter(Attraction.is_active == True).all()
+        attractions = db.query(Attraction).filter(Attraction.is_active == True).options(
+            joinedload(Attraction.country),
+        ).all()
         
         documents = []
         for attraction in attractions:
+            country_payload = self._build_country_payload(attraction.country)
             documents.append({
                 'id': attraction.id,
                 'name': attraction.name,
@@ -231,7 +352,20 @@ class SearchService:
                 'description': attraction.description,
                 'slug': attraction.slug,
                 'country_id': attraction.country_id,
+                'country_name': attraction.country.name if attraction.country else None,
+                'country_slug': attraction.country.slug if attraction.country else None,
+                'country_image_id': attraction.country.image_id if attraction.country else None,
                 'image_id': attraction.image_id,
+                'image_url': self._resolve_attraction_image_url(attraction),
+                'cover_image': attraction.cover_image,
+                'city': attraction.city,
+                'address': attraction.address,
+                'latitude': attraction.latitude,
+                'longitude': attraction.longitude,
+                'duration_minutes': attraction.duration_minutes,
+                'price': attraction.price,
+                'opening_hours': attraction.opening_hours,
+                'country': country_payload,
                 'is_active': attraction.is_active
             })
         
@@ -644,6 +778,15 @@ class SearchService:
             'summary': activity.summary,
             'description': activity.description,
             'slug': activity.slug,
+            'image_url': self._resolve_activity_image_url(activity),
+            'cover_image_id': activity.cover_image_id,
+            'country_id': activity.countries[0].id if getattr(activity, 'countries', None) else None,
+            'country_name': activity.countries[0].name if getattr(activity, 'countries', None) else None,
+            'country_slug': activity.countries[0].slug if getattr(activity, 'countries', None) else None,
+            'country_image_id': activity.countries[0].image_id if getattr(activity, 'countries', None) else None,
+            'country_names': ", ".join([country.name for country in getattr(activity, 'countries', []) if country.name]),
+            'country_slugs': [country.slug for country in getattr(activity, 'countries', []) if country.slug],
+            'countries': self._build_country_list_payload(getattr(activity, 'countries', [])),
             'is_active': activity.is_active
         }
         
@@ -666,7 +809,20 @@ class SearchService:
             'description': attraction.description,
             'slug': attraction.slug,
             'country_id': attraction.country_id,
+            'country_name': attraction.country.name if attraction.country else None,
+            'country_slug': attraction.country.slug if attraction.country else None,
+            'country_image_id': attraction.country.image_id if attraction.country else None,
             'image_id': attraction.image_id,
+            'image_url': self._resolve_attraction_image_url(attraction),
+            'cover_image': attraction.cover_image,
+            'city': attraction.city,
+            'address': attraction.address,
+            'latitude': attraction.latitude,
+            'longitude': attraction.longitude,
+            'duration_minutes': attraction.duration_minutes,
+            'price': attraction.price,
+            'opening_hours': attraction.opening_hours,
+            'country': self._build_country_payload(attraction.country),
             'is_active': attraction.is_active
         }
         

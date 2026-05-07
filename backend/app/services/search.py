@@ -130,6 +130,27 @@ class SearchService:
             return f"{cloudflare_settings.delivery_url}/{legacy_cover}/medium"
 
         return None
+
+    def _resolve_cloudflare_image_url(self, image_id: Optional[str]) -> Optional[str]:
+        """
+        Resolve a Cloudflare image ID or URL into a delivery URL.
+        """
+        if not image_id:
+            return None
+
+        if isinstance(image_id, str):
+            if image_id.startswith("http"):
+                return image_id
+
+            if image_id.startswith("cloudflare://"):
+                image_id = image_id.split("cloudflare://", 1)[1]
+
+        from app.core.cloudflare_config import cloudflare_settings
+
+        if not cloudflare_settings.delivery_url:
+            return None
+
+        return f"{cloudflare_settings.delivery_url}/{image_id}/medium"
     
     # Define index names for each entity type
     REGION_INDEX = 'regions'
@@ -148,7 +169,7 @@ class SearchService:
     INDEX_SETTINGS = {
         REGION_INDEX: {
             'searchableAttributes': ['name', 'summary', 'description'],
-            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'image_id'],
+            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'image_id', 'image_url'],
             'sortableAttributes': ['name'],
             'filterableAttributes': ['is_active']
         },
@@ -172,7 +193,7 @@ class SearchService:
         },
         COUNTRY_INDEX: {
             'searchableAttributes': ['name', 'summary', 'description'],
-            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'region_id', 'image_id'],
+            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'region_id', 'image_id', 'image_url'],
             'sortableAttributes': ['name'],
             'filterableAttributes': ['is_active', 'region_id']
         },
@@ -196,19 +217,19 @@ class SearchService:
         },
         PACKAGE_INDEX: {
             'searchableAttributes': ['name', 'summary', 'description', 'itinerary', 'inclusions', 'exclusions', 'inclusion_items', 'exclusion_items'],
-            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'country_id', 'duration_days', 'price', 'image_id', 'inclusion_items', 'exclusion_items'],
+            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'country_id', 'duration_days', 'price', 'image_id', 'image_url', 'inclusion_items', 'exclusion_items'],
             'sortableAttributes': ['name', 'price', 'duration_days'],
             'filterableAttributes': ['is_active', 'country_id', 'is_featured', 'duration_days']
         },
         GROUP_TRIP_INDEX: {
             'searchableAttributes': ['name', 'summary', 'description', 'itinerary', 'inclusions', 'exclusions', 'inclusion_items', 'exclusion_items'],
-            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'country_id', 'duration_days', 'price', 'image_id', 'inclusion_items', 'exclusion_items'],
+            'displayedAttributes': ['id', 'name', 'summary', 'description', 'slug', 'country_id', 'duration_days', 'price', 'image_id', 'image_url', 'inclusion_items', 'exclusion_items'],
             'sortableAttributes': ['name', 'price', 'duration_days'],
             'filterableAttributes': ['is_active', 'country_id', 'is_featured', 'duration_days']
         },
         BLOG_POST_INDEX: {
             'searchableAttributes': ['title', 'summary', 'content'],
-            'displayedAttributes': ['id', 'title', 'summary', 'slug', 'author', 'cover_image_id'],
+            'displayedAttributes': ['id', 'title', 'summary', 'slug', 'author', 'cover_image_id', 'image_url'],
             'sortableAttributes': ['title', 'published_at'],
             'filterableAttributes': ['is_active', 'published_at']
         }
@@ -256,6 +277,7 @@ class SearchService:
                 'description': region.description,
                 'slug': region.slug,
                 'image_id': region.image_id,
+                'image_url': self._resolve_cloudflare_image_url(region.image_id),
                 'is_active': region.is_active
             })
         
@@ -283,6 +305,7 @@ class SearchService:
                 'slug': country.slug,
                 'region_id': country.region_id,
                 'image_id': country.image_id,
+                'image_url': self._resolve_cloudflare_image_url(country.image_id),
                 'is_active': country.is_active
             })
         
@@ -436,6 +459,7 @@ class SearchService:
                 'duration_days': package.duration_days,
                 'price': package.price,
                 'image_id': package.image_id,
+                'image_url': self._resolve_cloudflare_image_url(package.image_id),
                 'itinerary': package.itinerary,
                 'inclusions': package.inclusions,
                 'exclusions': package.exclusions,
@@ -480,6 +504,7 @@ class SearchService:
                 'duration_days': group_trip.duration_days,
                 'price': group_trip.price,
                 'image_id': group_trip.image_id,
+                'image_url': self._resolve_cloudflare_image_url(group_trip.image_id),
                 'itinerary': group_trip.itinerary,
                 'inclusions': group_trip.inclusions,
                 'exclusions': group_trip.exclusions,
@@ -518,6 +543,7 @@ class SearchService:
                 'slug': blog_post.slug,
                 'author': author_name,
                 'cover_image_id': blog_post.cover_image_id,
+                'image_url': self._resolve_cloudflare_image_url(blog_post.cover_image_id),
                 'published_at': blog_post.published_at.isoformat() if blog_post.published_at else None,
                 'is_active': blog_post.is_active
             })
@@ -588,6 +614,8 @@ class SearchService:
             'summary': region.summary,
             'description': region.description,
             'slug': region.slug,
+            'image_id': region.image_id,
+            'image_url': self._resolve_cloudflare_image_url(region.image_id),
             'is_active': region.is_active
         }
         
@@ -610,6 +638,8 @@ class SearchService:
             'description': country.description,
             'slug': country.slug,
             'region_id': country.region_id,
+            'image_id': country.image_id,
+            'image_url': self._resolve_cloudflare_image_url(country.image_id),
             'is_active': country.is_active
         }
         
@@ -884,6 +914,8 @@ class SearchService:
             'country_id': package.country_id,
             'duration_days': package.duration_days,
             'price': package.price,
+            'image_id': package.image_id,
+            'image_url': self._resolve_cloudflare_image_url(package.image_id),
             'itinerary': package.itinerary,
             'inclusions': package.inclusions,
             'exclusions': package.exclusions,
@@ -923,6 +955,8 @@ class SearchService:
             'country_id': group_trip.country_id,
             'duration_days': group_trip.duration_days,
             'price': group_trip.price,
+            'image_id': group_trip.image_id,
+            'image_url': self._resolve_cloudflare_image_url(group_trip.image_id),
             'itinerary': group_trip.itinerary,
             'inclusions': group_trip.inclusions,
             'exclusions': group_trip.exclusions,
@@ -957,6 +991,7 @@ class SearchService:
             'slug': blog_post.slug,
             'author': author_name,
             'cover_image_id': blog_post.cover_image_id,
+            'image_url': self._resolve_cloudflare_image_url(blog_post.cover_image_id),
             'published_at': blog_post.published_at.isoformat() if blog_post.published_at else None,
             'is_active': blog_post.is_active
         }

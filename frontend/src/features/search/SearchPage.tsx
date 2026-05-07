@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Search, Filter, MapPin, Calendar, DollarSign, Clock } from 'lucide-react';
 import SeoHead from '../../components/seo/SeoHead';
+import { getCloudflareImageUrl } from '../../utils/cloudflareImageUtils';
 
 // API Hooks
 import { useSearch, type MeilisearchHit } from '../../lib/hooks/useSearch';
@@ -132,8 +133,8 @@ const SearchPage: React.FC = () => {
       }
       const normalizedId = typeof imageId === 'string' && imageId.startsWith('cloudflare://')
         ? imageId.replace('cloudflare://', '')
-        : imageId;
-      return `https://imagedelivery.net/4J4CgzUI_LpQRpA_N1TErQ/${normalizedId}/medium`;
+        : String(imageId);
+      return getCloudflareImageUrl(normalizedId, 'medium');
     }
     // Fallback to Unsplash based on type
     const searchTerm = hit.name || hit.title || index;

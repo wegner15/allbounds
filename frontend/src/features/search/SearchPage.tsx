@@ -35,7 +35,10 @@ const INDEX_CONFIG: Record<string, { label: string; route: (hit: MeilisearchHit)
   },
   attractions: {
     label: 'Attractions',
-    route: (hit) => `/attractions/${hit.country_slug || hit.country?.slug || hit.slug}`
+    route: (hit) => {
+      const countrySlug = hit.country_slug || hit.country?.slug || hit.countries?.[0]?.slug;
+      return countrySlug ? `/attractions/${countrySlug}/${hit.slug}` : `/attractions/${hit.slug}`;
+    }
   },
   accommodations: {
     label: 'Accommodations',

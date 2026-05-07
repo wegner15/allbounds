@@ -396,6 +396,10 @@ class SearchService:
                 'address': accommodation.address,
                 'is_active': accommodation.is_active
             })
+
+        if not documents:
+            logger.info("No active accommodations found to index")
+            return True
         
         return self.meilisearch_client.add_documents(self.ACCOMMODATION_INDEX, documents)
     

@@ -170,6 +170,10 @@ class MeilisearchClient:
         if not self.is_configured():
             logger.error("Meilisearch is not configured")
             return False
+
+        if not documents:
+            logger.info(f"Skipping add_documents for {index_name}: no documents to index")
+            return True
         
         try:
             index = self.get_index(index_name)
@@ -196,6 +200,10 @@ class MeilisearchClient:
         if not self.is_configured():
             logger.error("Meilisearch is not configured")
             return False
+
+        if not documents:
+            logger.info(f"Skipping update_documents for {index_name}: no documents to update")
+            return True
         
         try:
             index = self.get_index(index_name)

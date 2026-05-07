@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import { useComprehensivePackageBySlug, useRecommendedPackages } from '../../lib/hooks/usePackages';
 import { HeroSection, OverviewSection, ItinerarySection, InclusionsExclusionsSection, HotelsSection, AttractionsSection, GallerySection, ReviewsSection, BookingSidebar, StickyNavigation, RecommendedTours } from '../../components/tour';
 import ItineraryMapLeaflet from '../../components/tour/ItineraryMapLeaflet';
@@ -10,6 +9,7 @@ import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils'
 import PackageBookingForm from '../../components/forms/PackageBookingForm';
 import InquiryForm from '../../components/forms/InquiryForm';
 import Breadcrumb from '../../components/layout/Breadcrumb';
+import SeoHead from '../../components/seo/SeoHead';
 import type { HolidayTypeSummary } from '../../lib/types/api';
 
 const PackageDetailPageNew: React.FC = () => {
@@ -68,7 +68,15 @@ const PackageDetailPageNew: React.FC = () => {
 
   // Loading state with comprehensive skeleton
   if (isLoading) {
-    return <PackageDetailSkeleton />;
+    return (
+      <>
+        <SeoHead
+          title="Loading Package"
+          canonicalPath={`/packages/${slug || ''}`}
+        />
+        <PackageDetailSkeleton />
+      </>
+    );
   }
 
   // Error state with detailed error handling
@@ -81,73 +89,59 @@ const PackageDetailPageNew: React.FC = () => {
       errorMessage.toLowerCase().includes('not found');
 
     return (
-      <ErrorDisplay
-        type={isNetworkError ? 'network' : isNotFound ? 'notfound' : 'server'}
-        onRetry={() => refetch()}
-        showBackButton={true}
-        showHomeButton={true}
-      />
+      <>
+        <SeoHead
+          title={isNotFound ? 'Package Not Found' : 'Error Loading Package'}
+          canonicalPath={`/packages/${slug || ''}`}
+          noIndex={true}
+        />
+        <ErrorDisplay
+          type={isNetworkError ? 'network' : isNotFound ? 'notfound' : 'server'}
+          onRetry={() => refetch()}
+          showBackButton={true}
+          showHomeButton={true}
+        />
+      </>
     );
   }
 
   // Handle missing package data
   if (!packageDetail) {
     return (
-      <ErrorDisplay
-        type="notfound"
-        title="Package Not Found"
-        message="The package you're looking for doesn't exist or may have been removed."
-        showBackButton={true}
-        showHomeButton={true}
-      />
+      <>
+        <SeoHead
+          title="Package Not Found"
+          canonicalPath={`/packages/${slug || ''}`}
+          noIndex={true}
+        />
+        <ErrorDisplay
+          type="notfound"
+          title="Package Not Found"
+          message="The package you're looking for doesn't exist or may have been removed."
+          showBackButton={true}
+          showHomeButton={true}
+        />
+      </>
     );
   }
 
   return (
     <>
-      <Helmet>
-        {/* Primary Meta Tags */}
-        <title>{packageDetail.name} | Allbound Vacations</title>
-        <meta name="title" content={`${packageDetail.name} | Allbound Vacations`} />
-        <meta
-          name="description"
-          content={packageDetail.summary || packageDetail.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `Explore ${packageDetail.name} - ${packageDetail.duration_days} days in ${packageDetail.country.name}`}
-        />
-        <meta name="keywords" content={`${packageDetail.name}, ${packageDetail.country.name}, tour package, travel, vacation, ${packageDetail.holiday_types?.map(ht => ht.name).join(', ')}`} />
-
-        {/* Open Graph / Facebook */}
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={window.location.href} />
-        <meta property="og:title" content={`${packageDetail.name} | Allbound Vacations`} />
-        <meta
-          property="og:description"
-          content={packageDetail.summary || packageDetail.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `Explore ${packageDetail.name}`}
-        />
-        {packageDetail.image_id && (
-          <meta property="og:image" content={getImageUrlWithFallback(packageDetail.image_id, IMAGE_VARIANTS.LARGE)} />
-        )}
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:site_name" content="Allbound Vacations" />
-
-        {/* Twitter */}
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content={window.location.href} />
-        <meta property="twitter:title" content={`${packageDetail.name} | Allbound Vacations`} />
-        <meta
-          property="twitter:description"
-          content={packageDetail.summary || packageDetail.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `Explore ${packageDetail.name}`}
-        />
-        {packageDetail.image_id && (
-          <meta property="twitter:image" content={getImageUrlWithFallback(packageDetail.image_id, IMAGE_VARIANTS.LARGE)} />
-        )}
-
-        {/* Additional SEO Tags */}
-        <meta name="robots" content="index, follow" />
-        <meta name="language" content="English" />
-        <meta name="author" content="Allbound Vacations" />
-        <link rel="canonical" href={window.location.href} />
-      </Helmet>
+      <SeoHead
+        title={packageDetail.name}
+        description={packageDetail.summary || packageDetail.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `Explore ${packageDetail.name} - ${packageDetail.duration_days} days in ${packageDetail.country.name}`}
+        canonicalPath={`/packages/${packageDetail.slug}`}
+        image={packageDetail.image_id ? getImageUrlWithFallback(packageDetail.image_id, IMAGE_VARIANTS.LARGE) : undefined}
+        type="product"
+        keywords={[
+          packageDetail.name,
+          packageDetail.country.name,
+          'tour package',
+          'travel',
+          'vacation',
+          ...(packageDetail.holiday_types?.map(ht => ht.name) || []),
+        ]}
+      />
 
       <div className="min-h-screen bg-gray-50">
         {/* Hero Section - Full Width */}

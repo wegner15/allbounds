@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import { useCountryDetails } from '../../lib/hooks/useCountries';
+import SeoHead from '../../components/seo/SeoHead';
 import { CountryDetailSkeleton } from './components/CountryDetailSkeleton';
 import { NotFoundError, NetworkError, DestinationErrorDisplay } from './components/DestinationErrorDisplay';
 import DestinationHeroSection from './components/DestinationHeroSection';
@@ -20,16 +20,70 @@ const CountryCategoryPage: React.FC = () => {
     const { slug, category } = useParams<{ slug: string; category: CategoryType }>();
     const { data: country, isLoading, error, refetch } = useCountryDetails(slug || '');
 
-    if (isLoading) return <CountryDetailSkeleton />;
+    if (isLoading) {
+        return (
+            <>
+                <SeoHead
+                    title="Loading Destination Category"
+                    canonicalPath={`/destinations/${slug || ''}/${category || 'overview'}`}
+                />
+                <CountryDetailSkeleton />
+            </>
+        );
+    }
 
     if (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        if (errorMessage.includes('404')) return <NotFoundError destinationSlug={slug} onRetry={refetch} />;
-        if (errorMessage.includes('network')) return <NetworkError onRetry={refetch} />;
-        return <DestinationErrorDisplay type="server" onRetry={refetch} />;
+        if (errorMessage.includes('404')) {
+            return (
+                <>
+                    <SeoHead
+                        title="Destination Category Not Found"
+                        canonicalPath={`/destinations/${slug || ''}/${category || 'overview'}`}
+                        noIndex={true}
+                    />
+                    <NotFoundError destinationSlug={slug} onRetry={refetch} />
+                </>
+            );
+        }
+        if (errorMessage.includes('network')) {
+            return (
+                <>
+                    <SeoHead
+                        title="Destination Category Error"
+                        canonicalPath={`/destinations/${slug || ''}/${category || 'overview'}`}
+                        noIndex={true}
+                    />
+                    <NetworkError onRetry={refetch} />
+                </>
+            );
+        }
+        return (
+            <>
+                <SeoHead
+                    title="Destination Category Error"
+                    canonicalPath={`/destinations/${slug || ''}/${category || 'overview'}`}
+                    noIndex={true}
+                />
+                <DestinationErrorDisplay type="server" onRetry={refetch} />
+            </>
+        );
     }
 
-    if (!country) return <NotFoundError destinationSlug={slug} />;
+    if (!country) {
+        return (
+            <>
+                <SeoHead
+                    title="Destination Category Not Found"
+                    canonicalPath={`/destinations/${slug || ''}/${category || 'overview'}`}
+                    noIndex={true}
+                />
+                <NotFoundError destinationSlug={slug} />
+            </>
+        );
+    }
+
+    const canonicalCategory = category || 'overview';
 
     const renderCategory = () => {
         switch (category) {
@@ -55,9 +109,10 @@ const CountryCategoryPage: React.FC = () => {
 
     return (
         <div className="bg-gray-50 min-h-screen">
-            <Helmet>
-                <title>{`${getCategoryLabel()} in ${country.name} | AllBound Vacations`}</title>
-            </Helmet>
+            <SeoHead
+                title={`${getCategoryLabel()} in ${country.name}`}
+                canonicalPath={`/destinations/${country.slug}/${canonicalCategory}`}
+            />
 
             <Breadcrumb
                 items={[

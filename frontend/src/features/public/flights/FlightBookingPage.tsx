@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
 import { Plane, Calendar, MapPin, Users, ArrowRight } from 'lucide-react';
+import SeoHead from '../../../components/seo/SeoHead';
 import FlightBookingForm from './components/FlightBookingForm';
 
 const FlightBookingPage: React.FC = () => {
     const [isSuccess, setIsSuccess] = useState(false);
 
     return (
-        <div className="min-h-screen bg-white">
+        <>
+            <SeoHead
+                title="Flight Booking"
+                description="Book your flight with Allbound Vacations and access premium air travel options, flexible bookings, and dedicated support."
+                canonicalPath="/flights"
+            />
+            <div className="min-h-screen bg-white">
             {/* Hero Section */}
             <div className="relative h-[400px] bg-charcoal overflow-hidden">
                 <img
@@ -85,6 +92,7 @@ const FlightBookingPage: React.FC = () => {
                 </div>
             </div>
         </div>
+        </>
     );
 };
 

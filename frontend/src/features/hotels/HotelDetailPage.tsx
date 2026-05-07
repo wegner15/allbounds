@@ -1,8 +1,8 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Helmet } from 'react-helmet-async';
 import DOMPurify from 'dompurify';
+import SeoHead from '../../components/seo/SeoHead';
 
 // Components
 import Breadcrumb from '../../components/layout/Breadcrumb';
@@ -31,43 +31,53 @@ const HotelDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
-          <div className="h-64 bg-gray-200 rounded mb-6"></div>
-          <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-3/4 mb-6"></div>
+      <>
+        <SeoHead
+          title="Loading Hotel"
+          canonicalPath={`/hotels/${slug || ''}`}
+        />
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
+            <div className="h-64 bg-gray-200 rounded mb-6"></div>
+            <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-3/4 mb-6"></div>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (error || !hotel) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-          <p>Error loading hotel details. Please try again later.</p>
-          <Link to="/hotels" className="text-red-700 underline mt-2 inline-block">
-            Back to Hotels
-          </Link>
+      <>
+        <SeoHead
+          title="Hotel Not Found"
+          canonicalPath={`/hotels/${slug || ''}`}
+          noIndex={true}
+        />
+        <div className="container mx-auto px-4 py-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+            <p>Error loading hotel details. Please try again later.</p>
+            <Link to="/hotels" className="text-red-700 underline mt-2 inline-block">
+              Back to Hotels
+            </Link>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
     <>
-      <Helmet>
-        <title>{hotel.name} | Allbound Vacations</title>
-        <meta name="description" content={hotel.summary || hotel.description || `Stay at ${hotel.name} with Allbound Vacations`} />
-        <meta property="og:title" content={`${hotel.name} | Allbound Vacations`} />
-        <meta property="og:description" content={hotel.summary || hotel.description || `Stay at ${hotel.name} with Allbound Vacations`} />
-        {hotel.cover_image && (
-          <meta property="og:image" content={getImageUrlWithFallback(hotel.cover_image, IMAGE_VARIANTS.LARGE)} />
-        )}
-      </Helmet>
+      <SeoHead
+        title={hotel.name}
+        description={hotel.summary || hotel.description || `Stay at ${hotel.name} with Allbound Vacations`}
+        canonicalPath={`/hotels/${hotel.slug}`}
+        image={hotel.cover_image ? getImageUrlWithFallback(hotel.cover_image, IMAGE_VARIANTS.LARGE) : undefined}
+      />
 
       <div className="bg-paper min-h-screen">
         {/* Hero Section */}

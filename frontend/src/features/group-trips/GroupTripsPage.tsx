@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
 import { Link, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import DOMPurify from 'dompurify';
+import SeoHead from '../../components/seo/SeoHead';
 
 // Components
 import Button from '../../components/ui/Button';
@@ -186,10 +186,11 @@ const GroupTripsPage: React.FC = () => {
 
   return (
     <div className="bg-paper min-h-screen">
-      <Helmet>
-        <title>Group Trips | Allbound Vacations</title>
-        <meta name="description" content="Join our scheduled group trips to destinations across Africa and beyond." />
-      </Helmet>
+      <SeoHead
+        title="Group Trips"
+        description="Join our scheduled group trips to destinations across Africa and beyond."
+        canonicalPath="/group-trips"
+      />
 
       {/* Featured Group Trips Carousel */}
       {featuredTrips.length > 0 && (

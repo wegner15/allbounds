@@ -4,6 +4,7 @@ import { MapPin, Clock, DollarSign, ChevronLeft, ChevronRight } from 'lucide-rea
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import DOMPurify from 'dompurify';
+import SeoHead from '../../components/seo/SeoHead';
 import { useAttractionTrips } from '../../hooks/useAttractionTrips';
 import { RichTextDisplay } from '../../components/ui/RichTextDisplay';
 import Button from '../../components/ui/Button';
@@ -109,7 +110,13 @@ const AttractionDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <SeoHead
+        title={attraction?.name || 'Attraction'}
+        description={attraction?.description || `Explore ${attraction?.name || 'this attraction'} with Allbound Vacations.`}
+        canonicalPath={`/attractions/${slug}`}
+      />
+      <div className="min-h-screen bg-gray-50">
       {/* Breadcrumb Section */}
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -534,7 +541,8 @@ const AttractionDetailPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
+import SeoHead from '../../../components/seo/SeoHead';
 import { RichTextDisplay } from '../../../components/ui/RichTextDisplay';
 import { useContentBySlug } from '../../../lib/hooks/useContent';
 
@@ -9,6 +10,7 @@ const ContentPage: React.FC = () => {
   const pathname = window.location.pathname;
   const currentSlug = slug || pathname.substring(1); // Remove leading slash
   const { data: content, isLoading, error } = useContentBySlug(currentSlug);
+  const pageTitle = content?.title || currentSlug.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
 
   if (isLoading) {
     return (
@@ -45,48 +47,55 @@ const ContentPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Breadcrumb */}
-      <div className="border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <nav className="flex" aria-label="Breadcrumb">
-            <ol className="flex items-center space-x-4">
-              <li>
-                <Link to="/" className="text-gray-400 hover:text-gray-500">
-                  <svg className="flex-shrink-0 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                  </svg>
-                  <span className="sr-only">Home</span>
-                </Link>
-              </li>
-              <li>
-                <div className="flex items-center">
-                  <svg className="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="ml-4 text-sm font-medium text-gray-500" aria-current="page">
-                    {content.title}
-                  </span>
-                </div>
-              </li>
-            </ol>
-          </nav>
+    <>
+      <SeoHead
+        title={pageTitle}
+        description={`Read ${pageTitle} on Allbound Vacations.`}
+        canonicalPath={`/${currentSlug}`}
+      />
+      <div className="min-h-screen bg-white">
+        {/* Breadcrumb */}
+        <div className="border-b border-gray-200">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <nav className="flex" aria-label="Breadcrumb">
+              <ol className="flex items-center space-x-4">
+                <li>
+                  <Link to="/" className="text-gray-400 hover:text-gray-500">
+                    <svg className="flex-shrink-0 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                    </svg>
+                    <span className="sr-only">Home</span>
+                  </Link>
+                </li>
+                <li>
+                  <div className="flex items-center">
+                    <svg className="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                    </svg>
+                    <span className="ml-4 text-sm font-medium text-gray-500" aria-current="page">
+                      {content.title}
+                    </span>
+                  </div>
+                </li>
+              </ol>
+            </nav>
+          </div>
         </div>
-      </div>
-
-      {/* Content */}
-      <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
-        <header className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            {content.title}
-          </h1>
-        </header>
 
         {/* Content */}
-        <RichTextDisplay content={content.content} />
-      </article>
-    </div>
+        <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Header */}
+          <header className="mb-8">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              {content.title}
+            </h1>
+          </header>
+
+          {/* Content */}
+          <RichTextDisplay content={content.content} />
+        </article>
+      </div>
+    </>
   );
 };
 

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import SeoHead from '../../components/seo/SeoHead';
 import useAuthHook from '../../lib/hooks/useAuthHook';
 
 // Form validation schema
@@ -38,16 +38,14 @@ const LoginPage: React.FC = () => {
   
   return (
     <div className="min-h-screen bg-paper flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <Helmet>
-        <title>Login | AllBounds Admin</title>
-      </Helmet>
+      <SeoHead title="Login" description="Access the Allbound admin dashboard." canonicalPath="/login" noIndex={true} />
       
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-playfair font-bold text-charcoal">
           Sign in to your account
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Access the AllBounds admin dashboard
+          Access the Allbound admin dashboard
         </p>
       </div>
       

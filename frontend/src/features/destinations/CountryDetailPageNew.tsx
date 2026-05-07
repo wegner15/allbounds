@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { useParams } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import SeoHead from '../../components/seo/SeoHead';
 
 // Hooks
 import { useCountryDetails } from '../../lib/hooks/useCountries';
@@ -65,7 +65,15 @@ const CountryDetailPageNew: React.FC = () => {
 
   // Loading state
   if (isLoading) {
-    return <CountryDetailSkeleton />;
+    return (
+      <>
+        <SeoHead
+          title="Loading Destination"
+          canonicalPath={`/destinations/${slug || ''}`}
+        />
+        <CountryDetailSkeleton />
+      </>
+    );
   }
 
   // Error states
@@ -75,49 +83,75 @@ const CountryDetailPageNew: React.FC = () => {
     // Check for 404 error
     if (errorMessage.includes('404') || errorMessage.includes('not found')) {
       return (
-        <NotFoundError
-          destinationSlug={slug}
-          onRetry={() => refetch()}
-        />
+        <>
+          <SeoHead
+            title="Destination Not Found"
+            canonicalPath={`/destinations/${slug || ''}`}
+            noIndex={true}
+          />
+          <NotFoundError
+            destinationSlug={slug}
+            onRetry={() => refetch()}
+          />
+        </>
       );
     }
 
     // Check for network error
     if (errorMessage.includes('fetch') || errorMessage.includes('network') || errorMessage.includes('Failed to fetch')) {
       return (
-        <NetworkError
-          onRetry={() => refetch()}
-        />
+        <>
+          <SeoHead
+            title="Destination Loading Error"
+            canonicalPath={`/destinations/${slug || ''}`}
+            noIndex={true}
+          />
+          <NetworkError
+            onRetry={() => refetch()}
+          />
+        </>
       );
     }
 
     // Generic error
     return (
-      <DestinationErrorDisplay
-        type="server"
-        title="Error Loading Destination"
-        message="We encountered an error while loading this destination. Please try again later."
-        onRetry={() => refetch()}
-        showBackButton={true}
-        showHomeButton={true}
-      />
+      <>
+        <SeoHead
+          title="Error Loading Destination"
+          canonicalPath={`/destinations/${slug || ''}`}
+          noIndex={true}
+        />
+        <DestinationErrorDisplay
+          type="server"
+          title="Error Loading Destination"
+          message="We encountered an error while loading this destination. Please try again later."
+          onRetry={() => refetch()}
+          showBackButton={true}
+          showHomeButton={true}
+        />
+      </>
     );
   }
 
   // No data state
   if (!country) {
     return (
-      <NotFoundError
-        destinationSlug={slug}
-      />
+      <>
+        <SeoHead
+          title="Destination Not Found"
+          canonicalPath={`/destinations/${slug || ''}`}
+          noIndex={true}
+        />
+        <NotFoundError
+          destinationSlug={slug}
+        />
+      </>
     );
   }
 
-  // Prepare SEO data
-  const pageTitle = `${country.name} | AllBound Vacations`;
   const pageDescription = country.description
     ? country.description.replace(/<[^>]*>/g, '').substring(0, 160)
-    : `Discover ${country.name} with AllBound Vacations. Explore packages, group trips, attractions, and hotels.`;
+    : `Discover ${country.name} with Allbound Vacations. Explore packages, group trips, attractions, and hotels.`;
   const pageImage = country.image_id
     ? getImageUrlWithFallback(country.image_id, IMAGE_VARIANTS.LARGE)
     : undefined;
@@ -137,26 +171,12 @@ const CountryDetailPageNew: React.FC = () => {
 
   return (
     <DestinationErrorBoundary>
-      {/* SEO Meta Tags */}
-      <Helmet>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
-
-        {/* Open Graph / Facebook */}
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
-        {pageImage && <meta property="og:image" content={pageImage} />}
-
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={pageDescription} />
-        {pageImage && <meta name="twitter:image" content={pageImage} />}
-
-        {/* Canonical URL */}
-        <link rel="canonical" href={`${window.location.origin}/destinations/${country.slug}`} />
-      </Helmet>
+      <SeoHead
+        title={country.name}
+        description={pageDescription}
+        canonicalPath={`/destinations/${country.slug}`}
+        image={pageImage}
+      />
 
       {/* Skip to Content Link for Keyboard Navigation */}
       <a

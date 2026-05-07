@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useHotelBySlug } from '../../../lib/hooks/useHotels';
+import SeoHead from '../../../components/seo/SeoHead';
 import PackageBookingForm from '../../../components/forms/PackageBookingForm';
 import InquiryForm from '../../../components/forms/InquiryForm';
 import Breadcrumb from '../../../components/layout/Breadcrumb';
@@ -42,28 +43,47 @@ const HotelDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading hotel details...</p>
+      <>
+        <SeoHead
+          title="Loading Hotel"
+          canonicalPath={`/hotels/${slug || ''}`}
+        />
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading hotel details...</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (error || !hotel) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Hotel not found</h2>
-          <Link to="/hotels" className="text-blue-600 hover:text-blue-700">Back to Hotels</Link>
+      <>
+        <SeoHead
+          title="Hotel Not Found"
+          canonicalPath={`/hotels/${slug || ''}`}
+          noIndex={true}
+        />
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Hotel not found</h2>
+            <Link to="/hotels" className="text-blue-600 hover:text-blue-700">Back to Hotels</Link>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <SeoHead
+        title={hotel.name}
+        description={hotel.summary || hotel.description || `Stay at ${hotel.name} with Allbound Vacations.`}
+        canonicalPath={`/hotels/${hotel.slug}`}
+      />
+      <div className="min-h-screen bg-gray-50">
       {/* Breadcrumb Section */}
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -326,7 +346,8 @@ const HotelDetailPage: React.FC = () => {
         defaultSubject={hotel ? `Inquiry about ${hotel.name}` : ''}
         defaultMessage={hotel ? `I'm interested in staying at ${hotel.name}. Please provide more information about availability and rates.` : ''}
       />
-    </div>
+      </div>
+    </>
   );
 };
 

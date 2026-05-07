@@ -1,6 +1,6 @@
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
+import SeoHead from '../../components/seo/SeoHead';
 
 // Components
 import Button from '../../components/ui/Button';
@@ -19,10 +19,11 @@ const RegionsPage: React.FC = () => {
 
     return (
         <div className="bg-paper min-h-screen">
-            <Helmet>
-                <title>Regions | Allbound Vacations</title>
-                <meta name="description" content="Explore our diverse regions. From the savannas of East Africa to the deserts of North Africa, discover unique destinations." />
-            </Helmet>
+            <SeoHead
+                title="Regions"
+                description="Explore our diverse regions. From the savannas of East Africa to the deserts of North Africa, discover unique destinations."
+                canonicalPath="/regions"
+            />
 
             {/* Hero Section */}
             <div className="bg-cover bg-center h-80 md:h-96 flex items-center justify-center relative"

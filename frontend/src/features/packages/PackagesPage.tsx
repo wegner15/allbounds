@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import DOMPurify from 'dompurify';
+import SeoHead from '../../components/seo/SeoHead';
 
 // Components
 import Button from '../../components/ui/Button';
@@ -167,7 +168,13 @@ const PackagesPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <SeoHead
+        title="Vacation Packages"
+        description="Browse handpicked vacation packages, compare destinations, and find your next travel experience with Allbound Vacations."
+        canonicalPath="/packages"
+      />
+      <div className="min-h-screen bg-gray-50">
 
       {/* Hero Section - Package Carousel */}
       <PackageCarousel
@@ -450,7 +457,8 @@ const PackagesPage: React.FC = () => {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

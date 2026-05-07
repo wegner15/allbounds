@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet-async';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Search, Filter, MapPin, Calendar, DollarSign, Clock } from 'lucide-react';
+import SeoHead from '../../components/seo/SeoHead';
 
 // API Hooks
 import { useSearch, type MeilisearchHit } from '../../lib/hooks/useSearch';
@@ -221,10 +221,12 @@ const SearchPage: React.FC = () => {
 
   return (
     <div className="bg-paper min-h-screen">
-      <Helmet>
-        <title>{query ? `Search results for "${query}"` : 'Search'} | Allbound Vacations</title>
-        <meta name="description" content="Search for vacation packages, group trips, destinations, and more." />
-      </Helmet>
+      <SeoHead
+        title={query ? `Search results for "${query}"` : 'Search'}
+        description="Search for vacation packages, group trips, destinations, and more."
+        canonicalPath="/search"
+        noIndex={true}
+      />
 
       <div className="container mx-auto px-4 py-8">
         {/* Page Header */}

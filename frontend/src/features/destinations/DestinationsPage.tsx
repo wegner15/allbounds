@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
+import SeoHead from '../../components/seo/SeoHead';
 
 // Components
 import Button from '../../components/ui/Button';
@@ -25,10 +25,11 @@ const DestinationsPage: React.FC = () => {
 
   return (
     <div className="bg-paper min-h-screen">
-      <Helmet>
-        <title>Destinations | Allbound Vacations</title>
-        <meta name="description" content="Discover amazing destinations across Africa and beyond. Explore countries, regions, and unique travel experiences." />
-      </Helmet>
+      <SeoHead
+        title="Destinations"
+        description="Discover amazing destinations across Africa and beyond. Explore countries, regions, and unique travel experiences."
+        canonicalPath="/destinations"
+      />
 
       {/* Hero Section */}
       <div className="bg-cover bg-center h-80 md:h-96 flex items-center justify-center relative"

@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useGroupTripDetailsBySlug } from '../../lib/hooks/useGroupTrips';
 import { useAppStore } from '../../lib/store';
-import { Helmet } from 'react-helmet-async';
+import SeoHead from '../../components/seo/SeoHead';
 
 // Components
 import Breadcrumb from '../../components/layout/Breadcrumb';
@@ -94,43 +94,53 @@ const GroupTripDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
-          <div className="h-64 bg-gray-200 rounded mb-6"></div>
-          <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-3/4 mb-6"></div>
+      <>
+        <SeoHead
+          title="Loading Group Trip"
+          canonicalPath={`/group-trips/${slug || ''}`}
+        />
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
+            <div className="h-64 bg-gray-200 rounded mb-6"></div>
+            <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-3/4 mb-6"></div>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (error || !tripDetail) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-          <p>Error loading group trip details. Please try again later.</p>
-          <Link to="/group-trips" className="text-red-700 underline mt-2 inline-block">
-            Back to Group Trips
-          </Link>
+      <>
+        <SeoHead
+          title="Group Trip Not Found"
+          canonicalPath={`/group-trips/${slug || ''}`}
+          noIndex={true}
+        />
+        <div className="container mx-auto px-4 py-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+            <p>Error loading group trip details. Please try again later.</p>
+            <Link to="/group-trips" className="text-red-700 underline mt-2 inline-block">
+              Back to Group Trips
+            </Link>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
     <>
-      <Helmet>
-        <title>{tripDetail.name} | Allbound Vacations</title>
-        <meta name="description" content={tripDetail.description || ''} />
-        <meta property="og:title" content={`${tripDetail.name} | Allbound Vacations`} />
-        <meta property="og:description" content={tripDetail.description || ''} />
-        {tripDetail?.cover_image && (
-          <meta property="og:image" content={getImageUrlWithFallback(tripDetail.cover_image, IMAGE_VARIANTS.LARGE)} />
-        )}
-      </Helmet>
+      <SeoHead
+        title={tripDetail.name}
+        description={tripDetail.description || undefined}
+        canonicalPath={`/group-trips/${tripDetail.slug}`}
+        image={tripDetail?.cover_image ? getImageUrlWithFallback(tripDetail.cover_image, IMAGE_VARIANTS.LARGE) : undefined}
+      />
 
       {/* Sticky Trip Info Card */}
       <div className={`fixed top-20 left-0 right-0 z-45 transition-all duration-300 ${isScrolled ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'

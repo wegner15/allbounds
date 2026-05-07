@@ -1,4 +1,5 @@
 import React from 'react';
+import SeoHead from '../../components/seo/SeoHead';
 import HeroSection from './home/sections/HeroSection';
 import ThreeStepsSection from './home/sections/ThreeStepsSection';
 import SpecialTopDeals from './home/sections/SpecialTopDeals';
@@ -15,21 +16,28 @@ import WhyChooseUs from './home/sections/WhyChooseUs';
 
 const HomePage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-white">
-      <HeroSection />
-      <ThreeStepsSection />
-      <SpecialTopDeals />
-      <TopTrendingDestinations />
-      <HolidayByType />
-      <ContactUsCard />
-      <RecommendedHotels />
-      <PopularTrips />
-      <TrendingActivities />
-      <TrendingAttractions />
-      <WhyChooseUs />
-      <InspirationForNextTrip />
-      <CustomerReviews />
-    </div>
+    <>
+      <SeoHead
+        title="Home"
+        description="Discover extraordinary destinations and create unforgettable memories with Allbound Vacations."
+        canonicalPath="/"
+      />
+      <div className="min-h-screen bg-white">
+        <HeroSection />
+        <ThreeStepsSection />
+        <SpecialTopDeals />
+        <TopTrendingDestinations />
+        <HolidayByType />
+        <ContactUsCard />
+        <RecommendedHotels />
+        <PopularTrips />
+        <TrendingActivities />
+        <TrendingAttractions />
+        <WhyChooseUs />
+        <InspirationForNextTrip />
+        <CustomerReviews />
+      </div>
+    </>
   );
 };
 

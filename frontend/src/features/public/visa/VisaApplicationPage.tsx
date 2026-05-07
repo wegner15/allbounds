@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import VisaForm from './components/VisaForm';
-import { Helmet } from 'react-helmet-async';
+import SeoHead from '../../../components/seo/SeoHead';
 
 const VisaApplicationPage: React.FC = () => {
     const [isSuccess, setIsSuccess] = useState(false);
 
     return (
         <>
-            <Helmet>
-                <title>Apply for a Visa | Allbound Vacations</title>
-                <meta name="description" content="Get expert assistance with your visa application. We offer a 97% approval rate for tourist, business, student, and work visas." />
-            </Helmet>
+            <SeoHead
+                title="Visa Application"
+                description="Get expert assistance with your visa application. We offer a 97% approval rate for tourist, business, student, and work visas."
+                canonicalPath="/visa-application"
+            />
 
             <div className="min-h-screen bg-gray-50 pb-16">
                 {/* Hero Section */}

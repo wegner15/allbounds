@@ -1,15 +1,16 @@
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
+import SeoHead from '../../components/seo/SeoHead';
 import ContactInquiryForm from '../../components/forms/ContactInquiryForm';
 
 const ContactUsPage: React.FC = () => {
   return (
     <>
-      <Helmet>
-        <title>Contact Us - AllBounds Travel</title>
-        <meta name="description" content="Get in touch with AllBounds Travel for personalized travel planning and inquiries. We're here to help you plan your perfect adventure." />
-      </Helmet>
+      <SeoHead
+        title="Contact Us"
+        description="Get in touch with Allbound Vacations for personalized travel planning and inquiries."
+        canonicalPath="/contact-us"
+      />
 
       <div className="min-h-screen bg-white">
         {/* Hero Section */}

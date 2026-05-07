@@ -1,9 +1,16 @@
 import React from 'react';
 import { Compass, CreditCard, Calendar } from 'lucide-react';
+import SeoHead from '../../../components/seo/SeoHead';
 
 const PaymentPlansPage: React.FC = () => {
     return (
-        <div className="bg-white min-h-screen font-lato">
+        <>
+            <SeoHead
+                title="Payment Plans"
+                description="Learn how to pay for your vacation in instalments with flexible payment plans on eligible tours, cruises, and hotel packages."
+                canonicalPath="/payment-plans"
+            />
+            <div className="bg-white min-h-screen font-lato">
             {/* Hero Section */}
             <div className="relative h-[400px] flex items-center justify-center text-center text-white">
                 <div className="absolute inset-0 bg-blue-600 overflow-hidden">
@@ -65,6 +72,7 @@ const PaymentPlansPage: React.FC = () => {
                 </div>
             </div>
         </div>
+        </>
     );
 };
 

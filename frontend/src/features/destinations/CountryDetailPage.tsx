@@ -1,8 +1,8 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Helmet } from 'react-helmet-async';
 import DOMPurify from 'dompurify';
+import SeoHead from '../../components/seo/SeoHead';
 
 // Components
 import Breadcrumb from '../../components/layout/Breadcrumb';
@@ -47,43 +47,53 @@ const CountryDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
-          <div className="h-64 bg-gray-200 rounded mb-6"></div>
-          <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-3/4 mb-6"></div>
+      <>
+        <SeoHead
+          title="Loading Destination"
+          canonicalPath={`/destinations/${slug || ''}`}
+        />
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
+            <div className="h-64 bg-gray-200 rounded mb-6"></div>
+            <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-3/4 mb-6"></div>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (error || !country) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-          <p>Error loading country details. Please try again later.</p>
-          <Link to="/destinations" className="text-red-700 underline mt-2 inline-block">
-            Back to Destinations
-          </Link>
+      <>
+        <SeoHead
+          title="Destination Not Found"
+          canonicalPath={`/destinations/${slug || ''}`}
+          noIndex={true}
+        />
+        <div className="container mx-auto px-4 py-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+            <p>Error loading country details. Please try again later.</p>
+            <Link to="/destinations" className="text-red-700 underline mt-2 inline-block">
+              Back to Destinations
+            </Link>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
     <>
-      <Helmet>
-        <title>{country.name} | AllBound Vacations</title>
-        <meta name="description" content={country.description || `Discover ${country.name} with AllBound Vacations`} />
-        <meta property="og:title" content={`${country.name} | AllBound Vacations`} />
-        <meta property="og:description" content={country.description || `Discover ${country.name} with AllBound Vacations`} />
-        {country?.image_id && (
-          <meta property="og:image" content={getImageUrlWithFallback(country.image_id, IMAGE_VARIANTS.LARGE)} />
-        )}
-      </Helmet>
+      <SeoHead
+        title={country.name}
+        description={country.description || `Discover ${country.name} with Allbound Vacations`}
+        canonicalPath={`/destinations/${country.slug}`}
+        image={country?.image_id ? getImageUrlWithFallback(country.image_id, IMAGE_VARIANTS.LARGE) : undefined}
+      />
 
       <div className="bg-paper min-h-screen">
         {/* Hero Section */}

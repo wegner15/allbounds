@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /login
+Disallow: /search
+Disallow: /unauthorized
+Disallow: /form-showcase
+Disallow: /contact
+
+Sitemap: https://allboundvacations.com/sitemap.xml

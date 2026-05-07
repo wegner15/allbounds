@@ -1,8 +1,8 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import DOMPurify from 'dompurify';
 import CloudflareImage from '../../components/ui/CloudflareImage';
+import SeoHead from '../../components/seo/SeoHead';
 
 // API Hooks
 import { useHolidayTypeBySlug } from '../../lib/hooks/useHolidayTypes';
@@ -120,41 +120,53 @@ const HolidayTypeDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
-          <div className="h-64 bg-gray-200 rounded mb-6"></div>
-          <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-3/4 mb-6"></div>
+      <>
+        <SeoHead
+          title="Loading Holiday Type"
+          canonicalPath={`/holiday-types/${slug || ''}`}
+        />
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
+            <div className="h-64 bg-gray-200 rounded mb-6"></div>
+            <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-3/4 mb-6"></div>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (error || !holidayType) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-          <p>Error loading holiday type details. Please try again later.</p>
-          <Link to="/holiday-types" className="text-red-700 underline mt-2 inline-block">
-            Back to Holiday Types
-          </Link>
+      <>
+        <SeoHead
+          title="Holiday Type Not Found"
+          canonicalPath={`/holiday-types/${slug || ''}`}
+          noIndex={true}
+        />
+        <div className="container mx-auto px-4 py-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+            <p>Error loading holiday type details. Please try again later.</p>
+            <Link to="/holiday-types" className="text-red-700 underline mt-2 inline-block">
+              Back to Holiday Types
+            </Link>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
     <>
-      <Helmet>
-        <title>{holidayType.name} Holidays | Allbound Vacations</title>
-        <meta name="description" content={holidayType.description || ''} />
-        <meta property="og:title" content={`${holidayType.name} Holidays | Allbound Vacations`} />
-        <meta property="og:description" content={holidayType.description || ''} />
-        <meta property="og:image" content={`https://source.unsplash.com/random/1200x630/?${holidayType.name.toLowerCase()}`} />
-      </Helmet>
+      <SeoHead
+        title={`${holidayType.name} Holidays`}
+        description={holidayType.description || undefined}
+        canonicalPath={`/holiday-types/${holidayType.slug}`}
+        image={`https://source.unsplash.com/random/1200x630/?${holidayType.name.toLowerCase()}`}
+      />
 
       {/* Enhanced Hero Section */}
       <div className="relative min-h-screen flex items-center">

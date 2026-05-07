@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
+import SeoHead from '../../../components/seo/SeoHead';
 import { useHotels } from '../../../lib/hooks/useHotels';
 import { useHotelTypes } from '../../../lib/hooks/useHotelTypes';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
@@ -42,41 +43,61 @@ const HotelListPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white rounded-xl shadow-sm overflow-hidden">
-                  <div className="h-48 bg-gray-200"></div>
-                  <div className="p-6">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+      <>
+        <SeoHead
+          title="Hotels & Stays"
+          description="Discover amazing hotels and accommodations for your next adventure with Allbound Vacations."
+          canonicalPath="/hotels"
+        />
+        <div className="min-h-screen bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div className="h-48 bg-gray-200"></div>
+                    <div className="p-6">
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Unable to load hotels</h2>
-          <p className="text-gray-600">Please try again later.</p>
+      <>
+        <SeoHead
+          title="Hotels & Stays"
+          description="Discover amazing hotels and accommodations for your next adventure with Allbound Vacations."
+          canonicalPath="/hotels"
+        />
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Unable to load hotels</h2>
+            <p className="text-gray-600">Please try again later.</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <SeoHead
+        title="Hotels & Stays"
+        description="Discover amazing hotels and accommodations for your next adventure with Allbound Vacations."
+        canonicalPath="/hotels"
+      />
+      <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -356,7 +377,8 @@ const HotelListPage: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

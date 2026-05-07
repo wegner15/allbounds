@@ -5,6 +5,7 @@ import { queryClient } from './lib/api';
 import { AuthProvider } from './lib/contexts/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
+import SeoHead from './components/seo/SeoHead';
 
 // Import layout components
 import Header from './components/layout/Header';
@@ -141,44 +142,79 @@ import EmailLogsPage from './features/admin/logs/EmailLogsPage';
 
 
 const CountriesPage = () => (
-  <div>
-    <h1 className="text-4xl font-playfair mb-6">Discover Countries</h1>
-    <p className="text-lg mb-4">Explore countries with unique cultures and experiences.</p>
-  </div>
+  <>
+    <SeoHead
+      title="Countries"
+      description="Explore countries with unique cultures and experiences."
+      canonicalPath="/countries"
+    />
+    <div>
+      <h1 className="text-4xl font-playfair mb-6">Discover Countries</h1>
+      <p className="text-lg mb-4">Explore countries with unique cultures and experiences.</p>
+    </div>
+  </>
 );
 
 const StaysPage = () => (
-  <div>
-    <h1 className="text-4xl font-playfair mb-6">Luxury Stays</h1>
-    <p className="text-lg mb-4">Find the perfect accommodation for your journey.</p>
-  </div>
+  <>
+    <SeoHead
+      title="Stays"
+      description="Find the perfect accommodation for your journey."
+      canonicalPath="/stays"
+    />
+    <div>
+      <h1 className="text-4xl font-playfair mb-6">Luxury Stays</h1>
+      <p className="text-lg mb-4">Find the perfect accommodation for your journey.</p>
+    </div>
+  </>
 );
 
 const ActivitiesPage = () => (
-  <div>
-    <h1 className="text-4xl font-playfair mb-6">Activities</h1>
-    <p className="text-lg mb-4">Discover exciting activities at your destination.</p>
-  </div>
+  <>
+    <SeoHead
+      title="Activities"
+      description="Discover exciting activities at your destination."
+      canonicalPath="/activities"
+    />
+    <div>
+      <h1 className="text-4xl font-playfair mb-6">Activities</h1>
+      <p className="text-lg mb-4">Discover exciting activities at your destination.</p>
+    </div>
+  </>
 );
 
 // Remove the placeholder BlogPage since we now have proper public blog pages
 
 const NotFoundPage = () => (
-  <div className="text-center py-16">
-    <h1 className="text-4xl font-playfair mb-6">Page Not Found</h1>
-    <p className="text-lg mb-8">The page you're looking for doesn't exist or has been moved.</p>
-    <a href="/" className="bg-charcoal hover:bg-hover text-white px-6 py-3 rounded-md font-medium transition-colors">
-      Back to Home
-    </a>
-  </div>
+  <>
+    <SeoHead
+      title="Page Not Found"
+      canonicalUrl={typeof window !== 'undefined' ? window.location.href : undefined}
+      noIndex={true}
+    />
+    <div className="text-center py-16">
+      <h1 className="text-4xl font-playfair mb-6">Page Not Found</h1>
+      <p className="text-lg mb-8">The page you're looking for doesn't exist or has been moved.</p>
+      <a href="/" className="bg-charcoal hover:bg-hover text-white px-6 py-3 rounded-md font-medium transition-colors">
+        Back to Home
+      </a>
+    </div>
+  </>
 );
 
 // Admin pages
 const AdminPreviewPage = () => (
-  <div>
-    <h1 className="text-4xl font-playfair mb-6">Content Preview</h1>
-    <p className="text-lg mb-4">Preview content before publishing.</p>
-  </div>
+  <>
+    <SeoHead
+      title="Content Preview"
+      canonicalPath="/admin"
+      noIndex={true}
+    />
+    <div>
+      <h1 className="text-4xl font-playfair mb-6">Content Preview</h1>
+      <p className="text-lg mb-4">Preview content before publishing.</p>
+    </div>
+  </>
 );
 
 // Layout wrapper
@@ -247,13 +283,42 @@ import AdminLayout from './components/layout/AdminLayout';
 
 // Unauthorized page
 const UnauthorizedPage = () => (
-  <div className="text-center py-16">
-    <h1 className="text-4xl font-playfair mb-6">Unauthorized</h1>
-    <p className="text-lg mb-8">You don't have permission to access this page.</p>
-    <a href="/" className="bg-charcoal hover:bg-hover text-white px-6 py-3 rounded-md font-medium transition-colors">
-      Back to Home
-    </a>
-  </div>
+  <>
+    <SeoHead
+      title="Unauthorized"
+      canonicalPath="/unauthorized"
+      noIndex={true}
+    />
+    <div className="text-center py-16">
+      <h1 className="text-4xl font-playfair mb-6">Unauthorized</h1>
+      <p className="text-lg mb-8">You don't have permission to access this page.</p>
+      <a href="/" className="bg-charcoal hover:bg-hover text-white px-6 py-3 rounded-md font-medium transition-colors">
+        Back to Home
+      </a>
+    </div>
+  </>
+);
+
+const FormShowcasePage = () => (
+  <>
+    <SeoHead
+      title="Form Showcase"
+      canonicalPath="/form-showcase"
+      noIndex={true}
+    />
+    <FormShowcase />
+  </>
+);
+
+const ContactFormPage = () => (
+  <>
+    <SeoHead
+      title="Contact Form"
+      canonicalPath="/contact"
+      noIndex={true}
+    />
+    <ContactForm />
+  </>
 );
 
 // Router configuration
@@ -306,8 +371,8 @@ const router = createBrowserRouter([
       { path: 'search', element: <SearchPage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'unauthorized', element: <UnauthorizedPage /> },
-      { path: 'form-showcase', element: <FormShowcase /> },
-      { path: 'contact', element: <ContactForm /> },
+      { path: 'form-showcase', element: <FormShowcasePage /> },
+      { path: 'contact', element: <ContactFormPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

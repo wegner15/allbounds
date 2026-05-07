@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAppStore } from '../../lib/store';
-import { Helmet } from 'react-helmet-async';
 import DOMPurify from 'dompurify';
 import { usePackageDetailsBySlug } from '../../lib/hooks/usePackages';
 
@@ -20,6 +19,7 @@ import SimilarPackages from '../../components/recommendations/SimilarPackages';
 
 // Utils
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils';
+import SeoHead from '../../components/seo/SeoHead';
 
 // Hooks
 import { useActivePackagePriceCharts } from '../../lib/hooks/usePackagePriceCharts';
@@ -57,43 +57,54 @@ const PackageDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
-          <div className="h-64 bg-gray-200 rounded mb-6"></div>
-          <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-3/4 mb-6"></div>
+      <>
+        <SeoHead
+          title="Loading Package"
+          canonicalPath={`/packages/${slug || ''}`}
+        />
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
+            <div className="h-64 bg-gray-200 rounded mb-6"></div>
+            <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-3/4 mb-6"></div>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (error || !packageDetail) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-          <p>Error loading package details. Please try again later.</p>
-          <Link to="/packages" className="text-red-700 underline mt-2 inline-block">
-            Back to Packages
-          </Link>
+      <>
+        <SeoHead
+          title="Package Not Found"
+          canonicalPath={`/packages/${slug || ''}`}
+          noIndex={true}
+        />
+        <div className="container mx-auto px-4 py-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+            <p>Error loading package details. Please try again later.</p>
+            <Link to="/packages" className="text-red-700 underline mt-2 inline-block">
+              Back to Packages
+            </Link>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
     <>
-      <Helmet>
-        <title>{packageDetail.name} | Allbound Vacations</title>
-        <meta name="description" content={packageDetail.description || ''} />
-        <meta property="og:title" content={`${packageDetail.name} | Allbound Vacations`} />
-        <meta property="og:description" content={packageDetail.description || ''} />
-        {packageDetail?.image_id && (
-          <meta property="og:image" content={getImageUrlWithFallback(packageDetail.image_id, IMAGE_VARIANTS.LARGE)} />
-        )}
-      </Helmet>
+      <SeoHead
+        title={packageDetail.name}
+        description={packageDetail.description || undefined}
+        canonicalPath={`/packages/${packageDetail.slug}`}
+        image={packageDetail?.image_id ? getImageUrlWithFallback(packageDetail.image_id, IMAGE_VARIANTS.LARGE) : undefined}
+        type="product"
+      />
 
       <div className="container mx-auto px-4 py-8">
         <Breadcrumb

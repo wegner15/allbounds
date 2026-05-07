@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
+import SeoHead from '../../../components/seo/SeoHead';
 import { RichTextDisplay } from '../../../components/ui/RichTextDisplay';
 import { useBlogBySlug as useBlog, useRelatedBlogs } from '../../../lib/hooks/useBlogs';
 import { getCloudflareImageUrl } from '../../../utils/cloudflareImageUtils';
@@ -24,6 +25,14 @@ const BlogDetailPage: React.FC = () => {
     const readTime = Math.ceil(wordCount / wordsPerMinute);
     return `${readTime} min read`;
   };
+
+  const pageTitle = blog?.title || 'Article not found';
+  const pageDescription = blog?.summary
+    ? blog.summary.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)
+    : blog?.content
+      ? blog.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)
+      : 'Travel stories, destination insights, and helpful travel tips from Allbound Vacations.';
+  const pageImage = blog?.cover_image_id ? getCloudflareImageUrl(blog.cover_image_id, 'large') : undefined;
 
   const cleanHtmlContent = (html: string) => {
     // Remove TinyMCE data attributes that are not needed for display
@@ -71,7 +80,15 @@ const BlogDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <>
+      <SeoHead
+        title={pageTitle}
+        description={pageDescription}
+        canonicalPath={`/blog/${blog.slug}`}
+        image={pageImage}
+        type="article"
+      />
+      <div className="min-h-screen bg-white">
       {/* Breadcrumb */}
       <div className="border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -312,7 +329,8 @@ const BlogDetailPage: React.FC = () => {
           </div>
         </section>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

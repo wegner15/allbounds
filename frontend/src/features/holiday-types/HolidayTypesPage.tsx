@@ -1,7 +1,7 @@
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import CloudflareImage from '../../components/ui/CloudflareImage';
+import SeoHead from '../../components/seo/SeoHead';
 
 // API Hooks
 import { useHolidayTypes } from '../../lib/hooks/useHolidayTypes';
@@ -40,10 +40,11 @@ const HolidayTypesPage: React.FC = () => {
 
   return (
     <div className="bg-paper min-h-screen">
-      <Helmet>
-        <title>Holiday Types | Allbound Vacations</title>
-        <meta name="description" content="Explore our diverse range of holiday types and find your perfect vacation style." />
-      </Helmet>
+      <SeoHead
+        title="Holiday Types"
+        description="Explore our diverse range of holiday types and find your perfect vacation style."
+        canonicalPath="/holiday-types"
+      />
 
       {/* Hero Section */}
       <div className="bg-cover bg-center h-64 md:h-80 flex items-center justify-center" style={{ backgroundImage: 'url(https://source.unsplash.com/random/1600x900/?vacation)' }}>

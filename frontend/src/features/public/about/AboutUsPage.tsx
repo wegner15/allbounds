@@ -1,12 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Globe, ShieldCheck, Tag, Users, Clock, Plane, Star } from 'lucide-react';
+import SeoHead from '../../../components/seo/SeoHead';
 import ThreeStepsSection from '../home/sections/ThreeStepsSection';
 import ContactUsCard from '../home/sections/ContactUsCard';
 
 const AboutUsPage: React.FC = () => {
     return (
-        <div className="bg-white">
+        <>
+            <SeoHead
+                title="About Us"
+                description="Learn about Allbound Vacations, our bespoke travel approach, and why travelers trust us for tailor-made journeys across Africa and beyond."
+                canonicalPath="/about-us"
+            />
+            <div className="bg-white">
             {/* Hero Section */}
             <section className="relative h-[60vh] min-h-[400px] flex items-center justify-center">
                 <div className="absolute inset-0 w-full h-full">
@@ -196,6 +203,7 @@ const AboutUsPage: React.FC = () => {
             <ContactUsCard hideFeatures={true} />
 
         </div>
+        </>
     );
 };
 

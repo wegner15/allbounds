@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useActivityBySlug, useActivityTrips } from '../../../lib/hooks/useActivities';
-import { Helmet } from 'react-helmet-async';
 import DOMPurify from 'dompurify';
+import SeoHead from '../../../components/seo/SeoHead';
 import GridGallery from '../../../components/ui/GridGallery';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 import FromPriceDisplay from '../../../components/ui/FromPriceDisplay';
@@ -65,47 +65,60 @@ const ActivityDetailPage: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    <div className="animate-pulse">
-                        <div className="h-64 bg-gray-200 rounded-xl mb-8"></div>
-                        <div className="grid gap-8 lg:grid-cols-3">
-                            <div className="lg:col-span-2">
-                                <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
-                                <div className="h-4 bg-gray-200 rounded w-1/2 mb-6"></div>
-                                <div className="space-y-3">
-                                    <div className="h-4 bg-gray-200 rounded"></div>
-                                    <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-                                    <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+            <>
+                <SeoHead
+                    title="Loading Activity"
+                    canonicalPath={`/activities/${slug || ''}`}
+                />
+                <div className="min-h-screen bg-white">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                        <div className="animate-pulse">
+                            <div className="h-64 bg-gray-200 rounded-xl mb-8"></div>
+                            <div className="grid gap-8 lg:grid-cols-3">
+                                <div className="lg:col-span-2">
+                                    <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-1/2 mb-6"></div>
+                                    <div className="space-y-3">
+                                        <div className="h-4 bg-gray-200 rounded"></div>
+                                        <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                                        <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="bg-gray-100 rounded-xl p-6">
-                                <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
-                                <div className="h-10 bg-gray-200 rounded mb-4"></div>
-                                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                <div className="bg-gray-100 rounded-xl p-6">
+                                    <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
+                                    <div className="h-10 bg-gray-200 rounded mb-4"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </>
         );
     }
 
     if (error || !activity) {
         return (
-            <div className="min-h-screen bg-white flex items-center justify-center">
-                <div className="text-center">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Activity not found</h2>
-                    <p className="text-gray-600 mb-6">The activity you're looking for doesn't exist or has been removed.</p>
-                    <Link
-                        to="/activities"
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
-                    >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Activities
-                    </Link>
+            <>
+                <SeoHead
+                    title="Activity Not Found"
+                    canonicalPath={`/activities/${slug || ''}`}
+                    noIndex={true}
+                />
+                <div className="min-h-screen bg-white flex items-center justify-center">
+                    <div className="text-center">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-4">Activity not found</h2>
+                        <p className="text-gray-600 mb-6">The activity you're looking for doesn't exist or has been removed.</p>
+                        <Link
+                            to="/activities"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
+                        >
+                            <ArrowLeft className="w-4 h-4 mr-2" />
+                            Back to Activities
+                        </Link>
+                    </div>
                 </div>
-            </div>
+            </>
         );
     }
 
@@ -114,10 +127,11 @@ const ActivityDetailPage: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-white">
-            <Helmet>
-                <title>{activity.name} | Allbound Vacations</title>
-                <meta name="description" content={activity.summary || activity.description?.substring(0, 160)} />
-            </Helmet>
+            <SeoHead
+                title={activity.name}
+                description={activity.summary || activity.description?.substring(0, 160) || undefined}
+                canonicalPath={`/activities/${slug}`}
+            />
 
             {/* Breadcrumb */}
             <div className="border-b border-gray-200">

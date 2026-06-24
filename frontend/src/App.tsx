@@ -440,10 +440,15 @@ const router = createBrowserRouter([
       { path: 'packages', element: <PackagesListPage /> },
       { path: 'packages/new', element: <CreatePackagePage /> },
       { path: 'packages/:id/edit', element: <EditPackagePage /> },
+      // Group trip management routes
+      { path: 'group-trips', element: <GroupTripsListPage /> },
+      { path: 'group-trips/new', element: <CreateGroupTripPage /> },
+      { path: 'group-trips/:id/edit', element: <EditGroupTripPage /> },
       // Newsletter subscribers
       { path: 'newsletter', element: <SubscriberList /> },
       // Booking management routes
       { path: 'bookings/packages', element: <PackageBookingsPage /> },
+      { path: 'bookings/group-trips', element: <GroupTripBookingsPage /> },
       { path: 'bookings/inquiries', element: <GeneralInquiriesPage /> },
       { path: 'bookings/visa-applications', element: <VisaApplicationsPage /> },
       { path: 'bookings/flights', element: <FlightBookingsPage /> },

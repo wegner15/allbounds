@@ -37,8 +37,6 @@ services:
         condition: service_healthy
       meilisearch:
         condition: service_healthy
-      search_indexer:
-        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "curl", "-f", "--max-time", "5", "http://localhost:8000/health"]
       interval: 15s
@@ -149,8 +147,6 @@ services:
         condition: service_healthy
       meilisearch:
         condition: service_healthy
-      search_indexer:
-        condition: service_completed_successfully
     healthcheck:
       test: ["CMD-SHELL", "celery -A app.celery_app inspect ping -d celery@$$HOSTNAME"]
       interval: 30s

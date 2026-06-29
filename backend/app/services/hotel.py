@@ -16,6 +16,31 @@ class HotelService:
         if not image_id:
             return None
         return f"{cloudflare_settings.delivery_url}/{image_id}/{variant}"
+
+    def _resolve_cover_image_url(self, db: Session, hotel: Hotel) -> Optional[str]:
+        """
+        Get cover image url for a hotel, falling back to the first active media asset if image_id is not set.
+        """
+        if hotel.image_id:
+            return self._get_cloudflare_image_url(hotel.image_id)
+        
+        # Fallback to first active media asset
+        from app.models.media import MediaAsset
+        from app.models.hotel import hotel_media
+        
+        first_media = db.query(MediaAsset).join(hotel_media).filter(
+            hotel_media.c.hotel_id == hotel.id,
+            MediaAsset.is_active == True
+        ).order_by(MediaAsset.id.asc()).first()
+        
+        if not first_media:
+            return None
+            
+        if first_media.file_path.startswith("cloudflare://") and first_media.storage_key:
+            return self._get_cloudflare_image_url(first_media.storage_key)
+        elif first_media.storage_key:
+            return self._get_cloudflare_image_url(first_media.storage_key)
+        return first_media.file_path
     
     def get_hotels(self, db: Session, skip: int = 0, limit: int = 100, recommended: Optional[bool] = None, country: Optional[str] = None) -> List[Dict[str, Any]]:
         """
@@ -47,8 +72,7 @@ class HotelService:
         # Format hotels with cover images
         result = []
         for hotel in hotels:
-            # Use image_id directly — avoid loading media_assets for the list view
-            cover_image_url = self._get_cloudflare_image_url(hotel.image_id) if hotel.image_id else None
+            cover_image_url = self._resolve_cover_image_url(db, hotel)
 
             hotel_data = {
                 "id": hotel.id,
@@ -65,6 +89,7 @@ class HotelService:
                 } if hotel.country else None,
                 "image_id": hotel.image_id,
                 "image_url": cover_image_url,
+                "cover_image": cover_image_url,
                 "is_active": hotel.is_active,
                 "address": hotel.address,
                 "city": hotel.city,
@@ -94,7 +119,7 @@ class HotelService:
         # Format hotels — use image_id only, no media_assets loading
         result = []
         for hotel in hotels:
-            cover_image_url = self._get_cloudflare_image_url(hotel.image_id) if hotel.image_id else None
+            cover_image_url = self._resolve_cover_image_url(db, hotel)
             
             hotel_data = {
                 "id": hotel.id,
@@ -113,6 +138,7 @@ class HotelService:
                     "name": hotel.country.name,
                     "slug": hotel.country.slug,
                 } if hotel.country else None,
+                "image_url": cover_image_url,
                 "cover_image": cover_image_url,
                 "is_active": hotel.is_active,
                 "created_at": hotel.created_at,
@@ -143,7 +169,7 @@ class HotelService:
         # Format hotels — use image_id only, no media_assets loading
         result = []
         for hotel in hotels:
-            cover_image_url = self._get_cloudflare_image_url(hotel.image_id) if hotel.image_id else None
+            cover_image_url = self._resolve_cover_image_url(db, hotel)
             
             hotel_data = {
                 "id": hotel.id,
@@ -160,6 +186,7 @@ class HotelService:
                 } if hotel.country else None,
                 "image_id": hotel.image_id,
                 "image_url": cover_image_url,
+                "cover_image": cover_image_url,
                 "is_active": hotel.is_active,
                 "is_featured": hotel.is_featured,
                 "address": hotel.address,
@@ -259,6 +286,7 @@ class HotelService:
             "check_in_time": hotel.check_in_time,
             "check_out_time": hotel.check_out_time,
             "cover_image": cover_image,
+            "image_url": cover_image,
             "gallery_images": gallery_images,
             "country": {
                 "id": hotel.country.id,

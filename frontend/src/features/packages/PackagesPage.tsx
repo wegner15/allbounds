@@ -186,12 +186,27 @@ const PackagesPage: React.FC = () => {
       />
 
       <div className="container mx-auto px-4 py-8">
+        {/* SEO Introduction Block */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200/60 p-6 md:p-8 mb-8">
+          <div className="max-w-4xl">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 font-playfair mb-4">
+              Curated Travel Packages & Tailor-Made Vacations
+            </h1>
+            <p className="text-gray-600 leading-relaxed text-base md:text-lg mb-4">
+              Embark on the journey of a lifetime with our carefully crafted travel packages. Whether you're seeking the thrill of a classic East African safari, the serenity of pristine Indian Ocean beaches, or the cultural immersion of historic towns, we design itineraries that match your travel aspirations.
+            </p>
+            <p className="text-gray-600 leading-relaxed text-sm md:text-base">
+              At Allbound Vacations, we coordinate every detail—from luxury boutique stays and guided local excursions to seamless logistics and transfers. Explore our featured destinations, select your preferred holiday style, and customize your itinerary to create memories that will last forever.
+            </p>
+          </div>
+        </div>
+
         {/* Filters */}
         <div className="bg-gradient-to-r from-white to-gray-50 border border-gray-200 rounded-xl shadow-lg p-6 mb-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-teal-100 rounded-lg">
-                <svg className="w-6 h-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="p-2 bg-primary-light/40 rounded-lg">
+                <svg className="w-6 h-6 text-primary-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                 </svg>
               </div>
@@ -216,7 +231,7 @@ const PackagesPage: React.FC = () => {
             {/* Destination Filter */}
             <div className="space-y-2">
               <label className="flex items-center text-sm font-medium text-gray-700">
-                <svg className="w-4 h-4 mr-2 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
@@ -224,7 +239,7 @@ const PackagesPage: React.FC = () => {
               </label>
               <div className="relative">
                 <select
-                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200 appearance-none pr-10"
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 appearance-none pr-10"
                   value={selectedCountry}
                   onChange={(e) => setSelectedCountry(e.target.value)}
                   disabled={isLoadingCountries}
@@ -244,14 +259,14 @@ const PackagesPage: React.FC = () => {
             {/* Holiday Type Filter */}
             <div className="space-y-2">
               <label className="flex items-center text-sm font-medium text-gray-700">
-                <svg className="w-4 h-4 mr-2 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 Holiday Type
               </label>
               <div className="relative">
                 <select
-                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200 appearance-none pr-10"
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 appearance-none pr-10"
                   value={selectedHolidayType}
                   onChange={(e) => setSelectedHolidayType(e.target.value)}
                   disabled={isLoadingHolidayTypes}
@@ -271,14 +286,14 @@ const PackagesPage: React.FC = () => {
             {/* Price Range Filter */}
             <div className="space-y-2">
               <label className="flex items-center text-sm font-medium text-gray-700">
-                <svg className="w-4 h-4 mr-2 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                 </svg>
                 Price Range
               </label>
               <div className="relative">
                 <select
-                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200 appearance-none pr-10"
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 appearance-none pr-10"
                   value={selectedPriceRange}
                   onChange={(e) => setSelectedPriceRange(e.target.value)}
                 >
@@ -297,14 +312,14 @@ const PackagesPage: React.FC = () => {
             {/* Duration Filter */}
             <div className="space-y-2">
               <label className="flex items-center text-sm font-medium text-gray-700">
-                <svg className="w-4 h-4 mr-2 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Duration
               </label>
               <div className="relative">
                 <select
-                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200 appearance-none pr-10"
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 appearance-none pr-10"
                   value={selectedDuration}
                   onChange={(e) => setSelectedDuration(e.target.value)}
                 >
@@ -332,22 +347,22 @@ const PackagesPage: React.FC = () => {
                   <span>Active filters:</span>
                   <div className="flex flex-wrap gap-2">
                     {selectedCountry !== 'All' && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-teal-100 text-teal-800">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary-light/30 text-primary-dark">
                         {selectedCountry}
                       </span>
                     )}
                     {selectedHolidayType !== 'All' && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-teal-100 text-teal-800">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary-light/30 text-primary-dark">
                         {selectedHolidayType}
                       </span>
                     )}
                     {selectedPriceRange !== 'All' && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-teal-100 text-teal-800">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary-light/30 text-primary-dark">
                         {selectedPriceRange}
                       </span>
                     )}
                     {selectedDuration !== 'All' && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-teal-100 text-teal-800">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary-light/30 text-primary-dark">
                         {selectedDuration}
                       </span>
                     )}
@@ -395,7 +410,7 @@ const PackagesPage: React.FC = () => {
                         <div className="flex items-center justify-between mb-3">
                           {pkg.country && (
                             <div className="flex items-center text-sm font-medium text-gray-700">
-                              <svg className="w-4 h-4 mr-1 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <svg className="w-4 h-4 mr-1 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                               </svg>
@@ -409,7 +424,7 @@ const PackagesPage: React.FC = () => {
                           )}
                         </div>
                         <Link to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}`} className="block">
-                          <h3 className="text-lg font-medium text-charcoal hover:text-hover transition-colors mb-2">
+                          <h3 className="text-lg font-medium text-charcoal hover:text-primary-dark transition-colors mb-2">
                             {pkg.name}
                           </h3>
                         </Link>

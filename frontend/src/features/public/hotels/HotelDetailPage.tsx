@@ -119,7 +119,7 @@ const HotelDetailPage: React.FC = () => {
             <div className="flex flex-wrap items-center gap-6 text-gray-600">
               {(hotel.city || hotel.address) && (
                 <div className="flex items-center">
-                  <MapPin className="h-5 w-5 mr-2 text-blue-600" />
+                  <MapPin className="h-5 w-5 mr-2 text-primary" />
                   <span>
                     {hotel.city || hotel.address}
                     {hotel.country && `, ${hotel.country.name}`}
@@ -128,7 +128,7 @@ const HotelDetailPage: React.FC = () => {
               )}
               {hotel.price_category && (
                 <div className="flex items-center">
-                  <DollarSign className="h-5 w-5 mr-1 text-blue-600" />
+                  <DollarSign className="h-5 w-5 mr-1 text-primary" />
                   <span className="font-medium text-gray-900">{hotel.price_category} category</span>
                 </div>
               )}
@@ -159,24 +159,24 @@ const HotelDetailPage: React.FC = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Stay Information</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {hotel.check_in_time && (
-                    <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center gap-4">
-                      <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
+                    <div className="bg-primary-light/10 border border-primary-light/30 rounded-xl p-4 flex items-center gap-4">
+                      <div className="bg-primary-light/40 p-2 rounded-lg text-primary-dark">
                         <Clock size={24} />
                       </div>
                       <div>
-                        <span className="block text-xs text-blue-600 uppercase font-bold tracking-wider">Check-in</span>
+                        <span className="block text-xs text-primary-dark uppercase font-bold tracking-wider">Check-in</span>
                         <p className="text-lg font-semibold text-gray-900">{hotel.check_in_time}</p>
                       </div>
                     </div>
                   )}
 
                   {hotel.check_out_time && (
-                    <div className="bg-orange-50 border border-orange-100 rounded-xl p-4 flex items-center gap-4">
-                      <div className="bg-orange-100 p-2 rounded-lg text-orange-600">
+                    <div className="bg-quote-btn/10 border border-quote-btn/30 rounded-xl p-4 flex items-center gap-4">
+                      <div className="bg-quote-btn/20 p-2 rounded-lg text-quote-btn-dark">
                         <Clock size={24} />
                       </div>
                       <div>
-                        <span className="block text-xs text-orange-600 uppercase font-bold tracking-wider">Check-out</span>
+                        <span className="block text-xs text-quote-btn-dark uppercase font-bold tracking-wider">Check-out</span>
                         <p className="text-lg font-semibold text-gray-900">{hotel.check_out_time}</p>
                       </div>
                     </div>
@@ -214,7 +214,7 @@ const HotelDetailPage: React.FC = () => {
                   }, {} as Record<string, typeof hotel.amenities>)
                 ).map(([category, items]) => (
                   <div key={category} className="mb-8 last:mb-0">
-                    <h3 className="text-lg font-bold text-gray-800 mb-4 border-l-4 border-blue-500 pl-3">
+                    <h3 className="text-lg font-bold text-gray-800 mb-4 border-l-4 border-primary pl-3">
                       {category}
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -223,7 +223,7 @@ const HotelDetailPage: React.FC = () => {
                           key={amenity.id}
                           className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group hover:bg-white hover:shadow-md transition-all duration-300"
                         >
-                          <div className="bg-blue-100 p-2 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                          <div className="bg-primary-light/40 p-2 rounded-lg text-primary-dark group-hover:bg-primary group-hover:text-white transition-colors duration-300">
                             {/* Icon fallback logic */}
                             {amenity.name.toLowerCase().includes('wifi') ? <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" /></svg> :
                               amenity.name.toLowerCase().includes('pool') ? <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 16V8a2 2 0 00-1.45-1.92l-4-1A2 2 0 0013.1 6.32l-3.3 3.3a2 2 0 01-1.4.58H5a2 2 0 00-2 2v2a2 2 0 002 2h2.8a2 2 0 011.4.58l3.3 3.3a2 2 0 002.45.24l4-1A2 2 0 0021 16z" /></svg> :
@@ -259,14 +259,14 @@ const HotelDetailPage: React.FC = () => {
               <div className="space-y-4">
                 <button
                   onClick={() => setShowBookingForm(true)}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
+                  className="w-full bg-quote-btn hover:bg-quote-btn-dark text-white font-bold py-4 px-6 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
                 >
                   Book Your Stay
                 </button>
 
                 <button
                   onClick={() => setShowInquiryForm(true)}
-                  className="w-full border-2 border-gray-200 hover:border-gray-300 text-gray-700 font-bold py-4 px-6 rounded-xl transition-all active:scale-[0.98]"
+                  className="w-full border-2 border-primary/50 hover:border-primary text-gray-700 hover:text-primary-dark font-bold py-4 px-6 rounded-xl transition-all active:scale-[0.98]"
                 >
                   Send Inquiry
                 </button>
@@ -274,7 +274,7 @@ const HotelDetailPage: React.FC = () => {
 
               <div className="mt-8 space-y-4">
                 <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <div className="bg-green-100 p-1 rounded-full text-green-600">
+                  <div className="bg-primary-light/20 p-1 rounded-full text-primary-dark">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor font-bold">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
@@ -282,7 +282,7 @@ const HotelDetailPage: React.FC = () => {
                   <span>Free cancellation available</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <div className="bg-green-100 p-1 rounded-full text-green-600">
+                  <div className="bg-primary-light/20 p-1 rounded-full text-primary-dark">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
@@ -296,7 +296,7 @@ const HotelDetailPage: React.FC = () => {
                 <p className="text-sm text-gray-500 mb-4">
                   Need help choosing the right room? Our travel specialists are here to help.
                 </p>
-                <button className="text-blue-600 hover:text-blue-700 font-bold text-sm flex items-center gap-2">
+                <button className="text-primary hover:text-primary-dark font-bold text-sm flex items-center gap-2">
                   Chat with an expert <Clock size={16} />
                 </button>
               </div>

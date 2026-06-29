@@ -59,15 +59,19 @@ const GridGallery: React.FC<GridGalleryProps> = ({ images, className = "" }) => 
             <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3 min-h-0">
                 {/* Main Featured Image */}
                 <div
-                    className="md:col-span-2 relative group cursor-pointer overflow-hidden rounded-lg"
+                    className="md:col-span-2 relative group cursor-pointer overflow-hidden rounded-2xl border border-gray-100/50 shadow-sm"
                     onClick={() => handleOpenLightbox(0)}
                 >
                     <img
                         src={getImageUrlWithFallback(featuredImage.file_path, IMAGE_VARIANTS.MEDIUM)}
                         alt={featuredImage.alt_text || "Featured attraction"}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                    <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md px-3.5 py-2 rounded-full flex items-center gap-1.5 text-xs font-semibold text-charcoal shadow-sm opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                        <Maximize2 className="w-3.5 h-3.5" />
+                        <span>Expand View</span>
+                    </div>
                 </div>
 
                 {/* Side Stacked Images */}
@@ -75,15 +79,18 @@ const GridGallery: React.FC<GridGalleryProps> = ({ images, className = "" }) => 
                     {sideImages.map((img, idx) => (
                         <div
                             key={img.id || idx + 1}
-                            className="relative group cursor-pointer overflow-hidden rounded-lg"
+                            className="relative group cursor-pointer overflow-hidden rounded-2xl border border-gray-100/50 shadow-sm"
                             onClick={() => handleOpenLightbox(idx + 1)}
                         >
                             <img
                                 src={getImageUrlWithFallback(img.file_path, IMAGE_VARIANTS.MEDIUM)}
                                 alt={img.alt_text || `Gallery image ${idx + 2}`}
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                             />
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                            <div className="absolute bottom-3 right-3 bg-white/80 backdrop-blur-md p-1.5 rounded-full text-charcoal shadow-sm opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-300">
+                                <Maximize2 className="w-3 h-3" />
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -99,20 +106,20 @@ const GridGallery: React.FC<GridGalleryProps> = ({ images, className = "" }) => 
                         return (
                             <div
                                 key={img.id || overallIndex}
-                                className="relative h-full group cursor-pointer overflow-hidden rounded"
+                                className="relative h-full group cursor-pointer overflow-hidden rounded-xl border border-gray-100/50 shadow-xs"
                                 onClick={() => handleOpenLightbox(overallIndex)}
                             >
                                 <img
                                     src={getImageUrlWithFallback(img.file_path, IMAGE_VARIANTS.THUMBNAIL)}
                                     alt={img.alt_text || `Gallery image ${overallIndex + 1}`}
-                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                 />
                                 {isLast ? (
                                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center transition-colors group-hover:bg-black/60">
-                                        <span className="text-white text-base font-bold">+{remainingCount} photos</span>
+                                        <span className="text-white text-xs md:text-sm font-bold">+{remainingCount} photos</span>
                                     </div>
                                 ) : (
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                                 )}
                             </div>
                         );

@@ -56,6 +56,7 @@ const MainNavigation: React.FC = () => {
     { label: 'DESTINATIONS', path: '/destinations', hasDropdown: true },
     { label: 'HOLIDAY TYPES', path: '/holiday-types', hasDropdown: true },
     { label: 'PACKAGES', path: '/packages' },
+    { label: 'GROUP TRIPS', path: '/group-trips' },
     { label: 'FLIGHTS', path: '/flights' },
     { label: 'BLOG', path: '/blog' },
     { label: 'ABOUT US', path: '/about-us' },
@@ -208,9 +209,21 @@ const MainNavigation: React.FC = () => {
   };
 
   return (
-    <header className={`sticky top-0 z-[1000] bg-white w-full border-b border-gray-100 transition-shadow duration-300 ${scrolled ? 'shadow-md' : ''}`}>
-      {/* Top Tier: Logo, Contact, CTA — hidden when scrolled */}
-      <div className={`border-b border-gray-50 overflow-hidden transition-all duration-300 ease-in-out ${scrolled ? 'max-h-0 border-b-0 opacity-0' : 'max-h-32 opacity-100'}`}>
+    // will-change: transform prevents the browser from reflowing the page body
+    // on every scroll event tick, which was causing the menu to jitter.
+    <header
+      className={`sticky top-0 z-[1000] bg-white w-full border-b border-gray-100 transition-shadow duration-300 will-change-transform ${scrolled ? 'shadow-md' : ''}`}
+      style={{ willChange: 'transform' }}
+    >
+      {/* Top Tier: Logo, Contact, CTA — hidden when scrolled.
+          Using grid-rows transition instead of max-h to avoid expensive layout reflow. */}
+      <div
+        className={`border-b border-gray-50 transition-all duration-300 ease-in-out ${
+          scrolled ? 'grid-rows-[0fr] opacity-0 pointer-events-none overflow-hidden' : 'grid-rows-[1fr] opacity-100'
+        }`}
+        style={{ display: 'grid' }}
+      >
+        <div className="overflow-hidden">
         <div className="max-w-[1600px] mx-auto px-4 lg:px-6">
           <div className="flex items-center justify-between h-20 lg:h-24">
             {/* Logo */}
@@ -280,7 +293,8 @@ const MainNavigation: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+        </div>{/* end overflow-hidden inner wrapper */}
+      </div>{/* end grid outer wrapper */}
 
       {/* Bottom Tier: Navigation Links & Search — also shows compact logo when scrolled */}
       <div className="hidden lg:block bg-white">

@@ -7,11 +7,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Brand Colors (from design document)
-        primary: '#14B8A6', // Teal
-        'primary-dark': '#0F9488',
-        'primary-light': '#5EEAD4',
-        charcoal: '#2D3748', // Updated to match design doc
+        // Brand Colors (updated per design direction)
+        primary: '#8fbac0',         // Subtler, welcoming pastel blue-green
+        'primary-dark': '#6fa4ab',   // Hover / active shade
+        'primary-light': '#b8d8dc',  // Tint / background highlight
+        'quote-btn': '#c4a9af',      // Request a Quote CTA button
+        'quote-btn-dark': '#b0939a', // Quote button hover shade
+        charcoal: '#2D3748',
         'charcoal-light': '#4A5568',
         accent: '#F97316', // Warm Orange
         'accent-light': '#FB923C',
@@ -20,15 +22,15 @@ export default {
         error: '#EF4444', // Red
         paper: '#FAFAFA', // Background
         'paper-dark': '#F5F5F5',
-        
+
         // Legacy colors (keeping for backward compatibility)
         butter: '#eeca80',
         sand: '#edd785',
-        teal: '#14B8A6', // Aligned with primary
+        teal: '#8fbac0', // Aligned with updated primary
         mint: '#58e5b1',
         footer: '#bab7ac',
         'primary-link': '#2D3748',
-        hover: '#0F9488',
+        hover: '#6fa4ab',
         
         // Extended grays
         'gray-50': '#FAFAFA',

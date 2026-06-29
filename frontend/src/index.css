@@ -139,6 +139,10 @@ html {
   .btn-primary {
     @apply bg-primary hover:bg-primary-dark text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 hover:shadow-md active:scale-95;
   }
+
+  .btn-quote {
+    @apply bg-quote-btn hover:bg-quote-btn-dark text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 hover:shadow-md active:scale-95;
+  }
   
   .btn-secondary {
     @apply bg-accent hover:bg-accent-dark text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 hover:shadow-md active:scale-95;

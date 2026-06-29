@@ -1,11 +1,12 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useCountryDetails } from '../../lib/hooks/useCountries';
 import SeoHead from '../../components/seo/SeoHead';
 import { CountryDetailSkeleton } from './components/CountryDetailSkeleton';
 import { NotFoundError, NetworkError, DestinationErrorDisplay } from './components/DestinationErrorDisplay';
 import DestinationHeroSection from './components/DestinationHeroSection';
 import Breadcrumb from './components/Breadcrumb';
+import SectionNavigation from '../../components/ui/SectionNavigation';
 
 // Tabs (Full List components)
 import PackagesTab from './tabs/PackagesTab';
@@ -19,6 +20,7 @@ type CategoryType = 'packages' | 'group-trips' | 'attractions' | 'hotels' | 'act
 const CountryCategoryPage: React.FC = () => {
     const { slug, category } = useParams<{ slug: string; category: CategoryType }>();
     const { data: country, isLoading, error, refetch } = useCountryDetails(slug || '');
+    const navigate = useNavigate();
 
     if (isLoading) {
         return (
@@ -107,6 +109,40 @@ const CountryCategoryPage: React.FC = () => {
         }
     };
 
+    const getCategoryDescription = () => {
+        switch (category) {
+            case 'packages':
+                return `Discover the ultimate handpicked travel packages and custom tours across ${country.name}. From thrilling wildlife safaris in famous national reserves to cultural expeditions, luxury beach retreats, and adventure-filled itineraries, we design journeys that suit your unique style.`;
+            case 'group-trips':
+                return `Join a vibrant community of explorers on our scheduled small-group departures to ${country.name}. Perfect for solo travelers, couples, or friends looking to travel together, our group tours offer an affordable, social, and expertly-guided way to discover iconic destinations.`;
+            case 'attractions':
+                return `Explore the must-see landmarks, historical sites, and breathtaking natural wonders of ${country.name}. Plan your sightseeing checklist with our detailed guides on national parks, volcanic calderas, scenic vistas, and UNESCO World Heritage sites.`;
+            case 'hotels':
+                return `Find the best boutique lodges, luxury safari camps, eco-resorts, and city hotels in ${country.name}. Whether you are looking for an ultra-luxury tented suite with wilderness views or a cozy budget-friendly guest house, explore our premium options.`;
+            case 'activities':
+                return `Get active and dive into unique experiences across ${country.name}. Browse cultural walks, chimpanzee and gorilla trekking permits, hiking, white-water rafting, hot air balloon flights, and authentic culinary sessions.`;
+            default:
+                return `Explore all tourist categories, guides, accommodations, and packages for ${country.name}.`;
+        }
+    };
+
+    const subNavSections = [
+        { id: 'overview', label: 'Overview' },
+        { id: 'activities', label: 'Experiences' },
+        { id: 'packages', label: 'Featured Packages' },
+        { id: 'hotels', label: 'Where to Stay' },
+        { id: 'attractions', label: 'Must-See Attractions' },
+        { id: 'group-trips', label: 'Group Trips' },
+    ];
+
+    const handleSubNavClick = (sectionId: string) => {
+        if (sectionId === 'overview') {
+            navigate(`/destinations/${country.slug}`);
+        } else {
+            navigate(`/destinations/${country.slug}/${sectionId}`);
+        }
+    };
+
     return (
         <div className="bg-gray-50 min-h-screen">
             <SeoHead
@@ -124,14 +160,32 @@ const CountryCategoryPage: React.FC = () => {
 
             <DestinationHeroSection country={country} />
 
-            <main className="container mx-auto px-4 py-12">
-                <div className="mb-8">
+            {/* Sub-Navigation Menu */}
+            <SectionNavigation
+                sections={subNavSections}
+                activeSectionId={category}
+                onSectionClick={handleSubNavClick}
+            />
+
+            <main className="container mx-auto px-4 py-8">
+                {/* Back Link */}
+                <div className="mb-6">
                     <Link
                         to={`/destinations/${country.slug}`}
-                        className="text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1"
+                        className="text-primary-dark hover:text-primary font-semibold flex items-center gap-1.5 transition-colors duration-200 text-sm md:text-base"
                     >
                         <span>&larr;</span> Back to {country.name} Overview
                     </Link>
+                </div>
+
+                {/* SEO Category Intro Block */}
+                <div className="bg-white rounded-2xl border border-gray-200/60 p-6 md:p-8 mb-8 shadow-sm">
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 font-playfair mb-3">
+                        {getCategoryLabel()} in {country.name}
+                    </h1>
+                    <p className="text-gray-600 leading-relaxed text-sm md:text-base max-w-4xl">
+                        {getCategoryDescription()}
+                    </p>
                 </div>
 
                 {renderCategory()}

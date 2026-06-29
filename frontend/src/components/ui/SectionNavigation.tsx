@@ -7,13 +7,30 @@ export interface NavigationSection {
 
 interface SectionNavigationProps {
     sections: NavigationSection[];
+    activeSectionId?: string;
+    onSectionClick?: (sectionId: string) => void;
     className?: string;
 }
 
-const SectionNavigation: React.FC<SectionNavigationProps> = ({ sections, className = '' }) => {
-    const [activeSection, setActiveSection] = useState<string>(sections[0]?.id || '');
+const SectionNavigation: React.FC<SectionNavigationProps> = ({
+    sections,
+    activeSectionId,
+    onSectionClick,
+    className = ''
+}) => {
+    const [activeSection, setActiveSection] = useState<string>(activeSectionId || sections[0]?.id || '');
+
+    // Sync activeSection with activeSectionId prop if provided
+    useEffect(() => {
+        if (activeSectionId !== undefined) {
+            setActiveSection(activeSectionId);
+        }
+    }, [activeSectionId]);
 
     useEffect(() => {
+        // Only run IntersectionObserver if activeSectionId is not explicitly controlled from props
+        if (activeSectionId !== undefined) return;
+
         const observerOptions = {
             root: null,
             rootMargin: '-20% 0px -70% 0px', // Trigger when section is roughly in the middle of viewport
@@ -41,7 +58,7 @@ const SectionNavigation: React.FC<SectionNavigationProps> = ({ sections, classNa
         return () => {
             observer.disconnect();
         };
-    }, [sections]);
+    }, [sections, activeSectionId]);
 
     const scrollToSection = (sectionId: string) => {
         const element = document.getElementById(sectionId);
@@ -57,6 +74,14 @@ const SectionNavigation: React.FC<SectionNavigationProps> = ({ sections, classNa
         }
     };
 
+    const handleSectionClick = (sectionId: string) => {
+        if (onSectionClick) {
+            onSectionClick(sectionId);
+        } else {
+            scrollToSection(sectionId);
+        }
+    };
+
     return (
         <nav
             className={`sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm ${className}`}
@@ -64,21 +89,21 @@ const SectionNavigation: React.FC<SectionNavigationProps> = ({ sections, classNa
             aria-label="Section navigation"
         >
             <div className="container mx-auto px-4">
-                <div className="flex overflow-x-auto scrollbar-hide py-3 gap-2 md:gap-4">
+                <div className="flex flex-wrap py-2 gap-1.5 md:gap-2 justify-center lg:justify-start">
                     {sections.map((section) => {
                         const isActive = activeSection === section.id;
                         return (
                             <button
                                 key={section.id}
-                                onClick={() => scrollToSection(section.id)}
+                                onClick={() => handleSectionClick(section.id)}
                                 className={`
-                  whitespace-nowrap px-4 py-2 rounded-lg font-medium transition-all duration-200
-                  flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
-                  ${isActive
-                                        ? 'bg-primary text-white shadow-md'
-                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                  whitespace-nowrap px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200
+                                  flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+                                  ${isActive
+                                        ? 'bg-primary text-white shadow-sm'
+                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                                     }
-                `}
+                                `}
                                 aria-current={isActive ? 'location' : undefined}
                             >
                                 {section.label}

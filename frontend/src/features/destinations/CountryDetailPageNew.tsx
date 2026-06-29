@@ -16,6 +16,7 @@ import Breadcrumb from './components/Breadcrumb';
 import DestinationHeroSection from './components/DestinationHeroSection';
 import CTABanner from './components/CTABanner';
 import DestinationOverviewSection from './components/DestinationOverviewSection';
+import WhyVisitSection from './components/WhyVisitSection';
 import BestTimeToVisitSection from './components/BestTimeToVisitSection';
 import DestinationFAQ from './components/DestinationFAQ';
 
@@ -33,7 +34,6 @@ const RelatedDestinationsSection = lazy(() => import('./components/RelatedDestin
 import SectionNavigation from '../../components/ui/SectionNavigation';
 
 // Tab Components
-import AboutTab from './tabs/AboutTab';
 import PackagesTab from './tabs/PackagesTab';
 import GroupTripsTab from './tabs/GroupTripsTab';
 import AttractionsTab from './tabs/AttractionsTab';
@@ -200,28 +200,49 @@ const CountryDetailPageNew: React.FC = () => {
         {/* Section Navigation */}
         <SectionNavigation
           sections={[
-            { id: 'about', label: `About ${country.name}` },
-            { id: 'activities', label: 'Top Experiences' },
+            { id: 'overview', label: 'Overview' },
+            { id: 'why-visit', label: `Why Visit ${country.name}` },
+            { id: 'best-time', label: 'Best Time to Visit' },
+            { id: 'attractions', label: 'Top Things to Do' },
+            { id: 'activities', label: 'Experiences' },
             { id: 'packages', label: 'Featured Packages' },
             { id: 'deals', label: 'Special Offers' },
-            { id: 'hotels', label: 'Where to Stay' },
-            { id: 'attractions', label: 'Must-See Attractions' },
             { id: 'group-trips', label: 'Group Trips' },
+            { id: 'hotels', label: 'Where to Stay' },
+            { id: 'travel-guide', label: 'Travel Guide' },
+            { id: 'faq', label: 'FAQs & Tips' },
             { id: 'blog', label: 'Blog' },
-            { id: 'faq', label: 'FAQs' },
             { id: 'share', label: 'Share' },
             { id: 'similar', label: 'Similar Destinations' },
           ]}
         />
 
         <div className="container mx-auto px-4 py-8">
-          {/* About Section */}
-          <section id="about" className="scroll-mt-24 mb-20">
-            <AboutTab
-              country={country}
-              pageDescription={pageDescription}
-              pageImage={pageImage}
-            />
+          {/* Overview Section */}
+          <section id="overview" className="scroll-mt-24 mb-20">
+            <DestinationOverviewSection country={country} />
+          </section>
+
+          {/* Why Visit Section */}
+          <section id="why-visit" className="scroll-mt-24 mb-20">
+            <WhyVisitSection countryName={country.name} />
+          </section>
+
+          {/* Best Time to Visit Section */}
+          <section id="best-time" className="scroll-mt-24 mb-20">
+            <div className="space-y-6 md:space-y-8">
+              <BestTimeToVisitSection visitInfo={country.visit_info} />
+              
+              {/* Interactive Map */}
+              <Suspense fallback={<SectionLoader />}>
+                <InteractiveMapSection country={country} />
+              </Suspense>
+            </div>
+          </section>
+
+          {/* Attractions Section (Must-See Attractions) */}
+          <section id="attractions" className="scroll-mt-24 mb-20">
+            <AttractionsTab countryName={country.name} preview={true} destinationSlug={country.slug} title={`Must-See Attractions in ${country.name}`} />
           </section>
 
           {/* Activities Section (Top Experiences) */}
@@ -255,38 +276,41 @@ const CountryDetailPageNew: React.FC = () => {
         </div>
 
         <div className="container mx-auto px-4 pb-12">
-          {/* Hotels Section (Where to Stay) */}
-          <section id="hotels" className="scroll-mt-24 mb-20">
-            <HotelsTab countryId={country.id} preview={true} destinationSlug={country.slug} title={`Where to Stay in ${country.name}`} />
-          </section>
-
-          {/* Attractions Section (Must-See Attractions) */}
-          <section id="attractions" className="scroll-mt-24 mb-20">
-            <AttractionsTab countryName={country.name} preview={true} destinationSlug={country.slug} title={`Must-See Attractions in ${country.name}`} />
-          </section>
-
           {/* Group Trips Section */}
           <section id="group-trips" className="scroll-mt-24 mb-20">
             <GroupTripsTab countryId={country.id} preview={true} destinationSlug={country.slug} title={`Group Trips to ${country.name}`} />
           </section>
 
-          {/* Blog Section */}
-          <section id="blog" className="scroll-mt-24 mb-20">
-            <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
-              <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Latest from our Blog</h2>
-              <div className="text-gray-600">Coming soon... Discover travel stories and tips for {country.name}.</div>
+          {/* Hotels Section (Where to Stay) */}
+          <section id="hotels" className="scroll-mt-24 mb-20">
+            <HotelsTab countryId={country.id} preview={true} destinationSlug={country.slug} title={`Where to Stay in ${country.name}`} />
+          </section>
+
+          {/* Travel Guide Section */}
+          <section id="travel-guide" className="scroll-mt-24 mb-20">
+            <div className="bg-white rounded-2xl border border-gray-200/60 p-6 md:p-8 shadow-sm">
+              <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Travel Guide</h2>
+              <div className="text-gray-600">Coming soon... Interactive categories for {country.name}: Good to know, Things to Do, Going Out, Shopping, Beaches, Food & Drink, Sports, Events.</div>
             </div>
           </section>
 
           {/* FAQ Section */}
           <section id="faq" className="scroll-mt-24 mb-20">
-            <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
+            <div className="bg-white rounded-2xl border border-gray-200/60 p-6 md:p-8 shadow-sm">
               <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-8">Frequently Asked Questions</h2>
               {country.faqs && country.faqs.length > 0 ? (
                 <DestinationFAQ faqs={country.faqs} />
               ) : (
                 <p className="text-gray-500 text-sm">No FAQs found for this destination yet.</p>
               )}
+            </div>
+          </section>
+
+          {/* Blog Section */}
+          <section id="blog" className="scroll-mt-24 mb-20">
+            <div className="bg-white rounded-2xl border border-gray-200/60 p-6 md:p-8 shadow-sm">
+              <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Latest from our Blog</h2>
+              <div className="text-gray-600">Coming soon... Discover travel stories and tips for {country.name}.</div>
             </div>
           </section>
         </div>

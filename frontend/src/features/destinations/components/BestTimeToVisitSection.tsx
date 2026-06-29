@@ -61,8 +61,8 @@ const BestTimeToVisitSection: React.FC<BestTimeToVisitSectionProps> = React.memo
         </p>
       </div>
 
-      {/* Monthly Ratings Grid - 3x4 layout */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+      {/* Monthly Ratings Grid - Compact 12-column row on desktop, 6-column grid on mobile/tablet */}
+      <div className="grid grid-cols-6 lg:grid-cols-12 gap-2 mb-6">
         {MONTH_NAMES.map((month) => {
           const monthData = ratingsByMonth[month];
           const rating = monthData?.rating || 'unknown';
@@ -72,19 +72,19 @@ const BestTimeToVisitSection: React.FC<BestTimeToVisitSectionProps> = React.memo
             <div
               key={month}
               className={`
-                relative rounded-lg p-4 text-center transition-all duration-200 cursor-default
+                relative rounded-lg py-2 px-1 text-center transition-all duration-200 cursor-default
                 ${getRatingColor(rating)}
-                group
+                group flex flex-col justify-center items-center h-12
               `}
             >
               {/* Month name */}
-              <div className="text-sm font-semibold mb-1">
+              <div className="text-xs font-bold leading-tight">
                 {month.substring(0, 3)}
               </div>
 
               {/* Rating label */}
-              <div className="text-xs capitalize opacity-90">
-                {rating === 'unknown' ? 'N/A' : rating}
+              <div className="text-[10px] font-medium opacity-90 leading-tight">
+                {rating === 'unknown' ? 'N/A' : rating.substring(0, 4)}
               </div>
 
               {/* Tooltip for month-specific notes */}
@@ -94,7 +94,7 @@ const BestTimeToVisitSection: React.FC<BestTimeToVisitSectionProps> = React.memo
                   scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-200 ease-out origin-bottom
                   pointer-events-none group-hover:pointer-events-auto
                   bg-white text-gray-900 text-sm rounded-xl p-4
-                  w-96 z-50
+                  w-80 sm:w-96 z-50
                   shadow-xl border border-gray-100
                 ">
                   <div className="font-bold text-gray-900 mb-2 border-b border-gray-100 pb-2 flex items-center justify-between">

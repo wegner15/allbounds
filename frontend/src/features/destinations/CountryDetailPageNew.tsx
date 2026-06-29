@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import SeoHead from '../../components/seo/SeoHead';
 
@@ -22,23 +22,18 @@ import DestinationFAQ from './components/DestinationFAQ';
 
 // Lazy loaded components (below the fold) - Code splitting for better initial load
 const InteractiveMapSection = lazy(() => import('./components/InteractiveMapSection'));
-const PackagesSection = lazy(() => import('./components/PackagesSection'));
-const GroupTripsSection = lazy(() => import('./components/GroupTripsSection'));
-const AttractionsSection = lazy(() => import('./components/AttractionsSection'));
-const HotelsSection = lazy(() => import('./components/HotelsSection'));
-const ActivitiesSection = lazy(() => import('./components/ActivitiesSection'));
 const SocialSharingCard = lazy(() => import('./components/SocialSharingCard'));
 const RelatedDestinationsSection = lazy(() => import('./components/RelatedDestinationsSection'));
 
 // Section Navigation Component
 import SectionNavigation from '../../components/ui/SectionNavigation';
 
+// New consolidated components
+import DestinationExplorer from './components/DestinationExplorer';
+import TravelGuideSection from './components/TravelGuideSection';
+
 // Tab Components
-import PackagesTab from './tabs/PackagesTab';
 import GroupTripsTab from './tabs/GroupTripsTab';
-import AttractionsTab from './tabs/AttractionsTab';
-import HotelsTab from './tabs/HotelsTab';
-import ActivitiesTab from './tabs/ActivitiesTab';
 
 // Loading fallback component for lazy loaded sections
 const SectionLoader: React.FC = () => (
@@ -53,6 +48,7 @@ const SectionLoader: React.FC = () => (
 
 const CountryDetailPageNew: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [explorerTab, setExplorerTab] = useState<string>('all');
 
   // Fetch country details with all related data using custom hook
   // Retry logic (2 retries) is configured in the useCountryDetails hook
@@ -169,6 +165,35 @@ const CountryDetailPageNew: React.FC = () => {
     });
   }
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const offset = 100; // Account for sticky header
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  const handleSubNavClick = (sectionId: string) => {
+    if (['attractions', 'activities', 'packages', 'deals', 'hotels'].includes(sectionId)) {
+      if (sectionId === 'attractions') setExplorerTab('attractions');
+      else if (sectionId === 'activities') setExplorerTab('activities');
+      else if (sectionId === 'packages') setExplorerTab('packages');
+      else if (sectionId === 'deals') setExplorerTab('packages');
+      else if (sectionId === 'hotels') setExplorerTab('hotels');
+      
+      // Scroll to the unified explore section
+      scrollToSection('explore');
+    } else {
+      scrollToSection(sectionId);
+    }
+  };
+
   return (
     <DestinationErrorBoundary>
       <SeoHead
@@ -203,18 +228,15 @@ const CountryDetailPageNew: React.FC = () => {
             { id: 'overview', label: 'Overview' },
             { id: 'why-visit', label: `Why Visit ${country.name}` },
             { id: 'best-time', label: 'Best Time to Visit' },
-            { id: 'attractions', label: 'Top Things to Do' },
-            { id: 'activities', label: 'Experiences' },
-            { id: 'packages', label: 'Featured Packages' },
-            { id: 'deals', label: 'Special Offers' },
+            { id: 'explore', label: 'Explore' },
             { id: 'group-trips', label: 'Group Trips' },
-            { id: 'hotels', label: 'Where to Stay' },
             { id: 'travel-guide', label: 'Travel Guide' },
             { id: 'faq', label: 'FAQs & Tips' },
             { id: 'blog', label: 'Blog' },
             { id: 'share', label: 'Share' },
             { id: 'similar', label: 'Similar Destinations' },
           ]}
+          onSectionClick={handleSubNavClick}
         />
 
         <div className="container mx-auto px-4 py-8">
@@ -240,29 +262,14 @@ const CountryDetailPageNew: React.FC = () => {
             </div>
           </section>
 
-          {/* Attractions Section (Must-See Attractions) */}
-          <section id="attractions" className="scroll-mt-24 mb-20">
-            <AttractionsTab countryName={country.name} preview={true} destinationSlug={country.slug} title={`Must-See Attractions in ${country.name}`} />
-          </section>
-
-          {/* Activities Section (Top Experiences) */}
-          <section id="activities" className="scroll-mt-24 mb-20">
-            <ActivitiesTab countryId={country.id} preview={true} destinationSlug={country.slug} title={`Top Experiences in ${country.name}`} />
-          </section>
-
-          {/* Packages Section (Featured Packages) */}
-          <section id="packages" className="scroll-mt-24 mb-20">
-            <PackagesTab countryId={country.id} preview={true} destinationSlug={country.slug} title={`Featured ${country.name} Packages`} />
-          </section>
-
-          {/* Hot Deals Section (Special Offers) */}
-          <section id="deals" className="scroll-mt-24 mb-20">
-            <PackagesTab
+          {/* Consolidated Destination Explorer Section */}
+          <section id="explore" className="scroll-mt-24 mb-20">
+            <DestinationExplorer
               countryId={country.id}
-              preview={true}
+              countryName={country.name}
               destinationSlug={country.slug}
-              isDealsOnly={true}
-              title={`Special Offers in ${country.name}`}
+              activeTabId={explorerTab}
+              onTabChange={(tab) => setExplorerTab(tab)}
             />
           </section>
         </div>
@@ -281,17 +288,9 @@ const CountryDetailPageNew: React.FC = () => {
             <GroupTripsTab countryId={country.id} preview={true} destinationSlug={country.slug} title={`Group Trips to ${country.name}`} />
           </section>
 
-          {/* Hotels Section (Where to Stay) */}
-          <section id="hotels" className="scroll-mt-24 mb-20">
-            <HotelsTab countryId={country.id} preview={true} destinationSlug={country.slug} title={`Where to Stay in ${country.name}`} />
-          </section>
-
           {/* Travel Guide Section */}
           <section id="travel-guide" className="scroll-mt-24 mb-20">
-            <div className="bg-white rounded-2xl border border-gray-200/60 p-6 md:p-8 shadow-sm">
-              <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Travel Guide</h2>
-              <div className="text-gray-600">Coming soon... Interactive categories for {country.name}: Good to know, Things to Do, Going Out, Shopping, Beaches, Food & Drink, Sports, Events.</div>
-            </div>
+            <TravelGuideSection countrySlug={country.slug} countryName={country.name} />
           </section>
 
           {/* FAQ Section */}

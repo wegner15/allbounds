@@ -620,15 +620,15 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {activeTab === 'all' &&
                   (paginatedItems as typeof combinedResults).map((res) => {
-                    if (res.type === 'package') return <PackageCard key={res.id} package={res.item} />;
-                    if (res.type === 'activity') return <ActivityCard key={res.id} activity={res.item} />;
-                    if (res.type === 'attraction') return <AttractionCard key={res.id} attraction={res.item} />;
-                    return <HotelCard key={res.id} hotel={res.item} />;
+                    if (res.type === 'package') return <PackageCard key={res.id} package={res.item as any} />;
+                    if (res.type === 'activity') return <ActivityCard key={res.id} activity={res.item as any} />;
+                    if (res.type === 'attraction') return <AttractionCard key={res.id} attraction={res.item as any} />;
+                    return <HotelCard key={res.id} hotel={res.item as any} />;
                   })}
 
                 {activeTab === 'hotels' &&
                   (paginatedItems as typeof filteredHotels).map((hotel) => (
-                    <HotelCard key={hotel.id} hotel={hotel} />
+                    <HotelCard key={hotel.id} hotel={hotel as any} />
                   ))}
 
                 {activeTab === 'packages' &&
@@ -643,7 +643,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
 
                 {activeTab === 'attractions' &&
                   (paginatedItems as typeof filteredAttractions).map((attr) => (
-                    <AttractionCard key={attr.id} attraction={attr} />
+                    <AttractionCard key={attr.id} attraction={attr as any} />
                   ))}
               </div>
 

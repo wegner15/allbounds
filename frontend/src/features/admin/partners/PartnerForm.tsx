@@ -19,19 +19,9 @@ const partnerSchema = z.object({
     .max(100, 'Name cannot exceed 100 characters'),
   category: z.string().min(1, 'Please select a category'),
   logo_image_id: z.string().optional().nullable(),
-  website_url: z.string()
-    .transform(val => {
-      if (!val) return '';
-      // Automatically prepend https:// if missing
-      if (!/^https?:\/\//i.test(val)) {
-        return `https://${val}`;
-      }
-      return val;
-    })
-    .optional()
-    .nullable(),
-  order_index: z.coerce.number().default(0),
-  is_active: z.boolean().default(true),
+  website_url: z.string().optional().nullable(),
+  order_index: z.number(),
+  is_active: z.boolean(),
 });
 
 type PartnerFormData = z.infer<typeof partnerSchema>;
@@ -81,8 +71,12 @@ const PartnerForm: React.FC<PartnerFormProps> = ({
 
   const handleFormSubmit = async (formData: PartnerFormData) => {
     setServerError(null);
+    let formattedUrl = formData.website_url;
+    if (formattedUrl && !/^https?:\/\//i.test(formattedUrl)) {
+      formattedUrl = `https://${formattedUrl}`;
+    }
     try {
-      await onSubmit(formData);
+      await onSubmit({ ...formData, website_url: formattedUrl });
     } catch (error: any) {
       console.error('Error in partner form submit:', error);
       setServerError(error.message || 'An error occurred while saving. Please try again.');
@@ -197,7 +191,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({
                     ? 'ring-red-300 text-red-900 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
                     : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
                 `}
-                {...register('order_index')}
+                {...register('order_index', { valueAsNumber: true })}
               />
             </div>
             {errors.order_index && (

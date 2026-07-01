@@ -77,6 +77,20 @@ const GroupTripCard: React.FC<GroupTripCardProps> = React.memo(({ groupTrip }) =
 
         {/* Content */}
         <div className="p-3 md:p-4 flex flex-col flex-grow">
+          {/* Countries / Destinations */}
+          {(groupTrip.country || (groupTrip.countries && groupTrip.countries.length > 0)) && (
+            <div className="flex flex-wrap gap-1 items-center mb-1.5 text-xs text-gray-500 font-semibold uppercase tracking-wider">
+              <MapPin className="w-3.5 h-3.5 mr-0.5 text-teal-600 flex-shrink-0" />
+              {groupTrip.country && <span>{groupTrip.country.name}</span>}
+              {groupTrip.countries?.map((c) => (
+                <React.Fragment key={c.id}>
+                  <span className="text-gray-300 mx-0.5">•</span>
+                  <span className="text-gray-500">{c.name}</span>
+                </React.Fragment>
+              ))}
+            </div>
+          )}
+
           {/* Group Trip Name - H3 for proper heading hierarchy */}
           <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-teal-600 transition-colors">
             {groupTrip.name}

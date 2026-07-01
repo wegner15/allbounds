@@ -34,6 +34,7 @@ class GroupTripBase(BaseModel):
 class GroupTripCreate(GroupTripBase):
     inclusion_ids: Optional[List[int]] = Field(default_factory=list, description="List of inclusion IDs to associate with this group trip")
     exclusion_ids: Optional[List[int]] = Field(default_factory=list, description="List of exclusion IDs to associate with this group trip")
+    country_ids: Optional[List[int]] = Field(default_factory=list, description="List of additional country IDs (multiple destinations)")
     is_active: Optional[bool] = Field(True, description="Whether the group trip is active")
     is_featured: Optional[bool] = Field(False, description="Whether the group trip is featured")
 
@@ -59,6 +60,7 @@ class GroupTripUpdate(BaseModel):
     inclusion_ids: Optional[List[int]] = Field(None, description="List of inclusion IDs to associate with this group trip")
     exclusion_ids: Optional[List[int]] = Field(None, description="List of exclusion IDs to associate with this group trip")
     conversion_triggers: Optional[List[str]] = Field(None, description="List of conversion triggers")
+    country_ids: Optional[List[int]] = Field(None, description="List of additional country IDs (multiple destinations)")
 
 
 
@@ -106,6 +108,7 @@ class GroupTripResponse(GroupTripBase):
     inclusion_items: List[InclusionResponse] = Field(default_factory=list, description="Inclusions associated with this group trip")
     exclusion_items: List[ExclusionResponse] = Field(default_factory=list, description="Exclusions associated with this group trip")
     departures: List[GroupTripDepartureResponse] = Field(default_factory=list, description="Departures associated with this group trip")
+    countries: List[CountryResponse] = Field(default_factory=list, description="Additional destinations associated with this group trip")
 
     @field_validator('is_active', 'is_featured', mode='before')
     @classmethod

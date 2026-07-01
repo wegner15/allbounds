@@ -215,8 +215,20 @@ const GroupTripsListPage: React.FC = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{getCountryName(trip.country_id)}</div>
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-medium text-gray-900">{trip.country?.name || getCountryName(trip.country_id)}</div>
+                      {trip.countries && trip.countries.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {trip.countries.map((c: any) => (
+                            <span
+                              key={c.id}
+                              className="inline-block bg-teal-50 text-teal-700 text-xs px-2 py-0.5 rounded-full border border-teal-100"
+                            >
+                              {c.name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">

@@ -128,6 +128,10 @@ export interface GroupTripWithDepartures {
   is_active: boolean;
   itinerary?: string | PackageItineraryDay[] | null;
   departures: GroupTripDeparture[];
+  country_id?: number;
+  country?: Country;
+  countries?: Country[];
+  country_ids?: number[];
 }
 
 // Activity types
@@ -562,6 +566,8 @@ export interface GroupTrip extends BaseModel {
   min_participants?: number;
   departures: GroupTripDeparture[];
   conversion_triggers?: string[];
+  countries?: Country[];      // additional destinations (multi-destination)
+  country_ids?: number[];     // IDs of additional destinations
 }
 
 // Group Trip with gallery

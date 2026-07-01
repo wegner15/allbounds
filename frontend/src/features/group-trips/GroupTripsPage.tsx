@@ -121,7 +121,11 @@ const GroupTripsPage: React.FC = () => {
   // Apply filters
   const filteredTrips = groupTrips.filter(trip => {
     // Country filter
-    if (selectedCountry !== 'All' && trip.country?.name !== selectedCountry) return false;
+    if (selectedCountry !== 'All') {
+      const isPrimaryMatch = trip.country?.name === selectedCountry;
+      const isSecondaryMatch = trip.countries?.some(c => c.name === selectedCountry) || false;
+      if (!isPrimaryMatch && !isSecondaryMatch) return false;
+    }
 
     // Holiday type filter
     if (selectedHolidayType !== 'All') {
@@ -309,6 +313,7 @@ const GroupTripsPage: React.FC = () => {
                           {trip.country && (
                             <span className="inline-block bg-primary/10 text-primary-dark text-xs px-2 py-1 rounded-full">
                               📍 {trip.country.name}
+                              {trip.countries && trip.countries.map(c => `, ${c.name}`)}
                             </span>
                           )}
                           {trip.holiday_types && trip.holiday_types.slice(0, 1).map(type => (

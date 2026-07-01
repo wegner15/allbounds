@@ -31,6 +31,7 @@ const groupTripSchema = z.object({
   price: z.number().min(0, 'Price must be a positive number'),
   inclusion_ids: z.array(z.number()).optional(),
   exclusion_ids: z.array(z.number()).optional(),
+  country_ids: z.array(z.number()).optional(),
   image_id: z.string().optional(),
   is_active: z.boolean(),
   is_featured: z.boolean(),
@@ -112,6 +113,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
           price: groupTripData.price || 0,
           inclusion_ids: groupTripData.inclusion_items?.map((item: any) => item.id) || [],
           exclusion_ids: groupTripData.exclusion_items?.map((item: any) => item.id) || [],
+          country_ids: groupTripData.countries?.map((c: any) => c.id) || [],
           image_id: groupTripData.image_id || '',
           is_active: groupTripData.is_active !== undefined ? groupTripData.is_active : true,
           is_featured: groupTripData.is_featured !== undefined ? groupTripData.is_featured : false,
@@ -133,6 +135,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
           price: 0,
           inclusion_ids: [],
           exclusion_ids: [],
+          country_ids: [],
           image_id: '',
           is_active: true,
           is_featured: false,
@@ -216,6 +219,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
         is_featured: data.is_featured,
         inclusion_ids: data.inclusion_ids || [],
         exclusion_ids: data.exclusion_ids || [],
+        country_ids: data.country_ids || [],
         conversion_triggers: data.conversion_triggers?.map(t => t.value) || []
       };
       
@@ -472,6 +476,62 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
                   </p>
                 )}
               </div>
+            </div>
+            
+            {/* Additional Destinations */}
+            <div className="sm:col-span-6">
+              <label className="block text-sm font-medium text-gray-700">
+                Additional Destinations <span className="text-gray-400 font-normal">(optional)</span>
+              </label>
+              <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
+                <div className="mb-3">
+                  <p className="text-sm text-gray-700">
+                    Select extra countries this group trip covers. It will appear on each selected destination page.
+                  </p>
+                </div>
+                <Controller
+                  name="country_ids"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {countries
+                        ?.filter((c) => c.id !== watch('country_id')) // exclude primary
+                        .map((country) => {
+                          const checkboxId = `extra-country-${country.id}`;
+                          const isChecked = (field.value || []).includes(country.id);
+                          return (
+                            <div key={country.id} className="relative flex items-start">
+                              <div className="flex h-6 items-center">
+                                <input
+                                  id={checkboxId}
+                                  type="checkbox"
+                                  className="h-5 w-5 rounded border-gray-300 text-teal focus:ring-teal focus:ring-offset-0 cursor-pointer"
+                                  checked={isChecked}
+                                  onChange={(e) => {
+                                    const current = field.value || [];
+                                    if (e.target.checked) {
+                                      field.onChange([...current, country.id]);
+                                    } else {
+                                      field.onChange(current.filter((id: number) => id !== country.id));
+                                    }
+                                  }}
+                                />
+                              </div>
+                              <div className="ml-3 text-sm leading-6">
+                                <label htmlFor={checkboxId} className="font-medium text-gray-900 cursor-pointer">
+                                  {country.name}
+                                </label>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  )}
+                />
+              </div>
+              <p className="mt-2 text-xs text-gray-500">
+                Multi-destination group trips appear in all selected countries' destination pages.
+              </p>
             </div>
             
             {/* Description */}

@@ -294,3 +294,70 @@ def test_create_departure(client: TestClient, db: Session, superuser_token_heade
     assert created_departure["booked_slots"] == departure_data["booked_slots"]
     assert created_departure["group_trip_id"] == trip.id
     assert "id" in created_departure
+
+
+def test_multi_country_group_trip(client: TestClient, db: Session, superuser_token_headers):
+    """Test creating and updating a group trip with multiple destinations/countries."""
+    # Create region and countries
+    region = Region(name="GT Region", description="Desc", slug="gt-region")
+    db.add(region)
+    db.commit()
+    db.refresh(region)
+    
+    country1 = Country(name="GT Country 1", description="Desc 1", slug="gtc-1", region_id=region.id)
+    country2 = Country(name="GT Country 2", description="Desc 2", slug="gtc-2", region_id=region.id)
+    country3 = Country(name="GT Country 3", description="Desc 3", slug="gtc-3", region_id=region.id)
+    db.add(country1)
+    db.add(country2)
+    db.add(country3)
+    db.commit()
+    db.refresh(country1)
+    db.refresh(country2)
+    db.refresh(country3)
+
+    # 1. Create group trip with country_ids
+    group_trip_data = {
+        "name": "GT Multi Country",
+        "summary": "Summary",
+        "description": "Description",
+        "slug": "gt-multi-country",
+        "country_id": country1.id,
+        "duration_days": 12,
+        "price": 4000.0,
+        "country_ids": [country2.id, country3.id]
+    }
+    
+    response = client.post(
+        f"{settings.API_V1_STR}/group-trips/",
+        headers=superuser_token_headers,
+        json=group_trip_data,
+    )
+    assert response.status_code == 200
+    created = response.json()
+    assert created["country_id"] == country1.id
+    assert len(created["countries"]) == 2
+    country_ids = [c["id"] for c in created["countries"]]
+    assert country2.id in country_ids
+    assert country3.id in country_ids
+
+    # 2. Query group trips by country (secondary country search)
+    response_c2 = client.get(f"{settings.API_V1_STR}/group-trips/?country_id={country2.id}")
+    assert response_c2.status_code == 200
+    trips_c2 = response_c2.json()
+    assert len(trips_c2) == 1
+    assert trips_c2[0]["id"] == created["id"]
+
+    # 3. Update group trip with modified country_ids
+    update_data = {
+        "country_ids": [country3.id]
+    }
+    response = client.put(
+        f"{settings.API_V1_STR}/group-trips/{created['id']}",
+        headers=superuser_token_headers,
+        json=update_data,
+    )
+    assert response.status_code == 200
+    updated = response.json()
+    assert len(updated["countries"]) == 1
+    assert updated["countries"][0]["id"] == country3.id
+

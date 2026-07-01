@@ -12,6 +12,14 @@ group_trip_holiday_types = Table(
     Column("holiday_type_id", Integer, ForeignKey("holiday_types.id"), primary_key=True)
 )
 
+# Many-to-Many relationship table between GroupTrip and Country (multi-destination)
+group_trip_countries = Table(
+    "group_trip_countries",
+    Base.metadata,
+    Column("group_trip_id", Integer, ForeignKey("group_trips.id", ondelete="CASCADE"), primary_key=True),
+    Column("country_id", Integer, ForeignKey("countries.id", ondelete="CASCADE"), primary_key=True)
+)
+
 class GroupTrip(Base):
     __tablename__ = "group_trips"
 
@@ -38,6 +46,7 @@ class GroupTrip(Base):
 
     # Relationships
     country = relationship("Country", back_populates="group_trips")
+    countries = relationship("Country", secondary=group_trip_countries, lazy="select")
     holiday_types = relationship("HolidayType", secondary=group_trip_holiday_types, back_populates="group_trips")
     media_assets = relationship("MediaAsset", secondary="group_trip_media", back_populates="group_trips")
     reviews = relationship("Review", back_populates="group_trip")

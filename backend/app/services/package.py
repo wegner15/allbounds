@@ -1,6 +1,7 @@
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from sqlalchemy.orm import Session, joinedload, selectinload
+from sqlalchemy import or_
 
 from app.models.package import Package
 from app.models.media import MediaAsset
@@ -53,13 +54,18 @@ class PackageService:
     def get_packages_by_country(self, db: Session, country_id: int, skip: int = 0, limit: int = 100) -> List[Package]:
         """
         Retrieve all packages for a specific country with pagination.
+        Includes packages where the country is either the primary destination
+        or one of the additional destinations (via the package_countries M2M table).
         """
+        from app.models.country import Country
         return db.query(Package).options(
             joinedload(Package.country)
-            # Removed joinedload(Package.holiday_types) - causes circular loading
         ).filter(
-            Package.country_id == country_id,
-            Package.is_active == True
+            Package.is_active == True,
+            or_(
+                Package.country_id == country_id,
+                Package.countries.any(Country.id == country_id)
+            )
         ).offset(skip).limit(limit).all()
     
     def get_featured_packages(self, db: Session, skip: int = 0, limit: int = 100, country: Optional[str] = None) -> List[Package]:
@@ -390,6 +396,12 @@ class PackageService:
         if package_create.blog_post_ids:
             blog_posts = db.query(BlogPost).filter(BlogPost.id.in_(package_create.blog_post_ids)).all()
             db_package.blog_posts.extend(blog_posts)
+
+        # Handle additional countries (multi-destination)
+        if package_create.country_ids:
+            from app.models.country import Country
+            extra_countries = db.query(Country).filter(Country.id.in_(package_create.country_ids)).all()
+            db_package.countries.extend(extra_countries)
         
         db.commit()
         db.refresh(db_package)
@@ -403,7 +415,8 @@ class PackageService:
             selectinload(Package.holiday_types),
             selectinload(Package.inclusion_items),
             selectinload(Package.exclusion_items),
-            selectinload(Package.blog_posts)
+            selectinload(Package.blog_posts),
+            selectinload(Package.countries),
         ).filter(Package.id == package_id).first()
         if not db_package:
             return None
@@ -475,6 +488,23 @@ class PackageService:
                 if to_add_ids:
                     blog_posts = db.query(BlogPost).filter(BlogPost.id.in_(to_add_ids)).all()
                     db_package.blog_posts.extend(blog_posts)
+
+        # Handle additional countries (multi-destination)
+        if 'country_ids' in update_data:
+            country_ids = update_data.pop('country_ids')
+            if country_ids is not None:
+                from app.models.country import Country
+                current_ids = {c.id for c in db_package.countries}
+                new_ids = set(country_ids)
+
+                to_remove = [c for c in db_package.countries if c.id not in new_ids]
+                for c in to_remove:
+                    db_package.countries.remove(c)
+
+                to_add_ids = new_ids - current_ids
+                if to_add_ids:
+                    extra_countries = db.query(Country).filter(Country.id.in_(to_add_ids)).all()
+                    db_package.countries.extend(extra_countries)
         
         # Safely update slug if name changed
         update_data = update_slug_if_name_changed(

@@ -31,6 +31,7 @@ class PackageCreate(PackageBase):
     inclusion_ids: Optional[List[int]] = Field(default_factory=list, description="List of inclusion IDs to associate with this package")
     exclusion_ids: Optional[List[int]] = Field(default_factory=list, description="List of exclusion IDs to associate with this package")
     blog_post_ids: Optional[List[int]] = Field(default_factory=list, description="List of blog post IDs to associate with this package")
+    country_ids: Optional[List[int]] = Field(default_factory=list, description="List of additional country IDs (multiple destinations)")
 
 # Schema for updating a Package
 class PackageUpdate(BaseModel):
@@ -54,6 +55,7 @@ class PackageUpdate(BaseModel):
     blog_post_ids: Optional[List[int]] = Field(None, description="List of blog post IDs to associate with this package")
     faqs: Optional[List[dict]] = Field(None, description="List of FAQs")
     conversion_triggers: Optional[List[str]] = Field(None, description="List of conversion triggers")
+    country_ids: Optional[List[int]] = Field(None, description="List of additional country IDs (multiple destinations)")
 
 # Schema for Package response
 class PackageResponse(PackageBase):
@@ -69,6 +71,7 @@ class PackageResponse(PackageBase):
     holiday_types: List[HolidayTypeResponse] = []
     inclusion_items: List[InclusionResponse] = []
     exclusion_items: List[ExclusionResponse] = []
+    countries: List[CountryResponse] = []
     # REMOVED: holiday_types, inclusion_items, exclusion_items to prevent circular loading
     # These cause exponential memory growth due to bidirectional relationships
     # Use dedicated endpoints to fetch these if needed
@@ -104,6 +107,7 @@ class PackageListResponse(BaseModel):
     is_deal: bool
     created_at: datetime
     country: CountryResponse  # Only load country, not all relationships
+    countries: List[CountryResponse] = []  # Additional destinations
     
     class Config:
         from_attributes = True

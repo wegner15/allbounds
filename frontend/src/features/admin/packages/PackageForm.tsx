@@ -33,6 +33,7 @@ const packageSchema = z.object({
   inclusion_ids: z.array(z.number()).optional(),
   exclusion_ids: z.array(z.number()).optional(),
   blog_post_ids: z.array(z.number()).optional(),
+  country_ids: z.array(z.number()).optional(),
   image_id: z.string().optional(),
   is_active: z.boolean(),
   is_featured: z.boolean(),
@@ -107,6 +108,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
         inclusion_ids: packageData.inclusion_items?.map((item: any) => item.id) || [],
         exclusion_ids: packageData.exclusion_items?.map((item: any) => item.id) || [],
         blog_post_ids: packageData.blog_posts?.map((blog: any) => blog.id) || [],
+        country_ids: packageData.countries?.map((c: any) => c.id) || [],
         image_id: packageData.image_id || '',
         is_active: packageData.is_active,
         is_featured: packageData.is_featured,
@@ -126,6 +128,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
         inclusion_ids: [],
         exclusion_ids: [],
         blog_post_ids: [],
+        country_ids: [],
         image_id: '',
         is_active: true,
         is_featured: false,
@@ -703,6 +706,64 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                 Select the primary country for this package
               </p>
             )}
+          </div>
+
+          {/* Additional Destinations */}
+          <div className="sm:col-span-6">
+            <div className="flex justify-between items-center">
+              <label className="block text-sm font-semibold text-gray-800">
+                Additional Destinations <span className="text-gray-400 font-normal">(optional)</span>
+              </label>
+            </div>
+            <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
+              <div className="mb-3">
+                <p className="text-sm text-gray-700">
+                  Select extra countries this package covers. It will appear on each selected destination page.
+                </p>
+              </div>
+              <Controller
+                name="country_ids"
+                control={control}
+                render={({ field }) => (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {countries
+                      ?.filter((c) => c.id !== watch('country_id')) // exclude primary
+                      .map((country) => {
+                        const checkboxId = `extra-country-${country.id}`;
+                        const isChecked = (field.value || []).includes(country.id);
+                        return (
+                          <div key={country.id} className="relative flex items-start">
+                            <div className="flex h-6 items-center">
+                              <input
+                                id={checkboxId}
+                                type="checkbox"
+                                className="h-5 w-5 rounded border-gray-300 text-teal focus:ring-teal focus:ring-offset-0"
+                                checked={isChecked}
+                                onChange={(e) => {
+                                  const current = field.value || [];
+                                  if (e.target.checked) {
+                                    field.onChange([...current, country.id]);
+                                  } else {
+                                    field.onChange(current.filter((id: number) => id !== country.id));
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div className="ml-3 text-sm leading-6">
+                              <label htmlFor={checkboxId} className="font-medium text-gray-900 cursor-pointer">
+                                {country.name}
+                              </label>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
+              />
+            </div>
+            <p className="mt-2 text-xs text-gray-500">
+              Multi-destination packages appear in all selected countries' destination pages.
+            </p>
           </div>
 
           {/* Holiday Types */}

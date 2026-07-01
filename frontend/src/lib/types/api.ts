@@ -336,6 +336,8 @@ export interface Package extends BaseModel {
   review_count?: number;
   faqs?: { question: string; answer: string }[];
   conversion_triggers?: string[];
+  countries?: Country[];      // additional destinations (multi-destination)
+  country_ids?: number[];     // IDs of additional destinations
 }
 
 // Package with gallery

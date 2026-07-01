@@ -11,6 +11,14 @@ class PackageHolidayType(Base):
     package_id = Column(Integer, ForeignKey("packages.id"), primary_key=True)
     holiday_type_id = Column(Integer, ForeignKey("holiday_types.id"), primary_key=True)
 
+# Association table for Package ↔ Country (multiple destinations per package)
+PackageCountry = Table(
+    "package_countries",
+    Base.metadata,
+    Column("package_id", Integer, ForeignKey("packages.id", ondelete="CASCADE"), primary_key=True),
+    Column("country_id",  Integer, ForeignKey("countries.id",  ondelete="CASCADE"), primary_key=True),
+)
+
 class Package(Base):
     __tablename__ = "packages"
 
@@ -37,7 +45,10 @@ class Package(Base):
     conversion_triggers = Column(JSON, nullable=True)  # List of strings for conversion triggers
 
     # Relationships
-    country = relationship("Country", back_populates="packages")
+    country = relationship("Country", back_populates="packages", foreign_keys=[country_id])
+    # Additional destinations (many-to-many)
+    # CRITICAL: lazy='noload' — must be explicitly loaded with joinedload() in queries
+    countries = relationship("Country", secondary="package_countries", lazy="noload")
     # CRITICAL: lazy='noload' prevents automatic loading, must explicitly joinedload() in queries
     # This prevents circular loading: Package → HolidayType → Package → ...
     holiday_types = relationship("HolidayType", secondary="package_holiday_types", back_populates="packages")

@@ -30,7 +30,7 @@ const AboutTab: React.FC<AboutTabProps> = ({ country, pageDescription, pageImage
             <DestinationOverviewSection country={country} />
 
             {/* Why Visit Section */}
-            <WhyVisitSection countryName={country.name} />
+            <WhyVisitSection countryName={country.name} highlights={country.highlights} />
 
             {/* Best Time to Visit Section */}
             <BestTimeToVisitSection visitInfo={country.visit_info} />

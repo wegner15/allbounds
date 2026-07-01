@@ -70,6 +70,7 @@ export interface Country extends BaseModel {
   package_count?: number;
   media_assets?: MediaAsset[];
   faqs?: { question: string; answer: string }[];
+  highlights?: { title: string; desc: string }[];
 }
 
 export interface CountryCreate {
@@ -80,6 +81,7 @@ export interface CountryCreate {
   image_id?: string;
   media_asset_ids?: number[];
   is_favorite?: boolean;
+  highlights?: { title: string; desc: string }[];
 }
 
 export interface CountryUpdate extends Partial<CountryCreate> {
@@ -171,7 +173,7 @@ export type ActivityUpdate = Partial<ActivityCreate>;
 // Attraction types
 export interface Attraction extends BaseModel {
   name: string;
-  description: string;
+  description?: string;
   slug: string;
   country_id: number;
   country: Country;
@@ -265,7 +267,7 @@ export type AmenityUpdate = Partial<AmenityCreate> & {
 export interface Hotel extends BaseModel {
   name: string;
   summary?: string;
-  description: string;
+  description?: string;
   slug: string;
   country_id?: number;
   country?: Country;
@@ -324,6 +326,7 @@ export interface Package extends BaseModel {
   is_deal: boolean;
   inclusions?: InclusionExclusionItem[];
   exclusions?: InclusionExclusionItem[];
+  inclusion_items?: InclusionExclusionItem[];
   itinerary?: PackageItineraryDay[];
   holiday_types: HolidayType[];
   gallery_images?: MediaAsset[];

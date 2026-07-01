@@ -294,13 +294,13 @@ const PackageDetailPageNew: React.FC = () => {
           <div className="flex gap-2 sm:gap-3 max-w-screen-md mx-auto">
             <button
               onClick={() => setShowBookingForm(true)}
-              className="flex-1 bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold py-3.5 px-4 sm:px-6 rounded-lg transition-colors touch-manipulation min-h-[48px]"
+              className="flex-1 bg-primary hover:bg-primary-dark active:bg-primary-dark text-white font-semibold py-3.5 px-4 sm:px-6 rounded-lg transition-colors touch-manipulation min-h-[48px]"
             >
               Book Now
             </button>
             <button
               onClick={() => setShowInquiryForm(true)}
-              className="flex-1 bg-white hover:bg-gray-50 active:bg-gray-100 text-teal-600 font-semibold py-3.5 px-4 sm:px-6 rounded-lg border-2 border-teal-500 transition-colors touch-manipulation min-h-[48px]"
+              className="flex-1 bg-quote-btn hover:bg-quote-btn-dark active:bg-quote-btn-dark text-white font-semibold py-3.5 px-4 sm:px-6 rounded-lg transition-colors touch-manipulation min-h-[48px]"
             >
               Request Quote
             </button>

@@ -307,7 +307,7 @@ const GroupTripsPage: React.FC = () => {
                         {/* Tags */}
                         <div className="flex flex-wrap gap-2 mb-3">
                           {trip.country && (
-                            <span className="inline-block bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full">
+                            <span className="inline-block bg-primary/10 text-primary-dark text-xs px-2 py-1 rounded-full">
                               📍 {trip.country.name}
                             </span>
                           )}
@@ -335,57 +335,57 @@ const GroupTripsPage: React.FC = () => {
 
                         {/* Prominent Next Departure */}
                         {trip.departures && trip.departures.length > 0 && (
-                          <div className="group relative bg-teal-50 border-2 border-teal-200 rounded-lg p-3 mb-4 transition-all duration-500 hover:border-teal-400 hover:shadow-2xl hover:shadow-teal-300/40 hover:-translate-y-1 transform cursor-pointer overflow-hidden">
+                          <div className="group relative bg-primary-light/10 border-2 border-primary-light rounded-lg p-3 mb-4 transition-all duration-500 hover:border-primary hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-1 transform cursor-pointer overflow-hidden">
                             {/* Snake-like animated border effect */}
                             <div className="absolute inset-0 rounded-lg overflow-hidden">
                               {/* Top border segments - evenly distributed */}
-                              <div className="absolute top-0 left-0 w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-0"></div>
-                              <div className="absolute top-0 left-[20%] w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-100"></div>
-                              <div className="absolute top-0 left-[40%] w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-200"></div>
-                              <div className="absolute top-0 left-[60%] w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-300"></div>
-                              <div className="absolute top-0 left-[80%] w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-400"></div>
+                              <div className="absolute top-0 left-0 w-6 h-1 bg-gradient-to-r from-primary to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-0"></div>
+                              <div className="absolute top-0 left-[20%] w-6 h-1 bg-gradient-to-r from-primary to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-100"></div>
+                              <div className="absolute top-0 left-[40%] w-6 h-1 bg-gradient-to-r from-primary to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-200"></div>
+                              <div className="absolute top-0 left-[60%] w-6 h-1 bg-gradient-to-r from-primary to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-300"></div>
+                              <div className="absolute top-0 left-[80%] w-6 h-1 bg-gradient-to-r from-primary to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-400"></div>
 
                               {/* Right border segments - evenly distributed */}
-                              <div className="absolute top-0 right-0 w-1 h-6 bg-gradient-to-b from-blue-500 to-teal-400 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-500"></div>
-                              <div className="absolute top-[20%] right-0 w-1 h-6 bg-gradient-to-b from-blue-500 to-teal-400 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-600"></div>
-                              <div className="absolute top-[40%] right-0 w-1 h-6 bg-gradient-to-b from-blue-500 to-teal-400 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-700"></div>
-                              <div className="absolute top-[60%] right-0 w-1 h-6 bg-gradient-to-b from-blue-500 to-teal-400 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-800"></div>
-                              <div className="absolute top-[80%] right-0 w-1 h-6 bg-gradient-to-b from-blue-500 to-teal-400 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-900"></div>
+                              <div className="absolute top-0 right-0 w-1 h-6 bg-gradient-to-b from-blue-500 to-primary rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-500"></div>
+                              <div className="absolute top-[20%] right-0 w-1 h-6 bg-gradient-to-b from-blue-500 to-primary rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-600"></div>
+                              <div className="absolute top-[40%] right-0 w-1 h-6 bg-gradient-to-b from-blue-500 to-primary rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-700"></div>
+                              <div className="absolute top-[60%] right-0 w-1 h-6 bg-gradient-to-b from-blue-500 to-primary rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-800"></div>
+                              <div className="absolute top-[80%] right-0 w-1 h-6 bg-gradient-to-b from-blue-500 to-primary rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-900"></div>
 
                               {/* Bottom border segments - evenly distributed */}
-                              <div className="absolute bottom-0 left-0 w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1000"></div>
-                              <div className="absolute bottom-0 left-[20%] w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1100"></div>
-                              <div className="absolute bottom-0 left-[40%] w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1200"></div>
-                              <div className="absolute bottom-0 left-[60%] w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1300"></div>
-                              <div className="absolute bottom-0 left-[80%] w-6 h-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1400"></div>
+                              <div className="absolute bottom-0 left-0 w-6 h-1 bg-gradient-to-r from-primary to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1000"></div>
+                              <div className="absolute bottom-0 left-[20%] w-6 h-1 bg-gradient-to-r from-primary to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1100"></div>
+                              <div className="absolute bottom-0 left-[40%] w-6 h-1 bg-gradient-to-r from-primary to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1200"></div>
+                              <div className="absolute bottom-0 left-[60%] w-6 h-1 bg-gradient-to-r from-primary to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1300"></div>
+                              <div className="absolute bottom-0 left-[80%] w-6 h-1 bg-gradient-to-r from-primary to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1400"></div>
 
                               {/* Left border segments - evenly distributed */}
-                              <div className="absolute top-0 left-0 w-1 h-6 bg-gradient-to-b from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1500"></div>
-                              <div className="absolute top-[20%] left-0 w-1 h-6 bg-gradient-to-b from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1600"></div>
-                              <div className="absolute top-[40%] left-0 w-1 h-6 bg-gradient-to-b from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1700"></div>
-                              <div className="absolute top-[60%] left-0 w-1 h-6 bg-gradient-to-b from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1800"></div>
-                              <div className="absolute top-[80%] left-0 w-1 h-6 bg-gradient-to-b from-teal-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1900"></div>
+                              <div className="absolute top-0 left-0 w-1 h-6 bg-gradient-to-b from-primary to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1500"></div>
+                              <div className="absolute top-[20%] left-0 w-1 h-6 bg-gradient-to-b from-primary to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1600"></div>
+                              <div className="absolute top-[40%] left-0 w-1 h-6 bg-gradient-to-b from-primary to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1700"></div>
+                              <div className="absolute top-[60%] left-0 w-1 h-6 bg-gradient-to-b from-primary to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1800"></div>
+                              <div className="absolute top-[80%] left-0 w-1 h-6 bg-gradient-to-b from-primary to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-1900"></div>
                             </div>
 
                             {/* Animated gradient background */}
-                            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-teal-100 via-blue-50 to-teal-100 opacity-0 group-hover:opacity-100 transition-opacity duration-500 group-hover:animate-pulse"></div>
+                            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-primary/10 via-blue-50 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 group-hover:animate-pulse"></div>
 
                             {/* Subtle inner glow */}
                             <div className="absolute inset-1 rounded-md bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
 
                             <div className="relative flex items-center justify-between">
                               <div className="flex items-center">
-                                <svg className="w-5 h-5 mr-2 text-teal-600 group-hover:text-teal-700 group-hover:animate-bounce transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 mr-2 text-primary group-hover:text-primary-dark group-hover:animate-bounce transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                <span className="text-sm font-medium text-teal-800 group-hover:text-teal-900 transition-colors duration-300">Next Departure</span>
+                                <span className="text-sm font-medium text-primary-dark group-hover:text-primary-dark transition-colors duration-300">Next Departure</span>
                               </div>
-                              <span className="text-lg font-bold text-teal-900 group-hover:text-blue-900 group-hover:scale-110 transform transition-all duration-300 drop-shadow-sm">
+                              <span className="text-lg font-bold text-primary-dark group-hover:text-blue-900 group-hover:scale-110 transform transition-all duration-300 drop-shadow-sm">
                                 {formatDate(trip.departures[0].start_date)}
                               </span>
                             </div>
                             {trip.departures.length > 1 && (
-                              <div className="relative mt-1 text-xs text-teal-600 group-hover:text-teal-700 transition-colors duration-300">
+                              <div className="relative mt-1 text-xs text-primary group-hover:text-primary-dark transition-colors duration-300">
                                 +{trip.departures.length - 1} more dates available
                               </div>
                             )}

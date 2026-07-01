@@ -4,9 +4,10 @@ import { CheckCircle } from 'lucide-react';
 interface WhyVisitSectionProps {
   countryName: string;
   description?: string;
+  highlights?: Array<{ title: string; desc: string }>;
 }
 
-const WhyVisitSection: React.FC<WhyVisitSectionProps> = ({ countryName }) => {
+const WhyVisitSection: React.FC<WhyVisitSectionProps> = ({ countryName, highlights }) => {
   // Hardcoded highlights for major countries, generic for others
   const getHighlights = (name: string) => {
     const lowerName = name.toLowerCase();
@@ -52,7 +53,7 @@ const WhyVisitSection: React.FC<WhyVisitSectionProps> = ({ countryName }) => {
     ];
   };
 
-  const highlights = getHighlights(countryName);
+  const displayHighlights = (highlights && highlights.length > 0) ? highlights : getHighlights(countryName);
 
   return (
     <section className="py-16 bg-white rounded-2xl shadow-sm overflow-hidden my-8">
@@ -65,7 +66,7 @@ const WhyVisitSection: React.FC<WhyVisitSectionProps> = ({ countryName }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {highlights.map((item, index) => (
+          {displayHighlights.map((item, index) => (
             <div key={index} className="flex flex-col items-center text-center p-6 rounded-xl hover:bg-gray-50 transition-colors duration-300">
               <div className="w-16 h-16 bg-teal/10 rounded-full flex items-center justify-center mb-6 text-teal">
                 <CheckCircle className="w-8 h-8" />

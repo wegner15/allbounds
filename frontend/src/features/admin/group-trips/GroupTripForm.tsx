@@ -245,8 +245,8 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
             const endDate = new Date(data.end_date);
 
             const departureData = {
-              start_date: startDate.toISOString(),
-              end_date: endDate.toISOString(),
+              start_date: data.start_date,
+              end_date: data.end_date,
               price: data.price,
               available_slots: data.max_participants || 10,
               is_active: data.is_active
@@ -281,14 +281,11 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
         // After creating the group trip, create a departure
         if (data.start_date && data.end_date) {
           try {
-            const startDate = new Date(data.start_date);
-            const endDate = new Date(data.end_date);
-
             // Create a departure for this trip
             await apiClient.post(`/group-trips/${savedTrip.id}/departures`, {
               group_trip_id: savedTrip.id,
-              start_date: startDate.toISOString(),
-              end_date: endDate.toISOString(),
+              start_date: data.start_date,
+              end_date: data.end_date,
               price: data.price,
               available_slots: data.max_participants || 10,
               booked_slots: 0,

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Plane, Hotel, Car, Compass } from 'lucide-react';
 import { useSpecialDeals } from '../../hooks/useSpecialDeals';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../../utils/imageUtils';
 import FromPriceDisplay from '../../../../components/ui/FromPriceDisplay';
@@ -21,6 +22,61 @@ const getDealBadge = (deal: { name?: string; category?: string; package_type?: s
   )
     return { icon: '🎯', label: 'Activity' };
   return { icon: '🌍', label: 'Package' };
+};
+
+const renderInclusionIcons = (inclusionItems?: any[]) => {
+  if (!inclusionItems || inclusionItems.length === 0) return null;
+  
+  const inclusions = {
+    flight: false,
+    hotel: false,
+    car: false,
+    activity: false
+  };
+
+  inclusionItems.forEach(item => {
+    const name = (item.name || '').toLowerCase();
+    const category = (item.category || '').toLowerCase();
+    const icon = (item.icon || '').toLowerCase();
+
+    if (name.includes('flight') || category.includes('flight') || icon.includes('plane') || icon.includes('flight')) {
+      inclusions.flight = true;
+    }
+    if (name.includes('hotel') || name.includes('accommodation') || name.includes('stay') || name.includes('lodge') || category.includes('hotel') || category.includes('accommodation') || icon.includes('hotel') || icon.includes('bed')) {
+      inclusions.hotel = true;
+    }
+    if (name.includes('car') || name.includes('transfer') || name.includes('transport') || category.includes('transport') || category.includes('car') || icon.includes('car') || icon.includes('transport')) {
+      inclusions.car = true;
+    }
+    if (name.includes('activity') || name.includes('game drive') || name.includes('safari') || name.includes('tour') || category.includes('activities') || category.includes('activity') || icon.includes('compass') || icon.includes('activity') || icon.includes('map')) {
+      inclusions.activity = true;
+    }
+  });
+
+  return (
+    <div className="flex items-center gap-1.5 bg-black/45 backdrop-blur-sm px-2 py-1 rounded-md text-white">
+      {inclusions.flight && (
+        <span title="Flights Included">
+          <Plane className="w-3.5 h-3.5" />
+        </span>
+      )}
+      {inclusions.hotel && (
+        <span title="Accommodation Included">
+          <Hotel className="w-3.5 h-3.5" />
+        </span>
+      )}
+      {inclusions.car && (
+        <span title="Transfers Included">
+          <Car className="w-3.5 h-3.5" />
+        </span>
+      )}
+      {inclusions.activity && (
+        <span title="Activities Included">
+          <Compass className="w-3.5 h-3.5" />
+        </span>
+      )}
+    </div>
+  );
 };
 
 const SpecialTopDeals: React.FC = () => {
@@ -91,7 +147,7 @@ const SpecialTopDeals: React.FC = () => {
                       <img
                         src={getImageUrlWithFallback(
                           deal.image_id,
-                          IMAGE_VARIANTS.THUMBNAIL,
+                          IMAGE_VARIANTS.MEDIUM,
                           'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=400&q=80'
                         )}
                         alt={deal.name}
@@ -110,12 +166,15 @@ const SpecialTopDeals: React.FC = () => {
                           <h3 className="text-white font-semibold text-lg leading-tight drop-shadow-sm">
                             {deal.name}
                           </h3>
-                          <FromPriceDisplay
-                            packageId={deal.id}
-                            basePrice={deal.price}
-                            currency="$"
-                            className="text-white/90 text-sm mt-1"
-                          />
+                          <div className="flex justify-between items-center mt-2">
+                            <FromPriceDisplay
+                              packageId={deal.id}
+                              basePrice={deal.price}
+                              currency="$"
+                              className="text-white/90 text-sm"
+                            />
+                            {renderInclusionIcons(deal.inclusion_items)}
+                          </div>
                           {deal.conversion_triggers && deal.conversion_triggers.length > 0 && (
                             <div className="mt-2 flex flex-wrap gap-1">
                               {deal.conversion_triggers.slice(0, 2).map((trigger, i) => (

@@ -15,6 +15,7 @@ class CountryBase(BaseModel):
     image_id: Optional[str] = Field(None, description="Cloudflare Images ID for the country image")
     media_asset_ids: Optional[List[int]] = Field(None, description="List of IDs for the country's gallery")
     faqs: Optional[List[dict]] = Field(None, description="List of FAQs ({question: str, description: str})")
+    highlights: Optional[List[dict]] = Field(None, description="List of highlights ({title: str, desc: str})")
     is_favorite: bool = Field(False, description="Whether the country is marked as a favorite")
     
     @field_validator("is_favorite", mode="before")
@@ -37,6 +38,7 @@ class CountryUpdate(BaseModel):
     image_id: Optional[str] = Field(None, description="Cloudflare Images ID for the country image")
     media_asset_ids: Optional[List[int]] = Field(None, description="List of IDs for the country's gallery")
     faqs: Optional[List[dict]] = Field(None, description="List of FAQs")
+    highlights: Optional[List[dict]] = Field(None, description="List of highlights")
     is_active: Optional[bool] = Field(None, description="Whether the country is active")
     is_favorite: Optional[bool] = Field(None, description="Whether the country is marked as a favorite")
 

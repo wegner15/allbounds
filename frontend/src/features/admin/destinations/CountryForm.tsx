@@ -30,6 +30,10 @@ const countrySchema = z.object({
     question: z.string().min(1, 'Question is required'),
     answer: z.string().min(1, 'Answer is required'),
   })).optional(),
+  highlights: z.array(z.object({
+    title: z.string().min(1, 'Title is required'),
+    desc: z.string().min(1, 'Description is required'),
+  })).optional(),
 });
 
 type CountryFormData = z.infer<typeof countrySchema>;
@@ -72,6 +76,7 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
         is_active: countryData.is_active,
         is_favorite: countryData.is_favorite || false,
         faqs: countryData.faqs || [],
+        highlights: countryData.highlights || [],
       }
       : {
         name: '',
@@ -82,12 +87,18 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
         image_id: '',
         is_active: true,
         is_favorite: false,
+        highlights: [],
       },
   });
 
   const { fields: faqFields, append: appendFaq, remove: removeFaq } = useFieldArray({
     control,
     name: 'faqs',
+  });
+
+  const { fields: highlightFields, append: appendHighlight, remove: removeHighlight } = useFieldArray({
+    control,
+    name: 'highlights',
   });
 
   // Auto-generate slug from name
@@ -372,6 +383,66 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
                   ))}
                   {faqFields.length === 0 && (
                     <p className="text-sm text-gray-500 italic text-center py-4">No FAQs added yet.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Highlights (Why Visit Destination) */}
+            <div className="sm:col-span-6">
+              <div className="border-t border-gray-200 pt-6 mt-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-md font-medium text-gray-900">Why Visit Destination (Highlights)</h4>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => appendHighlight({ title: '', desc: '' })}
+                  >
+                    Add Highlight
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  {highlightFields.map((field, index) => (
+                    <div key={field.id} className="bg-gray-50 p-4 rounded-lg border border-gray-200 relative">
+                      <button
+                        type="button"
+                        onClick={() => removeHighlight(index)}
+                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                      >
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                      <div className="grid grid-cols-1 gap-4">
+                        <FormGroup>
+                          <FormInput
+                            id={`highlights.${index}.title`}
+                            label="Highlight Title"
+                            error={errors.highlights?.[index]?.title}
+                            fullWidth
+                            variant="filled"
+                            placeholder="e.g. Pristine Beaches"
+                            {...register(`highlights.${index}.title`)}
+                          />
+                        </FormGroup>
+                        <FormGroup>
+                          <FormTextarea
+                            id={`highlights.${index}.desc`}
+                            label="Description"
+                            error={errors.highlights?.[index]?.desc}
+                            fullWidth
+                            variant="filled"
+                            rows={2}
+                            placeholder="e.g. Relax on the world-famous white sand beaches of Diani..."
+                            {...register(`highlights.${index}.desc`)}
+                          />
+                        </FormGroup>
+                      </div>
+                    </div>
+                  ))}
+                  {highlightFields.length === 0 && (
+                    <p className="text-sm text-gray-500 italic text-center py-4">No highlights added yet.</p>
                   )}
                 </div>
               </div>

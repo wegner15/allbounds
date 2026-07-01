@@ -247,7 +247,7 @@ const CountryDetailPageNew: React.FC = () => {
 
           {/* Why Visit Section */}
           <section id="why-visit" className="scroll-mt-24 mb-20">
-            <WhyVisitSection countryName={country.name} />
+            <WhyVisitSection countryName={country.name} highlights={country.highlights} />
           </section>
 
           {/* Best Time to Visit Section */}

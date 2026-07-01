@@ -157,11 +157,11 @@ const BookingSidebar: React.FC<BookingSidebarProps> = ({
             Book Now
           </Button>
           <Button
-            variant="outline"
+            variant="primary"
             size="lg"
             fullWidth
             onClick={handleRequestQuote}
-            className="border-2 border-charcoal text-charcoal hover:bg-charcoal hover:text-white font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-95 touch-manipulation min-h-[52px] rounded-lg"
+            className="bg-quote-btn hover:bg-quote-btn-dark active:bg-quote-btn-dark text-white border-none font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-95 touch-manipulation min-h-[52px] rounded-lg shadow-lg hover:shadow-xl"
           >
             Request Quote
           </Button>

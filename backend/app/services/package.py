@@ -76,7 +76,8 @@ class PackageService:
             query = query.join(Package.country).filter(Country.name.ilike(f"%{country}%"))
 
         return query.options(
-            joinedload(Package.country)
+            joinedload(Package.country),
+            selectinload(Package.inclusion_items)
             # Removed joinedload(Package.holiday_types) - causes circular loading
         ).offset(skip).limit(limit).all()
 

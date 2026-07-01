@@ -1,27 +1,7 @@
 import React from 'react';
-
-/**
- * OurPartners — Homepage section displaying Hotel Partners, Airline Partners,
- * and Industry Affiliations fetched from the backend API.
- *
- * Phase 6 will wire up a real API hook once the Partner model/endpoints are live.
- * For now, the component renders a loading-friendly skeleton / empty-state pattern
- * and is ready to accept a `usePartners()` hook swap.
- */
-
-interface Partner {
-  id: number;
-  name: string;
-  logo_url?: string;
-  category: 'hotel' | 'airline' | 'affiliation';
-}
-
-// ─── Placeholder hook (will be replaced by real API hook in Phase 6) ──────────
-const usePartners = (): { data: Partner[] | undefined; isLoading: boolean } => {
-  // Return empty data for now — UI renders gracefully
-  return { data: undefined, isLoading: false };
-};
-// ─────────────────────────────────────────────────────────────────────────────
+import { usePartners } from '../../../../lib/hooks/usePartners';
+import CloudflareImage from '../../../../components/ui/CloudflareImage';
+import type { Partner } from '../../../../lib/types/api';
 
 const CATEGORIES: { key: Partner['category']; label: string; icon: string }[] = [
   { key: 'hotel',       label: 'Hotel Partners',        icon: '🏨' },
@@ -30,22 +10,41 @@ const CATEGORIES: { key: Partner['category']; label: string; icon: string }[] = 
 ];
 
 /** Renders a single partner logo tile */
-const PartnerTile: React.FC<{ partner: Partner }> = ({ partner }) => (
-  <div className="flex flex-col items-center justify-center p-4 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 gap-2 min-h-[96px]">
-    {partner.logo_url ? (
-      <img
-        src={partner.logo_url}
-        alt={partner.name}
-        className="h-10 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300"
-      />
-    ) : (
-      /* Text fallback when no logo is set */
-      <span className="text-sm font-semibold text-charcoal text-center leading-tight">
-        {partner.name}
-      </span>
-    )}
-  </div>
-);
+const PartnerTile: React.FC<{ partner: Partner }> = ({ partner }) => {
+  const content = (
+    <div className="flex flex-col items-center justify-center p-4 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 gap-2 min-h-[96px] w-full h-full">
+      {partner.logo_image_id ? (
+        <CloudflareImage
+          imageId={partner.logo_image_id}
+          variant="thumbnail"
+          alt={partner.name}
+          className="h-10 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300"
+          objectFit="contain"
+        />
+      ) : (
+        /* Text fallback when no logo is set */
+        <span className="text-sm font-semibold text-charcoal text-center leading-tight">
+          {partner.name}
+        </span>
+      )}
+    </div>
+  );
+
+  if (partner.website_url) {
+    return (
+      <a 
+        href={partner.website_url} 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="block w-full h-full"
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return content;
+};
 
 /** Skeleton tiles while loading */
 const SkeletonTile: React.FC = () => (

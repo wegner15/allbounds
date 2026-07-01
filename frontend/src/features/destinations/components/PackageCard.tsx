@@ -58,14 +58,31 @@ const PackageCard: React.FC<PackageCardProps> = React.memo(({ package: pkg }) =>
 
         {/* Content */}
         <div className="p-4 flex flex-col flex-grow">
-          {/* Country and Holiday Type */}
-          <div className="flex items-center justify-between mb-3 gap-2">
-            {pkg.country && (
-              <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-teal-50 text-teal-700 border border-teal-100">
-                <MapPin className="w-3.5 h-3.5 mr-1 text-teal-600 flex-shrink-0" />
-                <span className="truncate max-w-[120px] uppercase tracking-wide">{pkg.country.name}</span>
-              </div>
-            )}
+          {/* Destinations */}
+          <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {/* Primary destination */}
+              {pkg.country && (
+                <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-teal-50 text-teal-700 border border-teal-100">
+                  <MapPin className="w-3.5 h-3.5 mr-1 text-teal-600 flex-shrink-0" />
+                  <span className="truncate max-w-[100px] uppercase tracking-wide">{pkg.country.name}</span>
+                </div>
+              )}
+              {/* Additional destinations */}
+              {pkg.countries && pkg.countries.length > 0 && (
+                <>
+                  {pkg.countries.slice(0, 2).map((c) => (
+                    <div key={c.id} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-50 text-gray-600 border border-gray-200">
+                      <MapPin className="w-3 h-3 mr-1 text-gray-400 flex-shrink-0" />
+                      <span className="truncate max-w-[80px] uppercase tracking-wide">{c.name}</span>
+                    </div>
+                  ))}
+                  {pkg.countries.length > 2 && (
+                    <span className="text-xs text-gray-400 font-medium">+{pkg.countries.length - 2} more</span>
+                  )}
+                </>
+              )}
+            </div>
             {pkg.holiday_types && pkg.holiday_types.length > 0 && (
               <span className="inline-block bg-gray-50 text-gray-600 text-xs px-2.5 py-1 rounded-full font-medium flex-shrink-0 border border-gray-200">
                 {pkg.holiday_types[0].name}

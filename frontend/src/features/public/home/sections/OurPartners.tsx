@@ -12,7 +12,7 @@ const CATEGORIES: { key: Partner['category']; label: string; icon: string }[] = 
 /** Renders a single partner logo tile */
 const PartnerTile: React.FC<{ partner: Partner }> = ({ partner }) => {
   const content = (
-    <div className="flex flex-col items-center justify-center p-4 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 gap-2 min-h-[96px] w-full h-full">
+    <div className="flex flex-col items-center justify-center gap-2 w-full h-full opacity-70 hover:opacity-100 transition-opacity duration-200">
       {partner.logo_image_id ? (
         <CloudflareImage
           imageId={partner.logo_image_id}

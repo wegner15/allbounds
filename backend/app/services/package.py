@@ -27,7 +27,8 @@ class PackageService:
         MEMORY FIX: Only load essential relationships to prevent OOM
         """
         query = db.query(Package).options(
-            joinedload(Package.country)
+            joinedload(Package.country),
+            selectinload(Package.countries)
             # Removed joinedload(Package.holiday_types) - causes memory spike
             # Other relationships (inclusion_items, exclusion_items) are lazy-loaded on access
         ).filter(Package.is_active == True)
@@ -59,7 +60,8 @@ class PackageService:
         """
         from app.models.country import Country
         return db.query(Package).options(
-            joinedload(Package.country)
+            joinedload(Package.country),
+            selectinload(Package.countries)
         ).filter(
             Package.is_active == True,
             or_(
@@ -83,6 +85,7 @@ class PackageService:
 
         return query.options(
             joinedload(Package.country),
+            selectinload(Package.countries),
             selectinload(Package.inclusion_items)
             # Removed joinedload(Package.holiday_types) - causes circular loading
         ).offset(skip).limit(limit).all()
@@ -93,6 +96,7 @@ class PackageService:
         """
         return db.query(Package).options(
             joinedload(Package.country),
+            selectinload(Package.countries)
             # Removed joinedload(Package.holiday_types) - causes circular loading
         ).filter(
             Package.holiday_types.any(HolidayType.id == holiday_type_id),
@@ -105,6 +109,7 @@ class PackageService:
         """
         return db.query(Package).options(
             joinedload(Package.country),
+            selectinload(Package.countries)
             # Removed joinedload(Package.holiday_types) - causes circular loading
         ).filter(Package.id == package_id, Package.is_active == True).first()
     
@@ -130,6 +135,8 @@ class PackageService:
         package = db.query(Package).options(
             # Load country
             joinedload(Package.country),
+            # Load additional countries
+            joinedload(Package.countries),
             # Load holiday types
             joinedload(Package.holiday_types),
             # Load media assets

@@ -525,3 +525,76 @@ def test_add_remove_holiday_type(client: TestClient, db: Session, superuser_toke
         PackageHolidayType.holiday_type_id == holiday_type.id
     ).first()
     assert db_package_holiday_type is None
+
+
+def test_multi_country_package(client: TestClient, db: Session, superuser_token_headers):
+    """Test creating and updating a package with multiple countries."""
+    # Create region and countries
+    region = Region(name="Test Region Multi", description="Test Description", slug="test-region-multi")
+    db.add(region)
+    db.commit()
+    db.refresh(region)
+    
+    country1 = Country(name="Country 1", description="Desc 1", slug="c-1", region_id=region.id)
+    country2 = Country(name="Country 2", description="Desc 2", slug="c-2", region_id=region.id)
+    country3 = Country(name="Country 3", description="Desc 3", slug="c-3", region_id=region.id)
+    db.add(country1)
+    db.add(country2)
+    db.add(country3)
+    db.commit()
+    db.refresh(country1)
+    db.refresh(country2)
+    db.refresh(country3)
+
+    # 1. Create package with country_ids
+    package_data = {
+        "name": "Multi Country Tour",
+        "summary": "Summary",
+        "description": "Description description",
+        "slug": "multi-country-tour",
+        "country_id": country1.id,
+        "duration_days": 10,
+        "price": 3000.0,
+        "country_ids": [country2.id, country3.id]
+    }
+    
+    response = client.post(
+        f"{settings.API_V1_STR}/packages/",
+        headers=superuser_token_headers,
+        json=package_data,
+    )
+    assert response.status_code == 200
+    created = response.json()
+    assert created["country_id"] == country1.id
+    assert len(created["countries"]) == 2
+    country_ids = [c["id"] for c in created["countries"]]
+    assert country2.id in country_ids
+    assert country3.id in country_ids
+
+    # 2. Update package with new country_ids (remove country3, add country1 as secondary or just have country2 only)
+    update_data = {
+        "country_ids": [country2.id]
+    }
+    response = client.put(
+        f"{settings.API_V1_STR}/packages/{created['id']}",
+        headers=superuser_token_headers,
+        json=update_data,
+    )
+    assert response.status_code == 200
+    updated = response.json()
+    assert len(updated["countries"]) == 1
+    assert updated["countries"][0]["id"] == country2.id
+
+    # 3. Add country3 back and verify no duplicate key/integrity errors
+    update_data_2 = {
+        "country_ids": [country2.id, country3.id]
+    }
+    response = client.put(
+        f"{settings.API_V1_STR}/packages/{created['id']}",
+        headers=superuser_token_headers,
+        json=update_data_2,
+    )
+    assert response.status_code == 200
+    updated_2 = response.json()
+    assert len(updated_2["countries"]) == 2
+

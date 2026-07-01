@@ -47,8 +47,8 @@ class Package(Base):
     # Relationships
     country = relationship("Country", back_populates="packages", foreign_keys=[country_id])
     # Additional destinations (many-to-many)
-    # CRITICAL: lazy='noload' — must be explicitly loaded with joinedload() in queries
-    countries = relationship("Country", secondary="package_countries", lazy="noload")
+    # lazy='select' (default) allows on-demand loading when accessed in python code
+    countries = relationship("Country", secondary="package_countries", lazy="select")
     # CRITICAL: lazy='noload' prevents automatic loading, must explicitly joinedload() in queries
     # This prevents circular loading: Package → HolidayType → Package → ...
     holiday_types = relationship("HolidayType", secondary="package_holiday_types", back_populates="packages")

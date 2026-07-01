@@ -30,6 +30,7 @@ from app.api.api_v1.endpoints import (
     visa_applications,
     flight_bookings,
     email_logs,
+    partners,
 )
 
 api_router = APIRouter()
@@ -43,6 +44,7 @@ api_router.include_router(accommodations.router, prefix="/accommodations", tags=
 api_router.include_router(amenities.router, prefix="/amenities", tags=["Amenities"])
 api_router.include_router(hotels.router, prefix="/hotels", tags=["Hotels"])
 api_router.include_router(hotel_types.router, prefix="/hotel-types", tags=["Hotel Types"])
+api_router.include_router(partners.router, prefix="/partners", tags=["Partners"])
 api_router.include_router(packages.router, prefix="/packages", tags=["Packages"])
 api_router.include_router(group_trips.router, prefix="/group-trips", tags=["Group Trips"])
 api_router.include_router(holiday_types.router, prefix="/holiday-types", tags=["Holiday Types"])

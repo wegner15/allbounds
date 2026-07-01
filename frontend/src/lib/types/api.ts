@@ -784,3 +784,14 @@ export interface Stats {
   recent_activity: RecentActivityItem[];
   recent_bookings: RecentBookingItem[];
 }
+
+export interface Partner extends BaseModel {
+  name: string;
+  slug: string;
+  category: string;
+  logo_image_id?: string;
+  website_url?: string;
+  order_index: number;
+  is_active: boolean;
+}
+

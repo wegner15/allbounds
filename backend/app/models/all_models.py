@@ -34,6 +34,7 @@ from app.models.newsletter import NewsletterSubscription
 from app.models.visa_application import VisaApplication
 from app.models.flight_booking import FlightBooking, FlightPassenger
 from app.models.email_log import EmailLog
+from app.models.partner import Partner
 
 # This ensures all models are imported in the correct order
 __all__ = [
@@ -48,5 +49,6 @@ __all__ = [
     'ItineraryItem', 'ItineraryActivity',
     'Booking', 'BookingTraveler', 'Inquiry',
     'CountryVisitInfo', 'NewsletterSubscription', 'VisaApplication',
-    'FlightBooking', 'FlightPassenger', 'EmailLog',
+    'FlightBooking', 'FlightPassenger', 'EmailLog', 'Partner',
 ]
+

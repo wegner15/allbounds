@@ -70,6 +70,11 @@ import HotelTypesListPage from './features/admin/hotel-types/HotelTypesListPage'
 import CreateHotelTypePage from './features/admin/hotel-types/CreateHotelTypePage';
 import EditHotelTypePage from './features/admin/hotel-types/EditHotelTypePage';
 
+// Import admin partners pages
+import PartnersListPage from './features/admin/partners/PartnersListPage';
+import CreatePartnerPage from './features/admin/partners/CreatePartnerPage';
+import EditPartnerPage from './features/admin/partners/EditPartnerPage';
+
 // Import admin amenities pages
 import AmenitiesListPage from './features/admin/amenities/AmenitiesListPage';
 import CreateAmenityPage from './features/admin/amenities/CreateAmenityPage';
@@ -408,6 +413,10 @@ const router = createBrowserRouter([
       { path: 'hotel-types', element: <HotelTypesListPage /> },
       { path: 'hotel-types/new', element: <CreateHotelTypePage /> },
       { path: 'hotel-types/:id/edit', element: <EditHotelTypePage /> },
+      // Partner management routes
+      { path: 'partners', element: <PartnersListPage /> },
+      { path: 'partners/new', element: <CreatePartnerPage /> },
+      { path: 'partners/:id/edit', element: <EditPartnerPage /> },
       // Amenities management routes
       { path: 'amenities', element: <AmenitiesListPage /> },
       { path: 'amenities/new', element: <CreateAmenityPage /> },

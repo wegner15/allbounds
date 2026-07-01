@@ -283,6 +283,16 @@ export const endpoints = {
     coverImage: (id: number) => `/holiday-types/${id}/cover-image`,
   },
 
+  // Partners
+  partners: {
+    list: (category?: string) => `/partners/${category ? `?category=${category}` : ''}`,
+    create: () => '/partners/',
+    detail: (id: number) => `/partners/${id}`,
+    update: (id: number) => `/partners/${id}`,
+    delete: (id: number) => `/partners/${id}`,
+    bySlug: (slug: string) => `/partners/slug/${slug}`,
+  },
+
   // Reviews
   reviews: {
     list: () => '/reviews/',

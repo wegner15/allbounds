@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List
 from datetime import datetime
+from app.schemas.partner import PartnerResponse
 
 
 # Traveler schema
@@ -41,6 +42,7 @@ class BookingBase(BaseModel):
     # Additional Details
     special_requests: Optional[str] = Field(None, description="Any special requests or notes")
     source: str = Field(..., description="How they found us (website, social, referral, etc.)")
+    partner_code: Optional[str] = Field(None, description="Partner or referral code applied")
 
 
 class BookingCreate(BookingBase):
@@ -55,6 +57,8 @@ class BookingUpdate(BaseModel):
 class BookingResponse(BookingBase):
     id: int
     status: str
+    partner_id: Optional[int] = Field(None, description="Associated partner ID")
+    partner: Optional[PartnerResponse] = Field(None, description="Associated partner details")
     travelers: List[BookingTravelerResponse] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime

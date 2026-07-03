@@ -29,6 +29,16 @@ class BookingService:
 
     def create_booking(self, db: Session, booking: BookingCreate) -> Booking:
         """Create a new booking."""
+        # Resolve partner code if provided
+        partner_id = None
+        partner_code = None
+        if booking.partner_code:
+            from app.services.partner import partner_service
+            partner = partner_service.get_partner_by_code(db, booking.partner_code)
+            if partner:
+                partner_id = partner.id
+                partner_code = partner.partner_code
+
         # Create the booking
         db_booking = Booking(
             booking_type=booking.booking_type,
@@ -42,6 +52,8 @@ class BookingService:
             number_of_children=booking.number_of_children,
             special_requests=booking.special_requests,
             source=booking.source,
+            partner_id=partner_id,
+            partner_code=partner_code,
         )
         db.add(db_booking)
         db.flush()  # Get the booking ID
@@ -71,6 +83,15 @@ class BookingService:
     def _send_admin_notification(self, booking: Booking):
         booking_type_display = booking.booking_type.replace('_', ' ').title()
         subject = f"New {booking_type_display} Request - {booking.contact_name}"
+        
+        # Check for partner referral info
+        partner_info_row = ""
+        if booking.partner:
+            partner_info_row = f"""
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Referral Partner:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.partner.name} (Code: {booking.partner_code})</td></tr>
+            <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Referral Benefits:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">Discount: {booking.partner.discount_percent}%, Commission: {booking.partner.commission_percent}%</td></tr>
+            """
+
         content_html = f"""
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
             <tr><td style="padding: 10px; border-bottom: 1px solid #eee; width: 30%;"><strong>Type:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking_type_display}</td></tr>
@@ -80,6 +101,7 @@ class BookingService:
             <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Phone:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.contact_phone}</td></tr>
             <tr><td style="padding: 10px; border-bottom: 10px solid #eee;"><strong>Country:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.country_of_origin}</td></tr>
             <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Passengers:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.number_of_adults} Adults, {booking.number_of_children} Children</td></tr>
+            {partner_info_row}
             <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Special Requests:</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">{booking.special_requests or 'None'}</td></tr>
         </table>
         """

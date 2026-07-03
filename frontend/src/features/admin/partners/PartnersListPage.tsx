@@ -109,6 +109,15 @@ const PartnersListPage: React.FC = () => {
                         Category
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-charcoal">
+                        Promo Code
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-charcoal">
+                        Client Discount
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-charcoal">
+                        Partner Commission
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-charcoal">
                         Website
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-charcoal">
@@ -146,6 +155,17 @@ const PartnersListPage: React.FC = () => {
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {getCategoryLabel(partner.category)}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm">
+                          <span className="font-mono text-teal bg-teal/10 px-2 py-1 rounded text-xs font-bold">
+                            {partner.partner_code}
+                          </span>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {partner.discount_percent}%
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {partner.commission_percent}%
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {partner.website_url ? (

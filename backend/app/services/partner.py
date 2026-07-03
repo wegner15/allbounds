@@ -32,12 +32,29 @@ class PartnerService:
         Create a new partner.
         """
         slug = create_slug(partner_create.name)
+        
+        # Determine or generate partner code
+        partner_code = partner_create.partner_code
+        if not partner_code or not partner_code.strip():
+            import uuid
+            while True:
+                code = uuid.uuid4().hex[:6].upper()
+                # Check uniqueness
+                if not db.query(Partner).filter(Partner.partner_code == code).first():
+                    partner_code = code
+                    break
+        else:
+            partner_code = partner_code.strip().upper()
+
         db_partner = Partner(
             name=partner_create.name,
             slug=slug,
+            partner_code=partner_code,
             category=partner_create.category,
             logo_image_id=partner_create.logo_image_id,
             website_url=partner_create.website_url,
+            discount_percent=partner_create.discount_percent,
+            commission_percent=partner_create.commission_percent,
             order_index=partner_create.order_index or 0,
         )
         db.add(db_partner)
@@ -66,6 +83,15 @@ class PartnerService:
         db.commit()
         db.refresh(db_partner)
         return db_partner
+
+    def get_partner_by_code(self, db: Session, partner_code: str) -> Optional[Partner]:
+        """
+        Retrieve a specific partner by code (case-insensitive).
+        """
+        return db.query(Partner).filter(
+            Partner.partner_code == partner_code.strip().upper(),
+            Partner.is_active == True
+        ).first()
 
     def delete_partner(self, db: Session, partner_id: int) -> bool:
         """

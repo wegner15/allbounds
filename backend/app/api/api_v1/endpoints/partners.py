@@ -51,6 +51,27 @@ def get_partner_by_slug(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Partner not found")
     return partner
 
+@router.get("/validate/{code}")
+def validate_partner_code(
+    code: str,
+    db: Session = Depends(get_db),
+) -> Any:
+    """
+    Validate a partner code (publicly accessible).
+    """
+    partner = partner_service.get_partner_by_code(db, partner_code=code)
+    if partner is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Invalid or inactive partner referral code"
+        )
+    return {
+        "valid": True,
+        "partner_id": partner.id,
+        "name": partner.name,
+        "discount_percent": partner.discount_percent,
+    }
+
 @router.post("/", response_model=PartnerResponse)
 def create_partner(
     *,

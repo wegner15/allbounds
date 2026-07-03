@@ -30,12 +30,17 @@ class Booking(Base):
     # Status
     status = Column(String(50), nullable=False, default='pending')  # pending, confirmed, cancelled, completed
 
+    # Partner/Promo Referral
+    partner_id = Column(Integer, ForeignKey("partners.id"), nullable=True)
+    partner_code = Column(String(50), nullable=True)
+
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     # Relationships
     travelers = relationship("BookingTraveler", backref="booking", cascade="all, delete-orphan")
+    partner = relationship("Partner", backref="bookings")
 
 
 class BookingTraveler(Base):

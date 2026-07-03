@@ -306,6 +306,38 @@ const GroupTripBookingsPage: React.FC = () => {
                   </div>
                 )}
 
+                {selectedBooking.partner_code && (
+                  <div className="border-t border-gray-200 pt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Referral & Discount Partner Info</label>
+                    <div className="grid grid-cols-2 gap-4 bg-teal/5 p-3 rounded-lg border border-teal/20">
+                      <div>
+                        <span className="block text-xs text-gray-500 font-medium">Applied Code</span>
+                        <span className="font-mono text-teal font-bold">{selectedBooking.partner_code}</span>
+                      </div>
+                      {selectedBooking.partner ? (
+                        <>
+                          <div>
+                            <span className="block text-xs text-gray-500 font-medium">Partner Name</span>
+                            <span className="text-sm font-semibold text-gray-900">{selectedBooking.partner.name}</span>
+                          </div>
+                          <div>
+                            <span className="block text-xs text-gray-500 font-medium">Client Discount</span>
+                            <span className="text-sm text-gray-900">{selectedBooking.partner.discount_percent}%</span>
+                          </div>
+                          <div>
+                            <span className="block text-xs text-gray-500 font-medium">Partner Commission</span>
+                            <span className="text-sm text-gray-900">{selectedBooking.partner.commission_percent}%</span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="col-span-2 text-xs text-gray-500">
+                          Partner details not loaded or partner deleted.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {selectedBooking.special_requests && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Special Requests</label>

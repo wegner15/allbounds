@@ -18,6 +18,9 @@ const partnerSchema = z.object({
     .min(2, 'Name must be at least 2 characters')
     .max(100, 'Name cannot exceed 100 characters'),
   category: z.string().min(1, 'Please select a category'),
+  partner_code: z.string().optional().nullable(),
+  discount_percent: z.number().min(0, 'Discount must be 0 or more').max(100, 'Discount cannot exceed 100%'),
+  commission_percent: z.number().min(0, 'Commission must be 0 or more').max(100, 'Commission cannot exceed 100%'),
   logo_image_id: z.string().optional().nullable(),
   website_url: z.string().optional().nullable(),
   order_index: z.number(),
@@ -54,6 +57,9 @@ const PartnerForm: React.FC<PartnerFormProps> = ({
       ? {
           name: initialData.name,
           category: initialData.category,
+          partner_code: initialData.partner_code || '',
+          discount_percent: initialData.discount_percent || 0,
+          commission_percent: initialData.commission_percent || 0,
           logo_image_id: initialData.logo_image_id || '',
           website_url: initialData.website_url || '',
           order_index: initialData.order_index || 0,
@@ -62,12 +68,24 @@ const PartnerForm: React.FC<PartnerFormProps> = ({
       : {
           name: '',
           category: '',
+          partner_code: '',
+          discount_percent: 0,
+          commission_percent: 0,
           logo_image_id: '',
           website_url: '',
           order_index: 0,
           is_active: true,
         },
   });
+
+  const generateRandomCode = () => {
+    const chars = '0123456789ABCDEF';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars[Math.floor(Math.random() * 16)];
+    }
+    setValue('partner_code', code);
+  };
 
   const handleFormSubmit = async (formData: PartnerFormData) => {
     setServerError(null);
@@ -151,6 +169,88 @@ const PartnerForm: React.FC<PartnerFormProps> = ({
             {errors.category && (
               <p className="mt-2 text-sm text-red-600 font-medium">{errors.category.message}</p>
             )}
+          </div>
+
+          {/* Partner Code */}
+          <div>
+            <label htmlFor="partner_code" className="block text-sm font-semibold text-gray-800">
+              Partner Referral Code (Promo Code)
+            </label>
+            <div className="mt-2 flex space-x-2">
+              <input
+                type="text"
+                id="partner_code"
+                placeholder="e.g. QATAR6 (Leave blank to auto-generate 6-digit hex code)"
+                className={`block w-full px-4 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200 
+                  ${errors.partner_code
+                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
+                    : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
+                `}
+                {...register('partner_code')}
+              />
+              <button
+                type="button"
+                onClick={generateRandomCode}
+                className="px-4 py-2 text-sm font-medium text-teal bg-teal/10 rounded-lg border border-teal/20 hover:bg-teal/20 focus:outline-none focus:ring-2 focus:ring-teal"
+              >
+                Generate
+              </button>
+            </div>
+            {errors.partner_code && (
+              <p className="mt-2 text-sm text-red-600 font-medium">{errors.partner_code.message}</p>
+            )}
+            <p className="mt-2 text-xs text-gray-500">
+              This code can be shared via links (e.g. <code>?partner=CODE</code>) or entered during booking.
+            </p>
+          </div>
+
+          {/* Discount & Commission percentages */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="discount_percent" className="block text-sm font-semibold text-gray-800">
+                Client Discount (%)
+              </label>
+              <div className="mt-2">
+                <input
+                  type="number"
+                  step="0.01"
+                  id="discount_percent"
+                  placeholder="0"
+                  className={`block w-full px-4 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200 
+                    ${errors.discount_percent
+                      ? 'ring-red-300 text-red-900 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
+                      : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
+                  `}
+                  {...register('discount_percent', { valueAsNumber: true })}
+                />
+              </div>
+              {errors.discount_percent && (
+                <p className="mt-2 text-sm text-red-600 font-medium">{errors.discount_percent.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="commission_percent" className="block text-sm font-semibold text-gray-800">
+                Partner Commission (%)
+              </label>
+              <div className="mt-2">
+                <input
+                  type="number"
+                  step="0.01"
+                  id="commission_percent"
+                  placeholder="0"
+                  className={`block w-full px-4 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200 
+                    ${errors.commission_percent
+                      ? 'ring-red-300 text-red-900 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
+                      : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
+                  `}
+                  {...register('commission_percent', { valueAsNumber: true })}
+                />
+              </div>
+              {errors.commission_percent && (
+                <p className="mt-2 text-sm text-red-600 font-medium">{errors.commission_percent.message}</p>
+              )}
+            </div>
           </div>
 
           {/* Website URL */}

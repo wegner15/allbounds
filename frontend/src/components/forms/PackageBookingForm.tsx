@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -34,6 +34,7 @@ const bookingSchema = z.object({
   travelers: z.array(travelerSchema).min(1, 'At least one traveler is required'),
   special_requests: z.string().optional(),
   source: z.string().min(1, 'Please tell us how you found us'),
+  partner_code: z.string().optional().nullable(),
 }).refine((data) => {
   const totalTravelers = data.travelers.length;
   const expectedTravelers = data.number_of_adults + data.number_of_children;
@@ -73,6 +74,11 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
+  // Partner Referral states
+  const [validatedPartner, setValidatedPartner] = useState<{ name: string; discount_percent: number } | null>(null);
+  const [isValidatingPartner, setIsValidatingPartner] = useState(false);
+  const [partnerValidationMessage, setPartnerValidationMessage] = useState<string | null>(null);
+
   const {
     register,
     control,
@@ -96,6 +102,7 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
       travelers: [{ full_name: '', traveler_type: 'adult' }],
       special_requests: '',
       source: 'website',
+      partner_code: localStorage.getItem('partner_code') || '',
     },
   });
 
@@ -112,7 +119,7 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
   const watchedChildren = watch('number_of_children') || 0;
 
   // Update travelers array when adult/child counts change
-  React.useEffect(() => {
+  useEffect(() => {
     const currentTravelers = fields.length;
     const expectedTravelers = watchedAdults + watchedChildren;
 
@@ -147,6 +154,42 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
     });
   }, [watchedAdults, watchedChildren, fields, append, remove, setValue]);
 
+  // Validate partner code function
+  const handleValidatePartnerCode = useCallback(async (code: string) => {
+    if (!code || !code.trim()) {
+      setValidatedPartner(null);
+      setPartnerValidationMessage(null);
+      return;
+    }
+    setIsValidatingPartner(true);
+    setPartnerValidationMessage(null);
+    try {
+      const res = await apiClient.get<{ valid: boolean; name: string; discount_percent: number }>(
+        `/api/v1/partners/validate/${code.trim()}`
+      );
+      if (res.data && res.data.valid) {
+        setValidatedPartner(res.data);
+        setPartnerValidationMessage(`✓ Referral discount applied: ${res.data.name} (${res.data.discount_percent}% client discount)`);
+      } else {
+        setValidatedPartner(null);
+        setPartnerValidationMessage('✗ Invalid referral code');
+      }
+    } catch (err) {
+      setValidatedPartner(null);
+      setPartnerValidationMessage('✗ Invalid referral code');
+    } finally {
+      setIsValidatingPartner(false);
+    }
+  }, []);
+
+  // Check initial code on mount if available
+  useEffect(() => {
+    const initialCode = localStorage.getItem('partner_code');
+    if (initialCode && isOpen) {
+      handleValidatePartnerCode(initialCode);
+    }
+  }, [isOpen, handleValidatePartnerCode]);
+
   const bookingMutation = useMutation({
     mutationFn: async (data: BookingFormData) => {
       const bookingData: BookingCreate = {
@@ -162,6 +205,7 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
         travelers: data.travelers,
         special_requests: data.special_requests,
         source: data.source,
+        partner_code: data.partner_code || undefined,
       };
 
       return apiClient.post('/api/v1/bookings/', bookingData);
@@ -170,6 +214,8 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
       setIsSuccess(true);
       onSuccess?.();
       reset();
+      setValidatedPartner(null);
+      setPartnerValidationMessage(null);
       setStep('details');
     },
   });
@@ -177,7 +223,7 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
   const onSubmit = async (data: BookingFormData) => {
     console.log('onSubmit called, step:', step, 'data:', data);
     if (step === 'details') {
-      const isValid = await trigger(['contact_name', 'contact_email', 'contact_phone', 'country_of_origin', 'number_of_adults', 'number_of_children', 'source']);
+      const isValid = await trigger(['contact_name', 'contact_email', 'contact_phone', 'country_of_origin', 'number_of_adults', 'number_of_children', 'source', 'partner_code']);
       console.log('details validation:', isValid, 'errors:', errors);
       if (isValid) {
         setStep('travelers');
@@ -351,11 +397,11 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
                    placeholder="Enter your phone number"
                  />
                 <CountrySelect
-                  label="Country of Origin"
-                  value={watch('country_of_origin')}
-                  onChange={(value) => setValue('country_of_origin', value)}
-                  error={errors.country_of_origin}
-                  placeholder="Select your country"
+                   label="Country of Origin"
+                   value={watch('country_of_origin')}
+                   onChange={(value) => setValue('country_of_origin', value)}
+                   error={errors.country_of_origin}
+                   placeholder="Select your country"
                 />
               </div>
 
@@ -378,6 +424,59 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
                     <option key={num} value={num}>{num}</option>
                   ))}
                 </FormSelect>
+              </div>
+
+              {/* Partner / Promo Code field */}
+              <div>
+                <label htmlFor="partner_code" className="block text-sm font-semibold text-gray-800 mb-1">
+                  Referral / Partner Code (Optional)
+                </label>
+                <div className="flex space-x-2">
+                  <Controller
+                    name="partner_code"
+                    control={control}
+                    render={({ field }) => (
+                      <input
+                        type="text"
+                        {...field}
+                        value={field.value || ''}
+                        className="flex-grow px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono uppercase"
+                        placeholder="e.g. A4B2D9"
+                        onChange={(e) => {
+                          field.onChange(e);
+                          if (partnerValidationMessage) {
+                            setPartnerValidationMessage(null);
+                            setValidatedPartner(null);
+                          }
+                        }}
+                        onBlur={() => {
+                          field.onBlur();
+                          if (field.value) {
+                            handleValidatePartnerCode(field.value);
+                          }
+                        }}
+                      />
+                    )}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const code = getValues('partner_code');
+                      if (code) handleValidatePartnerCode(code);
+                    }}
+                    disabled={isValidatingPartner}
+                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md text-sm font-medium text-gray-700 disabled:opacity-50 transition-colors"
+                  >
+                    {isValidatingPartner ? 'Verifying...' : 'Verify'}
+                  </button>
+                </div>
+                {partnerValidationMessage && (
+                  <p className={`mt-2 text-xs font-semibold ${
+                    validatedPartner ? 'text-green-600' : 'text-red-500'
+                  }`}>
+                    {partnerValidationMessage}
+                  </p>
+                )}
               </div>
 
               <FormSelect
@@ -474,6 +573,17 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
                   <div><strong>Country:</strong> {watch('country_of_origin')}</div>
                   {watch('special_requests') && (
                     <div><strong>Special Requests:</strong> {watch('special_requests')}</div>
+                  )}
+                  {watch('partner_code') && validatedPartner && (
+                    <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-800 flex items-center">
+                      <svg className="w-5 h-5 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1-1H9z" clipRule="evenodd"/>
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                      </svg>
+                      <div>
+                        <span className="font-semibold">Promo Code Applied:</span> {validatedPartner.name} ({validatedPartner.discount_percent}% referral discount)
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>

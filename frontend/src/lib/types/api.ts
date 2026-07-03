@@ -718,6 +718,9 @@ export interface Booking extends BaseModel {
   special_requests?: string;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   source: string;
+  partner_id?: number;
+  partner_code?: string;
+  partner?: Partner;
 }
 
 export interface BookingCreate {
@@ -734,6 +737,7 @@ export interface BookingCreate {
   special_requests?: string;
   source: string;
   departure_id?: number;
+  partner_code?: string;
 }
 
 // Inquiry types
@@ -796,9 +800,12 @@ export interface Stats {
 export interface Partner extends BaseModel {
   name: string;
   slug: string;
+  partner_code: string;
   category: string;
   logo_image_id?: string;
   website_url?: string;
+  discount_percent: number;
+  commission_percent: number;
   order_index: number;
   is_active: boolean;
 }

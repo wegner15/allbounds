@@ -5,6 +5,9 @@ import type { Partner } from '../types/api';
 export interface PartnerCreateInput {
   name: string;
   category: string;
+  partner_code?: string | null;
+  discount_percent?: number;
+  commission_percent?: number;
   logo_image_id?: string;
   website_url?: string;
   order_index?: number;

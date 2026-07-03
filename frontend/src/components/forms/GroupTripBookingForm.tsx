@@ -167,9 +167,9 @@ const GroupTripBookingForm: React.FC<GroupTripBookingFormProps> = ({
       const res = await apiClient.get<{ valid: boolean; name: string; discount_percent: number }>(
         `/api/v1/partners/validate/${code.trim()}`
       );
-      if (res.data && res.data.valid) {
-        setValidatedPartner(res.data);
-        setPartnerValidationMessage(`✓ Referral discount applied: ${res.data.name} (${res.data.discount_percent}% client discount)`);
+      if (res && res.valid) {
+        setValidatedPartner(res);
+        setPartnerValidationMessage(`✓ Referral discount applied: ${res.name} (${res.discount_percent}% client discount)`);
       } else {
         setValidatedPartner(null);
         setPartnerValidationMessage('✗ Invalid referral code');
@@ -191,7 +191,6 @@ const GroupTripBookingForm: React.FC<GroupTripBookingFormProps> = ({
   }, [isOpen, handleValidatePartnerCode]);
 
   const bookingMutation = useMutation({
-    roleField: 'group_trip',
     mutationFn: async (data: BookingFormData) => {
       const bookingData: BookingCreate = {
         booking_type: 'group_trip',

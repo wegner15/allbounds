@@ -24,6 +24,18 @@ const PartnersListPage: React.FC = () => {
     }
   };
 
+  const handleCopyLink = (code: string) => {
+    const link = `${window.location.origin}/packages?partner=${code}`;
+    navigator.clipboard.writeText(link)
+      .then(() => {
+        toast.success('Referral link copied to clipboard!');
+      })
+      .catch((err) => {
+        console.error('Could not copy text: ', err);
+        toast.error('Failed to copy link');
+      });
+  };
+
   const getCategoryLabel = (value: string) => {
     return PARTNER_CATEGORIES.find(c => c.value === value)?.label || value;
   };
@@ -197,6 +209,13 @@ const PartnersListPage: React.FC = () => {
                         </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <div className="flex justify-end space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleCopyLink(partner.partner_code)}
+                            >
+                              Copy Link
+                            </Button>
                             <Link to={`/admin/partners/${partner.id}/edit`}>
                               <Button variant="outline" size="sm">
                                 Edit

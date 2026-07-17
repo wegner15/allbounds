@@ -89,11 +89,11 @@ const CountryCategoryPage: React.FC = () => {
 
     const renderCategory = () => {
         switch (category) {
-            case 'packages': return <PackagesTab countryId={country.id} preview={false} />;
-            case 'group-trips': return <GroupTripsTab countryId={country.id} preview={false} />;
-            case 'attractions': return <AttractionsTab countryName={country.name} preview={false} />;
-            case 'hotels': return <HotelsTab countryId={country.id} preview={false} hotelsData={country.hotels} />;
-            case 'activities': return <ActivitiesTab countryId={country.id} preview={false} />;
+            case 'packages': return <PackagesTab countryId={country.id} preview={false} destinationSlug={country.slug} />;
+            case 'group-trips': return <GroupTripsTab countryId={country.id} preview={false} destinationSlug={country.slug} />;
+            case 'attractions': return <AttractionsTab countryName={country.name} preview={false} destinationSlug={country.slug} />;
+            case 'hotels': return <HotelsTab countryId={country.id} preview={false} hotelsData={country.hotels} destinationSlug={country.slug} />;
+            case 'activities': return <ActivitiesTab countryId={country.id} preview={false} destinationSlug={country.slug} />;
             default: return <div>Category not found.</div>;
         }
     };

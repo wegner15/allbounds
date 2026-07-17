@@ -122,7 +122,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
 
   // 1. Hotels
   const filteredHotels = useMemo(() => {
-    const list = hotels?.filter(h => h.country_id === countryId && h.is_active) || [];
+    const list = hotels?.filter(h => (h.country_id === undefined || h.country_id === countryId) && h.is_active) || [];
     return list.filter(hotel => {
       // Search query
       if (searchQuery && !hotel.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
@@ -633,12 +633,12 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                     if (res.type === 'package') return <PackageCard key={res.id} package={res.item as any} />;
                     if (res.type === 'activity') return <ActivityCard key={res.id} activity={res.item as any} />;
                     if (res.type === 'attraction') return <AttractionCard key={res.id} attraction={res.item as any} />;
-                    return <HotelCard key={res.id} hotel={res.item as any} />;
+                    return <HotelCard key={res.id} hotel={{...res.item, country: res.item.country || { slug: destinationSlug }} as any} />;
                   })}
 
                 {activeTab === 'hotels' &&
                   (paginatedItems as typeof filteredHotels).map((hotel) => (
-                    <HotelCard key={hotel.id} hotel={hotel as any} />
+                    <HotelCard key={hotel.id} hotel={{...hotel, country: hotel.country || { slug: destinationSlug }} as any} />
                   ))}
 
                 {activeTab === 'packages' &&

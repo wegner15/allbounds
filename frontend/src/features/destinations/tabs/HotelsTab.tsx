@@ -32,14 +32,23 @@ const HotelsTab: React.FC<HotelsTabProps> = ({ countryId, preview = false, desti
         return <div className="text-red-500 py-8">Failed to load hotels.</div>;
     }
 
-    const countryHotels = hotels?.filter(hotel => hotel.country_id === countryId && hotel.is_active) || [];
+    const countryHotels = hotels?.filter(hotel => 
+        (hotel.country_id === undefined || hotel.country_id === countryId) && hotel.is_active
+    ) || [];
 
     return (
         <div>{/* removed py-6 since sections handle spacing */}
             <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">{title || "Stay at the Best Hotels"}</h2>
             <PaginatedGrid
                 items={countryHotels}
-                renderItem={(hotel) => <HotelCard hotel={hotel as any} />}
+                renderItem={(hotel: any) => (
+                    <HotelCard 
+                        hotel={{
+                            ...hotel, 
+                            country: hotel.country || (destinationSlug ? { slug: destinationSlug } : undefined)
+                        }} 
+                    />
+                )}
                 emptyMessage="No hotels listed for this destination yet."
                 itemsPerPage={preview ? 9 : 9}
                 showPagination={!preview}

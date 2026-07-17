@@ -9,13 +9,16 @@ interface HotelsTabProps {
     preview?: boolean;
     destinationSlug?: string;
     title?: string;
+    hotelsData?: any[];
 }
 
-const HotelsTab: React.FC<HotelsTabProps> = ({ countryId, preview = false, destinationSlug, title }) => {
+const HotelsTab: React.FC<HotelsTabProps> = ({ countryId, preview = false, destinationSlug, title, hotelsData }) => {
     // Client-side filtering as useHotels fetches all
-    const { data: hotels, isLoading, error } = useHotels();
+    const { data: fetchedHotels, isLoading, error } = useHotels(countryId);
 
-    if (isLoading) {
+    const hotels = hotelsData || fetchedHotels;
+
+    if (isLoading && !hotelsData) {
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
                 {[...Array(6)].map((_, i) => (
@@ -25,7 +28,7 @@ const HotelsTab: React.FC<HotelsTabProps> = ({ countryId, preview = false, desti
         );
     }
 
-    if (error) {
+    if (error && !hotelsData) {
         return <div className="text-red-500 py-8">Failed to load hotels.</div>;
     }
 

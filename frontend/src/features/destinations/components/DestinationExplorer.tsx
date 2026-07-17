@@ -16,6 +16,9 @@ interface DestinationExplorerProps {
   destinationSlug: string;
   activeTabId?: string;
   onTabChange?: (tabId: string) => void;
+  hotels?: any[];
+  activities?: any[];
+  attractions?: any[];
 }
 
 type ExplorerTab = 'all' | 'hotels' | 'packages' | 'activities' | 'attractions';
@@ -25,7 +28,10 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
   countryName,
   destinationSlug,
   activeTabId = 'all',
-  onTabChange
+  onTabChange,
+  hotels: initialHotels,
+  activities: initialActivities,
+  attractions: initialAttractions
 }) => {
   const [activeTab, setActiveTab] = useState<ExplorerTab>(activeTabId as ExplorerTab);
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,11 +55,15 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
     }
   };
 
-  // Fetch data
-  const { data: hotels, isLoading: hotelsLoading } = useHotels();
+  // Fetch data (using countryId for hotels to prevent global 100 limit bug)
+  const { data: fetchedHotels, isLoading: hotelsLoading } = useHotels(initialHotels ? undefined : countryId);
   const { data: packages, isLoading: packagesLoading } = usePackages({ country_id: countryId });
-  const { data: activities, isLoading: activitiesLoading } = useActivities(countryId);
-  const { data: attractions, isLoading: attractionsLoading } = useAttractions({ country: countryName });
+  const { data: fetchedActivities, isLoading: activitiesLoading } = useActivities(countryId);
+  const { data: fetchedAttractions, isLoading: attractionsLoading } = useAttractions({ country: countryName });
+
+  const hotels = initialHotels || fetchedHotels;
+  const activities = initialActivities || fetchedActivities;
+  const attractions = initialAttractions || fetchedAttractions;
 
   // Filter States
   // 1. Hotels

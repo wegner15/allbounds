@@ -14,6 +14,7 @@ import GroupTripsTab from './tabs/GroupTripsTab';
 import AttractionsTab from './tabs/AttractionsTab';
 import HotelsTab from './tabs/HotelsTab';
 import ActivitiesTab from './tabs/ActivitiesTab';
+import { DestinationExplorer } from './components/DestinationExplorer';
 
 type CategoryType = 'packages' | 'group-trips' | 'attractions' | 'hotels' | 'activities';
 
@@ -88,14 +89,25 @@ const CountryCategoryPage: React.FC = () => {
     const canonicalCategory = category || 'overview';
 
     const renderCategory = () => {
-        switch (category) {
-            case 'packages': return <PackagesTab countryId={country.id} preview={false} destinationSlug={country.slug} />;
-            case 'group-trips': return <GroupTripsTab countryId={country.id} preview={false} destinationSlug={country.slug} />;
-            case 'attractions': return <AttractionsTab countryName={country.name} preview={false} destinationSlug={country.slug} />;
-            case 'hotels': return <HotelsTab countryId={country.id} preview={false} hotelsData={country.hotels} destinationSlug={country.slug} />;
-            case 'activities': return <ActivitiesTab countryId={country.id} preview={false} destinationSlug={country.slug} />;
-            default: return <div>Category not found.</div>;
+        if (category === 'group-trips') {
+            return <GroupTripsTab countryId={country.id} preview={false} destinationSlug={country.slug} />;
         }
+
+        return (
+            <DestinationExplorer
+                countryId={country.id}
+                countryName={country.name}
+                destinationSlug={country.slug}
+                activeTabId={category}
+                onTabChange={(tabId) => {
+                    if (tabId === 'all') navigate(`/destinations/${country.slug}`);
+                    else navigate(`/destinations/${country.slug}/${tabId}`);
+                }}
+                hotels={country.hotels}
+                activities={country.activities}
+                attractions={country.attractions}
+            />
+        );
     };
 
     const getCategoryLabel = () => {

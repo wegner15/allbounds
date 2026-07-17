@@ -154,21 +154,33 @@ const Step3Dates: React.FC<Step3Props> = ({ state, updateState, onNext }) => {
           </div>
 
           {/* Duration Selection */}
-          <div ref={durationRef} className="max-w-md mx-auto scroll-mt-8">
+          <div ref={durationRef} className="max-w-4xl mx-auto scroll-mt-8">
             <h3 className="text-center font-bold text-gray-900 mb-6">How long do you want to travel for?</h3>
-            <select
-              value={state.duration || ''}
-              onChange={(e) => handleDurationSelect(e.target.value)}
-              className="w-full p-4 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-900 appearance-none text-center cursor-pointer font-medium"
-            >
-              <option value="" disabled>Select duration...</option>
-              <option value="1-3 days">1-3 days (Weekend escape)</option>
-              <option value="4-7 days">4-7 days (Short break)</option>
-              <option value="8-14 days">8-14 days (Classic holiday)</option>
-              <option value="15-21 days">15-21 days (Extended trip)</option>
-              <option value="3+ weeks">3+ weeks (Epic journey)</option>
-              <option value="Not sure">Not sure yet</option>
-            </select>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                { value: '1-3 days', label: '1-3 days', sub: 'Weekend escape' },
+                { value: '4-7 days', label: '4-7 days', sub: 'Short break' },
+                { value: '8-14 days', label: '8-14 days', sub: 'Classic holiday' },
+                { value: '15-21 days', label: '15-21 days', sub: 'Extended trip' },
+                { value: '3+ weeks', label: '3+ weeks', sub: 'Epic journey' },
+                { value: 'Not sure', label: 'Not sure yet', sub: 'Decide later' },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => handleDurationSelect(opt.value)}
+                  className={`flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all duration-300 ${
+                    state.duration === opt.value
+                      ? 'border-gray-900 bg-gray-900 text-white shadow-lg transform scale-[1.02]'
+                      : 'border-gray-200 bg-white text-gray-900 hover:border-gray-400 hover:shadow-md hover:-translate-y-1'
+                  }`}
+                >
+                  <span className="text-lg font-bold mb-1">{opt.label}</span>
+                  <span className={`text-sm ${state.duration === opt.value ? 'text-gray-300' : 'text-gray-500'}`}>
+                    {opt.sub}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       ) : (

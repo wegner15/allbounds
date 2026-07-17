@@ -80,9 +80,9 @@ const Step6Budget: React.FC<Step6Props> = ({ state, updateState, onNext }) => {
           step={500}
           value={state.budget === 'not-sure' ? 10000 : (state.budget || 10000)}
           onChange={handleSliderChange}
-          className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#F3E24A] accent-[#F3E24A]"
+          className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary accent-primary"
           style={{
-            background: `linear-gradient(to right, #F3E24A 0%, #F3E24A ${(
+            background: `linear-gradient(to right, #8fbac0 0%, #8fbac0 ${(
               (( (state.budget === 'not-sure' ? 10000 : (state.budget || 10000)) - minBudget) / (maxBudget - minBudget)) * 100
             )}%, #e5e7eb ${(
               (( (state.budget === 'not-sure' ? 10000 : (state.budget || 10000)) - minBudget) / (maxBudget - minBudget)) * 100
@@ -105,7 +105,7 @@ const Step6Budget: React.FC<Step6Props> = ({ state, updateState, onNext }) => {
         </button>
         <button
           onClick={handleNext}
-          className="px-10 py-4 bg-[#F3E24A] text-gray-900 font-bold tracking-widest uppercase rounded flex items-center hover:bg-[#e3d132] transition-colors"
+          className="px-10 py-4 bg-primary text-white font-bold tracking-widest uppercase rounded flex items-center hover:bg-primary-dark transition-colors"
         >
           Next <span className="ml-2">→</span>
         </button>

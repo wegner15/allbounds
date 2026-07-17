@@ -63,7 +63,7 @@ const Step4Experience: React.FC<Step4Props> = ({ state, updateState, onNext }) =
         </button>
         <button
           onClick={handleNext}
-          className="px-8 py-3 bg-[#F3E24A] text-gray-900 font-bold tracking-widest uppercase rounded flex items-center hover:bg-[#e3d132] transition-colors"
+          className="px-8 py-3 bg-primary text-white font-bold tracking-widest uppercase rounded flex items-center hover:bg-primary-dark transition-colors"
         >
           Next <span className="ml-2">→</span>
         </button>
@@ -78,8 +78,8 @@ const Step4Experience: React.FC<Step4Props> = ({ state, updateState, onNext }) =
             <button
               key={type.id}
               onClick={() => toggleExperience(type.id)}
-              className={`group relative h-24 md:h-32 rounded-xl overflow-hidden transition-all duration-300 transform focus:outline-none focus:ring-4 focus:ring-[#F3E24A] ${
-                isSelected ? 'ring-4 ring-[#F3E24A] scale-105 shadow-xl' : 'hover:-translate-y-1 hover:shadow-lg'
+              className={`group relative h-24 md:h-32 rounded-xl overflow-hidden transition-all duration-300 transform focus:outline-none focus:ring-4 focus:ring-primary ${
+                isSelected ? 'ring-4 ring-primary scale-105 shadow-xl' : 'hover:-translate-y-1 hover:shadow-lg'
               }`}
             >
               {/* Background Image */}
@@ -94,7 +94,7 @@ const Step4Experience: React.FC<Step4Props> = ({ state, updateState, onNext }) =
               
               {/* Content */}
               <div className="absolute inset-0 flex items-center justify-center p-2 text-center">
-                <h3 className={`text-sm md:text-base font-bold tracking-wide drop-shadow-md transition-colors ${isSelected ? 'text-[#F3E24A]' : 'text-white'}`}>
+                <h3 className={`text-sm md:text-base font-bold tracking-wide drop-shadow-md transition-colors ${isSelected ? 'text-primary' : 'text-white'}`}>
                   {type.name}
                 </h3>
               </div>

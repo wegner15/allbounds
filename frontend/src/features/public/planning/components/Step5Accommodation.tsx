@@ -53,8 +53,8 @@ const Step5Accommodation: React.FC<Step5Props> = ({ state, updateState, onNext }
           <button
             key={type.id}
             onClick={() => handleSelect(type.id)}
-            className={`group relative h-48 md:h-64 rounded-xl overflow-hidden transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#F3E24A] ${
-              state.accommodation === type.id ? 'ring-4 ring-[#F3E24A]' : ''
+            className={`group relative h-48 md:h-64 rounded-xl overflow-hidden transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-primary ${
+              state.accommodation === type.id ? 'ring-4 ring-primary' : ''
             }`}
           >
             {/* Background Image */}
@@ -80,8 +80,8 @@ const Step5Accommodation: React.FC<Step5Props> = ({ state, updateState, onNext }
         {/* Not Sure Button */}
         <button
           onClick={() => handleSelect('not-sure')}
-          className={`group relative h-48 md:h-64 rounded-xl overflow-hidden bg-[#EBE9E1] hover:bg-[#E0DED4] transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-[#F3E24A] ${
-            state.accommodation === 'not-sure' ? 'ring-4 ring-[#F3E24A]' : ''
+          className={`group relative h-48 md:h-64 rounded-xl overflow-hidden bg-[#EBE9E1] hover:bg-[#E0DED4] transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-primary ${
+            state.accommodation === 'not-sure' ? 'ring-4 ring-primary' : ''
           }`}
         >
           <div className="absolute inset-0 flex flex-col items-center justify-center p-4">

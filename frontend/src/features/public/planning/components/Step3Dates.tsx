@@ -171,7 +171,7 @@ const Step3Dates: React.FC<Step3Props> = ({ state, updateState, onNext }) => {
       <div className="mt-12 flex justify-center">
         <button
           onClick={handleNext}
-          className="px-12 py-4 bg-[#F3E24A] text-gray-900 font-bold tracking-widest uppercase rounded flex items-center hover:bg-[#e3d132] transition-colors"
+          className="px-12 py-4 bg-primary text-white font-bold tracking-widest uppercase rounded flex items-center hover:bg-primary-dark transition-colors"
         >
           Next <span className="ml-2">→</span>
         </button>

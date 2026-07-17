@@ -136,7 +136,7 @@ const Step8Details: React.FC<Step8Props> = ({ state, updateState, onSubmit }) =>
             <div className="pt-6">
               <button
                 type="submit"
-                className="w-full py-4 bg-[#F3E24A] text-gray-900 font-bold tracking-widest uppercase rounded hover:bg-[#e3d132] transition-colors shadow-sm"
+                className="w-full py-4 bg-primary text-white font-bold tracking-widest uppercase rounded hover:bg-primary-dark transition-colors shadow-sm"
               >
                 Submit Request
               </button>

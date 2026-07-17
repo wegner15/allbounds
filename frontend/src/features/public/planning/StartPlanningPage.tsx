@@ -158,9 +158,9 @@ const StartPlanningPage: React.FC = () => {
       {/* Top Banner */}
       <div className="bg-[#EBE9E1] py-4 px-6 flex justify-center items-center border-b border-[#E0DED4]">
         <div className="flex flex-col md:flex-row items-center gap-4 text-center">
-          {/* Mock logo for the award - replaced with something simpler for now */}
-          <div className="w-16 h-16 rounded-full border border-gray-400 flex items-center justify-center font-bold text-xs text-gray-700 bg-white">
-            WORLD'S<br/>BEST
+          {/* Logo icon */}
+          <div className="w-16 h-16 rounded-full border border-gray-200 flex items-center justify-center bg-white overflow-hidden shadow-sm">
+            <img src="/logo/android-chrome-192x192.png" alt="Allbound Vacations" className="w-10 h-10 object-contain" />
           </div>
           <div>
             <h2 className="text-xl md:text-2xl font-playfair text-gray-900">We're one of the World's Best Tour Operators!</h2>
@@ -179,7 +179,7 @@ const StartPlanningPage: React.FC = () => {
           
           <div className="hidden md:flex flex-1 mx-8 relative h-1.5 bg-[#EBE9E1] rounded-full overflow-hidden">
             <div 
-              className="absolute top-0 left-0 h-full bg-[#F3E24A] transition-all duration-500 ease-out"
+              className="absolute top-0 left-0 h-full bg-primary transition-all duration-500 ease-out"
               style={{ width: `${(currentStep / TOTAL_STEPS) * 100}%` }}
             />
           </div>

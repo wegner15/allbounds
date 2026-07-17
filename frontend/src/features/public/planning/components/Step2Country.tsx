@@ -41,8 +41,8 @@ const Step2Country: React.FC<Step2Props> = ({ state, updateState, onNext }) => {
           <button
             key={country.id}
             onClick={() => handleSelect(country.id)}
-            className={`group relative h-28 md:h-36 rounded-xl overflow-hidden transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-[#F3E24A] ${
-              state.countryId === country.id ? 'ring-4 ring-[#F3E24A]' : ''
+            className={`group relative h-28 md:h-36 rounded-xl overflow-hidden transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-primary ${
+              state.countryId === country.id ? 'ring-4 ring-primary' : ''
             }`}
           >
             {/* Background Image */}
@@ -67,8 +67,8 @@ const Step2Country: React.FC<Step2Props> = ({ state, updateState, onNext }) => {
         {/* Not Sure Button */}
         <button
           onClick={() => handleSelect('not-sure')}
-          className={`group relative h-28 md:h-36 rounded-xl overflow-hidden bg-[#EBE9E1] hover:bg-[#E0DED4] transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-[#F3E24A] ${
-            state.countryId === 'not-sure' ? 'ring-4 ring-[#F3E24A]' : ''
+          className={`group relative h-28 md:h-36 rounded-xl overflow-hidden bg-[#EBE9E1] hover:bg-[#E0DED4] transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-primary ${
+            state.countryId === 'not-sure' ? 'ring-4 ring-primary' : ''
           }`}
         >
           <div className="absolute inset-0 flex flex-col items-center justify-center p-2 text-center">

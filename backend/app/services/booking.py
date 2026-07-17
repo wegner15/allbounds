@@ -192,7 +192,7 @@ class InquiryService:
             subject=inquiry.subject,
             message=inquiry.message,
             source=inquiry.source,
-            details=inquiry.details if hasattr(inquiry, 'details') else None,
+            details=inquiry.details,
         )
         db.add(db_inquiry)
         db.commit()

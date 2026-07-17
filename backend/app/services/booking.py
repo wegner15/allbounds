@@ -172,7 +172,7 @@ from app.models.inquiry import Inquiry
 class InquiryService:
     def get_inquiries(self, db: Session, skip: int = 0, limit: int = 100) -> List[Inquiry]:
         """Retrieve all inquiries with pagination."""
-        return db.query(Inquiry).offset(skip).limit(limit).all()
+        return db.query(Inquiry).order_by(Inquiry.created_at.desc()).offset(skip).limit(limit).all()
 
     def get_inquiry(self, db: Session, inquiry_id: int) -> Optional[Inquiry]:
         """Retrieve a specific inquiry by ID."""
@@ -180,7 +180,7 @@ class InquiryService:
 
     def get_unread_inquiries(self, db: Session) -> List[Inquiry]:
         """Retrieve all unread inquiries."""
-        return db.query(Inquiry).filter(Inquiry.is_read == False).all()
+        return db.query(Inquiry).filter(Inquiry.is_read == False).order_by(Inquiry.created_at.desc()).all()
 
     def create_inquiry(self, db: Session, inquiry: InquiryCreate) -> Inquiry:
         """Create a new inquiry."""

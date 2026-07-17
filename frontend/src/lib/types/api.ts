@@ -751,6 +751,7 @@ export interface Inquiry extends BaseModel {
   source: string;
   status: 'new' | 'in_progress' | 'resolved' | 'closed';
   is_read: boolean;
+  details?: Record<string, any>;
 }
 
 export interface InquiryCreate {
@@ -761,6 +762,7 @@ export interface InquiryCreate {
   subject: string;
   message: string;
   source: string;
+  details?: Record<string, any>;
 }
 
 // Stats types

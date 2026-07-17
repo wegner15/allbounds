@@ -5,9 +5,98 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 // Components
 import Button from '../../../components/ui/Button';
 
-// API
 import { apiClient } from '../../../lib/api';
 import type { Inquiry } from '../../../lib/types/api';
+import { useRegions, useCountries } from '../../../lib/hooks/useDestinations';
+import { useHolidayTypes } from '../../../lib/hooks/useHolidayTypes';
+import { useHotelTypes } from '../../../lib/hooks/useHotelTypes';
+
+const WizardDetailsView: React.FC<{ details: any }> = ({ details }) => {
+  const { data: regions } = useRegions();
+  const { data: countries } = useCountries();
+  const { data: experiences } = useHolidayTypes();
+  const { data: accommodations } = useHotelTypes();
+
+  if (!details) return null;
+
+  const getRegionName = (id: any) => {
+    if (id === 'not-sure') return 'Not sure';
+    const region = regions?.find(r => r.id === Number(id));
+    return region ? region.name : id;
+  };
+
+  const getCountryName = (id: any) => {
+    if (id === 'not-sure') return 'Not sure';
+    const country = countries?.find(c => c.id === Number(id));
+    return country ? country.name : id;
+  };
+
+  const getExperienceNames = (ids: any[]) => {
+    if (!ids || !ids.length) return 'None selected';
+    return ids.map(id => {
+      const exp = experiences?.find(e => e.id === Number(id));
+      return exp ? exp.name : id;
+    }).join(', ');
+  };
+
+  const getAccommodationName = (id: any) => {
+    if (id === 'not-sure') return 'Not sure';
+    const acc = accommodations?.find(a => a.id === Number(id));
+    return acc ? acc.name : id;
+  };
+
+  return (
+    <div className="mt-6 border-t border-gray-200 pt-6">
+      <h4 className="text-md font-medium text-gray-900 mb-4">Planning Wizard Selections</h4>
+      <div className="bg-blue-50/50 rounded-lg p-5 grid grid-cols-1 md:grid-cols-2 gap-5 border border-blue-100">
+        <div>
+          <span className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Destination</span>
+          <p className="text-sm text-gray-900 font-medium">
+            {getRegionName(details.regionId)} 
+            {details.countryId && ` → ${getCountryName(details.countryId)}`}
+          </p>
+        </div>
+        
+        <div>
+          <span className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Travel Dates</span>
+          <p className="text-sm text-gray-900">
+            {details.dateType === 'exact' 
+              ? `Exact: ${details.year}-${details.month} (Duration: ${details.duration || 'Exact'})` 
+              : `Idea: ${details.month && details.month !== 'not-sure' ? details.month : 'Any month'} ${details.year || ''} (${details.duration || 'Not specified'})`}
+          </p>
+        </div>
+
+        <div>
+          <span className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Experiences</span>
+          <p className="text-sm text-gray-900">
+            {details.experiencesNotSure ? 'Not sure yet' : getExperienceNames(details.experiences)}
+          </p>
+        </div>
+
+        <div>
+          <span className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Accommodation</span>
+          <p className="text-sm text-gray-900">
+            {getAccommodationName(details.accommodation)}
+          </p>
+        </div>
+
+        <div>
+          <span className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Budget</span>
+          <p className="text-sm text-gray-900 font-medium text-green-700">
+            {details.budget === 'not-sure' ? 'Not sure' : `${details.currency || 'USD'} ${details.budget?.toLocaleString()}`}
+          </p>
+        </div>
+
+        <div>
+          <span className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Companions</span>
+          <p className="text-sm text-gray-900 capitalize">
+            {details.companions ? details.companions.replace('-', ' ') : 'Not specified'}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const GeneralInquiriesPage: React.FC = () => {
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
@@ -326,11 +415,15 @@ const GeneralInquiriesPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Message</label>
+                  <label className="block text-sm font-medium text-gray-700">Message / Extra Information</label>
                   <div className="mt-1 p-3 bg-gray-50 rounded-md">
                     <p className="text-sm text-gray-900 whitespace-pre-wrap">{selectedInquiry.message}</p>
                   </div>
                 </div>
+
+                {selectedInquiry.source === 'Start Planning Wizard' && selectedInquiry.details && (
+                  <WizardDetailsView details={selectedInquiry.details} />
+                )}
 
                 <div className="flex justify-end space-x-3 pt-4">
                   <Button variant="outline" onClick={() => setSelectedInquiry(null)}>

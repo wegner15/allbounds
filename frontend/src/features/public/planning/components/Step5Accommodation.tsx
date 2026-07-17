@@ -67,12 +67,9 @@ const Step5Accommodation: React.FC<Step5Props> = ({ state, updateState, onNext }
             
             {/* Content */}
             <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-              <h3 className="text-white text-xl md:text-2xl font-bold tracking-wide drop-shadow-md mb-2">
+              <h3 className="text-white text-xl md:text-2xl font-bold tracking-wide drop-shadow-md">
                 {type.name}
               </h3>
-              <p className="text-gray-100 text-xs md:text-sm max-w-[80%] opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
-                {type.description || getStyleDescription(type.name)}
-              </p>
             </div>
           </button>
         ))}

@@ -85,7 +85,7 @@ const Step8Details: React.FC<Step8Props> = ({ state, updateState, onSubmit }) =>
                 onChange={(e) => updateState({ moreInfo: e.target.value })}
                 rows={4}
                 className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:outline-none text-sm resize-none"
-                placeholder="For example: It's our 20th anniversary · My daughter is obsessed with elephants · We've done Kenya before and want something different"
+                placeholder="For example: We love boutique hotels, prefer a relaxed pace, and my husband is a huge photography enthusiast..."
               />
             </div>
 

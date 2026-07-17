@@ -144,12 +144,14 @@ def get_inquiries(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
+    status: Optional[str] = None,
+    is_read: Optional[bool] = None,
     current_user: User = Depends(has_permission("inquiry:read"))
 ) -> Any:
     """
     Retrieve all inquiries.
     """
-    inquiries = inquiry_service.get_inquiries(db, skip=skip, limit=limit)
+    inquiries = inquiry_service.get_inquiries(db, skip=skip, limit=limit, status=status, is_read=is_read)
     return inquiries
 
 

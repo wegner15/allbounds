@@ -170,9 +170,15 @@ from app.models.inquiry import Inquiry
 
 
 class InquiryService:
-    def get_inquiries(self, db: Session, skip: int = 0, limit: int = 100) -> List[Inquiry]:
-        """Retrieve all inquiries with pagination."""
-        return db.query(Inquiry).order_by(Inquiry.created_at.desc()).offset(skip).limit(limit).all()
+    def get_inquiries(self, db: Session, skip: int = 0, limit: int = 100, status: Optional[str] = None, is_read: Optional[bool] = None) -> List[Inquiry]:
+        """Retrieve all inquiries with pagination and optional filtering."""
+        query = db.query(Inquiry)
+        if status:
+            query = query.filter(Inquiry.status == status)
+        if is_read is not None:
+            query = query.filter(Inquiry.is_read == is_read)
+            
+        return query.order_by(Inquiry.created_at.desc()).offset(skip).limit(limit).all()
 
     def get_inquiry(self, db: Session, inquiry_id: int) -> Optional[Inquiry]:
         """Retrieve a specific inquiry by ID."""

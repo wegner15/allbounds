@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SeoHead from '../../../components/seo/SeoHead';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, CheckCircle } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../components/ui/DialogComponent';
 
 // Import Wizard Steps
 import Step1Region from './components/Step1Region';
@@ -87,6 +88,7 @@ const StartPlanningPage: React.FC = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<number>(getInitialStep);
   const [state, setState] = useState<PlanningState>(getInitialState);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Save to local storage whenever state or step changes
   useEffect(() => {
@@ -151,8 +153,7 @@ const StartPlanningPage: React.FC = () => {
       localStorage.removeItem(LOCAL_STORAGE_KEY);
       localStorage.removeItem(LOCAL_STORAGE_STEP_KEY);
       
-      alert('Thank you! Your inquiry has been submitted. A specialist will be in touch shortly.');
-      navigate('/');
+      setShowSuccessModal(true);
     } catch (error) {
       console.error("Failed to submit inquiry", error);
       alert('Sorry, there was an error submitting your inquiry. Please try again later.');
@@ -241,6 +242,32 @@ const StartPlanningPage: React.FC = () => {
           {renderStep()}
         </div>
       </div>
+
+      {/* Success Modal */}
+      <Dialog open={showSuccessModal} onOpenChange={() => {}}>
+        <DialogContent className="max-w-md p-6 text-center">
+          <div className="flex justify-center mb-4">
+            <CheckCircle className="w-16 h-16 text-green-500" />
+          </div>
+          <DialogHeader>
+            <DialogTitle>Thank you!</DialogTitle>
+          </DialogHeader>
+          <div className="mb-8">
+            <p className="text-gray-600">
+              Your inquiry has been submitted. A destination specialist will be in touch shortly to start crafting your journey.
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              setShowSuccessModal(false);
+              navigate('/');
+            }}
+            className="w-full py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors"
+          >
+            Return to Homepage
+          </button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

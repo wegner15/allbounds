@@ -100,6 +100,8 @@ const WizardDetailsView: React.FC<{ details: any }> = ({ details }) => {
 
 const GeneralInquiriesPage: React.FC = () => {
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [readFilter, setReadFilter] = useState<string>('all');
   const queryClient = useQueryClient();
 
   // Fetch inquiries
@@ -124,7 +126,7 @@ const GeneralInquiriesPage: React.FC = () => {
   // Update status mutation
   const updateStatusMutation = useMutation({
     mutationFn: async ({ inquiryId, status }: { inquiryId: number; status: string }) => {
-      await apiClient.put(`/api/v1/bookings/inquiries/${inquiryId}`, { status });
+      await apiClient.put(`/api/v1/bookings/inquiries/${inquiryId}`, { status, is_read: true });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inquiries'] });
@@ -159,7 +161,7 @@ const GeneralInquiriesPage: React.FC = () => {
       await updateStatusMutation.mutateAsync({ inquiryId, status: newStatus });
       // Update selected inquiry locally to reflect immediately
       if (selectedInquiry && selectedInquiry.id === inquiryId) {
-        setSelectedInquiry({ ...selectedInquiry, status: newStatus as any });
+        setSelectedInquiry({ ...selectedInquiry, status: newStatus as any, is_read: true });
       }
     } catch (error) {
       console.error('Failed to update status:', error);
@@ -275,13 +277,37 @@ const GeneralInquiriesPage: React.FC = () => {
 
         {/* Inquiries Table */}
         <div className="bg-white shadow overflow-hidden sm:rounded-md">
-          <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">
-              All Inquiries
-            </h3>
-            <p className="mt-1 max-w-2xl text-sm text-gray-500">
-              A list of all customer inquiries including their status and details.
-            </p>
+          <div className="px-4 py-5 sm:px-6 border-b border-gray-200 flex flex-col sm:flex-row justify-between sm:items-center space-y-4 sm:space-y-0">
+            <div>
+              <h3 className="text-lg leading-6 font-medium text-gray-900">
+                All Inquiries
+              </h3>
+              <p className="mt-1 max-w-2xl text-sm text-gray-500">
+                A list of all customer inquiries including their status and details.
+              </p>
+            </div>
+            <div className="flex space-x-4">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+              >
+                <option value="all">All Statuses</option>
+                <option value="new">New</option>
+                <option value="in_progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+                <option value="closed">Closed</option>
+              </select>
+              <select
+                value={readFilter}
+                onChange={(e) => setReadFilter(e.target.value)}
+                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+              >
+                <option value="all">All Read Status</option>
+                <option value="unread">Unread</option>
+                <option value="read">Read</option>
+              </select>
+            </div>
           </div>
 
           {isLoading ? (
@@ -294,9 +320,28 @@ const GeneralInquiriesPage: React.FC = () => {
               <p className="text-red-600">Error loading inquiries. Please try again.</p>
             </div>
           ) : inquiries && inquiries.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+            (() => {
+              const filteredInquiries = inquiries.filter(inquiry => {
+                if (statusFilter !== 'all' && inquiry.status !== statusFilter) return false;
+                if (readFilter !== 'all') {
+                  const isRead = readFilter === 'read';
+                  if (inquiry.is_read !== isRead) return false;
+                }
+                return true;
+              });
+
+              if (filteredInquiries.length === 0) {
+                return (
+                  <div className="text-center py-12">
+                    <p className="text-gray-500">No inquiries match the selected filters.</p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Customer
@@ -317,11 +362,11 @@ const GeneralInquiriesPage: React.FC = () => {
                       Actions
                     </th>
                   </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {inquiries.map((inquiry) => (
-                    <tr key={inquiry.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredInquiries.map((inquiry) => (
+                        <tr key={inquiry.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div>
                             <div className="text-sm font-medium text-gray-900">
@@ -375,12 +420,14 @@ const GeneralInquiriesPage: React.FC = () => {
                             Mark Read
                           </Button>
                         )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()
           ) : (
             <div className="text-center py-12">
               <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

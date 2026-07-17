@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, EmailStr
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 from app.schemas.partner import PartnerResponse
 
@@ -78,6 +78,7 @@ class InquiryBase(BaseModel):
     message: str = Field(..., description="Inquiry message")
 
     source: str = Field(..., description="How they found us")
+    details: Optional[Dict[str, Any]] = Field(None, description="Additional structured data from planning wizard")
 
 
 class InquiryCreate(InquiryBase):

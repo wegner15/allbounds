@@ -174,7 +174,7 @@ const AboutUsPage: React.FC = () => {
                         <a href="tel:+256782594008" className="border border-white hover:bg-white hover:text-primary transition-colors py-3 px-8 rounded font-bold tracking-widest text-sm flex-1">
                             CALL NOW
                         </a>
-                        <Link to="/contact-us" className="border border-white hover:bg-white hover:text-primary transition-colors py-3 px-8 rounded font-bold tracking-widest text-sm flex-1">
+                        <Link to="/start-planning" className="border border-white hover:bg-white hover:text-primary transition-colors py-3 px-8 rounded font-bold tracking-widest text-sm flex-1">
                             START PLANNING
                         </Link>
                     </div>

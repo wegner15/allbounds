@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, JSON
 from sqlalchemy.sql import func
 
 from app.db.database import Base
@@ -21,6 +21,9 @@ class Inquiry(Base):
 
     # Source tracking
     source = Column(String(100), nullable=False)  # How they found us
+
+    # Additional Structured Data (e.g., from Planning Wizard)
+    details = Column(JSON, nullable=True)
 
     # Status
     status = Column(String(50), nullable=False, default='new')  # new, in_progress, resolved, closed

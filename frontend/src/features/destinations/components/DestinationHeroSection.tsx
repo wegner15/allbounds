@@ -77,7 +77,7 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
           {/* Call to Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
             <Link
-              to="/contact-us"
+              to="/start-planning"
               className="px-8 py-3 border-2 border-white text-white font-semibold tracking-wider hover:bg-white hover:text-black transition-all duration-300 uppercase text-sm md:text-base rounded-sm min-w-[160px]"
             >
               Start Planning

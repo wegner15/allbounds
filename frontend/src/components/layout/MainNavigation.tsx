@@ -268,7 +268,7 @@ const MainNavigation: React.FC = () => {
 
               {/* CTA Button */}
               <Link
-                to="/contact-us"
+                to="/start-planning"
                 className="hidden sm:flex items-center px-6 py-3 bg-primary text-white text-sm font-bold rounded uppercase tracking-wider hover:bg-primary-dark transition-all transform hover:scale-[1.02] shadow-sm"
               >
                 Start Planning
@@ -376,7 +376,7 @@ const MainNavigation: React.FC = () => {
             {/* Compact CTA — visible when scrolled */}
             {scrolled && (
               <Link
-                to="/contact-us"
+                to="/start-planning"
                 className="ml-6 flex items-center px-4 py-2 bg-primary text-white text-xs font-bold rounded uppercase tracking-wider hover:bg-primary-dark transition-all shadow-sm whitespace-nowrap"
               >
                 Start Planning
@@ -507,7 +507,7 @@ const MainNavigation: React.FC = () => {
               </div>
 
               <Link
-                to="/contact-us"
+                to="/start-planning"
                 className="block w-full text-center px-6 py-3 bg-primary text-white text-sm font-bold rounded uppercase tracking-wider hover:bg-primary-dark transition-colors shadow-sm"
                 onClick={() => setMobileMenuOpen(false)}
               >

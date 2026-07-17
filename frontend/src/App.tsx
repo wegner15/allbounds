@@ -137,6 +137,7 @@ import SearchPage from './features/search/SearchPage';
 import FlightBookingPage from './features/public/flights/FlightBookingPage';
 import VisaApplicationPage from './features/public/visa/VisaApplicationPage';
 import AboutUsPage from './features/public/about/AboutUsPage';
+import StartPlanningPage from './features/public/planning/StartPlanningPage';
 
 // Import Admin Settings
 import AdminSettingsPage from './features/admin/settings/AdminSettingsPage';
@@ -344,6 +345,7 @@ const router = createBrowserRouter([
     element: <MainLayout />,
     children: [
       { index: true, element: <HomePage /> },
+      { path: 'start-planning', element: <StartPlanningPage /> },
       { path: 'destinations', element: <DestinationsPage /> },
       { path: 'destinations/regions/:slug', element: <RegionDetailPage /> },
       { path: 'destinations/countries/:slug', element: <CountryDetailPageNew /> },

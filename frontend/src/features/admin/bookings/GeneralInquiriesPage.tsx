@@ -121,6 +121,16 @@ const GeneralInquiriesPage: React.FC = () => {
     },
   });
 
+  // Update status mutation
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ inquiryId, status }: { inquiryId: number; status: string }) => {
+      await apiClient.put(`/api/v1/bookings/inquiries/${inquiryId}`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inquiries'] });
+    },
+  });
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'new':
@@ -141,6 +151,18 @@ const GeneralInquiriesPage: React.FC = () => {
       await markAsReadMutation.mutateAsync(inquiryId);
     } catch (error) {
       console.error('Failed to mark inquiry as read:', error);
+    }
+  };
+
+  const handleStatusChange = async (inquiryId: number, newStatus: string) => {
+    try {
+      await updateStatusMutation.mutateAsync({ inquiryId, status: newStatus });
+      // Update selected inquiry locally to reflect immediately
+      if (selectedInquiry && selectedInquiry.id === inquiryId) {
+        setSelectedInquiry({ ...selectedInquiry, status: newStatus as any });
+      }
+    } catch (error) {
+      console.error('Failed to update status:', error);
     }
   };
 
@@ -411,6 +433,20 @@ const GeneralInquiriesPage: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Source</label>
                     <p className="mt-1 text-sm text-gray-900">{selectedInquiry.source}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Status</label>
+                    <select
+                      value={selectedInquiry.status}
+                      onChange={(e) => handleStatusChange(selectedInquiry.id, e.target.value)}
+                      disabled={updateStatusMutation.isPending}
+                      className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    >
+                      <option value="new">New</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="resolved">Resolved</option>
+                      <option value="closed">Closed</option>
+                    </select>
                   </div>
                 </div>
 

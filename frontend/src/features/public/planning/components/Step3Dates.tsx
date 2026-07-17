@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import type { PlanningState } from '../StartPlanningPage';
 
 interface Step3Props {
@@ -15,6 +15,31 @@ const Step3Dates: React.FC<Step3Props> = ({ state, updateState, onNext }) => {
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
+
+  const monthRef = useRef<HTMLDivElement>(null);
+  const durationRef = useRef<HTMLDivElement>(null);
+  const nextBtnRef = useRef<HTMLDivElement>(null);
+
+  const handleYearSelect = (year: string) => {
+    updateState({ year });
+    setTimeout(() => {
+      monthRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 150);
+  };
+
+  const handleMonthSelect = (month: string) => {
+    updateState({ month });
+    setTimeout(() => {
+      durationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 150);
+  };
+
+  const handleDurationSelect = (duration: string) => {
+    updateState({ duration });
+    setTimeout(() => {
+      nextBtnRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 150);
+  };
 
   const handleNext = () => {
     // Basic validation
@@ -76,7 +101,7 @@ const Step3Dates: React.FC<Step3Props> = ({ state, updateState, onNext }) => {
             {years.map(year => (
               <button
                 key={year}
-                onClick={() => updateState({ year })}
+                onClick={() => handleYearSelect(year)}
                 className={`py-8 text-xl font-bold rounded-xl border-2 transition-all ${
                   state.year === year 
                     ? 'border-gray-900 bg-gray-900 text-white shadow-lg' 
@@ -89,13 +114,13 @@ const Step3Dates: React.FC<Step3Props> = ({ state, updateState, onNext }) => {
           </div>
 
           {/* Month Selection */}
-          <div>
+          <div ref={monthRef} className="scroll-mt-8">
             <h3 className="text-center font-bold text-gray-900 mb-6">Do you know which month?</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {months.map(month => (
                 <button
                   key={month}
-                  onClick={() => updateState({ month })}
+                  onClick={() => handleMonthSelect(month)}
                   className={`py-3 text-sm font-bold rounded-lg border-2 transition-all ${
                     state.month === month 
                       ? 'border-gray-900 bg-gray-900 text-white' 
@@ -106,7 +131,7 @@ const Step3Dates: React.FC<Step3Props> = ({ state, updateState, onNext }) => {
                 </button>
               ))}
               <button
-                onClick={() => updateState({ month: 'any' })}
+                onClick={() => handleMonthSelect('any')}
                 className={`py-3 text-sm font-bold rounded-lg border-2 transition-all ${
                   state.month === 'any' 
                     ? 'border-gray-900 bg-gray-900 text-white' 
@@ -116,7 +141,7 @@ const Step3Dates: React.FC<Step3Props> = ({ state, updateState, onNext }) => {
                 Any month
               </button>
               <button
-                onClick={() => updateState({ month: 'not-sure' })}
+                onClick={() => handleMonthSelect('not-sure')}
                 className={`py-3 text-sm font-bold rounded-lg border-2 transition-all ${
                   state.month === 'not-sure' 
                     ? 'border-gray-900 bg-[#EBE9E1] text-gray-900' 
@@ -129,11 +154,11 @@ const Step3Dates: React.FC<Step3Props> = ({ state, updateState, onNext }) => {
           </div>
 
           {/* Duration Selection */}
-          <div className="max-w-md mx-auto">
+          <div ref={durationRef} className="max-w-md mx-auto scroll-mt-8">
             <h3 className="text-center font-bold text-gray-900 mb-6">How long do you want to travel for?</h3>
             <select
               value={state.duration || ''}
-              onChange={(e) => updateState({ duration: e.target.value })}
+              onChange={(e) => handleDurationSelect(e.target.value)}
               className="w-full p-4 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-900 appearance-none text-center cursor-pointer font-medium"
             >
               <option value="" disabled>Select duration...</option>
@@ -168,7 +193,7 @@ const Step3Dates: React.FC<Step3Props> = ({ state, updateState, onNext }) => {
       )}
 
       {/* Next Button */}
-      <div className="mt-12 flex justify-center">
+      <div ref={nextBtnRef} className="mt-12 flex justify-center scroll-mt-8">
         <button
           onClick={handleNext}
           className="px-12 py-4 bg-primary text-white font-bold tracking-widest uppercase rounded flex items-center hover:bg-primary-dark transition-colors"

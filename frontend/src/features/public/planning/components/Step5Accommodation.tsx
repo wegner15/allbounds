@@ -1,6 +1,6 @@
 import React from 'react';
 import { useHotelTypes } from '../../../../lib/hooks/useHotelTypes';
-import { PlanningState } from '../StartPlanningPage';
+import type { PlanningState } from '../StartPlanningPage';
 
 interface Step5Props {
   state: PlanningState;

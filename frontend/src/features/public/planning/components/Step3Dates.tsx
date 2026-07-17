@@ -1,5 +1,5 @@
 import React from 'react';
-import { PlanningState } from '../StartPlanningPage';
+import type { PlanningState } from '../StartPlanningPage';
 
 interface Step3Props {
   state: PlanningState;

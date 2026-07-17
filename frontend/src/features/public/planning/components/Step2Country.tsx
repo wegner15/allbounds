@@ -1,8 +1,7 @@
 import React from 'react';
 import { useCountries } from '../../../../lib/hooks/useDestinations';
-import { getImageUrlWithFallback } from '../../../../lib/utils/imageUtils';
-import { IMAGE_VARIANTS } from '../../../../lib/constants';
-import { PlanningState } from '../StartPlanningPage';
+import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../../utils/imageUtils';
+import type { PlanningState } from '../StartPlanningPage';
 
 interface Step2Props {
   state: PlanningState;

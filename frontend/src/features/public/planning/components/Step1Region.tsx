@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRegions } from '../../../../lib/hooks/useDestinations';
-import { PlanningState } from '../StartPlanningPage';
+import type { PlanningState } from '../StartPlanningPage';
 
 interface Step1Props {
   state: PlanningState;

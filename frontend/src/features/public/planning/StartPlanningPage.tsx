@@ -35,12 +35,19 @@ export interface PlanningState {
 }
 
 const TOTAL_STEPS = 8;
+const LOCAL_STORAGE_KEY = 'allbounds_planning_state';
+const LOCAL_STORAGE_STEP_KEY = 'allbounds_planning_step';
 
-const StartPlanningPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(1);
-  
-  const [state, setState] = useState<PlanningState>({
+const getInitialState = (): PlanningState => {
+  try {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (e) {
+    console.error('Failed to parse planning state from local storage', e);
+  }
+  return {
     regionId: null,
     countryId: null,
     dateType: 'idea',
@@ -58,7 +65,37 @@ const StartPlanningPage: React.FC = () => {
     lastName: '',
     email: '',
     phone: '',
-  });
+  };
+};
+
+const getInitialStep = (): number => {
+  try {
+    const saved = localStorage.getItem(LOCAL_STORAGE_STEP_KEY);
+    if (saved) {
+      const parsed = parseInt(saved, 10);
+      if (!isNaN(parsed) && parsed >= 1 && parsed <= TOTAL_STEPS) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to parse planning step from local storage', e);
+  }
+  return 1;
+};
+
+const StartPlanningPage: React.FC = () => {
+  const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState<number>(getInitialStep);
+  const [state, setState] = useState<PlanningState>(getInitialState);
+
+  // Save to local storage whenever state or step changes
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
+  }, [state]);
+
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_STEP_KEY, currentStep.toString());
+  }, [currentStep]);
 
   const updateState = (updates: Partial<PlanningState>) => {
     setState(prev => ({ ...prev, ...updates }));
@@ -110,6 +147,10 @@ const StartPlanningPage: React.FC = () => {
       };
 
       await apiClient.post('/bookings/inquiries/', payload);
+      // Clear storage on success
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      localStorage.removeItem(LOCAL_STORAGE_STEP_KEY);
+      
       alert('Thank you! Your inquiry has been submitted. A specialist will be in touch shortly.');
       navigate('/');
     } catch (error) {
@@ -163,8 +204,8 @@ const StartPlanningPage: React.FC = () => {
             <img src="/logo/android-chrome-192x192.png" alt="Allbound Vacations" className="w-10 h-10 object-contain" />
           </div>
           <div>
-            <h2 className="text-xl md:text-2xl font-playfair text-gray-900">We're one of the World's Best Tour Operators!</h2>
-            <p className="text-sm text-gray-600">Voted No.1 in 2024 and No.2 in 2025 by <span className="underline cursor-pointer">Travel+Leisure</span></p>
+            <h2 className="text-xl md:text-2xl font-playfair text-gray-900">Your Journey Begins Here</h2>
+            <p className="text-sm text-gray-600">Let our destination specialists craft the perfect itinerary just for you.</p>
           </div>
         </div>
       </div>

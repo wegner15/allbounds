@@ -25,6 +25,7 @@ def get_group_trips(
     country_id: int = Query(None, description="Filter group trips by country ID"),
     featured: bool = Query(None, description="Filter group trips by featured status"),
     holiday_type: str = Query(None, description="Filter by holiday type slug"),
+    tag: str = Query(None, description="Filter by tag slug"),
 ) -> Any:
     """
     Retrieve all group trips.
@@ -41,11 +42,11 @@ def get_group_trips(
         group_trips = group_trip_service.get_group_trips_by_country(db, country_id=country_id, skip=skip, limit=limit)
     elif featured is not None:
         if featured:
-            group_trips = group_trip_service.get_featured_group_trips(db, skip=skip, limit=limit)
+            group_trips = group_trip_service.get_featured_group_trips(db, skip=skip, limit=limit, tag=tag)
         else:
-            group_trips = group_trip_service.get_group_trips(db, skip=skip, limit=limit)
+            group_trips = group_trip_service.get_group_trips(db, skip=skip, limit=limit, tag=tag)
     else:
-        group_trips = group_trip_service.get_group_trips(db, skip=skip, limit=limit)
+        group_trips = group_trip_service.get_group_trips(db, skip=skip, limit=limit, tag=tag)
     return group_trips
 
 @router.get("/{group_trip_id}", response_model=GroupTripWithCountryResponse)

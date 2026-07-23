@@ -3,6 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
 from app.db.database import Base
+from app.models.blog import group_trip_tags  # pivot table defined alongside Tag model
 
 # Many-to-Many relationship table between GroupTrip and HolidayType
 group_trip_holiday_types = Table(
@@ -64,6 +65,9 @@ class GroupTrip(Base):
     itinerary_items = relationship("ItineraryItem", 
                                    primaryjoin="and_(GroupTrip.id == foreign(ItineraryItem.entity_id), ItineraryItem.entity_type == 'group_trip')",
                                    cascade="all, delete-orphan")
+
+    # Relationship with Tags (for filtering)
+    tags = relationship("Tag", secondary=group_trip_tags, back_populates="group_trips", lazy="select")
 
 class GroupTripDeparture(Base):
     __tablename__ = "group_trip_departures"

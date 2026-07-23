@@ -33,6 +33,7 @@ def get_packages(
     country_id: int = Query(None, description="Filter by country ID"),
     country: str = Query(None, description="Filter by country name"),
     holiday_type: str = Query(None, description="Filter by holiday type slug"),
+    tag: str = Query(None, description="Filter by tag slug"),
 ) -> Any:
     """
     Retrieve all packages with optional ordering and filtering.
@@ -59,9 +60,9 @@ def get_packages(
         else:
             packages = []
     elif popular:
-        packages = package_service.get_featured_packages(db, skip=skip, limit=limit, country=country)
+        packages = package_service.get_featured_packages(db, skip=skip, limit=limit, country=country, tag=tag)
     else:
-        packages = package_service.get_packages(db, skip=skip, limit=limit, order_by=order_by, order=order)
+        packages = package_service.get_packages(db, skip=skip, limit=limit, order_by=order_by, order=order, tag=tag)
     
     # CRITICAL: Serialize to Pydantic INSIDE endpoint to prevent lazy-loading
     return [PackageListResponse.from_orm(pkg) for pkg in packages]
@@ -86,11 +87,12 @@ def get_featured_packages(
     skip: int = 0,
     limit: int = 100,
     country: str = Query(None, description="Filter featured packages by country name"),
+    tag: str = Query(None, description="Filter featured packages by tag slug"),
 ) -> Any:
     """
     Retrieve featured packages, optionally filtered by country.
     """
-    packages = package_service.get_featured_packages(db, skip=skip, limit=limit, country=country)
+    packages = package_service.get_featured_packages(db, skip=skip, limit=limit, country=country, tag=tag)
     # CRITICAL: Serialize to Pydantic INSIDE endpoint to prevent lazy-loading
     return [PackageWithCountryResponse.from_orm(pkg) for pkg in packages]
 

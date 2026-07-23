@@ -3,6 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
 from app.db.database import Base
+from app.models.blog import package_tags  # pivot table defined alongside Tag model
 
 # PackageHolidayType model for the association between Package and HolidayType
 class PackageHolidayType(Base):
@@ -74,3 +75,6 @@ class Package(Base):
     
     # Relationship with Blog Posts
     blog_posts = relationship("BlogPost", secondary="blog_post_packages", back_populates="packages")
+
+    # Relationship with Tags (for filtering)
+    tags = relationship("Tag", secondary=package_tags, back_populates="packages", lazy="select")

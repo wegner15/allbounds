@@ -39,6 +39,15 @@ export interface Hotel {
   image_url?: string;
   cover_image?: string;
   slug: string;
+  tags?: Array<{
+    id: number;
+    name: string;
+    slug: string;
+    category?: string;
+    color?: string;
+    icon?: string;
+  }>;
+  tag_ids?: number[];
   is_active: boolean;
   is_featured: boolean;
   created_at: string;
@@ -58,6 +67,7 @@ export interface HotelCreateInput {
   longitude?: number;
   price_category?: string;
   amenity_ids?: number[];
+  tag_ids?: number[];
   check_in_time?: string;
   check_out_time?: string;
   image_id?: string;

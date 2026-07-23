@@ -5,6 +5,7 @@ from datetime import datetime
 # Import at the top level to avoid Pydantic 2.x issues
 from app.schemas.country import CountryResponse
 from app.schemas.activity import ActivityResponse
+from app.schemas.content_tag import ContentTagResponse
 
 # Simplified hotel schema for use in attraction responses (avoids circular imports)
 class SimplifiedHotelResponse(BaseModel):
@@ -62,6 +63,7 @@ class AttractionBase(BaseModel):
 # Schema for creating a new Attraction
 class AttractionCreate(AttractionBase):
     cover_image: Optional[str] = Field(None, description="Cover image file path")
+    tag_ids: Optional[List[int]] = Field(None, description="List of tag IDs associated with the attraction")
 
 # Schema for updating an Attraction
 class AttractionUpdate(BaseModel):
@@ -79,6 +81,7 @@ class AttractionUpdate(BaseModel):
     image_id: Optional[str] = Field(None, description="Cloudflare Image ID for the attraction's primary image")
     cover_image: Optional[str] = Field(None, description="Cover image file path")
     is_active: Optional[bool] = Field(None, description="Whether the attraction is active")
+    tag_ids: Optional[List[int]] = Field(None, description="List of tag IDs associated with the attraction")
 
 # Schema for Attraction response
 class AttractionResponse(AttractionBase):
@@ -111,6 +114,7 @@ class AttractionResponse(AttractionBase):
     gallery_images: Optional[List[GalleryImageResponse]] = Field(None, description="Gallery images")
     activities: List[ActivityResponse] = Field([], description="Activities associated with the attraction")
     hotels: List[SimplifiedHotelResponse] = Field([], description="Hotels associated with the attraction")
+    tags: List[ContentTagResponse] = Field([], description="Tags associated with the attraction")
     
     class Config:
         from_attributes = True

@@ -6,6 +6,7 @@ from datetime import datetime
 from app.schemas.country import CountryResponse
 from app.schemas.holiday_type import HolidayTypeResponse
 from app.schemas.inclusion_exclusion import InclusionResponse, ExclusionResponse
+from app.schemas.content_tag import ContentTagResponse
 
 # Base Package Schema
 class PackageBase(BaseModel):
@@ -32,6 +33,7 @@ class PackageCreate(PackageBase):
     exclusion_ids: Optional[List[int]] = Field(default_factory=list, description="List of exclusion IDs to associate with this package")
     blog_post_ids: Optional[List[int]] = Field(default_factory=list, description="List of blog post IDs to associate with this package")
     country_ids: Optional[List[int]] = Field(default_factory=list, description="List of additional country IDs (multiple destinations)")
+    tag_ids: Optional[List[int]] = Field(default_factory=list, description="List of tag IDs to associate with this package")
 
 # Schema for updating a Package
 class PackageUpdate(BaseModel):
@@ -56,6 +58,7 @@ class PackageUpdate(BaseModel):
     faqs: Optional[List[dict]] = Field(None, description="List of FAQs")
     conversion_triggers: Optional[List[str]] = Field(None, description="List of conversion triggers")
     country_ids: Optional[List[int]] = Field(None, description="List of additional country IDs (multiple destinations)")
+    tag_ids: Optional[List[int]] = Field(None, description="List of tag IDs to associate with this package")
 
 # Schema for Package response
 class PackageResponse(PackageBase):
@@ -72,6 +75,7 @@ class PackageResponse(PackageBase):
     inclusion_items: List[InclusionResponse] = []
     exclusion_items: List[ExclusionResponse] = []
     countries: List[CountryResponse] = []
+    tags: List[ContentTagResponse] = []
     # REMOVED: holiday_types, inclusion_items, exclusion_items to prevent circular loading
     # These cause exponential memory growth due to bidirectional relationships
     # Use dedicated endpoints to fetch these if needed
@@ -108,6 +112,7 @@ class PackageListResponse(BaseModel):
     created_at: datetime
     country: CountryResponse  # Only load country, not all relationships
     countries: List[CountryResponse] = []  # Additional destinations
+    tags: List[ContentTagResponse] = []  # Tags for filtering
     
     class Config:
         from_attributes = True

@@ -10,11 +10,13 @@ import { useCreatePackage, useUpdatePackage } from '../../../lib/hooks/usePackag
 import { useInclusions } from '../../../lib/hooks/useInclusions';
 import { useExclusions } from '../../../lib/hooks/useExclusions';
 import { useBlogs } from '../../../lib/hooks/useBlogs';
+import { useContentTags } from '../../../lib/hooks/useContentTags';
 import ImageSelector from '../../../components/ui/ImageSelector';
 import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
 import GalleryManager from '../../../components/admin/GalleryManager';
 import PriceChartManager from '../../../components/admin/PriceChartManager';
 import { SimpleItineraryManager } from '../../../components/admin/SimpleItineraryManager';
+import TagSelector from '../../../components/admin/TagSelector';
 import type { GalleryImage } from '../../../lib/types/api';
 import ConfirmationModal from '../../../components/ui/ConfirmationModal';
 
@@ -34,6 +36,7 @@ const packageSchema = z.object({
   exclusion_ids: z.array(z.number()).optional(),
   blog_post_ids: z.array(z.number()).optional(),
   country_ids: z.array(z.number()).optional(),
+  tag_ids: z.array(z.number()).optional(),
   image_id: z.string().optional(),
   is_active: z.boolean(),
   is_featured: z.boolean(),
@@ -63,6 +66,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
   const { data: inclusions, isLoading: isLoadingInclusions } = useInclusions();
   const { data: exclusions, isLoading: isLoadingExclusions } = useExclusions();
   const { data: blogs, isLoading: isLoadingBlogs } = useBlogs(true);
+  const { data: allTags = [] } = useContentTags();
 
   const createPackageMutation = useCreatePackage();
   const updatePackageMutation = useUpdatePackage(packageData?.id || (packageId ? parseInt(packageId) : 0));
@@ -109,6 +113,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
         exclusion_ids: packageData.exclusion_items?.map((item: any) => item.id) || [],
         blog_post_ids: packageData.blog_posts?.map((blog: any) => blog.id) || [],
         country_ids: packageData.countries?.map((c: any) => c.id) || [],
+        tag_ids: packageData.tags?.map((t: any) => t.id) || [],
         image_id: packageData.image_id || '',
         is_active: packageData.is_active,
         is_featured: packageData.is_featured,
@@ -129,6 +134,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
         exclusion_ids: [],
         blog_post_ids: [],
         country_ids: [],
+        tag_ids: [],
         image_id: '',
         is_active: true,
         is_featured: false,
@@ -160,6 +166,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       setValue('exclusion_ids', packageData.exclusion_items?.map((item: any) => item.id) || []);
       setValue('blog_post_ids', packageData.blog_posts?.map((blog: any) => blog.id) || []);
       setValue('image_id', packageData.image_id || '');
+      setValue('tag_ids', packageData.tags?.map((t: any) => t.id) || []);
       setValue('is_active', packageData.is_active ?? true);
       setValue('is_featured', packageData.is_featured ?? false);
       setValue('is_deal', packageData.is_deal ?? false);
@@ -827,6 +834,23 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
             <p className="mt-2 text-xs text-gray-500">
               Holiday types help categorize packages and improve discoverability
             </p>
+          </div>
+
+          {/* Tags */}
+          <div className="sm:col-span-6">
+            <Controller
+              name="tag_ids"
+              control={control}
+              render={({ field }) => (
+                <TagSelector
+                  tags={allTags}
+                  selectedTagIds={field.value || []}
+                  onChange={field.onChange}
+                  label="Content Tags"
+                  helperText="Tags categorize this package for dynamic filtering on the public site."
+                />
+              )}
+            />
           </div>
 
           {/* Package Image */}

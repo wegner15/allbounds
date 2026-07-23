@@ -4,6 +4,7 @@ from sqlalchemy import or_
 
 from app.models.attraction import Attraction
 from app.models.country import Country
+from app.models.blog import Tag
 from app.schemas.attraction import AttractionCreate, AttractionUpdate
 from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
 
@@ -17,13 +18,14 @@ class AttractionService:
         search: Optional[str] = None,
         country: Optional[str] = None,
         category: Optional[str] = None,
+        tag: Optional[str] = None,
     ) -> List[Attraction]:
         """
         Retrieve all attractions with pagination ordered by newest first.
         """
         query = (
             db.query(Attraction)
-            .options(joinedload(Attraction.country), joinedload(Attraction.activities))
+            .options(joinedload(Attraction.country), joinedload(Attraction.activities), joinedload(Attraction.tags))
             .filter(Attraction.is_active == True)
         )
 
@@ -56,6 +58,9 @@ class AttractionService:
 
         if category:
             query = query.filter(Attraction.category == category)
+            
+        if tag:
+            query = query.filter(Attraction.tags.any(Tag.slug == tag))
 
         return (
             query.order_by(Attraction.created_at.desc())
@@ -70,6 +75,11 @@ class AttractionService:
         """
         return (
             db.query(Attraction)
+            .options(
+                joinedload(Attraction.country),
+                joinedload(Attraction.activities),
+                joinedload(Attraction.tags)
+            )
             .filter(
                 Attraction.country_id == country_id,
                 Attraction.is_active == True,
@@ -92,6 +102,7 @@ class AttractionService:
                 joinedload(Attraction.hotels),  # Explicitly load hotels
                 joinedload(Attraction.packages), # Explicitly load packages
                 joinedload(Attraction.group_trips), # Explicitly load group trips
+                joinedload(Attraction.tags), # Explicitly load tags
             )
             .filter(Attraction.id == attraction_id, Attraction.is_active == True)
             .first()
@@ -109,6 +120,7 @@ class AttractionService:
                 joinedload(Attraction.hotels),  # Explicitly load hotels
                 joinedload(Attraction.packages), # Explicitly load packages
                 joinedload(Attraction.group_trips), # Explicitly load group trips
+                joinedload(Attraction.tags), # Explicitly load tags
             )
             .filter(Attraction.slug == slug, Attraction.is_active == True)
             .first()
@@ -137,6 +149,14 @@ class AttractionService:
         db.add(db_attraction)
         db.commit()
         db.refresh(db_attraction)
+        
+        # Handle tags
+        if attraction_create.tag_ids:
+            tags = db.query(Tag).filter(Tag.id.in_(attraction_create.tag_ids)).all()
+            db_attraction.tags.extend(tags)
+            db.commit()
+            db.refresh(db_attraction)
+            
         return db_attraction
     
     def update_attraction(self, db: Session, attraction_id: int, attraction_update: AttractionUpdate) -> Optional[Attraction]:
@@ -154,8 +174,17 @@ class AttractionService:
             update_data, db, Attraction, db_attraction.slug, attraction_id
         )
         
+        # Handle tags separately
+        if 'tag_ids' in attraction_update.model_fields_set:
+            if attraction_update.tag_ids is not None:
+                tags = db.query(Tag).filter(Tag.id.in_(attraction_update.tag_ids)).all()
+                db_attraction.tags = tags
+            else:
+                db_attraction.tags = []
+        
         for key, value in update_data.items():
-            setattr(db_attraction, key, value)
+            if key != 'tag_ids':
+                setattr(db_attraction, key, value)
         
         db.commit()
         db.refresh(db_attraction)

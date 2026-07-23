@@ -7,7 +7,7 @@ from app.models.package import Package
 from app.models.media import MediaAsset
 from app.models.holiday_type import HolidayType
 from app.models.inclusion_exclusion import Inclusion, Exclusion
-from app.models.blog import BlogPost
+from app.models.blog import BlogPost, Tag
 from app.schemas.package import PackageCreate, PackageUpdate
 from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
 from app.core.cloudflare_config import cloudflare_settings
@@ -21,18 +21,22 @@ class PackageService:
             return None
         return f"{cloudflare_settings.delivery_url}/{image_id}/{variant}"
 
-    def get_packages(self, db: Session, skip: int = 0, limit: int = 100, order_by: str = "created_at", order: str = "desc") -> List[Package]:
+    def get_packages(self, db: Session, skip: int = 0, limit: int = 100, order_by: str = "created_at", order: str = "desc", tag: Optional[str] = None) -> List[Package]:
         """
         Retrieve all packages with pagination and ordering.
         MEMORY FIX: Only load essential relationships to prevent OOM
         """
         query = db.query(Package).options(
             joinedload(Package.country),
-            selectinload(Package.countries)
+            selectinload(Package.countries),
+            selectinload(Package.tags)
             # Removed joinedload(Package.holiday_types) - causes memory spike
             # Other relationships (inclusion_items, exclusion_items) are lazy-loaded on access
         ).filter(Package.is_active == True)
 
+        if tag:
+            query = query.filter(Package.tags.any(Tag.slug == tag))
+            
         # Apply ordering
         if order_by == "created_at":
             if order == "desc":
@@ -83,10 +87,14 @@ class PackageService:
             from app.models.country import Country
             query = query.join(Package.country).filter(Country.name.ilike(f"%{country}%"))
 
+        if tag:
+            query = query.filter(Package.tags.any(Tag.slug == tag))
+
         return query.options(
             joinedload(Package.country),
             selectinload(Package.countries),
-            selectinload(Package.inclusion_items)
+            selectinload(Package.inclusion_items),
+            selectinload(Package.tags)
             # Removed joinedload(Package.holiday_types) - causes circular loading
         ).offset(skip).limit(limit).all()
 
@@ -141,6 +149,8 @@ class PackageService:
             joinedload(Package.holiday_types),
             # Load media assets
             joinedload(Package.media_assets),
+            # Load tags
+            joinedload(Package.tags),
             # Load itinerary items with nested relationships
             joinedload(Package.itinerary_items).joinedload(ItineraryItem.hotels).joinedload(Hotel.amenities),
             joinedload(Package.itinerary_items).joinedload(ItineraryItem.hotels).joinedload(Hotel.media_assets),
@@ -266,7 +276,8 @@ class PackageService:
             joinedload(Package.country),
             # Removed joinedload(Package.holiday_types) - causes circular loading,
             joinedload(Package.inclusion_items),
-            joinedload(Package.exclusion_items)
+            joinedload(Package.exclusion_items),
+            joinedload(Package.tags)
         ).filter(Package.slug == slug, Package.is_active == True).first()
         
         if not package:
@@ -336,6 +347,17 @@ class PackageService:
                     "slug": ht.slug,
                 }
                 for ht in package.holiday_types
+            ],
+            "tags": [
+                {
+                    "id": tag.id,
+                    "name": tag.name,
+                    "slug": tag.slug,
+                    "category": tag.category,
+                    "color": tag.color,
+                    "icon": tag.icon
+                }
+                for tag in package.tags
             ],
             "inclusion_items": [
                 {
@@ -409,6 +431,11 @@ class PackageService:
             from app.models.country import Country
             extra_countries = db.query(Country).filter(Country.id.in_(package_create.country_ids)).all()
             db_package.countries.extend(extra_countries)
+            
+        # Handle tags
+        if package_create.tag_ids:
+            tags = db.query(Tag).filter(Tag.id.in_(package_create.tag_ids)).all()
+            db_package.tags.extend(tags)
         
         db.commit()
         db.refresh(db_package)
@@ -424,6 +451,7 @@ class PackageService:
             selectinload(Package.exclusion_items),
             selectinload(Package.blog_posts),
             selectinload(Package.countries),
+            selectinload(Package.tags),
         ).filter(Package.id == package_id).first()
         if not db_package:
             return None
@@ -512,6 +540,22 @@ class PackageService:
                 if to_add_ids:
                     extra_countries = db.query(Country).filter(Country.id.in_(to_add_ids)).all()
                     db_package.countries.extend(extra_countries)
+                    
+        # Handle tags separately
+        if 'tag_ids' in update_data:
+            tag_ids = update_data.pop('tag_ids')
+            if tag_ids is not None:
+                current_ids = {t.id for t in db_package.tags}
+                new_ids = set(tag_ids)
+
+                to_remove = [t for t in db_package.tags if t.id not in new_ids]
+                for t in to_remove:
+                    db_package.tags.remove(t)
+
+                to_add_ids = new_ids - current_ids
+                if to_add_ids:
+                    tags = db.query(Tag).filter(Tag.id.in_(to_add_ids)).all()
+                    db_package.tags.extend(tags)
         
         # Safely update slug if name changed
         update_data = update_slug_if_name_changed(

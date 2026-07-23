@@ -6,6 +6,7 @@ from datetime import datetime, date
 from app.schemas.country import CountryResponse
 from app.schemas.holiday_type import HolidayTypeResponse
 from app.schemas.inclusion_exclusion import InclusionResponse, ExclusionResponse
+from app.schemas.content_tag import ContentTagResponse
 
 # Forward reference for GroupTripDepartureResponse
 from typing import TYPE_CHECKING
@@ -37,6 +38,7 @@ class GroupTripCreate(GroupTripBase):
     country_ids: Optional[List[int]] = Field(default_factory=list, description="List of additional country IDs (multiple destinations)")
     is_active: Optional[bool] = Field(True, description="Whether the group trip is active")
     is_featured: Optional[bool] = Field(False, description="Whether the group trip is featured")
+    tag_ids: Optional[List[int]] = Field(default_factory=list, description="List of tag IDs to associate with this group trip")
 
 # Schema for updating a Group Trip
 class GroupTripUpdate(BaseModel):
@@ -61,6 +63,7 @@ class GroupTripUpdate(BaseModel):
     exclusion_ids: Optional[List[int]] = Field(None, description="List of exclusion IDs to associate with this group trip")
     conversion_triggers: Optional[List[str]] = Field(None, description="List of conversion triggers")
     country_ids: Optional[List[int]] = Field(None, description="List of additional country IDs (multiple destinations)")
+    tag_ids: Optional[List[int]] = Field(None, description="List of tag IDs to associate with this group trip")
 
 
 
@@ -109,6 +112,7 @@ class GroupTripResponse(GroupTripBase):
     exclusion_items: List[ExclusionResponse] = Field(default_factory=list, description="Exclusions associated with this group trip")
     departures: List[GroupTripDepartureResponse] = Field(default_factory=list, description="Departures associated with this group trip")
     countries: List[CountryResponse] = Field(default_factory=list, description="Additional destinations associated with this group trip")
+    tags: List[ContentTagResponse] = Field(default_factory=list, description="Tags associated with this group trip")
 
     @field_validator('is_active', 'is_featured', mode='before')
     @classmethod

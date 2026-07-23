@@ -13,6 +13,45 @@ blog_post_tags = Table(
     Column("tag_id", Integer, ForeignKey("tags.id"), primary_key=True)
 )
 
+# ---------------------------------------------------------------------------
+# Entity ↔ Tag pivot tables (defined here alongside the Tag model to keep all
+# tag-related association tables in one place and avoid circular imports)
+# ---------------------------------------------------------------------------
+package_tags = Table(
+    "package_tags",
+    Base.metadata,
+    Column("package_id", Integer, ForeignKey("packages.id", ondelete="CASCADE"), primary_key=True),
+    Column("tag_id",     Integer, ForeignKey("tags.id",     ondelete="CASCADE"), primary_key=True),
+)
+
+hotel_tags = Table(
+    "hotel_tags",
+    Base.metadata,
+    Column("hotel_id", Integer, ForeignKey("hotels.id", ondelete="CASCADE"), primary_key=True),
+    Column("tag_id",   Integer, ForeignKey("tags.id",   ondelete="CASCADE"), primary_key=True),
+)
+
+activity_tags = Table(
+    "activity_tags",
+    Base.metadata,
+    Column("activity_id", Integer, ForeignKey("activities.id", ondelete="CASCADE"), primary_key=True),
+    Column("tag_id",      Integer, ForeignKey("tags.id",       ondelete="CASCADE"), primary_key=True),
+)
+
+attraction_tags = Table(
+    "attraction_tags",
+    Base.metadata,
+    Column("attraction_id", Integer, ForeignKey("attractions.id", ondelete="CASCADE"), primary_key=True),
+    Column("tag_id",        Integer, ForeignKey("tags.id",        ondelete="CASCADE"), primary_key=True),
+)
+
+group_trip_tags = Table(
+    "group_trip_tags",
+    Base.metadata,
+    Column("group_trip_id", Integer, ForeignKey("group_trips.id", ondelete="CASCADE"), primary_key=True),
+    Column("tag_id",        Integer, ForeignKey("tags.id",        ondelete="CASCADE"), primary_key=True),
+)
+
 # Many-to-Many relationship table between BlogPost and Package (Tour)
 blog_post_packages = Table(
     "blog_post_packages",
@@ -57,13 +96,26 @@ class BlogPost(Base):
         return None
 
 class Tag(Base):
+    """Shared content tag used for filtering across all entity types."""
     __tablename__ = "tags"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(50), nullable=False, unique=True)
-    slug = Column(String(50), unique=True, index=True, nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    id          = Column(Integer, primary_key=True, index=True)
+    name        = Column(String(100), nullable=False, unique=True)
+    slug        = Column(String(100), unique=True, index=True, nullable=False)
+    description = Column(Text, nullable=True)
+    # Grouping field — e.g. 'audience', 'pace', 'environment', 'budget'
+    category    = Column(String(50), nullable=True, index=True)
+    icon        = Column(String(100), nullable=True)   # emoji or icon name
+    color       = Column(String(20), nullable=True)    # hex color, e.g. '#4CAF50'
+    order_index = Column(Integer, nullable=False, default=0)
+    is_active   = Column(Boolean, nullable=False, default=True)
+    created_at  = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at  = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     # Relationships
-    blog_posts = relationship("BlogPost", secondary=blog_post_tags, overlaps="tags")
+    blog_posts  = relationship("BlogPost",  secondary=blog_post_tags,  overlaps="tags")
+    packages    = relationship("Package",   secondary=package_tags,    back_populates="tags", lazy="noload")
+    hotels      = relationship("Hotel",     secondary=hotel_tags,      back_populates="tags", lazy="noload")
+    activities  = relationship("Activity",  secondary=activity_tags,   back_populates="tags", lazy="noload")
+    attractions = relationship("Attraction",secondary=attraction_tags, back_populates="tags", lazy="noload")
+    group_trips = relationship("GroupTrip", secondary=group_trip_tags, back_populates="tags", lazy="noload")

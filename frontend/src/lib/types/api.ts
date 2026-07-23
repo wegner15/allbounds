@@ -1,3 +1,5 @@
+import type { ContentTag } from './content-tag';
+
 // API response types based on the backend schemas
 
 // Base types
@@ -146,6 +148,8 @@ export interface Activity extends BaseModel {
   is_featured: boolean;
   countries: Country[];
   cover_image?: MediaAsset;
+  tags?: ContentTag[];
+  tag_ids?: number[];
 }
 
 export interface ActivityResponse extends Activity {
@@ -170,6 +174,7 @@ export interface ActivityCreate {
   cover_image_id?: number | null;
   media_asset_ids?: number[];
   country_ids?: number[];
+  tag_ids?: number[];
 }
 
 export type ActivityUpdate = Partial<ActivityCreate>;
@@ -192,6 +197,8 @@ export interface Attraction extends BaseModel {
   longitude?: number;
   city?: string;
   summary?: string;
+  tags?: ContentTag[];
+  tag_ids?: number[];
 }
 
 // Accommodation types
@@ -286,6 +293,8 @@ export interface Hotel extends BaseModel {
   price_category?: string;
   amenities?: Amenity[];
   amenity_ids?: number[];
+  tags?: ContentTag[];
+  tag_ids?: number[];
   check_in_time?: string;
   check_out_time?: string;
   latitude?: number;

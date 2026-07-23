@@ -6,6 +6,7 @@ from datetime import datetime
 from app.schemas.country import CountryResponse
 from app.schemas.hotel_type import HotelTypeResponse
 from app.schemas.amenity import AmenityResponse
+from app.schemas.content_tag import ContentTagResponse
 
 # Base Hotel Schema
 class HotelBase(BaseModel):
@@ -24,6 +25,7 @@ class HotelBase(BaseModel):
     check_in_time: Optional[str] = Field(None, description="Standard check-in time")
     check_out_time: Optional[str] = Field(None, description="Standard check-out time")
     image_id: Optional[str] = Field(None, description="Cloudflare Image ID for the hotel's primary image")
+    tag_ids: Optional[List[int]] = Field(None, description="List of tag IDs associated with the hotel")
     
 # Schema for creating a new Hotel
 class HotelCreate(HotelBase):
@@ -48,6 +50,7 @@ class HotelUpdate(BaseModel):
     image_id: Optional[str] = Field(None, description="Cloudflare Image ID for the hotel's primary image")
     is_active: Optional[bool] = Field(None, description="Whether the hotel is active")
     is_featured: Optional[bool] = Field(None, description="Whether the hotel is featured")
+    tag_ids: Optional[List[int]] = Field(None, description="List of tag IDs associated with the hotel")
 
 # Schema for Hotel response
 class HotelResponse(HotelBase):
@@ -86,6 +89,7 @@ class HotelWithCountryResponse(HotelResponse):
     hotel_type: Optional[HotelTypeResponse] = None
     amenities: List[AmenityResponse] = Field(default_factory=list, description="List of amenities associated with the hotel")
     amenity_ids: Optional[List[int]] = Field(default=None, description="List of amenity IDs for form editing")
+    tags: List[ContentTagResponse] = Field(default_factory=list, description="Tags associated with the hotel")
     
     @model_serializer(mode='wrap')
     def serialize_model(self, serializer, info):

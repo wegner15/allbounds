@@ -145,6 +145,11 @@ import AdminSettingsPage from './features/admin/settings/AdminSettingsPage';
 // Import Admin Logs
 import EmailLogsPage from './features/admin/logs/EmailLogsPage';
 
+// Import Admin Content Tags pages
+import TagsListPage from './features/admin/tags/TagsListPage';
+import CreateTagPage from './features/admin/tags/CreateTagPage';
+import EditTagPage from './features/admin/tags/EditTagPage';
+
 // Placeholder pages for routes we haven't fully implemented yet
 
 
@@ -482,6 +487,10 @@ const router = createBrowserRouter([
       { path: 'settings', element: <AdminSettingsPage /> },
       { path: 'logs/email', element: <EmailLogsPage /> },
       { path: 'preview/:type/:id', element: <AdminPreviewPage /> },
+      // Content Tags management routes
+      { path: 'tags', element: <TagsListPage /> },
+      { path: 'tags/new', element: <CreateTagPage /> },
+      { path: 'tags/:id/edit', element: <EditTagPage /> },
     ],
   },
 ]);

@@ -31,6 +31,7 @@ from app.api.api_v1.endpoints import (
     flight_bookings,
     email_logs,
     partners,
+    content_tags,
 )
 
 api_router = APIRouter()
@@ -52,6 +53,7 @@ api_router.include_router(inclusions.router, prefix="/inclusions", tags=["Inclus
 api_router.include_router(exclusions.router, prefix="/exclusions", tags=["Exclusions"])
 api_router.include_router(blog.router, prefix="/blog", tags=["Blog"])
 api_router.include_router(content.router, prefix="/content", tags=["Content"])
+api_router.include_router(content_tags.router, prefix="/tags", tags=["Tags"])
 api_router.include_router(search.router, prefix="/search", tags=["Search"])
 api_router.include_router(stats.router, prefix="/stats", tags=["Stats"])
 

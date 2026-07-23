@@ -8,6 +8,8 @@ import { useCountries } from '../../../lib/hooks/useDestinations';
 import { usePackages } from '../../../lib/hooks/usePackages';
 import { useInclusions } from '../../../lib/hooks/useInclusions';
 import { useExclusions } from '../../../lib/hooks/useExclusions';
+import { useContentTags } from '../../../lib/hooks/useContentTags';
+import TagSelector from '../../../components/admin/TagSelector';
 import GalleryManager from '../../../components/admin/GalleryManager';
 import { SimpleItineraryManager } from '../../../components/admin/SimpleItineraryManager';
 import { apiClient } from '../../../lib/api';
@@ -32,6 +34,7 @@ const groupTripSchema = z.object({
   inclusion_ids: z.array(z.number()).optional(),
   exclusion_ids: z.array(z.number()).optional(),
   country_ids: z.array(z.number()).optional(),
+  tag_ids: z.array(z.number()).optional(),
   image_id: z.string().optional(),
   is_active: z.boolean(),
   is_featured: z.boolean(),
@@ -57,6 +60,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
   const { data: packages } = usePackages();
   const { data: inclusions, isLoading: isLoadingInclusions } = useInclusions();
   const { data: exclusions, isLoading: isLoadingExclusions } = useExclusions();
+  const { data: allTags = [] } = useContentTags();
   
   // Fetch group trip details with gallery if editing
   const { data: groupTripDetails } = useGroupTripDetailsById(groupTripId || 0);
@@ -114,6 +118,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
           inclusion_ids: groupTripData.inclusion_items?.map((item: any) => item.id) || [],
           exclusion_ids: groupTripData.exclusion_items?.map((item: any) => item.id) || [],
           country_ids: groupTripData.countries?.map((c: any) => c.id) || [],
+          tag_ids: groupTripData.tags?.map((t: any) => t.id) || groupTripData.tag_ids || [],
           image_id: groupTripData.image_id || '',
           is_active: groupTripData.is_active !== undefined ? groupTripData.is_active : true,
           is_featured: groupTripData.is_featured !== undefined ? groupTripData.is_featured : false,
@@ -136,6 +141,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
           inclusion_ids: [],
           exclusion_ids: [],
           country_ids: [],
+          tag_ids: [],
           image_id: '',
           is_active: true,
           is_featured: false,
@@ -220,6 +226,7 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
         inclusion_ids: data.inclusion_ids || [],
         exclusion_ids: data.exclusion_ids || [],
         country_ids: data.country_ids || [],
+        tag_ids: data.tag_ids || [],
         conversion_triggers: data.conversion_triggers?.map(t => t.value) || []
       };
       
@@ -822,6 +829,25 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
                         );
                       })}
                     </div>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Content Tags */}
+            <div className="sm:col-span-6">
+              <div className="bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
+                <Controller
+                  name="tag_ids"
+                  control={control}
+                  render={({ field }) => (
+                    <TagSelector
+                      tags={allTags}
+                      selectedTagIds={field.value || []}
+                      onChange={field.onChange}
+                      label="Content Tags"
+                      helperText="Select tags to categorize this group trip for dynamic filtering across the platform."
+                    />
                   )}
                 />
               </div>

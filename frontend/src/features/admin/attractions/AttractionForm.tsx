@@ -4,6 +4,8 @@ import { useCountries } from '../../../lib/hooks/useCountries';
 import LocationPicker from '../../../components/LocationPicker';
 import GalleryManager from '../../../components/admin/GalleryManager';
 import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
+import TagSelector from '../../../components/admin/TagSelector';
+import { useContentTags } from '../../../lib/hooks/useContentTags';
 import type { Attraction, AttractionCreateInput, AttractionUpdateInput } from '../../../lib/hooks/useAttractions';
 import type { GalleryImage } from '../../../lib/types/api';
 import type { Country } from '../../../lib/hooks/useCountries';
@@ -17,11 +19,13 @@ interface AttractionFormProps {
 const AttractionForm: React.FC<AttractionFormProps> = ({ initialData, onSubmit, isLoading }) => {
   const navigate = useNavigate();
   const { data: countries } = useCountries();
+  const { data: allTags = [] } = useContentTags();
   
   const [formData, setFormData] = useState<AttractionCreateInput & { is_active?: boolean }>({
     name: '',
     country_id: 0,
     is_active: true,
+    tag_ids: [],
   });
   
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
@@ -34,10 +38,14 @@ const AttractionForm: React.FC<AttractionFormProps> = ({ initialData, onSubmit, 
       const {
         id,
         gallery_images,
+        tags,
         ...rest
       } = initialData;
       
-      setFormData(rest);
+      setFormData({
+        ...rest,
+        tag_ids: tags?.map((t) => t.id) || initialData.tag_ids || []
+      });
       
       // Set gallery images if available
       if (gallery_images) {
@@ -303,6 +311,17 @@ const AttractionForm: React.FC<AttractionFormProps> = ({ initialData, onSubmit, 
             height={350}
           />
         </div>
+      </div>
+
+      {/* Content Tags */}
+      <div className="border-b pb-6">
+        <TagSelector
+          tags={allTags}
+          selectedTagIds={formData.tag_ids || []}
+          onChange={(newTagIds) => setFormData(prev => ({ ...prev, tag_ids: newTagIds }))}
+          label="Content Tags"
+          helperText="Select tags to categorize this attraction for dynamic filtering across the application."
+        />
       </div>
 
       {/* Gallery */}

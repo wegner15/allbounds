@@ -3,6 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
 from app.db.database import Base
+from app.models.blog import attraction_tags  # pivot table defined alongside Tag model
 
 # Association tables for many-to-many relationships
 package_attractions = Table(
@@ -69,6 +70,9 @@ class Attraction(Base):
     # Relationship with Hotels
     # CRITICAL: lazy='noload' prevents querying hotel_attractions on every Attraction serialization
     hotels = relationship("Hotel", secondary=hotel_attractions, back_populates="attractions", lazy='noload')
+
+    # Relationship with Tags (for filtering)
+    tags = relationship("Tag", secondary=attraction_tags, back_populates="attractions", lazy="select")
 
     @property
     def computed_cover_image(self) -> str:

@@ -44,6 +44,15 @@ export interface Attraction {
     country_id?: number;
   }>;
   slug: string;
+  tags?: Array<{
+    id: number;
+    name: string;
+    slug: string;
+    category?: string;
+    color?: string;
+    icon?: string;
+  }>;
+  tag_ids?: number[];
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -63,6 +72,7 @@ export interface AttractionCreateInput {
   opening_hours?: string;
   image_id?: string;
   cover_image?: string;
+  tag_ids?: number[];
 }
 
 export interface AttractionUpdateInput extends Partial<AttractionCreateInput> {

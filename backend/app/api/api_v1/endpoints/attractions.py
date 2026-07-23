@@ -28,6 +28,7 @@ def get_attractions(
     search: Optional[str] = Query(None, description="Full-text search over attraction name, summary, description, city, address"),
     country: Optional[str] = Query(None, description="Filter by country slug or name"),
     category: Optional[str] = Query(None, description="Filter by attraction category"),
+    tag: Optional[str] = Query(None, description="Filter by tag slug"),
     country_id: int = Query(None, description="Filter by country ID"),
 ) -> Any:
     """
@@ -43,6 +44,7 @@ def get_attractions(
             search=search,
             country=country,
             category=category,
+            tag=tag,
         )
     # CRITICAL: Serialize to Pydantic to prevent lazy-loading
     return [AttractionResponse.from_orm(attraction) for attraction in attractions]

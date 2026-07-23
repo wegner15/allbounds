@@ -11,7 +11,9 @@ import type { ActivityCreate, ActivityUpdate, MediaAsset } from '../../../lib/ty
 import MediaGallery from '../../../components/media/MediaGallery';
 import CloudflareImageUpload from '../../../components/ui/CloudflareImageUpload';
 import { useCountries } from '../../../lib/hooks/useCountries';
+import { useContentTags } from '../../../lib/hooks/useContentTags';
 import { getCloudflareImageUrl } from '../../../utils/imageUtils';
+import TagSelector from '../../../components/admin/TagSelector';
 
 const activitySchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -22,6 +24,7 @@ const activitySchema = z.object({
   cover_image_id: z.number().nullable().optional(),
   media_asset_ids: z.array(z.number()).optional(),
   country_ids: z.array(z.number()).optional(),
+  tag_ids: z.array(z.number()).optional(),
 });
 
 type ActivityFormValues = z.infer<typeof activitySchema>;
@@ -38,7 +41,7 @@ interface ActivityFormProps {
 const ActivityForm: React.FC<ActivityFormProps> = ({ onSubmit, defaultValues, isEditing = false }) => {
   const methods = useForm<ActivityFormValues>({
     resolver: zodResolver(activitySchema),
-    defaultValues: defaultValues || { name: '', description: '', is_active: true, is_featured: false, cover_image_id: null, media_asset_ids: [], country_ids: [] },
+    defaultValues: defaultValues || { name: '', description: '', is_active: true, is_featured: false, cover_image_id: null, media_asset_ids: [], country_ids: [], tag_ids: [] },
   });
   const { control, handleSubmit, formState: { errors }, setValue, watch } = methods;
 
@@ -47,6 +50,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ onSubmit, defaultValues, is
   const countryIds = watch('country_ids') || [];
   const queryClient = useQueryClient();
   const { data: countries, isLoading: countriesLoading } = useCountries();
+  const { data: allTags = [] } = useContentTags();
 
   return (
     <FormProvider {...methods}>
@@ -221,6 +225,22 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ onSubmit, defaultValues, is
             selectedIds={mediaAssetIds}
             onAdd={(media) => setValue('media_asset_ids', [...mediaAssetIds, media.id])}
             onRemove={(mediaId) => setValue('media_asset_ids', mediaAssetIds.filter(id => id !== mediaId))}
+          />
+        </div>
+
+        <div>
+          <Controller
+            name="tag_ids"
+            control={control}
+            render={({ field }) => (
+              <TagSelector
+                tags={allTags}
+                selectedTagIds={field.value || []}
+                onChange={field.onChange}
+                label="Content Tags"
+                helperText="Tags help users discover this activity via dynamic filters."
+              />
+            )}
           />
         </div>
 

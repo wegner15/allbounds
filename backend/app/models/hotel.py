@@ -3,6 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
 from app.db.database import Base
+from app.models.blog import hotel_tags  # pivot table defined alongside Tag model
 
 # Define association tables for many-to-many relationships
 hotel_media = Table(
@@ -77,3 +78,6 @@ class Hotel(Base):
     # CRITICAL: lazy='noload' prevents circular loading and avoids querying hotel_attractions
     # on every Hotel ORM serialization (same pattern as packages and group_trips)
     attractions = relationship("Attraction", secondary="hotel_attractions", back_populates="hotels", lazy='noload')
+
+    # Relationship with Tags (for filtering)
+    tags = relationship("Tag", secondary=hotel_tags, back_populates="hotels", lazy="select")

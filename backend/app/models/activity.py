@@ -3,6 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
 from app.db.database import Base
+from app.models.blog import activity_tags  # pivot table defined alongside Tag model
 
 # Many-to-Many relationship table between Country and Activity
 country_activities = Table(
@@ -44,3 +45,5 @@ class Activity(Base):
     itinerary_items = relationship("ItineraryItem", secondary="itinerary_item_activities", back_populates="linked_activities")
     attractions = relationship("Attraction", secondary="attraction_activities", back_populates="activities")
 
+    # Relationship with Tags (for filtering)
+    tags = relationship("Tag", secondary=activity_tags, back_populates="activities", lazy="select")

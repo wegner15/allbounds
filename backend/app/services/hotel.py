@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.models.hotel import Hotel
 from app.models.country import Country
 from app.models.amenity import Amenity
+from app.models.blog import Tag
 from app.schemas.hotel import HotelCreate, HotelUpdate
 from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
 from app.core.cloudflare_config import cloudflare_settings
@@ -42,7 +43,7 @@ class HotelService:
             return self._get_cloudflare_image_url(first_media.storage_key)
         return first_media.file_path
     
-    def get_hotels(self, db: Session, skip: int = 0, limit: int = 100, recommended: Optional[bool] = None, country: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_hotels(self, db: Session, skip: int = 0, limit: int = 100, recommended: Optional[bool] = None, country: Optional[str] = None, tag: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Retrieve all hotels with pagination and optional filtering, including cover images.
         Hotels are ordered by creation date (newest first).
@@ -53,7 +54,8 @@ class HotelService:
         # We DO joinedload amenities to prevent N+1 queries (one query per hotel).
         query = db.query(Hotel).options(
             joinedload(Hotel.country),
-            joinedload(Hotel.amenities)
+            joinedload(Hotel.amenities),
+            joinedload(Hotel.tags)
         ).filter(Hotel.is_active == True)
 
         if recommended is not None and recommended:
@@ -63,6 +65,9 @@ class HotelService:
         if country:
             # Join with country to filter by country name
             query = query.join(Hotel.country).filter(Country.name.ilike(f"%{country}%"))
+            
+        if tag:
+            query = query.filter(Hotel.tags.any(Tag.slug == tag))
 
         # Order by created_at descending (newest first)
         query = query.order_by(Hotel.created_at.desc())
@@ -96,6 +101,17 @@ class HotelService:
                 "stars": hotel.stars,
                 "price_category": hotel.price_category,
                 "amenity_ids": [amenity.id for amenity in hotel.amenities],
+                "tags": [
+                    {
+                        "id": tag.id,
+                        "name": tag.name,
+                        "slug": tag.slug,
+                        "category": tag.category,
+                        "color": tag.color,
+                        "icon": tag.icon
+                    }
+                    for tag in hotel.tags
+                ] if hotel.tags else [],
                 "created_at": hotel.created_at,
                 "updated_at": hotel.updated_at,
             }
@@ -110,7 +126,8 @@ class HotelService:
         """
         hotels = db.query(Hotel).options(
             joinedload(Hotel.country),
-            joinedload(Hotel.amenities)
+            joinedload(Hotel.amenities),
+            joinedload(Hotel.tags)
         ).filter(
             Hotel.country_id == country_id,
             Hotel.is_active == True
@@ -141,6 +158,18 @@ class HotelService:
                 "image_url": cover_image_url,
                 "cover_image": cover_image_url,
                 "is_active": hotel.is_active,
+                "amenity_ids": [amenity.id for amenity in hotel.amenities],
+                "tags": [
+                    {
+                        "id": tag.id,
+                        "name": tag.name,
+                        "slug": tag.slug,
+                        "category": tag.category,
+                        "color": tag.color,
+                        "icon": tag.icon
+                    }
+                    for tag in hotel.tags
+                ] if hotel.tags else [],
                 "created_at": hotel.created_at,
                 "updated_at": hotel.updated_at,
             }
@@ -148,14 +177,15 @@ class HotelService:
         
         return result
     
-    def get_featured_hotels(self, db: Session, skip: int = 0, limit: int = 100, country: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_featured_hotels(self, db: Session, skip: int = 0, limit: int = 100, country: Optional[str] = None, tag: Optional[str] = None) -> List[Dict[str, Any]]:
         """
-        Retrieve featured hotels with cover images, optionally filtered by country.
+        Retrieve featured hotels with cover images, optionally filtered by country and tag.
         Hotels are ordered by creation date (newest first).
         """
         query = db.query(Hotel).options(
             joinedload(Hotel.country),
-            joinedload(Hotel.amenities)
+            joinedload(Hotel.amenities),
+            joinedload(Hotel.tags)
         ).filter(
             Hotel.is_active == True,
             Hotel.is_featured == True
@@ -163,6 +193,9 @@ class HotelService:
 
         if country:
             query = query.join(Hotel.country).filter(Country.name.ilike(f"%{country}%"))
+            
+        if tag:
+            query = query.filter(Hotel.tags.any(Tag.slug == tag))
 
         hotels = query.order_by(Hotel.created_at.desc()).offset(skip).limit(limit).all()
         
@@ -194,6 +227,17 @@ class HotelService:
                 "stars": hotel.stars,
                 "price_category": hotel.price_category,
                 "amenity_ids": [amenity.id for amenity in hotel.amenities],
+                "tags": [
+                    {
+                        "id": tag.id,
+                        "name": tag.name,
+                        "slug": tag.slug,
+                        "category": tag.category,
+                        "color": tag.color,
+                        "icon": tag.icon
+                    }
+                    for tag in hotel.tags
+                ] if hotel.tags else [],
                 "created_at": hotel.created_at,
                 "updated_at": hotel.updated_at,
             }
@@ -223,7 +267,8 @@ class HotelService:
             joinedload(Hotel.media_assets),
             joinedload(Hotel.country),
             joinedload(Hotel.hotel_type),
-            joinedload(Hotel.amenities)
+            joinedload(Hotel.amenities),
+            joinedload(Hotel.tags)
         ).filter(Hotel.slug == slug, Hotel.is_active == True).first()
         
         if not hotel:
@@ -283,6 +328,17 @@ class HotelService:
                 } for amenity in hotel.amenities if amenity.is_active
             ] if hotel.amenities else [],
             "amenity_ids": [amenity.id for amenity in hotel.amenities] if hotel.amenities else [],
+            "tags": [
+                {
+                    "id": tag.id,
+                    "name": tag.name,
+                    "slug": tag.slug,
+                    "category": tag.category,
+                    "color": tag.color,
+                    "icon": tag.icon
+                }
+                for tag in hotel.tags
+            ] if hotel.tags else [],
             "check_in_time": hotel.check_in_time,
             "check_out_time": hotel.check_out_time,
             "cover_image": cover_image,
@@ -338,6 +394,11 @@ class HotelService:
         if amenity_ids:
             amenities = db.query(Amenity).filter(Amenity.id.in_(amenity_ids)).all()
             db_hotel.amenities = amenities
+            
+        # Add tags if provided
+        if hotel_create.tag_ids:
+            tags = db.query(Tag).filter(Tag.id.in_(hotel_create.tag_ids)).all()
+            db_hotel.tags = tags
         
         db.commit()
         db.refresh(db_hotel)
@@ -375,6 +436,14 @@ class HotelService:
         if amenity_ids is not None:
             amenities = db.query(Amenity).filter(Amenity.id.in_(amenity_ids)).all()
             db_hotel.amenities = amenities
+            
+        # Handle tags
+        if "tag_ids" in hotel_update.model_fields_set:
+            if hotel_update.tag_ids is not None:
+                tags = db.query(Tag).filter(Tag.id.in_(hotel_update.tag_ids)).all()
+                db_hotel.tags = tags
+            else:
+                db_hotel.tags = []
         
         db.commit()
         db.refresh(db_hotel)

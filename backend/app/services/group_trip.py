@@ -6,24 +6,31 @@ from sqlalchemy.orm import Session, joinedload
 from app.models.group_trip import GroupTrip, GroupTripDeparture
 from app.models.media import MediaAsset
 from app.models.inclusion_exclusion import Inclusion, Exclusion
+from app.models.blog import Tag
 from app.schemas.group_trip import GroupTripCreate, GroupTripUpdate, GroupTripDepartureCreate, GroupTripDepartureUpdate
 from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
 from app.core.cloudflare_config import cloudflare_settings
 from app.services.group_trip_helper import format_group_trip_response
 
 class GroupTripService:
-    def get_group_trips(self, db: Session, skip: int = 0, limit: int = 100) -> List[GroupTrip]:
+    def get_group_trips(self, db: Session, skip: int = 0, limit: int = 100, tag: Optional[str] = None) -> List[GroupTrip]:
         """
         Retrieve all group trips with pagination.
         """
-        return db.query(GroupTrip).options(
+        query = db.query(GroupTrip).options(
             joinedload(GroupTrip.departures),
             joinedload(GroupTrip.country),
             joinedload(GroupTrip.countries),
             joinedload(GroupTrip.holiday_types),
             joinedload(GroupTrip.inclusion_items),
-            joinedload(GroupTrip.exclusion_items)
-        ).filter(GroupTrip.is_active == True).offset(skip).limit(limit).all()
+            joinedload(GroupTrip.exclusion_items),
+            joinedload(GroupTrip.tags)
+        ).filter(GroupTrip.is_active == True)
+        
+        if tag:
+            query = query.filter(GroupTrip.tags.any(Tag.slug == tag))
+            
+        return query.offset(skip).limit(limit).all()
     
     def get_group_trips_by_country(self, db: Session, country_id: int, skip: int = 0, limit: int = 100) -> List[GroupTrip]:
         """
@@ -38,7 +45,8 @@ class GroupTripService:
             joinedload(GroupTrip.countries),
             joinedload(GroupTrip.holiday_types),
             joinedload(GroupTrip.inclusion_items),
-            joinedload(GroupTrip.exclusion_items)
+            joinedload(GroupTrip.exclusion_items),
+            joinedload(GroupTrip.tags)
         ).filter(
             GroupTrip.is_active == True,
             or_(
@@ -57,7 +65,8 @@ class GroupTripService:
             joinedload(GroupTrip.countries),
             joinedload(GroupTrip.holiday_types),
             joinedload(GroupTrip.inclusion_items),
-            joinedload(GroupTrip.exclusion_items)
+            joinedload(GroupTrip.exclusion_items),
+            joinedload(GroupTrip.tags)
         ).filter(
             GroupTrip.is_active == True,
             GroupTrip.is_featured == True
@@ -74,7 +83,8 @@ class GroupTripService:
             joinedload(GroupTrip.countries),
             joinedload(GroupTrip.holiday_types),
             joinedload(GroupTrip.inclusion_items),
-            joinedload(GroupTrip.exclusion_items)
+            joinedload(GroupTrip.exclusion_items),
+            joinedload(GroupTrip.tags)
         ).filter(
             GroupTrip.holiday_types.any(HolidayType.id == holiday_type_id),
             GroupTrip.is_active == True
@@ -90,7 +100,8 @@ class GroupTripService:
             joinedload(GroupTrip.countries),
             joinedload(GroupTrip.holiday_types),
             joinedload(GroupTrip.inclusion_items),
-            joinedload(GroupTrip.exclusion_items)
+            joinedload(GroupTrip.exclusion_items),
+            joinedload(GroupTrip.tags)
         ).filter(GroupTrip.id == group_trip_id, GroupTrip.is_active == True).first()
     
     def get_group_trip_by_slug(self, db: Session, slug: str) -> Optional[GroupTrip]:
@@ -103,7 +114,8 @@ class GroupTripService:
             joinedload(GroupTrip.countries),
             joinedload(GroupTrip.holiday_types),
             joinedload(GroupTrip.inclusion_items),
-            joinedload(GroupTrip.exclusion_items)
+            joinedload(GroupTrip.exclusion_items),
+            joinedload(GroupTrip.tags)
         ).filter(GroupTrip.slug == slug, GroupTrip.is_active == True).first()
     
     def get_similar_group_trips(self, db: Session, group_trip_id: int, limit: int = 4) -> List[GroupTrip]:
@@ -124,7 +136,8 @@ class GroupTripService:
             joinedload(GroupTrip.countries),
             joinedload(GroupTrip.holiday_types),
             joinedload(GroupTrip.inclusion_items),
-            joinedload(GroupTrip.exclusion_items)
+            joinedload(GroupTrip.exclusion_items),
+            joinedload(GroupTrip.tags)
         ).filter(
             GroupTrip.id != group_trip_id,  # Exclude current trip
             GroupTrip.is_active == True,
@@ -149,7 +162,8 @@ class GroupTripService:
                 joinedload(GroupTrip.countries),
                 joinedload(GroupTrip.holiday_types),
                 joinedload(GroupTrip.inclusion_items),
-                joinedload(GroupTrip.exclusion_items)
+                joinedload(GroupTrip.exclusion_items),
+                joinedload(GroupTrip.tags)
             ).filter(
                 GroupTrip.id != group_trip_id,
                 GroupTrip.is_active == True,
@@ -172,7 +186,8 @@ class GroupTripService:
             joinedload(GroupTrip.holiday_types),
             joinedload(GroupTrip.departures),
             joinedload(GroupTrip.inclusion_items),
-            joinedload(GroupTrip.exclusion_items)
+            joinedload(GroupTrip.exclusion_items),
+            joinedload(GroupTrip.tags)
         ).filter(GroupTrip.slug == slug, GroupTrip.is_active == True).first()
         
         if not group_trip:
@@ -264,6 +279,17 @@ class GroupTripService:
                 }
                 for dep in group_trip.departures if dep.is_active
             ],
+            "tags": [
+                {
+                    "id": tag.id,
+                    "name": tag.name,
+                    "slug": tag.slug,
+                    "category": tag.category,
+                    "color": tag.color,
+                    "icon": tag.icon
+                }
+                for tag in group_trip.tags
+            ],
             "is_active": group_trip.is_active,
             "is_featured": group_trip.is_featured,
         }
@@ -308,6 +334,11 @@ class GroupTripService:
             from app.models.country import Country
             extra_countries = db.query(Country).filter(Country.id.in_(group_trip_create.country_ids)).all()
             db_group_trip.countries.extend(extra_countries)
+            
+        # Handle tags
+        if hasattr(group_trip_create, 'tag_ids') and group_trip_create.tag_ids:
+            tags = db.query(Tag).filter(Tag.id.in_(group_trip_create.tag_ids)).all()
+            db_group_trip.tags.extend(tags)
         
         db.commit()
         db.refresh(db_group_trip)
@@ -359,6 +390,22 @@ class GroupTripService:
                 if to_add_ids:
                     extra_countries = db.query(Country).filter(Country.id.in_(to_add_ids)).all()
                     db_group_trip.countries.extend(extra_countries)
+                    
+        # Handle tags separately
+        if 'tag_ids' in update_data:
+            tag_ids = update_data.pop('tag_ids')
+            if tag_ids is not None:
+                current_ids = {t.id for t in db_group_trip.tags}
+                new_ids = set(tag_ids)
+
+                to_remove = [t for t in db_group_trip.tags if t.id not in new_ids]
+                for t in to_remove:
+                    db_group_trip.tags.remove(t)
+
+                to_add_ids = new_ids - current_ids
+                if to_add_ids:
+                    tags = db.query(Tag).filter(Tag.id.in_(to_add_ids)).all()
+                    db_group_trip.tags.extend(tags)
         
         # Safely update slug if name changed
         update_data = update_slug_if_name_changed(
@@ -580,7 +627,8 @@ class GroupTripService:
             joinedload(GroupTrip.holiday_types),
             joinedload(GroupTrip.departures),
             joinedload(GroupTrip.inclusion_items),
-            joinedload(GroupTrip.exclusion_items)
+            joinedload(GroupTrip.exclusion_items),
+            joinedload(GroupTrip.tags)
         ).filter(GroupTrip.id == group_trip_id).first()
         
         if not group_trip:
@@ -671,6 +719,17 @@ class GroupTripService:
                     "is_active": dep.is_active,
                 }
                 for dep in group_trip.departures if dep.is_active
+            ],
+            "tags": [
+                {
+                    "id": tag.id,
+                    "name": tag.name,
+                    "slug": tag.slug,
+                    "category": tag.category,
+                    "color": tag.color,
+                    "icon": tag.icon
+                }
+                for tag in group_trip.tags
             ],
             "is_active": group_trip.is_active,
             "is_featured": group_trip.is_featured,

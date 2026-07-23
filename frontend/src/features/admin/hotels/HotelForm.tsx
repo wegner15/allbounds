@@ -8,6 +8,8 @@ import LocationPicker from '../../../components/LocationPicker';
 import TimeSelector from '../../../components/TimeSelector';
 import GalleryManager from '../../../components/admin/GalleryManager';
 import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
+import TagSelector from '../../../components/admin/TagSelector';
+import { useContentTags } from '../../../lib/hooks/useContentTags';
 import type { Hotel, HotelCreateInput, HotelUpdateInput } from '../../../lib/hooks/useHotels';
 import type { GalleryImage } from '../../../lib/types/api';
 
@@ -21,6 +23,7 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
   const navigate = useNavigate();
   const { data: countries } = useCountries();
   const { data: hotelTypes } = useHotelTypes();
+  const { data: allTags = [] } = useContentTags();
   // For the form, we want to fetch as many amenities as possible to display them all
   // Use a large limit for now. Ideally we'd have a non-paginated endpoint or "all" param.
   const { data: amenitiesData } = useAmenities(1, 100);
@@ -33,6 +36,7 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
     stars: 0,
     is_active: true,
     is_featured: false,
+    tag_ids: [],
   });
 
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
@@ -47,10 +51,14 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
         created_at,
         updated_at,
         country,
+        tags,
         ...rest
       } = initialData;
 
-      setFormData(rest);
+      setFormData({
+        ...rest,
+        tag_ids: tags?.map((t) => t.id) || initialData.tag_ids || []
+      });
 
       // Load existing gallery images
       if (id) {
@@ -374,6 +382,17 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
             height={350}
           />
         </div>
+      </div>
+
+      {/* Content Tags */}
+      <div className="border-b pb-6">
+        <TagSelector
+          tags={allTags}
+          selectedTagIds={formData.tag_ids || []}
+          onChange={(newTagIds) => setFormData(prev => ({ ...prev, tag_ids: newTagIds }))}
+          label="Content Tags"
+          helperText="Select tags to categorize this hotel for dynamic filtering across the application."
+        />
       </div>
 
       {/* Gallery Management */}

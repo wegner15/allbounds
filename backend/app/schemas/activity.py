@@ -4,6 +4,7 @@ from datetime import datetime
 
 from .media import MediaAssetResponse
 from .country import CountryResponse, CountryMinResponse
+from app.schemas.content_tag import ContentTagResponse
 
 # Base Activity Schema
 class ActivityBase(BaseModel):
@@ -18,6 +19,7 @@ class ActivityCreate(ActivityBase):
     cover_image_id: Optional[int] = Field(None, description="ID of the cover image media asset")
     media_asset_ids: Optional[List[int]] = Field([], description="List of media asset IDs for the gallery")
     country_ids: Optional[List[int]] = Field([], description="List of country IDs associated with the activity")
+    tag_ids: Optional[List[int]] = Field([], description="List of tag IDs associated with the activity")
 
 # Schema for updating an Activity
 class ActivityUpdate(BaseModel):
@@ -29,6 +31,7 @@ class ActivityUpdate(BaseModel):
     cover_image_id: Optional[int] = Field(None, description="ID of the cover image media asset")
     media_asset_ids: Optional[List[int]] = Field(None, description="List of media asset IDs for the gallery")
     country_ids: Optional[List[int]] = Field(None, description="List of country IDs associated with the activity")
+    tag_ids: Optional[List[int]] = Field(None, description="List of tag IDs associated with the activity")
 
 # Schema for Activity response
 class ActivityResponse(ActivityBase):
@@ -39,6 +42,7 @@ class ActivityResponse(ActivityBase):
     cover_image: Optional[MediaAssetResponse] = Field(None, description="Cover image of the activity")
     media_assets: List[MediaAssetResponse] = Field([], description="Gallery of media assets for the activity")
     countries: List[CountryMinResponse] = Field([], description="Countries associated with the activity")
+    tags: List[ContentTagResponse] = Field([], description="Tags associated with the activity")
     created_at: datetime
     updated_at: datetime
     

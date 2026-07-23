@@ -3,18 +3,24 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.models.activity import Activity
 from app.models.media import MediaAsset
+from app.models.blog import Tag
 from app.schemas.activity import ActivityCreate, ActivityUpdate
 from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
 
 class ActivityService:
-    def get_activities(self, db: Session, skip: int = 0, limit: int = 100) -> List[Activity]:
+    def get_activities(self, db: Session, skip: int = 0, limit: int = 100, tag: Optional[str] = None) -> List[Activity]:
         """
         Retrieve all activities with pagination.
         """
-        return db.query(Activity).filter(Activity.is_active == True).options(
+        query = db.query(Activity).filter(Activity.is_active == True)
+        if tag:
+            query = query.filter(Activity.tags.any(Tag.slug == tag))
+            
+        return query.options(
             joinedload(Activity.cover_image),
             joinedload(Activity.media_assets),
-            joinedload(Activity.countries)
+            joinedload(Activity.countries),
+            joinedload(Activity.tags)
         ).offset(skip).limit(limit).all()
     
     def get_activity(self, db: Session, activity_id: int) -> Optional[Activity]:
@@ -24,7 +30,8 @@ class ActivityService:
         return db.query(Activity).filter(Activity.id == activity_id, Activity.is_active == True).options(
             joinedload(Activity.cover_image),
             joinedload(Activity.media_assets),
-            joinedload(Activity.countries)
+            joinedload(Activity.countries),
+            joinedload(Activity.tags)
         ).first()
     
     def get_activity_by_slug(self, db: Session, slug: str) -> Optional[Activity]:
@@ -34,7 +41,8 @@ class ActivityService:
         return db.query(Activity).filter(Activity.slug == slug, Activity.is_active == True).options(
             joinedload(Activity.cover_image),
             joinedload(Activity.media_assets),
-            joinedload(Activity.countries)
+            joinedload(Activity.countries),
+            joinedload(Activity.tags)
         ).first()
     
     def get_activities_by_country(self, db: Session, country_id: int, skip: int = 0, limit: int = 100) -> List[Activity]:
@@ -49,12 +57,13 @@ class ActivityService:
         ).options(
             joinedload(Activity.cover_image),
             joinedload(Activity.media_assets),
-            joinedload(Activity.countries)
+            joinedload(Activity.countries),
+            joinedload(Activity.tags)
         ).offset(skip).limit(limit).all()
     
-    def get_featured_activities(self, db: Session, skip: int = 0, limit: int = 100, country: Optional[str] = None) -> List[Activity]:
+    def get_featured_activities(self, db: Session, skip: int = 0, limit: int = 100, country: Optional[str] = None, tag: Optional[str] = None) -> List[Activity]:
         """
-        Retrieve featured activities with pagination, optionally filtered by country.
+        Retrieve featured activities with pagination, optionally filtered by country and tag.
         """
         query = db.query(Activity).filter(
             Activity.is_active == True,
@@ -64,6 +73,9 @@ class ActivityService:
         if country:
             from app.models.country import Country
             query = query.join(Activity.countries).filter(Country.name.ilike(f"%{country}%"))
+            
+        if tag:
+            query = query.filter(Activity.tags.any(Tag.slug == tag))
 
         return query.options(
             joinedload(Activity.cover_image),
@@ -124,6 +136,13 @@ class ActivityService:
                 db_country = db.query(Country).filter(Country.id == country_id).first()
                 if db_country:
                     db_activity.countries.append(db_country)
+            db.commit()
+            db.refresh(db_activity)
+            
+        # Handle tags
+        if activity_create.tag_ids:
+            tags = db.query(Tag).filter(Tag.id.in_(activity_create.tag_ids)).all()
+            db_activity.tags.extend(tags)
             db.commit()
             db.refresh(db_activity)
         
@@ -196,6 +215,14 @@ class ActivityService:
                     db_country = db.query(Country).filter(Country.id == country_id).first()
                     if db_country:
                         db_activity.countries.append(db_country)
+                        
+        # Handle tags separately
+        if 'tag_ids' in activity_update.model_fields_set:
+            if activity_update.tag_ids is not None:
+                tags = db.query(Tag).filter(Tag.id.in_(activity_update.tag_ids)).all()
+                db_activity.tags = tags
+            else:
+                db_activity.tags = []
         
         db.commit()
         db.refresh(db_activity)

@@ -422,6 +422,8 @@ const router = createBrowserRouter([
       { path: 'holiday-types', element: <HolidayTypesListPage /> },
       { path: 'holiday-types/new', element: <CreateHolidayTypePage /> },
       { path: 'holiday-types/:id/edit', element: <EditHolidayTypePage /> },
+      // Content tags management route
+      { path: 'tags', element: <TagsListPage /> },
       // Hotel management routes
       { path: 'hotels', element: <HotelsListPage /> },
       { path: 'hotels/new', element: <CreateHotelPage /> },

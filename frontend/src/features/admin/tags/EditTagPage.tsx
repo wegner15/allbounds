@@ -10,11 +10,11 @@ const EditTagPage: React.FC = () => {
   const navigate = useNavigate();
 
   const { data: tag, isLoading, error } = useContentTag(tagId);
-  const updateMutation = useUpdateContentTag(tagId);
+  const updateMutation = useUpdateContentTag();
 
   const handleSubmit = async (data: any) => {
     try {
-      await updateMutation.mutateAsync(data);
+      await updateMutation.mutateAsync({ id: tagId, data });
       toast.success('Tag updated successfully!');
       navigate('/admin/tags');
     } catch (error: any) {

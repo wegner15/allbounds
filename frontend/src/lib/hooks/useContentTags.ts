@@ -45,13 +45,13 @@ export const useCreateContentTag = () => {
 };
 
 /** Update an existing tag */
-export const useUpdateContentTag = (id: number) => {
+export const useUpdateContentTag = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: ContentTagUpdate) =>
+    mutationFn: ({ id, data }: { id: number; data: ContentTagUpdate }) =>
       apiClient.put<ContentTag>(`/tags/${id}`, data),
-    onSuccess: (updated) => {
-      queryClient.setQueryData(['contentTag', id], updated);
+    onSuccess: (_updated, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['contentTag', variables.id] });
       queryClient.invalidateQueries({ queryKey: ['contentTags'] });
     },
   });

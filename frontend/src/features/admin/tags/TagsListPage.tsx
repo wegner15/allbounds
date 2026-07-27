@@ -67,6 +67,31 @@ const TagsListPage: React.FC = () => {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [editingCategoryName, setEditingCategoryName] = useState<{ oldName: string; newName: string } | null>(null);
 
+  // Custom, deleted, and renamed categories state (persisted in localStorage)
+  const [customCategories, setCustomCategories] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('allbounds_custom_tag_categories') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  const [deletedCategories, setDeletedCategories] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('allbounds_deleted_tag_categories') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  const [categoryRenames, setCategoryRenames] = useState<Record<string, string>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('allbounds_tag_category_renames') || '{}');
+    } catch {
+      return {};
+    }
+  });
+
   // Form state for Tag Modal
   const [formData, setFormData] = useState<{
     name: string;
@@ -98,14 +123,34 @@ const TagsListPage: React.FC = () => {
   const updateTagMutation = useUpdateContentTag();
   const deleteTagMutation = useDeleteContentTag();
 
-  // Extract all unique categories (merging defaults with DB tags)
+  // Extract all unique categories (merging defaults, custom, deleted, renames, and DB tags)
   const categories = useMemo(() => {
-    const set = new Set<string>(DEFAULT_CATEGORIES);
-    tags.forEach((t) => {
-      if (t.category) set.add(t.category);
+    const set = new Set<string>();
+
+    // 1. Add default categories (mapped or skipped if deleted)
+    DEFAULT_CATEGORIES.forEach((cat) => {
+      const mapped = categoryRenames[cat] || cat;
+      if (!deletedCategories.includes(cat) && !deletedCategories.includes(mapped)) {
+        set.add(mapped);
+      }
     });
+
+    // 2. Add custom categories
+    customCategories.forEach((cat) => {
+      if (!deletedCategories.includes(cat)) {
+        set.add(cat);
+      }
+    });
+
+    // 3. Add categories present on tags
+    tags.forEach((t) => {
+      if (t.category && !deletedCategories.includes(t.category)) {
+        set.add(t.category);
+      }
+    });
+
     return Array.from(set).sort();
-  }, [tags]);
+  }, [tags, customCategories, deletedCategories, categoryRenames]);
 
   // Filtered tags based on search and category
   const filteredTags = useMemo(() => {
@@ -191,6 +236,13 @@ const TagsListPage: React.FC = () => {
       return;
     }
 
+    // Persist new category to customCategories if it's not already tracked
+    if (!customCategories.includes(finalCategory) && !categories.includes(finalCategory)) {
+      const nextCustom = Array.from(new Set([...customCategories, finalCategory]));
+      setCustomCategories(nextCustom);
+      localStorage.setItem('allbounds_custom_tag_categories', JSON.stringify(nextCustom));
+    }
+
     const payload: ContentTagCreate | ContentTagUpdate = {
       name: formData.name.trim(),
       slug: formData.slug.trim() || formData.name.toLowerCase().replace(/\s+/g, '-'),
@@ -229,6 +281,30 @@ const TagsListPage: React.FC = () => {
     }
   };
 
+  // Add New Category
+  const handleAddCategory = () => {
+    if (!newCategoryName.trim()) return;
+    const cat = newCategoryName.trim().toLowerCase().replace(/\s+/g, '_');
+
+    if (categories.includes(cat)) {
+      toast.info(`Category "${cat.replace(/_/g, ' ')}" already exists!`);
+      return;
+    }
+
+    if (deletedCategories.includes(cat)) {
+      const nextDeleted = deletedCategories.filter((c) => c !== cat);
+      setDeletedCategories(nextDeleted);
+      localStorage.setItem('allbounds_deleted_tag_categories', JSON.stringify(nextDeleted));
+    }
+
+    const nextCustom = Array.from(new Set([...customCategories, cat]));
+    setCustomCategories(nextCustom);
+    localStorage.setItem('allbounds_custom_tag_categories', JSON.stringify(nextCustom));
+
+    setNewCategoryName('');
+    toast.success(`Created category "${cat.replace(/_/g, ' ')}". Select it when creating a tag!`);
+  };
+
   // Bulk Edit / Rename Category
   const handleRenameCategory = async () => {
     if (!editingCategoryName || !editingCategoryName.newName.trim()) return;
@@ -242,25 +318,83 @@ const TagsListPage: React.FC = () => {
     }
 
     const affectedTags = tags.filter((t) => t.category === oldName);
-    if (affectedTags.length === 0) {
-      toast.info(`No active tags found under category "${oldName}"`);
-      setEditingCategoryName(null);
-      return;
-    }
 
     try {
-      toast.info(`Updating ${affectedTags.length} tags to category "${normalizedNew}"...`);
-      for (const tag of affectedTags) {
-        await updateTagMutation.mutateAsync({
-          id: tag.id,
-          data: { category: normalizedNew },
-        });
+      if (affectedTags.length > 0) {
+        toast.info(`Updating ${affectedTags.length} tag${affectedTags.length > 1 ? 's' : ''} to category "${normalizedNew.replace(/_/g, ' ')}"...`);
+        for (const tag of affectedTags) {
+          await updateTagMutation.mutateAsync({
+            id: tag.id,
+            data: { category: normalizedNew },
+          });
+        }
       }
-      toast.success(`Successfully renamed category to "${normalizedNew}"`);
+
+      // Update custom categories
+      if (customCategories.includes(oldName)) {
+        const nextCustom = customCategories.map((c) => (c === oldName ? normalizedNew : c));
+        setCustomCategories(nextCustom);
+        localStorage.setItem('allbounds_custom_tag_categories', JSON.stringify(nextCustom));
+      }
+
+      // Track rename for default categories
+      const origDefault = DEFAULT_CATEGORIES.find((d) => (categoryRenames[d] || d) === oldName) || oldName;
+      if (DEFAULT_CATEGORIES.includes(origDefault)) {
+        const nextRenames = { ...categoryRenames, [origDefault]: normalizedNew };
+        setCategoryRenames(nextRenames);
+        localStorage.setItem('allbounds_tag_category_renames', JSON.stringify(nextRenames));
+      }
+
+      // Update selectedCategory filter if active
+      if (selectedCategory === oldName) {
+        setSelectedCategory(normalizedNew);
+      }
+
+      toast.success(`Successfully renamed category to "${normalizedNew.replace(/_/g, ' ')}"`);
       setEditingCategoryName(null);
     } catch (err) {
       toast.error('Failed to rename category across all tags');
     }
+  };
+
+  // Delete Category
+  const handleDeleteCategory = async (cat: string) => {
+    const affectedTags = tags.filter((t) => t.category === cat);
+
+    if (affectedTags.length > 0) {
+      if (
+        !window.confirm(
+          `Category "${cat.replace(/_/g, ' ')}" has ${affectedTags.length} tag(s). Are you sure you want to delete this category? The affected tags will be reassigned to "general".`
+        )
+      ) {
+        return;
+      }
+      try {
+        for (const tag of affectedTags) {
+          await updateTagMutation.mutateAsync({
+            id: tag.id,
+            data: { category: 'general' },
+          });
+        }
+      } catch (err) {
+        toast.error('Failed to reassign tags when deleting category');
+        return;
+      }
+    }
+
+    const nextCustom = customCategories.filter((c) => c !== cat);
+    setCustomCategories(nextCustom);
+    localStorage.setItem('allbounds_custom_tag_categories', JSON.stringify(nextCustom));
+
+    const nextDeleted = Array.from(new Set([...deletedCategories, cat]));
+    setDeletedCategories(nextDeleted);
+    localStorage.setItem('allbounds_deleted_tag_categories', JSON.stringify(nextDeleted));
+
+    if (selectedCategory === cat) {
+      setSelectedCategory('all');
+    }
+
+    toast.success(`Deleted category "${cat.replace(/_/g, ' ')}"`);
   };
 
   // Helper to render tag badge
@@ -732,19 +866,18 @@ const TagsListPage: React.FC = () => {
                   placeholder="e.g. season or difficulty"
                   value={newCategoryName}
                   onChange={(e) => setNewCategoryName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddCategory();
+                    }
+                  }}
                   className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-teal focus:border-teal"
                 />
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => {
-                    if (!newCategoryName.trim()) return;
-                    const cat = newCategoryName.trim().toLowerCase().replace(/\s+/g, '_');
-                    setSelectedCategory(cat);
-                    setNewCategoryName('');
-                    setIsCategoryModalOpen(false);
-                    toast.success(`Created category "${cat}". Select it when creating a tag!`);
-                  }}
+                  onClick={handleAddCategory}
                 >
                   Add
                 </Button>
@@ -776,7 +909,16 @@ const TagsListPage: React.FC = () => {
                               newName: e.target.value,
                             })
                           }
-                          className="flex-1 px-2 py-1 text-xs border border-teal-500 rounded"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleRenameCategory();
+                            } else if (e.key === 'Escape') {
+                              setEditingCategoryName(null);
+                            }
+                          }}
+                          autoFocus
+                          className="flex-1 px-2 py-1 text-xs border border-teal-500 rounded focus:ring-teal"
                         />
                         <Button variant="primary" size="sm" onClick={handleRenameCategory}>
                           Save
@@ -799,12 +941,21 @@ const TagsListPage: React.FC = () => {
                             ({count} {count === 1 ? 'tag' : 'tags'})
                           </span>
                         </div>
-                        <button
-                          onClick={() => setEditingCategoryName({ oldName: cat, newName: cat })}
-                          className="text-xs text-teal hover:underline font-medium"
-                        >
-                          Rename All
-                        </button>
+                        <div className="flex items-center space-x-3">
+                          <button
+                            onClick={() => setEditingCategoryName({ oldName: cat, newName: cat.replace(/_/g, ' ') })}
+                            className="text-xs text-teal hover:underline font-medium"
+                          >
+                            Rename All
+                          </button>
+                          <button
+                            onClick={() => handleDeleteCategory(cat)}
+                            className="text-xs text-red-500 hover:text-red-700 font-medium"
+                            title="Delete category"
+                          >
+                            <i className="fas fa-trash-alt" />
+                          </button>
+                        </div>
                       </>
                     )}
                   </div>

@@ -1,9 +1,11 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Search, SlidersHorizontal, X, ChevronDown, ChevronUp, Star, Clock, Compass, DollarSign, Eye, EyeOff } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Star, ArrowRight, Tag as TagIcon, ChevronRight } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { usePackages } from '../../../lib/hooks/usePackages';
 import { useHotels } from '../../../lib/hooks/useHotels';
 import { useActivities } from '../../../lib/hooks/useActivities';
 import { useAttractions } from '../../../lib/hooks/useAttractions';
+import { useContentTags } from '../../../lib/hooks/useContentTags';
 
 import HotelCard from './HotelCard';
 import PackageCard from './PackageCard';
@@ -23,6 +25,13 @@ interface DestinationExplorerProps {
 
 type ExplorerTab = 'all' | 'hotels' | 'packages' | 'activities' | 'attractions';
 
+const CATEGORY_ITEMS = [
+  { id: 'hotels', label: 'Where to Stay', icon: '🏨', anchor: 'section-hotels', slug: 'hotels' },
+  { id: 'packages', label: 'Featured Packages', icon: '🧳', anchor: 'section-packages', slug: 'packages' },
+  { id: 'activities', label: 'Experiences', icon: '🎯', anchor: 'section-activities', slug: 'activities' },
+  { id: 'attractions', label: 'Top Things to Do', icon: '📍', anchor: 'section-attractions', slug: 'attractions' },
+];
+
 export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
   countryId,
   countryName,
@@ -33,10 +42,15 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
   activities: initialActivities,
   attractions: initialAttractions
 }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<ExplorerTab>(activeTabId as ExplorerTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const explorerRef = useRef<HTMLDivElement>(null);
+
+  // Content Tags hook for dynamic filtering
+  const { data: contentTags = [] } = useContentTags({ include_inactive: false });
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
 
   // Sync activeTab state with activeTabId prop
   useEffect(() => {
@@ -45,17 +59,24 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
     }
   }, [activeTabId]);
 
-  // Handle Tab Change internally and externally
-  const handleTabSelect = (tab: ExplorerTab) => {
+  // Handle Tab / Navigation Select
+  const handleTabSelect = (tab: ExplorerTab, anchorId?: string) => {
     setActiveTab(tab);
     setSearchQuery('');
     resetAllFilters();
     if (onTabChange) {
       onTabChange(tab);
     }
+
+    if (tab === 'all' && anchorId) {
+      const element = document.getElementById(anchorId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
   };
 
-  // Fetch data (using countryId for hotels to prevent global 100 limit bug)
+  // Fetch data
   const { data: fetchedHotels, isLoading: hotelsLoading } = useHotels(initialHotels ? undefined : countryId);
   const { data: packages, isLoading: packagesLoading } = usePackages({ country_id: countryId });
   const { data: fetchedActivities, isLoading: activitiesLoading } = useActivities(countryId);
@@ -66,24 +87,18 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
   const attractions = initialAttractions || fetchedAttractions;
 
   // Filter States
-  // 1. Hotels
   const [hotelStars, setHotelStars] = useState<number[]>([]);
   const [hotelPriceCategories, setHotelPriceCategories] = useState<string[]>([]);
-  
-  // 2. Packages
   const [packageDurations, setPackageDurations] = useState<string[]>([]);
   const [packageBudgets, setPackageBudgets] = useState<string[]>([]);
   const [packageTypes, setPackageTypes] = useState<string[]>([]);
-
-  // 3. Activities
   const [activityIntensities, setActivityIntensities] = useState<string[]>([]);
   const [activityDurations, setActivityDurations] = useState<string[]>([]);
-
-  // 4. Attractions
   const [attractionTypes, setAttractionTypes] = useState<string[]>([]);
 
   // Reset Filters
   const resetAllFilters = () => {
+    setSelectedTagIds([]);
     setHotelStars([]);
     setHotelPriceCategories([]);
     setPackageDurations([]);
@@ -98,6 +113,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
   const hasActiveFilters = useMemo(() => {
     return (
       searchQuery !== '' ||
+      selectedTagIds.length > 0 ||
       hotelStars.length > 0 ||
       hotelPriceCategories.length > 0 ||
       packageDurations.length > 0 ||
@@ -108,13 +124,18 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
       attractionTypes.length > 0
     );
   }, [
-    searchQuery, hotelStars, hotelPriceCategories, packageDurations,
-    packageBudgets, packageTypes, activityIntensities, activityDurations,
-    attractionTypes
+    searchQuery, selectedTagIds, hotelStars, hotelPriceCategories, packageDurations,
+    packageBudgets, packageTypes, activityIntensities, activityDurations, attractionTypes
   ]);
 
-  // Loading indicator helper
   const isLoading = hotelsLoading || packagesLoading || activitiesLoading || attractionsLoading;
+
+  // Tag matcher helper
+  const matchesTags = (item: any) => {
+    if (selectedTagIds.length === 0) return true;
+    if (!item.tags || item.tags.length === 0) return false;
+    return item.tags.some((t: any) => selectedTagIds.includes(typeof t === 'number' ? t : t.id));
+  };
 
   // ----------------------------------------------------
   // FILTERING LOGIC
@@ -124,33 +145,26 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
   const filteredHotels = useMemo(() => {
     const list = hotels?.filter(h => (h.country_id === undefined || h.country_id === countryId) && h.is_active) || [];
     return list.filter(hotel => {
-      // Search query
+      if (!matchesTags(hotel)) return false;
       if (searchQuery && !hotel.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
           !(hotel.summary || '').toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
       }
-      // Star rating
-      if (hotelStars.length > 0 && (!hotel.stars || !hotelStars.includes(hotel.stars))) {
-        return false;
-      }
-      // Price category
-      if (hotelPriceCategories.length > 0 && (!hotel.price_category || !hotelPriceCategories.includes(hotel.price_category.toLowerCase()))) {
-        return false;
-      }
+      if (hotelStars.length > 0 && (!hotel.stars || !hotelStars.includes(hotel.stars))) return false;
+      if (hotelPriceCategories.length > 0 && (!hotel.price_category || !hotelPriceCategories.includes(hotel.price_category.toLowerCase()))) return false;
       return true;
     });
-  }, [hotels, countryId, searchQuery, hotelStars, hotelPriceCategories]);
+  }, [hotels, countryId, searchQuery, hotelStars, hotelPriceCategories, selectedTagIds]);
 
   // 2. Packages
   const filteredPackages = useMemo(() => {
     const list = packages?.filter(p => p.is_active) || [];
     return list.filter(pkg => {
-      // Search query
+      if (!matchesTags(pkg)) return false;
       if (searchQuery && !pkg.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
           !(pkg.summary || '').toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
       }
-      // Duration
       if (packageDurations.length > 0) {
         let match = false;
         if (packageDurations.includes('2-3') && pkg.duration_days >= 2 && pkg.duration_days <= 3) match = true;
@@ -159,7 +173,6 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
         if (packageDurations.includes('10+') && pkg.duration_days > 10) match = true;
         if (!match) return false;
       }
-      // Budget
       if (packageBudgets.length > 0) {
         let match = false;
         const price = pkg.price || 0;
@@ -169,114 +182,88 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
         if (packageBudgets.includes('5000+') && price > 5000) match = true;
         if (!match) return false;
       }
-      // Package Type
       if (packageTypes.length > 0) {
-        const types = pkg.holiday_types?.map(t => t.slug.toLowerCase()) || [];
+        const types = pkg.holiday_types?.map((t: any) => t.slug.toLowerCase()) || [];
         const hasMatch = packageTypes.some(t => types.includes(t.toLowerCase()));
         if (!hasMatch) return false;
       }
       return true;
     });
-  }, [packages, searchQuery, packageDurations, packageBudgets, packageTypes]);
+  }, [packages, searchQuery, packageDurations, packageBudgets, packageTypes, selectedTagIds]);
 
   // 3. Activities
   const filteredActivities = useMemo(() => {
     const list = activities?.filter(a => a.is_active) || [];
     return list.filter(activity => {
-      // Search query
+      if (!matchesTags(activity)) return false;
       if (searchQuery && !activity.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
           !(activity.summary || '').toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
       }
-      // Intensity (simulated from desc keywords or is_featured since backend field is text description)
       if (activityIntensities.length > 0) {
         const desc = (activity.description || '').toLowerCase();
         let intensity = 'moderate';
         if (desc.includes('extreme') || desc.includes('rafting') || desc.includes('trekking') || desc.includes('climbing')) intensity = 'extreme';
         else if (desc.includes('relax') || desc.includes('leisure') || desc.includes('stroll') || desc.includes('sightseeing')) intensity = 'relaxed';
-        
         if (!activityIntensities.includes(intensity)) return false;
       }
-      // Duration (simulated from desc)
       if (activityDurations.length > 0) {
         const desc = (activity.description || '').toLowerCase();
         let duration = 'half-day';
         if (desc.includes('multi-day') || desc.includes('days safari') || desc.includes('camping')) duration = 'multi-day';
         else if (desc.includes('full day') || desc.includes('8 hours') || desc.includes('all day')) duration = 'full-day';
-        
         if (!activityDurations.includes(duration)) return false;
       }
       return true;
     });
-  }, [activities, searchQuery, activityIntensities, activityDurations]);
+  }, [activities, searchQuery, activityIntensities, activityDurations, selectedTagIds]);
 
   // 4. Attractions
   const filteredAttractions = useMemo(() => {
     const list = attractions?.filter(a => a.is_active) || [];
     return list.filter(attraction => {
-      // Search query
+      if (!matchesTags(attraction)) return false;
       if (searchQuery && !attraction.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
           !(attraction.summary || '').toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
       }
-      // Type (simulated from desc)
       if (attractionTypes.length > 0) {
         const desc = (attraction.description || '').toLowerCase();
         let type = 'landmark';
         if (desc.includes('museum') || desc.includes('history') || desc.includes('ancient')) type = 'historical';
         else if (desc.includes('park') || desc.includes('reserve') || desc.includes('nature') || desc.includes('lake') || desc.includes('mountain')) type = 'natural';
         else if (desc.includes('church') || desc.includes('mosque') || desc.includes('temple')) type = 'religious';
-        
         if (!attractionTypes.includes(type)) return false;
       }
       return true;
     });
-  }, [attractions, searchQuery, attractionTypes]);
+  }, [attractions, searchQuery, attractionTypes, selectedTagIds]);
 
-  // Combined Results (All Experiences Tab)
-  const combinedResults = useMemo(() => {
-    const results: { type: 'hotel' | 'package' | 'activity' | 'attraction'; item: any; id: string }[] = [];
-    
-    filteredPackages.forEach(p => results.push({ type: 'package', item: p, id: `pkg-${p.id}` }));
-    filteredActivities.forEach(a => results.push({ type: 'activity', item: a, id: `act-${a.id}` }));
-    filteredAttractions.forEach(a => results.push({ type: 'attraction', item: a, id: `attr-${a.id}` }));
-    filteredHotels.forEach(h => results.push({ type: 'hotel', item: h, id: `hot-${h.id}` }));
-
-    return results;
-  }, [filteredHotels, filteredPackages, filteredActivities, filteredAttractions]);
-
-  // Pagination State
+  // Pagination for Category Listing mode
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
 
+  const currentCategoryList = useMemo(() => {
+    if (activeTab === 'hotels') return filteredHotels;
+    if (activeTab === 'packages') return filteredPackages;
+    if (activeTab === 'activities') return filteredActivities;
+    if (activeTab === 'attractions') return filteredAttractions;
+    return [];
+  }, [activeTab, filteredHotels, filteredPackages, filteredActivities, filteredAttractions]);
+
   const paginatedItems = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-
-    if (activeTab === 'all') return combinedResults.slice(start, end);
-    if (activeTab === 'hotels') return filteredHotels.slice(start, end);
-    if (activeTab === 'packages') return filteredPackages.slice(start, end);
-    if (activeTab === 'activities') return filteredActivities.slice(start, end);
-    return filteredAttractions.slice(start, end);
-  }, [activeTab, combinedResults, filteredHotels, filteredPackages, filteredActivities, filteredAttractions, currentPage]);
+    return currentCategoryList.slice(start, start + itemsPerPage);
+  }, [currentCategoryList, currentPage]);
 
   const totalPages = useMemo(() => {
-    let count = 0;
-    if (activeTab === 'all') count = combinedResults.length;
-    else if (activeTab === 'hotels') count = filteredHotels.length;
-    else if (activeTab === 'packages') count = filteredPackages.length;
-    else if (activeTab === 'activities') count = filteredActivities.length;
-    else count = filteredAttractions.length;
+    return Math.max(1, Math.ceil(currentCategoryList.length / itemsPerPage));
+  }, [currentCategoryList]);
 
-    return Math.max(1, Math.ceil(count / itemsPerPage));
-  }, [activeTab, combinedResults, filteredHotels, filteredPackages, filteredActivities, filteredAttractions]);
-
-  // Reset page to 1 when tab or filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeTab, searchQuery, hotelStars, hotelPriceCategories, packageDurations, packageBudgets, packageTypes, activityIntensities, activityDurations, attractionTypes]);
+  }, [activeTab, searchQuery, selectedTagIds, hotelStars, hotelPriceCategories, packageDurations, packageBudgets, packageTypes, activityIntensities, activityDurations, attractionTypes]);
 
-  // Helper toggle functions
   const toggleFilter = (value: any, list: any[], setList: React.Dispatch<React.SetStateAction<any[]>>) => {
     if (list.includes(value)) {
       setList(list.filter(v => v !== value));
@@ -285,10 +272,12 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
     }
   };
 
+  const isOverview = activeTab === 'all';
+
   return (
     <div ref={explorerRef} className="scroll-mt-24">
-      {/* Search and Mobile Filters Bar */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-gray-200/60 shadow-sm mb-6">
+      {/* Search Bar */}
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-gray-200/60 shadow-sm mb-8">
         <div className="relative flex-grow">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
@@ -308,63 +297,80 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
-          {hasActiveFilters && (
+        {!isOverview && (
+          <div className="flex items-center gap-2">
+            {hasActiveFilters && (
+              <button
+                onClick={resetAllFilters}
+                className="text-sm font-semibold text-gray-500 hover:text-primary transition-colors px-3 py-2 rounded-lg"
+              >
+                Clear Filters
+              </button>
+            )}
             <button
-              onClick={resetAllFilters}
-              className="text-sm font-semibold text-gray-500 hover:text-primary transition-colors px-3 py-2 rounded-lg"
+              onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+              className="md:hidden flex items-center justify-center gap-2 px-5 py-3 border border-gray-200 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 active:scale-95 transition-all"
             >
-              Clear Filters
+              <SlidersHorizontal className="w-4 h-4 text-primary" />
+              <span>Filters</span>
             </button>
-          )}
-          <button
-            onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
-            className="md:hidden flex items-center justify-center gap-2 px-5 py-3 border border-gray-200 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 active:scale-95 transition-all"
-          >
-            <SlidersHorizontal className="w-4 h-4 text-primary" />
-            <span>Filters</span>
-          </button>
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Main Explorer Container */}
+      {/* Layout Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         
-        {/* LEFT SIDEBAR: Tabs and Sub-Filters */}
-        <aside className={`lg:col-span-1 space-y-6 ${mobileFiltersOpen ? 'block' : 'hidden md:block'}`}>
+        {/* LEFT SIDEBAR: Simple Navigation Links (Overview) OR Filter Panel (Listing) */}
+        <aside className={`lg:col-span-1 space-y-6 ${!isOverview && mobileFiltersOpen ? 'block' : 'hidden md:block'}`}>
           
-          {/* Primary Tabs */}
+          {/* Primary Navigation Menu */}
           <div className="bg-white rounded-2xl border border-gray-200/60 p-4 shadow-sm">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4 px-2">Category</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4 px-2">Category Navigation</h3>
             <div className="flex flex-col gap-1">
-              {[
-                { id: 'all', label: 'All Experiences', icon: '✈️' },
-                { id: 'hotels', label: 'Where to Stay', icon: '🏨' },
-                { id: 'packages', label: 'Featured Packages', icon: '🧳' },
-                { id: 'activities', label: 'Experiences', icon: '🎯' },
-                { id: 'attractions', label: 'Top Things to Do', icon: '📍' },
-              ].map((tab) => {
-                const isActive = activeTab === tab.id;
+              <button
+                onClick={() => handleTabSelect('all')}
+                className={`flex items-center gap-3 w-full px-4 py-3.5 rounded-xl text-left font-semibold text-sm transition-all duration-300 ${
+                  activeTab === 'all'
+                    ? 'bg-primary/10 text-primary border-l-4 border-primary pl-3'
+                    : 'text-gray-700 hover:bg-gray-50 hover:text-primary border-l-4 border-transparent'
+                }`}
+              >
+                <span className="text-lg">✈️</span>
+                <span>All Categories</span>
+              </button>
+
+              {CATEGORY_ITEMS.map((cat) => {
+                const isActive = activeTab === cat.id;
                 return (
                   <button
-                    key={tab.id}
-                    onClick={() => handleTabSelect(tab.id as ExplorerTab)}
-                    className={`flex items-center gap-3 w-full px-4 py-3.5 rounded-xl text-left font-semibold text-sm transition-all duration-300 ${
+                    key={cat.id}
+                    onClick={() => {
+                      if (isOverview) {
+                        handleTabSelect('all', cat.anchor);
+                      } else {
+                        handleTabSelect(cat.id as ExplorerTab);
+                      }
+                    }}
+                    className={`flex items-center justify-between w-full px-4 py-3.5 rounded-xl text-left font-semibold text-sm transition-all duration-300 ${
                       isActive
                         ? 'bg-primary/10 text-primary border-l-4 border-primary pl-3'
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-primary-dark border-l-4 border-transparent'
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-primary border-l-4 border-transparent'
                     }`}
                   >
-                    <span className="text-lg">{tab.icon}</span>
-                    <span>{tab.label}</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg">{cat.icon}</span>
+                      <span>{cat.label}</span>
+                    </div>
+                    {isOverview && <ChevronRight className="w-4 h-4 text-gray-300" />}
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Secondary Sub-Filters Panel */}
-          {activeTab !== 'all' && (
+          {/* DYNAMIC FILTER PANEL (Only shown on Category Listing pages) */}
+          {!isOverview && (
             <div className="bg-white rounded-2xl border border-gray-200/60 p-5 shadow-sm space-y-6">
               <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                 <h3 className="font-bold text-gray-800 text-sm">Refine Results</h3>
@@ -378,10 +384,37 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 )}
               </div>
 
-              {/* HOTELS SUB-FILTERS */}
+              {/* DYNAMIC CONTENT TAGS FILTER */}
+              {contentTags.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-700">
+                    <TagIcon className="w-3.5 h-3.5 text-primary" />
+                    <span>Tags & Features</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {contentTags.map((tag) => {
+                      const isSelected = selectedTagIds.includes(tag.id);
+                      return (
+                        <button
+                          key={tag.id}
+                          onClick={() => toggleFilter(tag.id, selectedTagIds, setSelectedTagIds)}
+                          className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-all ${
+                            isSelected
+                              ? 'bg-primary text-white border-primary shadow-xs'
+                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-100'
+                          }`}
+                        >
+                          {tag.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* CATEGORY SPECIFIC SUB-FILTERS */}
               {activeTab === 'hotels' && (
-                <div className="space-y-6">
-                  {/* Star Rating */}
+                <div className="space-y-6 pt-4 border-t border-gray-100">
                   <div className="space-y-3">
                     <h4 className="font-bold text-gray-700 text-xs uppercase tracking-wider">Star Rating</h4>
                     <div className="space-y-2">
@@ -405,38 +438,11 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                       ))}
                     </div>
                   </div>
-
-                  {/* Price/Budget */}
-                  <div className="space-y-3 pt-4 border-t border-gray-100">
-                    <h4 className="font-bold text-gray-700 text-xs uppercase tracking-wider">Budget Category</h4>
-                    <div className="space-y-2">
-                      {[
-                        { id: 'budget', label: 'Economy ($)' },
-                        { id: 'mid-range', label: 'Mid-range ($$)' },
-                        { id: 'luxury', label: 'Luxury ($$$)' },
-                        { id: 'ultra-luxury', label: 'Ultra Luxury ($$$$)' },
-                      ].map((item) => (
-                        <label key={item.id} className="flex items-center gap-3 cursor-pointer group">
-                          <input
-                            type="checkbox"
-                            checked={hotelPriceCategories.includes(item.id)}
-                            onChange={() => toggleFilter(item.id, hotelPriceCategories, setHotelPriceCategories)}
-                            className="rounded border-gray-300 text-primary focus:ring-primary w-4.5 h-4.5"
-                          />
-                          <span className="text-sm text-gray-600 group-hover:text-gray-900 font-medium">
-                            {item.label}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
                 </div>
               )}
 
-              {/* PACKAGES SUB-FILTERS */}
               {activeTab === 'packages' && (
-                <div className="space-y-6">
-                  {/* Duration */}
+                <div className="space-y-6 pt-4 border-t border-gray-100">
                   <div className="space-y-3">
                     <h4 className="font-bold text-gray-700 text-xs uppercase tracking-wider">Duration</h4>
                     <div className="space-y-2">
@@ -460,66 +466,13 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                       ))}
                     </div>
                   </div>
-
-                  {/* Budget */}
-                  <div className="space-y-3 pt-4 border-t border-gray-100">
-                    <h4 className="font-bold text-gray-700 text-xs uppercase tracking-wider">Price Range</h4>
-                    <div className="space-y-2">
-                      {[
-                        { id: 'under-1000', label: 'Under $1,000' },
-                        { id: '1000-3000', label: '$1,000 - $3,000' },
-                        { id: '3000-5000', label: '$3,000 - $5,000' },
-                        { id: '5000+', label: 'Over $5,000' },
-                      ].map((item) => (
-                        <label key={item.id} className="flex items-center gap-3 cursor-pointer group">
-                          <input
-                            type="checkbox"
-                            checked={packageBudgets.includes(item.id)}
-                            onChange={() => toggleFilter(item.id, packageBudgets, setPackageBudgets)}
-                            className="rounded border-gray-300 text-primary focus:ring-primary w-4.5 h-4.5"
-                          />
-                          <span className="text-sm text-gray-600 group-hover:text-gray-900 font-medium">
-                            {item.label}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Travel/Holiday Style */}
-                  <div className="space-y-3 pt-4 border-t border-gray-100">
-                    <h4 className="font-bold text-gray-700 text-xs uppercase tracking-wider">Travel Style</h4>
-                    <div className="space-y-2">
-                      {[
-                        { id: 'safari', label: 'Safaris & Wildlife' },
-                        { id: 'beach', label: 'Beach Holidays' },
-                        { id: 'family', label: 'Family Travel' },
-                        { id: 'honeymoon', label: 'Honeymoon & Romantic' },
-                        { id: 'luxury', label: 'Luxury Tours' },
-                      ].map((item) => (
-                        <label key={item.id} className="flex items-center gap-3 cursor-pointer group">
-                          <input
-                            type="checkbox"
-                            checked={packageTypes.includes(item.id)}
-                            onChange={() => toggleFilter(item.id, packageTypes, setPackageTypes)}
-                            className="rounded border-gray-300 text-primary focus:ring-primary w-4.5 h-4.5"
-                          />
-                          <span className="text-sm text-gray-600 group-hover:text-gray-900 font-medium">
-                            {item.label}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
                 </div>
               )}
 
-              {/* ACTIVITIES SUB-FILTERS */}
               {activeTab === 'activities' && (
-                <div className="space-y-6">
-                  {/* Intensity */}
+                <div className="space-y-6 pt-4 border-t border-gray-100">
                   <div className="space-y-3">
-                    <h4 className="font-bold text-gray-700 text-xs uppercase tracking-wider">Intensity Level</h4>
+                    <h4 className="font-bold text-gray-700 text-xs uppercase tracking-wider">Intensity</h4>
                     <div className="space-y-2">
                       {[
                         { id: 'relaxed', label: 'Relaxed & Leisure' },
@@ -540,68 +493,14 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                       ))}
                     </div>
                   </div>
-
-                  {/* Duration */}
-                  <div className="space-y-3 pt-4 border-t border-gray-100">
-                    <h4 className="font-bold text-gray-700 text-xs uppercase tracking-wider">Duration</h4>
-                    <div className="space-y-2">
-                      {[
-                        { id: 'half-day', label: 'Half Day (1-4h)' },
-                        { id: 'full-day', label: 'Full Day (4-8h)' },
-                        { id: 'multi-day', label: 'Multi-Day Trek/Tour' },
-                      ].map((item) => (
-                        <label key={item.id} className="flex items-center gap-3 cursor-pointer group">
-                          <input
-                            type="checkbox"
-                            checked={activityDurations.includes(item.id)}
-                            onChange={() => toggleFilter(item.id, activityDurations, setActivityDurations)}
-                            className="rounded border-gray-300 text-primary focus:ring-primary w-4.5 h-4.5"
-                          />
-                          <span className="text-sm text-gray-600 group-hover:text-gray-900 font-medium">
-                            {item.label}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* ATTRACTIONS SUB-FILTERS */}
-              {activeTab === 'attractions' && (
-                <div className="space-y-6">
-                  {/* Attraction Type */}
-                  <div className="space-y-3">
-                    <h4 className="font-bold text-gray-700 text-xs uppercase tracking-wider">Attraction Type</h4>
-                    <div className="space-y-2">
-                      {[
-                        { id: 'landmark', label: 'Scenic Landmarks' },
-                        { id: 'natural', label: 'National Parks & Nature' },
-                        { id: 'historical', label: 'Museums & Heritage' },
-                        { id: 'religious', label: 'Religious Sites' },
-                      ].map((item) => (
-                        <label key={item.id} className="flex items-center gap-3 cursor-pointer group">
-                          <input
-                            type="checkbox"
-                            checked={attractionTypes.includes(item.id)}
-                            onChange={() => toggleFilter(item.id, attractionTypes, setAttractionTypes)}
-                            className="rounded border-gray-300 text-primary focus:ring-primary w-4.5 h-4.5"
-                          />
-                          <span className="text-sm text-gray-600 group-hover:text-gray-900 font-medium">
-                            {item.label}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
                 </div>
               )}
             </div>
           )}
         </aside>
 
-        {/* RIGHT AREA: Filter Results Grid */}
-        <div className="lg:col-span-3 space-y-6">
+        {/* RIGHT AREA: CATEGORY-BASED OVERVIEW (NO PAGINATION) OR CATEGORY LISTING */}
+        <div className="lg:col-span-3 space-y-12">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
@@ -612,52 +511,247 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 </div>
               ))}
             </div>
-          ) : paginatedItems.length > 0 ? (
+          ) : isOverview ? (
+            /* ==================================================== */
+            /* CATEGORY-BASED LAYOUT (OVERVIEW MODE - NO PAGINATION) */
+            /* ==================================================== */
+            <div className="space-y-16">
+              {/* SECTION 1: WHERE TO STAY */}
+              <section id="section-hotels" className="scroll-mt-24">
+                <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200/80">
+                  <div>
+                    <h2 className="text-2xl font-bold font-playfair text-gray-900 flex items-center gap-2">
+                      <span>🏨</span> Where to Stay in {countryName}
+                    </h2>
+                    <p className="text-xs md:text-sm text-gray-500 mt-1">Top rated lodges, luxury camps, and boutique hotels</p>
+                  </div>
+                  {filteredHotels.length > 0 && (
+                    <Link
+                      to={`/destinations/${destinationSlug}/hotels`}
+                      className="hidden sm:flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors"
+                    >
+                      <span>Read More ({filteredHotels.length})</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  )}
+                </div>
+
+                {filteredHotels.length > 0 ? (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredHotels.slice(0, 9).map((hotel) => (
+                        <HotelCard
+                          key={hotel.id}
+                          hotel={{ ...hotel, country: hotel.country || { slug: destinationSlug } }}
+                        />
+                      ))}
+                    </div>
+                    {filteredHotels.length > 9 && (
+                      <div className="mt-8 text-center">
+                        <Link
+                          to={`/destinations/${destinationSlug}/hotels`}
+                          className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-xs hover:shadow-md active:scale-95 text-sm"
+                        >
+                          <span>Read More Hotels in {countryName}</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </Link>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-gray-500 text-sm italic py-4">No hotels currently listed for {countryName}.</p>
+                )}
+              </section>
+
+              {/* SECTION 2: FEATURED PACKAGES */}
+              <section id="section-packages" className="scroll-mt-24">
+                <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200/80">
+                  <div>
+                    <h2 className="text-2xl font-bold font-playfair text-gray-900 flex items-center gap-2">
+                      <span>🧳</span> Featured Packages
+                    </h2>
+                    <p className="text-xs md:text-sm text-gray-500 mt-1">Handpicked itineraries, safaris, and custom guided tours</p>
+                  </div>
+                  {filteredPackages.length > 0 && (
+                    <Link
+                      to={`/destinations/${destinationSlug}/packages`}
+                      className="hidden sm:flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors"
+                    >
+                      <span>Read More ({filteredPackages.length})</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  )}
+                </div>
+
+                {filteredPackages.length > 0 ? (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredPackages.slice(0, 9).map((pkg) => (
+                        <PackageCard key={pkg.id} package={pkg} />
+                      ))}
+                    </div>
+                    {filteredPackages.length > 9 && (
+                      <div className="mt-8 text-center">
+                        <Link
+                          to={`/destinations/${destinationSlug}/packages`}
+                          className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-xs hover:shadow-md active:scale-95 text-sm"
+                        >
+                          <span>Read More Packages in {countryName}</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </Link>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-gray-500 text-sm italic py-4">No travel packages currently listed for {countryName}.</p>
+                )}
+              </section>
+
+              {/* SECTION 3: EXPERIENCES (ACTIVITIES) */}
+              <section id="section-activities" className="scroll-mt-24">
+                <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200/80">
+                  <div>
+                    <h2 className="text-2xl font-bold font-playfair text-gray-900 flex items-center gap-2">
+                      <span>🎯</span> Experiences & Activities
+                    </h2>
+                    <p className="text-xs md:text-sm text-gray-500 mt-1">Trekking permits, cultural walks, rafting, and adventures</p>
+                  </div>
+                  {filteredActivities.length > 0 && (
+                    <Link
+                      to={`/destinations/${destinationSlug}/activities`}
+                      className="hidden sm:flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors"
+                    >
+                      <span>Read More ({filteredActivities.length})</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  )}
+                </div>
+
+                {filteredActivities.length > 0 ? (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredActivities.slice(0, 9).map((act) => (
+                        <ActivityCard key={act.id} activity={act} />
+                      ))}
+                    </div>
+                    {filteredActivities.length > 9 && (
+                      <div className="mt-8 text-center">
+                        <Link
+                          to={`/destinations/${destinationSlug}/activities`}
+                          className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-xs hover:shadow-md active:scale-95 text-sm"
+                        >
+                          <span>Read More Experiences in {countryName}</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </Link>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-gray-500 text-sm italic py-4">No activity experiences listed for {countryName}.</p>
+                )}
+              </section>
+
+              {/* SECTION 4: TOP THINGS TO DO (ATTRACTIONS) */}
+              <section id="section-attractions" className="scroll-mt-24">
+                <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200/80">
+                  <div>
+                    <h2 className="text-2xl font-bold font-playfair text-gray-900 flex items-center gap-2">
+                      <span>📍</span> Top Things to Do & Attractions
+                    </h2>
+                    <p className="text-xs md:text-sm text-gray-500 mt-1">National parks, scenic landmarks, and heritage sites</p>
+                  </div>
+                  {filteredAttractions.length > 0 && (
+                    <Link
+                      to={`/destinations/${destinationSlug}/attractions`}
+                      className="hidden sm:flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors"
+                    >
+                      <span>Read More ({filteredAttractions.length})</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  )}
+                </div>
+
+                {filteredAttractions.length > 0 ? (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredAttractions.slice(0, 9).map((attr) => (
+                        <AttractionCard key={attr.id} attraction={attr as any} />
+                      ))}
+                    </div>
+                    {filteredAttractions.length > 9 && (
+                      <div className="mt-8 text-center">
+                        <Link
+                          to={`/destinations/${destinationSlug}/attractions`}
+                          className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-xs hover:shadow-md active:scale-95 text-sm"
+                        >
+                          <span>Read More Attractions in {countryName}</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </Link>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-gray-500 text-sm italic py-4">No attractions currently listed for {countryName}.</p>
+                )}
+              </section>
+            </div>
+          ) : (
+            /* ==================================================== */
+            /* DEDICATED CATEGORY LISTING MODE (WITH PAGINATION & TAG FILTERS) */
+            /* ==================================================== */
             <>
-              {/* Results count indicator */}
               <div className="flex items-center justify-between text-sm text-gray-500 font-semibold px-1">
                 <span>
-                  Showing {paginatedItems.length} of{' '}
-                  {activeTab === 'all' && combinedResults.length}
-                  {activeTab === 'hotels' && filteredHotels.length}
-                  {activeTab === 'packages' && filteredPackages.length}
-                  {activeTab === 'activities' && filteredActivities.length}
-                  {activeTab === 'attractions' && filteredAttractions.length} results
+                  Showing {paginatedItems.length} of {currentCategoryList.length} results
                 </span>
+                {hasActiveFilters && (
+                  <button onClick={resetAllFilters} className="text-xs font-bold text-primary hover:underline">
+                    Clear active filters
+                  </button>
+                )}
               </div>
 
-              {/* Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {activeTab === 'all' &&
-                  (paginatedItems as typeof combinedResults).map((res) => {
-                    if (res.type === 'package') return <PackageCard key={res.id} package={res.item as any} />;
-                    if (res.type === 'activity') return <ActivityCard key={res.id} activity={res.item as any} />;
-                    if (res.type === 'attraction') return <AttractionCard key={res.id} attraction={res.item as any} />;
-                    return <HotelCard key={res.id} hotel={{...res.item, country: res.item.country || { slug: destinationSlug }} as any} />;
-                  })}
+              {paginatedItems.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {activeTab === 'hotels' &&
+                    (paginatedItems as typeof filteredHotels).map((hotel) => (
+                      <HotelCard key={hotel.id} hotel={{ ...hotel, country: hotel.country || { slug: destinationSlug } }} />
+                    ))}
 
-                {activeTab === 'hotels' &&
-                  (paginatedItems as typeof filteredHotels).map((hotel) => (
-                    <HotelCard key={hotel.id} hotel={{...hotel, country: hotel.country || { slug: destinationSlug }} as any} />
-                  ))}
+                  {activeTab === 'packages' &&
+                    (paginatedItems as typeof filteredPackages).map((pkg) => (
+                      <PackageCard key={pkg.id} package={pkg} />
+                    ))}
 
-                {activeTab === 'packages' &&
-                  (paginatedItems as typeof filteredPackages).map((pkg) => (
-                    <PackageCard key={pkg.id} package={pkg} />
-                  ))}
+                  {activeTab === 'activities' &&
+                    (paginatedItems as typeof filteredActivities).map((act) => (
+                      <ActivityCard key={act.id} activity={act} />
+                    ))}
 
-                {activeTab === 'activities' &&
-                  (paginatedItems as typeof filteredActivities).map((act) => (
-                    <ActivityCard key={act.id} activity={act} />
-                  ))}
+                  {activeTab === 'attractions' &&
+                    (paginatedItems as typeof filteredAttractions).map((attr) => (
+                      <AttractionCard key={attr.id} attraction={attr as any} />
+                    ))}
+                </div>
+              ) : (
+                <div className="text-center py-16 bg-white border border-gray-200/60 rounded-2xl p-8 shadow-sm">
+                  <div className="text-5xl mb-4 text-gray-300">🔍</div>
+                  <h3 className="text-lg font-bold text-gray-800 mb-2">No matching items found</h3>
+                  <p className="text-gray-500 text-sm max-w-sm mx-auto mb-6">
+                    Try clearing or adjusting your search filters.
+                  </p>
+                  {hasActiveFilters && (
+                    <button
+                      onClick={resetAllFilters}
+                      className="px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all text-sm"
+                    >
+                      Clear all filters
+                    </button>
+                  )}
+                </div>
+              )}
 
-                {activeTab === 'attractions' &&
-                  (paginatedItems as typeof filteredAttractions).map((attr) => (
-                    <AttractionCard key={attr.id} attraction={attr as any} />
-                  ))}
-              </div>
-
-              {/* Premium Pagination */}
+              {/* Category Listing Pagination */}
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-1.5 pt-12 border-t border-gray-150">
                   <button
@@ -694,23 +788,6 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 </div>
               )}
             </>
-          ) : (
-            /* Empty State */
-            <div className="text-center py-20 bg-white border border-gray-200/60 rounded-2xl p-8 shadow-sm">
-              <div className="text-5xl mb-4 text-gray-300">🔍</div>
-              <h3 className="text-lg font-bold text-gray-800 mb-2">No matching listings found</h3>
-              <p className="text-gray-500 text-sm max-w-sm mx-auto mb-6">
-                We couldn't find any results matching your search terms or applied filters in {countryName}.
-              </p>
-              {hasActiveFilters && (
-                <button
-                  onClick={resetAllFilters}
-                  className="px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all text-sm"
-                >
-                  Clear all filters
-                </button>
-              )}
-            </div>
           )}
         </div>
       </div>

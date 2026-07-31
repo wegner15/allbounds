@@ -59,20 +59,23 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
     }
   }, [activeTabId]);
 
-  // Handle Tab / Navigation Select
+  // Handle Tab / Navigation Select with smooth positioning to top of explorer
   const handleTabSelect = (tab: ExplorerTab, anchorId?: string) => {
     setActiveTab(tab);
     setSearchQuery('');
     resetAllFilters();
-    if (onTabChange) {
-      onTabChange(tab);
-    }
 
     if (tab === 'all' && anchorId) {
       const element = document.getElementById(anchorId);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
+    } else if (explorerRef.current) {
+      explorerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    if (onTabChange) {
+      onTabChange(tab);
     }
   };
 
@@ -596,6 +599,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   {filteredHotels.length > 0 && (
                     <Link
                       to={`/destinations/${destinationSlug}/hotels`}
+                      onClick={() => handleTabSelect('hotels')}
                       className="hidden sm:flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors"
                     >
                       <span>Read More ({filteredHotels.length})</span>
@@ -618,6 +622,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                       <div className="mt-8 text-center">
                         <Link
                           to={`/destinations/${destinationSlug}/hotels`}
+                          onClick={() => handleTabSelect('hotels')}
                           className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-xs hover:shadow-md active:scale-95 text-sm"
                         >
                           <span>Read More Hotels in {countryName}</span>
@@ -643,6 +648,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   {filteredPackages.length > 0 && (
                     <Link
                       to={`/destinations/${destinationSlug}/packages`}
+                      onClick={() => handleTabSelect('packages')}
                       className="hidden sm:flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors"
                     >
                       <span>Read More ({filteredPackages.length})</span>
@@ -662,6 +668,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                       <div className="mt-8 text-center">
                         <Link
                           to={`/destinations/${destinationSlug}/packages`}
+                          onClick={() => handleTabSelect('packages')}
                           className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-xs hover:shadow-md active:scale-95 text-sm"
                         >
                           <span>Read More Packages in {countryName}</span>
@@ -687,6 +694,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   {filteredActivities.length > 0 && (
                     <Link
                       to={`/destinations/${destinationSlug}/activities`}
+                      onClick={() => handleTabSelect('activities')}
                       className="hidden sm:flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors"
                     >
                       <span>Read More ({filteredActivities.length})</span>
@@ -706,6 +714,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                       <div className="mt-8 text-center">
                         <Link
                           to={`/destinations/${destinationSlug}/activities`}
+                          onClick={() => handleTabSelect('activities')}
                           className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-xs hover:shadow-md active:scale-95 text-sm"
                         >
                           <span>Read More Experiences in {countryName}</span>
@@ -731,6 +740,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   {filteredAttractions.length > 0 && (
                     <Link
                       to={`/destinations/${destinationSlug}/attractions`}
+                      onClick={() => handleTabSelect('attractions')}
                       className="hidden sm:flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors"
                     >
                       <span>Read More ({filteredAttractions.length})</span>
@@ -750,6 +760,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                       <div className="mt-8 text-center">
                         <Link
                           to={`/destinations/${destinationSlug}/attractions`}
+                          onClick={() => handleTabSelect('attractions')}
                           className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-xs hover:shadow-md active:scale-95 text-sm"
                         >
                           <span>Read More Attractions in {countryName}</span>

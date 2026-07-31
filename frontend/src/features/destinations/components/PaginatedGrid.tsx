@@ -32,8 +32,15 @@ const PaginatedGrid = <T,>({
     const currentItems = items.slice(0, currentPage * itemsPerPage);
     const hasMore = currentItems.length < totalItems;
 
-    const handleLoadMore = () => {
+    const handleLoadMore = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.currentTarget.blur();
+        const currentScrollY = window.scrollY;
         setCurrentPage(prev => prev + 1);
+        requestAnimationFrame(() => {
+            window.scrollTo({ top: currentScrollY, behavior: 'instant' as ScrollBehavior });
+        });
     };
 
     if (totalItems === 0) {
@@ -57,8 +64,9 @@ const PaginatedGrid = <T,>({
             {showPagination && hasMore && (
                 <div className="mt-12 flex justify-center">
                     <button
+                        type="button"
                         onClick={handleLoadMore}
-                        className="group relative inline-flex items-center gap-3 px-10 py-4 bg-primary text-white font-bold rounded-xl shadow-md hover:shadow-2xl hover:bg-primary-dark hover:-translate-y-0.5 transition-all duration-300 active:scale-95"
+                        className="group relative inline-flex items-center gap-3 px-10 py-4 bg-primary text-white font-bold rounded-xl shadow-md hover:shadow-2xl hover:bg-primary-dark hover:-translate-y-0.5 transition-all duration-300 active:scale-95 cursor-pointer"
                     >
                         <span>{loadMoreLabel}</span>
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

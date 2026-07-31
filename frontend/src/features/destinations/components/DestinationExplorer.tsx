@@ -317,9 +317,15 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
 
   const hasMoreItems = visibleCount < currentCategoryList.length;
 
-  const handleLoadMore = (e: React.MouseEvent) => {
+  const handleLoadMore = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.blur();
+    const currentScrollY = window.scrollY;
     setVisibleCount(prev => prev + 9);
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: currentScrollY, behavior: 'instant' as ScrollBehavior });
+    });
   };
 
   useEffect(() => {
@@ -817,6 +823,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
               {hasMoreItems && (
                 <div className="mt-12 text-center">
                   <button
+                    type="button"
                     onClick={handleLoadMore}
                     className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-md hover:shadow-lg hover:bg-primary-dark active:scale-95 transition-all text-sm cursor-pointer"
                   >

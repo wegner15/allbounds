@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Search, X, Star, ArrowRight, Tag as TagIcon, ChevronDown } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Search, X, Tag as TagIcon, ChevronDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { usePackages } from '../../../lib/hooks/usePackages';
 import { useHotels } from '../../../lib/hooks/useHotels';
 import { useActivities } from '../../../lib/hooks/useActivities';
@@ -24,13 +24,6 @@ interface DestinationExplorerProps {
 }
 
 type ExplorerTab = 'all' | 'hotels' | 'packages' | 'activities' | 'attractions';
-
-const CATEGORY_ITEMS = [
-  { id: 'hotels', label: 'Where to Stay', icon: '🏨', anchor: 'section-hotels', slug: 'hotels' },
-  { id: 'packages', label: 'Featured Packages', icon: '🧳', anchor: 'section-packages', slug: 'packages' },
-  { id: 'activities', label: 'Experiences', icon: '🎯', anchor: 'section-activities', slug: 'activities' },
-  { id: 'attractions', label: 'Top Things to Do', icon: '📍', anchor: 'section-attractions', slug: 'attractions' },
-];
 
 export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
   countryId,
@@ -56,6 +49,12 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
   const [selectedActivityTagIds, setSelectedActivityTagIds] = useState<number[]>([]);
   const [selectedAttractionTagIds, setSelectedAttractionTagIds] = useState<number[]>([]);
 
+  // Per-section in-place visible count states (default 9 items each)
+  const [hotelVisibleCount, setHotelVisibleCount] = useState(9);
+  const [packageVisibleCount, setPackageVisibleCount] = useState(9);
+  const [activityVisibleCount, setActivityVisibleCount] = useState(9);
+  const [attractionVisibleCount, setAttractionVisibleCount] = useState(9);
+
   // Additional attribute filter states per section
   const [hotelStars, setHotelStars] = useState<number[]>([]);
   const [packageDurations, setPackageDurations] = useState<string[]>([]);
@@ -69,23 +68,13 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
     }
   }, [activeTabId]);
 
-  // Handle Navigation / Section Scroll
-  const handleTabSelect = (tab: ExplorerTab, anchorId?: string) => {
-    setActiveTab(tab);
-    
-    if (tab === 'all' && anchorId) {
-      const element = document.getElementById(anchorId);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    } else if (explorerRef.current) {
-      explorerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    if (onTabChange) {
-      onTabChange(tab);
-    }
-  };
+  // Reset visible counts when filters or search change
+  useEffect(() => {
+    setHotelVisibleCount(9);
+    setPackageVisibleCount(9);
+    setActivityVisibleCount(9);
+    setAttractionVisibleCount(9);
+  }, [searchQuery, selectedHotelTagIds, selectedPackageTagIds, selectedActivityTagIds, selectedAttractionTagIds, hotelStars, packageDurations, activityIntensities, attractionTypes]);
 
   // Unconditional data fetching ensures full items (with embedded tags) are loaded immediately on page load
   const { data: fetchedHotels, isLoading: hotelsLoading } = useHotels(countryId);
@@ -241,37 +230,50 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
     });
   }, [rawAttractions, searchQuery, selectedAttractionTagIds, attractionTypes]);
 
-  // In-place "Load More" logic for Category Listing mode
-  const [visibleCount, setVisibleCount] = useState(9);
-
-  const currentCategoryList = useMemo(() => {
-    if (activeTab === 'hotels') return filteredHotels;
-    if (activeTab === 'packages') return filteredPackages;
-    if (activeTab === 'activities') return filteredActivities;
-    if (activeTab === 'attractions') return filteredAttractions;
-    return [];
-  }, [activeTab, filteredHotels, filteredPackages, filteredActivities, filteredAttractions]);
-
-  const visibleItems = useMemo(() => {
-    return currentCategoryList.slice(0, visibleCount);
-  }, [currentCategoryList, visibleCount]);
-
-  const hasMoreItems = visibleCount < currentCategoryList.length;
-
-  const handleLoadMore = (e: React.MouseEvent<HTMLButtonElement>) => {
+  // In-place "Load More" Handlers per section (Zero scroll movement, no URL link changes)
+  const handleLoadMoreHotels = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
     e.currentTarget.blur();
     const currentScrollY = window.scrollY;
-    setVisibleCount(prev => prev + 9);
+    setHotelVisibleCount(prev => prev + 9);
     requestAnimationFrame(() => {
       window.scrollTo({ top: currentScrollY, behavior: 'instant' as ScrollBehavior });
     });
   };
 
-  useEffect(() => {
-    setVisibleCount(9);
-  }, [activeTab, searchQuery, selectedHotelTagIds, selectedPackageTagIds, selectedActivityTagIds, selectedAttractionTagIds, hotelStars, packageDurations, activityIntensities, attractionTypes]);
+  const handleLoadMorePackages = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.blur();
+    const currentScrollY = window.scrollY;
+    setPackageVisibleCount(prev => prev + 9);
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: currentScrollY, behavior: 'instant' as ScrollBehavior });
+    });
+  };
+
+  const handleLoadMoreActivities = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.blur();
+    const currentScrollY = window.scrollY;
+    setActivityVisibleCount(prev => prev + 9);
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: currentScrollY, behavior: 'instant' as ScrollBehavior });
+    });
+  };
+
+  const handleLoadMoreAttractions = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.blur();
+    const currentScrollY = window.scrollY;
+    setAttractionVisibleCount(prev => prev + 9);
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: currentScrollY, behavior: 'instant' as ScrollBehavior });
+    });
+  };
 
   const isOverview = activeTab === 'all';
 
@@ -287,11 +289,39 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
     setSearchQuery('');
   };
 
+  // Dedicated Category Listing mode items
+  const currentCategoryList = useMemo(() => {
+    if (activeTab === 'hotels') return filteredHotels;
+    if (activeTab === 'packages') return filteredPackages;
+    if (activeTab === 'activities') return filteredActivities;
+    if (activeTab === 'attractions') return filteredAttractions;
+    return [];
+  }, [activeTab, filteredHotels, filteredPackages, filteredActivities, filteredAttractions]);
+
+  const [categoryVisibleCount, setCategoryVisibleCount] = useState(9);
+  const visibleCategoryItems = useMemo(() => {
+    return currentCategoryList.slice(0, categoryVisibleCount);
+  }, [currentCategoryList, categoryVisibleCount]);
+
+  const handleLoadMoreCategory = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.blur();
+    const currentScrollY = window.scrollY;
+    setCategoryVisibleCount(prev => prev + 9);
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: currentScrollY, behavior: 'instant' as ScrollBehavior });
+    });
+  };
+
+  useEffect(() => {
+    setCategoryVisibleCount(9);
+  }, [activeTab]);
+
   return (
     <div ref={explorerRef} className="scroll-mt-24 space-y-8">
-      {/* TOP NAVIGATION BAR & SEARCH */}
-      <div className="bg-white p-4 md:p-6 rounded-2xl border border-gray-200/60 shadow-sm space-y-4">
-        {/* Search Input */}
+      {/* SEARCH BAR */}
+      <div className="bg-white p-4 rounded-2xl border border-gray-200/60 shadow-sm">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
@@ -310,48 +340,9 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
             </button>
           )}
         </div>
-
-        {/* Top Category Navigation Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none pt-2 border-t border-gray-100">
-          <button
-            onClick={() => handleTabSelect('all')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs md:text-sm whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === 'all'
-                ? 'bg-primary text-white shadow-xs'
-                : 'bg-gray-100/80 text-gray-700 hover:bg-gray-200/80'
-            }`}
-          >
-            <span>✈️</span>
-            <span>All Categories</span>
-          </button>
-
-          {CATEGORY_ITEMS.map((cat) => {
-            const isActive = activeTab === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => {
-                  if (isOverview) {
-                    handleTabSelect('all', cat.anchor);
-                  } else {
-                    handleTabSelect(cat.id as ExplorerTab);
-                  }
-                }}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs md:text-sm whitespace-nowrap transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-primary text-white shadow-xs'
-                    : 'bg-gray-100/80 text-gray-700 hover:bg-gray-200/80'
-                }`}
-              >
-                <span>{cat.icon}</span>
-                <span>{cat.label}</span>
-              </button>
-            );
-          })}
-        </div>
       </div>
 
-      {/* MAIN CONTENT AREA (FULL WIDTH, NO LEFT SIDEBAR) */}
+      {/* MAIN CONTENT AREA (FULL WIDTH, IN-PLACE LOAD MORE WITHOUT ROUTE LINKS) */}
       <div className="w-full space-y-12">
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -365,7 +356,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
           </div>
         ) : isOverview ? (
           /* ==================================================== */
-          /* CATEGORY-BASED OVERVIEW (PER-SECTION FILTERS) */
+          /* CATEGORY-BASED OVERVIEW (IN-PLACE SECTION LOAD MORE) */
           /* ==================================================== */
           <div className="space-y-16">
             
@@ -378,15 +369,15 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   </h2>
                   <p className="text-xs md:text-sm text-gray-500 mt-0.5">Top rated lodges, luxury camps, and boutique hotels</p>
                 </div>
-                {rawHotels.length > 0 && (
-                  <Link
-                    to={`/destinations/${destinationSlug}/hotels`}
-                    onClick={() => handleTabSelect('hotels')}
-                    className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors"
+                {filteredHotels.length > hotelVisibleCount && (
+                  <button
+                    type="button"
+                    onClick={handleLoadMoreHotels}
+                    className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors cursor-pointer"
                   >
-                    <span>Read More ({filteredHotels.length})</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
+                    <span>Load More ({filteredHotels.length - hotelVisibleCount} remaining)</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
                 )}
               </div>
 
@@ -428,23 +419,23 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
               {filteredHotels.length > 0 ? (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredHotels.slice(0, 9).map((hotel: any) => (
+                    {filteredHotels.slice(0, hotelVisibleCount).map((hotel: any) => (
                       <HotelCard
                         key={hotel.id}
                         hotel={{ ...hotel, country: hotel.country || { slug: destinationSlug } }}
                       />
                     ))}
                   </div>
-                  {filteredHotels.length > 9 && (
+                  {filteredHotels.length > hotelVisibleCount && (
                     <div className="mt-8 text-center">
-                      <Link
-                        to={`/destinations/${destinationSlug}/hotels`}
-                        onClick={() => handleTabSelect('hotels')}
-                        className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-2xs hover:shadow-md active:scale-95 text-sm"
+                      <button
+                        type="button"
+                        onClick={handleLoadMoreHotels}
+                        className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-2xs hover:shadow-md active:scale-95 text-sm cursor-pointer"
                       >
-                        <span>Read More Hotels in {countryName}</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </Link>
+                        <span>Load More Hotels ({filteredHotels.length - hotelVisibleCount} remaining)</span>
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
                     </div>
                   )}
                 </>
@@ -462,15 +453,15 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   </h2>
                   <p className="text-xs md:text-sm text-gray-500 mt-0.5">Handpicked itineraries, safaris, and custom guided tours</p>
                 </div>
-                {rawPackages.length > 0 && (
-                  <Link
-                    to={`/destinations/${destinationSlug}/packages`}
-                    onClick={() => handleTabSelect('packages')}
-                    className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors"
+                {filteredPackages.length > packageVisibleCount && (
+                  <button
+                    type="button"
+                    onClick={handleLoadMorePackages}
+                    className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors cursor-pointer"
                   >
-                    <span>Read More ({filteredPackages.length})</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
+                    <span>Load More ({filteredPackages.length - packageVisibleCount} remaining)</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
                 )}
               </div>
 
@@ -512,20 +503,20 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
               {filteredPackages.length > 0 ? (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredPackages.slice(0, 9).map((pkg: any) => (
+                    {filteredPackages.slice(0, packageVisibleCount).map((pkg: any) => (
                       <PackageCard key={pkg.id} package={pkg} />
                     ))}
                   </div>
-                  {filteredPackages.length > 9 && (
+                  {filteredPackages.length > packageVisibleCount && (
                     <div className="mt-8 text-center">
-                      <Link
-                        to={`/destinations/${destinationSlug}/packages`}
-                        onClick={() => handleTabSelect('packages')}
-                        className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-2xs hover:shadow-md active:scale-95 text-sm"
+                      <button
+                        type="button"
+                        onClick={handleLoadMorePackages}
+                        className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-2xs hover:shadow-md active:scale-95 text-sm cursor-pointer"
                       >
-                        <span>Read More Packages in {countryName}</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </Link>
+                        <span>Load More Packages ({filteredPackages.length - packageVisibleCount} remaining)</span>
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
                     </div>
                   )}
                 </>
@@ -543,15 +534,15 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   </h2>
                   <p className="text-xs md:text-sm text-gray-500 mt-0.5">Trekking permits, cultural walks, rafting, and adventures</p>
                 </div>
-                {rawActivities.length > 0 && (
-                  <Link
-                    to={`/destinations/${destinationSlug}/activities`}
-                    onClick={() => handleTabSelect('activities')}
-                    className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors"
+                {filteredActivities.length > activityVisibleCount && (
+                  <button
+                    type="button"
+                    onClick={handleLoadMoreActivities}
+                    className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors cursor-pointer"
                   >
-                    <span>Read More ({filteredActivities.length})</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
+                    <span>Load More ({filteredActivities.length - activityVisibleCount} remaining)</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
                 )}
               </div>
 
@@ -593,20 +584,20 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
               {filteredActivities.length > 0 ? (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredActivities.slice(0, 9).map((act: any) => (
+                    {filteredActivities.slice(0, activityVisibleCount).map((act: any) => (
                       <ActivityCard key={act.id} activity={act} />
                     ))}
                   </div>
-                  {filteredActivities.length > 9 && (
+                  {filteredActivities.length > activityVisibleCount && (
                     <div className="mt-8 text-center">
-                      <Link
-                        to={`/destinations/${destinationSlug}/activities`}
-                        onClick={() => handleTabSelect('activities')}
-                        className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-2xs hover:shadow-md active:scale-95 text-sm"
+                      <button
+                        type="button"
+                        onClick={handleLoadMoreActivities}
+                        className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-2xs hover:shadow-md active:scale-95 text-sm cursor-pointer"
                       >
-                        <span>Read More Experiences in {countryName}</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </Link>
+                        <span>Load More Experiences ({filteredActivities.length - activityVisibleCount} remaining)</span>
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
                     </div>
                   )}
                 </>
@@ -624,15 +615,15 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   </h2>
                   <p className="text-xs md:text-sm text-gray-500 mt-0.5">National parks, scenic landmarks, and heritage sites</p>
                 </div>
-                {rawAttractions.length > 0 && (
-                  <Link
-                    to={`/destinations/${destinationSlug}/attractions`}
-                    onClick={() => handleTabSelect('attractions')}
-                    className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors"
+                {filteredAttractions.length > attractionVisibleCount && (
+                  <button
+                    type="button"
+                    onClick={handleLoadMoreAttractions}
+                    className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors cursor-pointer"
                   >
-                    <span>Read More ({filteredAttractions.length})</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
+                    <span>Load More ({filteredAttractions.length - attractionVisibleCount} remaining)</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
                 )}
               </div>
 
@@ -674,20 +665,20 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
               {filteredAttractions.length > 0 ? (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredAttractions.slice(0, 9).map((attr: any) => (
+                    {filteredAttractions.slice(0, attractionVisibleCount).map((attr: any) => (
                       <AttractionCard key={attr.id} attraction={attr as any} />
                     ))}
                   </div>
-                  {filteredAttractions.length > 9 && (
+                  {filteredAttractions.length > attractionVisibleCount && (
                     <div className="mt-8 text-center">
-                      <Link
-                        to={`/destinations/${destinationSlug}/attractions`}
-                        onClick={() => handleTabSelect('attractions')}
-                        className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-2xs hover:shadow-md active:scale-95 text-sm"
+                      <button
+                        type="button"
+                        onClick={handleLoadMoreAttractions}
+                        className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-2xs hover:shadow-md active:scale-95 text-sm cursor-pointer"
                       >
-                        <span>Read More Attractions in {countryName}</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </Link>
+                        <span>Load More Attractions ({filteredAttractions.length - attractionVisibleCount} remaining)</span>
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
                     </div>
                   )}
                 </>
@@ -701,146 +692,9 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
           /* DEDICATED CATEGORY LISTING MODE (IN-PLACE LOAD MORE) */
           /* ==================================================== */
           <div className="space-y-6">
-            {/* Category Tag Filters Bar for single category mode */}
-            {activeTab === 'hotels' && hotelTags.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 bg-white p-4 rounded-2xl border border-gray-200/60 shadow-2xs">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-2 flex items-center gap-1">
-                  <TagIcon className="w-3.5 h-3.5 text-primary" /> Filter Hotels:
-                </span>
-                <button
-                  onClick={() => setSelectedHotelTagIds([])}
-                  className={`text-xs px-3.5 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-                    selectedHotelTagIds.length === 0
-                      ? 'bg-primary text-white shadow-2xs'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  All ({rawHotels.length})
-                </button>
-                {hotelTags.map((tag) => {
-                  const isSelected = selectedHotelTagIds.includes(tag.id);
-                  return (
-                    <button
-                      key={tag.id}
-                      onClick={() => toggleFilter(tag.id, selectedHotelTagIds, setSelectedHotelTagIds)}
-                      className={`text-xs px-3.5 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-                        isSelected
-                          ? 'bg-primary text-white shadow-2xs'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      {tag.name}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            {activeTab === 'packages' && packageTags.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 bg-white p-4 rounded-2xl border border-gray-200/60 shadow-2xs">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-2 flex items-center gap-1">
-                  <TagIcon className="w-3.5 h-3.5 text-primary" /> Filter Packages:
-                </span>
-                <button
-                  onClick={() => setSelectedPackageTagIds([])}
-                  className={`text-xs px-3.5 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-                    selectedPackageTagIds.length === 0
-                      ? 'bg-primary text-white shadow-2xs'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  All ({rawPackages.length})
-                </button>
-                {packageTags.map((tag) => {
-                  const isSelected = selectedPackageTagIds.includes(tag.id);
-                  return (
-                    <button
-                      key={tag.id}
-                      onClick={() => toggleFilter(tag.id, selectedPackageTagIds, setSelectedPackageTagIds)}
-                      className={`text-xs px-3.5 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-                        isSelected
-                          ? 'bg-primary text-white shadow-2xs'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      {tag.name}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            {activeTab === 'activities' && activityTags.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 bg-white p-4 rounded-2xl border border-gray-200/60 shadow-2xs">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-2 flex items-center gap-1">
-                  <TagIcon className="w-3.5 h-3.5 text-primary" /> Filter Experiences:
-                </span>
-                <button
-                  onClick={() => setSelectedActivityTagIds([])}
-                  className={`text-xs px-3.5 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-                    selectedActivityTagIds.length === 0
-                      ? 'bg-primary text-white shadow-2xs'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  All ({rawActivities.length})
-                </button>
-                {activityTags.map((tag) => {
-                  const isSelected = selectedActivityTagIds.includes(tag.id);
-                  return (
-                    <button
-                      key={tag.id}
-                      onClick={() => toggleFilter(tag.id, selectedActivityTagIds, setSelectedActivityTagIds)}
-                      className={`text-xs px-3.5 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-                        isSelected
-                          ? 'bg-primary text-white shadow-2xs'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      {tag.name}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            {activeTab === 'attractions' && attractionTags.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 bg-white p-4 rounded-2xl border border-gray-200/60 shadow-2xs">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-2 flex items-center gap-1">
-                  <TagIcon className="w-3.5 h-3.5 text-primary" /> Filter Attractions:
-                </span>
-                <button
-                  onClick={() => setSelectedAttractionTagIds([])}
-                  className={`text-xs px-3.5 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-                    selectedAttractionTagIds.length === 0
-                      ? 'bg-primary text-white shadow-2xs'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  All ({rawAttractions.length})
-                </button>
-                {attractionTags.map((tag) => {
-                  const isSelected = selectedAttractionTagIds.includes(tag.id);
-                  return (
-                    <button
-                      key={tag.id}
-                      onClick={() => toggleFilter(tag.id, selectedAttractionTagIds, setSelectedAttractionTagIds)}
-                      className={`text-xs px-3.5 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-                        isSelected
-                          ? 'bg-primary text-white shadow-2xs'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      {tag.name}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
             <div className="flex items-center justify-between text-sm text-gray-500 font-semibold px-1">
               <span>
-                Showing {visibleItems.length} of {currentCategoryList.length} results
+                Showing {visibleCategoryItems.length} of {currentCategoryList.length} results
               </span>
               {(selectedHotelTagIds.length > 0 || selectedPackageTagIds.length > 0 || selectedActivityTagIds.length > 0 || selectedAttractionTagIds.length > 0 || searchQuery !== '') && (
                 <button onClick={resetAllFilters} className="text-xs font-bold text-primary hover:underline">
@@ -849,25 +703,25 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
               )}
             </div>
 
-            {visibleItems.length > 0 ? (
+            {visibleCategoryItems.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {activeTab === 'hotels' &&
-                  (visibleItems as typeof filteredHotels).map((hotel) => (
+                  (visibleCategoryItems as typeof filteredHotels).map((hotel) => (
                     <HotelCard key={hotel.id} hotel={{ ...hotel, country: hotel.country || { slug: destinationSlug } }} />
                   ))}
 
                 {activeTab === 'packages' &&
-                  (visibleItems as typeof filteredPackages).map((pkg) => (
+                  (visibleCategoryItems as typeof filteredPackages).map((pkg) => (
                     <PackageCard key={pkg.id} package={pkg} />
                   ))}
 
                 {activeTab === 'activities' &&
-                  (visibleItems as typeof filteredActivities).map((act) => (
+                  (visibleCategoryItems as typeof filteredActivities).map((act) => (
                     <ActivityCard key={act.id} activity={act} />
                   ))}
 
                 {activeTab === 'attractions' &&
-                  (visibleItems as typeof filteredAttractions).map((attr) => (
+                  (visibleCategoryItems as typeof filteredAttractions).map((attr) => (
                     <AttractionCard key={attr.id} attraction={attr as any} />
                   ))}
               </div>
@@ -880,22 +734,22 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 </p>
                 <button
                   onClick={resetAllFilters}
-                  className="px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all text-sm"
+                  className="px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all text-sm cursor-pointer"
                 >
                   Clear all filters
                 </button>
               </div>
             )}
 
-            {/* In-Place Load More Button (Never scrolls or jumps page position) */}
-            {hasMoreItems && (
+            {/* In-Place Load More Button */}
+            {categoryVisibleCount < currentCategoryList.length && (
               <div className="mt-12 text-center">
                 <button
                   type="button"
-                  onClick={handleLoadMore}
+                  onClick={handleLoadMoreCategory}
                   className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-md hover:shadow-lg hover:bg-primary-dark active:scale-95 transition-all text-sm cursor-pointer"
                 >
-                  <span>Load More ({currentCategoryList.length - visibleCount} remaining)</span>
+                  <span>Load More ({currentCategoryList.length - categoryVisibleCount} remaining)</span>
                   <ChevronDown className="w-4 h-4" />
                 </button>
               </div>

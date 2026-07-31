@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Search, SlidersHorizontal, X, Star, ArrowRight, Tag as TagIcon, ChevronRight } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Star, ArrowRight, Tag as TagIcon, ChevronRight, ChevronDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { usePackages } from '../../../lib/hooks/usePackages';
 import { useHotels } from '../../../lib/hooks/useHotels';
@@ -76,15 +76,15 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
     }
   };
 
-  // Fetch data
-  const { data: fetchedHotels, isLoading: hotelsLoading } = useHotels(initialHotels ? undefined : countryId);
+  // Unconditional data fetching ensures full items (with embedded tags) are loaded immediately on page load
+  const { data: fetchedHotels, isLoading: hotelsLoading } = useHotels(countryId);
   const { data: packages, isLoading: packagesLoading } = usePackages({ country_id: countryId });
   const { data: fetchedActivities, isLoading: activitiesLoading } = useActivities(countryId);
   const { data: fetchedAttractions, isLoading: attractionsLoading } = useAttractions({ country: countryName });
 
-  const hotels = initialHotels || fetchedHotels;
-  const activities = initialActivities || fetchedActivities;
-  const attractions = initialAttractions || fetchedAttractions;
+  const hotels = fetchedHotels || initialHotels || [];
+  const activities = fetchedActivities || initialActivities || [];
+  const attractions = fetchedAttractions || initialAttractions || [];
 
   // Filter States
   const [hotelStars, setHotelStars] = useState<number[]>([]);
@@ -148,31 +148,37 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
     return selectedTagIds.some(id => itemTagIds.has(id));
   };
 
-  // Extract items for the currently selected category
+  // Extract items for the active category (or all items if in overview) for immediate tag discovery
   const rawCategoryItems = useMemo(() => {
-    if (activeTab === 'hotels') {
-      return hotels?.filter(h => (h.country_id === undefined || h.country_id === countryId) && h.is_active) || [];
-    }
-    if (activeTab === 'packages') {
-      return packages?.filter(p => p.is_active) || [];
-    }
-    if (activeTab === 'activities') {
-      return activities?.filter(a => a.is_active) || [];
-    }
-    if (activeTab === 'attractions') {
-      return attractions?.filter(a => a.is_active) || [];
-    }
-    return [];
+    const hList = hotels?.filter((h: any) => (h.country_id === undefined || h.country_id === countryId) && h.is_active) || [];
+    const pList = packages?.filter((p: any) => p.is_active) || [];
+    const actList = activities?.filter((a: any) => a.is_active) || [];
+    const attrList = attractions?.filter((a: any) => a.is_active) || [];
+
+    if (activeTab === 'hotels') return hList;
+    if (activeTab === 'packages') return pList;
+    if (activeTab === 'activities') return actList;
+    if (activeTab === 'attractions') return attrList;
+
+    return [...hList, ...pList, ...actList, ...attrList];
   }, [activeTab, hotels, packages, activities, attractions, countryId]);
 
-  // Extract unique tag IDs attached to at least one item in rawCategoryItems
-  const availableTagIds = useMemo(() => {
+  // Extract unique tag IDs and names attached to items in rawCategoryItems
+  const availableTagIdentifiers = useMemo(() => {
     const tagIds = new Set<number>();
+    const tagNames = new Set<string>();
+
     rawCategoryItems.forEach((item: any) => {
       if (Array.isArray(item.tags)) {
         item.tags.forEach((t: any) => {
-          const id = typeof t === 'number' ? t : t?.id;
-          if (id) tagIds.add(id);
+          if (typeof t === 'number') {
+            tagIds.add(t);
+          } else if (typeof t === 'string') {
+            tagNames.add(t.toLowerCase());
+          } else if (t && typeof t === 'object') {
+            if (t.id) tagIds.add(t.id);
+            if (t.name) tagNames.add(t.name.toLowerCase());
+          }
         });
       }
       if (Array.isArray(item.tag_ids)) {
@@ -181,13 +187,16 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
         });
       }
     });
-    return tagIds;
+    return { tagIds, tagNames };
   }, [rawCategoryItems]);
 
-  // Only show tags that are actually attached to items in the current category
+  // Only show tags that are actually attached to items in the active category
   const visibleTags = useMemo(() => {
-    return contentTags.filter(tag => availableTagIds.has(tag.id));
-  }, [contentTags, availableTagIds]);
+    return contentTags.filter(tag => 
+      availableTagIdentifiers.tagIds.has(tag.id) || 
+      availableTagIdentifiers.tagNames.has(tag.name.toLowerCase())
+    );
+  }, [contentTags, availableTagIdentifiers]);
 
   // ----------------------------------------------------
   // FILTERING LOGIC
@@ -195,8 +204,8 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
 
   // 1. Hotels
   const filteredHotels = useMemo(() => {
-    const list = hotels?.filter(h => (h.country_id === undefined || h.country_id === countryId) && h.is_active) || [];
-    return list.filter(hotel => {
+    const list = hotels?.filter((h: any) => (h.country_id === undefined || h.country_id === countryId) && h.is_active) || [];
+    return list.filter((hotel: any) => {
       if (!matchesTags(hotel)) return false;
       if (searchQuery && !hotel.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
           !(hotel.summary || '').toLowerCase().includes(searchQuery.toLowerCase())) {
@@ -210,8 +219,8 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
 
   // 2. Packages
   const filteredPackages = useMemo(() => {
-    const list = packages?.filter(p => p.is_active) || [];
-    return list.filter(pkg => {
+    const list = packages?.filter((p: any) => p.is_active) || [];
+    return list.filter((pkg: any) => {
       if (!matchesTags(pkg)) return false;
       if (searchQuery && !pkg.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
           !(pkg.summary || '').toLowerCase().includes(searchQuery.toLowerCase())) {
@@ -245,8 +254,8 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
 
   // 3. Activities
   const filteredActivities = useMemo(() => {
-    const list = activities?.filter(a => a.is_active) || [];
-    return list.filter(activity => {
+    const list = activities?.filter((a: any) => a.is_active) || [];
+    return list.filter((activity: any) => {
       if (!matchesTags(activity)) return false;
       if (searchQuery && !activity.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
           !(activity.summary || '').toLowerCase().includes(searchQuery.toLowerCase())) {
@@ -272,8 +281,8 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
 
   // 4. Attractions
   const filteredAttractions = useMemo(() => {
-    const list = attractions?.filter(a => a.is_active) || [];
-    return list.filter(attraction => {
+    const list = attractions?.filter((a: any) => a.is_active) || [];
+    return list.filter((attraction: any) => {
       if (!matchesTags(attraction)) return false;
       if (searchQuery && !attraction.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
           !(attraction.summary || '').toLowerCase().includes(searchQuery.toLowerCase())) {
@@ -291,9 +300,8 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
     });
   }, [attractions, searchQuery, attractionTypes, selectedTagIds]);
 
-  // Pagination for Category Listing mode
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 9;
+  // In-place "Load More" logic for Category Listing mode
+  const [visibleCount, setVisibleCount] = useState(9);
 
   const currentCategoryList = useMemo(() => {
     if (activeTab === 'hotels') return filteredHotels;
@@ -303,17 +311,19 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
     return [];
   }, [activeTab, filteredHotels, filteredPackages, filteredActivities, filteredAttractions]);
 
-  const paginatedItems = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return currentCategoryList.slice(start, start + itemsPerPage);
-  }, [currentCategoryList, currentPage]);
+  const visibleItems = useMemo(() => {
+    return currentCategoryList.slice(0, visibleCount);
+  }, [currentCategoryList, visibleCount]);
 
-  const totalPages = useMemo(() => {
-    return Math.max(1, Math.ceil(currentCategoryList.length / itemsPerPage));
-  }, [currentCategoryList]);
+  const hasMoreItems = visibleCount < currentCategoryList.length;
+
+  const handleLoadMore = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setVisibleCount(prev => prev + 9);
+  };
 
   useEffect(() => {
-    setCurrentPage(1);
+    setVisibleCount(9);
   }, [activeTab, searchQuery, selectedTagIds, hotelStars, hotelPriceCategories, packageDurations, packageBudgets, packageTypes, activityIntensities, activityDurations, attractionTypes]);
 
   const toggleFilter = (value: any, list: any[], setList: React.Dispatch<React.SetStateAction<any[]>>) => {
@@ -591,7 +601,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 {filteredHotels.length > 0 ? (
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {filteredHotels.slice(0, 9).map((hotel) => (
+                      {filteredHotels.slice(0, 9).map((hotel: any) => (
                         <HotelCard
                           key={hotel.id}
                           hotel={{ ...hotel, country: hotel.country || { slug: destinationSlug } }}
@@ -638,7 +648,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 {filteredPackages.length > 0 ? (
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {filteredPackages.slice(0, 9).map((pkg) => (
+                      {filteredPackages.slice(0, 9).map((pkg: any) => (
                         <PackageCard key={pkg.id} package={pkg} />
                       ))}
                     </div>
@@ -682,7 +692,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 {filteredActivities.length > 0 ? (
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {filteredActivities.slice(0, 9).map((act) => (
+                      {filteredActivities.slice(0, 9).map((act: any) => (
                         <ActivityCard key={act.id} activity={act} />
                       ))}
                     </div>
@@ -726,7 +736,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 {filteredAttractions.length > 0 ? (
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {filteredAttractions.slice(0, 9).map((attr) => (
+                      {filteredAttractions.slice(0, 9).map((attr: any) => (
                         <AttractionCard key={attr.id} attraction={attr as any} />
                       ))}
                     </div>
@@ -749,12 +759,12 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
             </div>
           ) : (
             /* ==================================================== */
-            /* DEDICATED CATEGORY LISTING MODE (WITH PAGINATION & TAG FILTERS) */
+            /* DEDICATED CATEGORY LISTING MODE (IN-PLACE LOAD MORE) */
             /* ==================================================== */
             <>
               <div className="flex items-center justify-between text-sm text-gray-500 font-semibold px-1">
                 <span>
-                  Showing {paginatedItems.length} of {currentCategoryList.length} results
+                  Showing {visibleItems.length} of {currentCategoryList.length} results
                 </span>
                 {hasActiveFilters && (
                   <button onClick={resetAllFilters} className="text-xs font-bold text-primary hover:underline">
@@ -763,25 +773,25 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 )}
               </div>
 
-              {paginatedItems.length > 0 ? (
+              {visibleItems.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {activeTab === 'hotels' &&
-                    (paginatedItems as typeof filteredHotels).map((hotel) => (
+                    (visibleItems as typeof filteredHotels).map((hotel) => (
                       <HotelCard key={hotel.id} hotel={{ ...hotel, country: hotel.country || { slug: destinationSlug } }} />
                     ))}
 
                   {activeTab === 'packages' &&
-                    (paginatedItems as typeof filteredPackages).map((pkg) => (
+                    (visibleItems as typeof filteredPackages).map((pkg) => (
                       <PackageCard key={pkg.id} package={pkg} />
                     ))}
 
                   {activeTab === 'activities' &&
-                    (paginatedItems as typeof filteredActivities).map((act) => (
+                    (visibleItems as typeof filteredActivities).map((act) => (
                       <ActivityCard key={act.id} activity={act} />
                     ))}
 
                   {activeTab === 'attractions' &&
-                    (paginatedItems as typeof filteredAttractions).map((attr) => (
+                    (visibleItems as typeof filteredAttractions).map((attr) => (
                       <AttractionCard key={attr.id} attraction={attr as any} />
                     ))}
                 </div>
@@ -803,39 +813,15 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 </div>
               )}
 
-              {/* Category Listing Pagination */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-1.5 pt-12 border-t border-gray-150">
+              {/* In-Place Load More Button (Never scrolls or jumps page position) */}
+              {hasMoreItems && (
+                <div className="mt-12 text-center">
                   <button
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                    disabled={currentPage === 1}
-                    className="px-4 py-2 text-sm font-semibold rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed select-none transition-colors"
+                    onClick={handleLoadMore}
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-md hover:shadow-lg hover:bg-primary-dark active:scale-95 transition-all text-sm cursor-pointer"
                   >
-                    Previous
-                  </button>
-                  {[...Array(totalPages)].map((_, i) => {
-                    const page = i + 1;
-                    const isActive = page === currentPage;
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        className={`w-10 h-10 text-sm font-bold rounded-lg transition-colors select-none ${
-                          isActive
-                            ? 'bg-primary text-white shadow-md shadow-primary/10'
-                            : 'border border-gray-250 hover:bg-gray-50 text-gray-700'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    );
-                  })}
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                    disabled={currentPage === totalPages}
-                    className="px-4 py-2 text-sm font-semibold rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed select-none transition-colors"
-                  >
-                    Next
+                    <span>Load More ({currentCategoryList.length - visibleCount} remaining)</span>
+                    <ChevronDown className="w-4 h-4" />
                   </button>
                 </div>
               )}

@@ -133,9 +133,61 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
   // Tag matcher helper
   const matchesTags = (item: any) => {
     if (selectedTagIds.length === 0) return true;
-    if (!item.tags || item.tags.length === 0) return false;
-    return item.tags.some((t: any) => selectedTagIds.includes(typeof t === 'number' ? t : t.id));
+    const itemTagIds = new Set<number>();
+    if (Array.isArray(item.tags)) {
+      item.tags.forEach((t: any) => {
+        const id = typeof t === 'number' ? t : t?.id;
+        if (id) itemTagIds.add(id);
+      });
+    }
+    if (Array.isArray(item.tag_ids)) {
+      item.tag_ids.forEach((id: any) => {
+        if (typeof id === 'number') itemTagIds.add(id);
+      });
+    }
+    return selectedTagIds.some(id => itemTagIds.has(id));
   };
+
+  // Extract items for the currently selected category
+  const rawCategoryItems = useMemo(() => {
+    if (activeTab === 'hotels') {
+      return hotels?.filter(h => (h.country_id === undefined || h.country_id === countryId) && h.is_active) || [];
+    }
+    if (activeTab === 'packages') {
+      return packages?.filter(p => p.is_active) || [];
+    }
+    if (activeTab === 'activities') {
+      return activities?.filter(a => a.is_active) || [];
+    }
+    if (activeTab === 'attractions') {
+      return attractions?.filter(a => a.is_active) || [];
+    }
+    return [];
+  }, [activeTab, hotels, packages, activities, attractions, countryId]);
+
+  // Extract unique tag IDs attached to at least one item in rawCategoryItems
+  const availableTagIds = useMemo(() => {
+    const tagIds = new Set<number>();
+    rawCategoryItems.forEach((item: any) => {
+      if (Array.isArray(item.tags)) {
+        item.tags.forEach((t: any) => {
+          const id = typeof t === 'number' ? t : t?.id;
+          if (id) tagIds.add(id);
+        });
+      }
+      if (Array.isArray(item.tag_ids)) {
+        item.tag_ids.forEach((id: any) => {
+          if (typeof id === 'number') tagIds.add(id);
+        });
+      }
+    });
+    return tagIds;
+  }, [rawCategoryItems]);
+
+  // Only show tags that are actually attached to items in the current category
+  const visibleTags = useMemo(() => {
+    return contentTags.filter(tag => availableTagIds.has(tag.id));
+  }, [contentTags, availableTagIds]);
 
   // ----------------------------------------------------
   // FILTERING LOGIC
@@ -384,15 +436,15 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 )}
               </div>
 
-              {/* DYNAMIC CONTENT TAGS FILTER */}
-              {contentTags.length > 0 && (
+              {/* DYNAMIC CONTENT TAGS FILTER (ONLY TAGS WITH ATTACHED ITEMS) */}
+              {visibleTags.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-700">
                     <TagIcon className="w-3.5 h-3.5 text-primary" />
                     <span>Tags & Features</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {contentTags.map((tag) => {
+                    {visibleTags.map((tag) => {
                       const isSelected = selectedTagIds.includes(tag.id);
                       return (
                         <button

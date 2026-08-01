@@ -180,15 +180,8 @@ const CountryDetailPageNew: React.FC = () => {
   };
 
   const handleSubNavClick = (sectionId: string) => {
-    if (['attractions', 'activities', 'packages', 'deals', 'hotels'].includes(sectionId)) {
-      if (sectionId === 'attractions') setExplorerTab('attractions');
-      else if (sectionId === 'activities') setExplorerTab('activities');
-      else if (sectionId === 'packages') setExplorerTab('packages');
-      else if (sectionId === 'deals') setExplorerTab('packages');
-      else if (sectionId === 'hotels') setExplorerTab('hotels');
-      
-      // Scroll to the unified explore section
-      scrollToSection('explore');
+    if (sectionId === 'explore') {
+      scrollToSection('group-trips');
     } else {
       scrollToSection(sectionId);
     }
@@ -228,13 +221,11 @@ const CountryDetailPageNew: React.FC = () => {
             { id: 'overview', label: 'Overview' },
             { id: 'why-visit', label: `Why Visit ${country.name}` },
             { id: 'best-time', label: 'Best Time to Visit' },
+            { id: 'section-attractions', label: 'Attractions' },
+            { id: 'section-activities', label: 'Activities' },
+            { id: 'section-packages', label: 'Packages' },
+            { id: 'section-hotels', label: 'Accommodation' },
             { id: 'explore', label: 'Explore' },
-            { id: 'group-trips', label: 'Group Trips' },
-            { id: 'travel-guide', label: 'Travel Guide' },
-            { id: 'faq', label: 'FAQs & Tips' },
-            { id: 'blog', label: 'Blog' },
-            { id: 'share', label: 'Share' },
-            { id: 'similar', label: 'Similar Destinations' },
           ]}
           onSectionClick={handleSubNavClick}
         />

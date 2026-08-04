@@ -269,4 +269,10 @@ html {
       scroll-behavior: auto !important;
     }
   }
+
+  /* Pause marquee on hover */
+  .pause-on-hover:hover {
+    animation-play-state: paused !important;
+  }
 }
+

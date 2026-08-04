@@ -34,9 +34,9 @@ class ContentTagUpdate(BaseModel):
 
 class ContentTagResponse(ContentTagBase):
     id: int
-    is_active: bool
-    created_at: datetime
-    updated_at: datetime
+    is_active: Optional[bool] = Field(True, description="Whether the tag is active")
+    created_at: Optional[datetime] = Field(None, description="Creation timestamp")
+    updated_at: Optional[datetime] = Field(None, description="Update timestamp")
 
     model_config = ConfigDict(from_attributes=True)
 

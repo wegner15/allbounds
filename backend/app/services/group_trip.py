@@ -283,10 +283,14 @@ class GroupTripService:
                 {
                     "id": tag.id,
                     "name": tag.name,
-                    "slug": tag.slug,
-                    "category": tag.category,
-                    "color": tag.color,
-                    "icon": tag.icon
+                    "slug": getattr(tag, 'slug', ''),
+                    "description": getattr(tag, 'description', None),
+                    "category": getattr(tag, 'category', None),
+                    "color": getattr(tag, 'color', None),
+                    "icon": getattr(tag, 'icon', None),
+                    "is_active": getattr(tag, 'is_active', True),
+                    "created_at": getattr(tag, 'created_at', None),
+                    "updated_at": getattr(tag, 'updated_at', None),
                 }
                 for tag in group_trip.tags
             ],

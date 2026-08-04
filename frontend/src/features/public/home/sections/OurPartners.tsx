@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { usePartners } from '../../../../lib/hooks/usePartners';
 import CloudflareImage from '../../../../components/ui/CloudflareImage';
 import type { Partner } from '../../../../lib/types/api';
@@ -9,15 +9,6 @@ interface CuratedPartner {
   name: string;
   category: 'airline' | 'hotel' | 'affiliation';
   logoSvg?: React.ReactNode;
-  logoTextStyle?: {
-    fontFamily?: string;
-    fontWeight?: string | number;
-    color?: string;
-    letterSpacing?: string;
-    fontSize?: string;
-  };
-  accentColor?: string;
-  subtext?: string;
   website_url?: string;
   logo_image_id?: string;
 }
@@ -82,7 +73,7 @@ const BRAND_LOGOS: Record<string, React.ReactNode> = {
   ),
   emirates: (
     <div className="flex flex-col items-center">
-      <div className="bg-red-600 text-white px-2 py-0.5 rounded-sm flex items-center gap-1">
+      <div className="bg-red-600 text-white px-2.5 py-1 rounded flex items-center gap-1">
         <span className="font-serif font-bold text-xs tracking-wider">Emirates</span>
       </div>
     </div>
@@ -305,68 +296,52 @@ const BRAND_LOGOS: Record<string, React.ReactNode> = {
   )
 };
 
-// 5 rows of curated high-end partners matching the visual layout in screenshot
-const CURATED_ROWS: CuratedPartner[][] = [
-  // Row 1
-  [
-    { id: 'c1', name: 'BVLGARI', category: 'hotel', logoSvg: BRAND_LOGOS.bvlgari },
-    { id: 'c2', name: 'AirArabia', category: 'airline', logoSvg: BRAND_LOGOS.airarabia },
-    { id: 'c3', name: 'Air Canada', category: 'airline', logoSvg: BRAND_LOGOS.aircanada },
-    { id: 'c4', name: 'Sofitel Luxury Hotels', category: 'hotel', logoSvg: BRAND_LOGOS.sofitel },
-    { id: 'c5', name: 'Cathay Pacific', category: 'airline', logoSvg: BRAND_LOGOS.cathay },
-    { id: 'c6', name: 'Amadeus', category: 'affiliation', logoSvg: BRAND_LOGOS.amadeus },
-    { id: 'c7', name: 'Accor', category: 'hotel', logoSvg: BRAND_LOGOS.accor },
-    { id: 'c8', name: 'Priority Pass', category: 'affiliation', logoSvg: BRAND_LOGOS.prioritypass },
-    { id: 'c9', name: 'Six Senses', category: 'hotel', logoSvg: BRAND_LOGOS.sixsenses },
-    { id: 'c10', name: 'Scoot', category: 'airline', logoSvg: BRAND_LOGOS.scoot },
-  ],
-  // Row 2
-  [
-    { id: 'c11', name: 'Royal Air Maroc', category: 'airline' },
-    { id: 'c12', name: 'flydubai', category: 'airline', logoSvg: BRAND_LOGOS.flydubai },
-    { id: 'c13', name: 'Delta Air Lines', category: 'airline', logoSvg: BRAND_LOGOS.delta },
-    { id: 'c14', name: 'Fairmont', category: 'hotel', logoSvg: BRAND_LOGOS.fairmont },
-    { id: 'c15', name: 'Singapore Airlines', category: 'airline', logoSvg: BRAND_LOGOS.singaporeair },
-    { id: 'c16', name: 'BAR Aviation', category: 'airline', logoSvg: BRAND_LOGOS.baraviation },
-    { id: 'c17', name: 'Raffles Hotels', category: 'hotel', logoSvg: BRAND_LOGOS.raffles },
-    { id: 'c18', name: 'Korean Air', category: 'airline' },
-    { id: 'c19', name: 'Andaz', category: 'hotel', logoSvg: BRAND_LOGOS.andaz },
-    { id: 'c20', name: 'Ethiopian Airlines', category: 'airline', logoSvg: BRAND_LOGOS.ethiopian },
-  ],
-  // Row 3
-  [
-    { id: 'c21', name: 'Emirates', category: 'airline', logoSvg: BRAND_LOGOS.emirates },
-    { id: 'c22', name: 'Qatar Airways', category: 'airline', logoSvg: BRAND_LOGOS.qatar },
-    { id: 'c23', name: 'The Ritz-Carlton', category: 'hotel', logoSvg: BRAND_LOGOS.ritzcarlton },
-    { id: 'c24', name: 'Fiji Airways', category: 'airline', logoSvg: BRAND_LOGOS.fijiairways },
-    { id: 'c25', name: 'dnata', category: 'affiliation' },
-    { id: 'c26', name: 'IndiGo', category: 'airline', logoSvg: BRAND_LOGOS.indigo },
-    { id: 'c27', name: 'British Airways', category: 'airline', logoSvg: BRAND_LOGOS.britishairways },
-    { id: 'c28', name: 'Four Seasons', category: 'hotel', logoSvg: BRAND_LOGOS.fourseasons },
-    { id: 'c29', name: 'Kenya Airways', category: 'airline', logoSvg: BRAND_LOGOS.kenyaairways },
-  ],
-  // Row 4
-  [
-    { id: 'c30', name: 'SWISS', category: 'airline', logoSvg: BRAND_LOGOS.swiss },
-    { id: 'c31', name: 'Park Hyatt', category: 'hotel', logoSvg: BRAND_LOGOS.parkhyatt },
-    { id: 'c32', name: 'Pegasus Airlines', category: 'airline', logoSvg: BRAND_LOGOS.pegasus },
-    { id: 'c33', name: 'AeroLink', category: 'airline', logoSvg: BRAND_LOGOS.aerolink },
-    { id: 'c34', name: 'Lufthansa', category: 'airline', logoSvg: BRAND_LOGOS.lufthansa },
-    { id: 'c35', name: 'Mandarin Oriental', category: 'hotel', logoSvg: BRAND_LOGOS.mandarinoriental },
-    { id: 'c36', name: 'Japan Airlines', category: 'airline', logoSvg: BRAND_LOGOS.jal },
-    { id: 'c37', name: 'Expedia', category: 'affiliation', logoSvg: BRAND_LOGOS.expedia },
-  ],
-  // Row 5
-  [
-    { id: 'c38', name: 'Belmond', category: 'hotel', logoSvg: BRAND_LOGOS.belmond },
-    { id: 'c39', name: 'GoldStar Insurance', category: 'affiliation', logoSvg: BRAND_LOGOS.goldstar },
-    { id: 'c40', name: 'BVLGARI', category: 'hotel', logoSvg: BRAND_LOGOS.bvlgari },
-    { id: 'c41', name: 'Air Canada', category: 'airline', logoSvg: BRAND_LOGOS.aircanada },
-    { id: 'c42', name: 'Accor', category: 'hotel', logoSvg: BRAND_LOGOS.accor },
-    { id: 'c43', name: 'Singapore Airlines', category: 'airline', logoSvg: BRAND_LOGOS.singaporeair },
-    { id: 'c44', name: 'SWISS', category: 'airline', logoSvg: BRAND_LOGOS.swiss },
-    { id: 'c45', name: 'Emirates', category: 'airline', logoSvg: BRAND_LOGOS.emirates },
-  ]
+// Curated list of all partners with defined categories
+const ALL_CURATED_PARTNERS: CuratedPartner[] = [
+  // Hotels & Villas
+  { id: 'c1', name: 'BVLGARI', category: 'hotel', logoSvg: BRAND_LOGOS.bvlgari },
+  { id: 'c4', name: 'Sofitel Luxury Hotels', category: 'hotel', logoSvg: BRAND_LOGOS.sofitel },
+  { id: 'c7', name: 'Accor', category: 'hotel', logoSvg: BRAND_LOGOS.accor },
+  { id: 'c9', name: 'Six Senses', category: 'hotel', logoSvg: BRAND_LOGOS.sixsenses },
+  { id: 'c14', name: 'Fairmont', category: 'hotel', logoSvg: BRAND_LOGOS.fairmont },
+  { id: 'c17', name: 'Raffles Hotels', category: 'hotel', logoSvg: BRAND_LOGOS.raffles },
+  { id: 'c19', name: 'Andaz', category: 'hotel', logoSvg: BRAND_LOGOS.andaz },
+  { id: 'c23', name: 'The Ritz-Carlton', category: 'hotel', logoSvg: BRAND_LOGOS.ritzcarlton },
+  { id: 'c28', name: 'Four Seasons', category: 'hotel', logoSvg: BRAND_LOGOS.fourseasons },
+  { id: 'c31', name: 'Park Hyatt', category: 'hotel', logoSvg: BRAND_LOGOS.parkhyatt },
+  { id: 'c35', name: 'Mandarin Oriental', category: 'hotel', logoSvg: BRAND_LOGOS.mandarinoriental },
+  { id: 'c38', name: 'Belmond', category: 'hotel', logoSvg: BRAND_LOGOS.belmond },
+
+  // Airlines
+  { id: 'c2', name: 'AirArabia', category: 'airline', logoSvg: BRAND_LOGOS.airarabia },
+  { id: 'c3', name: 'Air Canada', category: 'airline', logoSvg: BRAND_LOGOS.aircanada },
+  { id: 'c5', name: 'Cathay Pacific', category: 'airline', logoSvg: BRAND_LOGOS.cathay },
+  { id: 'c10', name: 'Scoot', category: 'airline', logoSvg: BRAND_LOGOS.scoot },
+  { id: 'c11', name: 'Royal Air Maroc', category: 'airline' },
+  { id: 'c12', name: 'flydubai', category: 'airline', logoSvg: BRAND_LOGOS.flydubai },
+  { id: 'c13', name: 'Delta Air Lines', category: 'airline', logoSvg: BRAND_LOGOS.delta },
+  { id: 'c15', name: 'Singapore Airlines', category: 'airline', logoSvg: BRAND_LOGOS.singaporeair },
+  { id: 'c16', name: 'BAR Aviation', category: 'airline', logoSvg: BRAND_LOGOS.baraviation },
+  { id: 'c18', name: 'Korean Air', category: 'airline' },
+  { id: 'c20', name: 'Ethiopian Airlines', category: 'airline', logoSvg: BRAND_LOGOS.ethiopian },
+  { id: 'c21', name: 'Emirates', category: 'airline', logoSvg: BRAND_LOGOS.emirates },
+  { id: 'c22', name: 'Qatar Airways', category: 'airline', logoSvg: BRAND_LOGOS.qatar },
+  { id: 'c24', name: 'Fiji Airways', category: 'airline', logoSvg: BRAND_LOGOS.fijiairways },
+  { id: 'c26', name: 'IndiGo', category: 'airline', logoSvg: BRAND_LOGOS.indigo },
+  { id: 'c27', name: 'British Airways', category: 'airline', logoSvg: BRAND_LOGOS.britishairways },
+  { id: 'c29', name: 'Kenya Airways', category: 'airline', logoSvg: BRAND_LOGOS.kenyaairways },
+  { id: 'c30', name: 'SWISS', category: 'airline', logoSvg: BRAND_LOGOS.swiss },
+  { id: 'c32', name: 'Pegasus Airlines', category: 'airline', logoSvg: BRAND_LOGOS.pegasus },
+  { id: 'c33', name: 'AeroLink', category: 'airline', logoSvg: BRAND_LOGOS.aerolink },
+  { id: 'c34', name: 'Lufthansa', category: 'airline', logoSvg: BRAND_LOGOS.lufthansa },
+  { id: 'c36', name: 'Japan Airlines', category: 'airline', logoSvg: BRAND_LOGOS.jal },
+
+  // Ground & Travel / Affiliations
+  { id: 'c6', name: 'Amadeus', category: 'affiliation', logoSvg: BRAND_LOGOS.amadeus },
+  { id: 'c8', name: 'Priority Pass', category: 'affiliation', logoSvg: BRAND_LOGOS.prioritypass },
+  { id: 'c25', name: 'dnata', category: 'affiliation' },
+  { id: 'c37', name: 'Expedia', category: 'affiliation', logoSvg: BRAND_LOGOS.expedia },
+  { id: 'c39', name: 'GoldStar Insurance', category: 'affiliation', logoSvg: BRAND_LOGOS.goldstar },
 ];
 
 /** Renders a single partner logo tile inside the marquee */
@@ -409,62 +384,131 @@ const MarqueePartnerCard: React.FC<{ partner: CuratedPartner }> = ({ partner }) 
   return content;
 };
 
+type CategoryFilter = 'all' | 'airline' | 'hotel' | 'affiliation';
+
+const CATEGORY_CONFIG: Record<CategoryFilter, { label: string; shortLabel: string; countText: string }> = {
+  all: { label: 'ALL PARTNERS', shortLabel: 'ALL', countText: '160+' },
+  airline: { label: 'AIRLINE PARTNERS', shortLabel: 'AIRLINES', countText: '60+' },
+  hotel: { label: 'HOTELS & VILLAS', shortLabel: 'HOTELS & VILLAS', countText: '75+' },
+  affiliation: { label: 'GROUND & TRAVEL', shortLabel: 'GROUND & TRAVEL', countText: '30+' },
+};
+
 const OurPartners: React.FC = () => {
   const { data: apiPartners } = usePartners();
+  const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all');
 
-  // If backend dynamic partners exist, inject them into our marquee rows
-  const mergedRows = React.useMemo(() => {
-    if (!apiPartners || apiPartners.length === 0) return CURATED_ROWS;
+  // Combine API partners and curated partners
+  const allPartnersCombined = useMemo(() => {
+    const combined = [...ALL_CURATED_PARTNERS];
 
-    // Convert API partners to CuratedPartner structure
-    const convertedApiPartners: CuratedPartner[] = apiPartners.map(p => ({
-      id: p.id,
-      name: p.name,
-      category: (p.category as any) || 'affiliation',
-      logo_image_id: p.logo_image_id,
-      website_url: p.website_url,
-    }));
+    if (apiPartners && apiPartners.length > 0) {
+      apiPartners.forEach(p => {
+        combined.unshift({
+          id: `api-${p.id}`,
+          name: p.name,
+          category: (p.category as any) || 'affiliation',
+          logo_image_id: p.logo_image_id,
+          website_url: p.website_url,
+        });
+      });
+    }
 
-    // Distribute API partners evenly across the 5 rows
-    const rows = CURATED_ROWS.map((row, idx) => {
-      const extra = convertedApiPartners.filter((_, i) => i % 5 === idx);
-      return [...extra, ...row];
+    return combined;
+  }, [apiPartners]);
+
+  // Filter partners based on active category selection
+  const filteredPartners = useMemo(() => {
+    if (activeCategory === 'all') return allPartnersCombined;
+    return allPartnersCombined.filter(p => p.category === activeCategory);
+  }, [allPartnersCombined, activeCategory]);
+
+  // Distribute filtered partners evenly across 5 sliding marquee rows
+  const marqueeRows = useMemo(() => {
+    if (filteredPartners.length === 0) return [[], [], [], [], []];
+
+    // Multiply items if filtered count is small so that scrolling is smooth and continuous
+    let extendedList = [...filteredPartners];
+    while (extendedList.length < 25) {
+      extendedList = [...extendedList, ...filteredPartners];
+    }
+
+    const r0: CuratedPartner[] = [];
+    const r1: CuratedPartner[] = [];
+    const r2: CuratedPartner[] = [];
+    const r3: CuratedPartner[] = [];
+    const r4: CuratedPartner[] = [];
+
+    extendedList.forEach((item, index) => {
+      const rowIdx = index % 5;
+      if (rowIdx === 0) r0.push(item);
+      else if (rowIdx === 1) r1.push(item);
+      else if (rowIdx === 2) r2.push(item);
+      else if (rowIdx === 3) r3.push(item);
+      else r4.push(item);
     });
 
-    return rows;
-  }, [apiPartners]);
+    return [r0, r1, r2, r3, r4];
+  }, [filteredPartners]);
 
   return (
     <section 
       className="py-16 md:py-24 bg-[#ebf1f5] overflow-hidden relative select-none" 
-      aria-label="Our Partners & Affiliations"
+      aria-label="Allbound Partners & Network"
     >
-      <div className="container mx-auto px-4 md:px-8 mb-12 md:mb-16">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          {/* Left Title Area */}
+      <div className="container mx-auto px-4 md:px-8 mb-12 md:mb-14">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+          
+          {/* Left Title Area - Adapted to Allbound Vacations */}
           <div className="max-w-2xl">
             {/* Tagline line */}
             <div className="flex items-center gap-2 text-xs font-bold tracking-[0.25em] text-slate-400 uppercase font-sans mb-3">
               <span className="w-6 h-[2px] bg-slate-300 rounded-full inline-block" />
-              WE'RE PARTNERED WITH
+              ALLBOUND PARTNERS &amp; NETWORK
             </div>
 
             {/* Main Heading */}
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-slate-900 font-semibold tracking-tight leading-[1.15]">
-              The names behind <br className="hidden sm:inline" />
-              a <span className="italic font-serif font-normal text-[#c59b27]">seamless</span> journey.
+              The trusted names behind your <br className="hidden sm:inline" />
+              <span className="italic font-serif font-normal text-[#c59b27]">perfected</span> journey.
             </h2>
           </div>
 
-          {/* Right Counter Badge */}
-          <div className="flex items-center gap-3 pt-2 md:pt-0">
-            <span className="text-3xl md:text-4xl font-serif italic font-semibold text-[#c59b27]">
-              160+
-            </span>
-            <div className="text-[10px] md:text-[11px] font-bold text-slate-400 tracking-[0.2em] uppercase font-sans leading-tight max-w-[220px]">
-              AIRLINES · HOTELS · VILLAS · GROUND &amp; TRAVEL PARTNERS
+          {/* Right Counter & Interactive Category Filters */}
+          <div className="flex flex-col items-start lg:items-end gap-3 pt-2 lg:pt-0">
+            {/* Dynamic Counter & Active Subtitle */}
+            <div className="flex items-center gap-3">
+              <span className="text-3xl md:text-4xl font-serif italic font-semibold text-[#c59b27] transition-all duration-300">
+                {CATEGORY_CONFIG[activeCategory].countText}
+              </span>
+              <div className="text-[10px] md:text-[11px] font-bold text-slate-400 tracking-[0.18em] uppercase font-sans leading-tight">
+                {CATEGORY_CONFIG[activeCategory].label}
+              </div>
+            </div>
+
+            {/* Interactive Category Filter Pills */}
+            <div className="flex flex-wrap items-center gap-1.5 bg-white/80 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200/80 shadow-sm">
+              {(['all', 'airline', 'hotel', 'affiliation'] as CategoryFilter[]).map((catKey) => {
+                const isActive = activeCategory === catKey;
+                return (
+                  <button
+                    key={catKey}
+                    onClick={() => setActiveCategory(catKey)}
+                    className={`px-3.5 py-1.5 rounded-xl text-[10px] md:text-[11px] font-bold tracking-wider uppercase transition-all duration-300 ${
+                      isActive
+                        ? 'bg-[#c59b27] text-white shadow-sm scale-105'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                    }`}
+                  >
+                    {catKey === 'airline' && <span className="mr-1">✈</span>}
+                    {catKey === 'hotel' && <span className="mr-1">🏨</span>}
+                    {catKey === 'affiliation' && <span className="mr-1">🤝</span>}
+                    {CATEGORY_CONFIG[catKey].shortLabel}
+                  </button>
+                );
+              })}
             </div>
           </div>
+
         </div>
       </div>
 
@@ -479,8 +523,10 @@ const OurPartners: React.FC = () => {
         <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-[#ebf1f5] via-[#ebf1f5]/80 to-transparent z-10 pointer-events-none" />
 
         {/* Slanted 3D Track Container */}
-        <div className="space-y-4 md:space-y-5 transform -rotate-1 scale-[1.01]">
-          {mergedRows.map((row, rowIndex) => {
+        <div className="space-y-4 md:space-y-5 transform -rotate-1 scale-[1.01] transition-all duration-500">
+          {marqueeRows.map((row, rowIndex) => {
+            if (row.length === 0) return null;
+
             // Alternate scroll direction and speeds per row
             const isReverse = rowIndex % 2 !== 0;
             const animationClass = isReverse
@@ -497,7 +543,7 @@ const OurPartners: React.FC = () => {
             const fullRowItems = [...row, ...row, ...row];
 
             return (
-              <div key={rowIndex} className="flex overflow-hidden group">
+              <div key={`${activeCategory}-${rowIndex}`} className="flex overflow-hidden group">
                 <div className={`flex gap-4 md:gap-5 shrink-0 pause-on-hover ${animationClass}`}>
                   {fullRowItems.map((item, itemIdx) => (
                     <MarqueePartnerCard key={`${item.id}-${itemIdx}`} partner={item} />

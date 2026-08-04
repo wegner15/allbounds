@@ -77,34 +77,9 @@ const Footer: React.FC<FooterProps> = ({
     return newSections;
   }, [sections, regionsWithCountries, holidayTypesData]);
 
-  const partners = [
-    { name: 'Emirates', src: '/affiliations/amirates.png' },
-    { name: 'Brussels Airlines', src: '/affiliations/brussels_airlines.png' },
-    { name: 'Ethiopian Airlines', src: '/affiliations/ethiopian_airlines.png' },
-    { name: 'Kenya Airways', src: '/affiliations/kenya_airways.png' },
-    { name: 'KLM Airlines', src: '/affiliations/klm_airlines.png' },
-    { name: 'Marriott Hotels', src: '/affiliations/marriott_hotels.png' },
-    { name: 'RwandAir', src: '/affiliations/rwanda_air.png' }
-  ];
-
   return (
     <footer className={`${className}`}>
-      {/* Affiliations / Trusted Partners Section */}
-      <div className="bg-white py-12 border-t border-gray-100">
-        <div className="container mx-auto px-4">
-          <h3 className="text-xs font-bold text-gray-500 tracking-wider text-center uppercase mb-8">Our Trusted Partners</h3>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
-            {partners.map((partner, index) => (
-              <img
-                key={index}
-                src={partner.src}
-                alt={partner.name}
-                className="h-10 md:h-12 object-contain opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300 cursor-pointer"
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+
 
       {/* Main Dark Footer */}
       <Newsletter />

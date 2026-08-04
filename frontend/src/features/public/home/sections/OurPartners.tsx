@@ -3,349 +3,8 @@ import { usePartners } from '../../../../lib/hooks/usePartners';
 import CloudflareImage from '../../../../components/ui/CloudflareImage';
 import type { Partner } from '../../../../lib/types/api';
 
-// Brand logo definition for predefined / curated partners
-interface CuratedPartner {
-  id: string | number;
-  name: string;
-  category: 'airline' | 'hotel' | 'affiliation';
-  logoSvg?: React.ReactNode;
-  website_url?: string;
-  logo_image_id?: string;
-}
-
-// SVG Logos for curated luxury travel & airline partners
-const BRAND_LOGOS: Record<string, React.ReactNode> = {
-  bvlgari: (
-    <div className="flex flex-col items-center">
-      <span className="font-serif tracking-[0.35em] text-sm font-semibold text-neutral-800 uppercase">
-        BVLGARI
-      </span>
-    </div>
-  ),
-  airarabia: (
-    <div className="flex items-center gap-1.5">
-      <div className="w-5 h-5 rounded-full bg-red-600 flex items-center justify-center text-white text-[10px] font-bold">
-        ✈
-      </div>
-      <div className="flex flex-col text-left leading-tight">
-        <span className="text-red-600 font-extrabold text-sm tracking-tight">AirArabia</span>
-        <span className="text-[9px] text-red-500 font-arabic tracking-tighter">العربية للطيران</span>
-      </div>
-    </div>
-  ),
-  aircanada: (
-    <div className="flex items-center gap-1.5">
-      <svg className="w-4 h-4 text-red-600 fill-current" viewBox="0 0 24 24">
-        <path d="M12 2L9.5 9H2l6 4.5L5.5 21 12 16.5 18.5 21 16 13.5l6-4.5h-7.5z"/>
-      </svg>
-      <span className="font-bold text-xs tracking-wider text-neutral-900 uppercase">AIR CANADA</span>
-    </div>
-  ),
-  sofitel: (
-    <div className="flex flex-col items-center text-center">
-      <div className="w-4 h-3 border-t border-b border-neutral-700 mb-0.5" />
-      <span className="font-serif tracking-[0.25em] text-xs font-bold text-neutral-800 uppercase">SOFITEL</span>
-      <span className="text-[7px] tracking-[0.3em] text-neutral-500 uppercase">LUXURY HOTELS</span>
-    </div>
-  ),
-  cathay: (
-    <div className="flex items-center gap-2">
-      <svg className="w-6 h-4 text-emerald-800 fill-current" viewBox="0 0 32 20">
-        <path d="M0 10 Q 16 0 32 10 Q 16 20 0 10 Z" />
-      </svg>
-      <span className="font-serif text-xs font-semibold text-emerald-950 tracking-wider">CATHAY PACIFIC</span>
-    </div>
-  ),
-  amadeus: (
-    <div className="flex items-center">
-      <span className="font-sans font-extrabold text-sm tracking-widest text-blue-900 lowercase">
-        a<span className="uppercase text-sky-600">mADeUS</span>
-      </span>
-    </div>
-  ),
-  accor: (
-    <div className="flex flex-col items-center">
-      <svg className="w-5 h-4 text-amber-600 fill-current mb-0.5" viewBox="0 0 24 24">
-        <path d="M12 2L2 22h4l6-12 6 12h4L12 2z"/>
-      </svg>
-      <span className="font-serif font-bold text-xs tracking-[0.3em] text-neutral-800 uppercase">ACCOR</span>
-    </div>
-  ),
-  emirates: (
-    <div className="flex flex-col items-center">
-      <div className="bg-red-600 text-white px-2.5 py-1 rounded flex items-center gap-1">
-        <span className="font-serif font-bold text-xs tracking-wider">Emirates</span>
-      </div>
-    </div>
-  ),
-  qatar: (
-    <div className="flex items-center gap-1.5">
-      <div className="w-6 h-6 rounded-full bg-amber-900/10 flex items-center justify-center">
-        <span className="text-amber-900 font-bold text-xs">🇶🇦</span>
-      </div>
-      <div className="flex flex-col text-left">
-        <span className="font-serif font-bold text-xs text-amber-950 tracking-wide">QATAR</span>
-        <span className="text-[8px] tracking-widest text-amber-900 uppercase">AIRWAYS القطرية</span>
-      </div>
-    </div>
-  ),
-  ritzcarlton: (
-    <div className="flex flex-col items-center">
-      <svg className="w-5 h-5 text-neutral-800 fill-current mb-0.5" viewBox="0 0 24 24">
-        <path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 3l5 3.1v6.8l-5 3.1-5-3.1V8.1L12 5z"/>
-      </svg>
-      <span className="font-serif font-semibold text-[10px] tracking-[0.2em] text-neutral-900 uppercase">THE RITZ-CARLTON</span>
-    </div>
-  ),
-  flydubai: (
-    <div className="flex items-center gap-1">
-      <span className="font-bold text-sm text-sky-500">fly</span>
-      <span className="font-bold text-sm text-blue-900">dubai</span>
-      <span className="w-2 h-2 rounded-full bg-orange-500" />
-    </div>
-  ),
-  delta: (
-    <div className="flex items-center gap-2">
-      <svg className="w-4 h-4 text-red-600 fill-current" viewBox="0 0 24 24">
-        <path d="M12 2L2 22h20L12 2zm0 5l6 12H6l6-12z"/>
-      </svg>
-      <span className="font-sans font-extrabold text-xs tracking-widest text-blue-950 uppercase">DELTA</span>
-    </div>
-  ),
-  fairmont: (
-    <div className="flex flex-col items-center">
-      <span className="font-serif italic font-bold text-base text-neutral-800">Fairmont</span>
-      <span className="text-[7px] tracking-[0.25em] text-neutral-500 uppercase -mt-1">HOTELS & RESORTS</span>
-    </div>
-  ),
-  singaporeair: (
-    <div className="flex items-center gap-2">
-      <svg className="w-5 h-5 text-amber-500 fill-current" viewBox="0 0 24 24">
-        <path d="M2.5 19h19L12 3 2.5 19zM12 7l4.5 8h-9L12 7z"/>
-      </svg>
-      <div className="flex flex-col text-left">
-        <span className="font-sans font-bold text-[10px] text-blue-950 tracking-wider uppercase">SINGAPORE</span>
-        <span className="font-sans text-[8px] text-amber-600 tracking-widest uppercase">AIRLINES</span>
-      </div>
-    </div>
-  ),
-  swiss: (
-    <div className="flex items-center gap-1.5">
-      <div className="w-4 h-4 bg-red-600 flex items-center justify-center text-white text-[10px] font-bold">
-        +
-      </div>
-      <span className="font-sans font-black text-xs tracking-widest text-neutral-900 uppercase">SWISS</span>
-    </div>
-  ),
-  parkhyatt: (
-    <div className="flex flex-col items-center">
-      <span className="font-serif text-xs tracking-[0.3em] font-medium text-neutral-900 uppercase">PARK HYATT™</span>
-    </div>
-  ),
-  expedia: (
-    <div className="flex items-center gap-1.5">
-      <div className="w-4 h-4 rounded-full bg-yellow-400 flex items-center justify-center text-blue-950 text-[9px] font-bold">
-        ✈
-      </div>
-      <span className="font-sans font-bold text-xs text-blue-950 tracking-tight">Expedia</span>
-    </div>
-  ),
-  fourseasons: (
-    <div className="flex flex-col items-center">
-      <svg className="w-4 h-4 text-neutral-700 fill-current mb-0.5" viewBox="0 0 24 24">
-        <path d="M12 2L8 8h8l-4-6zm-6 8l-4 6h8l-4-6zm12 0l-4 6h8l-4-6z"/>
-      </svg>
-      <span className="font-serif text-[9px] tracking-[0.2em] font-semibold text-neutral-800 uppercase">FOUR SEASONS</span>
-      <span className="text-[6px] tracking-[0.2em] text-neutral-500 uppercase">HOTELS AND RESORTS</span>
-    </div>
-  ),
-  kenyaairways: (
-    <div className="flex items-center gap-1.5">
-      <div className="w-4 h-4 rounded-full bg-red-600 text-white flex items-center justify-center text-[9px] font-bold">
-        K
-      </div>
-      <div className="flex flex-col text-left">
-        <span className="font-bold text-[10px] text-red-600 leading-none">Kenya Airways</span>
-        <span className="text-[7px] text-neutral-500 italic leading-tight">The Pride of Africa</span>
-      </div>
-    </div>
-  ),
-  ethiopian: (
-    <div className="flex items-center gap-1.5">
-      <div className="w-4 h-4 rounded-full bg-emerald-600 flex items-center justify-center text-yellow-300 text-[9px] font-bold">
-        🇪🇹
-      </div>
-      <span className="font-sans font-bold text-xs text-emerald-800 tracking-tight">Ethiopian</span>
-    </div>
-  ),
-  lufthansa: (
-    <div className="flex items-center gap-2">
-      <div className="w-5 h-5 rounded-full border-2 border-blue-900 flex items-center justify-center text-blue-900 text-[10px] font-bold">
-        🕊
-      </div>
-      <span className="font-sans font-bold text-xs tracking-wider text-blue-950 uppercase">Lufthansa</span>
-    </div>
-  ),
-  britishairways: (
-    <div className="flex items-center gap-1.5">
-      <div className="w-5 h-2 bg-gradient-to-r from-blue-800 via-red-600 to-blue-800 transform -skew-x-12" />
-      <span className="font-serif font-bold text-xs tracking-wider text-blue-950">BRITISH AIRWAYS</span>
-    </div>
-  ),
-  raffles: (
-    <div className="flex flex-col items-center">
-      <span className="font-serif font-bold text-xs tracking-[0.25em] text-neutral-900 uppercase">RAFFLES</span>
-      <span className="text-[7px] tracking-[0.2em] text-neutral-500 uppercase">HOTELS & RESORTS</span>
-    </div>
-  ),
-  fijiairways: (
-    <div className="flex items-center gap-2">
-      <div className="w-5 h-5 bg-neutral-900 text-white flex items-center justify-center text-[10px] font-bold rounded-sm">
-        ❖
-      </div>
-      <span className="font-serif font-bold text-xs tracking-widest text-neutral-900 uppercase">FIJI AIRWAYS</span>
-    </div>
-  ),
-  aerolink: (
-    <div className="flex items-center gap-1.5">
-      <div className="w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center text-neutral-900 text-[9px] font-bold">
-        ✈
-      </div>
-      <div className="flex flex-col text-left">
-        <span className="font-bold text-xs text-neutral-900 leading-none">AeroLink</span>
-        <span className="text-[7px] text-amber-700 font-semibold italic">The safari airline</span>
-      </div>
-    </div>
-  ),
-  jal: (
-    <div className="flex items-center gap-1.5">
-      <div className="w-5 h-5 rounded-full border-2 border-red-600 flex items-center justify-center">
-        <div className="w-2 h-2 rounded-full bg-red-600" />
-      </div>
-      <span className="font-sans font-bold text-xs text-neutral-900 tracking-widest">JAL</span>
-    </div>
-  ),
-  belmond: (
-    <div className="flex flex-col items-center">
-      <span className="font-serif font-bold text-xs tracking-[0.3em] text-neutral-900 uppercase">BELMOND</span>
-    </div>
-  ),
-  prioritypass: (
-    <div className="flex items-center gap-1.5">
-      <span className="font-serif font-extrabold text-sm text-neutral-800">P</span>
-      <span className="font-serif text-[10px] font-semibold text-neutral-600 tracking-widest uppercase">PRIORITY PASS™</span>
-    </div>
-  ),
-  sixsenses: (
-    <div className="flex flex-col items-center">
-      <div className="flex gap-1 mb-0.5">
-        <span className="w-1 h-1 rounded-full bg-purple-900" />
-        <span className="w-1 h-1 rounded-full bg-purple-900" />
-        <span className="w-1 h-1 rounded-full bg-purple-900" />
-      </div>
-      <span className="font-serif text-[10px] font-semibold tracking-[0.2em] text-purple-950 uppercase">SIX SENSES</span>
-      <span className="text-[6px] tracking-[0.15em] text-neutral-500 uppercase">HOTELS RESORTS SPAS</span>
-    </div>
-  ),
-  scoot: (
-    <div className="flex items-center">
-      <div className="bg-yellow-400 text-black px-2 py-0.5 rounded-full font-black italic text-xs tracking-tighter">
-        scoot
-      </div>
-    </div>
-  ),
-  andaz: (
-    <div className="flex items-center">
-      <span className="font-serif text-sm tracking-[0.3em] font-light text-teal-800 uppercase">A<span className="text-red-500">N</span>d<span className="text-green-600">A</span>Z</span>
-    </div>
-  ),
-  indigo: (
-    <div className="flex items-center gap-1">
-      <span className="font-bold text-sm text-indigo-900">IndiGo</span>
-      <svg className="w-3 h-3 text-indigo-500 fill-current" viewBox="0 0 24 24">
-        <path d="M2.5 19h19L12 3 2.5 19z"/>
-      </svg>
-    </div>
-  ),
-  baraviation: (
-    <div className="flex items-center gap-1.5">
-      <div className="w-5 h-5 bg-blue-900 rounded-sm text-white flex items-center justify-center text-[10px] font-extrabold">
-        BAR
-      </div>
-      <span className="font-sans font-bold text-[10px] text-blue-950 tracking-wider uppercase">AVIATION</span>
-    </div>
-  ),
-  pegasus: (
-    <div className="flex flex-col items-center">
-      <span className="font-sans font-extrabold text-xs text-red-600 tracking-tighter uppercase italic">PEGASUS</span>
-      <span className="text-[7px] text-neutral-600 font-bold tracking-widest uppercase">AIRLINES</span>
-    </div>
-  ),
-  mandarinoriental: (
-    <div className="flex flex-col items-center">
-      <div className="w-4 h-3 border-b-2 border-amber-600 mb-0.5" />
-      <span className="font-serif text-[9px] font-semibold tracking-[0.2em] text-neutral-900 uppercase">MANDARIN ORIENTAL</span>
-      <span className="text-[6px] tracking-[0.15em] text-amber-700 uppercase">THE HOTEL GROUP</span>
-    </div>
-  ),
-  goldstar: (
-    <div className="flex items-center gap-1">
-      <div className="w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center text-white font-bold text-[9px]">G</div>
-      <span className="font-bold text-[10px] text-blue-900 leading-tight">GoldStar Insurance</span>
-    </div>
-  )
-};
-
-// Curated list of all partners with defined categories
-const ALL_CURATED_PARTNERS: CuratedPartner[] = [
-  // Hotels & Villas
-  { id: 'c1', name: 'BVLGARI', category: 'hotel', logoSvg: BRAND_LOGOS.bvlgari },
-  { id: 'c4', name: 'Sofitel Luxury Hotels', category: 'hotel', logoSvg: BRAND_LOGOS.sofitel },
-  { id: 'c7', name: 'Accor', category: 'hotel', logoSvg: BRAND_LOGOS.accor },
-  { id: 'c9', name: 'Six Senses', category: 'hotel', logoSvg: BRAND_LOGOS.sixsenses },
-  { id: 'c14', name: 'Fairmont', category: 'hotel', logoSvg: BRAND_LOGOS.fairmont },
-  { id: 'c17', name: 'Raffles Hotels', category: 'hotel', logoSvg: BRAND_LOGOS.raffles },
-  { id: 'c19', name: 'Andaz', category: 'hotel', logoSvg: BRAND_LOGOS.andaz },
-  { id: 'c23', name: 'The Ritz-Carlton', category: 'hotel', logoSvg: BRAND_LOGOS.ritzcarlton },
-  { id: 'c28', name: 'Four Seasons', category: 'hotel', logoSvg: BRAND_LOGOS.fourseasons },
-  { id: 'c31', name: 'Park Hyatt', category: 'hotel', logoSvg: BRAND_LOGOS.parkhyatt },
-  { id: 'c35', name: 'Mandarin Oriental', category: 'hotel', logoSvg: BRAND_LOGOS.mandarinoriental },
-  { id: 'c38', name: 'Belmond', category: 'hotel', logoSvg: BRAND_LOGOS.belmond },
-
-  // Airlines
-  { id: 'c2', name: 'AirArabia', category: 'airline', logoSvg: BRAND_LOGOS.airarabia },
-  { id: 'c3', name: 'Air Canada', category: 'airline', logoSvg: BRAND_LOGOS.aircanada },
-  { id: 'c5', name: 'Cathay Pacific', category: 'airline', logoSvg: BRAND_LOGOS.cathay },
-  { id: 'c10', name: 'Scoot', category: 'airline', logoSvg: BRAND_LOGOS.scoot },
-  { id: 'c11', name: 'Royal Air Maroc', category: 'airline' },
-  { id: 'c12', name: 'flydubai', category: 'airline', logoSvg: BRAND_LOGOS.flydubai },
-  { id: 'c13', name: 'Delta Air Lines', category: 'airline', logoSvg: BRAND_LOGOS.delta },
-  { id: 'c15', name: 'Singapore Airlines', category: 'airline', logoSvg: BRAND_LOGOS.singaporeair },
-  { id: 'c16', name: 'BAR Aviation', category: 'airline', logoSvg: BRAND_LOGOS.baraviation },
-  { id: 'c18', name: 'Korean Air', category: 'airline' },
-  { id: 'c20', name: 'Ethiopian Airlines', category: 'airline', logoSvg: BRAND_LOGOS.ethiopian },
-  { id: 'c21', name: 'Emirates', category: 'airline', logoSvg: BRAND_LOGOS.emirates },
-  { id: 'c22', name: 'Qatar Airways', category: 'airline', logoSvg: BRAND_LOGOS.qatar },
-  { id: 'c24', name: 'Fiji Airways', category: 'airline', logoSvg: BRAND_LOGOS.fijiairways },
-  { id: 'c26', name: 'IndiGo', category: 'airline', logoSvg: BRAND_LOGOS.indigo },
-  { id: 'c27', name: 'British Airways', category: 'airline', logoSvg: BRAND_LOGOS.britishairways },
-  { id: 'c29', name: 'Kenya Airways', category: 'airline', logoSvg: BRAND_LOGOS.kenyaairways },
-  { id: 'c30', name: 'SWISS', category: 'airline', logoSvg: BRAND_LOGOS.swiss },
-  { id: 'c32', name: 'Pegasus Airlines', category: 'airline', logoSvg: BRAND_LOGOS.pegasus },
-  { id: 'c33', name: 'AeroLink', category: 'airline', logoSvg: BRAND_LOGOS.aerolink },
-  { id: 'c34', name: 'Lufthansa', category: 'airline', logoSvg: BRAND_LOGOS.lufthansa },
-  { id: 'c36', name: 'Japan Airlines', category: 'airline', logoSvg: BRAND_LOGOS.jal },
-
-  // Ground & Travel / Affiliations
-  { id: 'c6', name: 'Amadeus', category: 'affiliation', logoSvg: BRAND_LOGOS.amadeus },
-  { id: 'c8', name: 'Priority Pass', category: 'affiliation', logoSvg: BRAND_LOGOS.prioritypass },
-  { id: 'c25', name: 'dnata', category: 'affiliation' },
-  { id: 'c37', name: 'Expedia', category: 'affiliation', logoSvg: BRAND_LOGOS.expedia },
-  { id: 'c39', name: 'GoldStar Insurance', category: 'affiliation', logoSvg: BRAND_LOGOS.goldstar },
-];
-
-/** Renders a single partner logo tile inside the marquee */
-const MarqueePartnerCard: React.FC<{ partner: CuratedPartner }> = ({ partner }) => {
+/** Renders a single backend partner logo tile inside the marquee */
+const MarqueePartnerCard: React.FC<{ partner: Partner }> = ({ partner }) => {
   const content = (
     <div className="h-16 md:h-20 w-44 md:w-52 bg-white rounded-2xl border border-slate-200/70 shadow-[0_2px_10px_rgba(0,0,0,0.03)] px-5 py-3 flex items-center justify-center shrink-0 transition-all duration-300 hover:shadow-lg hover:border-amber-400/50 hover:scale-[1.04] cursor-pointer group">
       {partner.logo_image_id ? (
@@ -356,10 +15,6 @@ const MarqueePartnerCard: React.FC<{ partner: CuratedPartner }> = ({ partner }) 
           className="h-10 w-auto object-contain transition-all duration-300 group-hover:scale-105"
           objectFit="contain"
         />
-      ) : partner.logoSvg ? (
-        <div className="w-full flex justify-center items-center">
-          {partner.logoSvg}
-        </div>
       ) : (
         <span className="text-xs font-bold text-slate-800 tracking-wider uppercase text-center leading-snug font-sans group-hover:text-amber-600 transition-colors">
           {partner.name}
@@ -384,59 +39,80 @@ const MarqueePartnerCard: React.FC<{ partner: CuratedPartner }> = ({ partner }) 
   return content;
 };
 
-type CategoryFilter = 'all' | 'airline' | 'hotel' | 'affiliation';
+/** Skeleton loading card */
+const SkeletonCard: React.FC = () => (
+  <div className="h-16 md:h-20 w-44 md:w-52 bg-white/70 rounded-2xl border border-slate-200/50 animate-pulse shrink-0" />
+);
 
-const CATEGORY_CONFIG: Record<CategoryFilter, { label: string; shortLabel: string; countText: string }> = {
-  all: { label: 'ALL PARTNERS', shortLabel: 'ALL', countText: '160+' },
-  airline: { label: 'AIRLINE PARTNERS', shortLabel: 'AIRLINES', countText: '60+' },
-  hotel: { label: 'HOTELS & VILLAS', shortLabel: 'HOTELS & VILLAS', countText: '75+' },
-  affiliation: { label: 'GROUND & TRAVEL', shortLabel: 'GROUND & TRAVEL', countText: '30+' },
+// Category display labels helper
+const getCategoryLabel = (categoryKey: string): string => {
+  switch (categoryKey.toLowerCase()) {
+    case 'hotel':
+      return 'Hotels & Villas';
+    case 'airline':
+      return 'Airlines';
+    case 'affiliation':
+    case 'ground':
+      return 'Ground & Travel';
+    default:
+      return categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1);
+  }
+};
+
+const getCategoryIcon = (categoryKey: string): string => {
+  switch (categoryKey.toLowerCase()) {
+    case 'hotel':
+      return '🏨 ';
+    case 'airline':
+      return '✈ ';
+    case 'affiliation':
+    case 'ground':
+      return '🤝 ';
+    default:
+      return '';
+  }
 };
 
 const OurPartners: React.FC = () => {
-  const { data: apiPartners } = usePartners();
-  const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all');
+  const { data: partners, isLoading } = usePartners();
+  const [activeCategory, setActiveCategory] = useState<string>('all');
 
-  // Combine API partners and curated partners
-  const allPartnersCombined = useMemo(() => {
-    const combined = [...ALL_CURATED_PARTNERS];
+  // Filter only active partners returned from the API
+  const activePartners = useMemo(() => {
+    if (!partners) return [];
+    return partners.filter(p => p.is_active !== false);
+  }, [partners]);
 
-    if (apiPartners && apiPartners.length > 0) {
-      apiPartners.forEach(p => {
-        combined.unshift({
-          id: `api-${p.id}`,
-          name: p.name,
-          category: (p.category as any) || 'affiliation',
-          logo_image_id: p.logo_image_id,
-          website_url: p.website_url,
-        });
-      });
-    }
-
-    return combined;
-  }, [apiPartners]);
+  // Extract unique categories available from real backend partners
+  const availableCategories = useMemo(() => {
+    const cats = new Set<string>();
+    activePartners.forEach(p => {
+      if (p.category) cats.add(p.category.toLowerCase());
+    });
+    return Array.from(cats);
+  }, [activePartners]);
 
   // Filter partners based on active category selection
   const filteredPartners = useMemo(() => {
-    if (activeCategory === 'all') return allPartnersCombined;
-    return allPartnersCombined.filter(p => p.category === activeCategory);
-  }, [allPartnersCombined, activeCategory]);
+    if (activeCategory === 'all') return activePartners;
+    return activePartners.filter(p => (p.category || '').toLowerCase() === activeCategory.toLowerCase());
+  }, [activePartners, activeCategory]);
 
   // Distribute filtered partners evenly across 5 sliding marquee rows
   const marqueeRows = useMemo(() => {
     if (filteredPartners.length === 0) return [[], [], [], [], []];
 
-    // Multiply items if filtered count is small so that scrolling is smooth and continuous
+    // Duplicate list if necessary so marquee tracks scroll infinitely without empty gaps
     let extendedList = [...filteredPartners];
     while (extendedList.length < 25) {
       extendedList = [...extendedList, ...filteredPartners];
     }
 
-    const r0: CuratedPartner[] = [];
-    const r1: CuratedPartner[] = [];
-    const r2: CuratedPartner[] = [];
-    const r3: CuratedPartner[] = [];
-    const r4: CuratedPartner[] = [];
+    const r0: Partner[] = [];
+    const r1: Partner[] = [];
+    const r2: Partner[] = [];
+    const r3: Partner[] = [];
+    const r4: Partner[] = [];
 
     extendedList.forEach((item, index) => {
       const rowIdx = index % 5;
@@ -450,6 +126,11 @@ const OurPartners: React.FC = () => {
     return [r0, r1, r2, r3, r4];
   }, [filteredPartners]);
 
+  // Don't render section if not loading and zero partners exist in backend database
+  if (!isLoading && activePartners.length === 0) {
+    return null;
+  }
+
   return (
     <section 
       className="py-16 md:py-24 bg-[#ebf1f5] overflow-hidden relative select-none" 
@@ -458,7 +139,7 @@ const OurPartners: React.FC = () => {
       <div className="container mx-auto px-4 md:px-8 mb-12 md:mb-14">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
           
-          {/* Left Title Area - Adapted to Allbound Vacations */}
+          {/* Left Title Area */}
           <div className="max-w-2xl">
             {/* Tagline line */}
             <div className="flex items-center gap-2 text-xs font-bold tracking-[0.25em] text-slate-400 uppercase font-sans mb-3">
@@ -475,38 +156,51 @@ const OurPartners: React.FC = () => {
 
           {/* Right Counter & Interactive Category Filters */}
           <div className="flex flex-col items-start lg:items-end gap-3 pt-2 lg:pt-0">
-            {/* Dynamic Counter & Active Subtitle */}
+            {/* Dynamic Counter & Category Subtitle */}
             <div className="flex items-center gap-3">
               <span className="text-3xl md:text-4xl font-serif italic font-semibold text-[#c59b27] transition-all duration-300">
-                {CATEGORY_CONFIG[activeCategory].countText}
+                {isLoading ? '...' : `${filteredPartners.length}+`}
               </span>
               <div className="text-[10px] md:text-[11px] font-bold text-slate-400 tracking-[0.18em] uppercase font-sans leading-tight">
-                {CATEGORY_CONFIG[activeCategory].label}
+                {activeCategory === 'all'
+                  ? 'OUR TRUSTED GLOBAL PARTNERS'
+                  : getCategoryLabel(activeCategory).toUpperCase()}
               </div>
             </div>
 
             {/* Interactive Category Filter Pills */}
-            <div className="flex flex-wrap items-center gap-1.5 bg-white/80 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200/80 shadow-sm">
-              {(['all', 'airline', 'hotel', 'affiliation'] as CategoryFilter[]).map((catKey) => {
-                const isActive = activeCategory === catKey;
-                return (
-                  <button
-                    key={catKey}
-                    onClick={() => setActiveCategory(catKey)}
-                    className={`px-3.5 py-1.5 rounded-xl text-[10px] md:text-[11px] font-bold tracking-wider uppercase transition-all duration-300 ${
-                      isActive
-                        ? 'bg-[#c59b27] text-white shadow-sm scale-105'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
-                    }`}
-                  >
-                    {catKey === 'airline' && <span className="mr-1">✈</span>}
-                    {catKey === 'hotel' && <span className="mr-1">🏨</span>}
-                    {catKey === 'affiliation' && <span className="mr-1">🤝</span>}
-                    {CATEGORY_CONFIG[catKey].shortLabel}
-                  </button>
-                );
-              })}
-            </div>
+            {availableCategories.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 bg-white/80 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200/80 shadow-sm">
+                <button
+                  onClick={() => setActiveCategory('all')}
+                  className={`px-3.5 py-1.5 rounded-xl text-[10px] md:text-[11px] font-bold tracking-wider uppercase transition-all duration-300 ${
+                    activeCategory === 'all'
+                      ? 'bg-[#c59b27] text-white shadow-sm scale-105'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                  }`}
+                >
+                  ALL ({activePartners.length})
+                </button>
+                {availableCategories.map((catKey) => {
+                  const isActive = activeCategory === catKey;
+                  const catCount = activePartners.filter(p => (p.category || '').toLowerCase() === catKey).length;
+                  return (
+                    <button
+                      key={catKey}
+                      onClick={() => setActiveCategory(catKey)}
+                      className={`px-3.5 py-1.5 rounded-xl text-[10px] md:text-[11px] font-bold tracking-wider uppercase transition-all duration-300 ${
+                        isActive
+                          ? 'bg-[#c59b27] text-white shadow-sm scale-105'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                      }`}
+                    >
+                      {getCategoryIcon(catKey)}
+                      {getCategoryLabel(catKey).toUpperCase()} ({catCount})
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
         </div>
@@ -524,34 +218,45 @@ const OurPartners: React.FC = () => {
 
         {/* Slanted 3D Track Container */}
         <div className="space-y-4 md:space-y-5 transform -rotate-1 scale-[1.01] transition-all duration-500">
-          {marqueeRows.map((row, rowIndex) => {
-            if (row.length === 0) return null;
-
-            // Alternate scroll direction and speeds per row
-            const isReverse = rowIndex % 2 !== 0;
-            const animationClass = isReverse
-              ? rowIndex === 1
-                ? 'animate-marquee-right'
-                : 'animate-marquee-right-slow'
-              : rowIndex === 0
-                ? 'animate-marquee-left'
-                : rowIndex === 2
-                  ? 'animate-marquee-left-fast'
-                  : 'animate-marquee-left-slow';
-
-            // Duplicate array twice to ensure seamless infinite looping marquee
-            const fullRowItems = [...row, ...row, ...row];
-
-            return (
-              <div key={`${activeCategory}-${rowIndex}`} className="flex overflow-hidden group">
-                <div className={`flex gap-4 md:gap-5 shrink-0 pause-on-hover ${animationClass}`}>
-                  {fullRowItems.map((item, itemIdx) => (
-                    <MarqueePartnerCard key={`${item.id}-${itemIdx}`} partner={item} />
-                  ))}
-                </div>
+          {isLoading ? (
+            /* Loading skeletons */
+            [...Array(3)].map((_, rIdx) => (
+              <div key={rIdx} className="flex gap-4 md:gap-5 overflow-hidden">
+                {[...Array(8)].map((_, cIdx) => (
+                  <SkeletonCard key={cIdx} />
+                ))}
               </div>
-            );
-          })}
+            ))
+          ) : (
+            marqueeRows.map((row, rowIndex) => {
+              if (row.length === 0) return null;
+
+              // Alternate scroll direction and speeds per row
+              const isReverse = rowIndex % 2 !== 0;
+              const animationClass = isReverse
+                ? rowIndex === 1
+                  ? 'animate-marquee-right'
+                  : 'animate-marquee-right-slow'
+                : rowIndex === 0
+                  ? 'animate-marquee-left'
+                  : rowIndex === 2
+                    ? 'animate-marquee-left-fast'
+                    : 'animate-marquee-left-slow';
+
+              // Duplicate array twice to ensure seamless infinite looping marquee
+              const fullRowItems = [...row, ...row, ...row];
+
+              return (
+                <div key={`${activeCategory}-${rowIndex}`} className="flex overflow-hidden group">
+                  <div className={`flex gap-4 md:gap-5 shrink-0 pause-on-hover ${animationClass}`}>
+                    {fullRowItems.map((item, itemIdx) => (
+                      <MarqueePartnerCard key={`${item.id}-${itemIdx}`} partner={item} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </section>

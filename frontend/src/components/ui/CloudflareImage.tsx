@@ -127,8 +127,8 @@ const CloudflareImage: React.FC<CloudflareImageProps> = ({
         alt={alt}
         className={`cloudflare-image-error ${className}`}
         style={{ 
-          width: width || '100%', 
-          height: height || '100%',
+          ...(width !== undefined ? { width } : {}),
+          ...(height !== undefined ? { height } : {}),
           objectFit
         }}
       />
@@ -141,8 +141,8 @@ const CloudflareImage: React.FC<CloudflareImageProps> = ({
       alt={alt}
       className={`cloudflare-image ${className}`}
       style={{ 
-        width: width || '100%', 
-        height: height || '100%',
+        ...(width !== undefined ? { width } : {}),
+        ...(height !== undefined ? { height } : {}),
         objectFit
       }}
       loading={loading}

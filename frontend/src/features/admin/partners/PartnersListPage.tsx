@@ -151,9 +151,10 @@ const PartnersListPage: React.FC = () => {
                             <div className="w-12 h-12 rounded border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center">
                               <CloudflareImage
                                 imageId={partner.logo_image_id}
-                                variant="thumbnail"
+                                variant="medium"
                                 alt={partner.name}
                                 className="object-contain max-w-full max-h-full"
+                                objectFit="contain"
                               />
                             </div>
                           ) : (

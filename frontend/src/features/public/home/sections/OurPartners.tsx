@@ -6,13 +6,13 @@ import type { Partner } from '../../../../lib/types/api';
 /** Renders a single backend partner logo tile inside the marquee */
 const MarqueePartnerCard: React.FC<{ partner: Partner }> = ({ partner }) => {
   const content = (
-    <div className="h-16 md:h-20 w-44 md:w-52 bg-white rounded-2xl border border-slate-200/70 shadow-[0_2px_10px_rgba(0,0,0,0.03)] px-5 py-3 flex items-center justify-center shrink-0 transition-all duration-300 hover:shadow-lg hover:border-amber-400/50 hover:scale-[1.04] cursor-pointer group">
+    <div className="h-16 md:h-20 w-48 md:w-56 bg-white rounded-2xl border border-slate-200/70 shadow-[0_2px_10px_rgba(0,0,0,0.03)] px-4 py-2.5 flex items-center justify-center shrink-0 transition-all duration-300 hover:shadow-lg hover:border-amber-400/50 hover:scale-[1.04] cursor-pointer group">
       {partner.logo_image_id ? (
         <CloudflareImage
           imageId={partner.logo_image_id}
-          variant="thumbnail"
+          variant="medium"
           alt={partner.name}
-          className="h-10 w-auto object-contain transition-all duration-300 group-hover:scale-105"
+          className="max-h-10 md:max-h-12 max-w-[88%] w-auto h-auto object-contain transition-all duration-300 group-hover:scale-105"
           objectFit="contain"
         />
       ) : (

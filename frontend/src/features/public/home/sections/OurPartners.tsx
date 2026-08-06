@@ -98,32 +98,28 @@ const OurPartners: React.FC = () => {
     return activePartners.filter(p => (p.category || '').toLowerCase() === activeCategory.toLowerCase());
   }, [activePartners, activeCategory]);
 
-  // Distribute filtered partners evenly across 5 sliding marquee rows
+  // Distribute filtered partners evenly across 3 sliding marquee rows
   const marqueeRows = useMemo(() => {
-    if (filteredPartners.length === 0) return [[], [], [], [], []];
+    if (filteredPartners.length === 0) return [[], [], []];
 
     // Duplicate list if necessary so marquee tracks scroll infinitely without empty gaps
     let extendedList = [...filteredPartners];
-    while (extendedList.length < 25) {
+    while (extendedList.length < 15) {
       extendedList = [...extendedList, ...filteredPartners];
     }
 
     const r0: Partner[] = [];
     const r1: Partner[] = [];
     const r2: Partner[] = [];
-    const r3: Partner[] = [];
-    const r4: Partner[] = [];
 
     extendedList.forEach((item, index) => {
-      const rowIdx = index % 5;
+      const rowIdx = index % 3;
       if (rowIdx === 0) r0.push(item);
       else if (rowIdx === 1) r1.push(item);
-      else if (rowIdx === 2) r2.push(item);
-      else if (rowIdx === 3) r3.push(item);
-      else r4.push(item);
+      else r2.push(item);
     });
 
-    return [r0, r1, r2, r3, r4];
+    return [r0, r1, r2];
   }, [filteredPartners]);
 
   // Don't render section if not loading and zero partners exist in backend database
@@ -148,7 +144,7 @@ const OurPartners: React.FC = () => {
             </div>
 
             {/* Main Heading */}
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-playfair text-charcoal font-bold tracking-tight leading-[1.15]">
+            <h2 className="text-3xl md:text-4xl font-playfair text-charcoal font-bold tracking-tight leading-[1.2]">
               The trusted names behind your <br className="hidden sm:inline" />
               <span className="italic font-playfair font-normal text-primary-dark">perfected</span> journey.
             </h2>
@@ -234,14 +230,10 @@ const OurPartners: React.FC = () => {
               // Alternate scroll direction and speeds per row
               const isReverse = rowIndex % 2 !== 0;
               const animationClass = isReverse
-                ? rowIndex === 1
-                  ? 'animate-marquee-right'
-                  : 'animate-marquee-right-slow'
+                ? 'animate-marquee-right'
                 : rowIndex === 0
                   ? 'animate-marquee-left'
-                  : rowIndex === 2
-                    ? 'animate-marquee-left-fast'
-                    : 'animate-marquee-left-slow';
+                  : 'animate-marquee-left-slow';
 
               // Duplicate array twice to ensure seamless infinite looping marquee
               const fullRowItems = [...row, ...row, ...row];

@@ -6,7 +6,7 @@ import type { Partner } from '../../../../lib/types/api';
 /** Renders a single backend partner logo tile inside the marquee */
 const MarqueePartnerCard: React.FC<{ partner: Partner }> = ({ partner }) => {
   const content = (
-    <div className="h-16 md:h-20 w-48 md:w-56 bg-white rounded-2xl border border-slate-200/70 shadow-[0_2px_10px_rgba(0,0,0,0.03)] px-4 py-2.5 flex items-center justify-center shrink-0 transition-all duration-300 hover:shadow-lg hover:border-amber-400/50 hover:scale-[1.04] cursor-pointer group">
+    <div className="h-16 md:h-20 w-48 md:w-56 bg-white rounded-2xl border border-gray-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.03)] px-4 py-2.5 flex items-center justify-center shrink-0 transition-all duration-300 hover:shadow-lg hover:border-primary/50 hover:scale-[1.04] cursor-pointer group">
       {partner.logo_image_id ? (
         <CloudflareImage
           imageId={partner.logo_image_id}
@@ -16,7 +16,7 @@ const MarqueePartnerCard: React.FC<{ partner: Partner }> = ({ partner }) => {
           objectFit="contain"
         />
       ) : (
-        <span className="text-xs font-bold text-slate-800 tracking-wider uppercase text-center leading-snug font-sans group-hover:text-amber-600 transition-colors">
+        <span className="text-xs font-bold text-charcoal tracking-wider uppercase text-center leading-snug font-sans group-hover:text-primary-dark transition-colors">
           {partner.name}
         </span>
       )}
@@ -41,7 +41,7 @@ const MarqueePartnerCard: React.FC<{ partner: Partner }> = ({ partner }) => {
 
 /** Skeleton loading card */
 const SkeletonCard: React.FC = () => (
-  <div className="h-16 md:h-20 w-44 md:w-52 bg-white/70 rounded-2xl border border-slate-200/50 animate-pulse shrink-0" />
+  <div className="h-16 md:h-20 w-44 md:w-52 bg-gray-200/70 rounded-2xl border border-gray-200/50 animate-pulse shrink-0" />
 );
 
 // Category display labels helper
@@ -133,7 +133,7 @@ const OurPartners: React.FC = () => {
 
   return (
     <section 
-      className="py-16 md:py-24 bg-[#ebf1f5] overflow-hidden relative select-none" 
+      className="py-16 md:py-24 bg-gray-50/80 overflow-hidden relative select-none" 
       aria-label="Allbound Partners & Network"
     >
       <div className="container mx-auto px-4 md:px-8 mb-12 md:mb-14">
@@ -142,15 +142,15 @@ const OurPartners: React.FC = () => {
           {/* Left Title Area */}
           <div className="max-w-2xl">
             {/* Tagline line */}
-            <div className="flex items-center gap-2 text-xs font-bold tracking-[0.25em] text-slate-400 uppercase font-sans mb-3">
-              <span className="w-6 h-[2px] bg-slate-300 rounded-full inline-block" />
+            <div className="flex items-center gap-2 text-xs font-bold tracking-[0.25em] text-gray-500 uppercase font-sans mb-3">
+              <span className="w-6 h-[2px] bg-primary/40 rounded-full inline-block" />
               ALLBOUND PARTNERS &amp; NETWORK
             </div>
 
             {/* Main Heading */}
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-slate-900 font-semibold tracking-tight leading-[1.15]">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-playfair text-charcoal font-bold tracking-tight leading-[1.15]">
               The trusted names behind your <br className="hidden sm:inline" />
-              <span className="italic font-serif font-normal text-[#c59b27]">perfected</span> journey.
+              <span className="italic font-playfair font-normal text-primary-dark">perfected</span> journey.
             </h2>
           </div>
 
@@ -158,10 +158,10 @@ const OurPartners: React.FC = () => {
           <div className="flex flex-col items-start lg:items-end gap-3 pt-2 lg:pt-0">
             {/* Dynamic Counter & Category Subtitle */}
             <div className="flex items-center gap-3">
-              <span className="text-3xl md:text-4xl font-serif italic font-semibold text-[#c59b27] transition-all duration-300">
+              <span className="text-3xl md:text-4xl font-playfair italic font-bold text-primary-dark transition-all duration-300">
                 {isLoading ? '...' : `${filteredPartners.length}+`}
               </span>
-              <div className="text-[10px] md:text-[11px] font-bold text-slate-400 tracking-[0.18em] uppercase font-sans leading-tight">
+              <div className="text-[10px] md:text-[11px] font-bold text-gray-500 tracking-[0.18em] uppercase font-sans leading-tight">
                 {activeCategory === 'all'
                   ? 'OUR TRUSTED GLOBAL PARTNERS'
                   : getCategoryLabel(activeCategory).toUpperCase()}
@@ -170,13 +170,13 @@ const OurPartners: React.FC = () => {
 
             {/* Interactive Category Filter Pills */}
             {availableCategories.length > 0 && (
-              <div className="flex flex-wrap items-center gap-1.5 bg-white/80 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200/80 shadow-sm">
+              <div className="flex flex-wrap items-center gap-1.5 bg-white/80 backdrop-blur-md p-1.5 rounded-2xl border border-gray-200/80 shadow-sm">
                 <button
                   onClick={() => setActiveCategory('all')}
                   className={`px-3.5 py-1.5 rounded-xl text-[10px] md:text-[11px] font-bold tracking-wider uppercase transition-all duration-300 ${
                     activeCategory === 'all'
-                      ? 'bg-[#c59b27] text-white shadow-sm scale-105'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                      ? 'bg-primary text-white shadow-sm scale-105'
+                      : 'text-charcoal-light hover:text-charcoal hover:bg-gray-100/80'
                   }`}
                 >
                   ALL ({activePartners.length})
@@ -190,8 +190,8 @@ const OurPartners: React.FC = () => {
                       onClick={() => setActiveCategory(catKey)}
                       className={`px-3.5 py-1.5 rounded-xl text-[10px] md:text-[11px] font-bold tracking-wider uppercase transition-all duration-300 ${
                         isActive
-                          ? 'bg-[#c59b27] text-white shadow-sm scale-105'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                          ? 'bg-primary text-white shadow-sm scale-105'
+                          : 'text-charcoal-light hover:text-charcoal hover:bg-gray-100/80'
                       }`}
                     >
                       {getCategoryIcon(catKey)}
@@ -209,12 +209,12 @@ const OurPartners: React.FC = () => {
       {/* Marquee Multi-Row Container with Perspective Slant */}
       <div className="relative w-full overflow-hidden py-4">
         {/* Top & Bottom Soft Fade Gradients */}
-        <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-[#ebf1f5] to-transparent z-10 pointer-events-none" />
-        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#ebf1f5] to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-gray-50/80 to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-gray-50/80 to-transparent z-10 pointer-events-none" />
 
         {/* Left & Right Edge Soft Fade Gradients */}
-        <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-[#ebf1f5] via-[#ebf1f5]/80 to-transparent z-10 pointer-events-none" />
-        <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-[#ebf1f5] via-[#ebf1f5]/80 to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-gray-50/80 via-gray-50/60 to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-gray-50/80 via-gray-50/60 to-transparent z-10 pointer-events-none" />
 
         {/* Slanted 3D Track Container */}
         <div className="space-y-4 md:space-y-5 transform -rotate-1 scale-[1.01] transition-all duration-500">

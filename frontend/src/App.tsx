@@ -110,6 +110,7 @@ import HotelListPage from './features/public/hotels/HotelListPage';
 import HotelDetailPage from './features/public/hotels/HotelDetailPage';
 import AttractionListPage from './features/public/attractions/AttractionListPage';
 import AttractionDetailPage from './features/attractions/AttractionDetailPage';
+import PublicActivityListPage from './features/public/activities/ActivityListPage';
 import ActivityDetailPage from './features/public/activities/ActivityDetailPage';
 import PaymentPlansPage from './features/public/content/PaymentPlansPage';
 import GroupTripsPage from './features/group-trips/GroupTripsPage';
@@ -181,19 +182,7 @@ const StaysPage = () => (
   </>
 );
 
-const ActivitiesPage = () => (
-  <>
-    <SeoHead
-      title="Activities"
-      description="Discover exciting activities at your destination."
-      canonicalPath="/activities"
-    />
-    <div>
-      <h1 className="text-4xl font-playfair mb-6">Activities</h1>
-      <p className="text-lg mb-4">Discover exciting activities at your destination.</p>
-    </div>
-  </>
-);
+// Remove placeholder ActivitiesPage since we now have proper public ActivityListPage
 
 // Remove the placeholder BlogPage since we now have proper public blog pages
 
@@ -369,7 +358,7 @@ const router = createBrowserRouter([
       { path: 'destinations/:destination/hotels/:slug', element: <HotelDetailPage /> },
       { path: 'hotels/:destination/:slug', element: <HotelDetailPage /> },
       { path: 'hotels/:slug', element: <HotelDetailPage /> },
-      { path: 'activities', element: <ActivitiesPage /> },
+      { path: 'activities', element: <PublicActivityListPage /> },
       { path: 'destinations/:destination/activities/:slug', element: <ActivityDetailPage /> },
       { path: 'activities/:destination/:slug', element: <ActivityDetailPage /> },
       { path: 'activities/:slug', element: <ActivityDetailPage /> },

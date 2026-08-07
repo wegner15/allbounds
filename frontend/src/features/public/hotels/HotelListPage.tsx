@@ -99,14 +99,22 @@ const HotelListPage: React.FC = () => {
       />
       <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Find Your Perfect Stay
+      <div className="bg-gradient-to-b from-white via-gray-50/50 to-gray-50 border-b border-gray-200/80 py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.2em] text-primary uppercase mb-3">
+              <span className="w-6 h-[2px] bg-primary/60 rounded-full" />
+              ACCOMMODATIONS & STAYS
+              <span className="w-6 h-[2px] bg-primary/60 rounded-full" />
+            </div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-playfair text-charcoal mb-4 tracking-tight leading-tight">
+              Handpicked Stays & Luxury Accommodations
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-              Discover amazing hotels and accommodations for your next adventure.
+            <p className="text-base sm:text-lg text-gray-600 font-sans leading-relaxed mb-3">
+              From beachfront luxury resorts and intimate safari lodges to cozy boutique city hotels, discover curated accommodations designed to elevate your travel experience.
+            </p>
+            <p className="text-xs sm:text-sm text-gray-500 font-sans leading-relaxed">
+              Every property listed with Allbound Vacations is carefully chosen for its hospitality standards, unique setting, and exceptional guest satisfaction. Filter by destination, star rating, or hotel style below.
             </p>
           </div>
         </div>

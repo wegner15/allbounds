@@ -10,6 +10,8 @@ import Button from '../../../components/ui/Button';
 import { MapPin, Clock, Users, Calendar, ArrowLeft, DollarSign, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 
+import SimilarActivities from '../../../components/recommendations/SimilarActivities';
+
 const ActivityDetailPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
     const { data: activity, isLoading, error } = useActivityBySlug(slug || '');
@@ -484,6 +486,12 @@ const ActivityDetailPage: React.FC = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Similar Activities Section */}
+                <SimilarActivities 
+                    currentActivitySlug={activity.slug} 
+                    countryId={activity.countries?.[0]?.id} 
+                />
             </div>
         </div>
     );

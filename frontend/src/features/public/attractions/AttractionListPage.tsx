@@ -188,14 +188,22 @@ const AttractionListPage: React.FC = () => {
       />
       <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Discover Amazing Attractions
+      <div className="bg-gradient-to-b from-white via-gray-50/50 to-gray-50 border-b border-gray-200/80 py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.2em] text-primary uppercase mb-3">
+              <span className="w-6 h-[2px] bg-primary/60 rounded-full" />
+              DESTINATIONS & LANDMARKS
+              <span className="w-6 h-[2px] bg-primary/60 rounded-full" />
+            </div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-playfair text-charcoal mb-4 tracking-tight leading-tight">
+              Discover Iconic Sights & Natural Wonders
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-              Explore museums, parks, monuments, and unique experiences around the world.
+            <p className="text-base sm:text-lg text-gray-600 font-sans leading-relaxed mb-3">
+              Explore famous landmarks, national parks, historical monuments, and hidden gems across our destination network.
+            </p>
+            <p className="text-xs sm:text-sm text-gray-500 font-sans leading-relaxed">
+              Whether you are planning a day tour, a cultural walk, or a scenic safari stopover, browse our curated list of attractions to enrich your itinerary. Use the search and category filters below to explore by region or interest.
             </p>
           </div>
         </div>

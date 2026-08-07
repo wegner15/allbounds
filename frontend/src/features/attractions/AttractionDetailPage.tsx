@@ -12,6 +12,7 @@ import GridGallery from '../../components/ui/GridGallery';
 import Breadcrumb from '../../components/layout/Breadcrumb';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils';
 import ActivityCard from '../destinations/components/ActivityCard';
+import SimilarAttractions from '../../components/recommendations/SimilarAttractions';
 import 'leaflet/dist/leaflet.css';
 
 // Fix Leaflet icon issue - do this once when component mounts
@@ -540,6 +541,14 @@ const AttractionDetailPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Similar Attractions Section */}
+        {attraction && (
+          <SimilarAttractions
+            currentAttractionId={attraction.id}
+            countryId={attraction.country?.id}
+          />
+        )}
       </div>
       </div>
     </>

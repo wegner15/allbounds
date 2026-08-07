@@ -8,6 +8,7 @@ import logging
 from typing import Optional, Any, Callable
 from functools import wraps
 import redis
+from fastapi.encoders import jsonable_encoder
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -102,13 +103,9 @@ def cache_endpoint(ttl: int = 300, key_prefix: Optional[str] = None):
             
             # Store in cache
             try:
-                # Serialize result (support Pydantic models or standard dicts/lists)
-                if hasattr(result, 'dict'):
-                    serialized = json.dumps(result.dict(), default=str)
-                elif isinstance(result, list) and result and hasattr(result[0], 'dict'):
-                    serialized = json.dumps([item.dict() for item in result], default=str)
-                else:
-                    serialized = json.dumps(result, default=str)
+                # Use jsonable_encoder to handle SQLAlchemy models, Pydantic models, datetimes, etc.
+                data_to_cache = jsonable_encoder(result)
+                serialized = json.dumps(data_to_cache)
                 client.setex(cache_key, ttl, serialized)
                 logger.debug(f"Cached: {cache_key} (TTL: {ttl}s)")
             except Exception as e:

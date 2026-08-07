@@ -22,7 +22,7 @@ class UpdateFaqsRequest(BaseModel):
 router = APIRouter()
 
 @router.get("/", response_model=List[PackageListResponse])
-# @profile_memory_detailed  # DISABLED - may be causing memory leak
+@cache_endpoint(ttl=300)
 def get_packages(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -68,6 +68,7 @@ def get_packages(
     return [PackageListResponse.from_orm(pkg) for pkg in packages]
 
 @router.get("/country/{country_id}", response_model=List[PackageWithCountryResponse])
+@cache_endpoint(ttl=300)
 def get_packages_by_country(
     country_id: int,
     db: Session = Depends(get_db),
@@ -82,6 +83,7 @@ def get_packages_by_country(
     return [PackageWithCountryResponse.from_orm(pkg) for pkg in packages]
 
 @router.get("/featured", response_model=List[PackageWithCountryResponse])
+@cache_endpoint(ttl=300)
 def get_featured_packages(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -97,6 +99,7 @@ def get_featured_packages(
     return [PackageWithCountryResponse.from_orm(pkg) for pkg in packages]
 
 @router.get("/{package_id}", response_model=PackageWithCountryResponse)
+@cache_endpoint(ttl=300)
 def get_package(
     package_id: int,
     db: Session = Depends(get_db),
@@ -110,6 +113,7 @@ def get_package(
     return package
 
 @router.get("/slug/{slug}", response_model=PackageWithCountryResponse)
+@cache_endpoint(ttl=300)
 def get_package_by_slug(
     slug: str,
     db: Session = Depends(get_db),
@@ -123,6 +127,7 @@ def get_package_by_slug(
     return package
 
 @router.get("/details/{slug}")
+@cache_endpoint(ttl=300)
 def get_package_details_by_slug(
     slug: str,
     db: Session = Depends(get_db),
@@ -136,6 +141,7 @@ def get_package_details_by_slug(
     return package_details
 
 @router.get("/comprehensive/{slug}", response_model=PackageDetailResponse)
+@cache_endpoint(ttl=600)
 def get_comprehensive_package_by_slug(
     slug: str,
     db: Session = Depends(get_db),
@@ -176,6 +182,7 @@ def get_comprehensive_package_by_slug(
     return package
 
 @router.get("/{package_id}/similar", response_model=List[PackageWithCountryResponse])
+@cache_endpoint(ttl=300)
 def get_similar_packages(
     package_id: int,
     db: Session = Depends(get_db),
@@ -198,6 +205,7 @@ def create_package(
     Create new package.
     """
     package = package_service.create_package(db, package_in)
+    invalidate_cache_pattern("cache:*")
     return package
 
 @router.put("/{package_id}", response_model=PackageResponse)
@@ -215,6 +223,7 @@ def update_package(
     if package is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Package not found")
     package = package_service.update_package(db, package_id=package_id, package_update=package_in)
+    invalidate_cache_pattern("cache:*")
     return package
 
 @router.patch("/{package_id}", response_model=PackageResponse)
@@ -232,6 +241,7 @@ def patch_package(
     if package is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Package not found")
     package = package_service.patch_package(db, package_id=package_id, package_update=package_in)
+    invalidate_cache_pattern("cache:*")
     return package
 
 @router.delete("/{package_id}", response_model=PackageResponse)
@@ -248,6 +258,7 @@ def delete_package(
     if package is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Package not found")
     package_service.delete_package(db, package_id=package_id)
+    invalidate_cache_pattern("cache:*")
     return package
 
 @router.post("/{package_id}/publish", response_model=PackageResponse)

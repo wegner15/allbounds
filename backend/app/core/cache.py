@@ -11,20 +11,36 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-# Redis client
-try:
-    redis_client = redis.from_url(
-        settings.REDIS_URL,
-        decode_responses=True,
-        socket_connect_timeout=5,
-        socket_timeout=5
-    )
-    # Test connection
-    redis_client.ping()
-    logger.info(f"Redis connected successfully: {settings.REDIS_URL}")
-except Exception as e:
-    logger.warning(f"Redis connection failed: {e}. Caching will be disabled.")
-    redis_client = None
+_redis_client = None
+
+def get_redis_client():
+    global _redis_client
+    if _redis_client is not None:
+        try:
+            _redis_client.ping()
+            return _redis_client
+        except Exception:
+            _redis_client = None
+
+    try:
+        client = redis.from_url(
+            settings.REDIS_URL,
+            decode_responses=True,
+            socket_connect_timeout=3,
+            socket_timeout=3
+        )
+        client.ping()
+        _redis_client = client
+        logger.info(f"Redis connected successfully: {settings.REDIS_URL}")
+        return _redis_client
+    except Exception as e:
+        logger.warning(f"Redis connection failed: {e}. Caching will be disabled.")
+        return None
+
+def __getattr__(name):
+    if name == "redis_client":
+        return get_redis_client()
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 
 def get_cache(key: str) -> Optional[Any]:
@@ -37,11 +53,12 @@ def get_cache(key: str) -> Optional[Any]:
     Returns:
         Cached value or None if not found or error
     """
-    if not redis_client:
+    client = get_redis_client()
+    if not client:
         return None
         
     try:
-        value = redis_client.get(key)
+        value = client.get(key)
         if value:
             return json.loads(value)
         return None
@@ -53,21 +70,14 @@ def get_cache(key: str) -> Optional[Any]:
 def set_cache(key: str, value: Any, ttl: Optional[int] = None) -> bool:
     """
     Set value in cache.
-    
-    Args:
-        key: Cache key
-        value: Value to cache (must be JSON serializable)
-        ttl: Time to live in seconds (default from settings)
-        
-    Returns:
-        True if successful, False otherwise
     """
-    if not redis_client:
+    client = get_redis_client()
+    if not client:
         return False
         
     try:
         ttl = ttl or settings.REDIS_CACHE_TTL
-        redis_client.setex(
+        client.setex(
             key,
             ttl,
             json.dumps(value, default=str)
@@ -81,18 +91,13 @@ def set_cache(key: str, value: Any, ttl: Optional[int] = None) -> bool:
 def delete_cache(key: str) -> bool:
     """
     Delete value from cache.
-    
-    Args:
-        key: Cache key
-        
-    Returns:
-        True if successful, False otherwise
     """
-    if not redis_client:
+    client = get_redis_client()
+    if not client:
         return False
         
     try:
-        redis_client.delete(key)
+        client.delete(key)
         return True
     except Exception as e:
         logger.error(f"Error deleting cache key {key}: {e}")
@@ -102,20 +107,16 @@ def delete_cache(key: str) -> bool:
 def delete_pattern(pattern: str) -> int:
     """
     Delete all keys matching a pattern.
-    
-    Args:
-        pattern: Pattern to match (e.g., "packages:*")
-        
-    Returns:
-        Number of keys deleted
     """
-    if not redis_client:
+    client = get_redis_client()
+    if not client:
         return 0
         
     try:
-        keys = redis_client.keys(pattern)
+        keys = client.keys(pattern)
         if keys:
-            return redis_client.delete(*keys)
+            return client.delete(*keys)
+        return 0
         return 0
     except Exception as e:
         logger.error(f"Error deleting cache pattern {pattern}: {e}")

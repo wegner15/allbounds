@@ -12,19 +12,37 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-# Initialize Redis client
-try:
-    redis_client = redis.from_url(
-        settings.REDIS_URL,
-        decode_responses=True,
-        socket_connect_timeout=5,
-        socket_timeout=5
-    )
-    redis_client.ping()
-    logger.info(f"Redis cache connected: {settings.REDIS_URL}")
-except Exception as e:
-    logger.warning(f"Redis cache disabled: {e}")
-    redis_client = None
+_redis_client = None
+
+def get_redis_client():
+    """Lazily get or initialize Redis client with automatic reconnect."""
+    global _redis_client
+    if _redis_client is not None:
+        try:
+            _redis_client.ping()
+            return _redis_client
+        except Exception:
+            _redis_client = None
+
+    try:
+        client = redis.from_url(
+            settings.REDIS_URL,
+            decode_responses=True,
+            socket_connect_timeout=3,
+            socket_timeout=3
+        )
+        client.ping()
+        _redis_client = client
+        logger.info(f"Redis cache connected successfully: {settings.REDIS_URL}")
+        return _redis_client
+    except Exception as e:
+        logger.warning(f"Redis connection attempt failed: {e}")
+        return None
+
+def __getattr__(name):
+    if name == "redis_client":
+        return get_redis_client()
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 
 def get_cache_key(prefix: str, *args, **kwargs) -> str:
@@ -49,18 +67,13 @@ def cache_endpoint(ttl: int = 300, key_prefix: Optional[str] = None):
     Args:
         ttl: Time to live in seconds (default 5 minutes)
         key_prefix: Optional prefix for cache key
-        
-    Usage:
-        @router.get("/packages/")
-        @cache_endpoint(ttl=300, key_prefix="packages_list")
-        def get_packages(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-            return package_service.get_packages(db, skip, limit)
     """
     def decorator(func: Callable):
         @wraps(func)
         def wrapper(*args, **kwargs):
+            client = get_redis_client()
             # Skip caching if Redis not available
-            if not redis_client:
+            if not client:
                 return func(*args, **kwargs)
             
             # Extract only serializable arguments (skip db session, etc.)
@@ -76,7 +89,7 @@ def cache_endpoint(ttl: int = 300, key_prefix: Optional[str] = None):
             
             # Try to get from cache
             try:
-                cached = redis_client.get(cache_key)
+                cached = client.get(cache_key)
                 if cached:
                     logger.debug(f"Cache HIT: {cache_key}")
                     return json.loads(cached)
@@ -89,9 +102,14 @@ def cache_endpoint(ttl: int = 300, key_prefix: Optional[str] = None):
             
             # Store in cache
             try:
-                # Serialize result
-                serialized = json.dumps(result, default=str)
-                redis_client.setex(cache_key, ttl, serialized)
+                # Serialize result (support Pydantic models or standard dicts/lists)
+                if hasattr(result, 'dict'):
+                    serialized = json.dumps(result.dict(), default=str)
+                elif isinstance(result, list) and result and hasattr(result[0], 'dict'):
+                    serialized = json.dumps([item.dict() for item in result], default=str)
+                else:
+                    serialized = json.dumps(result, default=str)
+                client.setex(cache_key, ttl, serialized)
                 logger.debug(f"Cached: {cache_key} (TTL: {ttl}s)")
             except Exception as e:
                 logger.error(f"Cache write error: {e}")
@@ -109,14 +127,15 @@ def invalidate_cache_pattern(pattern: str):
     Args:
         pattern: Pattern to match (e.g., "cache:packages:*")
     """
-    if not redis_client:
+    client = get_redis_client()
+    if not client:
         return 0
     
     try:
-        keys = redis_client.keys(pattern)
+        keys = client.keys(pattern)
         if keys:
-            count = redis_client.delete(*keys)
-            logger.info(f"Invalidated {count} cache keys: {pattern}")
+            count = client.delete(*keys)
+            logger.info(f"Invalidated {count} cache keys matching: {pattern}")
             return count
         return 0
     except Exception as e:

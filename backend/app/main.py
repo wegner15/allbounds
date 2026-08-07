@@ -131,9 +131,10 @@ async def startup_event():
     
     # Test Redis connection
     try:
-        from app.core.cache import redis_client
-        if redis_client:
-            redis_client.ping()
+        from app.core.cache import get_redis_client
+        client = get_redis_client()
+        if client:
+            client.ping()
             logger.info("Redis connection successful")
         else:
             logger.warning("Redis client not initialized. Caching disabled.")

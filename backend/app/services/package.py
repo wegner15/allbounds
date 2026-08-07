@@ -74,9 +74,9 @@ class PackageService:
             )
         ).offset(skip).limit(limit).all()
     
-    def get_featured_packages(self, db: Session, skip: int = 0, limit: int = 100, country: Optional[str] = None) -> List[Package]:
+    def get_featured_packages(self, db: Session, skip: int = 0, limit: int = 100, country: Optional[str] = None, tag: Optional[str] = None) -> List[Package]:
         """
-        Retrieve featured packages with pagination, optionally filtered by country.
+        Retrieve featured packages with pagination, optionally filtered by country or tag.
         """
         query = db.query(Package).filter(
             Package.is_active == True,

@@ -8,6 +8,7 @@ import SeoHead from '../../components/seo/SeoHead';
 import Breadcrumb from '../../components/layout/Breadcrumb';
 import Button from '../../components/ui/Button';
 import ImageGallery from '../../components/ui/ImageGallery';
+import SimilarHotels from '../../components/recommendations/SimilarHotels';
 
 // API
 import { apiClient } from '../../lib/api';
@@ -267,6 +268,9 @@ const HotelDetailPage: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Similar Hotels Section */}
+          <SimilarHotels countryId={hotel.country_id || hotel.country?.id!} currentHotelId={hotel.id} />
         </div>
       </div>
     </>

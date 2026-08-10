@@ -3,7 +3,7 @@ import HotelCard from '../../features/destinations/components/HotelCard';
 import type { Hotel } from '../../lib/types/api';
 
 interface SimilarHotelsProps {
-    countryId: number;
+    countryId?: number;
     currentHotelId: number;
     limit?: number;
 }
@@ -24,13 +24,13 @@ const SimilarHotels: React.FC<SimilarHotelsProps> = ({ countryId, currentHotelId
         );
     }
 
-    if (error) {
+    if (error || !hotels) {
         return null;
     }
 
     const similarHotels = hotels
-        ?.filter((hotel) => hotel.id !== currentHotelId && hotel.is_active)
-        .slice(0, limit) || [];
+        .filter((hotel) => hotel.id !== currentHotelId && hotel.is_active && (!countryId || hotel.country_id === countryId || hotel.country?.id === countryId))
+        .slice(0, limit);
 
     if (similarHotels.length === 0) {
         return null;

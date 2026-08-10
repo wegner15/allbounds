@@ -330,6 +330,7 @@ class HotelService:
             "address": hotel.address,
             "city": hotel.city,
             "price_category": hotel.price_category,
+            "country_id": hotel.country_id,
             "amenities": [
                 {
                     "id": amenity.id,

@@ -307,7 +307,7 @@ const HotelDetailPage: React.FC = () => {
 
       {/* Similar Hotels Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        <SimilarHotels countryId={hotel.country_id!} currentHotelId={hotel.id} />
+        <SimilarHotels countryId={hotel.country_id || hotel.country?.id!} currentHotelId={hotel.id} />
       </div>
 
       {/* Booking Form Modal */}

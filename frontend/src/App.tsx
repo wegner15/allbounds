@@ -5,7 +5,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/api';
 import { AuthProvider } from './lib/contexts/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import ErrorBoundary from './components/ErrorBoundary';
+import ErrorBoundary, { RouteErrorFallback } from './components/ErrorBoundary';
 import SeoHead from './components/seo/SeoHead';
 
 // Import layout components
@@ -337,6 +337,7 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <MainLayout />,
+    errorElement: <RouteErrorFallback />,
     children: [
       { index: true, element: <HomePage /> },
       { path: 'start-planning', element: <StartPlanningPage /> },

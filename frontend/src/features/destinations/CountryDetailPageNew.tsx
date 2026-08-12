@@ -59,6 +59,37 @@ const CountryDetailPageNew: React.FC = () => {
     refetch
   } = useCountryDetails(slug || '');
 
+  // Automatically scroll to target section on initial page load or reload if URL contains a hash fragment
+  // Unconditional hook call before early returns prevents React Rule of Hooks violations (Minified Error #310)
+  React.useEffect(() => {
+    if (!isLoading && country) {
+      const rawHash = window.location.hash.replace('#', '');
+      if (rawHash) {
+        const targetId =
+          rawHash === 'attractions' ? 'section-attractions' :
+          rawHash === 'activities' ? 'section-activities' :
+          rawHash === 'packages' ? 'section-packages' :
+          rawHash === 'hotels' || rawHash === 'accommodation' ? 'section-hotels' :
+          rawHash === 'explore' ? 'group-trips' : rawHash;
+
+        const timer = setTimeout(() => {
+          const element = document.getElementById(targetId);
+          if (element) {
+            const offset = 100;
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.scrollY - offset;
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth',
+            });
+          }
+        }, 350);
+
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [isLoading, country]);
+
   // Loading state
   if (isLoading) {
     return (
@@ -194,27 +225,6 @@ const CountryDetailPageNew: React.FC = () => {
     }
   };
 
-  // Automatically scroll to target section on initial page load or reload if URL contains a hash fragment
-  React.useEffect(() => {
-    if (!isLoading && country) {
-      const rawHash = window.location.hash.replace('#', '');
-      if (rawHash) {
-        // Support clean aliases (#attractions, #activities, #packages, #hotels, #explore)
-        const targetId =
-          rawHash === 'attractions' ? 'section-attractions' :
-          rawHash === 'activities' ? 'section-activities' :
-          rawHash === 'packages' ? 'section-packages' :
-          rawHash === 'hotels' || rawHash === 'accommodation' ? 'section-hotels' :
-          rawHash === 'explore' ? 'group-trips' : rawHash;
-
-        const timer = setTimeout(() => {
-          scrollToSection(targetId);
-        }, 350);
-
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [isLoading, country]);
 
 
   return (

@@ -164,6 +164,7 @@ class CountryService:
         Retrieve a specific country by slug with all related destinations data.
         """
         from sqlalchemy.orm import selectinload
+        from app.models.package import Package
         from app.models.group_trip import GroupTrip, GroupTripDeparture
         from app.models.activity import Activity
         from app.models.hotel import Hotel
@@ -182,6 +183,7 @@ class CountryService:
             selectinload(Country.media_assets),
             selectinload(Country.visit_info)
         ).filter(Country.slug == slug, Country.is_active == True).first()
+
 
         
         if not country:
@@ -375,10 +377,11 @@ class CountryService:
         """
         from sqlalchemy.orm import selectinload
         from sqlalchemy import desc
+        from app.models.package import Package
         from app.models.group_trip import GroupTrip, GroupTripDeparture
-
         from app.models.hotel import Hotel
         from app.models.activity import Activity
+
 
         query = db.query(Country).options(
             selectinload(Country.region),

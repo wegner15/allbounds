@@ -226,86 +226,94 @@ const MainNavigation: React.FC = () => {
   };
 
   return (
-    <header className="w-full bg-white">
-      {/* Top Tier: Logo, Contact, CTA — scrolls naturally with page flow */}
-      <div className="border-b border-gray-100 bg-white">
-        <div className="max-w-[1600px] mx-auto px-4 lg:px-6">
-          <div className="flex items-center justify-between h-20 lg:h-24">
-            {/* Logo */}
-            <Link to="/" className="flex items-center flex-shrink-0">
-              <div className="flex items-center">
-                <img
-                  src="/logo/main_logo.png"
-                  alt="AllBound Vacations"
-                  className="h-10 sm:h-12 w-auto"
-                  onError={(e) => {
-                    const target = e.currentTarget as HTMLImageElement;
-                    target.style.display = 'none';
-                    const sibling = target.nextElementSibling as HTMLElement;
-                    if (sibling) sibling.style.display = 'block';
-                  }}
-                />
-                <span className="hidden text-2xl font-bold text-charcoal ml-2">AllBound Vacations</span>
-              </div>
-            </Link>
-
-            {/* Right Side: Contact, Wishlist, CTA */}
-            <div className="flex items-center space-x-6">
-              {/* Contact Info */}
-              <div className="hidden md:flex flex-col items-end mr-4">
-                <span className="text-xs text-gray-500 font-medium text-right">Call us today from 09:00 - 17:30</span>
-                <div className="flex flex-col items-end">
-                  <a href="tel:+256782594008" className="text-base lg:text-lg font-bold text-charcoal hover:text-primary transition-colors leading-tight">
-                    UG: +(256) 782 594 008
-                  </a>
-                  <a href="tel:+254723927458" className="text-base lg:text-lg font-bold text-charcoal hover:text-primary transition-colors leading-tight">
-                    KE: +(254) 723 927 458
-                  </a>
+    <header
+      className={`sticky top-0 z-[1000] bg-white w-full border-b border-gray-100 transition-shadow duration-300 ${
+        scrolled ? 'shadow-md' : ''
+      }`}
+    >
+      {/* Top Tier: Logo, Contact, CTA — smoothly collapses when scrolled */}
+      <div
+        className={`border-b border-gray-50 transition-all duration-300 ease-in-out ${
+          scrolled ? 'grid-rows-[0fr] opacity-0 pointer-events-none overflow-hidden' : 'grid-rows-[1fr] opacity-100'
+        }`}
+        style={{ display: 'grid' }}
+      >
+        <div className="overflow-hidden">
+          <div className="max-w-[1600px] mx-auto px-4 lg:px-6">
+            <div className="flex items-center justify-between h-20 lg:h-24">
+              {/* Logo */}
+              <Link to="/" className="flex items-center flex-shrink-0">
+                <div className="flex items-center">
+                  <img
+                    src="/logo/main_logo.png"
+                    alt="AllBound Vacations"
+                    className="h-10 sm:h-12 w-auto"
+                    onError={(e) => {
+                      const target = e.currentTarget as HTMLImageElement;
+                      target.style.display = 'none';
+                      const sibling = target.nextElementSibling as HTMLElement;
+                      if (sibling) sibling.style.display = 'block';
+                    }}
+                  />
+                  <span className="hidden text-2xl font-bold text-charcoal ml-2">AllBound Vacations</span>
                 </div>
-              </div>
-
-              {/* Wishlist Icon */}
-              <button className="text-charcoal-light hover:text-primary transition-colors" aria-label="Wishlist">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </button>
-
-              {/* CTA Button */}
-              <Link
-                to="/start-planning"
-                className="hidden sm:flex items-center px-6 py-3 bg-primary text-white text-sm font-bold rounded uppercase tracking-wider hover:bg-primary-dark transition-all transform hover:scale-[1.02] shadow-sm"
-              >
-                Start Planning
               </Link>
 
-              {/* Mobile menu button */}
-              <button
-                className="lg:hidden p-2 rounded-md text-charcoal hover:bg-gray-100 transition-colors"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                aria-label="Toggle menu"
-              >
-                {mobileMenuOpen ? (
+              {/* Right Side: Contact, Wishlist, CTA */}
+              <div className="flex items-center space-x-6">
+                {/* Contact Info */}
+                <div className="hidden md:flex flex-col items-end mr-4">
+                  <span className="text-xs text-gray-500 font-medium text-right">Call us today from 09:00 - 17:30</span>
+                  <div className="flex flex-col items-end">
+                    <a href="tel:+256782594008" className="text-base lg:text-lg font-bold text-charcoal hover:text-primary transition-colors leading-tight">
+                      UG: +(256) 782 594 008
+                    </a>
+                    <a href="tel:+254723927458" className="text-base lg:text-lg font-bold text-charcoal hover:text-primary transition-colors leading-tight">
+                      KE: +(254) 723 927 458
+                    </a>
+                  </div>
+                </div>
+
+                {/* Wishlist Icon */}
+                <button className="text-charcoal-light hover:text-primary transition-colors" aria-label="Wishlist">
                   <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
-                ) : (
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                )}
-              </button>
+                </button>
+
+                {/* CTA Button */}
+                <Link
+                  to="/start-planning"
+                  className="hidden sm:flex items-center px-6 py-3 bg-primary text-white text-sm font-bold rounded uppercase tracking-wider hover:bg-primary-dark transition-all transform hover:scale-[1.02] shadow-sm"
+                >
+                  Start Planning
+                </Link>
+
+                {/* Mobile menu button */}
+                <button
+                  className="lg:hidden p-2 rounded-md text-charcoal hover:bg-gray-100 transition-colors"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  aria-label="Toggle menu"
+                >
+                  {mobileMenuOpen ? (
+                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  ) : (
+                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Bottom Tier: Navigation Links & Search — Sticky at top-0 */}
-      <div
-        className={`sticky top-0 z-[1000] bg-white border-b border-gray-100 transition-shadow duration-300 ${
-          scrolled ? 'shadow-md' : ''
-        }`}
-      >
+      {/* Bottom Tier: Navigation Links & Search */}
+      <div className="bg-white">
+
         <div className="max-w-[1600px] mx-auto px-4 lg:px-6">
           <div className="flex items-center justify-between h-14">
 

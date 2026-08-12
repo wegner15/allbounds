@@ -10,6 +10,7 @@ import PackageBookingForm from '../../components/forms/PackageBookingForm';
 import InquiryForm from '../../components/forms/InquiryForm';
 import Breadcrumb from '../../components/layout/Breadcrumb';
 import SeasonalPricingTable from '../../components/common/SeasonalPricingTable';
+import { useEntityPriceCharts } from '../../lib/hooks/usePackagePriceCharts';
 import SeoHead from '../../components/seo/SeoHead';
 import type { HolidayTypeSummary } from '../../lib/types/api';
 
@@ -20,6 +21,11 @@ const PackageDetailPageNew: React.FC = () => {
 
   // Fetch comprehensive package details
   const { data: packageDetail, isLoading, error, refetch } = useComprehensivePackageBySlug(slug!);
+  const { data: fetchedPriceCharts } = useEntityPriceCharts('package', packageDetail?.id || 0);
+  const activePriceCharts = (packageDetail?.price_charts && packageDetail.price_charts.length > 0)
+    ? packageDetail.price_charts
+    : (fetchedPriceCharts || []);
+
 
   // Fetch recommended packages from the same country
   const { data: recommendedPackages } = useRecommendedPackages(
@@ -267,9 +273,9 @@ const PackageDetailPageNew: React.FC = () => {
               )}
 
               {/* Seasonal Pricing Section */}
-              {packageDetail.price_charts && packageDetail.price_charts.length > 0 && (
+              {activePriceCharts && activePriceCharts.length > 0 && (
                 <div id="pricing" className="mb-6 md:mb-8 scroll-mt-20">
-                  <SeasonalPricingTable priceCharts={packageDetail.price_charts} />
+                  <SeasonalPricingTable priceCharts={activePriceCharts} />
                 </div>
               )}
 
@@ -289,12 +295,13 @@ const PackageDetailPageNew: React.FC = () => {
                   packageSlug={packageDetail.slug}
                   price={packageDetail.price}
                   durationDays={packageDetail.duration_days}
-                  priceCharts={packageDetail.price_charts}
+                  priceCharts={activePriceCharts}
                   onBookNow={() => setShowBookingForm(true)}
                   onRequestQuote={() => setShowInquiryForm(true)}
                 />
               </div>
             </aside>
+
           </div>
         </div>
 

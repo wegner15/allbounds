@@ -7,6 +7,7 @@ import SeoHead from '../../components/seo/SeoHead';
 // Components
 import Breadcrumb from '../../components/layout/Breadcrumb';
 import SeasonalPricingTable from '../../components/common/SeasonalPricingTable';
+import { useEntityPriceCharts } from '../../lib/hooks/usePackagePriceCharts';
 import Button from '../../components/ui/Button';
 
 import ImageGallery from '../../components/ui/ImageGallery';
@@ -31,6 +32,11 @@ const HotelDetailPage: React.FC = () => {
       return response;
     },
   });
+
+  const { data: fetchedPriceCharts } = useEntityPriceCharts('hotel', hotel?.id || 0);
+  const activePriceCharts = (hotel?.price_charts && hotel.price_charts.length > 0)
+    ? hotel.price_charts
+    : (fetchedPriceCharts || []);
 
   if (isLoading) {
     return (
@@ -194,11 +200,12 @@ const HotelDetailPage: React.FC = () => {
               )}
 
               {/* Seasonal Pricing Section */}
-              {(hotel as any).price_charts && (hotel as any).price_charts.length > 0 && (
+              {activePriceCharts && activePriceCharts.length > 0 && (
                 <div id="pricing" className="mb-8">
-                  <SeasonalPricingTable priceCharts={(hotel as any).price_charts} title="Hotel Seasonal Room Rates" />
+                  <SeasonalPricingTable priceCharts={activePriceCharts} title="Hotel Seasonal Room Rates" />
                 </div>
               )}
+
 
               {/* Amenities Section */}
               {hotel.amenities && hotel.amenities.length > 0 && (

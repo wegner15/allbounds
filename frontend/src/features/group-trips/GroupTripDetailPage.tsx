@@ -10,6 +10,8 @@ import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import ImageCarousel from '../../components/ui/ImageCarousel';
 import SeasonalPricingTable from '../../components/common/SeasonalPricingTable';
+import { useEntityPriceCharts } from '../../lib/hooks/usePackagePriceCharts';
+
 import { EnhancedItineraryDisplay } from '../../components/ui/EnhancedItineraryDisplay';
 import { TextDisplay } from '../../components/ui/RichTextDisplay';
 import GroupTripBookingForm from '../../components/forms/GroupTripBookingForm';
@@ -28,6 +30,11 @@ const GroupTripDetailPage: React.FC = () => {
 
   // Fetch group trip details with gallery
   const { data: tripDetail, isLoading, error } = useGroupTripDetailsBySlug(slug || '');
+  const { data: fetchedPriceCharts } = useEntityPriceCharts('group_trip', tripDetail?.id || 0);
+  const activePriceCharts = (tripDetail?.price_charts && tripDetail.price_charts.length > 0)
+    ? tripDetail.price_charts
+    : (fetchedPriceCharts || []);
+
 
   // Handle scroll to show/hide sticky card
   React.useEffect(() => {
@@ -308,11 +315,12 @@ const GroupTripDetailPage: React.FC = () => {
               )}
 
               {/* Seasonal Pricing Section */}
-              {(tripDetail as any).price_charts && (tripDetail as any).price_charts.length > 0 && (
+              {activePriceCharts && activePriceCharts.length > 0 && (
                 <div id="pricing" className="mb-6">
-                  <SeasonalPricingTable priceCharts={(tripDetail as any).price_charts} title="Group Trip Seasonal Pricing" />
+                  <SeasonalPricingTable priceCharts={activePriceCharts} title="Group Trip Seasonal Pricing" />
                 </div>
               )}
+
 
               {/* Itinerary Section */}
               <EnhancedItineraryDisplay

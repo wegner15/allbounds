@@ -158,9 +158,26 @@ const MainNavigation: React.FC = () => {
     { name: 'Blog', slug: 'blog', icon: '📝' },
   ];
 
-  // Scroll listener for compact nav
+  // Scroll listener for compact nav with hysteresis & rAF throttling
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 60);
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScroll = window.scrollY;
+          setScrolled((prev) => {
+            // Dual threshold: collapse at > 80px, expand only when < 30px
+            if (!prev && currentScroll > 80) return true;
+            if (prev && currentScroll < 30) return false;
+            return prev;
+          });
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -209,11 +226,8 @@ const MainNavigation: React.FC = () => {
   };
 
   return (
-    // will-change: transform prevents the browser from reflowing the page body
-    // on every scroll event tick, which was causing the menu to jitter.
     <header
-      className={`sticky top-0 z-[1000] bg-white w-full border-b border-gray-100 transition-shadow duration-300 will-change-transform ${scrolled ? 'shadow-md' : ''}`}
-      style={{ willChange: 'transform' }}
+      className={`sticky top-0 z-[1000] bg-white w-full border-b border-gray-100 transition-shadow duration-300 ${scrolled ? 'shadow-md' : ''}`}
     >
       {/* Top Tier: Logo, Contact, CTA — hidden when scrolled.
           Using grid-rows transition instead of max-h to avoid expensive layout reflow. */}
@@ -301,23 +315,28 @@ const MainNavigation: React.FC = () => {
         <div className="max-w-[1600px] mx-auto px-4 lg:px-6">
           <div className={`flex items-center justify-between transition-all duration-300 ${scrolled ? 'h-12' : 'h-14'}`}>
 
-            {/* Compact logo — only visible when scrolled */}
-            {scrolled && (
-              <Link to="/" className="flex items-center flex-shrink-0 mr-6">
-                <img
-                  src="/logo/main_logo.png"
-                  alt="AllBound Vacations"
-                  className="h-7 w-auto"
-                  onError={(e) => {
-                    const target = e.currentTarget as HTMLImageElement;
-                    target.style.display = 'none';
-                    const sibling = target.nextElementSibling as HTMLElement;
-                    if (sibling) sibling.style.display = 'block';
-                  }}
-                />
-                <span className="hidden text-base font-bold text-charcoal ml-2">AllBound</span>
-              </Link>
-            )}
+            {/* Compact logo — smoothly transitions when scrolled */}
+            <Link
+              to="/"
+              className={`flex items-center flex-shrink-0 transition-all duration-300 ease-in-out ${
+                scrolled
+                  ? 'opacity-100 max-w-[200px] mr-6 pointer-events-auto'
+                  : 'opacity-0 max-w-0 mr-0 overflow-hidden pointer-events-none'
+              }`}
+            >
+              <img
+                src="/logo/main_logo.png"
+                alt="AllBound Vacations"
+                className="h-7 w-auto"
+                onError={(e) => {
+                  const target = e.currentTarget as HTMLImageElement;
+                  target.style.display = 'none';
+                  const sibling = target.nextElementSibling as HTMLElement;
+                  if (sibling) sibling.style.display = 'block';
+                }}
+              />
+              <span className="hidden text-base font-bold text-charcoal ml-2">AllBound</span>
+            </Link>
 
             {/* Navigation Links */}
             <nav className="flex items-center space-x-0 xl:space-x-1">
@@ -373,28 +392,32 @@ const MainNavigation: React.FC = () => {
               </form>
             </div>
 
-            {/* Compact CTA — visible when scrolled */}
-            {scrolled && (
-              <Link
-                to="/start-planning"
-                className="ml-6 flex items-center px-4 py-2 bg-primary text-white text-xs font-bold rounded uppercase tracking-wider hover:bg-primary-dark transition-all shadow-sm whitespace-nowrap"
-              >
-                Start Planning
-              </Link>
-            )}
+            {/* Compact CTA — smoothly transitions when scrolled */}
+            <Link
+              to="/start-planning"
+              className={`flex items-center bg-primary text-white text-xs font-bold rounded uppercase tracking-wider hover:bg-primary-dark transition-all shadow-sm whitespace-nowrap ${
+                scrolled
+                  ? 'opacity-100 max-w-[200px] ml-6 px-4 py-2 pointer-events-auto'
+                  : 'opacity-0 max-w-0 ml-0 px-0 py-0 overflow-hidden pointer-events-none'
+              }`}
+            >
+              Start Planning
+            </Link>
 
             {/* Mobile menu button (scrolled mode) */}
-            {scrolled && (
-              <button
-                className="lg:hidden ml-3 p-2 rounded-md text-charcoal hover:bg-gray-100 transition-colors"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                aria-label="Toggle menu"
-              >
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            )}
+            <button
+              className={`lg:hidden p-2 rounded-md text-charcoal hover:bg-gray-100 transition-all ${
+                scrolled
+                  ? 'opacity-100 max-w-[50px] ml-3 pointer-events-auto'
+                  : 'opacity-0 max-w-0 ml-0 p-0 overflow-hidden pointer-events-none'
+              }`}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>

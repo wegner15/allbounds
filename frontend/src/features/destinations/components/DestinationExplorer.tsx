@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Search, X, Tag as TagIcon, ChevronDown } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Search, X, Tag as TagIcon, ChevronDown, ChevronRight } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 import { usePackages } from '../../../lib/hooks/usePackages';
 import { useHotels } from '../../../lib/hooks/useHotels';
 import { useActivities } from '../../../lib/hooks/useActivities';
@@ -370,14 +370,13 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   <p className="text-xs md:text-sm text-gray-500 mt-0.5">National parks, scenic landmarks, and heritage sites</p>
                 </div>
                 {filteredAttractions.length > attractionVisibleCount && (
-                  <button
-                    type="button"
-                    onClick={handleLoadMoreAttractions}
+                  <Link
+                    to={`/destinations/${destinationSlug}/attractions`}
                     className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors cursor-pointer"
                   >
                     <span>Load More ({filteredAttractions.length - attractionVisibleCount} remaining)</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
                 )}
               </div>
 
@@ -425,14 +424,13 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   </div>
                   {filteredAttractions.length > attractionVisibleCount && (
                     <div className="mt-8 text-center">
-                      <button
-                        type="button"
-                        onClick={handleLoadMoreAttractions}
+                      <Link
+                        to={`/destinations/${destinationSlug}/attractions`}
                         className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-2xs hover:shadow-md active:scale-95 text-sm cursor-pointer"
                       >
                         <span>Load More Attractions ({filteredAttractions.length - attractionVisibleCount} remaining)</span>
-                        <ChevronDown className="w-4 h-4" />
-                      </button>
+                        <ChevronRight className="w-4 h-4" />
+                      </Link>
                     </div>
                   )}
                 </>
@@ -451,14 +449,13 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   <p className="text-xs md:text-sm text-gray-500 mt-0.5">Trekking permits, cultural walks, rafting, and adventures</p>
                 </div>
                 {filteredActivities.length > activityVisibleCount && (
-                  <button
-                    type="button"
-                    onClick={handleLoadMoreActivities}
+                  <Link
+                    to={`/destinations/${destinationSlug}/activities`}
                     className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors cursor-pointer"
                   >
                     <span>Load More ({filteredActivities.length - activityVisibleCount} remaining)</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
                 )}
               </div>
 
@@ -506,14 +503,13 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   </div>
                   {filteredActivities.length > activityVisibleCount && (
                     <div className="mt-8 text-center">
-                      <button
-                        type="button"
-                        onClick={handleLoadMoreActivities}
+                      <Link
+                        to={`/destinations/${destinationSlug}/activities`}
                         className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-2xs hover:shadow-md active:scale-95 text-sm cursor-pointer"
                       >
                         <span>Load More Activities ({filteredActivities.length - activityVisibleCount} remaining)</span>
-                        <ChevronDown className="w-4 h-4" />
-                      </button>
+                        <ChevronRight className="w-4 h-4" />
+                      </Link>
                     </div>
                   )}
                 </>
@@ -532,14 +528,13 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   <p className="text-xs md:text-sm text-gray-500 mt-0.5">Handpicked itineraries, safaris, and custom guided tours</p>
                 </div>
                 {filteredPackages.length > packageVisibleCount && (
-                  <button
-                    type="button"
-                    onClick={handleLoadMorePackages}
+                  <Link
+                    to={`/destinations/${destinationSlug}/packages`}
                     className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors cursor-pointer"
                   >
                     <span>Load More ({filteredPackages.length - packageVisibleCount} remaining)</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
                 )}
               </div>
 
@@ -587,14 +582,13 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   </div>
                   {filteredPackages.length > packageVisibleCount && (
                     <div className="mt-8 text-center">
-                      <button
-                        type="button"
-                        onClick={handleLoadMorePackages}
+                      <Link
+                        to={`/destinations/${destinationSlug}/packages`}
                         className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-2xs hover:shadow-md active:scale-95 text-sm cursor-pointer"
                       >
                         <span>Load More Packages ({filteredPackages.length - packageVisibleCount} remaining)</span>
-                        <ChevronDown className="w-4 h-4" />
-                      </button>
+                        <ChevronRight className="w-4 h-4" />
+                      </Link>
                     </div>
                   )}
                 </>
@@ -613,14 +607,13 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   <p className="text-xs md:text-sm text-gray-500 mt-0.5">Top rated lodges, luxury camps, and boutique hotels</p>
                 </div>
                 {filteredHotels.length > hotelVisibleCount && (
-                  <button
-                    type="button"
-                    onClick={handleLoadMoreHotels}
+                  <Link
+                    to={`/destinations/${destinationSlug}/hotels`}
                     className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors cursor-pointer"
                   >
                     <span>Load More ({filteredHotels.length - hotelVisibleCount} remaining)</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
                 )}
               </div>
 
@@ -671,14 +664,13 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   </div>
                   {filteredHotels.length > hotelVisibleCount && (
                     <div className="mt-8 text-center">
-                      <button
-                        type="button"
-                        onClick={handleLoadMoreHotels}
+                      <Link
+                        to={`/destinations/${destinationSlug}/hotels`}
                         className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-2xs hover:shadow-md active:scale-95 text-sm cursor-pointer"
                       >
                         <span>Load More Accommodation ({filteredHotels.length - hotelVisibleCount} remaining)</span>
-                        <ChevronDown className="w-4 h-4" />
-                      </button>
+                        <ChevronRight className="w-4 h-4" />
+                      </Link>
                     </div>
                   )}
                 </>

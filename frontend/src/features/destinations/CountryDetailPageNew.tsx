@@ -180,12 +180,42 @@ const CountryDetailPageNew: React.FC = () => {
   };
 
   const handleSubNavClick = (sectionId: string) => {
+    // Mutate URL hash so section link is updated in browser address bar
+    if (window.history.pushState) {
+      window.history.pushState(null, '', `#${sectionId}`);
+    } else {
+      window.location.hash = sectionId;
+    }
+
     if (sectionId === 'explore') {
       scrollToSection('group-trips');
     } else {
       scrollToSection(sectionId);
     }
   };
+
+  // Automatically scroll to target section on initial page load or reload if URL contains a hash fragment
+  React.useEffect(() => {
+    if (!isLoading && country) {
+      const rawHash = window.location.hash.replace('#', '');
+      if (rawHash) {
+        // Support clean aliases (#attractions, #activities, #packages, #hotels, #explore)
+        const targetId =
+          rawHash === 'attractions' ? 'section-attractions' :
+          rawHash === 'activities' ? 'section-activities' :
+          rawHash === 'packages' ? 'section-packages' :
+          rawHash === 'hotels' || rawHash === 'accommodation' ? 'section-hotels' :
+          rawHash === 'explore' ? 'group-trips' : rawHash;
+
+        const timer = setTimeout(() => {
+          scrollToSection(targetId);
+        }, 350);
+
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [isLoading, country]);
+
 
   return (
     <DestinationErrorBoundary>

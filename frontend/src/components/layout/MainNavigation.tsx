@@ -226,18 +226,9 @@ const MainNavigation: React.FC = () => {
   };
 
   return (
-    <header
-      className={`sticky top-0 z-[1000] bg-white w-full border-b border-gray-100 transition-shadow duration-300 ${scrolled ? 'shadow-md' : ''}`}
-    >
-      {/* Top Tier: Logo, Contact, CTA — hidden when scrolled.
-          Using grid-rows transition instead of max-h to avoid expensive layout reflow. */}
-      <div
-        className={`border-b border-gray-50 transition-all duration-300 ease-in-out ${
-          scrolled ? 'grid-rows-[0fr] opacity-0 pointer-events-none overflow-hidden' : 'grid-rows-[1fr] opacity-100'
-        }`}
-        style={{ display: 'grid' }}
-      >
-        <div className="overflow-hidden">
+    <header className="w-full bg-white">
+      {/* Top Tier: Logo, Contact, CTA — scrolls naturally with page flow */}
+      <div className="border-b border-gray-100 bg-white">
         <div className="max-w-[1600px] mx-auto px-4 lg:px-6">
           <div className="flex items-center justify-between h-20 lg:h-24">
             {/* Logo */}
@@ -307,36 +298,40 @@ const MainNavigation: React.FC = () => {
             </div>
           </div>
         </div>
-        </div>{/* end overflow-hidden inner wrapper */}
-      </div>{/* end grid outer wrapper */}
+      </div>
 
-      {/* Bottom Tier: Navigation Links & Search — also shows compact logo when scrolled */}
-      <div className="hidden lg:block bg-white">
+      {/* Bottom Tier: Navigation Links & Search — Sticky at top-0 */}
+      <div
+        className={`sticky top-0 z-[1000] bg-white border-b border-gray-100 transition-shadow duration-300 ${
+          scrolled ? 'shadow-md' : ''
+        }`}
+      >
         <div className="max-w-[1600px] mx-auto px-4 lg:px-6">
-          <div className={`flex items-center justify-between transition-all duration-300 ${scrolled ? 'h-12' : 'h-14'}`}>
+          <div className="flex items-center justify-between h-14">
 
             {/* Compact logo — smoothly transitions when scrolled */}
-            <Link
-              to="/"
-              className={`flex items-center flex-shrink-0 transition-all duration-300 ease-in-out ${
+            <div
+              className={`flex items-center transition-all duration-300 ${
                 scrolled
                   ? 'opacity-100 max-w-[200px] mr-6 pointer-events-auto'
                   : 'opacity-0 max-w-0 mr-0 overflow-hidden pointer-events-none'
               }`}
             >
-              <img
-                src="/logo/main_logo.png"
-                alt="AllBound Vacations"
-                className="h-7 w-auto"
-                onError={(e) => {
-                  const target = e.currentTarget as HTMLImageElement;
-                  target.style.display = 'none';
-                  const sibling = target.nextElementSibling as HTMLElement;
-                  if (sibling) sibling.style.display = 'block';
-                }}
-              />
-              <span className="hidden text-base font-bold text-charcoal ml-2">AllBound</span>
-            </Link>
+              <Link to="/" className="flex items-center flex-shrink-0">
+                <img
+                  src="/logo/main_logo.png"
+                  alt="AllBound Vacations"
+                  className="h-7 w-auto"
+                  onError={(e) => {
+                    const target = e.currentTarget as HTMLImageElement;
+                    target.style.display = 'none';
+                    const sibling = target.nextElementSibling as HTMLElement;
+                    if (sibling) sibling.style.display = 'block';
+                  }}
+                />
+                <span className="hidden text-base font-bold text-charcoal ml-2">AllBound</span>
+              </Link>
+            </div>
 
             {/* Navigation Links */}
             <nav className="flex items-center space-x-0 xl:space-x-1">
@@ -344,7 +339,7 @@ const MainNavigation: React.FC = () => {
                 <div key={item.path} className="relative group">
                   {item.hasDropdown ? (
                     <button
-                      className={`flex items-center text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-3 xl:px-4 border-b-2 border-transparent hover:border-primary ${scrolled ? 'py-3' : 'py-4'}`}
+                      className="flex items-center py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-3 xl:px-4 border-b-2 border-transparent hover:border-primary"
                       onClick={item.label === 'DESTINATIONS' ? toggleDestinations : toggleHolidayTypes}
                       data-dropdown={item.label === 'DESTINATIONS' ? 'destinations' : 'holiday-types'}
                     >
@@ -365,7 +360,7 @@ const MainNavigation: React.FC = () => {
                   ) : (
                     <Link
                       to={item.path}
-                      className={`inline-block text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-3 xl:px-4 border-b-2 border-transparent hover:border-primary ${scrolled ? 'py-3' : 'py-4'}`}
+                      className="inline-block py-4 text-sm xl:text-base font-bold text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-3 xl:px-4 border-b-2 border-transparent hover:border-primary"
                     >
                       {item.label}
                     </Link>
@@ -393,36 +388,46 @@ const MainNavigation: React.FC = () => {
             </div>
 
             {/* Compact CTA — smoothly transitions when scrolled */}
-            <Link
-              to="/start-planning"
-              className={`flex items-center bg-primary text-white text-xs font-bold rounded uppercase tracking-wider hover:bg-primary-dark transition-all shadow-sm whitespace-nowrap ${
+            <div
+              className={`flex items-center transition-all duration-300 ${
                 scrolled
-                  ? 'opacity-100 max-w-[200px] ml-6 px-4 py-2 pointer-events-auto'
-                  : 'opacity-0 max-w-0 ml-0 px-0 py-0 overflow-hidden pointer-events-none'
+                  ? 'opacity-100 max-w-[200px] ml-6 pointer-events-auto'
+                  : 'opacity-0 max-w-0 ml-0 overflow-hidden pointer-events-none'
               }`}
             >
-              Start Planning
-            </Link>
+              <Link
+                to="/start-planning"
+                className="flex items-center px-4 py-2 bg-primary text-white text-xs font-bold rounded uppercase tracking-wider hover:bg-primary-dark transition-all shadow-sm whitespace-nowrap"
+              >
+                Start Planning
+              </Link>
+            </div>
 
             {/* Mobile menu button (scrolled mode) */}
-            <button
-              className={`lg:hidden p-2 rounded-md text-charcoal hover:bg-gray-100 transition-all ${
+            <div
+              className={`lg:hidden transition-all duration-300 ${
                 scrolled
                   ? 'opacity-100 max-w-[50px] ml-3 pointer-events-auto'
-                  : 'opacity-0 max-w-0 ml-0 p-0 overflow-hidden pointer-events-none'
+                  : 'opacity-0 max-w-0 ml-0 overflow-hidden pointer-events-none'
               }`}
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle menu"
             >
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
+              <button
+                className="p-2 rounded-md text-charcoal hover:bg-gray-100 transition-colors"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle menu"
+              >
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            </div>
+
           </div>
         </div>
       </div>
 
       {/* Mobile Menu */}
+
       {mobileMenuOpen && (
         <div className="lg:hidden bg-white border-t border-gray-200 shadow-lg">
           <div className="px-4 py-3 space-y-3">

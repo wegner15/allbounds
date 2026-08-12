@@ -74,10 +74,16 @@ const SectionNavigation: React.FC<SectionNavigationProps> = ({
         }
     };
 
-    const handleSectionClick = (sectionId: string) => {
+    const handleSectionClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+        e.preventDefault();
         if (onSectionClick) {
             onSectionClick(sectionId);
         } else {
+            if (window.history.pushState) {
+                window.history.pushState(null, '', `#${sectionId}`);
+            } else {
+                window.location.hash = sectionId;
+            }
             scrollToSection(sectionId);
         }
     };
@@ -93,9 +99,10 @@ const SectionNavigation: React.FC<SectionNavigationProps> = ({
                     {sections.map((section) => {
                         const isActive = activeSection === section.id;
                         return (
-                            <button
+                            <a
                                 key={section.id}
-                                onClick={() => handleSectionClick(section.id)}
+                                href={`#${section.id}`}
+                                onClick={(e) => handleSectionClick(e, section.id)}
                                 className={`
                                   whitespace-nowrap px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200
                                   flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
@@ -107,12 +114,13 @@ const SectionNavigation: React.FC<SectionNavigationProps> = ({
                                 aria-current={isActive ? 'location' : undefined}
                             >
                                 {section.label}
-                            </button>
+                            </a>
                         );
                     })}
                 </div>
             </div>
         </nav>
+
     );
 };
 

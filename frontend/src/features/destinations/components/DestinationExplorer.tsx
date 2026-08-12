@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Search, X, Tag as TagIcon, ChevronDown, ChevronRight } from 'lucide-react';
+import { Search, X, Tag as TagIcon, ChevronDown, ChevronRight, SlidersHorizontal, RotateCcw, Filter } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { usePackages } from '../../../lib/hooks/usePackages';
 import { useHotels } from '../../../lib/hooks/useHotels';
@@ -60,6 +60,9 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
   const [packageDurations, setPackageDurations] = useState<string[]>([]);
   const [activityIntensities, setActivityIntensities] = useState<string[]>([]);
   const [attractionTypes, setAttractionTypes] = useState<string[]>([]);
+
+  // Mobile filter drawer state
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
   // Sync activeTab state with activeTabId prop
   useEffect(() => {
@@ -313,6 +316,42 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
       window.scrollTo({ top: currentScrollY, behavior: 'instant' as ScrollBehavior });
     });
   };
+
+  // Tag helpers for active dedicated category
+  const currentCategoryTags = useMemo(() => {
+    if (activeTab === 'hotels') return hotelTags;
+    if (activeTab === 'packages') return packageTags;
+    if (activeTab === 'activities') return activityTags;
+    if (activeTab === 'attractions') return attractionTags;
+    return [];
+  }, [activeTab, hotelTags, packageTags, activityTags, attractionTags]);
+
+  const selectedTagIdsForCurrentCategory = useMemo(() => {
+    if (activeTab === 'hotels') return selectedHotelTagIds;
+    if (activeTab === 'packages') return selectedPackageTagIds;
+    if (activeTab === 'activities') return selectedActivityTagIds;
+    if (activeTab === 'attractions') return selectedAttractionTagIds;
+    return [];
+  }, [activeTab, selectedHotelTagIds, selectedPackageTagIds, selectedActivityTagIds, selectedAttractionTagIds]);
+
+  const toggleTagForCurrentCategory = (tagId: number) => {
+    if (activeTab === 'hotels') toggleFilter(tagId, selectedHotelTagIds, setSelectedHotelTagIds);
+    else if (activeTab === 'packages') toggleFilter(tagId, selectedPackageTagIds, setSelectedPackageTagIds);
+    else if (activeTab === 'activities') toggleFilter(tagId, selectedActivityTagIds, setSelectedActivityTagIds);
+    else if (activeTab === 'attractions') toggleFilter(tagId, selectedAttractionTagIds, setSelectedAttractionTagIds);
+  };
+
+  const hasActiveFilters = useMemo(() => {
+    return selectedHotelTagIds.length > 0 ||
+      selectedPackageTagIds.length > 0 ||
+      selectedActivityTagIds.length > 0 ||
+      selectedAttractionTagIds.length > 0 ||
+      hotelStars.length > 0 ||
+      packageDurations.length > 0 ||
+      activityIntensities.length > 0 ||
+      attractionTypes.length > 0 ||
+      searchQuery !== '';
+  }, [selectedHotelTagIds, selectedPackageTagIds, selectedActivityTagIds, selectedAttractionTagIds, hotelStars, packageDurations, activityIntensities, attractionTypes, searchQuery]);
 
   useEffect(() => {
     setCategoryVisibleCount(9);
@@ -681,72 +720,305 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
           </div>
         ) : (
           /* ==================================================== */
-          /* DEDICATED CATEGORY LISTING MODE (IN-PLACE LOAD MORE) */
+          /* DEDICATED CATEGORY LISTING MODE WITH SIDEBAR FILTERS */
           /* ==================================================== */
-          <div className="space-y-6">
-            <div className="flex items-center justify-between text-sm text-gray-500 font-semibold px-1">
-              <span>
-                Showing {visibleCategoryItems.length} of {currentCategoryList.length} results
+          <div className="flex flex-col lg:flex-row gap-8 items-start">
+            
+            {/* MOBILE FILTER TOGGLE BUTTON */}
+            <div className="lg:hidden w-full flex items-center justify-between bg-white p-4 rounded-xl border border-gray-200/80 shadow-2xs">
+              <span className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                <SlidersHorizontal className="w-4 h-4 text-primary" /> Filter Results
               </span>
-              {(selectedHotelTagIds.length > 0 || selectedPackageTagIds.length > 0 || selectedActivityTagIds.length > 0 || selectedAttractionTagIds.length > 0 || searchQuery !== '') && (
-                <button onClick={resetAllFilters} className="text-xs font-bold text-primary hover:underline">
-                  Clear active filters
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
+                className="px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg shadow-2xs hover:bg-primary-dark transition-colors cursor-pointer"
+              >
+                {mobileFilterOpen ? 'Hide Filters' : 'Show Filters'}
+              </button>
             </div>
 
-            {visibleCategoryItems.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {activeTab === 'hotels' &&
-                  (visibleCategoryItems as typeof filteredHotels).map((hotel) => (
-                    <HotelCard key={hotel.id} hotel={{ ...hotel, country: hotel.country || { slug: destinationSlug } }} />
-                  ))}
-
-                {activeTab === 'packages' &&
-                  (visibleCategoryItems as typeof filteredPackages).map((pkg) => (
-                    <PackageCard key={pkg.id} package={pkg} />
-                  ))}
-
-                {activeTab === 'activities' &&
-                  (visibleCategoryItems as typeof filteredActivities).map((act) => (
-                    <ActivityCard key={act.id} activity={act} />
-                  ))}
-
-                {activeTab === 'attractions' &&
-                  (visibleCategoryItems as typeof filteredAttractions).map((attr) => (
-                    <AttractionCard key={attr.id} attraction={attr as any} />
-                  ))}
+            {/* SIDEBAR FILTER PANEL */}
+            <aside
+              className={`w-full lg:w-72 flex-shrink-0 bg-white rounded-2xl border border-gray-200/80 p-5 shadow-2xs space-y-6 lg:sticky lg:top-28 ${
+                mobileFilterOpen ? 'block' : 'hidden lg:block'
+              }`}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-gray-150">
+                <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-primary" />
+                  <span>Filter {activeTab !== 'all' ? activeTab.charAt(0).toUpperCase() + activeTab.slice(1) : ''}</span>
+                </h3>
+                {hasActiveFilters && (
+                  <button
+                    type="button"
+                    onClick={resetAllFilters}
+                    className="text-xs font-semibold text-primary hover:text-primary-dark flex items-center gap-1 transition-colors cursor-pointer"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Reset</span>
+                  </button>
+                )}
               </div>
-            ) : (
-              <div className="text-center py-16 bg-white border border-gray-200/60 rounded-2xl p-8 shadow-sm">
-                <div className="text-5xl mb-4 text-gray-300">🔍</div>
-                <h3 className="text-lg font-bold text-gray-800 mb-2">No matching items found</h3>
-                <p className="text-gray-500 text-sm max-w-sm mx-auto mb-6">
-                  Try clearing or adjusting your search filters.
-                </p>
-                <button
-                  onClick={resetAllFilters}
-                  className="px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all text-sm cursor-pointer"
-                >
-                  Clear all filters
-                </button>
-              </div>
-            )}
 
-            {/* In-Place Load More Button */}
-            {categoryVisibleCount < currentCategoryList.length && (
-              <div className="mt-12 text-center">
-                <button
-                  type="button"
-                  onClick={handleLoadMoreCategory}
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-md hover:shadow-lg hover:bg-primary-dark active:scale-95 transition-all text-sm cursor-pointer"
-                >
-                  <span>Load More ({currentCategoryList.length - categoryVisibleCount} remaining)</span>
-                  <ChevronDown className="w-4 h-4" />
-                </button>
+              {/* SECTION 1: CATEGORY NAVIGATION TABS */}
+              <div>
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2.5">
+                  Category
+                </h4>
+                <div className="space-y-1">
+                  {[
+                    { id: 'all', label: 'Overview' },
+                    { id: 'attractions', label: `Attractions (${rawAttractions.length})` },
+                    { id: 'activities', label: `Activities (${rawActivities.length})` },
+                    { id: 'packages', label: `Packages (${rawPackages.length})` },
+                    { id: 'hotels', label: `Accommodation (${rawHotels.length})` },
+                  ].map((cat) => {
+                    const isSelected = activeTab === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => {
+                          if (onTabChange) onTabChange(cat.id);
+                          else {
+                            if (cat.id === 'all') navigate(`/destinations/${destinationSlug}`);
+                            else navigate(`/destinations/${destinationSlug}/${cat.id}`);
+                          }
+                        }}
+                        className={`w-full flex items-center justify-between text-xs px-3 py-2 rounded-lg font-medium transition-all text-left cursor-pointer ${
+                          isSelected
+                            ? 'bg-primary text-white font-bold shadow-2xs'
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        <span>{cat.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            )}
+
+              {/* SECTION 2: TAG FILTERS FOR ACTIVE CATEGORY */}
+              {currentCategoryTags.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2.5 flex items-center justify-between">
+                    <span>Tags</span>
+                    {selectedTagIdsForCurrentCategory.length > 0 && (
+                      <span className="text-[10px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
+                        {selectedTagIdsForCurrentCategory.length} active
+                      </span>
+                    )}
+                  </h4>
+                  <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                    {currentCategoryTags.map((tag) => {
+                      const isSelected = selectedTagIdsForCurrentCategory.includes(tag.id);
+                      return (
+                        <label
+                          key={tag.id}
+                          className={`flex items-center justify-between text-xs px-2.5 py-2 rounded-lg cursor-pointer transition-all ${
+                            isSelected
+                              ? 'bg-primary/10 text-primary font-bold border border-primary/20'
+                              : 'text-gray-700 hover:bg-gray-50 border border-transparent'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleTagForCurrentCategory(tag.id)}
+                              className="rounded text-primary focus:ring-primary h-3.5 w-3.5"
+                            />
+                            <span>{tag.name}</span>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION 3: CATEGORY SPECIFIC ATTRIBUTE FILTERS */}
+              {/* Packages Duration Filter */}
+              {activeTab === 'packages' && (
+                <div>
+                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2.5">
+                    Trip Duration
+                  </h4>
+                  <div className="space-y-1.5">
+                    {[
+                      { id: '2-3', label: '2 - 3 Days' },
+                      { id: '4-6', label: '4 - 6 Days' },
+                      { id: '7-10', label: '7 - 10 Days' },
+                      { id: '10+', label: '10+ Days' },
+                    ].map((dur) => {
+                      const isSelected = packageDurations.includes(dur.id);
+                      return (
+                        <label
+                          key={dur.id}
+                          className={`flex items-center gap-2 text-xs px-2.5 py-2 rounded-lg cursor-pointer transition-all ${
+                            isSelected ? 'bg-primary/10 text-primary font-bold' : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleFilter(dur.id, packageDurations, setPackageDurations)}
+                            className="rounded text-primary focus:ring-primary h-3.5 w-3.5"
+                          />
+                          <span>{dur.label}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Hotels Star Rating Filter */}
+              {activeTab === 'hotels' && (
+                <div>
+                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2.5">
+                    Star Rating
+                  </h4>
+                  <div className="space-y-1.5">
+                    {[5, 4, 3].map((star) => {
+                      const isSelected = hotelStars.includes(star);
+                      return (
+                        <label
+                          key={star}
+                          className={`flex items-center gap-2 text-xs px-2.5 py-2 rounded-lg cursor-pointer transition-all ${
+                            isSelected ? 'bg-primary/10 text-primary font-bold' : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleFilter(star, hotelStars, setHotelStars)}
+                            className="rounded text-primary focus:ring-primary h-3.5 w-3.5"
+                          />
+                          <span>{star} Star Accommodation</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Activities Intensity Filter */}
+              {activeTab === 'activities' && (
+                <div>
+                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2.5">
+                    Experience Type
+                  </h4>
+                  <div className="space-y-1.5">
+                    {[
+                      { id: 'relaxed', label: 'Relaxed & Sightseeing' },
+                      { id: 'moderate', label: 'Moderate Adventure' },
+                      { id: 'extreme', label: 'Extreme Thrills' },
+                    ].map((type) => {
+                      const isSelected = activityIntensities.includes(type.id);
+                      return (
+                        <label
+                          key={type.id}
+                          className={`flex items-center gap-2 text-xs px-2.5 py-2 rounded-lg cursor-pointer transition-all ${
+                            isSelected ? 'bg-primary/10 text-primary font-bold' : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleFilter(type.id, activityIntensities, setActivityIntensities)}
+                            className="rounded text-primary focus:ring-primary h-3.5 w-3.5"
+                          />
+                          <span>{type.label}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </aside>
+
+            {/* MAIN RESULTS CONTENT AREA */}
+            <main className="flex-1 min-w-0 space-y-6">
+              {/* Header Stats & Active Filter Summary */}
+              <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-gray-600 bg-white p-4 rounded-xl border border-gray-200/80 shadow-2xs">
+                <div>
+                  <span className="font-bold text-gray-900">
+                    Showing {visibleCategoryItems.length} of {currentCategoryList.length} results
+                  </span>
+                  {searchQuery && (
+                    <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-md">
+                      Search: &ldquo;{searchQuery}&rdquo;
+                    </span>
+                  )}
+                </div>
+                {hasActiveFilters && (
+                  <button
+                    onClick={resetAllFilters}
+                    className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <RotateCcw className="w-3 h-3" /> Clear filters
+                  </button>
+                )}
+              </div>
+
+              {/* RESULTS GRID */}
+              {visibleCategoryItems.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {activeTab === 'hotels' &&
+                    (visibleCategoryItems as typeof filteredHotels).map((hotel) => (
+                      <HotelCard key={hotel.id} hotel={{ ...hotel, country: hotel.country || { slug: destinationSlug } }} />
+                    ))}
+
+                  {activeTab === 'packages' &&
+                    (visibleCategoryItems as typeof filteredPackages).map((pkg) => (
+                      <PackageCard key={pkg.id} package={pkg} />
+                    ))}
+
+                  {activeTab === 'activities' &&
+                    (visibleCategoryItems as typeof filteredActivities).map((act) => (
+                      <ActivityCard key={act.id} activity={act} />
+                    ))}
+
+                  {activeTab === 'attractions' &&
+                    (visibleCategoryItems as typeof filteredAttractions).map((attr) => (
+                      <AttractionCard key={attr.id} attraction={attr as any} />
+                    ))}
+                </div>
+              ) : (
+                <div className="text-center py-16 bg-white border border-gray-200/60 rounded-2xl p-8 shadow-sm">
+                  <div className="text-5xl mb-4 text-gray-300">🔍</div>
+                  <h3 className="text-lg font-bold text-gray-800 mb-2">No matching items found</h3>
+                  <p className="text-gray-500 text-sm max-w-sm mx-auto mb-6">
+                    Try clearing or adjusting your search or tag filters.
+                  </p>
+                  <button
+                    onClick={resetAllFilters}
+                    className="px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all text-sm cursor-pointer"
+                  >
+                    Clear all filters
+                  </button>
+                </div>
+              )}
+
+              {/* In-Place Load More Button */}
+              {categoryVisibleCount < currentCategoryList.length && (
+                <div className="mt-12 text-center">
+                  <button
+                    type="button"
+                    onClick={handleLoadMoreCategory}
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-md hover:shadow-lg hover:bg-primary-dark active:scale-95 transition-all text-sm cursor-pointer"
+                  >
+                    <span>Load More ({currentCategoryList.length - categoryVisibleCount} remaining)</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </main>
           </div>
+
         )}
       </div>
     </div>

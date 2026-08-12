@@ -366,7 +366,9 @@ class CountryService:
                 "image_id": country.image_id,
                 "faqs": country.faqs,
                 "highlights": country.highlights,
+                "category_intros": country.category_intros,
                 "is_active": country.is_active,
+
                 "is_favorite": country.is_favorite,
                 "created_at": country.created_at.isoformat() if country.created_at else None,
                 "updated_at": country.updated_at.isoformat() if country.updated_at else None,
@@ -510,7 +512,9 @@ class CountryService:
             slug=slug,
             faqs=country_create.faqs,
             highlights=country_create.highlights,
+            category_intros=country_create.category_intros,
             is_favorite=country_create.is_favorite,
+
         )
         db.add(db_country)
         

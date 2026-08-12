@@ -155,10 +155,19 @@ const CountryCategoryPage: React.FC = () => {
         }
     };
 
+    const customIntro = (country as any)?.category_intros?.[canonicalCategory];
+    const displayTitle = customIntro?.title?.trim()
+        ? customIntro.title
+        : `${getCategoryLabel()} in ${country.name}`;
+
+    const displayDescription = customIntro?.description?.trim()
+        ? customIntro.description
+        : getCategoryDescription();
+
     return (
         <div className="bg-gray-50 min-h-screen">
             <SeoHead
-                title={`${getCategoryLabel()} in ${country.name}`}
+                title={displayTitle}
                 canonicalPath={`/destinations/${country.slug}/${canonicalCategory}`}
             />
 
@@ -193,10 +202,10 @@ const CountryCategoryPage: React.FC = () => {
                 {/* SEO Category Intro Block */}
                 <div className="bg-white rounded-2xl border border-gray-200/60 p-6 md:p-8 mb-8 shadow-sm">
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900 font-playfair mb-3">
-                        {getCategoryLabel()} in {country.name}
+                        {displayTitle}
                     </h1>
                     <p className="text-gray-600 leading-relaxed text-sm md:text-base max-w-4xl">
-                        {getCategoryDescription()}
+                        {displayDescription}
                     </p>
                 </div>
 
@@ -204,6 +213,7 @@ const CountryCategoryPage: React.FC = () => {
             </main>
         </div>
     );
+
 };
 
 export default CountryCategoryPage;

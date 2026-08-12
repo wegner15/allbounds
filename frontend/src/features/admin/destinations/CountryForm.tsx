@@ -125,6 +125,26 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
     }
   }, [isEdit, countryData]);
 
+  const [categoryIntros, setCategoryIntros] = useState<Record<string, { title: string; description: string }>>(() => {
+    return (countryData?.category_intros as Record<string, { title: string; description: string }>) || {
+      packages: { title: '', description: '' },
+      hotels: { title: '', description: '' },
+      activities: { title: '', description: '' },
+      attractions: { title: '', description: '' },
+      'group-trips': { title: '', description: '' },
+    };
+  });
+
+  const handleCategoryIntroChange = (catKey: string, field: 'title' | 'description', value: string) => {
+    setCategoryIntros((prev) => ({
+      ...prev,
+      [catKey]: {
+        ...(prev[catKey] || { title: '', description: '' }),
+        [field]: value,
+      },
+    }));
+  };
+
   const onSubmit = async (data: CountryFormData) => {
     setIsSubmitting(true);
     setServerError(null);
@@ -132,8 +152,10 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
     try {
       const finalData = {
         ...data,
+        category_intros: categoryIntros,
         media_asset_ids: galleryImages.map(img => img.id)
       };
+
 
       if (isEdit) {
         await updateCountryMutation.mutateAsync(finalData);
@@ -448,8 +470,63 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
               </div>
             </div>
 
+            {/* Category SEO Intros (Custom Titles & Descriptions) */}
+            <div className="sm:col-span-6">
+              <div className="border-t border-gray-200 pt-6 mt-6">
+                <div className="mb-4">
+                  <h4 className="text-md font-medium text-gray-900">Category Intros & SEO (Optional)</h4>
+                  <p className="text-sm text-gray-500">
+                    Customize titles and intro descriptions for dedicated listing pages in this country. Leave empty to use auto-generated defaults.
+                  </p>
+                </div>
+
+                <div className="space-y-6 bg-gray-50 p-5 rounded-xl border border-gray-200">
+                  {[
+                    { key: 'packages', label: 'Travel Packages', icon: '📦' },
+                    { key: 'hotels', label: 'Accommodation & Hotels', icon: '🏨' },
+                    { key: 'activities', label: 'Activities & Experiences', icon: '🧭' },
+                    { key: 'attractions', label: 'Must-See Attractions', icon: '🎯' },
+                    { key: 'group-trips', label: 'Group Trips', icon: '👥' },
+                  ].map((cat) => (
+                    <div key={cat.key} className="bg-white p-4 rounded-lg border border-gray-200 shadow-2xs space-y-3">
+                      <div className="flex items-center gap-2 font-bold text-gray-800 text-sm border-b border-gray-100 pb-2">
+                        <span>{cat.icon}</span>
+                        <span>{cat.label} Page Intro</span>
+                      </div>
+                      <div className="grid grid-cols-1 gap-3">
+                        <FormGroup>
+                          <FormInput
+                            id={`category_intros.${cat.key}.title`}
+                            label="Custom Page Title"
+                            fullWidth
+                            variant="filled"
+                            placeholder={`Default: ${cat.label} in ${watch('name') || 'Destination'}`}
+                            value={categoryIntros[cat.key]?.title || ''}
+                            onChange={(e) => handleCategoryIntroChange(cat.key, 'title', e.target.value)}
+                          />
+                        </FormGroup>
+                        <FormGroup>
+                          <FormTextarea
+                            id={`category_intros.${cat.key}.description`}
+                            label="Custom Intro / SEO Description"
+                            fullWidth
+                            variant="filled"
+                            rows={2}
+                            placeholder="Enter custom promotional or SEO description for this category..."
+                            value={categoryIntros[cat.key]?.description || ''}
+                            onChange={(e) => handleCategoryIntroChange(cat.key, 'description', e.target.value)}
+                          />
+                        </FormGroup>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {/* Gallery Manager */}
             <div className="sm:col-span-6">
+
               <div className="border-t border-gray-200 pt-6 mt-6">
                 <h4 className="text-md font-medium text-gray-900 mb-4">Country Gallery</h4>
                 <p className="text-sm text-gray-500 mb-4">

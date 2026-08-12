@@ -73,6 +73,7 @@ export interface Country extends BaseModel {
   media_assets?: MediaAsset[];
   faqs?: { question: string; answer: string }[];
   highlights?: { title: string; desc: string }[];
+  category_intros?: Record<string, { title?: string; description?: string; hero_image_id?: string }>;
 }
 
 export interface CountryCreate {
@@ -84,7 +85,9 @@ export interface CountryCreate {
   media_asset_ids?: number[];
   is_favorite?: boolean;
   highlights?: { title: string; desc: string }[];
+  category_intros?: Record<string, { title?: string; description?: string; hero_image_id?: string }>;
 }
+
 
 export interface CountryUpdate extends Partial<CountryCreate> {
   is_active?: boolean;

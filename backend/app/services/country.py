@@ -194,7 +194,9 @@ class CountryService:
             "image_id": country.image_id,
             "faqs": country.faqs,
             "highlights": country.highlights,
+            "category_intros": country.category_intros,
             "is_active": country.is_active,
+
             "created_at": country.created_at,
             "updated_at": country.updated_at,
             "region": {

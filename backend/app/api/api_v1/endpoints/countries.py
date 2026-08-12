@@ -202,15 +202,13 @@ def update_country(
     """
     Update a country.
     """
-    country = country_service.get_country(db, country_id=country_id)
-    if country is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Country not found")
     country = country_service.update_country(db, country_id=country_id, country_update=country_in)
-    # Invalidate the Redis cache for this country's detail page
     from app.core.redis_cache import invalidate_cache_pattern
-    invalidate_cache_pattern(f"cache:get_country_details_by_slug:slug={country.slug}")
-    invalidate_cache_pattern("cache:get_country_details_by_slug:*")
+    invalidate_cache_pattern(f"*get_country_details_by_slug*")
+    invalidate_cache_pattern(f"*get_countries*")
     return CountryResponse.from_orm(country)
+
+
 
 
 @router.delete("/{country_id}", response_model=CountryResponse)

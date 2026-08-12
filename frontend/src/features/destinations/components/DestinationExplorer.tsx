@@ -748,7 +748,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
               <div className="flex items-center justify-between pb-3 border-b border-gray-150">
                 <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
                   <Filter className="w-4 h-4 text-primary" />
-                  <span>Filter {activeTab !== 'all' ? activeTab.charAt(0).toUpperCase() + activeTab.slice(1) : ''}</span>
+                  <span>Filter {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</span>
                 </h3>
                 {hasActiveFilters && (
                   <button

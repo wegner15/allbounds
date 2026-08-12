@@ -3,22 +3,30 @@ import { apiClient } from '../api';
 
 export interface PriceChart {
   id: number;
-  package_id: number;
+  package_id?: number;
+  group_trip_id?: number;
+  hotel_id?: number;
   title: string;
   start_date: string;
   end_date: string;
   price: number;
+  booking_price?: number;
+  notes?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
 }
 
 export interface PriceChartCreateInput {
-  package_id: number;
+  package_id?: number;
+  group_trip_id?: number;
+  hotel_id?: number;
   title: string;
   start_date: string;
   end_date: string;
   price: number;
+  booking_price?: number;
+  notes?: string;
   is_active?: boolean;
 }
 
@@ -27,8 +35,11 @@ export interface PriceChartUpdateInput {
   start_date?: string;
   end_date?: string;
   price?: number;
+  booking_price?: number;
+  notes?: string;
   is_active?: boolean;
 }
+
 
 // Hook for fetching price charts for a specific package
 export const usePackagePriceCharts = (packageId: number) => {
@@ -99,18 +110,76 @@ export const useUpdatePriceChart = (priceChartId: number) => {
   });
 };
 
-// Hook for deleting a price chart
-export const useDeletePriceChart = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async ({ priceChartId, packageId }: { priceChartId: number, packageId: number }) => {
-      await apiClient.delete(`/price-charts/${priceChartId}`);
-      return { priceChartId, packageId };
+// Generic multi-entity Hooks (Package, GroupTrip, Hotel)
+export type PriceChartEntityType = 'package' | 'group_trip' | 'hotel';
+
+const getEntityEndpoint = (entityType: PriceChartEntityType, entityId: number) => {
+  if (entityType === 'group_trip') return `/group-trips/${entityId}/price-charts`;
+  if (entityType === 'hotel') return `/hotels/${entityId}/price-charts`;
+  return `/packages/${entityId}/price-charts`;
+};
+
+const getEntityCreateEndpoint = (entityType: PriceChartEntityType) => {
+  if (entityType === 'group_trip') return `/group-trips/price-charts`;
+  if (entityType === 'hotel') return `/hotels/price-charts`;
+  return `/price-charts`;
+};
+
+const getEntityItemEndpoint = (entityType: PriceChartEntityType, id: number) => {
+  if (entityType === 'group_trip') return `/group-trips/price-charts/${id}`;
+  if (entityType === 'hotel') return `/hotels/price-charts/${id}`;
+  return `/price-charts/${id}`;
+};
+
+export const useEntityPriceCharts = (entityType: PriceChartEntityType, entityId: number) => {
+  return useQuery<PriceChart[]>({
+    queryKey: [entityType, entityId, 'price-charts'],
+    queryFn: async () => {
+      return apiClient.get<PriceChart[]>(getEntityEndpoint(entityType, entityId));
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['packages', data.packageId, 'price-charts'] });
-      queryClient.invalidateQueries({ queryKey: ['packages', data.packageId, 'price-charts', 'active'] });
+    enabled: !!entityId,
+  });
+};
+
+export const useCreateEntityPriceChart = (entityType: PriceChartEntityType) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ entityId, ...priceChart }: PriceChartCreateInput & { entityId: number }) => {
+      const payload: any = { ...priceChart };
+      if (entityType === 'package') payload.package_id = entityId;
+      else if (entityType === 'group_trip') payload.group_trip_id = entityId;
+      else if (entityType === 'hotel') payload.hotel_id = entityId;
+
+      return apiClient.post<PriceChart>(getEntityCreateEndpoint(entityType), payload);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [entityType, variables.entityId, 'price-charts'] });
     },
   });
 };
+
+export const useUpdateEntityPriceChart = (entityType: PriceChartEntityType, priceChartId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ entityId, ...priceChart }: PriceChartUpdateInput & { entityId: number }) => {
+      return apiClient.put<PriceChart>(getEntityItemEndpoint(entityType, priceChartId), priceChart);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [entityType, variables.entityId, 'price-charts'] });
+    },
+  });
+};
+
+export const useDeleteEntityPriceChart = (entityType: PriceChartEntityType) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ priceChartId, entityId }: { priceChartId: number; entityId: number }) => {
+      await apiClient.delete(getEntityItemEndpoint(entityType, priceChartId));
+      return { priceChartId, entityId };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: [entityType, data.entityId, 'price-charts'] });
+    },
+  });
+};
+

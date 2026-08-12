@@ -52,6 +52,8 @@ class GroupTrip(Base):
     media_assets = relationship("MediaAsset", secondary="group_trip_media", back_populates="group_trips")
     reviews = relationship("Review", back_populates="group_trip")
     departures = relationship("GroupTripDeparture", back_populates="group_trip")
+    price_charts = relationship("GroupTripPriceChart", back_populates="group_trip", cascade="all, delete-orphan")
+
     
     # Relationships with Hotels and Attractions
     hotels = relationship("Hotel", secondary="group_trip_hotels", back_populates="group_trips")

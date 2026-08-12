@@ -9,6 +9,7 @@ import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils'
 import PackageBookingForm from '../../components/forms/PackageBookingForm';
 import InquiryForm from '../../components/forms/InquiryForm';
 import Breadcrumb from '../../components/layout/Breadcrumb';
+import SeasonalPricingTable from '../../components/common/SeasonalPricingTable';
 import SeoHead from '../../components/seo/SeoHead';
 import type { HolidayTypeSummary } from '../../lib/types/api';
 
@@ -265,8 +266,16 @@ const PackageDetailPageNew: React.FC = () => {
                 </div>
               )}
 
+              {/* Seasonal Pricing Section */}
+              {packageDetail.price_charts && packageDetail.price_charts.length > 0 && (
+                <div id="pricing" className="mb-6 md:mb-8 scroll-mt-20">
+                  <SeasonalPricingTable priceCharts={packageDetail.price_charts} />
+                </div>
+              )}
+
               {/* Reviews Section */}
               {packageDetail.reviews && (
+
                 <div className="mb-6 md:mb-8">
                   <ReviewsSection reviews={packageDetail.reviews} />
                 </div>

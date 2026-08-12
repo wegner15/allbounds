@@ -15,8 +15,10 @@ import { SimpleItineraryManager } from '../../../components/admin/SimpleItinerar
 import { apiClient } from '../../../lib/api';
 import ImageSelector from '../../../components/ui/ImageSelector';
 import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
+import PriceChartManager from '../../../components/admin/PriceChartManager';
 
 // Form validation schema
+
 const groupTripSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   summary: z.string().max(255, 'Summary must be less than 255 characters').optional(),
@@ -984,8 +986,15 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
         </div>
       </div>
       
+      {isEdit && (groupTripId || groupTripData?.id) && (
+        <div className="bg-white shadow rounded-lg p-6">
+          <PriceChartManager entityType="group_trip" entityId={groupTripId || groupTripData?.id} />
+        </div>
+      )}
+
       {/* Form actions */}
       <div className="sticky bottom-0 bg-white shadow-md px-8 py-5 border-t border-gray-200 z-10 -mx-6 -mb-6 mt-8">
+
         <div className="flex justify-end space-x-4 max-w-7xl mx-auto">
           <button
             type="button"

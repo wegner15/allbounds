@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import PriceChartManager from '../../../components/admin/PriceChartManager';
 import { useNavigate } from 'react-router-dom';
+
 import { useCountries } from '../../../lib/hooks/useCountries';
 import { useHotelTypes } from '../../../lib/hooks/useHotelTypes';
 import { useAmenities } from '../../../lib/hooks/useAmenities';
@@ -440,8 +442,15 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
         </div>
       )}
 
+      {initialData?.id && (
+        <div className="bg-white shadow rounded-lg p-6 mt-8">
+          <PriceChartManager entityType="hotel" entityId={initialData.id} />
+        </div>
+      )}
+
       {/* Form Actions */}
       <div className="flex justify-end space-x-4 mt-8">
+
         <button
           type="button"
           onClick={() => navigate('/admin/hotels')}

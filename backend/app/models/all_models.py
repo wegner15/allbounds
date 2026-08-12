@@ -36,6 +36,9 @@ from app.models.flight_booking import FlightBooking, FlightPassenger
 from app.models.email_log import EmailLog
 from app.models.partner import Partner
 
+from app.models.group_trip_price_chart import GroupTripPriceChart
+from app.models.hotel_price_chart import HotelPriceChart
+
 # This ensures all models are imported in the correct order
 __all__ = [
     'User', 'Role', 'Permission',
@@ -43,7 +46,7 @@ __all__ = [
     'Attraction', 'Accommodation', 'Amenity', 'Hotel', 'HotelType', 'Activity',
     'Package', 'PackageHolidayType', 'PackagePriceChart',
     'Inclusion', 'Exclusion',
-    'GroupTrip', 'GroupTripDeparture',
+    'GroupTrip', 'GroupTripDeparture', 'GroupTripPriceChart', 'HotelPriceChart',
     'Review', 'BlogPost', 'Tag', 'ContentPage',
     'MediaAsset', 'AuditLog', 'SeoMeta',
     'ItineraryItem', 'ItineraryActivity',
@@ -51,4 +54,5 @@ __all__ = [
     'CountryVisitInfo', 'NewsletterSubscription', 'VisaApplication',
     'FlightBooking', 'FlightPassenger', 'EmailLog', 'Partner',
 ]
+
 

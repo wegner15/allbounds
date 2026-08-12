@@ -9,6 +9,7 @@ import Breadcrumb from '../../components/layout/Breadcrumb';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import ImageCarousel from '../../components/ui/ImageCarousel';
+import SeasonalPricingTable from '../../components/common/SeasonalPricingTable';
 import { EnhancedItineraryDisplay } from '../../components/ui/EnhancedItineraryDisplay';
 import { TextDisplay } from '../../components/ui/RichTextDisplay';
 import GroupTripBookingForm from '../../components/forms/GroupTripBookingForm';
@@ -306,8 +307,16 @@ const GroupTripDetailPage: React.FC = () => {
                 </>
               )}
 
+              {/* Seasonal Pricing Section */}
+              {(tripDetail as any).price_charts && (tripDetail as any).price_charts.length > 0 && (
+                <div id="pricing" className="mb-6">
+                  <SeasonalPricingTable priceCharts={(tripDetail as any).price_charts} title="Group Trip Seasonal Pricing" />
+                </div>
+              )}
+
               {/* Itinerary Section */}
               <EnhancedItineraryDisplay
+
                 entityType="group_trip"
                 entityId={tripDetail.id}
                 isScrolled={isScrolled}

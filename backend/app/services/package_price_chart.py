@@ -43,7 +43,10 @@ class PackagePriceChartService:
     
     def create_price_chart(self, db: Session, price_chart_data: PackagePriceChartCreate) -> PackagePriceChart:
         """Create a new price chart."""
-        db_price_chart = PackagePriceChart(**price_chart_data.model_dump())
+        data = price_chart_data.model_dump()
+        if data.get("booking_price") is None:
+            data["booking_price"] = data.get("price")
+        db_price_chart = PackagePriceChart(**data)
         db.add(db_price_chart)
         db.commit()
         db.refresh(db_price_chart)
@@ -59,9 +62,13 @@ class PackagePriceChartService:
         for key, value in update_data.items():
             setattr(db_price_chart, key, value)
         
+        if db_price_chart.booking_price is None:
+            db_price_chart.booking_price = db_price_chart.price
+
         db.commit()
         db.refresh(db_price_chart)
         return db_price_chart
+
     
     def delete_price_chart(self, db: Session, price_chart_id: int) -> bool:
         """Delete a price chart."""

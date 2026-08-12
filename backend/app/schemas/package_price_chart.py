@@ -8,6 +8,8 @@ class PackagePriceChartBase(BaseModel):
     start_date: date = Field(..., description="Start date of the price period")
     end_date: date = Field(..., description="End date of the price period")
     price: float = Field(..., description="Price in USD for this period", ge=0)
+    booking_price: Optional[float] = Field(None, description="Optional booking/deposit price in USD (defaults to price if blank)", ge=0)
+    notes: Optional[str] = Field(None, description="Optional notes relevant to this price period")
 
     @validator('end_date')
     def end_date_must_be_after_start_date(cls, v, values):
@@ -26,7 +28,10 @@ class PackagePriceChartUpdate(BaseModel):
     start_date: Optional[date] = Field(None, description="Start date of the price period")
     end_date: Optional[date] = Field(None, description="End date of the price period")
     price: Optional[float] = Field(None, description="Price in USD for this period", ge=0)
+    booking_price: Optional[float] = Field(None, description="Optional booking/deposit price in USD", ge=0)
+    notes: Optional[str] = Field(None, description="Optional notes relevant to this price period")
     is_active: Optional[bool] = Field(None, description="Whether the price chart is active")
+
 
     @validator('end_date')
     def end_date_must_be_after_start_date(cls, v, values):

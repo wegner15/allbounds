@@ -6,7 +6,9 @@ import SeoHead from '../../components/seo/SeoHead';
 
 // Components
 import Breadcrumb from '../../components/layout/Breadcrumb';
+import SeasonalPricingTable from '../../components/common/SeasonalPricingTable';
 import Button from '../../components/ui/Button';
+
 import ImageGallery from '../../components/ui/ImageGallery';
 import SimilarHotels from '../../components/recommendations/SimilarHotels';
 
@@ -191,8 +193,16 @@ const HotelDetailPage: React.FC = () => {
                 </div>
               )}
 
+              {/* Seasonal Pricing Section */}
+              {(hotel as any).price_charts && (hotel as any).price_charts.length > 0 && (
+                <div id="pricing" className="mb-8">
+                  <SeasonalPricingTable priceCharts={(hotel as any).price_charts} title="Hotel Seasonal Room Rates" />
+                </div>
+              )}
+
               {/* Amenities Section */}
               {hotel.amenities && hotel.amenities.length > 0 && (
+
                 <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
                   <h2 className="text-2xl font-playfair text-charcoal mb-6">Amenities</h2>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">

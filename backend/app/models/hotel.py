@@ -65,6 +65,8 @@ class Hotel(Base):
     amenities = relationship("Amenity", secondary=hotel_amenities, backref="hotels")
     media_assets = relationship("MediaAsset", secondary=hotel_media, back_populates="hotels")
     reviews = relationship("Review", back_populates="hotel")
+    price_charts = relationship("HotelPriceChart", back_populates="hotel", cascade="all, delete-orphan")
+
     
     # Relationships with Packages and Group Trips
     # CRITICAL: lazy='noload' prevents circular loading: Hotel → Package → Hotel → ...

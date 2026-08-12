@@ -7,6 +7,8 @@ from app.schemas.country import CountryResponse
 from app.schemas.holiday_type import HolidayTypeResponse
 from app.schemas.inclusion_exclusion import InclusionResponse, ExclusionResponse
 from app.schemas.content_tag import ContentTagResponse
+from app.schemas.package_price_chart import PackagePriceChartResponse
+
 
 # Base Package Schema
 class PackageBase(BaseModel):
@@ -76,6 +78,8 @@ class PackageResponse(PackageBase):
     exclusion_items: List[ExclusionResponse] = []
     countries: List[CountryResponse] = []
     tags: List[ContentTagResponse] = []
+    price_charts: List[PackagePriceChartResponse] = []
+
     # REMOVED: holiday_types, inclusion_items, exclusion_items to prevent circular loading
     # These cause exponential memory growth due to bidirectional relationships
     # Use dedicated endpoints to fetch these if needed

@@ -268,7 +268,8 @@ class HotelService:
         Retrieve a specific hotel by slug with media assets.
         """
         return db.query(Hotel).options(
-            joinedload(Hotel.media_assets)
+            joinedload(Hotel.media_assets),
+            joinedload(Hotel.price_charts)
         ).filter(Hotel.slug == slug, Hotel.is_active == True).first()
     
     def get_hotel_details_by_slug(self, db: Session, slug: str) -> Optional[Dict[str, Any]]:
@@ -277,11 +278,13 @@ class HotelService:
         """
         hotel = db.query(Hotel).options(
             joinedload(Hotel.media_assets),
+            joinedload(Hotel.price_charts),
             joinedload(Hotel.country),
             joinedload(Hotel.hotel_type),
             joinedload(Hotel.amenities),
             joinedload(Hotel.tags)
         ).filter(Hotel.slug == slug, Hotel.is_active == True).first()
+
         
         if not hotel:
             return None
@@ -361,7 +364,20 @@ class HotelService:
             "cover_image": cover_image,
             "image_url": cover_image,
             "gallery_images": gallery_images,
+            "price_charts": [
+                {
+                    "id": pc.id,
+                    "title": pc.title,
+                    "start_date": pc.start_date.isoformat() if pc.start_date else None,
+                    "end_date": pc.end_date.isoformat() if pc.end_date else None,
+                    "price": float(pc.price) if pc.price else 0,
+                    "booking_price": float(pc.booking_price) if pc.booking_price is not None else float(pc.price) if pc.price else 0,
+                    "notes": pc.notes,
+                    "is_active": pc.is_active,
+                } for pc in hotel.price_charts if pc.is_active
+            ] if hotel.price_charts else [],
             "country": {
+
                 "id": hotel.country.id,
                 "name": hotel.country.name,
                 "slug": hotel.country.slug,

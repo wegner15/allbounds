@@ -170,16 +170,19 @@ class CountryService:
 
         country = db.query(Country).options(
             selectinload(Country.region),
-            selectinload(Country.packages),
+            selectinload(Country.packages).selectinload(Package.price_charts),
             selectinload(Country.group_trips).selectinload(GroupTrip.departures),
+            selectinload(Country.group_trips).selectinload(GroupTrip.price_charts),
             selectinload(Country.attractions),
             selectinload(Country.accommodations),
             selectinload(Country.hotels).selectinload(Hotel.media_assets),
             selectinload(Country.hotels).selectinload(Hotel.amenities),
+            selectinload(Country.hotels).selectinload(Hotel.price_charts),
             selectinload(Country.activities).selectinload(Activity.cover_image),
             selectinload(Country.media_assets),
             selectinload(Country.visit_info)
         ).filter(Country.slug == slug, Country.is_active == True).first()
+
         
         if not country:
             return None
@@ -216,6 +219,18 @@ class CountryService:
                     "duration_days": pkg.duration_days,
                     "image_id": pkg.image_id,
                     "is_active": pkg.is_active,
+                    "price_charts": [
+                        {
+                            "id": pc.id,
+                            "title": pc.title,
+                            "start_date": pc.start_date.isoformat() if pc.start_date else None,
+                            "end_date": pc.end_date.isoformat() if pc.end_date else None,
+                            "price": float(pc.price) if pc.price else 0,
+                            "booking_price": float(pc.booking_price) if pc.booking_price is not None else float(pc.price) if pc.price else 0,
+                            "notes": pc.notes,
+                            "is_active": pc.is_active,
+                        } for pc in pkg.price_charts if pc.is_active
+                    ] if hasattr(pkg, 'price_charts') and pkg.price_charts else [],
                 }
                 for pkg in country.packages if pkg.is_active
             ],
@@ -231,6 +246,18 @@ class CountryService:
                     "min_participants": trip.min_participants,
                     "image_id": trip.image_id,
                     "is_active": trip.is_active,
+                    "price_charts": [
+                        {
+                            "id": pc.id,
+                            "title": pc.title,
+                            "start_date": pc.start_date.isoformat() if pc.start_date else None,
+                            "end_date": pc.end_date.isoformat() if pc.end_date else None,
+                            "price": float(pc.price) if pc.price else 0,
+                            "booking_price": float(pc.booking_price) if pc.booking_price is not None else float(pc.price) if pc.price else 0,
+                            "notes": pc.notes,
+                            "is_active": pc.is_active,
+                        } for pc in trip.price_charts if pc.is_active
+                    ] if hasattr(trip, 'price_charts') and trip.price_charts else [],
                     "departures": [
                         {
                             "id": dep.id,
@@ -288,9 +315,22 @@ class CountryService:
                     "cover_image": _get_hotel_cover_image(hotel),
                     "slug": hotel.slug,
                     "is_active": hotel.is_active,
+                    "price_charts": [
+                        {
+                            "id": pc.id,
+                            "title": pc.title,
+                            "start_date": pc.start_date.isoformat() if pc.start_date else None,
+                            "end_date": pc.end_date.isoformat() if pc.end_date else None,
+                            "price": float(pc.price) if pc.price else 0,
+                            "booking_price": float(pc.booking_price) if pc.booking_price is not None else float(pc.price) if pc.price else 0,
+                            "notes": pc.notes,
+                            "is_active": pc.is_active,
+                        } for pc in hotel.price_charts if pc.is_active
+                    ] if hasattr(hotel, 'price_charts') and hotel.price_charts else [],
                 }
                 for hotel in country.hotels if hotel.is_active
             ],
+
             "activities": [
                 {
                     "id": activity.id,

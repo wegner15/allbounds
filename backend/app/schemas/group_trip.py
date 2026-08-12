@@ -7,6 +7,8 @@ from app.schemas.country import CountryResponse
 from app.schemas.holiday_type import HolidayTypeResponse
 from app.schemas.inclusion_exclusion import InclusionResponse, ExclusionResponse
 from app.schemas.content_tag import ContentTagResponse
+from app.schemas.group_trip_price_chart import GroupTripPriceChartResponse
+
 
 # Forward reference for GroupTripDepartureResponse
 from typing import TYPE_CHECKING
@@ -111,7 +113,9 @@ class GroupTripResponse(GroupTripBase):
     inclusion_items: List[InclusionResponse] = Field(default_factory=list, description="Inclusions associated with this group trip")
     exclusion_items: List[ExclusionResponse] = Field(default_factory=list, description="Exclusions associated with this group trip")
     departures: List[GroupTripDepartureResponse] = Field(default_factory=list, description="Departures associated with this group trip")
+    price_charts: List[GroupTripPriceChartResponse] = Field(default_factory=list, description="Price charts associated with this group trip")
     countries: List[CountryResponse] = Field(default_factory=list, description="Additional destinations associated with this group trip")
+
     tags: List[ContentTagResponse] = Field(default_factory=list, description="Tags associated with this group trip")
 
     @field_validator('is_active', 'is_featured', mode='before')

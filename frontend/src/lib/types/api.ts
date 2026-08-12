@@ -9,6 +9,20 @@ export interface BaseModel {
   updated_at: string;
 }
 
+export interface PriceChart extends BaseModel {
+  package_id?: number;
+  group_trip_id?: number;
+  hotel_id?: number;
+  title: string;
+  start_date: string;
+  end_date: string;
+  price: number;
+  booking_price?: number;
+  notes?: string;
+  is_active: boolean;
+}
+
+
 export interface PaginatedResponse<T> {
   items: T[];
   total: number;
@@ -302,7 +316,9 @@ export interface Hotel extends BaseModel {
   check_out_time?: string;
   latitude?: number;
   longitude?: number;
+  price_charts?: PriceChart[];
 }
+
 
 // Hotel with gallery
 export interface HotelWithGallery extends Hotel {
@@ -577,7 +593,9 @@ export interface GroupTrip extends BaseModel {
   max_participants?: number;
   min_participants?: number;
   departures: GroupTripDeparture[];
+  price_charts?: PriceChart[];
   conversion_triggers?: string[];
+
   countries?: Country[];      // additional destinations (multi-destination)
   country_ids?: number[];     // IDs of additional destinations
 }

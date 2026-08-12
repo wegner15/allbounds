@@ -7,6 +7,8 @@ from app.schemas.country import CountryResponse
 from app.schemas.hotel_type import HotelTypeResponse
 from app.schemas.amenity import AmenityResponse
 from app.schemas.content_tag import ContentTagResponse
+from app.schemas.hotel_price_chart import HotelPriceChartResponse
+
 
 # Base Hotel Schema
 class HotelBase(BaseModel):
@@ -90,6 +92,8 @@ class HotelWithCountryResponse(HotelResponse):
     amenities: List[AmenityResponse] = Field(default_factory=list, description="List of amenities associated with the hotel")
     amenity_ids: Optional[List[int]] = Field(default=None, description="List of amenity IDs for form editing")
     tags: List[ContentTagResponse] = Field(default_factory=list, description="Tags associated with the hotel")
+    price_charts: List[HotelPriceChartResponse] = Field(default_factory=list, description="Price charts associated with the hotel")
+
     
     @model_serializer(mode='wrap')
     def serialize_model(self, serializer, info):

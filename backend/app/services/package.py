@@ -125,7 +125,11 @@ class PackageService:
         """
         Retrieve a specific package by slug.
         """
-        return db.query(Package).filter(Package.slug == slug, Package.is_active == True).first()
+        return db.query(Package).options(
+            selectinload(Package.price_charts),
+            selectinload(Package.country)
+        ).filter(Package.slug == slug, Package.is_active == True).first()
+
     
     def get_comprehensive_package_by_slug(self, db: Session, slug: str) -> Optional[Package]:
         """

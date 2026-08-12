@@ -96,6 +96,7 @@ class GroupTripService:
         """
         return db.query(GroupTrip).options(
             joinedload(GroupTrip.departures),
+            joinedload(GroupTrip.price_charts),
             joinedload(GroupTrip.country),
             joinedload(GroupTrip.countries),
             joinedload(GroupTrip.holiday_types),
@@ -110,6 +111,7 @@ class GroupTripService:
         """
         return db.query(GroupTrip).options(
             joinedload(GroupTrip.departures),
+            joinedload(GroupTrip.price_charts),
             joinedload(GroupTrip.country),
             joinedload(GroupTrip.countries),
             joinedload(GroupTrip.holiday_types),
@@ -117,6 +119,7 @@ class GroupTripService:
             joinedload(GroupTrip.exclusion_items),
             joinedload(GroupTrip.tags)
         ).filter(GroupTrip.slug == slug, GroupTrip.is_active == True).first()
+
     
     def get_similar_group_trips(self, db: Session, group_trip_id: int, limit: int = 4) -> List[GroupTrip]:
         """

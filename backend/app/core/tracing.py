@@ -2,22 +2,25 @@ import logging
 import importlib.util
 from typing import Optional
 
-# Core OpenTelemetry imports
-from opentelemetry import trace
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+logger = logging.getLogger(__name__)
 
-# Optional instrumentation imports - will be imported dynamically if available
-from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+# Core OpenTelemetry imports wrapped in try/except to prevent application startup failure
+try:
+    from opentelemetry import trace
+    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+    from opentelemetry.sdk.resources import Resource
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+    from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+    OPENTELEMETRY_AVAILABLE = True
+except (ImportError, ModuleNotFoundError) as err:
+    OPENTELEMETRY_AVAILABLE = False
+    logger.warning(f"OpenTelemetry tracing disabled (missing dependency): {err}")
 
 # Check if optional dependencies are available
 def is_module_available(module_name):
     return importlib.util.find_spec(module_name) is not None
-
-logger = logging.getLogger(__name__)
 
 def setup_tracing(app, service_name: str = "allbounds-backend", endpoint: Optional[str] = None) -> None:
     """
@@ -28,6 +31,9 @@ def setup_tracing(app, service_name: str = "allbounds-backend", endpoint: Option
         service_name: Name of the service
         endpoint: OTLP endpoint for exporting traces
     """
+    if not OPENTELEMETRY_AVAILABLE:
+        logger.info("Skipping OpenTelemetry tracing setup (OpenTelemetry unavailable)")
+        return
     try:
         # Create a resource with service information
         resource = Resource.create({"service.name": service_name})

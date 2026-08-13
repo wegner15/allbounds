@@ -194,7 +194,7 @@ const PackageDetailPageNew: React.FC = () => {
             </div>
 
             {packageDetail.summary && (
-              <p className="text-gray-600 text-base md:text-lg max-w-4xl leading-relaxed">
+              <p className="text-gray-600 text-base md:text-lg leading-relaxed">
                 {packageDetail.summary}
               </p>
             )}

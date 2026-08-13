@@ -188,7 +188,7 @@ const PackagesPage: React.FC = () => {
       <div className="container mx-auto px-4 py-8">
         {/* SEO Introduction Block */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200/60 p-6 md:p-8 mb-8">
-          <div className="max-w-4xl">
+          <div>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 font-playfair mb-4">
               Curated Travel Packages & Tailor-Made Vacations
             </h1>

@@ -204,7 +204,7 @@ const CountryCategoryPage: React.FC = () => {
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900 font-playfair mb-3">
                         {displayTitle}
                     </h1>
-                    <p className="text-gray-600 leading-relaxed text-sm md:text-base max-w-4xl">
+                    <p className="text-gray-600 leading-relaxed text-sm md:text-base">
                         {displayDescription}
                     </p>
                 </div>

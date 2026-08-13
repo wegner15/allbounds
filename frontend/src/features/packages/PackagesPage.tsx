@@ -185,21 +185,22 @@ const PackagesPage: React.FC = () => {
         autoPlayInterval={6000}
       />
 
-      <div className="container mx-auto px-4 py-8">
-        {/* SEO Introduction Block */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200/60 p-6 md:p-8 mb-8">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 font-playfair mb-4">
-              Curated Travel Packages & Tailor-Made Vacations
-            </h1>
-            <p className="text-gray-600 leading-relaxed text-base md:text-lg mb-4">
-              Embark on the journey of a lifetime with our carefully crafted travel packages. Whether you're seeking the thrill of a classic East African safari, the serenity of pristine Indian Ocean beaches, or the cultural immersion of historic towns, we design itineraries that match your travel aspirations.
-            </p>
-            <p className="text-gray-600 leading-relaxed text-sm md:text-base">
-              At Allbound Vacations, we coordinate every detail—from luxury boutique stays and guided local excursions to seamless logistics and transfers. Explore our featured destinations, select your preferred holiday style, and customize your itinerary to create memories that will last forever.
-            </p>
-          </div>
+      {/* Full-Width SEO Introduction Section */}
+      <div className="w-full bg-white border-b border-gray-200/60 shadow-sm py-8 md:py-10 mb-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 font-playfair mb-4">
+            Curated Travel Packages & Tailor-Made Vacations
+          </h1>
+          <p className="text-gray-600 leading-relaxed text-base md:text-lg mb-4 w-full">
+            Embark on the journey of a lifetime with our carefully crafted travel packages. Whether you're seeking the thrill of a classic East African safari, the serenity of pristine Indian Ocean beaches, or the cultural immersion of historic towns, we design itineraries that match your travel aspirations.
+          </p>
+          <p className="text-gray-600 leading-relaxed text-sm md:text-base w-full">
+            At Allbound Vacations, we coordinate every detail—from luxury boutique stays and guided local excursions to seamless logistics and transfers. Explore our featured destinations, select your preferred holiday style, and customize your itinerary to create memories that will last forever.
+          </p>
         </div>
+      </div>
+
+      <div className="container mx-auto px-4 pb-12">
 
         {/* Filters */}
         <div className="bg-gradient-to-r from-white to-gray-50 border border-gray-200 rounded-xl shadow-lg p-6 mb-8">

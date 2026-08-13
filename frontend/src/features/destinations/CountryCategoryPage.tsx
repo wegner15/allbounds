@@ -188,27 +188,29 @@ const CountryCategoryPage: React.FC = () => {
                 onSectionClick={handleSubNavClick}
             />
 
-            <main className="container mx-auto px-4 py-8">
-                {/* Back Link */}
-                <div className="mb-6">
-                    <Link
-                        to={`/destinations/${country.slug}`}
-                        className="text-primary-dark hover:text-primary font-semibold flex items-center gap-1.5 transition-colors duration-200 text-sm md:text-base"
-                    >
-                        <span>&larr;</span> Back to {country.name} Overview
-                    </Link>
-                </div>
+            {/* Full-Width Section Description Banner */}
+            <div className="w-full bg-white border-b border-gray-200/60 shadow-sm py-8 md:py-10 mb-8">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                    {/* Back Link */}
+                    <div className="mb-4">
+                        <Link
+                            to={`/destinations/${country.slug}`}
+                            className="text-primary-dark hover:text-primary font-semibold flex items-center gap-1.5 transition-colors duration-200 text-sm md:text-base"
+                        >
+                            <span>&larr;</span> Back to {country.name} Overview
+                        </Link>
+                    </div>
 
-                {/* SEO Category Intro Block */}
-                <div className="bg-white rounded-2xl border border-gray-200/60 p-6 md:p-8 mb-8 shadow-sm">
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 font-playfair mb-3">
+                    <h1 className="text-2xl md:text-4xl font-bold text-gray-900 font-playfair mb-3">
                         {displayTitle}
                     </h1>
-                    <p className="text-gray-600 leading-relaxed text-sm md:text-base">
+                    <p className="text-gray-600 leading-relaxed text-base md:text-lg w-full">
                         {displayDescription}
                     </p>
                 </div>
+            </div>
 
+            <main className="container mx-auto px-4 pb-12">
                 {renderCategory()}
             </main>
         </div>

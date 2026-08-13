@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapIcon, UsersIcon } from '@heroicons/react/24/outline';
+import { MapIcon, CalendarIcon } from '@heroicons/react/24/outline';
 
 interface CTABannerProps {
   countrySlug: string;
@@ -20,7 +20,7 @@ const CTABanner: React.FC<CTABannerProps> = ({ countrySlug, countryName }) => {
               Ready to Explore {countryName}?
             </h2>
             <p className="text-white/90 text-base md:text-lg max-w-2xl mx-auto">
-              Discover our curated travel packages and join exciting group trips
+              Discover our curated travel packages and plan your dream trip
             </p>
           </div>
           
@@ -35,14 +35,14 @@ const CTABanner: React.FC<CTABannerProps> = ({ countrySlug, countryName }) => {
               <span className="text-lg">View Packages</span>
             </Link>
             
-            {/* Secondary CTA - Join Group Trips */}
+            {/* Secondary CTA - Plan My Trip */}
             <Link
-              to={`/group-trips?country=${countrySlug}`}
+              to="/start-planning"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-10 py-4 bg-transparent text-white font-bold rounded-xl border-2 border-white/80 hover:bg-white hover:text-primary hover:border-white shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-white/30"
-              aria-label={`Join group trips to ${countryName}`}
+              aria-label={`Plan your trip to ${countryName}`}
             >
-              <UsersIcon className="w-6 h-6" aria-hidden="true" />
-              <span className="text-lg">Join Group Trips</span>
+              <CalendarIcon className="w-6 h-6" aria-hidden="true" />
+              <span className="text-lg">Plan My Trip</span>
             </Link>
           </div>
         </div>

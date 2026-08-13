@@ -82,8 +82,9 @@ services:
   db:
     image: postgres:15-alpine
     restart: unless-stopped
-    ports:
-      - "5435:5432"
+    # Internal service - not exposed to host network
+    # ports:
+    #   - "127.0.0.1:5435:5432" # Uncomment only for local DB GUI access
     environment:
       - POSTGRES_USER=allbounds
       - POSTGRES_PASSWORD=allbounds
@@ -100,8 +101,9 @@ services:
   meilisearch:
     image: getmeili/meilisearch:v1.3
     restart: unless-stopped
-    ports:
-      - "7705:7700"
+    # Internal service - not exposed to host network
+    # ports:
+    #   - "127.0.0.1:7705:7700" # Uncomment only for local debugging access
     environment:
       - MEILI_MASTER_KEY=masterKey
     volumes:
@@ -116,8 +118,9 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    ports:
-      - "6379:6379"
+    # Internal service - not exposed to host network
+    # ports:
+    #   - "127.0.0.1:6379:6379" # Uncomment only for local debugging access
     volumes:
       - redis_data:/data
     healthcheck:

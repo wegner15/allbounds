@@ -28,8 +28,9 @@ services:
   db:
     image: postgres:15-alpine
     restart: unless-stopped
-    ports:
-      - "5435:5432"
+    # Internal service - not exposed to host network
+    # ports:
+    #   - "127.0.0.1:5435:5432" # Uncomment only for local DB GUI access
     environment:
       - POSTGRES_USER=allbounds
       - POSTGRES_PASSWORD=allbounds

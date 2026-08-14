@@ -217,7 +217,7 @@ const HotelListPage: React.FC = () => {
             {[1, 2].map((i) => (
               <div key={i}>
                 <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-5">
                   {[...Array(4)].map((_, j) => (
                     <div key={j} className="h-64 bg-gray-200 rounded-xl"></div>
                   ))}
@@ -247,7 +247,7 @@ const HotelListPage: React.FC = () => {
                       {typeHotels.length}
                     </span>
                   </div>
-                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-5">
                     {typeHotels.map((hotel) => (
                       <div key={hotel.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden group">
                         {/* Hotel Image */}

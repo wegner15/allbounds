@@ -277,7 +277,7 @@ const AttractionListPage: React.FC = () => {
             <p className="text-gray-500">Try adjusting your search criteria.</p>
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-5">
             {filteredAttractions.map((attraction) => (
               <div key={attraction.id} className="bg-white rounded-2xl shadow-lg overflow-hidden group transform hover:-translate-y-1 transition-all duration-300 flex flex-col">
                 <Link to={`/attractions/${attraction.slug}`} className="block h-48 md:h-56 overflow-hidden">

@@ -270,7 +270,7 @@ const CountryDetailPageNew: React.FC = () => {
           onSectionClick={handleSubNavClick}
         />
 
-        <div className="container mx-auto px-4 py-8">
+        <div className="fluid-container py-8">
           {/* Overview Section */}
           <section id="overview" className="scroll-mt-24 mb-20">
             <DestinationOverviewSection country={country} />
@@ -313,7 +313,7 @@ const CountryDetailPageNew: React.FC = () => {
           />
         </div>
 
-        <div className="container mx-auto px-4 pb-12">
+        <div className="fluid-container pb-12">
           {/* Group Trips Section */}
           <section id="group-trips" className="scroll-mt-24 mb-20">
             <GroupTripsTab countryId={country.id} preview={true} destinationSlug={country.slug} title={`Group Trips to ${country.name}`} />

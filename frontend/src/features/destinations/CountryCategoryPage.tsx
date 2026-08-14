@@ -190,7 +190,7 @@ const CountryCategoryPage: React.FC = () => {
 
             {/* Full-Width Section Description Banner */}
             <div className="w-full bg-white border-b border-gray-200/60 shadow-sm py-8 md:py-10 mb-8">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="fluid-container">
                     {/* Back Link */}
                     <div className="mb-4">
                         <Link
@@ -210,7 +210,7 @@ const CountryCategoryPage: React.FC = () => {
                 </div>
             </div>
 
-            <main className="container mx-auto px-4 pb-12">
+            <main className="fluid-container pb-12">
                 {renderCategory()}
             </main>
         </div>

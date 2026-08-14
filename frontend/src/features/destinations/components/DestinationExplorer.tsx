@@ -535,7 +535,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
 
               {filteredActivities.length > 0 ? (
                 <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-5 gap-6">
                     {filteredActivities.slice(0, activityVisibleCount).map((act: any) => (
                       <ActivityCard key={act.id} activity={act} />
                     ))}
@@ -614,7 +614,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
 
               {filteredPackages.length > 0 ? (
                 <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-5 gap-6">
                     {filteredPackages.slice(0, packageVisibleCount).map((pkg: any) => (
                       <PackageCard key={pkg.id} package={pkg} />
                     ))}
@@ -693,7 +693,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
 
               {filteredHotels.length > 0 ? (
                 <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-5 gap-6">
                     {filteredHotels.slice(0, hotelVisibleCount).map((hotel: any) => (
                       <HotelCard
                         key={hotel.id}
@@ -966,7 +966,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
 
               {/* RESULTS GRID */}
               {visibleCategoryItems.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-5 gap-6">
                   {activeTab === 'hotels' &&
                     (visibleCategoryItems as typeof filteredHotels).map((hotel) => (
                       <HotelCard key={hotel.id} hotel={{ ...hotel, country: hotel.country || { slug: destinationSlug } }} />

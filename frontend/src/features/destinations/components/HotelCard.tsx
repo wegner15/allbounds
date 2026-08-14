@@ -125,7 +125,7 @@ const HotelCard: React.FC<HotelCardProps> = React.memo(({ hotel }) => {
                         {amenity.icon}
                       </span>
                     )}
-                    <span className="truncate max-w-[100px]">{amenity.name}</span>
+                    <span>{amenity.name}</span>
                   </div>
                 ))}
                 {remainingAmenitiesCount > 0 && (

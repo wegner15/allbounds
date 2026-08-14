@@ -239,7 +239,7 @@ const MainNavigation: React.FC = () => {
         style={{ display: 'grid' }}
       >
         <div className="overflow-hidden">
-          <div className="max-w-[1600px] mx-auto px-4 lg:px-6">
+          <div className="fluid-container">
             <div className="flex items-center justify-between h-20 lg:h-24">
               {/* Logo */}
               <Link to="/" className="flex items-center flex-shrink-0">
@@ -314,7 +314,7 @@ const MainNavigation: React.FC = () => {
       {/* Bottom Tier: Navigation Links & Search */}
       <div className="bg-white">
 
-        <div className="max-w-[1600px] mx-auto px-4 lg:px-6">
+        <div className="fluid-container">
           <div className="flex items-center justify-between h-14">
 
             {/* Compact logo — smoothly transitions when scrolled */}

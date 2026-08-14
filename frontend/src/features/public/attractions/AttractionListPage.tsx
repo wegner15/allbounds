@@ -139,11 +139,11 @@ const AttractionListPage: React.FC = () => {
           canonicalPath="/attractions"
         />
         <div className="min-h-screen bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="fluid-container py-12">
             <div className="animate-pulse">
               <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {[...Array(6)].map((_, i) => (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+                {[...Array(8)].map((_, i) => (
                   <div key={i} className="bg-white rounded-xl shadow-sm overflow-hidden">
                     <div className="h-48 bg-gray-200"></div>
                     <div className="p-6">
@@ -189,8 +189,8 @@ const AttractionListPage: React.FC = () => {
       <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <div className="bg-gradient-to-b from-white via-gray-50/50 to-gray-50 border-b border-gray-200/80 py-12 md:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
+        <div className="fluid-container">
+          <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.2em] text-primary uppercase mb-3">
               <span className="w-6 h-[2px] bg-primary/60 rounded-full" />
               DESTINATIONS & LANDMARKS
@@ -211,7 +211,7 @@ const AttractionListPage: React.FC = () => {
 
       {/* Filters */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="fluid-container py-4">
           <div className="grid gap-4 md:grid-cols-4">
             {/* Search */}
             <div className="relative">
@@ -266,7 +266,7 @@ const AttractionListPage: React.FC = () => {
       </div>
 
       {/* Attractions Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-4 lg:px-6 xl:px-8 py-8">
+      <div className="fluid-container py-8">
         {filteredAttractions.length === 0 ? (
           <div className="text-center py-12">
             <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -277,7 +277,7 @@ const AttractionListPage: React.FC = () => {
             <p className="text-gray-500">Try adjusting your search criteria.</p>
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {filteredAttractions.map((attraction) => (
               <div key={attraction.id} className="bg-white rounded-2xl shadow-lg overflow-hidden group transform hover:-translate-y-1 transition-all duration-300 flex flex-col">
                 <Link to={`/attractions/${attraction.slug}`} className="block h-48 md:h-56 overflow-hidden">
@@ -288,7 +288,7 @@ const AttractionListPage: React.FC = () => {
                   />
                 </Link>
                 <div className="p-4 flex flex-col flex-grow">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2 h-14">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2 leading-snug">
                     {attraction.name}
                   </h3>
                   {attraction.description ? (

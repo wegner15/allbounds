@@ -109,17 +109,17 @@ const CountryDetailPage: React.FC = () => {
           )}
           <div className="absolute inset-0 bg-black bg-opacity-40"></div>
           <div className="absolute bottom-0 left-0 right-0 p-8">
-            <div className="container mx-auto">
+            <div className="fluid-container">
               <h1 className="text-4xl md:text-6xl font-playfair text-white mb-4">{country.name}</h1>
               <div
-                className="text-xl text-white/90 max-w-2xl line-clamp-3"
+                className="text-xl text-white/90 max-w-4xl line-clamp-3"
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(country.description || '') }}
               />
             </div>
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-8">
+        <div className="fluid-container py-8">
           <Breadcrumb
             items={[
               { label: 'Destinations', path: '/destinations' },
@@ -129,9 +129,9 @@ const CountryDetailPage: React.FC = () => {
             className="mb-8"
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Main Content */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-3">
               {/* Country Overview */}
               <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
                 <h2 className="text-2xl font-playfair text-charcoal mb-4">About {country.name}</h2>

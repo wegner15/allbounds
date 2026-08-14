@@ -94,7 +94,7 @@ const SectionNavigation: React.FC<SectionNavigationProps> = ({
             role="navigation"
             aria-label="Section navigation"
         >
-            <div className="container mx-auto px-4">
+            <div className="fluid-container">
                 <div className="flex flex-wrap py-2 gap-1.5 md:gap-2 justify-center lg:justify-start">
                     {sections.map((section) => {
                         const isActive = activeSection === section.id;

@@ -208,7 +208,7 @@ const GroupTripsPage: React.FC = () => {
         />
       )}
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="fluid-container py-8">
         {/* Filters */}
         <div className="bg-white p-4 rounded shadow mb-6">
           <h2 className="text-xl font-medium mb-4">Filter Group Trips</h2>
@@ -297,7 +297,7 @@ const GroupTripsPage: React.FC = () => {
                   </Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
                   {currentTrips.map(trip => (
                     <div key={trip.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
                       <Link to={`/group-trips/${trip.slug}`}>

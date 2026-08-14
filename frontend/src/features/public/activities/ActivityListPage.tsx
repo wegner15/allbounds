@@ -108,8 +108,8 @@ const ActivityListPage: React.FC = () => {
       <div className="min-h-screen bg-gray-50">
         {/* Top Hero Introductory Section */}
         <div className="bg-gradient-to-b from-white via-gray-50/50 to-gray-50 border-b border-gray-200/80 py-12 md:py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto">
+          <div className="fluid-container">
+            <div className="text-center max-w-4xl mx-auto">
               <div className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.2em] text-primary uppercase mb-3">
                 <span className="w-6 h-[2px] bg-primary/60 rounded-full" />
                 EXCURSIONS & EXPERIENCES
@@ -130,7 +130,7 @@ const ActivityListPage: React.FC = () => {
 
         {/* Filter Controls */}
         <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-xs">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="fluid-container py-4">
             <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
               {/* Search Bar */}
               <div className="relative w-full sm:w-80">
@@ -167,7 +167,7 @@ const ActivityListPage: React.FC = () => {
         </div>
 
         {/* Activities Grid */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="fluid-container py-12">
           {filteredActivities.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-2xl border border-gray-200/60 shadow-xs p-8 max-w-lg mx-auto">
               <Compass className="w-12 h-12 text-primary/60 mx-auto mb-4 animate-bounce" />
@@ -186,7 +186,7 @@ const ActivityListPage: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
               {filteredActivities.map((act: ActivityResponse) => {
                 const primaryCountry = act.countries?.[0];
                 const countrySlug = primaryCountry?.slug || 'explore';

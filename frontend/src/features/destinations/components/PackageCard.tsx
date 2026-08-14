@@ -65,7 +65,7 @@ const PackageCard: React.FC<PackageCardProps> = React.memo(({ package: pkg }) =>
               {pkg.country && (
                 <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-teal-50 text-teal-700 border border-teal-100">
                   <MapPin className="w-3.5 h-3.5 mr-1 text-teal-600 flex-shrink-0" />
-                  <span className="truncate max-w-[100px] uppercase tracking-wide">{pkg.country.name}</span>
+                  <span className="uppercase tracking-wide">{pkg.country.name}</span>
                 </div>
               )}
               {/* Additional destinations */}
@@ -74,7 +74,7 @@ const PackageCard: React.FC<PackageCardProps> = React.memo(({ package: pkg }) =>
                   {pkg.countries.slice(0, 2).map((c) => (
                     <div key={c.id} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-50 text-gray-600 border border-gray-200">
                       <MapPin className="w-3 h-3 mr-1 text-gray-400 flex-shrink-0" />
-                      <span className="truncate max-w-[80px] uppercase tracking-wide">{c.name}</span>
+                      <span className="uppercase tracking-wide">{c.name}</span>
                     </div>
                   ))}
                   {pkg.countries.length > 2 && (

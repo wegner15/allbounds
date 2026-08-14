@@ -187,7 +187,7 @@ const PackagesPage: React.FC = () => {
 
       {/* Full-Width SEO Introduction Section */}
       <div className="w-full bg-white border-b border-gray-200/60 shadow-sm py-8 md:py-10 mb-8">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="fluid-container">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 font-playfair mb-4">
             Curated Travel Packages & Tailor-Made Vacations
           </h1>
@@ -200,7 +200,7 @@ const PackagesPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 pb-12">
+      <div className="fluid-container pb-12">
 
         {/* Filters */}
         <div className="bg-gradient-to-r from-white to-gray-50 border border-gray-200 rounded-xl shadow-lg p-6 mb-8">

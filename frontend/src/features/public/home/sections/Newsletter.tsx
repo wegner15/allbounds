@@ -14,7 +14,7 @@ const Newsletter: React.FC = () => {
 
   return (
     <div className="py-16 bg-charcoal text-paper">
-      <div className="container mx-auto px-4 text-center">
+      <div className="fluid-container text-center">
         <h2 className="text-h2 font-playfair font-bold mb-2">Your Travel Journey Starts Here</h2>
         <p className="text-body font-lato mb-6 text-paper/80">Sign up and we'll send the best deals to you</p>
 

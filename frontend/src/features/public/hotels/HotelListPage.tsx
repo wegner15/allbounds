@@ -100,8 +100,8 @@ const HotelListPage: React.FC = () => {
       <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <div className="bg-gradient-to-b from-white via-gray-50/50 to-gray-50 border-b border-gray-200/80 py-12 md:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
+        <div className="fluid-container">
+          <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.2em] text-primary uppercase mb-3">
               <span className="w-6 h-[2px] bg-primary/60 rounded-full" />
               ACCOMMODATIONS & STAYS
@@ -122,7 +122,7 @@ const HotelListPage: React.FC = () => {
 
       {/* Filters */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="fluid-container py-4">
           <div className="grid gap-4 md:grid-cols-4">
             {/* Search */}
             <div className="relative">
@@ -160,12 +160,10 @@ const HotelListPage: React.FC = () => {
               onChange={(e) => setMinStars(e.target.value ? Number(e.target.value) : '')}
               className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">All Ratings</option>
-              <option value="5">5 Star</option>
-              <option value="4">4+ Star</option>
-              <option value="3">3+ Star</option>
-              <option value="2">2+ Star</option>
-              <option value="1">1+ Star</option>
+              <option value="">All Star Ratings</option>
+              <option value="5">5 Stars</option>
+              <option value="4">4+ Stars</option>
+              <option value="3">3+ Stars</option>
             </select>
 
             {/* Results Count */}
@@ -176,9 +174,9 @@ const HotelListPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Hotel Type Navigation */}
+      {/* Sub-Header Navigation */}
       <div className="bg-white border-b border-gray-200 sticky top-[73px] z-10 shadow-sm overflow-x-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div className="fluid-container py-3">
           <div className="flex space-x-2 min-w-max pb-1">
             <button
               onClick={() => {
@@ -208,40 +206,19 @@ const HotelListPage: React.FC = () => {
                 <span>{type.name}</span>
               </button>
             ))}
-
-            {/* Tag for Other Accommodations if any exist */}
-            {filteredHotels.some(h => !h.hotel_type_id) && (
-              <button
-                onClick={() => {
-                  const element = document.getElementById('type-other');
-                  if (element) {
-                    const headerOffset = 140;
-                    const elementPosition = element.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                    window.scrollTo({
-                      top: offsetPosition,
-                      behavior: "smooth"
-                    });
-                  }
-                }}
-                className="px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center gap-2"
-              >
-                <span>Other Accommodations</span>
-              </button>
-            )}
           </div>
         </div>
       </div>
 
       {/* Hotels List - Grouped by Type */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="all-hotels">
+      <div className="fluid-container py-8" id="all-hotels">
         {isLoading || isLoadingTypes ? (
           <div className="animate-pulse space-y-12">
             {[1, 2].map((i) => (
               <div key={i}>
                 <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {[...Array(3)].map((_, j) => (
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+                  {[...Array(4)].map((_, j) => (
                     <div key={j} className="h-64 bg-gray-200 rounded-xl"></div>
                   ))}
                 </div>
@@ -270,7 +247,7 @@ const HotelListPage: React.FC = () => {
                       {typeHotels.length}
                     </span>
                   </div>
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                     {typeHotels.map((hotel) => (
                       <div key={hotel.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden group">
                         {/* Hotel Image */}

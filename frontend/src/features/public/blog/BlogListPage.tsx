@@ -48,11 +48,11 @@ const BlogListPage: React.FC = () => {
         canonicalPath="/blog"
       />
       <div className="min-h-screen bg-gray-50">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="fluid-container py-12">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-          <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-2">
-              {[...Array(6)].map((_, i) => (
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+              {[...Array(8)].map((_, i) => (
                 <div key={i} className="bg-white rounded-xl shadow-sm overflow-hidden">
                   <div className="h-48 bg-gray-200"></div>
                   <div className="p-6">
@@ -99,7 +99,7 @@ const BlogListPage: React.FC = () => {
       <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="fluid-container py-16">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
               Travel Stories & Insights
@@ -130,11 +130,11 @@ const BlogListPage: React.FC = () => {
       </div>
 
       {/* Blog Grid */}
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="fluid-container py-12">
         {filteredBlogs.length === 0 ? (
           <div className="text-center py-12">
             <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2H7V8z" />
             </svg>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               {searchTerm ? 'No articles found' : 'No articles published yet'}
@@ -144,7 +144,7 @@ const BlogListPage: React.FC = () => {
             </p>
           </div>
         ) : (
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {currentBlogs.map((blog) => (
                 <article key={blog.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
                   {blog.cover_image_id && (

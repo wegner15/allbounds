@@ -84,7 +84,7 @@ const Footer: React.FC<FooterProps> = ({
       {/* Main Dark Footer */}
       <Newsletter />
       <div className="bg-charcoal py-12 text-gray-300 border-t border-gray-700/50">
-        <div className="container mx-auto px-4">
+        <div className="fluid-container">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Logo and About */}
             <div className="lg:col-span-1">

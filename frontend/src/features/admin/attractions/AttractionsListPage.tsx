@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { usePaginatedAttractions, useDeleteAttraction } from '../../../lib/hooks/useAttractions';
+import { usePaginatedAttractions, useDeleteAttraction, usePatchAttraction } from '../../../lib/hooks/useAttractions';
 import type { Attraction } from '../../../lib/hooks/useAttractions';
 import CountryFilterSelect from '../../../components/ui/CountryFilterSelect';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
@@ -13,6 +13,7 @@ const AttractionsListPage: React.FC = () => {
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [updatingItems, setUpdatingItems] = useState<Record<string, boolean>>({});
 
   // Debounce search input
   useEffect(() => {
@@ -35,6 +36,25 @@ const AttractionsListPage: React.FC = () => {
   const total = data?.total || 0;
   const totalPages = data?.pages || 0;
   const deleteAttraction = useDeleteAttraction();
+  const patchAttractionMutation = usePatchAttraction();
+
+  const handleToggleField = async (id: number, field: 'is_featured' | 'is_active', currentValue: boolean) => {
+    const key = `${id}-${field}`;
+    setUpdatingItems(prev => ({ ...prev, [key]: true }));
+    try {
+      await patchAttractionMutation.mutateAsync({
+        id,
+        data: { [field]: !currentValue },
+      });
+    } catch (err) {
+      console.error(`Failed to update ${field}:`, err);
+      alert(`Failed to update ${field}. Please try again.`);
+    } finally {
+      setUpdatingItems(prev => ({ ...prev, [key]: false }));
+    }
+  };
+
+  const isUpdating = (id: number, field: string) => !!updatingItems[`${id}-${field}`];
 
   const handleDelete = async (id: number) => {
     try {
@@ -135,7 +155,10 @@ const AttractionsListPage: React.FC = () => {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Category
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Featured
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
                   <th scope="col" className="relative px-6 py-3">
@@ -145,7 +168,7 @@ const AttractionsListPage: React.FC = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {attractions.map((attraction: Attraction) => (
-                  <tr key={attraction.id}>
+                  <tr key={attraction.id} className="hover:bg-gray-50/70 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-10 w-10 flex-shrink-0">
@@ -174,18 +197,75 @@ const AttractionsListPage: React.FC = () => {
                         {attraction.category || 'General'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-col gap-1 items-start">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                          ${attraction.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                          {attraction.is_active ? 'Active' : 'Inactive'}
+                    {/* Featured / Favorite Toggle */}
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleField(attraction.id, 'is_featured', !!attraction.is_featured)}
+                        disabled={isUpdating(attraction.id, 'is_featured')}
+                        title={attraction.is_featured ? 'Remove from featured' : 'Mark as featured / favorite'}
+                        className={`${attraction.is_featured ? 'bg-amber-500' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:opacity-50`}
+                      >
+                        <span className="sr-only">Toggle featured status</span>
+                        <span className={`${attraction.is_featured ? 'translate-x-5' : 'translate-x-0'} pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}>
+                          {isUpdating(attraction.id, 'is_featured') ? (
+                            <span className="absolute inset-0 flex h-full w-full items-center justify-center">
+                              <svg className="animate-spin h-3 w-3 text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                            </span>
+                          ) : (
+                            <>
+                              <span className={`${attraction.is_featured ? 'opacity-0 duration-100 ease-out' : 'opacity-100 duration-200 ease-in'} absolute inset-0 flex h-full w-full items-center justify-center transition-opacity`} aria-hidden="true">
+                                <svg className="h-3 w-3 text-gray-400" fill="none" viewBox="0 0 12 12">
+                                  <path d="M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              </span>
+                              <span className={`${attraction.is_featured ? 'opacity-100 duration-200 ease-in' : 'opacity-0 duration-100 ease-out'} absolute inset-0 flex h-full w-full items-center justify-center transition-opacity`} aria-hidden="true">
+                                <svg className="h-3 w-3 text-amber-500 fill-current" viewBox="0 0 20 20">
+                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                              </span>
+                            </>
+                          )}
                         </span>
-                        {attraction.is_featured && (
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">
-                            ★ Featured
-                          </span>
-                        )}
-                      </div>
+                      </button>
+                    </td>
+                    {/* Status Toggle */}
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleField(attraction.id, 'is_active', attraction.is_active !== false)}
+                        disabled={isUpdating(attraction.id, 'is_active')}
+                        title={attraction.is_active ? 'Click to deactivate' : 'Click to activate'}
+                        className={`${attraction.is_active !== false ? 'bg-teal' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal focus:ring-offset-2 disabled:opacity-50`}
+                      >
+                        <span className="sr-only">Toggle active status</span>
+                        <span className={`${attraction.is_active !== false ? 'translate-x-5' : 'translate-x-0'} pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}>
+                          {isUpdating(attraction.id, 'is_active') ? (
+                            <span className="absolute inset-0 flex h-full w-full items-center justify-center">
+                              <svg className="animate-spin h-3 w-3 text-teal" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                            </span>
+                          ) : (
+                            <>
+                              <span className={`${attraction.is_active !== false ? 'opacity-0 duration-100 ease-out' : 'opacity-100 duration-200 ease-in'} absolute inset-0 flex h-full w-full items-center justify-center transition-opacity`} aria-hidden="true">
+                                <svg className="h-3 w-3 text-gray-400" fill="none" viewBox="0 0 12 12">
+                                  <path d="M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              </span>
+                              <span className={`${attraction.is_active !== false ? 'opacity-100 duration-200 ease-in' : 'opacity-0 duration-100 ease-out'} absolute inset-0 flex h-full w-full items-center justify-center transition-opacity`} aria-hidden="true">
+                                <svg className="h-3 w-3 text-teal" fill="currentColor" viewBox="0 0 12 12">
+                                  <path d="M3.707 5.293a1 1 0 00-1.414 1.414l1.414-1.414zM5 8l-.707.707a1 1 0 001.414 0L5 8zm4.707-3.293a1 1 0 00-1.414-1.414l1.414 1.414zm-7.414 2l2 2 1.414-1.414-2-2-1.414 1.414zm3.414 2l4-4-1.414-1.414-4 4 1.414 1.414z" />
+                                </svg>
+                              </span>
+                            </>
+                          )}
+                        </span>
+                      </button>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <Link 

@@ -225,6 +225,7 @@ def create_attraction(
     return attraction
 
 @router.put("/{attraction_id}", response_model=AttractionResponse)
+@router.patch("/{attraction_id}", response_model=AttractionResponse)
 def update_attraction(
     *,
     db: Session = Depends(get_db),

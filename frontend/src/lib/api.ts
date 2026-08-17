@@ -276,6 +276,7 @@ export const endpoints = {
     create: () => '/attractions/',
     detail: (id: number) => `/attractions/${id}`,
     update: (id: number) => `/attractions/${id}`,
+    patch: (id: number) => `/attractions/${id}`,
     delete: (id: number) => `/attractions/${id}`,
     bySlug: (slug: string) => `/attractions/slug/${slug}`,
     byCountry: (countryId: number) => `/attractions/?country_id=${countryId}`,

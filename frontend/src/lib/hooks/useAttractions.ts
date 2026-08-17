@@ -235,6 +235,26 @@ export const useUpdateAttraction = () => {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['attractions'] });
+      queryClient.invalidateQueries({ queryKey: ['trending-attractions'] });
+      queryClient.invalidateQueries({ queryKey: ['countries-with-attractions'] });
+      queryClient.invalidateQueries({ queryKey: ['attractions', variables.id] });
+    },
+  });
+};
+
+// Hook for patching attraction fields (e.g., is_featured, is_active)
+export const usePatchAttraction = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: AttractionUpdateInput }) => {
+      const response = await apiClient.patch(`/attractions/${id}`, data);
+      return response;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['attractions'] });
+      queryClient.invalidateQueries({ queryKey: ['trending-attractions'] });
+      queryClient.invalidateQueries({ queryKey: ['countries-with-attractions'] });
       queryClient.invalidateQueries({ queryKey: ['attractions', variables.id] });
     },
   });

@@ -15,6 +15,15 @@ const PackagesListPage: React.FC = () => {
   const deletePackage = useDeletePackage();
   const patchPackage = usePatchPackage();
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [packageTypeModal, setPackageTypeModal] = useState<{
+    isOpen: boolean;
+    packageItem: any | null;
+    selectedType: 'safari' | 'holiday';
+  }>({
+    isOpen: false,
+    packageItem: null,
+    selectedType: 'safari',
+  });
 
   // Filter packages based on search query
   const filteredPackages = packages?.filter(pkg =>
@@ -199,15 +208,38 @@ const PackagesListPage: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {pkg.package_type === 'holiday' ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal/15 text-teal border border-teal/30">
-                          🏖️ Holiday
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
-                          🦁 Safari
-                        </span>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPackageTypeModal({
+                            isOpen: true,
+                            packageItem: pkg,
+                            selectedType: (pkg.package_type as 'safari' | 'holiday') || 'safari',
+                          })
+                        }
+                        title="Click to change package category"
+                        className={`group inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150 hover:scale-105 active:scale-95 shadow-xs cursor-pointer ${
+                          pkg.package_type === 'holiday'
+                            ? 'bg-teal/15 text-teal border border-teal/30 hover:bg-teal hover:text-white'
+                            : 'bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-600 hover:text-white'
+                        }`}
+                      >
+                        <span>{pkg.package_type === 'holiday' ? '🏖️' : '🦁'}</span>
+                        <span>{pkg.package_type === 'holiday' ? 'Holiday' : 'Safari'}</span>
+                        <svg
+                          className="w-3 h-3 opacity-60 group-hover:opacity-100 transition-opacity ml-0.5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                          />
+                        </svg>
+                      </button>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">{pkg.country?.name}</div>
@@ -405,6 +437,141 @@ const PackagesListPage: React.FC = () => {
                 disabled={deletePackage.isPending}
               >
                 {deletePackage.isPending ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change Package Type Popup Modal */}
+      {packageTypeModal.isOpen && packageTypeModal.packageItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 transform transition-all">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h4 className="text-lg font-bold text-gray-900">Change Package Type</h4>
+                <p className="text-xs text-gray-500 mt-0.5 truncate max-w-xs font-medium">
+                  {packageTypeModal.packageItem.name}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPackageTypeModal({ isOpen: false, packageItem: null, selectedType: 'safari' })}
+                className="text-gray-400 hover:text-gray-600 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <p className="text-xs sm:text-sm text-gray-600 mb-5">
+              Select which section on the website this package should appear under:
+            </p>
+
+            <div className="space-y-3 mb-6">
+              {/* Safari option */}
+              <div
+                onClick={() => setPackageTypeModal(prev => ({ ...prev, selectedType: 'safari' }))}
+                className={`cursor-pointer rounded-xl border-2 p-4 flex items-start space-x-3 transition-all duration-150 ${
+                  packageTypeModal.selectedType === 'safari'
+                    ? 'border-amber-600 bg-amber-50/80 shadow-sm ring-1 ring-amber-600/30'
+                    : 'border-gray-200 bg-white hover:border-amber-300 hover:bg-amber-50/30'
+                }`}
+              >
+                <input
+                  type="radio"
+                  id="modal_type_safari"
+                  name="modal_package_type"
+                  checked={packageTypeModal.selectedType === 'safari'}
+                  onChange={() => setPackageTypeModal(prev => ({ ...prev, selectedType: 'safari' }))}
+                  className="h-4 w-4 text-amber-600 border-gray-300 focus:ring-amber-500 mt-1"
+                />
+                <div className="flex-1">
+                  <label htmlFor="modal_type_safari" className="font-bold text-gray-900 cursor-pointer flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 text-sm">
+                      <span>🦁</span>
+                      <span>Popular Safari Packages</span>
+                    </span>
+                    {packageTypeModal.selectedType === 'safari' && (
+                      <span className="text-xs bg-amber-600 text-white font-semibold px-2 py-0.5 rounded-full">Selected</span>
+                    )}
+                  </label>
+                  <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                    Wildlife tours, game drives, wilderness lodges, and bush adventures (e.g. Kenya, Uganda, Tanzania).
+                  </p>
+                </div>
+              </div>
+
+              {/* Holiday option */}
+              <div
+                onClick={() => setPackageTypeModal(prev => ({ ...prev, selectedType: 'holiday' }))}
+                className={`cursor-pointer rounded-xl border-2 p-4 flex items-start space-x-3 transition-all duration-150 ${
+                  packageTypeModal.selectedType === 'holiday'
+                    ? 'border-teal bg-teal/10 shadow-sm ring-1 ring-teal/30'
+                    : 'border-gray-200 bg-white hover:border-teal-light hover:bg-teal/5'
+                }`}
+              >
+                <input
+                  type="radio"
+                  id="modal_type_holiday"
+                  name="modal_package_type"
+                  checked={packageTypeModal.selectedType === 'holiday'}
+                  onChange={() => setPackageTypeModal(prev => ({ ...prev, selectedType: 'holiday' }))}
+                  className="h-4 w-4 text-teal border-gray-300 focus:ring-teal mt-1"
+                />
+                <div className="flex-1">
+                  <label htmlFor="modal_type_holiday" className="font-bold text-gray-900 cursor-pointer flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 text-sm">
+                      <span>🏖️</span>
+                      <span>Popular Holiday Packages</span>
+                    </span>
+                    {packageTypeModal.selectedType === 'holiday' && (
+                      <span className="text-xs bg-teal text-white font-semibold px-2 py-0.5 rounded-full">Selected</span>
+                    )}
+                  </label>
+                  <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                    Leisure, beach getaways, city tours, island breaks, and international vacation packages (e.g. Dubai, Zanzibar, Mauritius, Egypt).
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => setPackageTypeModal({ isOpen: false, packageItem: null, selectedType: 'safari' })}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={patchPackage.isPending}
+                onClick={async () => {
+                  if (packageTypeModal.packageItem) {
+                    try {
+                      await patchPackage.mutateAsync({
+                        id: packageTypeModal.packageItem.id,
+                        data: { package_type: packageTypeModal.selectedType }
+                      });
+                      setPackageTypeModal({ isOpen: false, packageItem: null, selectedType: 'safari' });
+                    } catch (err) {
+                      console.error('Failed to update package type:', err);
+                      alert('Failed to update package type. Please try again.');
+                    }
+                  }
+                }}
+                className="px-5 py-2 text-sm font-bold text-white bg-teal hover:bg-teal-dark rounded-lg transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50"
+              >
+                {patchPackage.isPending ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Updating...</span>
+                  </>
+                ) : (
+                  <span>Save Changes</span>
+                )}
               </button>
             </div>
           </div>

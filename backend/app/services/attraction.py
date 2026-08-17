@@ -19,6 +19,7 @@ class AttractionService:
         country: Optional[str] = None,
         category: Optional[str] = None,
         tag: Optional[str] = None,
+        featured: Optional[bool] = None,
     ) -> List[Attraction]:
         """
         Retrieve all attractions with pagination ordered by newest first.
@@ -28,6 +29,9 @@ class AttractionService:
             .options(joinedload(Attraction.country), joinedload(Attraction.activities), joinedload(Attraction.tags))
             .filter(Attraction.is_active == True)
         )
+
+        if featured is not None:
+            query = query.filter(Attraction.is_featured == featured)
 
         if search:
             normalized = f"%{search.strip().lower()}%"
@@ -206,6 +210,7 @@ class AttractionService:
             price=attraction_create.price,
             opening_hours=attraction_create.opening_hours,
             image_id=attraction_create.image_id,
+            is_featured=getattr(attraction_create, 'is_featured', False) or False,
             slug=slug,
         )
         db.add(db_attraction)

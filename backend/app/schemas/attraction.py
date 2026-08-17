@@ -63,6 +63,7 @@ class AttractionBase(BaseModel):
 # Schema for creating a new Attraction
 class AttractionCreate(AttractionBase):
     cover_image: Optional[str] = Field(None, description="Cover image file path")
+    is_featured: Optional[bool] = Field(False, description="Whether the attraction is featured")
     tag_ids: Optional[List[int]] = Field(None, description="List of tag IDs associated with the attraction")
 
 # Schema for updating an Attraction
@@ -81,6 +82,7 @@ class AttractionUpdate(BaseModel):
     image_id: Optional[str] = Field(None, description="Cloudflare Image ID for the attraction's primary image")
     cover_image: Optional[str] = Field(None, description="Cover image file path")
     is_active: Optional[bool] = Field(None, description="Whether the attraction is active")
+    is_featured: Optional[bool] = Field(None, description="Whether the attraction is featured")
     tag_ids: Optional[List[int]] = Field(None, description="List of tag IDs associated with the attraction")
 
 # Schema for Attraction response
@@ -88,6 +90,7 @@ class AttractionResponse(AttractionBase):
     id: int
     slug: str = Field(..., description="URL-friendly slug for the attraction", example="maasai-mara")
     is_active: bool = Field(..., description="Whether the attraction is active")
+    is_featured: bool = Field(False, description="Whether the attraction is featured")
     created_at: datetime
     updated_at: datetime
     cover_image: Optional[str] = Field(None, description="Cover image URL")

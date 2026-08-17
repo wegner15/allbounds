@@ -2,12 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient, endpoints } from '../../../lib/api';
 import type { Hotel, Country } from '../../../lib/types/api';
 
-// Fetch countries that have hotels
-export const useCountriesWithHotels = () => {
+// Fetch countries that have hotels (optionally featured only)
+export const useCountriesWithHotels = (featured?: boolean) => {
   return useQuery<Country[], Error>({
-    queryKey: ['countries-with-hotels'],
+    queryKey: ['countries-with-hotels', featured],
     queryFn: async () => {
-      const response = await apiClient.get<Country[]>(endpoints.countries.withHotels());
+      const response = await apiClient.get<Country[]>(endpoints.countries.withHotels(featured));
       return response;
     },
   });
@@ -24,23 +24,23 @@ export const useCountriesWithPackages = (packageType?: string, featured?: boolea
   });
 };
 
-// Fetch countries that have activities
-export const useCountriesWithActivities = () => {
+// Fetch countries that have activities (optionally featured only)
+export const useCountriesWithActivities = (featured?: boolean) => {
   return useQuery<Country[], Error>({
-    queryKey: ['countries-with-activities'],
+    queryKey: ['countries-with-activities', featured],
     queryFn: async () => {
-      const response = await apiClient.get<Country[]>(endpoints.countries.withActivities());
+      const response = await apiClient.get<Country[]>(endpoints.countries.withActivities(featured));
       return response;
     },
   });
 };
 
-// Fetch countries that have attractions
-export const useCountriesWithAttractions = () => {
+// Fetch countries that have attractions (optionally featured only)
+export const useCountriesWithAttractions = (featured?: boolean) => {
   return useQuery<Country[], Error>({
-    queryKey: ['countries-with-attractions'],
+    queryKey: ['countries-with-attractions', featured],
     queryFn: async () => {
-      const response = await apiClient.get<Country[]>(endpoints.countries.withAttractions());
+      const response = await apiClient.get<Country[]>(endpoints.countries.withAttractions(featured));
       return response;
     },
   });

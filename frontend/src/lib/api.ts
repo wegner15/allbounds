@@ -160,7 +160,7 @@ export const endpoints = {
   countries: {
     list: () => '/countries/',
     create: () => '/countries/',
-    withHotels: () => '/countries/with-hotels',
+    withHotels: (featured?: boolean) => featured ? '/countries/with-hotels?featured=true' : '/countries/with-hotels',
     withPackages: (packageType?: string, featured?: boolean) => {
       const params = new URLSearchParams();
       if (packageType) params.append('package_type', packageType);
@@ -168,8 +168,8 @@ export const endpoints = {
       const qs = params.toString();
       return qs ? `/countries/with-packages?${qs}` : '/countries/with-packages';
     },
-    withActivities: () => '/countries/with-activities',
-    withAttractions: () => '/countries/with-attractions',
+    withActivities: (featured?: boolean) => featured ? '/countries/with-activities?featured=true' : '/countries/with-activities',
+    withAttractions: (featured?: boolean) => featured ? '/countries/with-attractions?featured=true' : '/countries/with-attractions',
     byId: (id: number) => `/countries/${id}`,
     update: (id: number) => `/countries/${id}`,
     delete: (id: number) => `/countries/${id}`,
@@ -272,6 +272,7 @@ export const endpoints = {
   // Attractions
   attractions: {
     list: () => '/attractions/',
+    featured: () => '/attractions/featured',
     create: () => '/attractions/',
     detail: (id: number) => `/attractions/${id}`,
     update: (id: number) => `/attractions/${id}`,

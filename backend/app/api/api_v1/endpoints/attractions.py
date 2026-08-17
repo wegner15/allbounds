@@ -77,9 +77,10 @@ def get_attractions(
     category: Optional[str] = Query(None, description="Filter by attraction category"),
     tag: Optional[str] = Query(None, description="Filter by tag slug"),
     country_id: int = Query(None, description="Filter by country ID"),
+    featured: Optional[bool] = Query(None, description="Filter by featured status"),
 ) -> Any:
     """
-    Retrieve all attractions optionally filtered by search, country, and category.
+    Retrieve all attractions optionally filtered by search, country, category, and featured status.
     """
     if country_id:
         attractions = attraction_service.get_attractions_by_country(db, country_id=country_id, skip=skip, limit=limit)
@@ -92,8 +93,30 @@ def get_attractions(
             country=country,
             category=category,
             tag=tag,
+            featured=featured,
         )
     # CRITICAL: Serialize to Pydantic to prevent lazy-loading
+    return [AttractionResponse.from_orm(attraction) for attraction in attractions]
+
+@router.get("/featured", response_model=List[AttractionResponse])
+def get_featured_attractions(
+    db: Session = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+    country: Optional[str] = Query(None, description="Filter by country slug or name"),
+    tag: Optional[str] = Query(None, description="Filter by tag slug"),
+) -> Any:
+    """
+    Retrieve featured attractions, optionally filtered by country.
+    """
+    attractions = attraction_service.get_attractions(
+        db,
+        skip=skip,
+        limit=limit,
+        country=country,
+        tag=tag,
+        featured=True,
+    )
     return [AttractionResponse.from_orm(attraction) for attraction in attractions]
 
 @router.get("/country/{country_id}", response_model=List[AttractionResponse])

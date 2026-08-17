@@ -95,11 +95,12 @@ def get_countries_with_hotels(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
+    featured: bool = Query(False, description="Filter to countries with featured hotels"),
 ) -> Any:
     """
-    Retrieve countries that have active hotels.
+    Retrieve countries that have active hotels, optionally filtered by featured status.
     """
-    countries = country_service.get_countries_with_hotels(db, skip=skip, limit=limit)
+    countries = country_service.get_countries_with_hotels(db, skip=skip, limit=limit, featured_only=featured)
     return [CountryWithRegionResponse.from_orm(country) for country in countries]
 
 @router.get("/with-packages", response_model=List[CountryWithRegionResponse])
@@ -121,11 +122,12 @@ def get_countries_with_activities(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
+    featured: bool = Query(False, description="Filter to countries with featured activities"),
 ) -> Any:
     """
-    Retrieve countries that have active activities.
+    Retrieve countries that have active activities, optionally filtered by featured status.
     """
-    countries = country_service.get_countries_with_activities(db, skip=skip, limit=limit)
+    countries = country_service.get_countries_with_activities(db, skip=skip, limit=limit, featured_only=featured)
     return [CountryWithRegionResponse.from_orm(country) for country in countries]
 
 @router.get("/with-attractions", response_model=List[CountryWithRegionResponse])
@@ -133,11 +135,12 @@ def get_countries_with_attractions(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
+    featured: bool = Query(False, description="Filter to countries with featured attractions"),
 ) -> Any:
     """
-    Retrieve countries that have active attractions.
+    Retrieve countries that have active attractions, optionally filtered by featured status.
     """
-    countries = country_service.get_countries_with_attractions(db, skip=skip, limit=limit)
+    countries = country_service.get_countries_with_attractions(db, skip=skip, limit=limit, featured_only=featured)
     return [CountryWithRegionResponse.from_orm(country) for country in countries]
 
 @router.get("/{country_id}", response_model=CountryWithRegionResponse)

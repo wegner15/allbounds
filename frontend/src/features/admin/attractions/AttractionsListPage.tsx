@@ -175,10 +175,17 @@ const AttractionsListPage: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        ${attraction.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                        {attraction.is_active ? 'Active' : 'Inactive'}
-                      </span>
+                      <div className="flex flex-col gap-1 items-start">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                          ${attraction.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                          {attraction.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                        {attraction.is_featured && (
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">
+                            ★ Featured
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <Link 

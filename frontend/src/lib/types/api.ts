@@ -207,6 +207,7 @@ export interface Attraction extends BaseModel {
   image_id?: string;
   cover_image?: string;
   is_active: boolean;
+  is_featured?: boolean;
   location?: string;
   entry_fee?: number;
   opening_hours?: string;

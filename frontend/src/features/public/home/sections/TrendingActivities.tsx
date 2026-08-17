@@ -5,7 +5,7 @@ import { useTrendingActivities } from '../../hooks/useTrendingActivities';
 import { useCountriesWithActivities } from '../../hooks/useRecommendedHotels';
 
 const TrendingActivities: React.FC = () => {
-  const { data: availableCountries, isLoading: countriesLoading } = useCountriesWithActivities();
+  const { data: availableCountries, isLoading: countriesLoading } = useCountriesWithActivities(true);
   const locations = availableCountries?.map(country => country.name) || [];
   const [activeTab, setActiveTab] = useState<string>('');
 

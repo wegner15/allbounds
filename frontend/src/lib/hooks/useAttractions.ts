@@ -54,6 +54,7 @@ export interface Attraction {
   }>;
   tag_ids?: number[];
   is_active: boolean;
+  is_featured?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -72,11 +73,13 @@ export interface AttractionCreateInput {
   opening_hours?: string;
   image_id?: string;
   cover_image?: string;
+  is_featured?: boolean;
   tag_ids?: number[];
 }
 
 export interface AttractionUpdateInput extends Partial<AttractionCreateInput> {
   is_active?: boolean;
+  is_featured?: boolean;
 }
 
 export interface AttractionRelationships {

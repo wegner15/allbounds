@@ -6,7 +6,7 @@ import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../../utils/image
 import DOMPurify from 'dompurify';
 
 const RecommendedHotels: React.FC = () => {
-  const { data: countries, isLoading: countriesLoading } = useCountriesWithHotels();
+  const { data: countries, isLoading: countriesLoading } = useCountriesWithHotels(true);
   const [activeTab, setActiveTab] = useState<string>('');
 
   // Set the first country as active when countries are loaded

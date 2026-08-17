@@ -21,10 +21,11 @@ const AttractionForm: React.FC<AttractionFormProps> = ({ initialData, onSubmit, 
   const { data: countries } = useCountries();
   const { data: allTags = [] } = useContentTags();
   
-  const [formData, setFormData] = useState<AttractionCreateInput & { is_active?: boolean }>({
+  const [formData, setFormData] = useState<AttractionCreateInput & { is_active?: boolean; is_featured?: boolean }>({
     name: '',
     country_id: 0,
     is_active: true,
+    is_featured: false,
     tag_ids: [],
   });
   
@@ -337,16 +338,29 @@ const AttractionForm: React.FC<AttractionFormProps> = ({ initialData, onSubmit, 
         />
       </div>
 
-      {/* Status */}
-      {initialData && (
-        <div>
-          <h2 className="text-lg font-semibold mb-4">Status</h2>
+      {/* Status & Visibility */}
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold">Status & Visibility</h2>
+        <div className="space-y-3">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="is_featured"
+              name="is_featured"
+              checked={formData.is_featured === true}
+              onChange={handleCheckboxChange}
+              className="h-4 w-4 text-teal focus:ring-teal border-gray-300 rounded"
+            />
+            <label htmlFor="is_featured" className="ml-2 block text-sm font-medium text-gray-700">
+              Featured Attraction (showcases on homepage and featured sections)
+            </label>
+          </div>
           <div className="flex items-center">
             <input
               type="checkbox"
               id="is_active"
               name="is_active"
-              checked={formData.is_active === true}
+              checked={formData.is_active !== false}
               onChange={handleCheckboxChange}
               className="h-4 w-4 text-teal focus:ring-teal border-gray-300 rounded"
             />
@@ -354,11 +368,11 @@ const AttractionForm: React.FC<AttractionFormProps> = ({ initialData, onSubmit, 
               Active (visible to public)
             </label>
           </div>
-          <p className="mt-1 text-sm text-gray-500">
-            Inactive attractions won't appear in public listings or search results
-          </p>
         </div>
-      )}
+        <p className="text-sm text-gray-500">
+          Inactive attractions won't appear in public listings or search results.
+        </p>
+      </div>
 
       {/* Form Actions */}
       <div className="flex justify-end space-x-4 mt-8">

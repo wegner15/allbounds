@@ -78,16 +78,19 @@ class CountryService:
             Country.is_active == True
         ).offset(skip).limit(limit).all()
 
-    def get_countries_with_hotels(self, db: Session, skip: int = 0, limit: int = 100) -> List[Country]:
+    def get_countries_with_hotels(self, db: Session, skip: int = 0, limit: int = 100, featured_only: bool = False) -> List[Country]:
         """
-        Retrieve countries that have active hotels.
+        Retrieve countries that have active hotels, optionally filtered by featured_only.
         """
         from app.models.hotel import Hotel
 
-        return db.query(Country).join(Hotel).filter(
+        query = db.query(Country).join(Hotel).filter(
             Country.is_active == True,
             Hotel.is_active == True
-        ).group_by(Country.id).offset(skip).limit(limit).all()
+        )
+        if featured_only:
+            query = query.filter(Hotel.is_featured == True)
+        return query.group_by(Country.id).offset(skip).limit(limit).all()
 
     def get_countries_with_packages(self, db: Session, skip: int = 0, limit: int = 100, package_type: Optional[str] = None, featured_only: bool = False) -> List[Country]:
         """
@@ -106,32 +109,37 @@ class CountryService:
             
         return query.group_by(Country.id).offset(skip).limit(limit).all()
 
-    def get_countries_with_activities(self, db: Session, skip: int = 0, limit: int = 100) -> List[Country]:
+    def get_countries_with_activities(self, db: Session, skip: int = 0, limit: int = 100, featured_only: bool = False) -> List[Country]:
         """
-        Retrieve countries that have active and featured activities.
+        Retrieve countries that have active activities, optionally filtered by featured_only.
         """
         from app.models.activity import Activity
 
-        return db.query(Country).join(
+        query = db.query(Country).join(
             Country.activities
         ).filter(
             Country.is_active == True,
-            Activity.is_active == True,
-            Activity.is_featured == True
-        ).group_by(Country.id).offset(skip).limit(limit).all()
+            Activity.is_active == True
+        )
+        if featured_only:
+            query = query.filter(Activity.is_featured == True)
+        return query.group_by(Country.id).offset(skip).limit(limit).all()
 
-    def get_countries_with_attractions(self, db: Session, skip: int = 0, limit: int = 100) -> List[Country]:
+    def get_countries_with_attractions(self, db: Session, skip: int = 0, limit: int = 100, featured_only: bool = False) -> List[Country]:
         """
-        Retrieve countries that have active attractions.
+        Retrieve countries that have active attractions, optionally filtered by featured_only.
         """
         from app.models.attraction import Attraction
 
-        return db.query(Country).join(
+        query = db.query(Country).join(
             Country.attractions
         ).filter(
             Country.is_active == True,
             Attraction.is_active == True
-        ).group_by(Country.id).offset(skip).limit(limit).all()
+        )
+        if featured_only:
+            query = query.filter(Attraction.is_featured == True)
+        return query.group_by(Country.id).offset(skip).limit(limit).all()
 
     def get_countries_by_holiday_type(self, db: Session, holiday_type_slug: str, skip: int = 0, limit: int = 100) -> List[Country]:
         """

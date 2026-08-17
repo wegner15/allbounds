@@ -5,7 +5,7 @@ import { useCountriesWithAttractions } from '../../hooks/useRecommendedHotels';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../../utils/imageUtils';
 
 const TrendingAttractions: React.FC = () => {
-  const { data: availableCountries, isLoading: countriesLoading } = useCountriesWithAttractions();
+  const { data: availableCountries, isLoading: countriesLoading } = useCountriesWithAttractions(true);
   const locations = availableCountries?.map(country => country.name) || [];
   const [activeTab, setActiveTab] = useState<string>('');
 

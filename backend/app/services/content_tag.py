@@ -27,6 +27,52 @@ class ContentTagService:
         
         items = query.offset(skip).limit(limit).all()
         return items, total
+
+    def get_paginated_tags(
+        self,
+        db: Session,
+        page: int = 1,
+        limit: int = 10,
+        search: Optional[str] = None,
+        category: Optional[str] = None,
+        include_inactive: bool = True,
+        order_by: str = "order_index",
+        order: str = "asc",
+    ) -> tuple[List[Tag], int]:
+        """
+        Retrieve paginated tags with search and category filtering for admin list.
+        """
+        query = db.query(Tag)
+
+        if not include_inactive:
+            query = query.filter(Tag.is_active == True)
+
+        if category and category != "all":
+            query = query.filter(Tag.category == category)
+
+        if search and search.strip():
+            term = f"%{search.strip()}%"
+            query = query.filter(
+                or_(
+                    Tag.name.ilike(term),
+                    Tag.slug.ilike(term),
+                    Tag.description.ilike(term),
+                )
+            )
+
+        total = query.count()
+
+        if order_by == "name":
+            query = query.order_by(Tag.name.desc() if order == "desc" else Tag.name.asc())
+        elif order_by == "created_at":
+            query = query.order_by(Tag.created_at.desc() if order == "desc" else Tag.created_at.asc())
+        else:
+            query = query.order_by(Tag.order_index.asc(), Tag.created_at.desc())
+
+        skip = (page - 1) * limit if page > 0 else 0
+        items = query.offset(skip).limit(limit).all()
+
+        return items, total
     
     def get_tag(self, db: Session, tag_id: int) -> Optional[Tag]:
         """

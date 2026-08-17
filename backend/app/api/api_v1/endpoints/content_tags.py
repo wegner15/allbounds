@@ -1,18 +1,58 @@
 from typing import Any, List, Optional
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.schemas.content_tag import ContentTagCreate, ContentTagUpdate, ContentTagResponse
+from app.schemas.content_tag import (
+    ContentTagCreate,
+    ContentTagUpdate,
+    ContentTagResponse,
+    PaginatedContentTagResponse,
+)
 from app.services.content_tag import content_tag_service
 
 router = APIRouter()
+
+@router.get("/paginated", response_model=PaginatedContentTagResponse)
+def read_paginated_tags(
+    db: Session = Depends(get_db),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(10, ge=1, le=100, description="Items per page"),
+    search: Optional[str] = Query(None, description="Search term for tag name, slug or description"),
+    category: Optional[str] = Query(None, description="Filter by category"),
+    include_inactive: bool = Query(True, description="Include inactive tags"),
+    order_by: str = Query("order_index", description="Field to order by"),
+    order: str = Query("asc", description="Order direction (asc/desc)"),
+) -> Any:
+    """
+    Retrieve paginated tags for admin list view.
+    """
+    import math
+    items, total = content_tag_service.get_paginated_tags(
+        db=db,
+        page=page,
+        limit=limit,
+        search=search,
+        category=category,
+        include_inactive=include_inactive,
+        order_by=order_by,
+        order=order,
+    )
+    pages = math.ceil(total / limit) if limit > 0 else 0
+
+    return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "size": limit,
+        "pages": pages,
+    }
 
 @router.get("/", response_model=List[ContentTagResponse])
 def read_tags(
     db: Session = Depends(get_db),
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 1000,
     category: Optional[str] = None,
     include_inactive: bool = False
 ) -> Any:

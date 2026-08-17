@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import Button from '../../../components/ui/Button';
 import {
   useContentTags,
+  usePaginatedContentTags,
   useCreateContentTag,
   useUpdateContentTag,
   useDeleteContentTag,
@@ -58,6 +59,9 @@ const TagsListPage: React.FC = () => {
   const [includeInactive, setIncludeInactive] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
   // Modals state
   const [isTagModalOpen, setIsTagModalOpen] = useState(false);
@@ -92,6 +96,15 @@ const TagsListPage: React.FC = () => {
     }
   });
 
+  // Debounce search query
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
   // Form state for Tag Modal
   const [formData, setFormData] = useState<{
     name: string;
@@ -116,9 +129,22 @@ const TagsListPage: React.FC = () => {
   });
 
   // Queries & Mutations
-  const { data: tags = [], isLoading, error } = useContentTags({
+  const { data: allTags = [] } = useContentTags({
     include_inactive: includeInactive,
   });
+
+  const { data: paginatedData, isLoading, error } = usePaginatedContentTags({
+    page,
+    limit,
+    search: debouncedSearch || undefined,
+    category: selectedCategory !== 'all' ? selectedCategory : undefined,
+    include_inactive: includeInactive,
+  });
+
+  const tags = paginatedData?.items || [];
+  const total = paginatedData?.total || 0;
+  const totalPages = paginatedData?.pages || 0;
+
   const createTagMutation = useCreateContentTag();
   const updateTagMutation = useUpdateContentTag();
   const deleteTagMutation = useDeleteContentTag();
@@ -143,30 +169,14 @@ const TagsListPage: React.FC = () => {
     });
 
     // 3. Add categories present on tags
-    tags.forEach((t) => {
+    allTags.forEach((t) => {
       if (t.category && !deletedCategories.includes(t.category)) {
         set.add(t.category);
       }
     });
 
     return Array.from(set).sort();
-  }, [tags, customCategories, deletedCategories, categoryRenames]);
-
-  // Filtered tags based on search and category
-  const filteredTags = useMemo(() => {
-    return tags.filter((tag) => {
-      const matchesSearch =
-        !searchQuery ||
-        tag.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        tag.slug.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (tag.description && tag.description.toLowerCase().includes(searchQuery.toLowerCase()));
-
-      const matchesCategory =
-        selectedCategory === 'all' || tag.category === selectedCategory;
-
-      return matchesSearch && matchesCategory;
-    });
-  }, [tags, searchQuery, selectedCategory]);
+  }, [allTags, customCategories, deletedCategories, categoryRenames]);
 
   // Open modal to create a tag
   const handleOpenCreateModal = () => {
@@ -216,6 +226,12 @@ const TagsListPage: React.FC = () => {
       name,
       slug: editingTag ? prev.slug : generatedSlug,
     }));
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+    }
   };
 
   // Handle Save Tag
@@ -317,7 +333,7 @@ const TagsListPage: React.FC = () => {
       return;
     }
 
-    const affectedTags = tags.filter((t) => t.category === oldName);
+    const affectedTags = allTags.filter((t) => t.category === oldName);
 
     try {
       if (affectedTags.length > 0) {
@@ -359,7 +375,7 @@ const TagsListPage: React.FC = () => {
 
   // Delete Category
   const handleDeleteCategory = async (cat: string) => {
-    const affectedTags = tags.filter((t) => t.category === cat);
+    const affectedTags = allTags.filter((t) => t.category === cat);
 
     if (affectedTags.length > 0) {
       if (
@@ -447,7 +463,7 @@ const TagsListPage: React.FC = () => {
       {/* Category Overview Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
         <button
-          onClick={() => setSelectedCategory('all')}
+          onClick={() => { setSelectedCategory('all'); setPage(1); }}
           className={`p-3 rounded-lg border text-left transition-all ${
             selectedCategory === 'all'
               ? 'bg-teal text-white border-teal shadow'
@@ -455,16 +471,16 @@ const TagsListPage: React.FC = () => {
           }`}
         >
           <div className="text-xs uppercase tracking-wider font-semibold opacity-80">All Tags</div>
-          <div className="text-xl font-bold mt-1">{tags.length}</div>
+          <div className="text-xl font-bold mt-1">{allTags.length}</div>
         </button>
 
         {categories.map((cat) => {
-          const count = tags.filter((t) => t.category === cat).length;
+          const count = allTags.filter((t) => t.category === cat).length;
           const isSelected = selectedCategory === cat;
           return (
             <button
               key={cat}
-              onClick={() => setSelectedCategory(cat)}
+              onClick={() => { setSelectedCategory(cat); setPage(1); }}
               className={`p-3 rounded-lg border text-left transition-all ${
                 isSelected
                   ? 'bg-teal text-white border-teal shadow'
@@ -498,7 +514,7 @@ const TagsListPage: React.FC = () => {
             <input
               type="checkbox"
               checked={includeInactive}
-              onChange={(e) => setIncludeInactive(e.target.checked)}
+              onChange={(e) => { setIncludeInactive(e.target.checked); setPage(1); }}
               className="mr-2 rounded border-gray-300 text-teal focus:ring-teal"
             />
             Include Inactive
@@ -517,7 +533,7 @@ const TagsListPage: React.FC = () => {
           <div className="p-8 text-center bg-red-50 text-red-700 border-b border-red-200">
             Failed to load tags from server.
           </div>
-        ) : filteredTags.length === 0 ? (
+        ) : tags.length === 0 ? (
           <div className="p-12 text-center text-gray-500">
             <i className="fas fa-tags text-4xl text-gray-300 mb-3" />
             <p className="text-base font-medium">No tags found</p>
@@ -526,85 +542,195 @@ const TagsListPage: React.FC = () => {
             </p>
           </div>
         ) : (
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="py-3.5 pl-6 pr-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Tag Badge
-                </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Slug
-                </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Description
-                </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Order Index
-                </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th scope="col" className="relative py-3.5 pl-3 pr-6 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {filteredTags.map((tag) => (
-                <tr key={tag.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="whitespace-nowrap py-4 pl-6 pr-3 text-sm">
-                    {renderTagBadge(tag)}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-4 text-xs font-mono text-gray-600">
-                    {tag.slug}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-4 text-sm">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
-                      {tag.category || 'general'}
-                    </span>
-                  </td>
-                  <td className="px-3 py-4 text-sm text-gray-500 max-w-xs truncate">
-                    {tag.description || '-'}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 font-mono">
-                    {tag.order_index}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-4 text-sm">
-                    <span
-                      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
-                        tag.is_active
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}
-                    >
-                      {tag.is_active ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap py-4 pl-3 pr-6 text-right text-sm font-medium">
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleOpenEditModal(tag)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDeleteTag(tag.id, tag.name)}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </td>
+          <div>
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="py-3.5 pl-6 pr-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Tag Badge
+                  </th>
+                  <th scope="col" className="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Slug
+                  </th>
+                  <th scope="col" className="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Category
+                  </th>
+                  <th scope="col" className="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Description
+                  </th>
+                  <th scope="col" className="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Order Index
+                  </th>
+                  <th scope="col" className="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th scope="col" className="relative py-3.5 pl-3 pr-6 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-200 bg-white">
+                {tags.map((tag) => (
+                  <tr key={tag.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="whitespace-nowrap py-4 pl-6 pr-3 text-sm">
+                      {renderTagBadge(tag)}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 text-xs font-mono text-gray-600">
+                      {tag.slug}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                        {tag.category || 'general'}
+                      </span>
+                    </td>
+                    <td className="px-3 py-4 text-sm text-gray-500 max-w-xs truncate">
+                      {tag.description || '-'}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 font-mono">
+                      {tag.order_index}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm">
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
+                          tag.is_active
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}
+                      >
+                        {tag.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap py-4 pl-3 pr-6 text-right text-sm font-medium">
+                      <div className="flex justify-end space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpenEditModal(tag)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteTag(tag.id, tag.name)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Pagination Toolbar */}
+            {total > 0 && (
+              <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 rounded-b-lg">
+                <div className="flex-1 flex justify-between sm:hidden">
+                  <button
+                    onClick={() => handlePageChange(page - 1)}
+                    disabled={page <= 1}
+                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => handlePageChange(page + 1)}
+                    disabled={page >= totalPages}
+                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-4">
+                    <p className="text-sm text-gray-700">
+                      Showing <span className="font-semibold">{(page - 1) * limit + 1}</span> to{' '}
+                      <span className="font-semibold">{Math.min(page * limit, total)}</span> of{' '}
+                      <span className="font-semibold">{total}</span> tags
+                    </p>
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <span>Show</span>
+                      <select
+                        value={limit}
+                        onChange={(e) => {
+                          setLimit(Number(e.target.value));
+                          setPage(1);
+                        }}
+                        className="border border-gray-300 rounded-md py-1 px-2 text-sm bg-white focus:ring-teal focus:border-teal"
+                      >
+                        <option value={10}>10</option>
+                        <option value={25}>25</option>
+                        <option value={50}>50</option>
+                        <option value={100}>100</option>
+                      </select>
+                      <span>per page</span>
+                    </div>
+                  </div>
+                  <div>
+                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                      <button
+                        onClick={() => handlePageChange(page - 1)}
+                        disabled={page <= 1}
+                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <span className="sr-only">Previous</span>
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                        if (
+                          totalPages > 7 &&
+                          pageNum !== 1 &&
+                          pageNum !== totalPages &&
+                          Math.abs(page - pageNum) > 1
+                        ) {
+                          if (Math.abs(page - pageNum) === 2) {
+                            return (
+                              <span
+                                key={pageNum}
+                                className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
+                              >
+                                ...
+                              </span>
+                            );
+                          }
+                          return null;
+                        }
+
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => handlePageChange(pageNum)}
+                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                              page === pageNum
+                                ? 'z-10 bg-teal border-teal text-white font-bold'
+                                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+
+                      <button
+                        onClick={() => handlePageChange(page + 1)}
+                        disabled={page >= totalPages}
+                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <span className="sr-only">Next</span>
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         )}
       </div>
 

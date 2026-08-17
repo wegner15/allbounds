@@ -1,8 +1,36 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../api';
-import type { ContentTag, ContentTagCreate, ContentTagUpdate } from '../types/content-tag';
+import type { ContentTag, ContentTagCreate, ContentTagUpdate, PaginatedContentTagResponse } from '../types/content-tag';
 
 // ----- Queries -----
+
+/** Fetch paginated tags for Admin table */
+export const usePaginatedContentTags = (params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  category?: string;
+  include_inactive?: boolean;
+  order_by?: string;
+  order?: string;
+}) => {
+  const queryParams = new URLSearchParams();
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        queryParams.append(key, value.toString());
+      }
+    });
+  }
+
+  const queryString = queryParams.toString();
+  const endpoint = queryString ? `/tags/paginated?${queryString}` : '/tags/paginated';
+
+  return useQuery<PaginatedContentTagResponse>({
+    queryKey: ['contentTags', 'paginated', params],
+    queryFn: () => apiClient.get<PaginatedContentTagResponse>(endpoint),
+  });
+};
 
 /** Fetch all tags, optionally filtered by category or active status */
 export const useContentTags = (params?: {

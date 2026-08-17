@@ -44,3 +44,12 @@ export type TagCategory =
   | 'budget'
   | 'duration'
   | 'general';
+
+export interface PaginatedContentTagResponse {
+  items: ContentTag[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}
+

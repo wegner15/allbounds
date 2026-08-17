@@ -7,7 +7,8 @@ import HolidayByType from './home/sections/HolidayByType';
 import TopTrendingDestinations from './home/sections/TopTrendingDestinations';
 import ContactUsCard from './home/sections/ContactUsCard';
 import RecommendedHotels from './home/sections/RecommendedHotels';
-import PopularTrips from './home/sections/PopularTrips';
+import PopularSafariPackages from './home/sections/PopularSafariPackages';
+import PopularHolidayPackages from './home/sections/PopularHolidayPackages';
 import TrendingActivities from './home/sections/TrendingActivities';
 import TrendingAttractions from './home/sections/TrendingAttractions';
 import InspirationForNextTrip from './home/sections/InspirationForNextTrip';
@@ -31,7 +32,8 @@ const HomePage: React.FC = () => {
         <HolidayByType />
         <ContactUsCard />
         <RecommendedHotels />
-        <PopularTrips />
+        <PopularSafariPackages />
+        <PopularHolidayPackages />
         <TrendingActivities />
         <TrendingAttractions />
         <WhyChooseUs />

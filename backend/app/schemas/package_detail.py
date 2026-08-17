@@ -195,6 +195,7 @@ class PackageDetailResponse(BaseModel):
     image_id: Optional[str] = None
     is_active: bool
     is_featured: bool
+    package_type: str = "safari"
     created_at: datetime
     updated_at: datetime
     

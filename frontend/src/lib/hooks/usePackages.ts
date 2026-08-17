@@ -6,6 +6,7 @@ import type { Package, PackageWithGallery } from '../types/api';
 export const usePackages = (params?: {
   country_id?: number;
   holiday_type_id?: number;
+  package_type?: string;
   min_price?: number;
   max_price?: number;
   min_duration?: number;
@@ -37,11 +38,11 @@ export const usePackages = (params?: {
 };
 
 // Hook for fetching featured packages
-export const useFeaturedPackages = (limit: number = 10) => {
+export const useFeaturedPackages = (limit: number = 10, packageType?: string) => {
   return useQuery<Package[]>({
-    queryKey: ['packages', 'featured', limit],
+    queryKey: ['packages', 'featured', limit, packageType],
     queryFn: async () => {
-      return apiClient.get<Package[]>(`${endpoints.packages.featured()}?limit=${limit}`);
+      return apiClient.get<Package[]>(`${endpoints.packages.featured(packageType)}?limit=${limit}`);
     },
   });
 };

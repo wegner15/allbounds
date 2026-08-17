@@ -161,7 +161,7 @@ export const endpoints = {
     list: () => '/countries/',
     create: () => '/countries/',
     withHotels: () => '/countries/with-hotels',
-    withPackages: () => '/countries/with-packages',
+    withPackages: (packageType?: string) => packageType ? `/countries/with-packages?package_type=${packageType}` : '/countries/with-packages',
     withActivities: () => '/countries/with-activities',
     withAttractions: () => '/countries/with-attractions',
     byId: (id: number) => `/countries/${id}`,
@@ -179,7 +179,7 @@ export const endpoints = {
   packages: {
     list: () => '/packages/',
     create: () => '/packages/',
-    featured: () => '/packages/featured',
+    featured: (packageType?: string) => packageType ? `/packages/featured?package_type=${packageType}` : '/packages/featured',
     detail: (id: number) => `/packages/${id}`,
     update: (id: number) => `/packages/${id}`,
     patch: (id: number) => `/packages/${id}`,

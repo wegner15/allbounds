@@ -107,11 +107,12 @@ def get_countries_with_packages(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
+    package_type: str = Query(None, description="Filter by package type (safari or holiday)"),
 ) -> Any:
     """
-    Retrieve countries that have active packages.
+    Retrieve countries that have active packages, optionally filtered by package_type.
     """
-    countries = country_service.get_countries_with_packages(db, skip=skip, limit=limit)
+    countries = country_service.get_countries_with_packages(db, skip=skip, limit=limit, package_type=package_type)
     return [CountryWithRegionResponse.from_orm(country) for country in countries]
 
 @router.get("/with-activities", response_model=List[CountryWithRegionResponse])

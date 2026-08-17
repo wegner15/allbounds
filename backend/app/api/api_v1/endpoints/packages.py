@@ -34,6 +34,7 @@ def get_packages(
     country: str = Query(None, description="Filter by country name"),
     holiday_type: str = Query(None, description="Filter by holiday type slug"),
     tag: str = Query(None, description="Filter by tag slug"),
+    package_type: str = Query(None, description="Filter by package type (safari or holiday)"),
 ) -> Any:
     """
     Retrieve all packages with optional ordering and filtering.
@@ -47,22 +48,24 @@ def get_packages(
         holiday_type_obj = db.query(HolidayType).filter(HolidayType.slug == holiday_type, HolidayType.is_active == True).first()
         if holiday_type_obj:
             packages = package_service.get_packages_by_holiday_type(db, holiday_type_id=holiday_type_obj.id, skip=skip, limit=limit)
+            if package_type:
+                packages = [p for p in packages if getattr(p, 'package_type', None) == package_type]
         else:
             packages = []
     elif country_id:
-        packages = package_service.get_packages_by_country(db, country_id=country_id, skip=skip, limit=limit)
+        packages = package_service.get_packages_by_country(db, country_id=country_id, skip=skip, limit=limit, package_type=package_type)
     elif country:
         # Find country by name and get packages for that country
         from app.models.country import Country
         country_obj = db.query(Country).filter(Country.name == country, Country.is_active == True).first()
         if country_obj:
-            packages = package_service.get_packages_by_country(db, country_id=country_obj.id, skip=skip, limit=limit)
+            packages = package_service.get_packages_by_country(db, country_id=country_obj.id, skip=skip, limit=limit, package_type=package_type)
         else:
             packages = []
     elif popular:
-        packages = package_service.get_featured_packages(db, skip=skip, limit=limit, country=country, tag=tag)
+        packages = package_service.get_featured_packages(db, skip=skip, limit=limit, country=country, tag=tag, package_type=package_type)
     else:
-        packages = package_service.get_packages(db, skip=skip, limit=limit, order_by=order_by, order=order, tag=tag)
+        packages = package_service.get_packages(db, skip=skip, limit=limit, order_by=order_by, order=order, tag=tag, package_type=package_type)
     
     # CRITICAL: Serialize to Pydantic INSIDE endpoint to prevent lazy-loading
     return [PackageListResponse.from_orm(pkg) for pkg in packages]
@@ -74,11 +77,12 @@ def get_packages_by_country(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
+    package_type: str = Query(None, description="Filter packages by package type (safari or holiday)"),
 ) -> Any:
     """
     Retrieve packages by country ID.
     """
-    packages = package_service.get_packages_by_country(db, country_id=country_id, skip=skip, limit=limit)
+    packages = package_service.get_packages_by_country(db, country_id=country_id, skip=skip, limit=limit, package_type=package_type)
     # CRITICAL: Serialize to Pydantic INSIDE endpoint to prevent lazy-loading
     return [PackageWithCountryResponse.from_orm(pkg) for pkg in packages]
 
@@ -90,11 +94,12 @@ def get_featured_packages(
     limit: int = 100,
     country: str = Query(None, description="Filter featured packages by country name"),
     tag: str = Query(None, description="Filter featured packages by tag slug"),
+    package_type: str = Query(None, description="Filter featured packages by package type (safari or holiday)"),
 ) -> Any:
     """
-    Retrieve featured packages, optionally filtered by country.
+    Retrieve featured packages, optionally filtered by country or package_type.
     """
-    packages = package_service.get_featured_packages(db, skip=skip, limit=limit, country=country, tag=tag)
+    packages = package_service.get_featured_packages(db, skip=skip, limit=limit, country=country, tag=tag, package_type=package_type)
     # CRITICAL: Serialize to Pydantic INSIDE endpoint to prevent lazy-loading
     return [PackageWithCountryResponse.from_orm(pkg) for pkg in packages]
 

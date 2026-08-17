@@ -7,9 +7,11 @@ import CountryFilterSelect from '../../../components/ui/CountryFilterSelect';
 const PackagesListPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCountryId, setSelectedCountryId] = useState<number | undefined>(undefined);
-  const { data: packages, isLoading, error } = usePackages(
-    selectedCountryId ? { country_id: selectedCountryId } : undefined
-  );
+  const [selectedPackageType, setSelectedPackageType] = useState<'all' | 'safari' | 'holiday'>('all');
+  const { data: packages, isLoading, error } = usePackages({
+    ...(selectedCountryId ? { country_id: selectedCountryId } : {}),
+    ...(selectedPackageType !== 'all' ? { package_type: selectedPackageType } : {}),
+  });
   const deletePackage = useDeletePackage();
   const patchPackage = usePatchPackage();
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
@@ -43,7 +45,7 @@ const PackagesListPage: React.FC = () => {
         <div>
           <h3 className="text-lg leading-6 font-medium text-gray-900">All Packages</h3>
           <p className="mt-1 text-sm text-gray-500">
-            Manage your vacation packages
+            Manage your vacation and safari packages
           </p>
         </div>
         <div className="mt-4 sm:mt-0">
@@ -57,6 +59,45 @@ const PackagesListPage: React.FC = () => {
             Add Package
           </Link>
         </div>
+      </div>
+
+      {/* Package Type Category Filter Tabs */}
+      <div className="flex items-center space-x-2 mb-4 bg-gray-100 p-1.5 rounded-lg w-fit">
+        <button
+          type="button"
+          onClick={() => setSelectedPackageType('all')}
+          className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+            selectedPackageType === 'all'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          All Packages
+        </button>
+        <button
+          type="button"
+          onClick={() => setSelectedPackageType('safari')}
+          className={`px-4 py-2 text-sm font-medium rounded-md flex items-center space-x-1.5 transition-all ${
+            selectedPackageType === 'safari'
+              ? 'bg-amber-600 text-white shadow-sm'
+              : 'text-gray-600 hover:text-amber-800'
+          }`}
+        >
+          <span>🦁</span>
+          <span>Safari Packages</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setSelectedPackageType('holiday')}
+          className={`px-4 py-2 text-sm font-medium rounded-md flex items-center space-x-1.5 transition-all ${
+            selectedPackageType === 'holiday'
+              ? 'bg-teal text-white shadow-sm'
+              : 'text-gray-600 hover:text-teal'
+          }`}
+        >
+          <span>🏖️</span>
+          <span>Holiday Packages</span>
+        </button>
       </div>
 
       {/* Search and filters */}
@@ -81,12 +122,12 @@ const PackagesListPage: React.FC = () => {
             onChange={(id) => { setSelectedCountryId(id); setSearchQuery(''); }}
             className="w-full sm:w-56"
           />
-          {selectedCountryId && (
+          {(selectedCountryId || selectedPackageType !== 'all') && (
             <button
-              onClick={() => setSelectedCountryId(undefined)}
+              onClick={() => { setSelectedCountryId(undefined); setSelectedPackageType('all'); }}
               className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-transparent rounded-md hover:bg-gray-200 transition-colors whitespace-nowrap"
             >
-              Clear filter
+              Reset filters
             </button>
           )}
         </div>
@@ -110,6 +151,9 @@ const PackagesListPage: React.FC = () => {
                 <tr>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Package
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Type
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Destination
@@ -153,6 +197,17 @@ const PackagesListPage: React.FC = () => {
                           <div className="text-sm text-gray-500">{pkg.slug}</div>
                         </div>
                       </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {pkg.package_type === 'holiday' ? (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal/15 text-teal border border-teal/30">
+                          🏖️ Holiday
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                          🦁 Safari
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">{pkg.country?.name}</div>

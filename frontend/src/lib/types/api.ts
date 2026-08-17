@@ -356,6 +356,7 @@ export interface Package extends BaseModel {
   is_active: boolean;
   is_featured: boolean;
   is_deal: boolean;
+  package_type?: 'safari' | 'holiday' | string;
   inclusions?: InclusionExclusionItem[];
   exclusions?: InclusionExclusionItem[];
   inclusion_items?: InclusionExclusionItem[];
@@ -524,6 +525,7 @@ export interface PackageDetailResponse {
   is_active: boolean;
   is_featured: boolean;
   is_deal: boolean;
+  package_type?: 'safari' | 'holiday' | string;
   created_at: string;
   updated_at: string;
   country: CountrySummary;

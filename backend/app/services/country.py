@@ -89,16 +89,20 @@ class CountryService:
             Hotel.is_active == True
         ).group_by(Country.id).offset(skip).limit(limit).all()
 
-    def get_countries_with_packages(self, db: Session, skip: int = 0, limit: int = 100) -> List[Country]:
+    def get_countries_with_packages(self, db: Session, skip: int = 0, limit: int = 100, package_type: Optional[str] = None) -> List[Country]:
         """
-        Retrieve countries that have active packages.
+        Retrieve countries that have active packages, optionally filtered by package_type (safari or holiday).
         """
         from app.models.package import Package
 
-        return db.query(Country).join(Package).filter(
+        query = db.query(Country).join(Package).filter(
             Country.is_active == True,
             Package.is_active == True
-        ).group_by(Country.id).offset(skip).limit(limit).all()
+        )
+        if package_type:
+            query = query.filter(Package.package_type == package_type)
+            
+        return query.group_by(Country.id).offset(skip).limit(limit).all()
 
     def get_countries_with_activities(self, db: Session, skip: int = 0, limit: int = 100) -> List[Country]:
         """

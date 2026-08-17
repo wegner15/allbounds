@@ -40,6 +40,7 @@ class Package(Base):
     is_featured = Column(Boolean, default=False)
     is_deal = Column(Boolean, nullable=False, default=False, server_default=func.false())
     is_published = Column(Boolean, default=False)
+    package_type = Column(String(50), nullable=False, default="safari", server_default="safari", index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     published_at = Column(DateTime(timezone=True), nullable=True)

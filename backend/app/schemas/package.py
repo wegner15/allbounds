@@ -23,6 +23,7 @@ class PackageBase(BaseModel):
     exclusions: Optional[str] = Field(None, description="What's excluded from the package")
     image_id: Optional[str] = Field(None, description="Cloudflare image ID for the package thumbnail")
     is_deal: Optional[bool] = Field(False, description="Whether the package is marked as a special deal")
+    package_type: Optional[str] = Field("safari", description="Package type: 'safari' or 'holiday'")
     faqs: Optional[List[dict]] = Field(None, description="List of FAQs ({question: str, answer: str})")
     conversion_triggers: Optional[List[str]] = Field(None, description="List of conversion triggers for the package")
     
@@ -52,6 +53,7 @@ class PackageUpdate(BaseModel):
     is_active: Optional[bool] = Field(None, description="Whether the package is active")
     is_featured: Optional[bool] = Field(None, description="Whether the package is featured")
     is_deal: Optional[bool] = Field(None, description="Whether the package is a special deal")
+    package_type: Optional[str] = Field(None, description="Package type: 'safari' or 'holiday'")
     published_at: Optional[datetime] = Field(None, description="When the package was published")
     holiday_type_ids: Optional[List[int]] = Field(None, description="List of holiday type IDs to associate with this package")
     inclusion_ids: Optional[List[int]] = Field(None, description="List of inclusion IDs to associate with this package")
@@ -69,6 +71,7 @@ class PackageResponse(PackageBase):
     is_active: bool = Field(..., description="Whether the package is active")
     is_featured: bool = Field(..., description="Whether the package is featured")
     is_deal: Optional[bool] = Field(False, description="Whether the package is a special deal")
+    package_type: str = Field("safari", description="Package type: 'safari' or 'holiday'")
     is_published: bool = Field(..., description="Whether the package is published")
     created_at: datetime
     updated_at: datetime
@@ -113,6 +116,7 @@ class PackageListResponse(BaseModel):
     is_active: bool
     is_featured: bool
     is_deal: bool
+    package_type: str = "safari"
     created_at: datetime
     country: CountryResponse  # Only load country, not all relationships
     countries: List[CountryResponse] = []  # Additional destinations

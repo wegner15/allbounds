@@ -21,7 +21,7 @@ class PackageService:
             return None
         return f"{cloudflare_settings.delivery_url}/{image_id}/{variant}"
 
-    def get_packages(self, db: Session, skip: int = 0, limit: int = 100, order_by: str = "created_at", order: str = "desc", tag: Optional[str] = None) -> List[Package]:
+    def get_packages(self, db: Session, skip: int = 0, limit: int = 100, order_by: str = "created_at", order: str = "desc", tag: Optional[str] = None, package_type: Optional[str] = None) -> List[Package]:
         """
         Retrieve all packages with pagination and ordering.
         MEMORY FIX: Only load essential relationships to prevent OOM
@@ -33,6 +33,9 @@ class PackageService:
             # Removed joinedload(Package.holiday_types) - causes memory spike
             # Other relationships (inclusion_items, exclusion_items) are lazy-loaded on access
         ).filter(Package.is_active == True)
+
+        if package_type:
+            query = query.filter(Package.package_type == package_type)
 
         if tag:
             query = query.filter(Package.tags.any(Tag.slug == tag))
@@ -56,14 +59,14 @@ class PackageService:
 
         return query.offset(skip).limit(limit).all()
     
-    def get_packages_by_country(self, db: Session, country_id: int, skip: int = 0, limit: int = 100) -> List[Package]:
+    def get_packages_by_country(self, db: Session, country_id: int, skip: int = 0, limit: int = 100, package_type: Optional[str] = None) -> List[Package]:
         """
         Retrieve all packages for a specific country with pagination.
         Includes packages where the country is either the primary destination
         or one of the additional destinations (via the package_countries M2M table).
         """
         from app.models.country import Country
-        return db.query(Package).options(
+        query = db.query(Package).options(
             joinedload(Package.country),
             selectinload(Package.countries)
         ).filter(
@@ -72,16 +75,23 @@ class PackageService:
                 Package.country_id == country_id,
                 Package.countries.any(Country.id == country_id)
             )
-        ).offset(skip).limit(limit).all()
+        )
+        if package_type:
+            query = query.filter(Package.package_type == package_type)
+            
+        return query.offset(skip).limit(limit).all()
     
-    def get_featured_packages(self, db: Session, skip: int = 0, limit: int = 100, country: Optional[str] = None, tag: Optional[str] = None) -> List[Package]:
+    def get_featured_packages(self, db: Session, skip: int = 0, limit: int = 100, country: Optional[str] = None, tag: Optional[str] = None, package_type: Optional[str] = None) -> List[Package]:
         """
-        Retrieve featured packages with pagination, optionally filtered by country or tag.
+        Retrieve featured packages with pagination, optionally filtered by country, tag, or package_type.
         """
         query = db.query(Package).filter(
             Package.is_active == True,
             Package.is_featured == True
         )
+
+        if package_type:
+            query = query.filter(Package.package_type == package_type)
 
         if country:
             from app.models.country import Country
@@ -389,6 +399,7 @@ class PackageService:
             ],
             "is_active": package.is_active,
             "is_featured": package.is_featured,
+            "package_type": getattr(package, 'package_type', 'safari') or 'safari',
         }
     
     def create_package(self, db: Session, package_create: PackageCreate) -> Package:
@@ -409,6 +420,10 @@ class PackageService:
             image_id=package_create.image_id,
             is_active=package_create.is_active,
             is_featured=package_create.is_featured,
+            is_deal=package_create.is_deal or False,
+            package_type=package_create.package_type or "safari",
+            faqs=package_create.faqs,
+            conversion_triggers=package_create.conversion_triggers,
             slug=slug,
         )
         db.add(db_package)

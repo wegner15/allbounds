@@ -41,6 +41,7 @@ const packageSchema = z.object({
   is_active: z.boolean(),
   is_featured: z.boolean(),
   is_deal: z.boolean(),
+  package_type: z.enum(['safari', 'holiday']),
   faqs: z.array(z.object({
     question: z.string().min(1, 'Question is required'),
     answer: z.string().min(1, 'Answer is required'),
@@ -118,6 +119,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
         is_active: packageData.is_active,
         is_featured: packageData.is_featured,
         is_deal: packageData.is_deal || false,
+        package_type: packageData.package_type || 'safari',
         faqs: packageData.faqs || [],
         conversion_triggers: packageData.conversion_triggers?.map((t: string) => ({ value: t })) || [],
       }
@@ -139,6 +141,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
         is_active: true,
         is_featured: false,
         is_deal: false,
+        package_type: 'safari',
         faqs: [],
         conversion_triggers: [],
       },
@@ -170,6 +173,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       setValue('is_active', packageData.is_active ?? true);
       setValue('is_featured', packageData.is_featured ?? false);
       setValue('is_deal', packageData.is_deal ?? false);
+      setValue('package_type', packageData.package_type || 'safari');
       setValue('faqs', packageData.faqs || []);
       setValue('conversion_triggers', packageData.conversion_triggers?.map((t: string) => ({ value: t })) || []);
 
@@ -659,11 +663,98 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
             )}
           </div>
 
+          {/* Package Type Selector (Safari vs Holiday) */}
+          <div className="sm:col-span-6 bg-gradient-to-r from-amber-50/40 via-white to-teal-50/40 border border-gray-200 rounded-xl p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <label className="block text-base font-bold text-gray-900">
+                  Package Type <span className="text-red-500">*</span>
+                </label>
+                <p className="text-xs text-gray-600 mt-0.5">
+                  Select whether this package belongs to Safari Experiences or Holiday Vacations. The website will automatically display it in its corresponding section.
+                </p>
+              </div>
+            </div>
+            <Controller
+              name="package_type"
+              control={control}
+              render={({ field }) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Safari Option */}
+                  <div
+                    onClick={() => field.onChange('safari')}
+                    className={`cursor-pointer rounded-xl border-2 p-4 flex items-start space-x-3 transition-all duration-200 ${
+                      field.value === 'safari'
+                        ? 'border-amber-600 bg-amber-50/80 shadow-sm ring-1 ring-amber-600/30'
+                        : 'border-gray-200 bg-white hover:border-amber-300 hover:bg-amber-50/30'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      id="type-safari"
+                      name="package_type_radio"
+                      checked={field.value === 'safari'}
+                      onChange={() => field.onChange('safari')}
+                      className="h-4 w-4 text-amber-600 border-gray-300 focus:ring-amber-500 mt-1"
+                    />
+                    <div className="flex-1">
+                      <label htmlFor="type-safari" className="font-bold text-gray-900 cursor-pointer flex items-center justify-between">
+                        <span className="text-sm sm:text-base flex items-center gap-1.5">
+                          <span>🦁</span>
+                          <span>Safari Package</span>
+                        </span>
+                        {field.value === 'safari' && (
+                          <span className="text-xs bg-amber-600 text-white font-semibold px-2 py-0.5 rounded-full">Selected</span>
+                        )}
+                      </label>
+                      <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
+                        Safari destinations, wildlife tours, game reserves, wilderness lodges, and bush adventures (e.g. Kenya, Uganda, Tanzania, South Africa).
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Holiday Option */}
+                  <div
+                    onClick={() => field.onChange('holiday')}
+                    className={`cursor-pointer rounded-xl border-2 p-4 flex items-start space-x-3 transition-all duration-200 ${
+                      field.value === 'holiday'
+                        ? 'border-teal bg-teal/10 shadow-sm ring-1 ring-teal/30'
+                        : 'border-gray-200 bg-white hover:border-teal-light hover:bg-teal/5'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      id="type-holiday"
+                      name="package_type_radio"
+                      checked={field.value === 'holiday'}
+                      onChange={() => field.onChange('holiday')}
+                      className="h-4 w-4 text-teal border-gray-300 focus:ring-teal mt-1"
+                    />
+                    <div className="flex-1">
+                      <label htmlFor="type-holiday" className="font-bold text-gray-900 cursor-pointer flex items-center justify-between">
+                        <span className="text-sm sm:text-base flex items-center gap-1.5">
+                          <span>🏖️</span>
+                          <span>Holiday Package</span>
+                        </span>
+                        {field.value === 'holiday' && (
+                          <span className="text-xs bg-teal text-white font-semibold px-2 py-0.5 rounded-full">Selected</span>
+                        )}
+                      </label>
+                      <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
+                        Leisure and beach getaways, city tours, luxury island breaks, and international vacation packages (e.g. Dubai, Zanzibar, Mauritius, Maldives, Egypt).
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            />
+          </div>
+
           {/* Country */}
           <div className="sm:col-span-3">
             <div className="flex justify-between items-center">
               <label htmlFor="country_id" className="block text-sm font-semibold text-gray-800">
-                Country
+                Country / Destination <span className="text-red-500">*</span>
               </label>
             </div>
             <div className="mt-2 relative">

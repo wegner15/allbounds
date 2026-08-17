@@ -42,6 +42,7 @@ const PackagesPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCountry, setSelectedCountry] = useState('All');
   const [selectedHolidayType, setSelectedHolidayType] = useState('All');
+  const [selectedPackageType, setSelectedPackageType] = useState<'All' | 'Safari' | 'Holiday'>('All');
   const [selectedPriceRange, setSelectedPriceRange] = useState('All');
   const [selectedDuration, setSelectedDuration] = useState('All');
 
@@ -72,6 +73,18 @@ const PackagesPage: React.FC = () => {
 
   // Sync URL params with state
   useEffect(() => {
+    // Package Type filter
+    const packageTypeParam = searchParams.get('packageType');
+    if (packageTypeParam) {
+      if (packageTypeParam.toLowerCase() === 'safari') {
+        setSelectedPackageType('Safari');
+      } else if (packageTypeParam.toLowerCase() === 'holiday') {
+        setSelectedPackageType('Holiday');
+      } else {
+        setSelectedPackageType('All');
+      }
+    }
+
     // Country filter
     const countryParam = searchParams.get('country');
     if (countryParam && countriesData) {
@@ -112,11 +125,15 @@ const PackagesPage: React.FC = () => {
   // Pagination
   const packagesPerPage = 6;
   const packages = packagesData || [];
-  const totalPackages = packages.length;
-  const totalPages = Math.ceil(totalPackages / packagesPerPage);
 
   // Apply filters
   const filteredPackages = packages.filter(pkg => {
+    // Package Type filter
+    if (selectedPackageType !== 'All') {
+      const pkgType = (pkg.package_type || 'safari').toLowerCase();
+      if (pkgType !== selectedPackageType.toLowerCase()) return false;
+    }
+
     // Country filter
     if (selectedCountry !== 'All' && pkg.country?.name !== selectedCountry) return false;
 
@@ -149,6 +166,9 @@ const PackagesPage: React.FC = () => {
     return true;
   });
 
+  const totalPackages = filteredPackages.length;
+  const totalPages = Math.ceil(totalPackages / packagesPerPage);
+
   // Get current packages (cumulative for "Load More")
   const currentPackages = filteredPackages.slice(0, currentPage * packagesPerPage);
   const hasMore = currentPackages.length < filteredPackages.length;
@@ -160,6 +180,7 @@ const PackagesPage: React.FC = () => {
 
   // Reset filters
   const handleResetFilters = () => {
+    setSelectedPackageType('All');
     setSelectedCountry('All');
     setSelectedHolidayType('All');
     setSelectedPriceRange('All');
@@ -201,6 +222,42 @@ const PackagesPage: React.FC = () => {
       </div>
 
       <div className="fluid-container pb-12">
+
+        {/* Package Category Selector Tabs */}
+        <div className="flex flex-wrap items-center gap-3 mb-6">
+          <button
+            onClick={() => { setSelectedPackageType('All'); setCurrentPage(1); }}
+            className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 shadow-sm ${
+              selectedPackageType === 'All'
+                ? 'bg-gray-900 text-white shadow-md'
+                : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            All Packages ({packagesData?.length || 0})
+          </button>
+          <button
+            onClick={() => { setSelectedPackageType('Safari'); setCurrentPage(1); }}
+            className={`px-5 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2 transition-all duration-200 shadow-sm ${
+              selectedPackageType === 'Safari'
+                ? 'bg-amber-600 text-white shadow-md shadow-amber-600/20'
+                : 'bg-white text-gray-700 border border-gray-200 hover:border-amber-300 hover:bg-amber-50/40'
+            }`}
+          >
+            <span>🦁</span>
+            <span>Safari Packages</span>
+          </button>
+          <button
+            onClick={() => { setSelectedPackageType('Holiday'); setCurrentPage(1); }}
+            className={`px-5 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2 transition-all duration-200 shadow-sm ${
+              selectedPackageType === 'Holiday'
+                ? 'bg-teal text-white shadow-md shadow-teal/20'
+                : 'bg-white text-gray-700 border border-gray-200 hover:border-teal hover:bg-teal/5'
+            }`}
+          >
+            <span>🏖️</span>
+            <span>Holiday Packages</span>
+          </button>
+        </div>
 
         {/* Filters */}
         <div className="bg-gradient-to-r from-white to-gray-50 border border-gray-200 rounded-xl shadow-lg p-6 mb-8">

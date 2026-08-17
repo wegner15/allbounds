@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import OptimizedImage from '../../../components/ui/OptimizedImage';
 import { getResponsiveImageSizes } from '../../../utils/imageUtils';
 import type { CountryWithDetails } from '../../../lib/types/api';
+import DestinationBookingModal from '../../../components/forms/DestinationBookingModal';
 
 interface DestinationHeroSectionProps {
   country: CountryWithDetails;
 }
 
 const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo(({ country }) => {
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+
   return (
     <section
       className="relative w-full h-[500px] md:h-[600px] lg:h-[700px] overflow-hidden"
@@ -76,24 +79,31 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
 
           {/* Call to Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+            <button
+              type="button"
+              onClick={() => setBookingModalOpen(true)}
+              className="px-8 py-3.5 bg-primary hover:bg-primary-dark text-white font-bold tracking-wider transition-all duration-300 uppercase text-sm md:text-base rounded-md shadow-xl hover:scale-105 active:scale-95 cursor-pointer min-w-[180px]"
+            >
+              Book {country.name}
+            </button>
+
             <Link
-              to="/start-planning"
-              className="px-8 py-3 border-2 border-white text-white font-semibold tracking-wider hover:bg-white hover:text-black transition-all duration-300 uppercase text-sm md:text-base rounded-sm min-w-[160px]"
+              to={`/destinations/${country.slug}/book`}
+              className="px-8 py-3.5 border-2 border-white text-white font-semibold tracking-wider hover:bg-white hover:text-black transition-all duration-300 uppercase text-sm md:text-base rounded-md min-w-[180px]"
             >
-              Start Planning
+              Inquire Destination
             </Link>
-
-            <span className="text-white/80 font-serif italic text-lg">-or-</span>
-
-            <a
-              href="tel:+256782594008"
-              className="px-8 py-3 bg-teal hover:bg-teal-dark text-white font-semibold tracking-wider transition-all duration-300 uppercase text-sm md:text-base rounded-sm shadow-lg min-w-[160px]"
-            >
-              Call Us Now
-            </a>
           </div>
         </div>
       </div>
+
+      {/* Booking Modal */}
+      <DestinationBookingModal
+        isOpen={bookingModalOpen}
+        onClose={() => setBookingModalOpen(false)}
+        defaultDestination={country.name}
+        countryId={country.id}
+      />
     </section>
   );
 });

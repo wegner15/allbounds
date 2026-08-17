@@ -13,6 +13,7 @@ import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 
 // Import feature pages
+import { DestinationBookingPage } from './features/public/planning/DestinationBookingPage';
 import PackagesPage from './features/packages/PackagesPage';
 import PackageDetailPage from './features/packages/PackageDetailPage';
 import PackageDetailPageNew from './features/packages/PackageDetailPageNew';
@@ -341,6 +342,8 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: 'start-planning', element: <StartPlanningPage /> },
+      { path: 'book-destination', element: <DestinationBookingPage /> },
+      { path: 'destinations/:slug/book', element: <DestinationBookingPage /> },
       { path: 'destinations', element: <DestinationsPage /> },
       { path: 'destinations/regions/:slug', element: <RegionDetailPage /> },
       { path: 'destinations/countries/:slug', element: <CountryDetailPageNew /> },

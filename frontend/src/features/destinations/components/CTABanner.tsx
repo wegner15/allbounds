@@ -28,21 +28,21 @@ const CTABanner: React.FC<CTABannerProps> = ({ countrySlug, countryName }) => {
             {/* Primary CTA - View Packages */}
             <Link
               to={`/packages?country=${countrySlug}`}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-10 py-4 bg-white text-primary font-bold rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-white/50"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-3.5 bg-white text-primary font-bold rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-white/50"
               aria-label={`View travel packages for ${countryName}`}
             >
-              <MapIcon className="w-6 h-6" aria-hidden="true" />
-              <span className="text-lg">View Packages</span>
+              <MapIcon className="w-5 h-5" aria-hidden="true" />
+              <span className="text-base">View Packages</span>
             </Link>
             
-            {/* Secondary CTA - Plan My Trip */}
+            {/* Secondary CTA - Book Destination */}
             <Link
-              to="/start-planning"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-10 py-4 bg-transparent text-white font-bold rounded-xl border-2 border-white/80 hover:bg-white hover:text-primary hover:border-white shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-white/30"
-              aria-label={`Plan your trip to ${countryName}`}
+              to={`/destinations/${countrySlug}/book`}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-3.5 bg-transparent text-white font-bold rounded-xl border-2 border-white/80 hover:bg-white hover:text-primary hover:border-white shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-white/30"
+              aria-label={`Book your trip to ${countryName}`}
             >
-              <CalendarIcon className="w-6 h-6" aria-hidden="true" />
-              <span className="text-lg">Plan My Trip</span>
+              <CalendarIcon className="w-5 h-5" aria-hidden="true" />
+              <span className="text-base">Book {countryName}</span>
             </Link>
           </div>
         </div>

@@ -98,6 +98,96 @@ const WizardDetailsView: React.FC<{ details: any }> = ({ details }) => {
   );
 };
 
+const DestinationBookingDetailsView: React.FC<{ details: any }> = ({ details }) => {
+  if (!details) return null;
+
+  return (
+    <div className="mt-6 border-t border-gray-200 pt-6">
+      <h4 className="text-md font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+        Destination Booking Inquiry Details
+      </h4>
+      <div className="bg-emerald-50/60 rounded-xl p-5 grid grid-cols-1 md:grid-cols-2 gap-4 border border-emerald-200 text-xs">
+        <div>
+          <span className="block font-bold text-gray-500 uppercase tracking-wider mb-0.5">Target Destination</span>
+          <p className="text-sm font-bold text-emerald-900">{details.destination || 'Not specified'}</p>
+        </div>
+
+        <div>
+          <span className="block font-bold text-gray-500 uppercase tracking-wider mb-0.5">Contact Preferences</span>
+          <p className="text-gray-900 font-medium">Method: {details.preferred_contact_method || 'WhatsApp'} | Best Time: {details.best_time_to_contact || 'Any Time'}</p>
+        </div>
+
+        <div>
+          <span className="block font-bold text-gray-500 uppercase tracking-wider mb-0.5">Travel Type & Timeframe</span>
+          <p className="text-gray-900 font-medium">{details.travel_type || 'N/A'} (Timeframe: {details.travel_timeframe || 'N/A'})</p>
+        </div>
+
+        <div>
+          <span className="block font-bold text-gray-500 uppercase tracking-wider mb-0.5">Travel Dates & Flexibility</span>
+          <p className="text-gray-900 font-medium">
+            Start: {details.start_date || 'N/A'} {details.return_date ? `to ${details.return_date}` : ''} ({details.date_flexibility || 'Exact'}) {details.number_of_nights ? `- ${details.number_of_nights}` : ''}
+          </p>
+        </div>
+
+        <div>
+          <span className="block font-bold text-gray-500 uppercase tracking-wider mb-0.5">Group & Rooms</span>
+          <p className="text-gray-900 font-medium">
+            Adults: {details.adults || 1} | Children: {details.children || 0} {details.children_ages ? `(Ages: ${details.children_ages})` : ''} | Infants: {details.infants || 0} | Rooms: {details.rooms_required || 1}
+          </p>
+        </div>
+
+        <div>
+          <span className="block font-bold text-gray-500 uppercase tracking-wider mb-0.5">Accommodation & Meal Plan</span>
+          <p className="text-gray-900 font-medium">
+            Category: {details.accommodation_category || 'N/A'} | Room: {details.room_preference || 'N/A'} | Meal: {details.meal_plan || 'N/A'}
+          </p>
+        </div>
+
+        <div>
+          <span className="block font-bold text-emerald-800 uppercase tracking-wider mb-0.5">Estimated Budget</span>
+          <p className="text-sm font-bold text-emerald-800">{details.budget_per_person || 'N/A'}</p>
+        </div>
+
+        <div>
+          <span className="block font-bold text-gray-500 uppercase tracking-wider mb-0.5">Custom Itinerary & Package</span>
+          <p className="text-gray-900 font-medium">
+            Custom: {details.interested_in_custom_itinerary || 'Yes'} | Preferred Pkg: {details.has_preferred_package === 'Yes' ? details.preferred_package_name || 'Yes' : 'No'}
+          </p>
+        </div>
+
+        <div>
+          <span className="block font-bold text-gray-500 uppercase tracking-wider mb-0.5">Flights & Transfers</span>
+          <p className="text-gray-900 font-medium">
+            Flights: {details.need_flights || 'No'} {details.departure_city ? `from ${details.departure_city}` : ''} ({details.preferred_cabin || 'Economy'}) | Transfers: {details.need_transfers || 'Yes'} | Ground: {details.transportation_during_trip || 'Private'}
+          </p>
+        </div>
+
+        <div>
+          <span className="block font-bold text-gray-500 uppercase tracking-wider mb-0.5">Experiences Selected</span>
+          <p className="text-gray-900 font-medium">
+            {details.selected_activities && details.selected_activities.length > 0 ? details.selected_activities.join(', ') : 'None selected'}
+          </p>
+        </div>
+
+        <div>
+          <span className="block font-bold text-gray-500 uppercase tracking-wider mb-0.5">Occasion & Dietary</span>
+          <p className="text-gray-900 font-medium">
+            Occasion: {details.special_occasion || 'None'} | Dietary: {details.dietary_requirements || 'None'}
+          </p>
+        </div>
+
+        <div>
+          <span className="block font-bold text-gray-500 uppercase tracking-wider mb-0.5">Lead Source & Attachments</span>
+          <p className="text-gray-900 font-medium">
+            Source: {details.lead_source || 'Website'} {details.uploaded_filename ? `| Attached: ${details.uploaded_filename}` : ''}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const GeneralInquiriesPage: React.FC = () => {
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -506,6 +596,10 @@ const GeneralInquiriesPage: React.FC = () => {
 
                 {selectedInquiry.source === 'Start Planning Wizard' && selectedInquiry.details && (
                   <WizardDetailsView details={selectedInquiry.details} />
+                )}
+
+                {(selectedInquiry.source?.includes('Destination Booking') || selectedInquiry.details?.form_type === 'destination_booking') && selectedInquiry.details && (
+                  <DestinationBookingDetailsView details={selectedInquiry.details} />
                 )}
 
                 <div className="flex justify-end space-x-3 pt-4">

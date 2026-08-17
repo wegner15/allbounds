@@ -31,6 +31,77 @@ class GroupTripService:
             query = query.filter(GroupTrip.tags.any(Tag.slug == tag))
             
         return query.offset(skip).limit(limit).all()
+
+    def get_paginated_group_trips(
+        self,
+        db: Session,
+        page: int = 1,
+        limit: int = 10,
+        search: Optional[str] = None,
+        country_id: Optional[int] = None,
+        holiday_type_id: Optional[int] = None,
+        tag: Optional[str] = None,
+        include_inactive: bool = True,
+        order_by: str = "created_at",
+        order: str = "desc",
+    ):
+        """
+        Retrieve paginated group trips with search and filtering for admin panel.
+        Returns (items, total_count).
+        """
+        from app.models.country import Country
+        from app.models.holiday_type import HolidayType
+        query = db.query(GroupTrip).options(
+            joinedload(GroupTrip.departures),
+            joinedload(GroupTrip.country),
+            joinedload(GroupTrip.countries),
+            joinedload(GroupTrip.holiday_types),
+            joinedload(GroupTrip.inclusion_items),
+            joinedload(GroupTrip.exclusion_items),
+            joinedload(GroupTrip.tags)
+        )
+
+        if not include_inactive:
+            query = query.filter(GroupTrip.is_active == True)
+
+        if country_id:
+            query = query.filter(
+                or_(
+                    GroupTrip.country_id == country_id,
+                    GroupTrip.countries.any(Country.id == country_id)
+                )
+            )
+
+        if holiday_type_id:
+            query = query.filter(GroupTrip.holiday_types.any(HolidayType.id == holiday_type_id))
+
+        if tag:
+            query = query.filter(GroupTrip.tags.any(Tag.slug == tag))
+
+        if search and search.strip():
+            term = f"%{search.strip()}%"
+            query = query.outerjoin(GroupTrip.country).filter(
+                or_(
+                    GroupTrip.name.ilike(term),
+                    GroupTrip.description.ilike(term),
+                    GroupTrip.summary.ilike(term),
+                    Country.name.ilike(term)
+                )
+            )
+
+        total = query.count()
+
+        if order_by == "name":
+            query = query.order_by(GroupTrip.name.desc() if order == "desc" else GroupTrip.name.asc())
+        elif order_by == "price":
+            query = query.order_by(GroupTrip.price.desc() if order == "desc" else GroupTrip.price.asc())
+        else:
+            query = query.order_by(GroupTrip.created_at.desc() if order == "desc" else GroupTrip.created_at.asc())
+
+        skip = (page - 1) * limit if page > 0 else 0
+        items = query.offset(skip).limit(limit).all()
+
+        return items, total
     
     def get_group_trips_by_country(self, db: Session, country_id: int, skip: int = 0, limit: int = 100) -> List[GroupTrip]:
         """

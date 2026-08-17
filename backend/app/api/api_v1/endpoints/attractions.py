@@ -7,7 +7,15 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.core.redis_cache import cache_endpoint
 from app.models.user import User
-from app.schemas.attraction import AttractionResponse, AttractionCreate, AttractionUpdate, AttractionWithCountryResponse, AttractionWithRelationshipsResponse, SimplifiedHotelResponse
+from app.schemas.attraction import (
+    AttractionResponse,
+    AttractionCreate,
+    AttractionUpdate,
+    AttractionWithCountryResponse,
+    AttractionWithRelationshipsResponse,
+    SimplifiedHotelResponse,
+    PaginatedAttractionResponse,
+)
 from app.schemas.package import PackageWithCountryResponse
 from app.schemas.group_trip import GroupTripWithCountryResponse
 from app.schemas.activity import ActivityResponse
@@ -18,6 +26,45 @@ class SetCoverImageRequest(BaseModel):
     image_id: str
 
 router = APIRouter()
+
+@router.get("/paginated", response_model=PaginatedAttractionResponse)
+def get_paginated_attractions(
+    db: Session = Depends(get_db),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(10, ge=1, le=100, description="Items per page"),
+    search: Optional[str] = Query(None, description="Search term"),
+    country_id: Optional[int] = Query(None, description="Filter by country ID"),
+    category: Optional[str] = Query(None, description="Filter by category"),
+    tag: Optional[str] = Query(None, description="Filter by tag slug"),
+    include_inactive: bool = Query(True, description="Include inactive attractions"),
+    order_by: str = Query("created_at", description="Field to order by"),
+    order: str = Query("desc", description="Order direction (asc/desc)"),
+) -> Any:
+    """
+    Retrieve paginated list of attractions for admin list view.
+    """
+    import math
+    items, total = attraction_service.get_paginated_attractions(
+        db=db,
+        page=page,
+        limit=limit,
+        search=search,
+        country_id=country_id,
+        category=category,
+        tag=tag,
+        include_inactive=include_inactive,
+        order_by=order_by,
+        order=order,
+    )
+    pages = math.ceil(total / limit) if limit > 0 else 0
+
+    return {
+        "items": [AttractionResponse.from_orm(item) for item in items],
+        "total": total,
+        "page": page,
+        "size": limit,
+        "pages": pages,
+    }
 
 @router.get("/", response_model=List[AttractionResponse])
 @router.get("", response_model=List[AttractionResponse])  # Explicit route without trailing slash

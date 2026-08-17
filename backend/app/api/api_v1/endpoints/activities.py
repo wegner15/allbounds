@@ -6,11 +6,54 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.core.redis_cache import cache_endpoint
 from app.models.user import User
-from app.schemas.activity import ActivityResponse, ActivityCreate, ActivityUpdate, ActivityTripsResponse
+from app.schemas.activity import (
+    ActivityResponse,
+    ActivityCreate,
+    ActivityUpdate,
+    ActivityTripsResponse,
+    PaginatedActivityResponse,
+)
 from app.services.activity import activity_service
 from app.auth.dependencies import get_current_user, has_permission
 
 router = APIRouter()
+
+@router.get("/paginated", response_model=PaginatedActivityResponse)
+def get_paginated_activities(
+    db: Session = Depends(get_db),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(10, ge=1, le=100, description="Items per page"),
+    search: str = Query(None, description="Search term for activity name or description"),
+    country_id: int = Query(None, description="Filter by country ID"),
+    tag: str = Query(None, description="Filter by tag slug"),
+    include_inactive: bool = Query(True, description="Include inactive activities"),
+    order_by: str = Query("created_at", description="Field to order by"),
+    order: str = Query("desc", description="Order direction (asc/desc)"),
+) -> Any:
+    """
+    Retrieve paginated list of activities for admin list view.
+    """
+    import math
+    items, total = activity_service.get_paginated_activities(
+        db=db,
+        page=page,
+        limit=limit,
+        search=search,
+        country_id=country_id,
+        tag=tag,
+        include_inactive=include_inactive,
+        order_by=order_by,
+        order=order,
+    )
+    pages = math.ceil(total / limit) if limit > 0 else 0
+
+    return {
+        "items": [ActivityResponse.from_orm(item) for item in items],
+        "total": total,
+        "page": page,
+        "size": limit,
+        "pages": pages,
+    }
 
 @router.get("/", response_model=List[ActivityResponse])
 def get_activities(

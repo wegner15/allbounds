@@ -25,6 +25,52 @@ class BlogService:
             query = query.filter(BlogPost.is_published == True)
         return query.order_by(BlogPost.created_at.desc()).offset(skip).limit(limit).all()
 
+    def get_paginated_blogs(
+        self,
+        db: Session,
+        page: int = 1,
+        limit: int = 10,
+        search: Optional[str] = None,
+        tag: Optional[str] = None,
+        include_drafts: bool = True,
+        order_by: str = "created_at",
+        order: str = "desc",
+    ):
+        """
+        Retrieve paginated blog posts with search and filtering for admin panel.
+        Returns (items, total_count).
+        """
+        from sqlalchemy import or_
+        query = db.query(BlogPost)
+
+        if not include_drafts:
+            query = query.filter(BlogPost.is_published == True, BlogPost.is_active == True)
+
+        if tag:
+            query = query.filter(BlogPost.tags.any(Tag.slug == tag))
+
+        if search and search.strip():
+            term = f"%{search.strip()}%"
+            query = query.filter(
+                or_(
+                    BlogPost.title.ilike(term),
+                    BlogPost.summary.ilike(term),
+                    BlogPost.slug.ilike(term),
+                )
+            )
+
+        total = query.count()
+
+        if order_by == "title":
+            query = query.order_by(BlogPost.title.desc() if order == "desc" else BlogPost.title.asc())
+        else:
+            query = query.order_by(BlogPost.created_at.desc() if order == "desc" else BlogPost.created_at.asc())
+
+        skip = (page - 1) * limit if page > 0 else 0
+        items = query.offset(skip).limit(limit).all()
+
+        return items, total
+
     def get_blog_post(
         self, 
         db: Session, 

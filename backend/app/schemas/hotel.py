@@ -114,3 +114,14 @@ class HotelWithRelationshipsResponse(HotelWithCountryResponse):
     group_trip_ids: Optional[List[int]] = Field(None, description="IDs of group trips associated with this hotel")
     
     model_config = ConfigDict(from_attributes=True)
+
+# Schema for paginated hotel response (optimized for admin list)
+class PaginatedHotelResponse(BaseModel):
+    items: List[HotelWithCountryResponse]
+    total: int
+    page: int
+    size: int
+    pages: int
+
+    model_config = ConfigDict(from_attributes=True)
+

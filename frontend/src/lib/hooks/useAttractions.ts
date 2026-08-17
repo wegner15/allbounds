@@ -127,6 +127,46 @@ const buildAttractionsQueryString = (params?: AttractionsQueryParams) => {
   return searchParams.toString();
 };
 
+export interface PaginatedAttractionResponse {
+  items: Attraction[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}
+
+// Hook for fetching paginated attractions (optimized for Admin List)
+export const usePaginatedAttractions = (params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  country_id?: number;
+  category?: string;
+  tag?: string;
+  include_inactive?: boolean;
+  order_by?: string;
+  order?: string;
+}) => {
+  const queryParams = new URLSearchParams();
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        queryParams.append(key, value.toString());
+      }
+    });
+  }
+
+  const queryString = queryParams.toString();
+  const endpoint = queryString ? `/attractions/paginated?${queryString}` : '/attractions/paginated';
+
+  return useQuery<PaginatedAttractionResponse>({
+    queryKey: ['attractions', 'paginated', params],
+    queryFn: async () => {
+      return apiClient.get<PaginatedAttractionResponse>(endpoint);
+    },
+  });
+};
+
 // Hook for fetching attractions
 export const useAttractions = <TData = Attraction[]>(
   params?: AttractionsQueryParams,

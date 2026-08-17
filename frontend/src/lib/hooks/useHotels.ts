@@ -83,6 +83,45 @@ export interface HotelRelationships {
   group_trip_ids: number[];
 }
 
+export interface PaginatedHotelResponse {
+  items: Hotel[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}
+
+// Hook for fetching paginated hotels (optimized for Admin List)
+export const usePaginatedHotels = (params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  country_id?: number;
+  tag?: string;
+  include_inactive?: boolean;
+  order_by?: string;
+  order?: string;
+}) => {
+  const queryParams = new URLSearchParams();
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        queryParams.append(key, value.toString());
+      }
+    });
+  }
+
+  const queryString = queryParams.toString();
+  const endpoint = queryString ? `${endpoints.hotels.paginated(queryString)}` : endpoints.hotels.paginated();
+
+  return useQuery<PaginatedHotelResponse>({
+    queryKey: ['hotels', 'paginated', params],
+    queryFn: async () => {
+      return apiClient.get<PaginatedHotelResponse>(endpoint);
+    },
+  });
+};
+
 // Hook for fetching hotels
 export const useHotels = (countryId?: number) => {
   return useQuery<Hotel[]>({

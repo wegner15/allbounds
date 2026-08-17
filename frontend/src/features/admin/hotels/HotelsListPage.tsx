@@ -1,26 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { useHotels, useDeleteHotel } from '../../../lib/hooks/useHotels';
+import { usePaginatedHotels, useDeleteHotel } from '../../../lib/hooks/useHotels';
 import type { Hotel } from '../../../lib/hooks/useHotels';
-import { useCountries } from '../../../lib/hooks/useCountries';
 import CountryFilterSelect from '../../../components/ui/CountryFilterSelect';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 
 const HotelsListPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCountryId, setSelectedCountryId] = useState<number | undefined>(undefined);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
-  const { data: hotels, isLoading, error } = useHotels(selectedCountryId);
-  const { data: countries } = useCountries();
-  const deleteHotel = useDeleteHotel();
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
-  // Filter hotels based on search term
-  const filteredHotels = hotels?.filter((hotel: Hotel) =>
-    hotel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    hotel.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    hotel.country?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  const { data, isLoading, error } = usePaginatedHotels({
+    page,
+    limit,
+    search: debouncedSearch || undefined,
+    country_id: selectedCountryId,
+    include_inactive: true,
+  });
+
+  const hotels = data?.items || [];
+  const total = data?.total || 0;
+  const totalPages = data?.pages || 0;
+  const deleteHotel = useDeleteHotel();
 
   const handleDelete = async (id: number) => {
     try {
@@ -32,6 +46,12 @@ const HotelsListPage: React.FC = () => {
     }
   };
 
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Helmet>
@@ -39,10 +59,13 @@ const HotelsListPage: React.FC = () => {
       </Helmet>
       
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Hotels</h1>
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">Hotels</h1>
+          <p className="mt-1 text-sm text-gray-500">Manage accommodation and hotel properties</p>
+        </div>
         <Link
           to="/admin/hotels/new"
-          className="bg-teal hover:bg-teal-dark text-white py-2 px-4 rounded-md flex items-center"
+          className="bg-teal hover:bg-teal-dark text-white py-2 px-4 rounded-md flex items-center shadow-sm transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
@@ -51,7 +74,7 @@ const HotelsListPage: React.FC = () => {
         </Link>
       </div>
 
-      <div className="bg-white shadow-md rounded-lg p-6">
+      <div className="bg-white shadow rounded-lg p-6">
         {/* Search and filters */}
         <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="relative w-full sm:max-w-md">
@@ -63,7 +86,7 @@ const HotelsListPage: React.FC = () => {
             <input
               type="text"
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-gray-50 text-sm placeholder-gray-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal focus:border-teal transition-colors shadow-sm"
-              placeholder="Search hotels by name..."
+              placeholder="Search hotels by name, city, address..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -71,91 +94,88 @@ const HotelsListPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row w-full sm:w-auto items-center gap-3">
             <CountryFilterSelect
               value={selectedCountryId}
-              onChange={(id) => { setSelectedCountryId(id); setSearchTerm(''); }}
+              onChange={(id) => { setSelectedCountryId(id); setPage(1); }}
               className="w-full sm:w-56"
             />
-            {selectedCountryId && (
+            {(selectedCountryId || searchTerm) && (
               <button
-                onClick={() => setSelectedCountryId(undefined)}
+                onClick={() => { setSelectedCountryId(undefined); setSearchTerm(''); setPage(1); }}
                 className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-transparent rounded-md hover:bg-gray-200 transition-colors whitespace-nowrap"
               >
-                Clear filter
+                Reset filters
               </button>
             )}
           </div>
         </div>
 
         {isLoading ? (
-          <div className="text-center py-4">
-            <div className="spinner"></div>
-            <p className="mt-2 text-gray-600">Loading hotels...</p>
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-charcoal"></div>
+            <p className="mt-2 text-sm text-gray-500">Loading hotels...</p>
           </div>
         ) : error ? (
-          <div className="bg-red-50 text-red-600 p-4 rounded-md">
+          <div className="bg-red-50 text-red-600 p-4 rounded-md text-sm">
             Error loading hotels. Please try again.
           </div>
-        ) : filteredHotels?.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-gray-600">
-              No hotels found
-              {selectedCountryId && countries ? ` in ${countries.find(c => c.id === selectedCountryId)?.name ?? 'selected country'}` : ''}
-              {searchTerm ? ' matching your search' : ''}.
-            </p>
+        ) : hotels.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-sm">No hotels found matching your criteria.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cover</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Star</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Hotel
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Location
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Rating
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th scope="col" className="relative px-6 py-3">
+                    <span className="sr-only">Actions</span>
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredHotels?.map((hotel) => (
+                {hotels.map((hotel: Hotel) => (
                   <tr key={hotel.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="h-14 w-14 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
-                        {hotel.cover_image || hotel.image_url || hotel.image_id ? (
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 flex-shrink-0">
                           <img
-                            src={getImageUrlWithFallback(hotel.cover_image || hotel.image_url || hotel.image_id, IMAGE_VARIANTS.THUMBNAIL, 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=200&q=80')}
+                            className="h-10 w-10 rounded-md object-cover"
+                            src={getImageUrlWithFallback(
+                              hotel.image_id,
+                              IMAGE_VARIANTS.THUMBNAIL,
+                              hotel.cover_image || hotel.image_url || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=100&q=80'
+                            )}
                             alt={hotel.name}
-                            className="h-full w-full object-cover"
                           />
-                        ) : (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-6 w-6 text-gray-300"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l3-4 2 3 3-4 4 5z" />
-                          </svg>
-                        )}
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">{hotel.name}</div>
+                          <div className="text-sm text-gray-500">{hotel.slug}</div>
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-medium text-gray-900">{hotel.name}</div>
+                      <div className="text-sm text-gray-900">{hotel.city || 'N/A'}</div>
+                      <div className="text-sm text-gray-500">{hotel.country?.name || 'N/A'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div>{hotel.city || '--'}, {hotel.country?.name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex">
-                        {Array.from({ length: Math.floor(hotel.stars || 0) }).map((_, i) => (
+                      <div className="flex items-center">
+                        {[...Array(Math.floor(hotel.stars || 0))].map((_, i) => (
                           <svg key={i} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                           </svg>
                         ))}
-                        {hotel.stars && hotel.stars % 1 !== 0 && (
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -165,29 +185,121 @@ const HotelsListPage: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Link 
-                        to={`/admin/hotels/${hotel.id}/edit`}
-                        className="text-teal hover:text-teal-dark mr-4"
-                      >
-                        Edit
-                      </Link>
-                      <Link 
-                        to={`/admin/hotels/${hotel.id}/relationships`}
-                        className="text-blue-600 hover:text-blue-900 mr-4"
-                      >
-                        Relationships
-                      </Link>
-                      <button
-                        onClick={() => setDeleteConfirmId(hotel.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
+                      <Link to={`/admin/hotels/${hotel.id}/edit`} className="text-teal hover:text-teal-dark mr-4">Edit</Link>
+                      <button onClick={() => setDeleteConfirmId(hotel.id)} className="text-red-600 hover:text-red-900">Delete</button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+
+            {/* Pagination Bar */}
+            {total > 0 && (
+              <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 rounded-b-lg">
+                <div className="flex-1 flex justify-between sm:hidden">
+                  <button
+                    onClick={() => handlePageChange(page - 1)}
+                    disabled={page <= 1}
+                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => handlePageChange(page + 1)}
+                    disabled={page >= totalPages}
+                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-4">
+                    <p className="text-sm text-gray-700">
+                      Showing <span className="font-semibold">{(page - 1) * limit + 1}</span> to{' '}
+                      <span className="font-semibold">{Math.min(page * limit, total)}</span> of{' '}
+                      <span className="font-semibold">{total}</span> hotels
+                    </p>
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <span>Show</span>
+                      <select
+                        value={limit}
+                        onChange={(e) => {
+                          setLimit(Number(e.target.value));
+                          setPage(1);
+                        }}
+                        className="border border-gray-300 rounded-md py-1 px-2 text-sm bg-white focus:ring-teal focus:border-teal"
+                      >
+                        <option value={10}>10</option>
+                        <option value={25}>25</option>
+                        <option value={50}>50</option>
+                        <option value={100}>100</option>
+                      </select>
+                      <span>per page</span>
+                    </div>
+                  </div>
+                  <div>
+                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                      <button
+                        onClick={() => handlePageChange(page - 1)}
+                        disabled={page <= 1}
+                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <span className="sr-only">Previous</span>
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                        if (
+                          totalPages > 7 &&
+                          pageNum !== 1 &&
+                          pageNum !== totalPages &&
+                          Math.abs(page - pageNum) > 1
+                        ) {
+                          if (Math.abs(page - pageNum) === 2) {
+                            return (
+                              <span
+                                key={pageNum}
+                                className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
+                              >
+                                ...
+                              </span>
+                            );
+                          }
+                          return null;
+                        }
+
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => handlePageChange(pageNum)}
+                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                              page === pageNum
+                                ? 'z-10 bg-teal border-teal text-white font-bold'
+                                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+
+                      <button
+                        onClick={() => handlePageChange(page + 1)}
+                        disabled={page >= totalPages}
+                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <span className="sr-only">Next</span>
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

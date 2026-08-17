@@ -379,6 +379,14 @@ export interface PackageWithGallery extends Omit<Package, 'gallery_images'> {
   gallery_images: GalleryImage[];
 }
 
+export interface PaginatedPackageResponse {
+  items: Package[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}
+
 // Comprehensive Package Detail types for tour page redesign
 export interface CountrySummary {
   id: number;

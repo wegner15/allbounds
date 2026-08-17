@@ -136,3 +136,15 @@ class PackageInclusionCreate(BaseModel):
 # Schema for adding an exclusion to a package
 class PackageExclusionCreate(BaseModel):
     exclusion_id: int = Field(..., description="ID of the exclusion to add to the package")
+
+# Schema for paginated package response (for admin list)
+class PaginatedPackageResponse(BaseModel):
+    items: List[PackageListResponse]
+    total: int
+    page: int
+    size: int
+    pages: int
+
+    class Config:
+        from_attributes = True
+

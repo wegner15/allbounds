@@ -8,7 +8,7 @@ from app.models.user import User
 from app.schemas.group_trip import (
     GroupTripResponse, GroupTripCreate, GroupTripUpdate, GroupTripWithCountryResponse,
     GroupTripHolidayTypeCreate, GroupTripDepartureResponse, GroupTripDepartureCreate,
-    GroupTripDepartureUpdate
+    GroupTripDepartureUpdate, PaginatedGroupTripResponse,
 )
 from app.schemas.media import MediaAssetResponse
 from pydantic import BaseModel
@@ -16,6 +16,45 @@ from app.services.group_trip import group_trip_service
 from app.auth.dependencies import get_current_user, has_permission
 
 router = APIRouter()
+
+@router.get("/paginated", response_model=PaginatedGroupTripResponse)
+def get_paginated_group_trips(
+    db: Session = Depends(get_db),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(10, ge=1, le=100, description="Items per page"),
+    search: str = Query(None, description="Search term for group trip name or description"),
+    country_id: int = Query(None, description="Filter by country ID"),
+    holiday_type_id: int = Query(None, description="Filter by holiday type ID"),
+    tag: str = Query(None, description="Filter by tag slug"),
+    include_inactive: bool = Query(True, description="Include inactive group trips"),
+    order_by: str = Query("created_at", description="Field to order by"),
+    order: str = Query("desc", description="Order direction (asc/desc)"),
+) -> Any:
+    """
+    Retrieve paginated list of group trips for admin list view.
+    """
+    import math
+    items, total = group_trip_service.get_paginated_group_trips(
+        db=db,
+        page=page,
+        limit=limit,
+        search=search,
+        country_id=country_id,
+        holiday_type_id=holiday_type_id,
+        tag=tag,
+        include_inactive=include_inactive,
+        order_by=order_by,
+        order=order,
+    )
+    pages = math.ceil(total / limit) if limit > 0 else 0
+
+    return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "size": limit,
+        "pages": pages,
+    }
 
 @router.get("/", response_model=List[GroupTripResponse])
 def get_group_trips(

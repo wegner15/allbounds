@@ -135,3 +135,15 @@ class AttractionWithRelationshipsResponse(AttractionWithCountryResponse):
     
     class Config:
         from_attributes = True
+
+# Schema for paginated attraction response (optimized for admin list)
+class PaginatedAttractionResponse(BaseModel):
+    items: List[AttractionResponse]
+    total: int
+    page: int
+    size: int
+    pages: int
+
+    class Config:
+        from_attributes = True
+

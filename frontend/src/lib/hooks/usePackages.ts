@@ -1,6 +1,37 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient, endpoints } from '../api';
-import type { Package, PackageWithGallery } from '../types/api';
+import type { Package, PackageWithGallery, PaginatedPackageResponse } from '../types/api';
+
+// Hook for fetching paginated packages (optimized for Admin List)
+export const usePaginatedPackages = (params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  country_id?: number;
+  package_type?: string;
+  include_inactive?: boolean;
+  order_by?: string;
+  order?: string;
+}) => {
+  const queryParams = new URLSearchParams();
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        queryParams.append(key, value.toString());
+      }
+    });
+  }
+
+  const queryString = queryParams.toString();
+  const endpoint = queryString ? `${endpoints.packages.paginated(queryString)}` : endpoints.packages.paginated();
+
+  return useQuery<PaginatedPackageResponse>({
+    queryKey: ['packages', 'paginated', params],
+    queryFn: async () => {
+      return apiClient.get<PaginatedPackageResponse>(endpoint);
+    },
+  });
+};
 
 // Hook for fetching all packages
 export const usePackages = (params?: {

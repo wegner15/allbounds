@@ -2,6 +2,46 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient, endpoints } from '../api';
 import type { GroupTrip, GroupTripWithGallery, GroupTripDeparture } from '../types/api';
 
+export interface PaginatedGroupTripResponse {
+  items: GroupTrip[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}
+
+// Hook for fetching paginated group trips (optimized for Admin List)
+export const usePaginatedGroupTrips = (params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  country_id?: number;
+  holiday_type_id?: number;
+  tag?: string;
+  include_inactive?: boolean;
+  order_by?: string;
+  order?: string;
+}) => {
+  const queryParams = new URLSearchParams();
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        queryParams.append(key, value.toString());
+      }
+    });
+  }
+
+  const queryString = queryParams.toString();
+  const endpoint = queryString ? `/group-trips/paginated?${queryString}` : '/group-trips/paginated';
+
+  return useQuery<PaginatedGroupTripResponse>({
+    queryKey: ['groupTrips', 'paginated', params],
+    queryFn: async () => {
+      return apiClient.get<PaginatedGroupTripResponse>(endpoint);
+    },
+  });
+};
+
 // Hook for fetching all group trips
 export const useGroupTrips = (params?: { 
   country_id?: number;

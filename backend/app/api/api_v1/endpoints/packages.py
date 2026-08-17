@@ -6,7 +6,15 @@ from pydantic import BaseModel
 
 from app.db.database import get_db
 from app.models.user import User
-from app.schemas.package import PackageResponse, PackageCreate, PackageUpdate, PackageWithCountryResponse, PackageHolidayTypeCreate, PackageListResponse
+from app.schemas.package import (
+    PackageResponse,
+    PackageCreate,
+    PackageUpdate,
+    PackageWithCountryResponse,
+    PackageHolidayTypeCreate,
+    PackageListResponse,
+    PaginatedPackageResponse,
+)
 from app.schemas.package_detail import PackageDetailResponse
 from app.services.package import package_service
 from app.auth.dependencies import get_current_user, has_permission
@@ -69,6 +77,44 @@ def get_packages(
     
     # CRITICAL: Serialize to Pydantic INSIDE endpoint to prevent lazy-loading
     return [PackageListResponse.from_orm(pkg) for pkg in packages]
+
+@router.get("/paginated", response_model=PaginatedPackageResponse)
+def get_paginated_packages(
+    db: Session = Depends(get_db),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(10, ge=1, le=100, description="Items per page"),
+    search: str = Query(None, description="Search term for package name or destination"),
+    country_id: int = Query(None, description="Filter by country ID"),
+    package_type: str = Query(None, description="Filter by package type (safari or holiday)"),
+    include_inactive: bool = Query(True, description="Include inactive packages"),
+    order_by: str = Query("created_at", description="Field to order by"),
+    order: str = Query("desc", description="Order direction (asc/desc)"),
+) -> Any:
+    """
+    Retrieve paginated list of packages optimized for admin list view.
+    Reduces database load and memory usage.
+    """
+    import math
+    items, total = package_service.get_paginated_packages(
+        db=db,
+        page=page,
+        limit=limit,
+        search=search,
+        country_id=country_id,
+        package_type=package_type,
+        include_inactive=include_inactive,
+        order_by=order_by,
+        order=order,
+    )
+    pages = math.ceil(total / limit) if limit > 0 else 0
+
+    return {
+        "items": [PackageListResponse.from_orm(pkg) for pkg in items],
+        "total": total,
+        "page": page,
+        "size": limit,
+        "pages": pages,
+    }
 
 @router.get("/country/{country_id}", response_model=List[PackageWithCountryResponse])
 @cache_endpoint(ttl=300)

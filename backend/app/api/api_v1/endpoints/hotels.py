@@ -7,7 +7,14 @@ from app.db.database import get_db
 from app.core.redis_cache import cache_endpoint
 from app.models.hotel import Hotel
 from app.models.user import User
-from app.schemas.hotel import HotelResponse, HotelCreate, HotelUpdate, HotelWithCountryResponse, HotelWithRelationshipsResponse
+from app.schemas.hotel import (
+    HotelResponse,
+    HotelCreate,
+    HotelUpdate,
+    HotelWithCountryResponse,
+    HotelWithRelationshipsResponse,
+    PaginatedHotelResponse,
+)
 from app.services.hotel import hotel_service
 from app.auth.dependencies import get_current_user, has_permission
 from pydantic import BaseModel
@@ -17,6 +24,43 @@ router = APIRouter()
 
 class SetCoverImageRequest(BaseModel):
     image_id: str
+
+@router.get("/paginated", response_model=PaginatedHotelResponse)
+def get_paginated_hotels(
+    db: Session = Depends(get_db),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(10, ge=1, le=100, description="Items per page"),
+    search: str = Query(None, description="Search term for hotel name, city, address, or country"),
+    country_id: int = Query(None, description="Filter by country ID"),
+    tag: str = Query(None, description="Filter by tag slug"),
+    include_inactive: bool = Query(True, description="Include inactive hotels"),
+    order_by: str = Query("created_at", description="Field to order by"),
+    order: str = Query("desc", description="Order direction (asc/desc)"),
+) -> Any:
+    """
+    Retrieve paginated list of hotels optimized for admin list view.
+    """
+    import math
+    items, total = hotel_service.get_paginated_hotels(
+        db=db,
+        page=page,
+        limit=limit,
+        search=search,
+        country_id=country_id,
+        tag=tag,
+        include_inactive=include_inactive,
+        order_by=order_by,
+        order=order,
+    )
+    pages = math.ceil(total / limit) if limit > 0 else 0
+
+    return {
+        "items": [HotelWithCountryResponse(**hotel) for hotel in items],
+        "total": total,
+        "page": page,
+        "size": limit,
+        "pages": pages,
+    }
 
 @router.get("/")
 @router.get("")  # Explicit route without trailing slash

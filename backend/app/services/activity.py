@@ -22,6 +22,61 @@ class ActivityService:
             joinedload(Activity.countries),
             joinedload(Activity.tags)
         ).offset(skip).limit(limit).all()
+
+    def get_paginated_activities(
+        self,
+        db: Session,
+        page: int = 1,
+        limit: int = 10,
+        search: Optional[str] = None,
+        country_id: Optional[int] = None,
+        tag: Optional[str] = None,
+        include_inactive: bool = True,
+        order_by: str = "created_at",
+        order: str = "desc",
+    ):
+        """
+        Retrieve paginated activities with search and filtering for admin panel.
+        Returns (items, total_count).
+        """
+        from sqlalchemy import or_
+        from app.models.country import Country
+        query = db.query(Activity).options(
+            joinedload(Activity.cover_image),
+            joinedload(Activity.countries),
+            joinedload(Activity.tags)
+        )
+
+        if not include_inactive:
+            query = query.filter(Activity.is_active == True)
+
+        if country_id:
+            query = query.filter(Activity.countries.any(Country.id == country_id))
+
+        if tag:
+            query = query.filter(Activity.tags.any(Tag.slug == tag))
+
+        if search and search.strip():
+            normalized = f"%{search.strip().lower()}%"
+            query = query.filter(
+                or_(
+                    Activity.name.ilike(normalized),
+                    Activity.description.ilike(normalized),
+                    Activity.summary.ilike(normalized),
+                )
+            )
+
+        total = query.count()
+
+        if order_by == "name":
+            query = query.order_by(Activity.name.desc() if order == "desc" else Activity.name.asc())
+        else:
+            query = query.order_by(Activity.created_at.desc() if order == "desc" else Activity.created_at.asc())
+
+        skip = (page - 1) * limit if page > 0 else 0
+        items = query.offset(skip).limit(limit).all()
+
+        return items, total
     
     def get_activity(self, db: Session, activity_id: int) -> Optional[Activity]:
         """

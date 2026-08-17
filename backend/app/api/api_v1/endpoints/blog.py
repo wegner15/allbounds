@@ -5,13 +5,55 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models.blog import BlogPost
 from app.models.user import User
-from app.schemas.blog import BlogPostResponse, BlogPostCreate, BlogPostUpdate
+from app.schemas.blog import (
+    BlogPostResponse,
+    BlogPostCreate,
+    BlogPostUpdate,
+    PaginatedBlogResponse,
+)
 from app.services.blog import blog_service
 from app.services.audit import create_audit_log
 from app.auth.dependencies import get_current_active_superuser, get_current_user, get_current_user_optional
 from app.utils.slug import create_slug
 
 router = APIRouter()
+
+@router.get("/paginated", response_model=PaginatedBlogResponse)
+def get_paginated_blogs(
+    db: Session = Depends(get_db),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(10, ge=1, le=100, description="Items per page"),
+    search: str = Query(None, description="Search term for blog title or summary"),
+    tag: str = Query(None, description="Filter by tag slug"),
+    include_drafts: bool = Query(True, description="Include drafts for admin view"),
+    order_by: str = Query("created_at", description="Field to order by"),
+    order: str = Query("desc", description="Order direction (asc/desc)"),
+    current_user: Optional[User] = Depends(get_current_user_optional),
+):
+    """
+    Retrieve paginated list of blog posts for admin list view.
+    """
+    import math
+    # Allow drafts if current_user is superuser or if include_drafts is requested
+    items, total = blog_service.get_paginated_blogs(
+        db=db,
+        page=page,
+        limit=limit,
+        search=search,
+        tag=tag,
+        include_drafts=include_drafts,
+        order_by=order_by,
+        order=order,
+    )
+    pages = math.ceil(total / limit) if limit > 0 else 0
+
+    return {
+        "items": [BlogPostResponse.model_validate(item) for item in items],
+        "total": total,
+        "page": page,
+        "size": limit,
+        "pages": pages,
+    }
 
 @router.get("/", response_model=List[BlogPostResponse])
 def read_blog_posts(

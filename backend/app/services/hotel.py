@@ -122,6 +122,108 @@ class HotelService:
             result.append(hotel_data)
 
         return result
+
+    def get_paginated_hotels(
+        self,
+        db: Session,
+        page: int = 1,
+        limit: int = 10,
+        search: Optional[str] = None,
+        country_id: Optional[int] = None,
+        tag: Optional[str] = None,
+        include_inactive: bool = True,
+        order_by: str = "created_at",
+        order: str = "desc",
+    ):
+        """
+        Retrieve paginated hotels with search and filtering for admin panel.
+        Returns (items, total_count).
+        """
+        from sqlalchemy import or_
+        query = db.query(Hotel).options(
+            joinedload(Hotel.country),
+            joinedload(Hotel.amenities),
+            joinedload(Hotel.tags)
+        )
+
+        if not include_inactive:
+            query = query.filter(Hotel.is_active == True)
+
+        if country_id:
+            query = query.filter(Hotel.country_id == country_id)
+
+        if tag:
+            query = query.filter(Hotel.tags.any(Tag.slug == tag))
+
+        if search and search.strip():
+            term = f"%{search.strip()}%"
+            query = query.outerjoin(Hotel.country).filter(
+                or_(
+                    Hotel.name.ilike(term),
+                    Hotel.city.ilike(term),
+                    Hotel.address.ilike(term),
+                    Country.name.ilike(term)
+                )
+            )
+
+        total = query.count()
+
+        if order_by == "name":
+            query = query.order_by(Hotel.name.desc() if order == "desc" else Hotel.name.asc())
+        elif order_by == "stars":
+            query = query.order_by(Hotel.stars.desc() if order == "desc" else Hotel.stars.asc())
+        else:
+            query = query.order_by(Hotel.created_at.desc() if order == "desc" else Hotel.created_at.asc())
+
+        skip = (page - 1) * limit if page > 0 else 0
+        hotels = query.offset(skip).limit(limit).all()
+
+        result = []
+        for hotel in hotels:
+            cover_image_url = self._resolve_cover_image_url(db, hotel)
+            hotel_data = {
+                "id": hotel.id,
+                "name": hotel.name,
+                "summary": hotel.summary,
+                "description": hotel.description,
+                "slug": hotel.slug,
+                "country_id": hotel.country_id,
+                "hotel_type_id": hotel.hotel_type_id,
+                "country": {
+                    "id": hotel.country.id,
+                    "name": hotel.country.name,
+                    "slug": hotel.country.slug,
+                } if hotel.country else None,
+                "image_id": hotel.image_id,
+                "image_url": cover_image_url,
+                "cover_image": cover_image_url,
+                "is_active": hotel.is_active,
+                "address": hotel.address,
+                "city": hotel.city,
+                "stars": hotel.stars,
+                "price_category": hotel.price_category,
+                "amenity_ids": [amenity.id for amenity in hotel.amenities] if hotel.amenities else [],
+                "tags": [
+                    {
+                        "id": tag_item.id,
+                        "name": tag_item.name,
+                        "slug": getattr(tag_item, 'slug', ''),
+                        "description": getattr(tag_item, 'description', None),
+                        "category": getattr(tag_item, 'category', None),
+                        "color": getattr(tag_item, 'color', None),
+                        "icon": getattr(tag_item, 'icon', None),
+                        "is_active": getattr(tag_item, 'is_active', True),
+                        "created_at": getattr(tag_item, 'created_at', None),
+                        "updated_at": getattr(tag_item, 'updated_at', None),
+                    }
+                    for tag_item in hotel.tags
+                ] if hotel.tags else [],
+                "created_at": hotel.created_at,
+                "updated_at": hotel.updated_at,
+            }
+            result.append(hotel_data)
+
+        return result, total
     
     def get_hotels_by_country(self, db: Session, country_id: int, skip: int = 0, limit: int = 100) -> List[Dict[str, Any]]:
         """

@@ -58,6 +58,71 @@ class PackageService:
                 query = query.order_by(Package.price.asc())
 
         return query.offset(skip).limit(limit).all()
+
+    def get_paginated_packages(
+        self,
+        db: Session,
+        page: int = 1,
+        limit: int = 10,
+        search: Optional[str] = None,
+        country_id: Optional[int] = None,
+        package_type: Optional[str] = None,
+        include_inactive: bool = True,
+        order_by: str = "created_at",
+        order: str = "desc",
+    ):
+        """
+        Retrieve paginated packages with search and filtering for admin panel.
+        Returns (items, total_count).
+        """
+        from app.models.country import Country
+        query = db.query(Package).options(
+            joinedload(Package.country),
+            selectinload(Package.countries),
+            selectinload(Package.tags)
+        )
+
+        if not include_inactive:
+            query = query.filter(Package.is_active == True)
+
+        if package_type:
+            query = query.filter(Package.package_type == package_type)
+
+        if country_id:
+            query = query.filter(
+                or_(
+                    Package.country_id == country_id,
+                    Package.countries.any(Country.id == country_id)
+                )
+            )
+
+        if search and search.strip():
+            term = f"%{search.strip()}%"
+            query = query.outerjoin(Package.country).filter(
+                or_(
+                    Package.name.ilike(term),
+                    Package.slug.ilike(term),
+                    Country.name.ilike(term)
+                )
+            )
+
+        total = query.count()
+
+        if order_by == "created_at":
+            query = query.order_by(Package.created_at.desc() if order == "desc" else Package.created_at.asc())
+        elif order_by == "name":
+            query = query.order_by(Package.name.desc() if order == "desc" else Package.name.asc())
+        elif order_by == "price":
+            query = query.order_by(Package.price.desc() if order == "desc" else Package.price.asc())
+        elif order_by == "duration_days":
+            query = query.order_by(Package.duration_days.desc() if order == "desc" else Package.duration_days.asc())
+        else:
+            query = query.order_by(Package.created_at.desc())
+
+        skip = (page - 1) * limit if page > 0 else 0
+        items = query.offset(skip).limit(limit).all()
+
+        return items, total
     
     def get_packages_by_country(self, db: Session, country_id: int, skip: int = 0, limit: int = 100, package_type: Optional[str] = None) -> List[Package]:
         """

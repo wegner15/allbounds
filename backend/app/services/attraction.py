@@ -68,6 +68,68 @@ class AttractionService:
             .limit(limit)
             .all()
         )
+
+    def get_paginated_attractions(
+        self,
+        db: Session,
+        page: int = 1,
+        limit: int = 10,
+        search: Optional[str] = None,
+        country_id: Optional[int] = None,
+        category: Optional[str] = None,
+        tag: Optional[str] = None,
+        include_inactive: bool = True,
+        order_by: str = "created_at",
+        order: str = "desc",
+    ):
+        """
+        Retrieve paginated attractions with search and filtering for admin panel.
+        Returns (items, total_count).
+        """
+        query = db.query(Attraction).options(
+            joinedload(Attraction.country),
+            joinedload(Attraction.activities),
+            joinedload(Attraction.tags)
+        )
+
+        if not include_inactive:
+            query = query.filter(Attraction.is_active == True)
+
+        if country_id:
+            query = query.filter(Attraction.country_id == country_id)
+
+        if category:
+            query = query.filter(Attraction.category == category)
+
+        if tag:
+            query = query.filter(Attraction.tags.any(Tag.slug == tag))
+
+        if search and search.strip():
+            normalized = f"%{search.strip().lower()}%"
+            query = query.outerjoin(Attraction.country).filter(
+                or_(
+                    Attraction.name.ilike(normalized),
+                    Attraction.description.ilike(normalized),
+                    Attraction.summary.ilike(normalized),
+                    Attraction.city.ilike(normalized),
+                    Attraction.address.ilike(normalized),
+                    Country.name.ilike(normalized),
+                )
+            )
+
+        total = query.count()
+
+        if order_by == "name":
+            query = query.order_by(Attraction.name.desc() if order == "desc" else Attraction.name.asc())
+        elif order_by == "price":
+            query = query.order_by(Attraction.price.desc() if order == "desc" else Attraction.price.asc())
+        else:
+            query = query.order_by(Attraction.created_at.desc() if order == "desc" else Attraction.created_at.asc())
+
+        skip = (page - 1) * limit if page > 0 else 0
+        items = query.offset(skip).limit(limit).all()
+
+        return items, total
     
     def get_attractions_by_country(self, db: Session, country_id: int, skip: int = 0, limit: int = 100) -> List[Attraction]:
         """

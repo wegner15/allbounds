@@ -61,3 +61,15 @@ class ActivityTripsResponse(BaseModel):
     group_trips: List[Any] = []
     total_packages: int = 0
     total_group_trips: int = 0
+
+# Schema for paginated activity response (optimized for admin list)
+class PaginatedActivityResponse(BaseModel):
+    items: List[ActivityResponse]
+    total: int
+    page: int
+    size: int
+    pages: int
+
+    class Config:
+        from_attributes = True
+

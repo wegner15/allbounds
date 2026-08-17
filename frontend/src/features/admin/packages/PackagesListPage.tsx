@@ -1,17 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useDeletePackage, usePackages, usePatchPackage } from '../../../lib/hooks/usePackages';
+import { useDeletePackage, usePaginatedPackages, usePatchPackage } from '../../../lib/hooks/usePackages';
 import CloudflareImage from '../../../components/ui/CloudflareImage';
 import CountryFilterSelect from '../../../components/ui/CountryFilterSelect';
 
 const PackagesListPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCountryId, setSelectedCountryId] = useState<number | undefined>(undefined);
   const [selectedPackageType, setSelectedPackageType] = useState<'all' | 'safari' | 'holiday'>('all');
-  const { data: packages, isLoading, error } = usePackages({
-    ...(selectedCountryId ? { country_id: selectedCountryId } : {}),
-    ...(selectedPackageType !== 'all' ? { package_type: selectedPackageType } : {}),
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  // Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  const { data, isLoading, error } = usePaginatedPackages({
+    page,
+    limit,
+    search: debouncedSearch || undefined,
+    country_id: selectedCountryId,
+    package_type: selectedPackageType !== 'all' ? selectedPackageType : undefined,
+    include_inactive: true,
   });
+
+  const packages = data?.items || [];
+  const total = data?.total || 0;
+  const totalPages = data?.pages || 0;
+
   const deletePackage = useDeletePackage();
   const patchPackage = usePatchPackage();
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
@@ -24,12 +46,6 @@ const PackagesListPage: React.FC = () => {
     packageItem: null,
     selectedType: 'safari',
   });
-
-  // Filter packages based on search query
-  const filteredPackages = packages?.filter(pkg =>
-    pkg.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    pkg.country?.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const handleDelete = async (id: number) => {
     try {
@@ -46,6 +62,12 @@ const PackagesListPage: React.FC = () => {
       patchPackage.variables?.id === id &&
       patchPackage.variables?.data &&
       Object.prototype.hasOwnProperty.call(patchPackage.variables.data, field);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+    }
   };
 
   return (
@@ -74,7 +96,7 @@ const PackagesListPage: React.FC = () => {
       <div className="flex items-center space-x-2 mb-4 bg-gray-100 p-1.5 rounded-lg w-fit">
         <button
           type="button"
-          onClick={() => setSelectedPackageType('all')}
+          onClick={() => { setSelectedPackageType('all'); setPage(1); }}
           className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
             selectedPackageType === 'all'
               ? 'bg-white text-gray-900 shadow-sm'
@@ -85,7 +107,7 @@ const PackagesListPage: React.FC = () => {
         </button>
         <button
           type="button"
-          onClick={() => setSelectedPackageType('safari')}
+          onClick={() => { setSelectedPackageType('safari'); setPage(1); }}
           className={`px-4 py-2 text-sm font-medium rounded-md flex items-center space-x-1.5 transition-all ${
             selectedPackageType === 'safari'
               ? 'bg-amber-600 text-white shadow-sm'
@@ -97,7 +119,7 @@ const PackagesListPage: React.FC = () => {
         </button>
         <button
           type="button"
-          onClick={() => setSelectedPackageType('holiday')}
+          onClick={() => { setSelectedPackageType('holiday'); setPage(1); }}
           className={`px-4 py-2 text-sm font-medium rounded-md flex items-center space-x-1.5 transition-all ${
             selectedPackageType === 'holiday'
               ? 'bg-teal text-white shadow-sm'
@@ -128,12 +150,12 @@ const PackagesListPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row w-full sm:w-auto items-center gap-3">
           <CountryFilterSelect
             value={selectedCountryId}
-            onChange={(id) => { setSelectedCountryId(id); setSearchQuery(''); }}
+            onChange={(id) => { setSelectedCountryId(id); setPage(1); }}
             className="w-full sm:w-56"
           />
-          {(selectedCountryId || selectedPackageType !== 'all') && (
+          {(selectedCountryId || selectedPackageType !== 'all' || searchQuery) && (
             <button
-              onClick={() => { setSelectedCountryId(undefined); setSelectedPackageType('all'); }}
+              onClick={() => { setSelectedCountryId(undefined); setSelectedPackageType('all'); setSearchQuery(''); setPage(1); }}
               className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-transparent rounded-md hover:bg-gray-200 transition-colors whitespace-nowrap"
             >
               Reset filters
@@ -147,13 +169,13 @@ const PackagesListPage: React.FC = () => {
         {isLoading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-charcoal"></div>
-            <p className="mt-2">Loading packages...</p>
+            <p className="mt-2 text-sm text-gray-500">Loading packages...</p>
           </div>
         ) : error ? (
           <div className="text-center py-12 text-red-500">
             <p>Error loading packages. Please try again later.</p>
           </div>
-        ) : filteredPackages && filteredPackages.length > 0 ? (
+        ) : packages && packages.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -188,7 +210,7 @@ const PackagesListPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredPackages.map((pkg) => (
+                {packages.map((pkg) => (
                   <tr key={pkg.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -389,6 +411,114 @@ const PackagesListPage: React.FC = () => {
                 ))}
               </tbody>
             </table>
+
+            {/* Pagination Bar */}
+            {total > 0 && (
+              <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 rounded-b-lg">
+                <div className="flex-1 flex justify-between sm:hidden">
+                  <button
+                    onClick={() => handlePageChange(page - 1)}
+                    disabled={page <= 1}
+                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => handlePageChange(page + 1)}
+                    disabled={page >= totalPages}
+                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-4">
+                    <p className="text-sm text-gray-700">
+                      Showing <span className="font-semibold">{(page - 1) * limit + 1}</span> to{' '}
+                      <span className="font-semibold">{Math.min(page * limit, total)}</span> of{' '}
+                      <span className="font-semibold">{total}</span> packages
+                    </p>
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <span>Show</span>
+                      <select
+                        value={limit}
+                        onChange={(e) => {
+                          setLimit(Number(e.target.value));
+                          setPage(1);
+                        }}
+                        className="border border-gray-300 rounded-md py-1 px-2 text-sm bg-white focus:ring-teal focus:border-teal"
+                      >
+                        <option value={10}>10</option>
+                        <option value={25}>25</option>
+                        <option value={50}>50</option>
+                        <option value={100}>100</option>
+                      </select>
+                      <span>per page</span>
+                    </div>
+                  </div>
+                  <div>
+                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                      <button
+                        onClick={() => handlePageChange(page - 1)}
+                        disabled={page <= 1}
+                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <span className="sr-only">Previous</span>
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                        if (
+                          totalPages > 7 &&
+                          pageNum !== 1 &&
+                          pageNum !== totalPages &&
+                          Math.abs(page - pageNum) > 1
+                        ) {
+                          if (Math.abs(page - pageNum) === 2) {
+                            return (
+                              <span
+                                key={pageNum}
+                                className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
+                              >
+                                ...
+                              </span>
+                            );
+                          }
+                          return null;
+                        }
+
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => handlePageChange(pageNum)}
+                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                              page === pageNum
+                                ? 'z-10 bg-teal border-teal text-white font-bold'
+                                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+
+                      <button
+                        onClick={() => handlePageChange(page + 1)}
+                        disabled={page >= totalPages}
+                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <span className="sr-only">Next</span>
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="text-center py-12">

@@ -145,3 +145,15 @@ class GroupTripInclusionCreate(BaseModel):
 # Schema for adding an exclusion to a group trip
 class GroupTripExclusionCreate(BaseModel):
     exclusion_id: int = Field(..., description="ID of the exclusion to add to the group trip")
+
+# Schema for paginated group trip response (optimized for admin list)
+class PaginatedGroupTripResponse(BaseModel):
+    items: List[GroupTripWithCountryResponse]
+    total: int
+    page: int
+    size: int
+    pages: int
+
+    class Config:
+        from_attributes = True
+

@@ -47,6 +47,44 @@ export interface BlogPostUpdateInput {
   package_ids?: number[];
 }
 
+export interface PaginatedBlogResponse {
+  items: BlogPost[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}
+
+// Hook for fetching paginated blog posts (optimized for Admin List)
+export const usePaginatedBlogs = (params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  tag?: string;
+  include_drafts?: boolean;
+  order_by?: string;
+  order?: string;
+}) => {
+  const queryParams = new URLSearchParams();
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        queryParams.append(key, value.toString());
+      }
+    });
+  }
+
+  const queryString = queryParams.toString();
+  const endpoint = queryString ? `/blog/paginated?${queryString}` : '/blog/paginated';
+
+  return useQuery<PaginatedBlogResponse>({
+    queryKey: ['blogs', 'paginated', params],
+    queryFn: async () => {
+      return apiClient.get<PaginatedBlogResponse>(endpoint);
+    },
+  });
+};
+
 // Hook for fetching all blog posts
 export const useBlogs = (includeDrafts: boolean = false) => {
   return useQuery<BlogPost[]>({

@@ -191,6 +191,7 @@ export const endpoints = {
     byHolidayType: (holidayTypeId: number) => `/packages/?holiday_type_id=${holidayTypeId}`,
     coverImage: (id: number) => `/packages/${id}/cover-image`,
     similar: (id: number, limit?: number) => `/packages/${id}/similar${limit ? `?limit=${limit}` : ''}`,
+    paginated: (queryString?: string) => queryString ? `/packages/paginated?${queryString}` : '/packages/paginated',
   },
 
   // Hotels
@@ -210,6 +211,7 @@ export const endpoints = {
     assignGroupTrip: (hotelId: number, groupTripId: number) => `/hotels/${hotelId}/group-trips/${groupTripId}`,
     removeGroupTrip: (hotelId: number, groupTripId: number) => `/hotels/${hotelId}/group-trips/${groupTripId}`,
     setCoverImage: (id: number) => `/hotels/${id}/cover-image`,
+    paginated: (queryString?: string) => queryString ? `/hotels/paginated?${queryString}` : '/hotels/paginated',
   },
 
   // Hotel Types
@@ -235,6 +237,7 @@ export const endpoints = {
     byCountry: (countryId: number) => `/group-trips/?country_id=${countryId}`,
     byHolidayType: (holidayTypeId: number) => `/group-trips/?holiday_type_id=${holidayTypeId}`,
     departures: (groupTripId: number) => `/group-trips/${groupTripId}/departures`,
+    paginated: (queryString?: string) => queryString ? `/group-trips/paginated?${queryString}` : '/group-trips/paginated',
   },
 
 
@@ -257,6 +260,7 @@ export const endpoints = {
     create: () => '/activities/',
     update: (id: number) => `/activities/${id}`,
     delete: (id: number) => `/activities/${id}`,
+    paginated: (queryString?: string) => queryString ? `/activities/paginated?${queryString}` : '/activities/paginated',
   },
 
   // Attractions
@@ -270,6 +274,7 @@ export const endpoints = {
     byCountry: (countryId: number) => `/attractions/?country_id=${countryId}`,
     trips: (id: number) => `/attractions/${id}/trips`,
     tripsBySlug: (slug: string) => `/attractions/slug/${slug}/trips`,
+    paginated: (queryString?: string) => queryString ? `/attractions/paginated?${queryString}` : '/attractions/paginated',
   },
 
   // Holiday Types
@@ -304,6 +309,7 @@ export const endpoints = {
     detail: (id: number) => `/blog/${id}`,
     bySlug: (slug: string) => `/blog/slug/${slug}`,
     byTag: (tag: string) => `/blog/?tag=${tag}`,
+    paginated: (queryString?: string) => queryString ? `/blog/paginated?${queryString}` : '/blog/paginated',
   },
 
   // Newsletter

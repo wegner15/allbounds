@@ -76,3 +76,15 @@ class BlogPostResponse(BlogPostBase):
     
     class Config:
         from_attributes = True
+
+# Schema for paginated blog response (optimized for admin list)
+class PaginatedBlogResponse(BaseModel):
+    items: List[BlogPostResponse]
+    total: int
+    page: int
+    size: int
+    pages: int
+
+    class Config:
+        from_attributes = True
+

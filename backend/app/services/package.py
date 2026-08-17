@@ -160,7 +160,12 @@ class PackageService:
 
         if country:
             from app.models.country import Country
-            query = query.join(Package.country).filter(Country.name.ilike(f"%{country}%"))
+            query = query.filter(
+                or_(
+                    Package.country.has(Country.name.ilike(f"%{country}%")),
+                    Package.countries.any(Country.name.ilike(f"%{country}%"))
+                )
+            )
 
         if tag:
             query = query.filter(Package.tags.any(Tag.slug == tag))

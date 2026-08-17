@@ -161,7 +161,13 @@ export const endpoints = {
     list: () => '/countries/',
     create: () => '/countries/',
     withHotels: () => '/countries/with-hotels',
-    withPackages: (packageType?: string) => packageType ? `/countries/with-packages?package_type=${packageType}` : '/countries/with-packages',
+    withPackages: (packageType?: string, featured?: boolean) => {
+      const params = new URLSearchParams();
+      if (packageType) params.append('package_type', packageType);
+      if (featured) params.append('featured', 'true');
+      const qs = params.toString();
+      return qs ? `/countries/with-packages?${qs}` : '/countries/with-packages';
+    },
     withActivities: () => '/countries/with-activities',
     withAttractions: () => '/countries/with-attractions',
     byId: (id: number) => `/countries/${id}`,

@@ -60,6 +60,8 @@ def get_packages(
                 packages = [p for p in packages if getattr(p, 'package_type', None) == package_type]
         else:
             packages = []
+    elif popular:
+        packages = package_service.get_featured_packages(db, skip=skip, limit=limit, country=country, tag=tag, package_type=package_type)
     elif country_id:
         packages = package_service.get_packages_by_country(db, country_id=country_id, skip=skip, limit=limit, package_type=package_type)
     elif country:
@@ -70,8 +72,6 @@ def get_packages(
             packages = package_service.get_packages_by_country(db, country_id=country_obj.id, skip=skip, limit=limit, package_type=package_type)
         else:
             packages = []
-    elif popular:
-        packages = package_service.get_featured_packages(db, skip=skip, limit=limit, country=country, tag=tag, package_type=package_type)
     else:
         packages = package_service.get_packages(db, skip=skip, limit=limit, order_by=order_by, order=order, tag=tag, package_type=package_type)
     

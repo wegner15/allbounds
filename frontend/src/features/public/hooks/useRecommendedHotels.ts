@@ -13,12 +13,12 @@ export const useCountriesWithHotels = () => {
   });
 };
 
-// Fetch countries that have packages (optionally filtered by package type)
-export const useCountriesWithPackages = (packageType?: string) => {
+// Fetch countries that have packages (optionally filtered by package type and featured status)
+export const useCountriesWithPackages = (packageType?: string, featured?: boolean) => {
   return useQuery<Country[], Error>({
-    queryKey: ['countries-with-packages', packageType],
+    queryKey: ['countries-with-packages', packageType, featured],
     queryFn: async () => {
-      const response = await apiClient.get<Country[]>(endpoints.countries.withPackages(packageType));
+      const response = await apiClient.get<Country[]>(endpoints.countries.withPackages(packageType, featured));
       return response;
     },
   });

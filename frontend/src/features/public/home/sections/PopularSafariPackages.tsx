@@ -8,7 +8,7 @@ import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../../utils/image
 import FromPriceDisplay from '../../../../components/ui/FromPriceDisplay';
 
 const PopularSafariPackages: React.FC = () => {
-  const { data: availableCountries, isLoading: countriesLoading } = useCountriesWithPackages('safari');
+  const { data: availableCountries, isLoading: countriesLoading } = useCountriesWithPackages('safari', true);
   const locations = availableCountries?.map(country => country.name) || [];
   const [activeTab, setActiveTab] = useState<string>('');
 

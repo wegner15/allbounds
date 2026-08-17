@@ -161,11 +161,17 @@ const TrendingActivities: React.FC = () => {
 
         <div className="text-center">
           <Link
-            to="/activities"
-            className="inline-flex items-center text-primary hover:text-primary-dark font-medium"
+            to={
+              availableCountries?.find(c => c.name === activeTab)?.slug
+                ? `/destinations/${availableCountries.find(c => c.name === activeTab)?.slug}/activities`
+                : activeTab
+                  ? `/activities?country=${encodeURIComponent(activeTab)}`
+                  : '/activities'
+            }
+            className="inline-flex items-center text-primary hover:text-primary-dark font-medium group transition-colors"
           >
-            More
-            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span>More {activeTab ? `${activeTab} ` : ''}Activities</span>
+            <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </Link>

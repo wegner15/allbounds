@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import SeoHead from '../../../components/seo/SeoHead';
 import { useActivities } from '../../../lib/hooks/useActivities';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
@@ -7,8 +7,16 @@ import { MapPin, Search, Compass, Sparkles } from 'lucide-react';
 import type { ActivityResponse } from '../../../lib/types/api';
 
 const ActivityListPage: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState(() => searchParams.get('country') || '');
+
+  useEffect(() => {
+    const countryParam = searchParams.get('country');
+    if (countryParam !== null) {
+      setSelectedCountry(countryParam);
+    }
+  }, [searchParams]);
 
   const { data: activities, isLoading, error } = useActivities();
 

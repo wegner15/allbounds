@@ -86,10 +86,10 @@ const PopularSafariPackages: React.FC = () => {
           </div>
 
           <Link
-            to="/packages?packageType=safari"
+            to={activeTab ? `/packages?packageType=safari&country=${encodeURIComponent(activeTab)}` : '/packages?packageType=safari'}
             className="hidden md:inline-flex items-center text-sm font-semibold text-amber-700 hover:text-amber-800 transition-colors group"
           >
-            <span>Explore All Safari Packages</span>
+            <span>Explore {activeTab ? `${activeTab} ` : 'All '}Safari Packages</span>
             <ArrowRight className="w-4 h-4 ml-1.5 transform group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
@@ -232,10 +232,10 @@ const PopularSafariPackages: React.FC = () => {
         {/* Mobile View All CTA */}
         <div className="text-center mt-6 md:hidden">
           <Link
-            to="/packages?packageType=safari"
+            to={activeTab ? `/packages?packageType=safari&country=${encodeURIComponent(activeTab)}` : '/packages?packageType=safari'}
             className="inline-flex items-center text-sm font-bold text-amber-700 hover:text-amber-800"
           >
-            <span>Explore All Safari Packages</span>
+            <span>Explore {activeTab ? `${activeTab} ` : 'All '}Safari Packages</span>
             <ArrowRight className="w-4 h-4 ml-1.5" />
           </Link>
         </div>

@@ -86,10 +86,10 @@ const PopularHolidayPackages: React.FC = () => {
           </div>
 
           <Link
-            to="/packages?packageType=holiday"
+            to={activeTab ? `/packages?packageType=holiday&country=${encodeURIComponent(activeTab)}` : '/packages?packageType=holiday'}
             className="hidden md:inline-flex items-center text-sm font-semibold text-teal hover:text-teal-dark transition-colors group"
           >
-            <span>Explore All Holiday Packages</span>
+            <span>Explore {activeTab ? `${activeTab} ` : 'All '}Holiday Packages</span>
             <ArrowRight className="w-4 h-4 ml-1.5 transform group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
@@ -232,10 +232,10 @@ const PopularHolidayPackages: React.FC = () => {
         {/* Mobile View All CTA */}
         <div className="text-center mt-6 md:hidden">
           <Link
-            to="/packages?packageType=holiday"
+            to={activeTab ? `/packages?packageType=holiday&country=${encodeURIComponent(activeTab)}` : '/packages?packageType=holiday'}
             className="inline-flex items-center text-sm font-bold text-teal hover:text-teal-dark"
           >
-            <span>Explore All Holiday Packages</span>
+            <span>Explore {activeTab ? `${activeTab} ` : 'All '}Holiday Packages</span>
             <ArrowRight className="w-4 h-4 ml-1.5" />
           </Link>
         </div>

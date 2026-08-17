@@ -201,11 +201,17 @@ const RecommendedHotels: React.FC = () => {
 
         <div className="text-center">
           <Link
-            to="/hotels"
-            className="inline-flex items-center text-primary hover:text-primary-dark font-medium"
+            to={
+              countries?.find(c => c.name === activeTab)?.slug
+                ? `/destinations/${countries.find(c => c.name === activeTab)?.slug}/hotels`
+                : activeTab
+                  ? `/hotels?country=${encodeURIComponent(activeTab)}`
+                  : '/hotels'
+            }
+            className="inline-flex items-center text-primary hover:text-primary-dark font-medium group transition-colors"
           >
-            More
-            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span>More {activeTab ? `${activeTab} ` : ''}Hotels</span>
+            <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </Link>

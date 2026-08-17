@@ -9,10 +9,12 @@ from app.schemas.package_price_chart import (
     PackagePriceChartUpdate,
     PackagePriceChartResponse
 )
+from app.core.redis_cache import cache_endpoint, invalidate_cache_pattern
 
 router = APIRouter()
 
 @router.get("/packages/{package_id}/price-charts", response_model=List[PackagePriceChartResponse])
+@cache_endpoint(ttl=300)
 def get_package_price_charts(
     package_id: int,
     db: Session = Depends(get_db),
@@ -26,6 +28,7 @@ def get_package_price_charts(
     return price_charts
 
 @router.get("/packages/{package_id}/price-charts/active", response_model=List[PackagePriceChartResponse])
+@cache_endpoint(ttl=300)
 def get_active_package_price_charts(
     package_id: int,
     db: Session = Depends(get_db)
@@ -37,6 +40,7 @@ def get_active_package_price_charts(
     return price_charts
 
 @router.get("/price-charts/{price_chart_id}", response_model=PackagePriceChartResponse)
+@cache_endpoint(ttl=300)
 def get_price_chart(
     price_chart_id: int,
     db: Session = Depends(get_db)
@@ -57,7 +61,9 @@ def create_price_chart(
     """
     Create a new price chart.
     """
-    return package_price_chart_service.create_price_chart(db, price_chart_data)
+    result = package_price_chart_service.create_price_chart(db, price_chart_data)
+    invalidate_cache_pattern(f"*price-charts*")
+    return result
 
 @router.put("/price-charts/{price_chart_id}", response_model=PackagePriceChartResponse)
 def update_price_chart(
@@ -71,6 +77,7 @@ def update_price_chart(
     updated_price_chart = package_price_chart_service.update_price_chart(db, price_chart_id, price_chart_data)
     if not updated_price_chart:
         raise HTTPException(status_code=404, detail="Price chart not found")
+    invalidate_cache_pattern(f"*price-charts*")
     return updated_price_chart
 
 @router.delete("/price-charts/{price_chart_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -84,4 +91,5 @@ def delete_price_chart(
     deleted = package_price_chart_service.delete_price_chart(db, price_chart_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Price chart not found")
+    invalidate_cache_pattern(f"*price-charts*")
     return None

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import SeoHead from '../../../components/seo/SeoHead';
 import { useHotels } from '../../../lib/hooks/useHotels';
@@ -7,9 +7,17 @@ import { useHotelTypes } from '../../../lib/hooks/useHotelTypes';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 
 const HotelListPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState(() => searchParams.get('country') || '');
   const [minStars, setMinStars] = useState<number | ''>('');
+
+  useEffect(() => {
+    const countryParam = searchParams.get('country');
+    if (countryParam !== null) {
+      setSelectedCountry(countryParam);
+    }
+  }, [searchParams]);
   const { data: hotels, isLoading, error } = useHotels();
   const { data: hotelTypes, isLoading: isLoadingTypes } = useHotelTypes();
 

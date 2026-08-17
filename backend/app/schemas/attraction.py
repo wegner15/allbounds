@@ -90,17 +90,17 @@ class AttractionResponse(AttractionBase):
     id: int
     slug: str = Field(..., description="URL-friendly slug for the attraction", example="maasai-mara")
     is_active: bool = Field(..., description="Whether the attraction is active")
-    is_featured: bool = Field(False, description="Whether the attraction is featured")
+    is_featured: Optional[bool] = Field(False, description="Whether the attraction is featured")
     created_at: datetime
     updated_at: datetime
     cover_image: Optional[str] = Field(None, description="Cover image URL")
     country: Optional[CountryResponse] = Field(None, description="Country details for the attraction")
     
-    @field_validator('is_active', mode='before')
+    @field_validator('is_active', 'is_featured', mode='before')
     @classmethod
     def validate_boolean_fields(cls, v):
         """Convert None to False for boolean fields"""
-        return v if v is not None else False
+        return bool(v) if v is not None else False
     
     @field_validator('cover_image', mode='before')
     @classmethod

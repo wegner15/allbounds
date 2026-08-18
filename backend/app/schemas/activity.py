@@ -11,6 +11,9 @@ class ActivityBase(BaseModel):
     name: str = Field(..., description="Name of the activity", example="Safari")
     description: Optional[str] = Field(None, description="Description of the activity")
     summary: Optional[str] = Field(None, description="Brief summary of the activity")
+    highlights: Optional[List[str]] = Field(None, description="Highlights of the activity")
+    inclusions: Optional[List[str]] = Field(None, description="Included items")
+    exclusions: Optional[List[str]] = Field(None, description="Excluded items")
 
 # Schema for creating a new Activity
 class ActivityCreate(ActivityBase):
@@ -32,6 +35,9 @@ class ActivityUpdate(BaseModel):
     media_asset_ids: Optional[List[int]] = Field(None, description="List of media asset IDs for the gallery")
     country_ids: Optional[List[int]] = Field(None, description="List of country IDs associated with the activity")
     tag_ids: Optional[List[int]] = Field(None, description="List of tag IDs associated with the activity")
+    highlights: Optional[List[str]] = Field(None, description="Highlights of the activity")
+    inclusions: Optional[List[str]] = Field(None, description="Included items")
+    exclusions: Optional[List[str]] = Field(None, description="Excluded items")
 
 # Schema for Activity response
 class ActivityResponse(ActivityBase):

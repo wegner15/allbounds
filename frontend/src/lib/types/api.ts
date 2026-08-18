@@ -167,6 +167,9 @@ export interface Activity extends BaseModel {
   cover_image?: MediaAsset;
   tags?: ContentTag[];
   tag_ids?: number[];
+  highlights?: string[];
+  inclusions?: string[];
+  exclusions?: string[];
 }
 
 export interface ActivityResponse extends Activity {
@@ -192,6 +195,9 @@ export interface ActivityCreate {
   media_asset_ids?: number[];
   country_ids?: number[];
   tag_ids?: number[];
+  highlights?: string[];
+  inclusions?: string[];
+  exclusions?: string[];
 }
 
 export type ActivityUpdate = Partial<ActivityCreate>;

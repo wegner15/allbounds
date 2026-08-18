@@ -7,7 +7,7 @@ import GridGallery from '../../../components/ui/GridGallery';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 import FromPriceDisplay from '../../../components/ui/FromPriceDisplay';
 import Button from '../../../components/ui/Button';
-import { MapPin, Clock, Users, Calendar, ArrowLeft, DollarSign, Mail } from 'lucide-react';
+import { MapPin, Clock, Users, Calendar, ArrowLeft, DollarSign, Mail, Check, X } from 'lucide-react';
 import { format } from 'date-fns';
 
 import SimilarActivities from '../../../components/recommendations/SimilarActivities';
@@ -16,6 +16,63 @@ const ActivityDetailPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
     const { data: activity, isLoading, error } = useActivityBySlug(slug || '');
     const { data: trips } = useActivityTrips(slug || '');
+    const [showFullDescription, setShowFullDescription] = React.useState(false);
+
+    // Compute Highlights
+    const highlightsList = React.useMemo(() => {
+        if (!activity) return [];
+        if (activity.highlights && activity.highlights.length > 0) {
+            return activity.highlights;
+        }
+        if (activity.summary) {
+            const items = activity.summary
+                .split(/(?<=[.!?])\s+|\n+/)
+                .map(s => s.trim().replace(/^[•\-\*\s]+/, ''))
+                .filter(s => s.length > 10);
+            if (items.length > 1) return items;
+        }
+        if (activity.description) {
+            const clean = activity.description.replace(/<[^>]*>/g, ' ');
+            const sentences = clean
+                .split(/(?<=[.!?])\s+|\n+/)
+                .map(s => s.trim().replace(/^[•\-\*\s]+/, ''))
+                .filter(s => s.length > 15 && s.length < 150);
+            if (sentences.length >= 2) return sentences.slice(0, 5);
+        }
+        return [
+            `Discover the history and unique charm of ${activity.name}`,
+            `Explore iconic local landmarks and top attractions with expert guidance`,
+            `Encounter vibrant culture, wildlife, or scenic natural landscapes`,
+            `Enjoy a seamless, memorable travel experience with provided support`,
+            `Capture stunning photos and create lifelong memories`
+        ];
+    }, [activity]);
+
+    // Compute Inclusions
+    const inclusionsList = React.useMemo(() => {
+        if (!activity) return [];
+        if (activity.inclusions && activity.inclusions.length > 0) {
+            return activity.inclusions;
+        }
+        return [
+            `Guided tour of ${activity.name}`,
+            `Professional English-speaking local guide`,
+            `All entry fees and activity tickets (if option selected)`,
+            `Hotel pickup and drop-off (select options)`
+        ];
+    }, [activity]);
+
+    // Compute Exclusions
+    const exclusionsList = React.useMemo(() => {
+        if (!activity) return [];
+        if (activity.exclusions && activity.exclusions.length > 0) {
+            return activity.exclusions;
+        }
+        return [
+            `Tips`,
+            `Gratuities`
+        ];
+    }, [activity]);
 
     // Keyboard navigation is handled by GridGallery's Lightbox
 
@@ -237,57 +294,82 @@ const ActivityDetailPage: React.FC = () => {
 
                     {/* Main Content */}
                     <div className="lg:col-span-2">
-                        {/* Summary / Description */}
-                        {activity.summary && (
-                            <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-                                <p className="text-lg text-gray-600 leading-relaxed">
-                                    {activity.summary}
-                                </p>
-                            </div>
-                        )}
+                        {/* Sections: Highlights, Full Description, Includes */}
+                        <div className="border-t border-b border-gray-200 divide-y divide-gray-200 mb-12">
 
-                        {/* Description */}
-                        {activity.description && (
-                            <div className="mb-8">
-                                <h2 className="text-xl font-semibold text-gray-900 mb-4">About This Activity</h2>
-                                <div
-                                    className="prose max-w-none text-gray-600 leading-relaxed"
-                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(activity.description) }}
-                                />
+                            {/* 1. Highlights Section */}
+                            <div className="py-8 flex flex-col md:flex-row md:items-start gap-4 md:gap-8">
+                                <div className="md:w-1/4 flex-shrink-0">
+                                    <h2 className="text-lg md:text-xl font-bold text-gray-900">Highlights</h2>
+                                </div>
+                                <div className="md:w-3/4">
+                                    <ul className="space-y-3 text-gray-700 text-base leading-relaxed">
+                                        {highlightsList.map((item, index) => (
+                                            <li key={index} className="flex items-start">
+                                                <span className="text-gray-900 font-bold mr-3 select-none text-lg">•</span>
+                                                <span className="pt-0.5">{item}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             </div>
-                        )}
 
-                        {/* Activity Details */}
-                        <div className="mb-8">
-                            <h2 className="text-xl font-semibold text-gray-900 mb-4">Activity Information</h2>
-                            <div className="grid gap-4 md:grid-cols-2">
-                                {activity.countries && activity.countries.length > 0 && (
-                                    <div className="flex items-center">
-                                        <MapPin className="w-5 h-5 text-gray-400 mr-3" />
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-900">Location</span>
-                                            <p className="text-sm text-gray-600">{activity.countries.map(c => c.name).join(', ')}</p>
-                                        </div>
+                            {/* 2. Full Description Section */}
+                            <div className="py-8 flex flex-col md:flex-row md:items-start gap-4 md:gap-8">
+                                <div className="md:w-1/4 flex-shrink-0">
+                                    <h2 className="text-lg md:text-xl font-bold text-gray-900">Full description</h2>
+                                </div>
+                                <div className="md:w-3/4">
+                                    <div className="text-gray-700 text-base leading-relaxed">
+                                        {showFullDescription || !activity.description || activity.description.length <= 300 ? (
+                                            <div
+                                                className="prose max-w-none text-gray-700 leading-relaxed"
+                                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(activity.description || activity.summary || '') }}
+                                            />
+                                        ) : (
+                                            <div>
+                                                <p className="line-clamp-4 text-gray-700 leading-relaxed">
+                                                    {activity.description ? activity.description.replace(/<[^>]*>/g, '') : activity.summary}
+                                                </p>
+                                            </div>
+                                        )}
+                                        {activity.description && activity.description.length > 300 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowFullDescription(!showFullDescription)}
+                                                className="mt-3 text-gray-900 font-semibold underline text-sm hover:text-teal-700 transition-colors inline-block cursor-pointer"
+                                            >
+                                                {showFullDescription ? 'See less' : 'See more'}
+                                            </button>
+                                        )}
                                     </div>
-                                )}
-
-                                {(activity as any).duration_minutes && (
-                                    <div className="flex items-center">
-                                        <Clock className="w-5 h-5 text-gray-400 mr-3" />
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-900">Duration</span>
-                                            <p className="text-sm text-gray-600">
-                                                {Math.floor((activity as any).duration_minutes / 60) > 0
-                                                    ? `${Math.floor((activity as any).duration_minutes / 60)}h `
-                                                    : ''}
-                                                {(activity as any).duration_minutes % 60 > 0
-                                                    ? `${(activity as any).duration_minutes % 60}m`
-                                                    : ''}
-                                            </p>
-                                        </div>
-                                    </div>
-                                )}
+                                </div>
                             </div>
+
+                            {/* 3. Includes Section */}
+                            <div className="py-8 flex flex-col md:flex-row md:items-start gap-4 md:gap-8">
+                                <div className="md:w-1/4 flex-shrink-0">
+                                    <h2 className="text-lg md:text-xl font-bold text-gray-900">Includes</h2>
+                                </div>
+                                <div className="md:w-3/4 space-y-3">
+                                    {/* Included items */}
+                                    {inclusionsList.map((item, index) => (
+                                        <div key={`inc-${index}`} className="flex items-start text-gray-700 text-base leading-relaxed">
+                                            <Check className="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0 mt-0.5" />
+                                            <span>{item}</span>
+                                        </div>
+                                    ))}
+
+                                    {/* Excluded items */}
+                                    {exclusionsList.map((item, index) => (
+                                        <div key={`exc-${index}`} className="flex items-start text-gray-600 text-base leading-relaxed">
+                                            <X className="w-5 h-5 text-rose-500 mr-3 flex-shrink-0 mt-0.5" />
+                                            <span>{item}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
                         </div>
 
                         {/* Recommended Tours Section */}

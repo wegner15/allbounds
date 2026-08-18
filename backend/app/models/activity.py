@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, Table, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, Table, ForeignKey, JSON
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
@@ -33,6 +33,9 @@ class Activity(Base):
     cover_image_id = Column(Integer, ForeignKey("media_assets.id"), nullable=True)
     is_active = Column(Boolean, default=True)
     is_featured = Column(Boolean, default=False)
+    highlights = Column(JSON, nullable=True)
+    inclusions = Column(JSON, nullable=True)
+    exclusions = Column(JSON, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

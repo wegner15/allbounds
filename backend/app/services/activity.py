@@ -170,7 +170,10 @@ class ActivityService:
             slug=slug,
             is_active=activity_create.is_active if activity_create.is_active is not None else True,
             is_featured=activity_create.is_featured if activity_create.is_featured is not None else False,
-            cover_image_id=activity_create.cover_image_id
+            cover_image_id=activity_create.cover_image_id,
+            highlights=activity_create.highlights,
+            inclusions=activity_create.inclusions,
+            exclusions=activity_create.exclusions,
         )
         db.add(db_activity)
         db.commit()

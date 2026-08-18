@@ -39,10 +39,10 @@ const CTABanner: React.FC<CTABannerProps> = ({ countrySlug, countryName }) => {
             <Link
               to={`/destinations/${countrySlug}/book`}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-3.5 bg-transparent text-white font-bold rounded-xl border-2 border-white/80 hover:bg-white hover:text-primary hover:border-white shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-white/30"
-              aria-label={`Book your trip to ${countryName}`}
+              aria-label={`Plan my ${countryName} trip`}
             >
               <CalendarIcon className="w-5 h-5" aria-hidden="true" />
-              <span className="text-base">Book {countryName}</span>
+              <span className="text-base">Plan My {countryName} Trip</span>
             </Link>
           </div>
         </div>

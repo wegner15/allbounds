@@ -598,3 +598,64 @@ def test_multi_country_package(client: TestClient, db: Session, superuser_token_
     updated_2 = response.json()
     assert len(updated_2["countries"]) == 2
 
+def test_modify_inactive_package(client: TestClient, db: Session, superuser_token_headers):
+    """Test modifying and activating an inactive package does not return 404."""
+    region = Region(name="Test Region Inactive", description="Test Description", slug="test-region-inactive")
+    db.add(region)
+    db.commit()
+    db.refresh(region)
+
+    country = Country(name="Test Country Inactive", description="Test Description", slug="test-country-inactive", region_id=region.id)
+    db.add(country)
+    db.commit()
+    db.refresh(country)
+
+    # Create inactive package directly
+    package = Package(
+        name="Inactive Package",
+        summary="Summary",
+        description="Description",
+        slug="inactive-package",
+        country_id=country.id,
+        duration_days=5,
+        price=500.0,
+        is_active=False
+    )
+    db.add(package)
+    db.commit()
+    db.refresh(package)
+
+    # Verify GET package by ID returns the package
+    get_res = client.get(
+        f"{settings.API_V1_STR}/packages/{package.id}",
+        headers=superuser_token_headers
+    )
+    assert get_res.status_code == 200
+    assert get_res.json()["is_active"] is False
+
+    # Patch package to activate it
+    patch_res = client.patch(
+        f"{settings.API_V1_STR}/packages/{package.id}",
+        headers=superuser_token_headers,
+        json={"is_active": True}
+    )
+    assert patch_res.status_code == 200
+    assert patch_res.json()["is_active"] is True
+
+    # Deactivate package again
+    client.patch(
+        f"{settings.API_V1_STR}/packages/{package.id}",
+        headers=superuser_token_headers,
+        json={"is_active": False}
+    )
+
+    # PUT package while inactive
+    put_res = client.put(
+        f"{settings.API_V1_STR}/packages/{package.id}",
+        headers=superuser_token_headers,
+        json={"name": "Inactive Package Updated"}
+    )
+    assert put_res.status_code == 200
+    assert put_res.json()["name"] == "Inactive Package Updated"
+
+

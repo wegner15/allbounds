@@ -199,7 +199,7 @@ class PackageService:
             joinedload(Package.country),
             selectinload(Package.countries)
             # Removed joinedload(Package.holiday_types) - causes circular loading
-        ).filter(Package.id == package_id, Package.is_active == True).first()
+        ).filter(Package.id == package_id).first()
     
     def get_package_by_slug(self, db: Session, slug: str) -> Optional[Package]:
         """

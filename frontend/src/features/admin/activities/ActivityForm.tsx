@@ -25,23 +25,56 @@ const activitySchema = z.object({
   media_asset_ids: z.array(z.number()).optional(),
   country_ids: z.array(z.number()).optional(),
   tag_ids: z.array(z.number()).optional(),
+  highlights_raw: z.string().optional(),
+  inclusions_raw: z.string().optional(),
+  exclusions_raw: z.string().optional(),
 });
 
 type ActivityFormValues = z.infer<typeof activitySchema>;
 
 interface ActivityFormProps {
-  onSubmit: (data: ActivityCreate | ActivityUpdate) => void;
+  onSubmit: (data: (ActivityCreate | ActivityUpdate) & { highlights?: string[]; inclusions?: string[]; exclusions?: string[] }) => void;
   defaultValues?: ActivityFormValues & { 
     media_assets?: MediaAsset[];
     cover_image?: MediaAsset;
+    highlights?: string[];
+    inclusions?: string[];
+    exclusions?: string[];
   };
   isEditing?: boolean;
 }
 
+const parseLines = (val?: string): string[] => {
+  if (!val) return [];
+  return val.split('\n').map(s => s.trim()).filter(Boolean);
+};
+
 const ActivityForm: React.FC<ActivityFormProps> = ({ onSubmit, defaultValues, isEditing = false }) => {
+  const initialHighlights = defaultValues?.highlights_raw ?? (defaultValues?.highlights ? defaultValues.highlights.join('\n') : '');
+  const initialInclusions = defaultValues?.inclusions_raw ?? (defaultValues?.inclusions ? defaultValues.inclusions.join('\n') : '');
+  const initialExclusions = defaultValues?.exclusions_raw ?? (defaultValues?.exclusions ? defaultValues.exclusions.join('\n') : '');
+
   const methods = useForm<ActivityFormValues>({
     resolver: zodResolver(activitySchema),
-    defaultValues: defaultValues || { name: '', description: '', is_active: true, is_featured: false, cover_image_id: null, media_asset_ids: [], country_ids: [], tag_ids: [] },
+    defaultValues: defaultValues ? {
+      ...defaultValues,
+      highlights_raw: initialHighlights,
+      inclusions_raw: initialInclusions,
+      exclusions_raw: initialExclusions,
+    } : {
+      name: '',
+      description: '',
+      summary: '',
+      is_active: true,
+      is_featured: false,
+      cover_image_id: null,
+      media_asset_ids: [],
+      country_ids: [],
+      tag_ids: [],
+      highlights_raw: '',
+      inclusions_raw: '',
+      exclusions_raw: '',
+    },
   });
   const { control, handleSubmit, formState: { errors }, setValue, watch } = methods;
 
@@ -52,9 +85,22 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ onSubmit, defaultValues, is
   const { data: countries, isLoading: countriesLoading } = useCountries();
   const { data: allTags = [] } = useContentTags();
 
+  const handleFormSubmit = (data: ActivityFormValues) => {
+    const formattedData = {
+      ...data,
+      highlights: parseLines(data.highlights_raw),
+      inclusions: parseLines(data.inclusions_raw),
+      exclusions: parseLines(data.exclusions_raw),
+    };
+    delete (formattedData as any).highlights_raw;
+    delete (formattedData as any).inclusions_raw;
+    delete (formattedData as any).exclusions_raw;
+    onSubmit(formattedData as any);
+  };
+
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(data => onSubmit(data as ActivityCreate | ActivityUpdate))} className="space-y-4">
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
           <Controller
@@ -101,6 +147,69 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ onSubmit, defaultValues, is
           />
           {errors.summary && <p className="text-sm text-red-500 mt-1">{errors.summary.message}</p>}
           <p className="text-xs text-gray-500 mt-1">A concise summary that appears in activity cards and search results</p>
+        </div>
+
+        {/* Highlights */}
+        <div>
+          <label htmlFor="highlights_raw" className="block text-sm font-medium text-gray-700">
+            Highlights
+          </label>
+          <Controller
+            name="highlights_raw"
+            control={control}
+            render={({ field }) => (
+              <textarea
+                id="highlights_raw"
+                rows={4}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm font-mono"
+                placeholder="Discover the history of Prison Island&#10;Visit the UNESCO World Heritage site of Stone Town&#10;Encounter giant tortoises"
+                {...field}
+              />
+            )}
+          />
+          <p className="text-xs text-gray-500 mt-1">Enter each highlight bullet point on a new line</p>
+        </div>
+
+        {/* Inclusions */}
+        <div>
+          <label htmlFor="inclusions_raw" className="block text-sm font-medium text-gray-700">
+            Inclusions (Included Items)
+          </label>
+          <Controller
+            name="inclusions_raw"
+            control={control}
+            render={({ field }) => (
+              <textarea
+                id="inclusions_raw"
+                rows={4}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm font-mono"
+                placeholder="Guided tour of Prison Island&#10;Boat ride to and from the island&#10;Lunch at Spice Farm & Soft drinks"
+                {...field}
+              />
+            )}
+          />
+          <p className="text-xs text-gray-500 mt-1">Enter each included item on a new line (will display with green checkmarks)</p>
+        </div>
+
+        {/* Exclusions */}
+        <div>
+          <label htmlFor="exclusions_raw" className="block text-sm font-medium text-gray-700">
+            Exclusions (Excluded Items)
+          </label>
+          <Controller
+            name="exclusions_raw"
+            control={control}
+            render={({ field }) => (
+              <textarea
+                id="exclusions_raw"
+                rows={3}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm font-mono"
+                placeholder="Tips&#10;Gratuities&#10;Personal expenses"
+                {...field}
+              />
+            )}
+          />
+          <p className="text-xs text-gray-500 mt-1">Enter each excluded item on a new line (will display with red cross marks)</p>
         </div>
 
         <div>

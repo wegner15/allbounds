@@ -56,6 +56,9 @@ const ActivityEditPage: React.FC = () => {
               media_asset_ids: data.media_asset_ids,
               country_ids: data.country_ids,
               tag_ids: data.tag_ids,
+              highlights: data.highlights,
+              inclusions: data.inclusions,
+              exclusions: data.exclusions,
             };
             mutate(updateData);
           }}
@@ -71,6 +74,9 @@ const ActivityEditPage: React.FC = () => {
             tag_ids: activity.tags?.map(t => t.id) || [],
             cover_image: activity.cover_image || null,
             media_assets: activity.media_assets,
+            highlights: activity.highlights || [],
+            inclusions: activity.inclusions || [],
+            exclusions: activity.exclusions || [],
           }}
           isEditing
         />

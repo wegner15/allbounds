@@ -32,7 +32,11 @@ const ActivityCreatePage: React.FC = () => {
           is_featured: data.is_featured,
           cover_image_id: data.cover_image_id,
           media_asset_ids: data.media_asset_ids,
-          country_ids: data.country_ids
+          country_ids: data.country_ids,
+          tag_ids: data.tag_ids,
+          highlights: data.highlights,
+          inclusions: data.inclusions,
+          exclusions: data.exclusions,
         };
         mutate(createData);
       }} />

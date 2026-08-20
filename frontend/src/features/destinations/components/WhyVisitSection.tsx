@@ -71,7 +71,7 @@ const WhyVisitSection: React.FC<WhyVisitSectionProps> = ({ countryName, highligh
               key={index} 
               className="flex flex-col items-center text-center p-6 md:p-8 rounded-2xl bg-[#f8fafb] border border-gray-100/80 shadow-sm hover:shadow-md hover:-translate-y-1 hover:bg-white hover:border-teal/30 transition-all duration-300"
             >
-              <div className="w-14 h-14 bg-teal/10 rounded-full flex items-center justify-center mb-6 text-teal ring-4 ring-teal/5">
+              <div className="w-14 h-14 bg-amber-100/80 text-amber-600 rounded-full flex items-center justify-center mb-6 ring-4 ring-amber-500/10">
                 <CheckCircle className="w-7 h-7" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3 font-playfair">{item.title}</h3>

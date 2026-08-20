@@ -388,8 +388,8 @@ const HolidayTypeDetailPage: React.FC = () => {
             </div>
 
             {packagesLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {[...Array(4)].map((_, index) => (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+                {[...Array(3)].map((_, index) => (
                   <div key={index} className="bg-white rounded-2xl shadow-lg overflow-hidden animate-pulse">
                     <div className="h-64 bg-gray-200"></div>
                     <div className="p-6">
@@ -401,7 +401,7 @@ const HolidayTypeDetailPage: React.FC = () => {
                 ))}
               </div>
             ) : packages && packages.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
                 {packages.map((pkg) => (
                   <Link
                     key={pkg.id}
@@ -490,8 +490,8 @@ const HolidayTypeDetailPage: React.FC = () => {
             </div>
 
             {groupTripsLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {[...Array(4)].map((_, index) => (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+                {[...Array(3)].map((_, index) => (
                   <div key={index} className="bg-white rounded-2xl shadow-lg overflow-hidden animate-pulse">
                     <div className="h-64 bg-gray-200"></div>
                     <div className="p-6">
@@ -503,7 +503,7 @@ const HolidayTypeDetailPage: React.FC = () => {
                 ))}
               </div>
             ) : groupTrips && groupTrips.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
                 {groupTrips.map((trip) => (
                   <Link
                     key={trip.id}

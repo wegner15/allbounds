@@ -318,8 +318,8 @@ const HolidayTypeDetailPage: React.FC = () => {
             </div>
 
             {destinationsLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {[...Array(4)].map((_, index) => (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+                {[...Array(3)].map((_, index) => (
                   <div key={index} className="overflow-hidden rounded-2xl shadow-lg animate-pulse">
                     <div className="h-80 bg-gray-200"></div>
                     <div className="p-8">
@@ -334,7 +334,7 @@ const HolidayTypeDetailPage: React.FC = () => {
                 ))}
               </div>
             ) : featuredDestinations && featuredDestinations.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
                 {featuredDestinations.map((destination) => (
                   <Link
                     key={destination.id}

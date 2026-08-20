@@ -562,7 +562,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 pb-2 border-b border-gray-200/80 gap-2">
                 <div>
                   <h2 className="text-2xl font-bold font-playfair text-gray-900 flex items-center gap-2">
-                    <span>🧳</span> Packages in {countryName}
+                    <span>🧳</span> Packages to {countryName}
                   </h2>
                   <p className="text-xs md:text-sm text-gray-500 mt-0.5">Handpicked itineraries, safaris, and custom guided tours</p>
                 </div>

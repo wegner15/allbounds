@@ -36,7 +36,16 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
         { name: 'Flight Bookings', href: '/admin/bookings/flights' }
       ]
     },
-    { name: 'Destinations', href: '/admin/destinations', icon: 'globe' },
+    {
+      name: 'Destinations',
+      href: '#',
+      icon: 'globe',
+      subItems: [
+        { name: 'All Regions & Overview', href: '/admin/destinations' },
+        { name: 'Countries & Guides', href: '/admin/destinations/countries' },
+        { name: 'Travel Guide Categories', href: '/admin/travel-guides/categories' }
+      ]
+    },
     { name: 'Holiday Types', href: '/admin/holiday-types', icon: 'tag' },
     { name: 'Content Tags', href: '/admin/tags', icon: 'labels' },
     { name: 'Packages', href: '/admin/packages', icon: 'package' },

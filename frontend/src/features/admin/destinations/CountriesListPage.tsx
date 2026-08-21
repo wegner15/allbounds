@@ -39,16 +39,28 @@ const CountriesListPage: React.FC = () => {
             Manage countries for your travel offerings
           </p>
         </div>
-        <Link to="/admin/destinations/countries/new">
-          <Button variant="primary" size="md">
-            <span className="flex items-center">
-              <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Add Country
-            </span>
-          </Button>
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link to="/admin/travel-guides/categories">
+            <Button variant="secondary" size="md">
+              <span className="flex items-center">
+                <svg className="-ml-1 mr-2 h-5 w-5 text-amber-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                Guide Categories
+              </span>
+            </Button>
+          </Link>
+          <Link to="/admin/destinations/countries/new">
+            <Button variant="primary" size="md">
+              <span className="flex items-center">
+                <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add Country
+              </span>
+            </Button>
+          </Link>
+        </div>
       </div>
       
       {/* Filters */}

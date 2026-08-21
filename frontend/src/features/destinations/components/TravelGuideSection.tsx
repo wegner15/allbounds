@@ -23,8 +23,11 @@ const TravelGuideSection: React.FC<TravelGuideSectionProps> = ({ countrySlug, co
   const { data: apiCategories = [] } = useTravelGuideCategories(false);
   const { data: apiItems = [] } = useDestinationGuideItems({ countrySlug, includeInactive: false });
 
-  // Use API categories if present, otherwise static fallback
-  const categories = useMemo(() => {
+  // Fallback static guide data
+  const staticGuideData = useMemo(() => getTravelGuide(countrySlug), [countrySlug]);
+
+  // Base list of categories
+  const rawCategories = useMemo(() => {
     if (apiCategories.length > 0) {
       return apiCategories.map((c) => ({
         id: c.slug || String(c.id),
@@ -37,9 +40,29 @@ const TravelGuideSection: React.FC<TravelGuideSectionProps> = ({ countrySlug, co
     return STATIC_CATEGORIES.map((c) => ({ ...c, categoryId: 0 }));
   }, [apiCategories]);
 
+  // Filter categories to ONLY include those with contents for this country
+  const categories = useMemo(() => {
+    return rawCategories.filter((cat) => {
+      // 1. Check API items in database
+      if (apiItems.length > 0 && cat.categoryId) {
+        const hasApiItems = apiItems.some((item) => item.category_id === cat.categoryId);
+        if (hasApiItems) return true;
+      }
+      // 2. Check static guide data items
+      if (staticGuideData && cat.slug) {
+        const key = cat.slug as keyof typeof staticGuideData;
+        const staticItems = staticGuideData[key];
+        if (Array.isArray(staticItems) && staticItems.length > 0) {
+          return true;
+        }
+      }
+      return false;
+    });
+  }, [rawCategories, apiItems, staticGuideData]);
+
   const [activeTabSlug, setActiveTabSlug] = useState<string>('');
 
-  // Automatically sync activeTabSlug to the first category when categories load
+  // Automatically sync activeTabSlug to the first category with contents
   useEffect(() => {
     if (categories.length > 0) {
       const isValid = categories.some((c) => c.slug === activeTabSlug || c.id === activeTabSlug);
@@ -52,9 +75,6 @@ const TravelGuideSection: React.FC<TravelGuideSectionProps> = ({ countrySlug, co
   const activeCategory = useMemo(() => {
     return categories.find((c) => c.slug === activeTabSlug || c.id === activeTabSlug) || categories[0];
   }, [categories, activeTabSlug]);
-
-  // Fallback static guide data
-  const staticGuideData = useMemo(() => getTravelGuide(countrySlug), [countrySlug]);
 
   // Determine active items matching the active category
   const activeItems = useMemo(() => {
@@ -82,6 +102,10 @@ const TravelGuideSection: React.FC<TravelGuideSectionProps> = ({ countrySlug, co
 
     return [];
   }, [apiItems, activeCategory, staticGuideData]);
+
+  if (categories.length === 0) {
+    return null;
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200/60 p-6 md:p-8 shadow-sm">
@@ -120,35 +144,27 @@ const TravelGuideSection: React.FC<TravelGuideSectionProps> = ({ countrySlug, co
 
       {/* Content Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {activeItems.length > 0 ? (
-          activeItems.map((item, index) => (
-            <div
-              key={index}
-              className="group bg-gray-50/50 hover:bg-white rounded-2xl p-6 border border-gray-100 hover:border-gray-200/80 transition-all duration-300 hover:shadow-md flex flex-col h-full"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-3xl p-3 bg-white group-hover:bg-primary-light/10 rounded-xl transition-colors duration-300 shadow-sm border border-gray-100">
-                  {item.icon || 'ℹ️'}
-                </span>
-                <span className="text-xs font-bold text-gray-400 group-hover:text-primary transition-colors duration-300">
-                  {index + 1 < 10 ? `0${index + 1}` : index + 1}
-                </span>
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2 font-playfair group-hover:text-primary transition-colors duration-300">
-                {item.title}
-              </h3>
-              <p className="text-gray-600 text-sm leading-relaxed flex-grow">
-                {item.content}
-              </p>
+        {activeItems.map((item, index) => (
+          <div
+            key={index}
+            className="group bg-gray-50/50 hover:bg-white rounded-2xl p-6 border border-gray-100 hover:border-gray-200/80 transition-all duration-300 hover:shadow-md flex flex-col h-full"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-3xl p-3 bg-white group-hover:bg-primary-light/10 rounded-xl transition-colors duration-300 shadow-sm border border-gray-100">
+                {item.icon || 'ℹ️'}
+              </span>
+              <span className="text-xs font-bold text-gray-400 group-hover:text-primary transition-colors duration-300">
+                {index + 1 < 10 ? `0${index + 1}` : index + 1}
+              </span>
             </div>
-          ))
-        ) : (
-          <div className="col-span-full text-center py-12 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
-            <p className="text-gray-500 font-medium text-sm md:text-base">
-              No travel guide recommendations added for <strong>{activeCategory?.label || 'this category'}</strong> in {countryName} yet.
+            <h3 className="text-lg font-bold text-gray-900 mb-2 font-playfair group-hover:text-primary transition-colors duration-300">
+              {item.title}
+            </h3>
+            <p className="text-gray-600 text-sm leading-relaxed flex-grow">
+              {item.content}
             </p>
           </div>
-        )}
+        ))}
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { getTravelGuide } from '../data/travelGuidesData';
 import { useTravelGuideCategories, useDestinationGuideItems } from '../../../lib/hooks/useTravelGuides';
 
@@ -23,7 +23,7 @@ const TravelGuideSection: React.FC<TravelGuideSectionProps> = ({ countrySlug, co
   const { data: apiCategories = [] } = useTravelGuideCategories(false);
   const { data: apiItems = [] } = useDestinationGuideItems({ countrySlug, includeInactive: false });
 
-  // Use API categories if present, otherwise static
+  // Use API categories if present, otherwise static fallback
   const categories = useMemo(() => {
     if (apiCategories.length > 0) {
       return apiCategories.map((c) => ({
@@ -37,28 +37,51 @@ const TravelGuideSection: React.FC<TravelGuideSectionProps> = ({ countrySlug, co
     return STATIC_CATEGORIES.map((c) => ({ ...c, categoryId: 0 }));
   }, [apiCategories]);
 
-  const [activeTabSlug, setActiveTabSlug] = useState<string>('good-to-know');
+  const [activeTabSlug, setActiveTabSlug] = useState<string>('');
+
+  // Automatically sync activeTabSlug to the first category when categories load
+  useEffect(() => {
+    if (categories.length > 0) {
+      const isValid = categories.some((c) => c.slug === activeTabSlug || c.id === activeTabSlug);
+      if (!isValid) {
+        setActiveTabSlug(categories[0].slug || categories[0].id);
+      }
+    }
+  }, [categories, activeTabSlug]);
+
+  const activeCategory = useMemo(() => {
+    return categories.find((c) => c.slug === activeTabSlug || c.id === activeTabSlug) || categories[0];
+  }, [categories, activeTabSlug]);
 
   // Fallback static guide data
   const staticGuideData = useMemo(() => getTravelGuide(countrySlug), [countrySlug]);
 
-  // Determine active items
+  // Determine active items matching the active category
   const activeItems = useMemo(() => {
-    if (apiItems.length > 0) {
-      const activeCat = categories.find((c) => c.slug === activeTabSlug || c.id === activeTabSlug);
-      if (activeCat && activeCat.categoryId) {
-        const filtered = apiItems.filter((item) => item.category_id === activeCat.categoryId);
+    if (!activeCategory) return [];
+
+    // 1. Try DB items matching activeCategory
+    if (apiItems.length > 0 && activeCategory.categoryId) {
+      const filtered = apiItems.filter((item) => item.category_id === activeCategory.categoryId);
+      if (filtered.length > 0) {
         return filtered.map((item) => ({
           title: item.title,
           content: item.content,
-          icon: item.icon || activeCat.icon || 'ℹ️',
+          icon: item.icon || activeCategory.icon || 'ℹ️',
         }));
       }
     }
-    // Fallback to static data
-    const key = activeTabSlug as keyof typeof staticGuideData;
-    return staticGuideData[key] || [];
-  }, [apiItems, categories, activeTabSlug, staticGuideData]);
+
+    // 2. Try static guide data matching activeCategory slug
+    if (staticGuideData && activeCategory.slug) {
+      const key = activeCategory.slug as keyof typeof staticGuideData;
+      if (staticGuideData[key] && Array.isArray(staticGuideData[key]) && staticGuideData[key].length > 0) {
+        return staticGuideData[key];
+      }
+    }
+
+    return [];
+  }, [apiItems, activeCategory, staticGuideData]);
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200/60 p-6 md:p-8 shadow-sm">
@@ -77,7 +100,7 @@ const TravelGuideSection: React.FC<TravelGuideSectionProps> = ({ countrySlug, co
       {/* Tabs Navigation */}
       <div className="flex overflow-x-auto pb-4 mb-8 -mx-6 px-6 md:mx-0 md:px-0 scrollbar-none gap-2">
         {categories.map((cat) => {
-          const isActive = activeTabSlug === cat.slug || activeTabSlug === cat.id;
+          const isActive = (activeCategory?.slug && cat.slug === activeCategory.slug) || (activeCategory?.id && cat.id === activeCategory.id);
           return (
             <button
               key={cat.id}
@@ -120,8 +143,10 @@ const TravelGuideSection: React.FC<TravelGuideSectionProps> = ({ countrySlug, co
             </div>
           ))
         ) : (
-          <div className="col-span-full text-center py-12 text-gray-500">
-            No guide recommendations found for this category.
+          <div className="col-span-full text-center py-12 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+            <p className="text-gray-500 font-medium text-sm md:text-base">
+              No travel guide recommendations added for <strong>{activeCategory?.label || 'this category'}</strong> in {countryName} yet.
+            </p>
           </div>
         )}
       </div>

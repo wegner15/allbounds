@@ -3,7 +3,21 @@ import { Link } from 'react-router-dom';
 import { useCountries, useRegions } from '../../../lib/hooks/useDestinations';
 import Button from '../../../components/ui/Button';
 import FormInputWithIcon from '../../../components/ui/FormInputWithIcon';
+import CloudflareImageDisplay from '../../../components/ui/CloudflareImageDisplay';
 import type { Country } from '../../../lib/types/api';
+
+const stripHtml = (html?: string | null): string => {
+  if (!html) return '';
+  return html
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
 
 const CountriesListPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -185,19 +199,30 @@ const CountriesListPage: React.FC = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-12 w-12">
-                          <img
-                            className="h-12 w-12 rounded-md object-cover shadow-sm"
-                            src={country.image_url || 'https://source.unsplash.com/random/100x100/?flag'}
+                          <CloudflareImageDisplay
+                            imageId={country.image_id}
+                            fallbackUrl={
+                              country.image_url && !country.image_url.includes('source.unsplash.com')
+                                ? country.image_url
+                                : undefined
+                            }
                             alt={country.name}
+                            className="h-12 w-12 rounded-md object-cover shadow-sm"
+                            variant="thumbnail"
+                            width="48"
+                            height="48"
                           />
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{country.name}</div>
-                          <div className="text-sm text-gray-500 truncate max-w-xs">
-                            {country.description.length > 100 
-                              ? `${country.description.substring(0, 100)}...` 
-                              : country.description}
-                          </div>
+                          {(() => {
+                            const cleanDesc = stripHtml(country.description || country.summary);
+                            return (
+                              <div className="text-xs text-gray-500 truncate max-w-xs" title={cleanDesc}>
+                                {cleanDesc.length > 90 ? `${cleanDesc.substring(0, 90)}...` : cleanDesc}
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
                     </td>

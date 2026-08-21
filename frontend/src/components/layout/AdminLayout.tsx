@@ -18,7 +18,7 @@ interface AdminLayoutProps {
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dashboard' }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['Destinations', 'Holiday Types', 'Group Trips', 'Hotels', 'Hotel Types', 'Attractions', 'Activities', 'Blog', 'Content', 'Users', 'Newsletter', 'Settings']));
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const location = useLocation();
   const { user, handleLogout } = useAuthHook();
 

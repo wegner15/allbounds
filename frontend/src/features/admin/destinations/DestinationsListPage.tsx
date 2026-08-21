@@ -213,7 +213,11 @@ const DestinationsListPage: React.FC = () => {
                           <div className="flex-shrink-0 h-10 w-10">
                             <CloudflareImageDisplay
                               imageId={region.image_id}
-                              fallbackUrl={region.image_url || 'https://source.unsplash.com/random/100x100/?map'}
+                              fallbackUrl={
+                                region.image_url && !region.image_url.includes('source.unsplash.com')
+                                  ? region.image_url
+                                  : undefined
+                              }
                               alt={region.name}
                               className="h-10 w-10 rounded-md object-cover"
                               variant="thumbnail"
@@ -334,7 +338,11 @@ const DestinationsListPage: React.FC = () => {
                           <div className="flex-shrink-0 h-10 w-10">
                             <CloudflareImageDisplay
                               imageId={country.image_id}
-                              fallbackUrl={country.image_url || 'https://source.unsplash.com/random/100x100/?flag'}
+                              fallbackUrl={
+                                country.image_url && !country.image_url.includes('source.unsplash.com')
+                                  ? country.image_url
+                                  : undefined
+                              }
                               alt={country.name}
                               className="h-10 w-10 rounded-md object-cover"
                               variant="thumbnail"

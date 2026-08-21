@@ -78,6 +78,7 @@ export const CountryTravelGuideEditor: React.FC<CountryTravelGuideEditorProps> =
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!formData.title || !formData.content) return;
 
     if (editingItem) {
@@ -136,6 +137,7 @@ export const CountryTravelGuideEditor: React.FC<CountryTravelGuideEditorProps> =
           </p>
         </div>
         <button
+          type="button"
           onClick={handleOpenAddModal}
           className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary-dark transition-colors shadow-sm"
         >
@@ -152,6 +154,7 @@ export const CountryTravelGuideEditor: React.FC<CountryTravelGuideEditorProps> =
           return (
             <button
               key={cat.id}
+              type="button"
               onClick={() => setActiveCategoryId(cat.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap transition-all ${
                 isActive
@@ -189,6 +192,7 @@ export const CountryTravelGuideEditor: React.FC<CountryTravelGuideEditorProps> =
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-gray-400">0{index + 1}</span>
                     <button
+                      type="button"
                       onClick={() => handleOpenEditModal(item)}
                       className="p-1 text-gray-400 hover:text-primary transition-colors"
                       title="Edit"
@@ -196,6 +200,7 @@ export const CountryTravelGuideEditor: React.FC<CountryTravelGuideEditorProps> =
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleDelete(item.id)}
                       className="p-1 text-gray-400 hover:text-red-600 transition-colors"
                       title="Delete"
@@ -222,6 +227,7 @@ export const CountryTravelGuideEditor: React.FC<CountryTravelGuideEditorProps> =
               No guide recommendations added for <strong>{activeCategory?.name}</strong> yet.
             </p>
             <button
+              type="button"
               onClick={handleOpenAddModal}
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-lg text-xs font-bold transition-colors"
             >
@@ -237,6 +243,7 @@ export const CountryTravelGuideEditor: React.FC<CountryTravelGuideEditorProps> =
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl relative animate-in fade-in zoom-in-95 duration-200">
             <button
+              type="button"
               onClick={() => setIsModalOpen(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
             >

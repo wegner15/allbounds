@@ -120,6 +120,7 @@ const CountryVisitInfoEditor: React.FC<CountryVisitInfoEditorProps> = ({ country
         <h2 className="text-xl font-semibold">Country Visit Information</h2>
         {!isEditing ? (
           <button
+            type="button"
             onClick={() => setIsEditing(true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
@@ -128,12 +129,14 @@ const CountryVisitInfoEditor: React.FC<CountryVisitInfoEditorProps> = ({ country
         ) : (
           <div className="space-x-2">
             <button
+              type="button"
               onClick={handleCancel}
               className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
             >
               Cancel
             </button>
             <button
+              type="button"
               onClick={handleSubmit(onSubmit)}
               className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
             >

@@ -6,11 +6,96 @@ import { useHotels } from '../../../lib/hooks/useHotels';
 import { useActivities } from '../../../lib/hooks/useActivities';
 import { useAttractions } from '../../../lib/hooks/useAttractions';
 import { useContentTags } from '../../../lib/hooks/useContentTags';
+import type { ContentTag } from '../../../lib/types/content-tag';
 
 import HotelCard from './HotelCard';
 import PackageCard from './PackageCard';
 import ActivityCard from './ActivityCard';
 import AttractionCard from './AttractionCard';
+
+export interface TagCategoryMeta {
+  key: string;
+  label: string;
+  icon: string;
+  order: number;
+}
+
+const CATEGORY_MAP: Record<string, TagCategoryMeta> = {
+  budget: { key: 'budget', label: 'Price Range', icon: '💰', order: 1 },
+  price: { key: 'budget', label: 'Price Range', icon: '💰', order: 1 },
+  price_range: { key: 'budget', label: 'Price Range', icon: '💰', order: 1 },
+  traveler_type: { key: 'traveler_type', label: 'Ideal For', icon: '👥', order: 2 },
+  audience: { key: 'traveler_type', label: 'Ideal For', icon: '👥', order: 2 },
+  vibe: { key: 'vibe', label: 'Theme & Vibe', icon: '🏖️', order: 3 },
+  style: { key: 'style', label: 'Style & Experience', icon: '✨', order: 4 },
+  experience: { key: 'style', label: 'Style & Experience', icon: '✨', order: 4 },
+  activity_type: { key: 'activity_type', label: 'Activity Type', icon: '🎯', order: 5 },
+  destination_type: { key: 'destination_type', label: 'Destination Style', icon: '🗺️', order: 6 },
+  duration: { key: 'duration', label: 'Trip Duration', icon: '⏱️', order: 7 },
+  general: { key: 'general', label: 'Other Tags', icon: '🏷️', order: 99 },
+};
+
+export const getTagCategoryMeta = (tag: ContentTag): TagCategoryMeta => {
+  const cat = (tag.category || '').toLowerCase().trim();
+
+  if (cat && cat !== 'general' && CATEGORY_MAP[cat]) {
+    return CATEGORY_MAP[cat];
+  }
+
+  const name = (tag.name || '').toLowerCase();
+
+  // Price / Budget heuristic ($0 - $500, $500 - $1,000, Budget, Price, etc.)
+  if (name.includes('$') || name.includes('budget') || name.includes('price') || /^\$\d+/.test(name)) {
+    return CATEGORY_MAP.budget;
+  }
+
+  // Traveler / Audience heuristic (Couples, Families, Honeymooners, etc.)
+  if (
+    name.includes('couple') ||
+    name.includes('family') ||
+    name.includes('families') ||
+    name.includes('honeymoon') ||
+    name.includes('solo') ||
+    name.includes('friend') ||
+    name.includes('group') ||
+    name.includes('adult')
+  ) {
+    return CATEGORY_MAP.traveler_type;
+  }
+
+  // Vibe / Theme heuristic (Beach, Safari, Luxury, Adventure, etc.)
+  if (
+    name.includes('beach') ||
+    name.includes('safari') ||
+    name.includes('luxury') ||
+    name.includes('adventure') ||
+    name.includes('relax') ||
+    name.includes('culture') ||
+    name.includes('nature') ||
+    name.includes('shopping') ||
+    name.includes('wellness') ||
+    name.includes('mountain') ||
+    name.includes('island')
+  ) {
+    return CATEGORY_MAP.vibe;
+  }
+
+  return (cat && CATEGORY_MAP[cat]) || CATEGORY_MAP.general;
+};
+
+export const groupTagsByCategory = (tags: ContentTag[]): { meta: TagCategoryMeta; tags: ContentTag[] }[] => {
+  const groupsRecord: Record<string, { meta: TagCategoryMeta; tags: ContentTag[] }> = {};
+
+  tags.forEach((tag) => {
+    const meta = getTagCategoryMeta(tag);
+    if (!groupsRecord[meta.key]) {
+      groupsRecord[meta.key] = { meta, tags: [] };
+    }
+    groupsRecord[meta.key].tags.push(tag);
+  });
+
+  return Object.values(groupsRecord).sort((a, b) => a.meta.order - b.meta.order);
+};
 
 interface DestinationExplorerProps {
   countryId: number;
@@ -325,6 +410,10 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
     if (activeTab === 'attractions') return attractionTags;
     return [];
   }, [activeTab, hotelTags, packageTags, activityTags, attractionTags]);
+
+  const groupedCategoryTags = useMemo(() => {
+    return groupTagsByCategory(currentCategoryTags);
+  }, [currentCategoryTags]);
 
   const selectedTagIdsForCurrentCategory = useMemo(() => {
     if (activeTab === 'hotels') return selectedHotelTagIds;
@@ -800,41 +889,68 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 </div>
               </div>
 
-              {/* SECTION 2: TAG FILTERS FOR ACTIVE CATEGORY */}
+              {/* SECTION 2: TAG FILTERS FOR ACTIVE CATEGORY (GROUPED BY CATEGORY) */}
               {currentCategoryTags.length > 0 && (
-                <div>
-                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2.5 flex items-center justify-between">
-                    <span>Tags</span>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between pb-1 border-b border-gray-200/80">
+                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <TagIcon className="w-3.5 h-3.5 text-primary" />
+                      <span>Tags & Preferences</span>
+                    </h4>
                     {selectedTagIdsForCurrentCategory.length > 0 && (
-                      <span className="text-[10px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
-                        {selectedTagIdsForCurrentCategory.length} active
-                      </span>
+                      <button
+                        onClick={() => {
+                          if (activeTab === 'hotels') setSelectedHotelTagIds([]);
+                          else if (activeTab === 'packages') setSelectedPackageTagIds([]);
+                          else if (activeTab === 'activities') setSelectedActivityTagIds([]);
+                          else if (activeTab === 'attractions') setSelectedAttractionTagIds([]);
+                        }}
+                        className="text-[10px] font-semibold text-primary hover:text-primary-dark underline cursor-pointer"
+                      >
+                        Clear ({selectedTagIdsForCurrentCategory.length})
+                      </button>
                     )}
-                  </h4>
-                  <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
-                    {currentCategoryTags.map((tag) => {
-                      const isSelected = selectedTagIdsForCurrentCategory.includes(tag.id);
-                      return (
-                        <label
-                          key={tag.id}
-                          className={`flex items-center justify-between text-xs px-2.5 py-2 rounded-lg cursor-pointer transition-all ${
-                            isSelected
-                              ? 'bg-primary/10 text-primary font-bold border border-primary/20'
-                              : 'text-gray-700 hover:bg-gray-50 border border-transparent'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => toggleTagForCurrentCategory(tag.id)}
-                              className="rounded text-primary focus:ring-primary h-3.5 w-3.5"
-                            />
-                            <span>{tag.name}</span>
-                          </div>
-                        </label>
-                      );
-                    })}
+                  </div>
+
+                  <div className="space-y-4 max-h-80 overflow-y-auto pr-1 scrollbar-thin">
+                    {groupedCategoryTags.map(({ meta, tags }) => (
+                      <div key={meta.key} className="space-y-1.5">
+                        <h5 className="text-[11px] font-bold uppercase tracking-wider text-gray-500 flex items-center justify-between pt-1">
+                          <span className="flex items-center gap-1.5">
+                            <span>{meta.icon}</span>
+                            <span>{meta.label}</span>
+                          </span>
+                          <span className="text-[10px] font-medium text-gray-400">
+                            ({tags.length})
+                          </span>
+                        </h5>
+                        <div className="space-y-1">
+                          {tags.map((tag) => {
+                            const isSelected = selectedTagIdsForCurrentCategory.includes(tag.id);
+                            return (
+                              <label
+                                key={tag.id}
+                                className={`flex items-center justify-between text-xs px-2.5 py-1.5 rounded-lg cursor-pointer transition-all ${
+                                  isSelected
+                                    ? 'bg-primary/10 text-primary font-bold border border-primary/20 shadow-2xs'
+                                    : 'text-gray-700 hover:bg-gray-50 border border-transparent'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    onChange={() => toggleTagForCurrentCategory(tag.id)}
+                                    className="rounded text-primary focus:ring-primary h-3.5 w-3.5"
+                                  />
+                                  <span>{tag.name}</span>
+                                </div>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}

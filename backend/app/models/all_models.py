@@ -30,6 +30,7 @@ from app.models.itinerary import ItineraryItem, ItineraryActivity
 from app.models.booking import Booking, BookingTraveler
 from app.models.inquiry import Inquiry
 from app.models.country_visit_info import CountryVisitInfo
+from app.models.travel_guide import TravelGuideCategory, TravelGuideItem
 from app.models.newsletter import NewsletterSubscription
 from app.models.visa_application import VisaApplication
 from app.models.flight_booking import FlightBooking, FlightPassenger

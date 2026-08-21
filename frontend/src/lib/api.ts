@@ -362,6 +362,22 @@ export const endpoints = {
     detail: (id: number) => `/users/${id}`,
     me: () => '/users/me',
   },
+
+  // Travel Guides
+  travelGuides: {
+    categories: (includeInactive: boolean = false) => `/travel-guides/categories${includeInactive ? '?include_inactive=true' : ''}`,
+    categoryDetail: (id: number) => `/travel-guides/categories/${id}`,
+    items: (params?: { country_id?: number; country_slug?: string; category_id?: number; include_inactive?: boolean }) => {
+      const q = new URLSearchParams();
+      if (params?.country_id) q.set('country_id', String(params.country_id));
+      if (params?.country_slug) q.set('country_slug', params.country_slug);
+      if (params?.category_id) q.set('category_id', String(params.category_id));
+      if (params?.include_inactive) q.set('include_inactive', 'true');
+      const qs = q.toString();
+      return `/travel-guides/items${qs ? `?${qs}` : ''}`;
+    },
+    itemDetail: (id: number) => `/travel-guides/items/${id}`,
+  },
 };
 
 // Type definitions for API responses

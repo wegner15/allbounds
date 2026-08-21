@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient, endpoints } from '../../../lib/api';
 import CountryVisitInfoEditor from './CountryVisitInfoEditor';
+import CountryTravelGuideEditor from './CountryTravelGuideEditor';
 import type { Country } from '../../../lib/types/api';
 
 const ManageCountryVisitInfoPage: React.FC = () => {
@@ -40,10 +41,10 @@ const ManageCountryVisitInfoPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 space-y-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">
-          Manage Visit Information: {country.name}
+          Manage Visit & Travel Guide Information: {country.name}
         </h1>
         <Link
           to="/admin/countries"
@@ -53,7 +54,7 @@ const ManageCountryVisitInfoPage: React.FC = () => {
         </Link>
       </div>
       
-      <div className="mb-6 bg-white rounded-lg shadow-sm p-4">
+      <div className="bg-white rounded-lg shadow-sm p-4">
         <h2 className="text-lg font-medium mb-2">Country Information</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -70,6 +71,7 @@ const ManageCountryVisitInfoPage: React.FC = () => {
       </div>
       
       <CountryVisitInfoEditor countryId={countryId} />
+      <CountryTravelGuideEditor countryId={countryId} />
     </div>
   );
 };

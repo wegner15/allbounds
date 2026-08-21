@@ -63,25 +63,18 @@ const EditCountryPage: React.FC = () => {
   
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Edit Country: {country.name}</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Update the details of this country
+            Use the sub-menu tabs below to edit specific sections for this destination.
           </p>
         </div>
-        <div className="flex space-x-3">
-          <Link to={`/admin/countries/${country.id}/visit-info`}>
-            <Button variant="secondary" size="md">
-              <span className="flex items-center">
-                <svg className="mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-                </svg>
-                Manage Visit Friendliness
-              </span>
-            </Button>
-          </Link>
-        </div>
+        <Link to="/admin/destinations/countries">
+          <Button variant="outline" size="md">
+            ← Back to Countries List
+          </Button>
+        </Link>
       </div>
       
       <CountryForm countryData={country} isEdit={true} />

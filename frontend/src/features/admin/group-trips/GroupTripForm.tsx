@@ -12,12 +12,9 @@ import { useContentTags } from '../../../lib/hooks/useContentTags';
 import TagSelector from '../../../components/admin/TagSelector';
 import GalleryManager from '../../../components/admin/GalleryManager';
 import { SimpleItineraryManager } from '../../../components/admin/SimpleItineraryManager';
-import { apiClient } from '../../../lib/api';
 import ImageSelector from '../../../components/ui/ImageSelector';
 import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
 import PriceChartManager from '../../../components/admin/PriceChartManager';
-
-// Form validation schema
 
 const groupTripSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -49,45 +46,35 @@ const groupTripSchema = z.object({
 type GroupTripFormData = z.infer<typeof groupTripSchema>;
 
 interface GroupTripFormProps {
-  groupTripData?: any; // The group trip data to edit, if any
+  groupTripData?: any;
   isEdit?: boolean;
-  groupTripId?: number; // The ID of the group trip being edited
+  groupTripId?: number;
 }
 
 const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = false, groupTripId }) => {
   const navigate = useNavigate();
   
   const { data: countries, isLoading: isLoadingCountries } = useCountries();
-  const isLoadingDestinations = isLoadingCountries;
   const { data: packages } = usePackages();
-  const { data: inclusions, isLoading: isLoadingInclusions } = useInclusions();
-  const { data: exclusions, isLoading: isLoadingExclusions } = useExclusions();
+  const { data: inclusions } = useInclusions();
+  const { data: exclusions } = useExclusions();
   const { data: allTags = [] } = useContentTags();
   
-  // Fetch group trip details with gallery if editing
   const { data: groupTripDetails } = useGroupTripDetailsById(groupTripId || 0);
   
   const createGroupTripMutation = useCreateGroupTrip();
   const updateGroupTripMutation = useUpdateGroupTrip();
   
+  const [activeSection, setActiveSection] = useState<string>('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
-  const [selectedCountryId, setSelectedCountryId] = useState<number | null>(
-    isEdit && groupTripData ? groupTripData.country_id : null
-  );
-  const [selectedImageId, setSelectedImageId] = useState<string>(
-    isEdit && groupTripData ? groupTripData.image_id || '' : ''
-  );
   
-  // Gallery state
   const [galleryImages, setGalleryImages] = useState<any[]>([]);
   const [coverImageId, setCoverImageId] = useState<number | null>(null);
   
-  // Initialize gallery data when editing
   useEffect(() => {
     if (isEdit && (groupTripDetails as any)?.gallery) {
       setGalleryImages((groupTripDetails as any).gallery);
-      // Find cover image from gallery or use the main image_id
       const coverImage = (groupTripDetails as any).gallery.find((img: any) => img.id === (groupTripDetails as any).cover_image_id);
       if (coverImage) {
         setCoverImageId(coverImage.id);
@@ -95,7 +82,6 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
     }
   }, [isEdit, groupTripDetails]);
   
-  // Initialize form with default values or existing group trip data
   const {
     register,
     handleSubmit,
@@ -150,11 +136,15 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
           start_date: '',
           end_date: '',
           itinerary: '',
-          conversion_triggers: []
-        }
+          conversion_triggers: [],
+        },
   });
-  
-  // Auto-generate slug from name
+
+  const { fields: triggerFields, append: appendTrigger, remove: removeTrigger } = useFieldArray({
+    control,
+    name: 'conversion_triggers',
+  });
+
   const name = watch('name');
   useEffect(() => {
     if (!isEdit && name) {
@@ -165,152 +155,24 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
       setValue('slug', generatedSlug);
     }
   }, [name, setValue, isEdit]);
-  
-  // Watch country_id to filter packages
-  const countryId = watch('country_id');
-  useEffect(() => {
-    setSelectedCountryId(countryId || null);
-  }, [countryId]);
-  
-  // Filter packages by selected country
-  const filteredPackages = packages?.filter(pkg => 
-    pkg.country_id === selectedCountryId
-  );
-  
-  // Add refs to track important form values
-  const imageIdRef = React.useRef<string>('');
-  
-  // Watch image_id and store in ref
-  const currentImageId = watch('image_id');
-  useEffect(() => {
-    if (currentImageId) {
-      imageIdRef.current = currentImageId;
-    }
-  }, [currentImageId]);
 
-  // Sync selectedImageId with form data when editing
-  useEffect(() => {
-    if (isEdit && groupTripData?.image_id) {
-      setSelectedImageId(groupTripData.image_id);
-    }
-  }, [isEdit, groupTripData]);
-
-  // Conversion Triggers Field Array
-  const { fields: triggerFields, append: appendTrigger, remove: removeTrigger } = useFieldArray({
-    control,
-    name: 'conversion_triggers',
-  });
-
-  const onSubmit = async (data: GroupTripFormData) => {
+  const onSubmit = async (formData: GroupTripFormData) => {
     setIsSubmitting(true);
     setServerError(null);
-    
+
     try {
-      // Log all form data to help with debugging
-      console.log('Form submission data:', data);
-      
-      // Prepare the group trip data - explicitly include only fields the API expects
-      const groupTripData = {
-        name: data.name,
-        summary: data.summary || undefined,
-        slug: data.slug,
-        description: data.description,
-        country_id: data.country_id,
-        package_id: data.package_id || undefined,
-        duration_days: data.duration_days,
-        min_participants: data.min_participants || undefined,
-        max_participants: data.max_participants,
-        price: data.price,
-        itinerary: data.itinerary || undefined,
-        image_id: data.image_id || undefined,
-        is_active: data.is_active,
-        is_featured: data.is_featured,
-        inclusion_ids: data.inclusion_ids || [],
-        exclusion_ids: data.exclusion_ids || [],
-        country_ids: data.country_ids || [],
-        tag_ids: data.tag_ids || [],
-        conversion_triggers: data.conversion_triggers?.map(t => t.value) || []
+      const payload = {
+        ...formData,
+        package_id: formData.package_id || undefined,
+        conversion_triggers: formData.conversion_triggers?.map((t: any) => t.value) || [],
       };
-      
-      let savedTrip;
-      
-      if (isEdit) {
-        // Get the group trip ID from props or from URL as fallback
-        const tripId = groupTripId || parseInt(window.location.pathname.split('/').pop() || '0');
-        
-        // Create update data with the trip ID
-        const updateData = {
-          id: tripId,
-          ...groupTripData
-        };
 
-        console.log('Update data for group trip:', updateData);
-        savedTrip = await updateGroupTripMutation.mutateAsync(updateData);
-
-        // After updating the group trip, handle the departure
-        try {
-          // Get existing departures
-          const departures = await apiClient.get(`/group-trips/${savedTrip.id}/departures`);
-
-          if (data.start_date && data.end_date) {
-            // Always use the dates from the form when available
-            const startDate = new Date(data.start_date);
-            const endDate = new Date(data.end_date);
-
-            const departureData = {
-              start_date: data.start_date,
-              end_date: data.end_date,
-              price: data.price,
-              available_slots: data.max_participants || 10,
-              is_active: data.is_active
-            };
-
-            if (Array.isArray(departures) && departures.length > 0) {
-              // Update existing departure
-              await apiClient.put(
-                `/group-trips/${savedTrip.id}/departures/${departures[0].id}`,
-                departureData
-              );
-            } else {
-              // Create new departure
-              await apiClient.post(
-                `/group-trips/${savedTrip.id}/departures`,
-                {
-                  ...departureData,
-                  group_trip_id: savedTrip.id,
-                  booked_slots: 0
-                }
-              );
-            }
-          }
-        } catch (departureError) {
-          console.error('Error updating/creating departure:', departureError);
-          // Continue with form submission even if departure update fails
-        }
+      if (isEdit && groupTripId) {
+        await updateGroupTripMutation.mutateAsync({ id: groupTripId, ...payload });
       } else {
-        // Create new group trip
-        savedTrip = await createGroupTripMutation.mutateAsync(groupTripData);
-
-        // After creating the group trip, create a departure
-        if (data.start_date && data.end_date) {
-          try {
-            // Create a departure for this trip
-            await apiClient.post(`/group-trips/${savedTrip.id}/departures`, {
-              group_trip_id: savedTrip.id,
-              start_date: data.start_date,
-              end_date: data.end_date,
-              price: data.price,
-              available_slots: data.max_participants || 10,
-              booked_slots: 0,
-              is_active: data.is_active
-            });
-          } catch (departureError) {
-            console.error('Error creating departure:', departureError);
-            // Continue even if departure creation fails
-          }
-        }
+        await createGroupTripMutation.mutateAsync(payload);
       }
-      
+
       navigate('/admin/group-trips');
     } catch (error) {
       console.error('Error saving group trip:', error);
@@ -319,708 +181,552 @@ const GroupTripForm: React.FC<GroupTripFormProps> = ({ groupTripData, isEdit = f
       setIsSubmitting(false);
     }
   };
-  
-  if (isLoadingDestinations) {
+
+  const handleFormSubmit = handleSubmit(onSubmit);
+
+  if (isLoadingCountries) {
     return (
       <div className="text-center py-12">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-charcoal"></div>
-        <p className="mt-2">Loading countries...</p>
+        <p className="mt-2 text-sm text-gray-500">Loading form data...</p>
       </div>
     );
   }
-  
+
+  const SECTIONS = [
+    { id: 'basic', label: 'Basic Details', icon: '📝' },
+    { id: 'itinerary', label: 'Day-by-Day Itinerary', icon: '🗓️' },
+    { id: 'pricing', label: 'Price Charts', icon: '💵' },
+    { id: 'inclusions', label: 'Inclusions & Exclusions', icon: '✅' },
+    { id: 'gallery', label: 'Photo Gallery', icon: '🖼️', badge: galleryImages.length },
+    { id: 'triggers_publish', label: 'Triggers & Publishing', icon: '⚡', badge: triggerFields.length },
+  ];
+
   return (
-    <form 
-      onSubmit={handleSubmit(onSubmit)} 
-      className="space-y-8"
-    >
+    <div className="space-y-6">
+      {Object.keys(errors).length > 0 && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl shadow-xs">
+          <span className="font-bold text-sm">Please fix validation errors before saving:</span>
+          <ul className="list-disc list-inside text-xs mt-1 space-y-0.5">
+            {Object.entries(errors).map(([key, error]: [string, any]) => (
+              <li key={key}>
+                <span className="capitalize font-semibold">{key.replace('_', ' ')}</span>: {error.message}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {serverError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg relative">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium">
           {serverError}
         </div>
       )}
-      
-      {/* Trip Details Section */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
-          <h3 className="text-lg font-medium leading-6 text-gray-900">Trip Details</h3>
-          <p className="mt-1 text-sm text-gray-500">Basic information about the group trip.</p>
-        </div>
-        <div className="px-6 py-6">
-          <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-            {/* Name */}
-            <div className="sm:col-span-4">
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Trip Name
-              </label>
-              <div className="mt-1">
-                <input
-                  type="text"
-                  id="name"
-                  className={`shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 bg-white transition-colors ${
-                    errors.name ? 'border-red-300 bg-red-50' : 'hover:border-gray-400'
-                  }`}
-                  {...register('name')}
-                />
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-                )}
-              </div>
-             </div>
 
-             {/* Summary */}
-             <div className="sm:col-span-6">
-               <label htmlFor="summary" className="block text-sm font-medium text-gray-700">
-                 Summary
-               </label>
-               <div className="mt-1">
-                 <textarea
-                   id="summary"
-                   rows={3}
-                   className={`shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 bg-white transition-colors ${
-                     errors.summary ? 'border-red-300 bg-red-50' : 'hover:border-gray-400'
-                   }`}
-                   placeholder="Brief summary of the group trip (max 255 characters)..."
-                   {...register('summary')}
-                 />
-                 {errors.summary && (
-                   <p className="mt-1 text-sm text-red-600">{errors.summary.message}</p>
-                 )}
-               </div>
-               <p className="mt-1 text-xs text-gray-500">
-                 Short description displayed in trip cards. Keep it under 255 characters.
-               </p>
-             </div>
+      <div className="flex flex-col lg:flex-row gap-8 items-start relative">
+        {/* STICKY VERTICAL LEFT NAVIGATION */}
+        <div className="w-full lg:w-64 flex-shrink-0 sticky top-20 bg-white rounded-2xl border border-gray-200/80 p-3 shadow-2xs space-y-1.5 z-10">
+          <div className="px-3 py-2 border-b border-gray-100 mb-1">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">Group Trip Sections</h3>
+            <p className="text-sm font-bold text-gray-900 truncate mt-0.5">{watch('name') || 'New Group Trip'}</p>
+          </div>
 
-             {/* Slug */}
-            <div className="sm:col-span-4">
-              <label htmlFor="slug" className="block text-sm font-medium text-gray-700">
-                Slug
-              </label>
-              <div className="mt-1">
-                <input
-                  type="text"
-                  id="slug"
-                  className={`shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md ${
-                    errors.slug ? 'border-red-300' : ''
+          <div className="space-y-1">
+            {SECTIONS.map((sec) => {
+              const isActive = activeSection === sec.id;
+              return (
+                <button
+                  key={sec.id}
+                  type="button"
+                  onClick={() => setActiveSection(sec.id)}
+                  className={`w-full flex items-center justify-between text-xs px-3.5 py-2.5 rounded-xl font-semibold transition-all text-left cursor-pointer ${
+                    isActive
+                      ? 'bg-primary text-white shadow-2xs scale-[1.01]'
+                      : 'text-gray-700 hover:bg-gray-100'
                   }`}
-                  {...register('slug')}
-                />
-                {errors.slug && (
-                  <p className="mt-1 text-sm text-red-600">{errors.slug.message}</p>
-                )}
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Used in the URL: https://example.com/group-trips/your-slug
-              </p>
-              </div>
-
-              {/* Destination (Country) */}
-            <div className="sm:col-span-3">
-              <label htmlFor="country_id" className="block text-sm font-medium text-gray-700">
-                Destination
-              </label>
-              <div className="mt-1">
-                <select
-                  id="country_id"
-                  className={`shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 bg-white transition-colors appearance-none ${
-                    errors.country_id ? 'border-red-300 bg-red-50' : 'hover:border-gray-400'
-                  }`}
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                    backgroundPosition: 'right 0.5rem center',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundSize: '1.5em 1.5em',
-                    paddingRight: '2.5rem'
-                  }}
-                  {...register('country_id', { valueAsNumber: true })}
                 >
-                  <option value={0}>Select a destination</option>
-                  {countries?.map((country) => (
-                    <option key={country.id} value={country.id}>
-                      {country.name}
-                    </option>
-                  ))}
-                </select>
-                {errors.country_id && (
-                  <p className="mt-1 text-sm text-red-600">{errors.country_id.message}</p>
-                )}
-              </div>
-            </div>
-            
-            {/* Package (optional) */}
-            <div className="sm:col-span-3">
-              <label htmlFor="package_id" className="block text-sm font-medium text-gray-700">
-                Package (Optional)
-              </label>
-              <div className="mt-1">
-                <select
-                  id="package_id"
-                  className={`shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 bg-white transition-colors appearance-none ${
-                    errors.package_id ? 'border-red-300 bg-red-50' : 'hover:border-gray-400'
-                  } ${(!selectedCountryId || filteredPackages?.length === 0) ? 'bg-gray-50 text-gray-500' : ''}`}
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                    backgroundPosition: 'right 0.5rem center',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundSize: '1.5em 1.5em',
-                    paddingRight: '2.5rem'
-                  }}
-                  {...register('package_id', { valueAsNumber: true })}
-                  disabled={!selectedCountryId || filteredPackages?.length === 0}
-                >
-                  <option value={0}>Select a package (optional)</option>
-                  {filteredPackages?.map((pkg) => (
-                    <option key={pkg.id} value={pkg.id}>
-                      {pkg.name}
-                    </option>
-                  ))}
-                </select>
-                {errors.package_id && (
-                  <p className="mt-1 text-sm text-red-600">{errors.package_id.message}</p>
-                )}
-                {!selectedCountryId && (
-                  <p className="mt-1 text-xs text-gray-500">
-                    Select a destination first to see available packages
-                  </p>
-                )}
-              </div>
-            </div>
-            
-            {/* Additional Destinations */}
-            <div className="sm:col-span-6">
-              <label className="block text-sm font-medium text-gray-700">
-                Additional Destinations <span className="text-gray-400 font-normal">(optional)</span>
-              </label>
-              <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
-                <div className="mb-3">
-                  <p className="text-sm text-gray-700">
-                    Select extra countries this group trip covers. It will appear on each selected destination page.
-                  </p>
-                </div>
-                <Controller
-                  name="country_ids"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {countries
-                        ?.filter((c) => c.id !== watch('country_id')) // exclude primary
-                        .map((country) => {
-                          const checkboxId = `extra-country-${country.id}`;
-                          const isChecked = (field.value || []).includes(country.id);
-                          return (
-                            <div key={country.id} className="relative flex items-start">
-                              <div className="flex h-6 items-center">
-                                <input
-                                  id={checkboxId}
-                                  type="checkbox"
-                                  className="h-5 w-5 rounded border-gray-300 text-teal focus:ring-teal focus:ring-offset-0 cursor-pointer"
-                                  checked={isChecked}
-                                  onChange={(e) => {
-                                    const current = field.value || [];
-                                    if (e.target.checked) {
-                                      field.onChange([...current, country.id]);
-                                    } else {
-                                      field.onChange(current.filter((id: number) => id !== country.id));
-                                    }
-                                  }}
-                                />
-                              </div>
-                              <div className="ml-3 text-sm leading-6">
-                                <label htmlFor={checkboxId} className="font-medium text-gray-900 cursor-pointer">
-                                  {country.name}
-                                </label>
-                              </div>
-                            </div>
-                          );
-                        })}
-                    </div>
+                  <span className="flex items-center gap-2">
+                    <span>{sec.icon}</span>
+                    <span>{sec.label}</span>
+                  </span>
+                  {sec.badge !== undefined && (
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                      isActive ? 'bg-white/20 text-white' : 'bg-gray-150 text-gray-600'
+                    }`}>
+                      {sec.badge}
+                    </span>
                   )}
-                />
-              </div>
-              <p className="mt-2 text-xs text-gray-500">
-                Multi-destination group trips appear in all selected countries' destination pages.
-              </p>
-            </div>
-            
-            {/* Description */}
-            <div className="sm:col-span-6">
-              <Controller
-                name="description"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <TinyMCEEditor
-                    value={field.value}
-                    onChange={field.onChange}
-                    label="Description"
-                    placeholder="Detailed description of the group trip..."
-                    height={350}
-                    error={fieldState.error?.message}
-                    helperText="Describe the group trip in detail. Include itinerary highlights, included activities, and what makes this trip special."
-                    required
-                  />
-                )}
-              />
-            </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="pt-3 border-t border-gray-100 space-y-2 mt-2">
+            <button
+              type="button"
+              onClick={handleFormSubmit}
+              disabled={isSubmitting}
+              className="w-full py-2.5 px-4 bg-teal hover:bg-teal-dark text-white text-xs font-bold rounded-xl shadow-2xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              <span>{isSubmitting ? 'Saving...' : isEdit ? 'Save Group Trip' : 'Create Group Trip'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/admin/group-trips')}
+              className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-xl transition-all text-center cursor-pointer"
+            >
+              Cancel
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Trip Schedule & Capacity Section */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
-          <h3 className="text-lg font-medium leading-6 text-gray-900">Schedule & Capacity</h3>
-          <p className="mt-1 text-sm text-gray-500">Set dates, duration, and participant limits.</p>
-        </div>
-        <div className="px-6 py-6">
-          <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-            {/* Start Date */}
-            <div className="sm:col-span-3">
-              <label htmlFor="start_date" className="block text-sm font-medium text-gray-700">
-                Start Date
-              </label>
-              <div className="mt-1">
-                <input
-                  type="date"
-                  id="start_date"
-                  className={`shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 bg-white transition-colors ${
-                    errors.start_date ? 'border-red-300 bg-red-50' : 'hover:border-gray-400'
-                  }`}
-                  style={{
-                    colorScheme: 'light'
-                  }}
-                  {...register('start_date')}
-                />
-                {errors.start_date && (
-                  <p className="mt-1 text-sm text-red-600">{errors.start_date.message}</p>
-                )}
-              </div>
-            </div>
-            
-            {/* End Date */}
-            <div className="sm:col-span-3">
-              <label htmlFor="end_date" className="block text-sm font-medium text-gray-700">
-                End Date
-              </label>
-              <div className="mt-1">
-                <input
-                  type="date"
-                  id="end_date"
-                  className={`shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 bg-white transition-colors ${
-                    errors.end_date ? 'border-red-300 bg-red-50' : 'hover:border-gray-400'
-                  }`}
-                  style={{
-                    colorScheme: 'light'
-                  }}
-                  {...register('end_date')}
-                />
-                {errors.end_date && (
-                  <p className="mt-1 text-sm text-red-600">{errors.end_date.message}</p>
-                )}
-              </div>
-            </div>
-            
-            {/* Max Participants */}
-            <div className="sm:col-span-3">
-              <label htmlFor="max_participants" className="block text-sm font-medium text-gray-700">
-                Maximum Participants
-              </label>
-              <div className="mt-1">
-                <input
-                  type="number"
-                  id="max_participants"
-                  min="1"
-                  className={`shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 bg-white transition-colors ${
-                    errors.max_participants ? 'border-red-300 bg-red-50' : 'hover:border-gray-400'
-                  }`}
-                  {...register('max_participants', { valueAsNumber: true })}
-                />
-                {errors.max_participants && (
-                  <p className="mt-1 text-sm text-red-600">{errors.max_participants.message}</p>
-                )}
-              </div>
-            </div>
-            
-            {/* Price */}
-            <div className="sm:col-span-3">
-              <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-                Price
-              </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-500 sm:text-sm">$</span>
+        {/* RIGHT MAIN CONTENT DISPLAY */}
+        <div className="flex-1 min-w-0 space-y-8 w-full">
+          <form onSubmit={handleFormSubmit} className="space-y-8">
+            {/* SECTION 1: BASIC DETAILS */}
+            {activeSection === 'basic' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>📝</span> Basic Details & Schedule
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Trip name, slug, departure dates, pricing, and destination</p>
                 </div>
-                <input
-                  type="number"
-                  id="price"
-                  min="0"
-                  step="0.01"
-                  className={`pl-7 shadow-sm focus:ring-teal focus:border-teal block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 bg-white transition-colors ${
-                    errors.price ? 'border-red-300 bg-red-50' : 'hover:border-gray-400'
-                  }`}
-                  {...register('price', { valueAsNumber: true })}
-                />
-                {errors.price && (
-                  <p className="mt-1 text-sm text-red-600">{errors.price.message}</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Media & Status Section */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
-          <h3 className="text-lg font-medium leading-6 text-gray-900">Media & Status</h3>
-          <p className="mt-1 text-sm text-gray-500">Add images and set the trip status.</p>
-        </div>
-        <div className="px-6 py-6">
-          <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-            {/* Cover Image Section */}
-            <div className="sm:col-span-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
-                <div className="mb-3">
-                  <h4 className="text-lg font-medium text-gray-900">Cover Image</h4>
-                  <p className="text-sm text-gray-700">Select a main cover image for this group trip from the gallery.</p>
-                </div>
-                
-                <ImageSelector
-                  initialImageId={selectedImageId}
-                  onImageSelected={(imageId: string) => {
-                    console.log('Group trip cover image selected:', imageId);
-                    setSelectedImageId(imageId);
-                    setValue('image_id', imageId);
-                    setCoverImageId(Number(imageId)); // Also update the local state for gallery manager
-
-                    if (isEdit && groupTripId && imageId) {
-                      console.log('Immediately updating group trip cover image to:', imageId);
-                      apiClient.put(`/api/v1/group-trips/${groupTripId}/cover-image`, {
-                        media_id: Number(imageId)
-                      })
-                      .then(response => {
-                        console.log('Group trip cover image updated successfully:', response);
-                      })
-                      .catch(error => {
-                        console.error('Error updating group trip cover image:', error);
-                      });
-                    }
-                  }}
-                  variant="thumbnail"
-                  className="mt-2"
-                />
-
-                {/* Hidden input to ensure image_id is included in form data */}
-                <input
-                  type="hidden"
-                  {...register('image_id')}
-                />
-              </div>
-            </div>
-
-            {/* Inclusions */}
-            <div className="sm:col-span-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
-                <div className="mb-3">
-                  <h4 className="text-lg font-medium text-gray-900">Inclusions</h4>
-                  <p className="text-sm text-gray-700">Select all inclusions that apply to this group trip:</p>
-                </div>
-                <Controller
-                  name="inclusion_ids"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {inclusions?.map((inclusion) => {
-                        const checkboxId = `inclusion-${inclusion.id}`;
-                        const isChecked = (field.value || []).includes(inclusion.id);
-                        
-                        return (
-                          <div key={inclusion.id} className="relative flex items-start">
-                            <div className="flex h-6 items-center">
-                              <input
-                                id={checkboxId}
-                                type="checkbox"
-                                className="h-5 w-5 rounded border-gray-300 text-teal focus:ring-teal focus:ring-offset-0"
-                                checked={isChecked}
-                                onChange={(e) => {
-                                  const currentInclusions = field.value || [];
-                                  if (e.target.checked) {
-                                    field.onChange([...currentInclusions, inclusion.id]);
-                                  } else {
-                                    field.onChange(currentInclusions.filter((id) => id !== inclusion.id));
-                                  }
-                                }}
-                              />
-                            </div>
-                            <div className="ml-3 text-sm leading-6">
-                              <label htmlFor={checkboxId} className="font-medium text-gray-900 cursor-pointer flex items-center">
-                                {inclusion.icon && (
-                                  <i className={`fas fa-${inclusion.icon} mr-2 text-teal`}></i>
-                                )}
-                                {inclusion.name}
-                                {inclusion.category && (
-                                  <span className="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                                    {inclusion.category}
-                                  </span>
-                                )}
-                              </label>
-                              {inclusion.description && (
-                                <p className="text-xs text-gray-500 mt-1">{inclusion.description}</p>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Exclusions */}
-            <div className="sm:col-span-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
-                <div className="mb-3">
-                  <h4 className="text-lg font-medium text-gray-900">Exclusions</h4>
-                  <p className="text-sm text-gray-700">Select all exclusions that apply to this group trip:</p>
-                </div>
-                <Controller
-                  name="exclusion_ids"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {exclusions?.map((exclusion) => {
-                        const checkboxId = `exclusion-${exclusion.id}`;
-                        const isChecked = (field.value || []).includes(exclusion.id);
-                        
-                        return (
-                          <div key={exclusion.id} className="relative flex items-start">
-                            <div className="flex h-6 items-center">
-                              <input
-                                id={checkboxId}
-                                type="checkbox"
-                                className="h-5 w-5 rounded border-gray-300 text-red-500 focus:ring-red-500 focus:ring-offset-0"
-                                checked={isChecked}
-                                onChange={(e) => {
-                                  const currentExclusions = field.value || [];
-                                  if (e.target.checked) {
-                                    field.onChange([...currentExclusions, exclusion.id]);
-                                  } else {
-                                    field.onChange(currentExclusions.filter((id) => id !== exclusion.id));
-                                  }
-                                }}
-                              />
-                            </div>
-                            <div className="ml-3 text-sm leading-6">
-                              <label htmlFor={checkboxId} className="font-medium text-gray-900 cursor-pointer flex items-center">
-                                {exclusion.icon && (
-                                  <i className={`fas fa-${exclusion.icon} mr-2 text-red-500`}></i>
-                                )}
-                                {exclusion.name}
-                                {exclusion.category && (
-                                  <span className="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                                    {exclusion.category}
-                                  </span>
-                                )}
-                              </label>
-                              {exclusion.description && (
-                                <p className="text-xs text-gray-500 mt-1">{exclusion.description}</p>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Content Tags */}
-            <div className="sm:col-span-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
-                <Controller
-                  name="tag_ids"
-                  control={control}
-                  render={({ field }) => (
-                    <TagSelector
-                      tags={allTags}
-                      selectedTagIds={field.value || []}
-                      onChange={field.onChange}
-                      label="Content Tags"
-                      helperText="Select tags to categorize this group trip for dynamic filtering across the platform."
+                <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                  {/* Name */}
+                  <div className="sm:col-span-4">
+                    <label htmlFor="name" className="block text-sm font-semibold text-gray-800 mb-1">
+                      Group Trip Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      placeholder="e.g. Serengeti Great Migration Expedition 2026"
+                      className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl shadow-xs focus:ring-2 focus:ring-teal"
+                      {...register('name')}
                     />
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Conversion Triggers Section */}
-            <div className="sm:col-span-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
-                <div className="mb-3 flex justify-between items-center">
-                  <div>
-                    <h4 className="text-lg font-medium text-gray-900">Conversion Triggers</h4>
-                    <p className="text-sm text-gray-700">Add dynamic triggers to encourage bookings (e.g., "Pay 50% deposit").</p>
+                    {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => appendTrigger({ value: '' })}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal hover:bg-teal/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal"
-                  >
-                    <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                    </svg>
-                    Add Trigger
-                  </button>
-                </div>
-                <div className="space-y-4">
-                  {triggerFields.length === 0 ? (
-                    <div className="text-center py-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-                      <p className="text-sm text-gray-500 italic">No conversion triggers added yet. Click "Add Trigger" to start.</p>
-                    </div>
-                  ) : (
-                    triggerFields.map((field, index) => (
-                      <div key={field.id} className="flex items-start gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100 group relative">
-                        <div className="flex-grow">
-                          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Trigger Text</label>
-                          <input
-                            {...register(`conversion_triggers.${index}.value`)}
-                            placeholder='e.g. "Pay 50% deposit"'
-                            className={`block w-full px-4 py-2 sm:text-sm border-gray-300 rounded-md shadow-sm focus:ring-teal focus:border-teal bg-white ${
-                              errors.conversion_triggers?.[index]?.value ? 'border-red-300' : ''
-                            }`}
-                          />
-                          {errors.conversion_triggers?.[index]?.value && (
-                            <p className="mt-1 text-xs text-red-600 font-medium">{errors.conversion_triggers[index]?.value?.message}</p>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeTrigger(index)}
-                          className="mt-6 text-gray-400 hover:text-red-500 transition-colors p-2"
-                          aria-label="Remove trigger"
-                        >
-                          <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
-                    ))
-                  )}
+
+                  {/* Slug */}
+                  <div className="sm:col-span-4">
+                    <label htmlFor="slug" className="block text-sm font-semibold text-gray-800 mb-1">
+                      URL Slug <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="slug"
+                      placeholder="serengeti-great-migration-expedition-2026"
+                      className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl shadow-xs focus:ring-2 focus:ring-teal font-mono text-xs"
+                      {...register('slug')}
+                    />
+                    {errors.slug && <p className="mt-1 text-xs text-red-600">{errors.slug.message}</p>}
+                  </div>
+
+                  {/* Summary */}
+                  <div className="sm:col-span-6">
+                    <label htmlFor="summary" className="block text-sm font-semibold text-gray-800 mb-1">
+                      Summary Overview
+                    </label>
+                    <textarea
+                      id="summary"
+                      rows={2}
+                      placeholder="Concise summary for group trip cards..."
+                      className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl shadow-xs focus:ring-2 focus:ring-teal"
+                      {...register('summary')}
+                    />
+                    {errors.summary && <p className="mt-1 text-xs text-red-600">{errors.summary.message}</p>}
+                  </div>
+
+                  {/* Description */}
+                  <div className="sm:col-span-6">
+                    <Controller
+                      name="description"
+                      control={control}
+                      render={({ field, fieldState }) => (
+                        <TinyMCEEditor
+                          value={field.value}
+                          onChange={field.onChange}
+                          label="Full Description"
+                          placeholder="Detailed itinerary overview and highlights..."
+                          height={320}
+                          error={fieldState.error?.message}
+                          required
+                        />
+                      )}
+                    />
+                  </div>
+
+                  {/* Dates & Duration */}
+                  <div className="sm:col-span-2">
+                    <label htmlFor="start_date" className="block text-sm font-semibold text-gray-800 mb-1">
+                      Start Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      id="start_date"
+                      className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl shadow-xs focus:ring-2 focus:ring-teal"
+                      {...register('start_date')}
+                    />
+                    {errors.start_date && <p className="mt-1 text-xs text-red-600">{errors.start_date.message}</p>}
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label htmlFor="end_date" className="block text-sm font-semibold text-gray-800 mb-1">
+                      End Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      id="end_date"
+                      className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl shadow-xs focus:ring-2 focus:ring-teal"
+                      {...register('end_date')}
+                    />
+                    {errors.end_date && <p className="mt-1 text-xs text-red-600">{errors.end_date.message}</p>}
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label htmlFor="duration_days" className="block text-sm font-semibold text-gray-800 mb-1">
+                      Duration (Days) <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      id="duration_days"
+                      min="1"
+                      placeholder="7"
+                      className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl shadow-xs focus:ring-2 focus:ring-teal"
+                      {...register('duration_days', { valueAsNumber: true })}
+                    />
+                    {errors.duration_days && <p className="mt-1 text-xs text-red-600">{errors.duration_days.message}</p>}
+                  </div>
+
+                  {/* Price & Participants */}
+                  <div className="sm:col-span-2">
+                    <label htmlFor="price" className="block text-sm font-semibold text-gray-800 mb-1">
+                      Price (USD) <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      id="price"
+                      min="0"
+                      step="0.01"
+                      placeholder="1500.00"
+                      className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl shadow-xs focus:ring-2 focus:ring-teal"
+                      {...register('price', { valueAsNumber: true })}
+                    />
+                    {errors.price && <p className="mt-1 text-xs text-red-600">{errors.price.message}</p>}
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label htmlFor="min_participants" className="block text-sm font-semibold text-gray-800 mb-1">
+                      Min Participants
+                    </label>
+                    <input
+                      type="number"
+                      id="min_participants"
+                      min="0"
+                      placeholder="4"
+                      className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl shadow-xs focus:ring-2 focus:ring-teal"
+                      {...register('min_participants', { valueAsNumber: true })}
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label htmlFor="max_participants" className="block text-sm font-semibold text-gray-800 mb-1">
+                      Max Capacity <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      id="max_participants"
+                      min="1"
+                      placeholder="12"
+                      className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl shadow-xs focus:ring-2 focus:ring-teal"
+                      {...register('max_participants', { valueAsNumber: true })}
+                    />
+                    {errors.max_participants && <p className="mt-1 text-xs text-red-600">{errors.max_participants.message}</p>}
+                  </div>
+
+                  {/* Destination & Package Link */}
+                  <div className="sm:col-span-3">
+                    <label htmlFor="country_id" className="block text-sm font-semibold text-gray-800 mb-1">
+                      Destination Country <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="country_id"
+                      className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl shadow-xs focus:ring-2 focus:ring-teal"
+                      {...register('country_id', { valueAsNumber: true })}
+                    >
+                      <option value={0}>Select a country</option>
+                      {countries?.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                    {errors.country_id && <p className="mt-1 text-xs text-red-600">{errors.country_id.message}</p>}
+                  </div>
+
+                  <div className="sm:col-span-3">
+                    <label htmlFor="package_id" className="block text-sm font-semibold text-gray-800 mb-1">
+                      Link Base Package <span className="text-gray-400 font-normal">(optional)</span>
+                    </label>
+                    <select
+                      id="package_id"
+                      className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl shadow-xs focus:ring-2 focus:ring-teal"
+                      {...register('package_id', { valueAsNumber: true })}
+                    >
+                      <option value={0}>Standalone Group Trip (No Base Package)</option>
+                      {packages?.map((pkg: any) => (
+                        <option key={pkg.id} value={pkg.id}>{pkg.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Tags */}
+                  <div className="sm:col-span-6">
+                    <Controller
+                      name="tag_ids"
+                      control={control}
+                      render={({ field }) => (
+                        <TagSelector
+                          tags={allTags}
+                          selectedTagIds={field.value || []}
+                          onChange={field.onChange}
+                          label="Content Tags"
+                          helperText="Categorizes this group trip for public site filters."
+                        />
+                      )}
+                    />
+                  </div>
+
+                  {/* Cover Image */}
+                  <div className="sm:col-span-6">
+                    <label className="block text-sm font-semibold text-gray-800 mb-2">Primary Cover Image</label>
+                    <ImageSelector
+                      initialImageId={watch('image_id')}
+                      onImageSelected={(imageId) => {
+                        setValue('image_id', imageId);
+                      }}
+                      variant="thumbnail"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Gallery Management */}
-            <div className="sm:col-span-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
-                <div className="mb-3">
-                  <h4 className="text-lg font-medium text-gray-900">Gallery Images</h4>
-                  <p className="text-sm text-gray-700">Upload and manage images for this group trip. You can select a cover image from here.</p>
+            {/* SECTION 2: DAY-BY-DAY ITINERARY */}
+            {activeSection === 'itinerary' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>🗓️</span> Day-by-Day Itinerary
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Configure daily schedule, activities, and included meals</p>
+                </div>
+                {isEdit && groupTripId ? (
+                  <SimpleItineraryManager
+                    entityType="group_trip"
+                    entityId={groupTripId}
+                    countryId={watch('country_id')}
+                  />
+                ) : (
+                  <div className="p-6 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                    <p className="text-sm text-gray-500">Save the group trip first to manage day-by-day itinerary schedule.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SECTION 3: PRICE CHARTS */}
+            {activeSection === 'pricing' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>💵</span> Seasonal Price Charts
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Rates, seasonal pricing, and single supplement tiers</p>
+                </div>
+                {isEdit && groupTripId ? (
+                  <PriceChartManager entityType="group_trip" entityId={groupTripId} />
+                ) : (
+                  <div className="p-6 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                    <p className="text-sm text-gray-500">Save the group trip first to configure price charts.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SECTION 4: INCLUSIONS & EXCLUSIONS */}
+            {activeSection === 'inclusions' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>✅</span> Inclusions & Exclusions
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Specify included services and excluded items for travelers</p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-teal uppercase tracking-wider mb-2">Included Services</label>
+                  <Controller
+                    name="inclusion_ids"
+                    control={control}
+                    render={({ field }) => (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-gray-50/70 p-4 rounded-xl border border-gray-200/80">
+                        {inclusions?.map((inc) => (
+                          <label key={inc.id} className="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 rounded border-gray-300 text-teal focus:ring-teal"
+                              checked={(field.value || []).includes(inc.id)}
+                              onChange={(e) => {
+                                const current = field.value || [];
+                                if (e.target.checked) field.onChange([...current, inc.id]);
+                                else field.onChange(current.filter((id) => id !== inc.id));
+                              }}
+                            />
+                            <span>{inc.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-red-600 uppercase tracking-wider mb-2">Excluded Services</label>
+                  <Controller
+                    name="exclusion_ids"
+                    control={control}
+                    render={({ field }) => (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-gray-50/70 p-4 rounded-xl border border-gray-200/80">
+                        {exclusions?.map((exc) => (
+                          <label key={exc.id} className="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 rounded border-gray-300 text-red-500 focus:ring-red-500"
+                              checked={(field.value || []).includes(exc.id)}
+                              onChange={(e) => {
+                                const current = field.value || [];
+                                if (e.target.checked) field.onChange([...current, exc.id]);
+                                else field.onChange(current.filter((id) => id !== exc.id));
+                              }}
+                            />
+                            <span>{exc.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* SECTION 5: PHOTO GALLERY */}
+            {activeSection === 'gallery' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>🖼️</span> Group Trip Gallery
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Upload and manage photo gallery images</p>
                 </div>
                 <GalleryManager
                   entityType="group_trip"
-                  entityId={groupTripId || 0}
+                  entityId={groupTripId}
                   images={galleryImages}
                   coverImageId={coverImageId}
                   onImagesChange={setGalleryImages}
-                  onCoverImageChange={(imageId) => {
-                    setCoverImageId(imageId);
-                    const coverImage = galleryImages.find(img => img.id === imageId);
-                    if (coverImage) {
-                      // Update the dedicated cover image selector as well
-                      setValue('image_id', coverImage.cloudflare_id || String(coverImage.id));
-                    }
-                  }}
+                  onCoverImageChange={setCoverImageId}
                 />
-              </div>
-            </div>
-
-            {/* Itinerary Management */}
-            {isEdit && groupTripData?.id && (
-              <div className="sm:col-span-6">
-                <div className="flex justify-between items-center">
-                  <label className="block text-sm font-semibold text-gray-800">
-                    Group Trip Itinerary
-                  </label>
-                </div>
-                <div className="mt-2">
-                  <SimpleItineraryManager
-                    entityType="group_trip"
-                    entityId={groupTripData.id}
-                  />
-                </div>
-                <p className="mt-2 text-xs text-gray-500">
-                  Create a day-by-day itinerary for this group trip. This helps participants understand the schedule and activities.
-                </p>
               </div>
             )}
-            
-            {/* Status */}
-            <div className="sm:col-span-6 space-y-3">
-              <div className="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <input
-                  id="is_active"
-                  type="checkbox"
-                  className="h-5 w-5 text-teal focus:ring-teal focus:ring-offset-0 border-gray-300 rounded transition-colors cursor-pointer"
-                  {...register('is_active')}
-                />
-                <label htmlFor="is_active" className="ml-3 block text-sm font-medium text-gray-900 cursor-pointer select-none">
-                  Active (visible on the website)
-                </label>
+
+            {/* SECTION 6: TRIGGERS & PUBLISHING */}
+            {activeSection === 'triggers_publish' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>⚡</span> Triggers & Publication Status
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Conversion triggers and trip visibility toggles</p>
+                </div>
+
+                {/* Conversion Triggers */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="block text-sm font-semibold text-gray-800">Conversion Triggers</label>
+                    <button
+                      type="button"
+                      onClick={() => appendTrigger({ value: '' })}
+                      className="px-3 py-1.5 bg-teal text-white text-xs font-bold rounded-lg shadow-2xs hover:bg-teal-dark transition-all cursor-pointer"
+                    >
+                      + Add Trigger
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {triggerFields.length === 0 ? (
+                      <p className="text-xs text-gray-500 italic py-2">No conversion triggers added yet.</p>
+                    ) : (
+                      triggerFields.map((field, index) => (
+                        <div key={field.id} className="flex items-center gap-3">
+                          <input
+                            {...register(`conversion_triggers.${index}.value`)}
+                            placeholder='e.g. "Only 4 spots remaining"'
+                            className="flex-1 px-3.5 py-2 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeTrigger(index)}
+                            className="text-red-500 hover:text-red-700 text-xs font-semibold px-2 py-1 cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Publication Controls */}
+                <div className="pt-4 border-t border-gray-150 space-y-4">
+                  <div className="flex items-center justify-between bg-gray-50/70 p-4 rounded-xl border border-gray-200/80">
+                    <div>
+                      <span className="font-bold text-sm text-gray-900 block">Active Status</span>
+                      <span className="text-xs text-gray-500">Makes this group trip visible on public pages</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={watch('is_active')}
+                        onChange={(e) => setValue('is_active', e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal"></div>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center justify-between bg-gray-50/70 p-4 rounded-xl border border-gray-200/80">
+                    <div>
+                      <span className="font-bold text-sm text-gray-900 block">Featured Trip</span>
+                      <span className="text-xs text-gray-500">Displays this trip in homepage featured group trips</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={watch('is_featured')}
+                        onChange={(e) => setValue('is_featured', e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                    </label>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <input
-                  id="is_featured"
-                  type="checkbox"
-                  className="h-5 w-5 text-teal focus:ring-teal focus:ring-offset-0 border-gray-300 rounded transition-colors cursor-pointer"
-                  {...register('is_featured')}
-                />
-                <label htmlFor="is_featured" className="ml-3 block text-sm font-medium text-gray-900 cursor-pointer select-none">
-                  Featured (highlighted on the website)
-                </label>
-              </div>
-            </div>
-          </div>
+            )}
+          </form>
         </div>
       </div>
-      
-      {isEdit && (groupTripId || groupTripData?.id) && (
-        <div className="bg-white shadow rounded-lg p-6">
-          <PriceChartManager entityType="group_trip" entityId={groupTripId || groupTripData?.id} />
-        </div>
-      )}
-
-      {/* Form actions */}
-      <div className="sticky bottom-0 bg-white shadow-md px-8 py-5 border-t border-gray-200 z-10 -mx-6 -mb-6 mt-8">
-
-        <div className="flex justify-end space-x-4 max-w-7xl mx-auto">
-          <button
-            type="button"
-            className="py-2.5 px-5 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal transition-colors"
-            onClick={() => navigate('/admin/group-trips')}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="py-2.5 px-5 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal hover:bg-teal-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal disabled:opacity-50 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-          >
-            {isSubmitting ? (
-              <span className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Saving...
-              </span>
-            ) : isEdit ? 'Update Group Trip' : 'Create Group Trip'}
-          </button>
-        </div>
-      </div>
-    </form>
+    </div>
   );
 };
 

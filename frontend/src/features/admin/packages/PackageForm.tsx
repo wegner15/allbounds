@@ -54,7 +54,7 @@ const packageSchema = z.object({
 type PackageFormData = z.infer<typeof packageSchema>;
 
 interface PackageFormProps {
-  packageData?: any; // The package data to edit, if any
+  packageData?: any;
   isEdit?: boolean;
 }
 
@@ -64,14 +64,15 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
   const isEdit = !!packageId;
   const { data: countries, isLoading: isLoadingCountries } = useCountries();
   const { data: holidayTypes, isLoading: isLoadingHolidayTypes } = useHolidayTypes();
-  const { data: inclusions, isLoading: isLoadingInclusions } = useInclusions();
-  const { data: exclusions, isLoading: isLoadingExclusions } = useExclusions();
+  const { data: inclusions } = useInclusions();
+  const { data: exclusions } = useExclusions();
   const { data: blogs, isLoading: isLoadingBlogs } = useBlogs(true);
   const { data: allTags = [] } = useContentTags();
 
   const createPackageMutation = useCreatePackage();
   const updatePackageMutation = useUpdatePackage(packageData?.id || (packageId ? parseInt(packageId) : 0));
 
+  const [activeSection, setActiveSection] = useState<string>('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [isSavingFaqs, setIsSavingFaqs] = useState(false);
@@ -90,7 +91,6 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [coverImageId, setCoverImageId] = useState<number | null>(null);
 
-  // Initialize form with default values or existing package data
   const {
     register,
     handleSubmit,
@@ -147,65 +147,19 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       },
   });
 
-  // Initialize form values and gallery images from existing package data
   useEffect(() => {
     if (isEdit && packageData) {
-      console.log('PackageForm: Initializing form with packageData:', packageData);
-      console.log('PackageForm: Country ID:', packageData.country_id);
-      console.log('PackageForm: Holiday types:', packageData.holiday_types);
-      console.log('PackageForm: Inclusions:', packageData.inclusion_items);
-      console.log('PackageForm: Exclusions:', packageData.exclusion_items);
-
-      // Update form values when packageData is loaded
-      setValue('name', packageData.name || '');
-      setValue('slug', packageData.slug || '');
-      setValue('description', packageData.description || '');
-      setValue('summary', packageData.summary || '');
-      setValue('price', packageData.price || 0);
-      setValue('duration_days', packageData.duration_days || 1);
-      setValue('country_id', packageData.country_id || 0);
-      setValue('holiday_type_ids', packageData.holiday_types?.map((ht: any) => ht.id) || []);
-      setValue('inclusion_ids', packageData.inclusion_items?.map((item: any) => item.id) || []);
-      setValue('exclusion_ids', packageData.exclusion_items?.map((item: any) => item.id) || []);
-      setValue('blog_post_ids', packageData.blog_posts?.map((blog: any) => blog.id) || []);
-      setValue('image_id', packageData.image_id || '');
-      setValue('tag_ids', packageData.tags?.map((t: any) => t.id) || []);
-      setValue('is_active', packageData.is_active ?? true);
-      setValue('is_featured', packageData.is_featured ?? false);
-      setValue('is_deal', packageData.is_deal ?? false);
-      setValue('package_type', packageData.package_type || 'safari');
-      setValue('faqs', packageData.faqs || []);
-      setValue('conversion_triggers', packageData.conversion_triggers?.map((t: string) => ({ value: t })) || []);
-
-      console.log('PackageForm: Set country_id to:', packageData.country_id);
-      console.log('PackageForm: Set holiday_type_ids to:', packageData.holiday_types?.map((ht: any) => ht.id) || []);
-      console.log('PackageForm: Set inclusion_ids to:', packageData.inclusion_items?.map((item: any) => item.id) || []);
-      console.log('PackageForm: Set exclusion_ids to:', packageData.exclusion_items?.map((item: any) => item.id) || []);
-
-      // Initialize gallery images
-      if (packageData.gallery_images) {
-        setGalleryImages(packageData.gallery_images);
-      }
-
-      // Initialize cover image
-      if (packageData.image_id) {
-        setCoverImageId(parseInt(packageData.image_id));
-      } else if (packageData.cover_image) {
-        const imageId = typeof packageData.cover_image === 'string'
-          ? null // We'll need to handle URL to ID conversion if needed
-          : packageData.cover_image;
-        setCoverImageId(imageId);
+      if (packageData.cover_image_id) {
+        setCoverImageId(packageData.cover_image_id);
       }
     }
-  }, [isEdit, packageData, setValue]);
+  }, [isEdit, packageData]);
 
-  // FAQ Field Array
   const { fields: faqFields, append: appendFaq, remove: removeFaq } = useFieldArray({
     control,
     name: 'faqs',
   });
   
-  // Conversion Triggers Field Array
   const { fields: triggerFields, append: appendTrigger, remove: removeTrigger } = useFieldArray({
     control,
     name: 'conversion_triggers',
@@ -250,24 +204,16 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
   const executeDeleteFaq = async () => {
     if (faqToDeleteIndex === null) return;
 
-    // Remove from UI
     removeFaq(faqToDeleteIndex);
     
-    // Automatically save to backend if editing an existing package
     if (isEdit && packageId) {
       setIsSavingFaqs(true);
       try {
-        // We need to get the FAQs AFTER the removal, but react-hook-form's watch might not have updated immediately in this sync flow.
-        // So we get the current array, remove the item, and send that to backend.
         const currentFaqs = watch('faqs') || [];
         const newFaqs = currentFaqs.filter((_, i) => i !== faqToDeleteIndex);
         
         await apiClient.patch(`/api/v1/packages/${packageId}/faqs`, { faqs: newFaqs });
-        
-        // Modal will close because we override the onConfirm below
         setModalState(prev => ({ ...prev, isOpen: false }));
-        
-        // Optionally show success modal, but maybe better to just be quiet on normal deletes to avoid click fatigue
       } catch (error: any) {
         console.error('Error deleting FAQ:', error);
         setModalState({
@@ -281,13 +227,11 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
         setFaqToDeleteIndex(null);
       }
     } else {
-      // If creating new package, just remove from UI and close modal
       setModalState(prev => ({ ...prev, isOpen: false }));
       setFaqToDeleteIndex(null);
     }
   };
 
-  // Auto-generate slug from name
   const name = watch('name');
   useEffect(() => {
     if (!isEdit && name) {
@@ -304,23 +248,18 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
     setServerError(null);
 
     try {
-      // Prepare the data for submission
-      const packageData = {
+      const payload = {
         ...formData,
-        // Ensure boolean fields are included from the form state
         is_featured: watch('is_featured'),
         is_deal: watch('is_deal'),
-        // Use the form's image_id (which is now properly set by the ImageSelector)
         image_id: formData.image_id || undefined,
         conversion_triggers: formData.conversion_triggers?.map(t => t.value) || []
       };
 
-      console.log('Submitting package with data:', packageData);
-
       if (isEdit) {
-        await updatePackageMutation.mutateAsync(packageData);
+        await updatePackageMutation.mutateAsync(payload);
       } else {
-        await createPackageMutation.mutateAsync(packageData);
+        await createPackageMutation.mutateAsync(payload);
       }
 
       navigate('/admin/packages');
@@ -332,41 +271,38 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
     }
   };
 
-
-
-  // Type-safe form submission handler
   const handleFormSubmit = handleSubmit(onSubmit);
-
-  // Debug form errors
-  useEffect(() => {
-    if (Object.keys(errors).length > 0) {
-      console.log('Form validation errors:', errors);
-    }
-  }, [errors]);
 
   if (isLoadingCountries || isLoadingHolidayTypes) {
     return (
       <div className="text-center py-12">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-charcoal"></div>
-        <p className="mt-2">Loading form data...</p>
+        <p className="mt-2 text-sm text-gray-500">Loading form data...</p>
       </div>
     );
   }
 
+  const SECTIONS = [
+    { id: 'basic', label: 'Basic Details', icon: '📝' },
+    { id: 'itinerary', label: 'Day-by-Day Itinerary', icon: '🗓️' },
+    { id: 'pricing', label: 'Price Charts', icon: '💵' },
+    { id: 'inclusions', label: 'Inclusions & Exclusions', icon: '✅' },
+    { id: 'gallery', label: 'Photo Gallery', icon: '🖼️', badge: galleryImages.length },
+    { id: 'triggers_blogs', label: 'Triggers & Blogs', icon: '⚡', badge: triggerFields.length },
+    { id: 'faqs_publish', label: 'FAQs & Publishing', icon: '❓', badge: faqFields.length },
+  ];
+
   return (
-    <form onSubmit={handleFormSubmit} className="space-y-8">
+    <div className="space-y-6">
       {Object.keys(errors).length > 0 && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg relative">
-          <div className="flex items-center mb-2">
-            <svg className="h-5 w-5 text-red-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-            <span className="font-bold">Please fix the following validation errors:</span>
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl shadow-xs">
+          <div className="flex items-center mb-1">
+            <span className="font-bold text-sm">Please fix the following validation errors:</span>
           </div>
-          <ul className="list-disc list-inside text-sm">
+          <ul className="list-disc list-inside text-xs space-y-0.5">
             {Object.entries(errors).map(([key, error]: [string, any]) => (
               <li key={key}>
-                <span className="capitalize font-medium">{key.replace('_', ' ')}</span>: {error.message}
+                <span className="capitalize font-semibold">{key.replace('_', ' ')}</span>: {error.message}
               </li>
             ))}
           </ul>
@@ -374,1220 +310,717 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
       )}
 
       {serverError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg relative">
-          <div className="flex items-center">
-            <svg className="h-5 w-5 text-red-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-            <span>{serverError}</span>
-          </div>
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium">
+          {serverError}
         </div>
       )}
-      {/* Conversion Triggers Section */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-          <div>
-            <h3 className="text-lg font-medium leading-6 text-gray-900">Conversion Triggers</h3>
-            <p className="mt-1 text-sm text-gray-500">Add dynamic triggers to encourage bookings (e.g., "Pay 50% deposit", "Visa included").</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => appendTrigger({ value: '' })}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal hover:bg-teal/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal"
-          >
-            <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-            </svg>
-            Add Trigger
-          </button>
-        </div>
-        <div className="px-6 py-6">
-          <div className="space-y-4">
-            {triggerFields.length === 0 ? (
-              <div className="text-center py-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-                <p className="text-sm text-gray-500 italic">No conversion triggers added yet. Click "Add Trigger" to start.</p>
-              </div>
-            ) : (
-              triggerFields.map((field, index) => (
-                <div key={field.id} className="flex items-start gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100 group relative">
-                  <div className="flex-grow">
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Trigger Text</label>
-                    <input
-                      {...register(`conversion_triggers.${index}.value`)}
-                      placeholder='e.g. "Pay 50% deposit"'
-                      className={`block w-full px-4 py-2 sm:text-sm border-gray-300 rounded-md shadow-sm focus:ring-teal focus:border-teal bg-white ${
-                        errors.conversion_triggers?.[index]?.value ? 'border-red-300' : ''
-                      }`}
-                    />
-                    {errors.conversion_triggers?.[index]?.value && (
-                      <p className="mt-1 text-xs text-red-600 font-medium">{errors.conversion_triggers[index]?.value?.message}</p>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeTrigger(index)}
-                    className="mt-6 text-gray-400 hover:text-red-500 transition-colors p-2"
-                    aria-label="Remove trigger"
-                  >
-                    <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
-          <h3 className="text-lg font-medium text-gray-900">
-            {isEdit ? 'Edit Package' : 'Create New Package'}
-          </h3>
-          <p className="mt-1 text-sm text-gray-500">
-            {isEdit ? 'Update the details for this package' : 'Fill in the details to create a new vacation package'}
-          </p>
-        </div>
-        <div className="p-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-          {/* Package name */}
-          <div className="sm:col-span-4">
-            <div className="flex justify-between items-center">
-              <label htmlFor="name" className="block text-sm font-semibold text-gray-800">
-                Package Name
-              </label>
-              <span className="text-xs text-gray-500 font-medium">
-                {watch('name')?.length || 0}/100 characters
-              </span>
-            </div>
-            <div className="mt-2 relative">
-              <input
-                type="text"
-                id="name"
-                placeholder="e.g. Safari Adventure"
-                className={`block w-full px-4 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200 
-                  ${errors.name
-                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
-                    : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
-                `}
-                {...register('name')}
-              />
-              {errors.name && (
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              )}
-            </div>
-            {errors.name ? (
-              <p className="mt-2 text-sm text-red-600 font-medium">{errors.name.message}</p>
-            ) : (
-              <p className="mt-2 text-xs text-gray-500">Enter a clear, descriptive name for this package</p>
-            )}
+
+      <div className="flex flex-col lg:flex-row gap-8 items-start relative">
+        {/* STICKY VERTICAL LEFT NAVIGATION */}
+        <div className="w-full lg:w-64 flex-shrink-0 sticky top-20 bg-white rounded-2xl border border-gray-200/80 p-3 shadow-2xs space-y-1.5 z-10">
+          <div className="px-3 py-2 border-b border-gray-100 mb-1">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">Package Sections</h3>
+            <p className="text-sm font-bold text-gray-900 truncate mt-0.5">{watch('name') || 'New Package'}</p>
           </div>
 
-          {/* Package slug */}
-          <div className="sm:col-span-4">
-            <div className="flex justify-between items-center">
-              <label htmlFor="slug" className="block text-sm font-semibold text-gray-800">
-                URL Slug
-              </label>
-              <span className="text-xs text-gray-500 font-medium">
-                {watch('slug')?.length || 0}/100 characters
-              </span>
-            </div>
-            <div className="mt-2 relative">
-              <div className="absolute inset-y-0 left-0 px-3 flex items-center pointer-events-none">
-                <span className="text-gray-500 sm:text-sm font-medium">/packages/</span>
-              </div>
-              <input
-                type="text"
-                id="slug"
-                placeholder="safari-adventure"
-                className={`block w-full pl-24 pr-10 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200 
-                  ${errors.slug
-                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
-                    : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
-                `}
-                {...register('slug')}
-              />
-              {errors.slug && (
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              )}
-            </div>
-            {errors.slug ? (
-              <p className="mt-2 text-sm text-red-600 font-medium">{errors.slug.message}</p>
-            ) : (
-              <p className="mt-2 text-xs text-gray-500">
-                Used in the URL: https://example.com/packages/your-slug
-              </p>
-            )}
-          </div>
-
-          {/* Description */}
-          <div className="sm:col-span-6">
-            <Controller
-              name="description"
-              control={control}
-              render={({ field, fieldState }) => (
-                <TinyMCEEditor
-                  value={field.value}
-                  onChange={field.onChange}
-                  label="Description"
-                  placeholder="Provide a detailed description of this package..."
-                  height={350}
-                  maxLength={5000}
-                  error={fieldState.error?.message}
-                  helperText="Describe the package in detail. Include key features, experiences, and what makes it unique."
-                  required
-                />
-              )}
-            />
-          </div>
-
-          {/* Summary */}
-          <div className="sm:col-span-6">
-            <div className="flex justify-between items-center">
-              <label htmlFor="summary" className="block text-sm font-semibold text-gray-800">
-                Summary
-              </label>
-              <span className="text-xs text-gray-500 font-medium">
-                {watch('summary')?.length || 0}/255 characters
-              </span>
-            </div>
-            <div className="mt-2">
-              <textarea
-                id="summary"
-                rows={3}
-                placeholder="Write a concise summary that will appear in cards and previews..."
-                className={`block w-full px-4 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200
-                   ${errors.summary
-                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
-                    : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
-                 `}
-                {...register('summary')}
-              />
-              {errors.summary ? (
-                <p className="mt-2 text-sm text-red-600 font-medium">{errors.summary.message}</p>
-              ) : (
-                <p className="mt-2 text-xs text-gray-500">A brief summary for card displays and search results</p>
-              )}
-            </div>
-          </div>
-
-          {/* Price */}
-          <div className="sm:col-span-2">
-            <div className="flex justify-between items-center">
-              <label htmlFor="price" className="block text-sm font-semibold text-gray-800">
-                Price (per person)
-              </label>
-            </div>
-            <div className="mt-2 relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <span className="text-gray-500 font-medium">$</span>
-              </div>
-              <input
-                type="number"
-                id="price"
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-                className={`block w-full pl-8 pr-12 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200
-                  ${errors.price
-                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
-                    : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
-                `}
-                {...register('price', { valueAsNumber: true })}
-              />
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <span className="text-gray-500 sm:text-sm">USD</span>
-              </div>
-              {errors.price && (
-                <div className="absolute inset-y-0 right-0 pr-10 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              )}
-            </div>
-            {errors.price ? (
-              <p className="mt-2 text-sm text-red-600 font-medium">{errors.price.message}</p>
-            ) : (
-              <p className="mt-2 text-xs text-gray-500">
-                Enter the price per person in USD
-              </p>
-            )}
-          </div>
-
-          {/* Duration */}
-          <div className="sm:col-span-2">
-            <div className="flex justify-between items-center">
-              <label htmlFor="duration_days" className="block text-sm font-semibold text-gray-800">
-                Duration (days)
-              </label>
-            </div>
-            <div className="mt-2 relative">
-              <input
-                type="number"
-                id="duration_days"
-                min="1"
-                placeholder="e.g. 7"
-                className={`block w-full pl-4 pr-12 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset transition-all duration-200
-                  ${errors.duration_days
-                    ? 'ring-red-300 text-red-900 placeholder-red-300 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
-                    : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
-                `}
-                {...register('duration_days', { valueAsNumber: true })}
-              />
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <span className="text-gray-500 sm:text-sm">days</span>
-              </div>
-              {errors.duration_days && (
-                <div className="absolute inset-y-0 right-0 pr-12 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              )}
-            </div>
-            {errors.duration_days ? (
-              <p className="mt-2 text-sm text-red-600 font-medium">{errors.duration_days.message}</p>
-            ) : (
-              <p className="mt-2 text-xs text-gray-500">
-                Enter the total duration of the package in days
-              </p>
-            )}
-          </div>
-
-          {/* Package Type Selector (Safari vs Holiday) */}
-          <div className="sm:col-span-6 bg-gradient-to-r from-amber-50/40 via-white to-teal-50/40 border border-gray-200 rounded-xl p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <label className="block text-base font-bold text-gray-900">
-                  Package Type <span className="text-red-500">*</span>
-                </label>
-                <p className="text-xs text-gray-600 mt-0.5">
-                  Select whether this package belongs to Safari Experiences or Holiday Vacations. The website will automatically display it in its corresponding section.
-                </p>
-              </div>
-            </div>
-            <Controller
-              name="package_type"
-              control={control}
-              render={({ field }) => (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Safari Option */}
-                  <div
-                    onClick={() => field.onChange('safari')}
-                    className={`cursor-pointer rounded-xl border-2 p-4 flex items-start space-x-3 transition-all duration-200 ${
-                      field.value === 'safari'
-                        ? 'border-amber-600 bg-amber-50/80 shadow-sm ring-1 ring-amber-600/30'
-                        : 'border-gray-200 bg-white hover:border-amber-300 hover:bg-amber-50/30'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      id="type-safari"
-                      name="package_type_radio"
-                      checked={field.value === 'safari'}
-                      onChange={() => field.onChange('safari')}
-                      className="h-4 w-4 text-amber-600 border-gray-300 focus:ring-amber-500 mt-1"
-                    />
-                    <div className="flex-1">
-                      <label htmlFor="type-safari" className="font-bold text-gray-900 cursor-pointer flex items-center justify-between">
-                        <span className="text-sm sm:text-base flex items-center gap-1.5">
-                          <span>🦁</span>
-                          <span>Safari Package</span>
-                        </span>
-                        {field.value === 'safari' && (
-                          <span className="text-xs bg-amber-600 text-white font-semibold px-2 py-0.5 rounded-full">Selected</span>
-                        )}
-                      </label>
-                      <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
-                        Safari destinations, wildlife tours, game reserves, wilderness lodges, and bush adventures (e.g. Kenya, Uganda, Tanzania, South Africa).
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Holiday Option */}
-                  <div
-                    onClick={() => field.onChange('holiday')}
-                    className={`cursor-pointer rounded-xl border-2 p-4 flex items-start space-x-3 transition-all duration-200 ${
-                      field.value === 'holiday'
-                        ? 'border-teal bg-teal/10 shadow-sm ring-1 ring-teal/30'
-                        : 'border-gray-200 bg-white hover:border-teal-light hover:bg-teal/5'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      id="type-holiday"
-                      name="package_type_radio"
-                      checked={field.value === 'holiday'}
-                      onChange={() => field.onChange('holiday')}
-                      className="h-4 w-4 text-teal border-gray-300 focus:ring-teal mt-1"
-                    />
-                    <div className="flex-1">
-                      <label htmlFor="type-holiday" className="font-bold text-gray-900 cursor-pointer flex items-center justify-between">
-                        <span className="text-sm sm:text-base flex items-center gap-1.5">
-                          <span>🏖️</span>
-                          <span>Holiday Package</span>
-                        </span>
-                        {field.value === 'holiday' && (
-                          <span className="text-xs bg-teal text-white font-semibold px-2 py-0.5 rounded-full">Selected</span>
-                        )}
-                      </label>
-                      <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
-                        Leisure and beach getaways, city tours, luxury island breaks, and international vacation packages (e.g. Dubai, Zanzibar, Mauritius, Maldives, Egypt).
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            />
-          </div>
-
-          {/* Country */}
-          <div className="sm:col-span-3">
-            <div className="flex justify-between items-center">
-              <label htmlFor="country_id" className="block text-sm font-semibold text-gray-800">
-                Country / Destination <span className="text-red-500">*</span>
-              </label>
-            </div>
-            <div className="mt-2 relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <select
-                id="country_id"
-                className={`block w-full pl-11 pr-10 py-3 sm:text-sm border-0 rounded-lg shadow-sm ring-1 ring-inset appearance-none bg-none transition-all duration-200
-                  ${errors.country_id
-                    ? 'ring-red-300 text-red-900 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
-                    : 'ring-gray-300 bg-white focus:ring-2 focus:ring-teal'}
-                `}
-                {...register('country_id', { valueAsNumber: true })}
-                value={watch('country_id') || 0}
-                onChange={(e) => {
-                  console.log('Country changed to:', e.target.value);
-                  setValue('country_id', parseInt(e.target.value));
-                }}
-              >
-                <option value={0}>Select a country</option>
-                {countries?.map((country) => (
-                  <option key={country.id} value={country.id}>
-                    {country.name}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </div>
-              {errors.country_id && (
-                <div className="absolute inset-y-0 right-0 pr-10 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              )}
-            </div>
-            {errors.country_id ? (
-              <p className="mt-2 text-sm text-red-600 font-medium">{errors.country_id.message}</p>
-            ) : (
-              <p className="mt-2 text-xs text-gray-500">
-                Select the primary country for this package
-              </p>
-            )}
-          </div>
-
-          {/* Additional Destinations */}
-          <div className="sm:col-span-6">
-            <div className="flex justify-between items-center">
-              <label className="block text-sm font-semibold text-gray-800">
-                Additional Destinations <span className="text-gray-400 font-normal">(optional)</span>
-              </label>
-            </div>
-            <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
-              <div className="mb-3">
-                <p className="text-sm text-gray-700">
-                  Select extra countries this package covers. It will appear on each selected destination page.
-                </p>
-              </div>
-              <Controller
-                name="country_ids"
-                control={control}
-                render={({ field }) => (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {countries
-                      ?.filter((c) => c.id !== watch('country_id')) // exclude primary
-                      .map((country) => {
-                        const checkboxId = `extra-country-${country.id}`;
-                        const isChecked = (field.value || []).includes(country.id);
-                        return (
-                          <div key={country.id} className="relative flex items-start">
-                            <div className="flex h-6 items-center">
-                              <input
-                                id={checkboxId}
-                                type="checkbox"
-                                className="h-5 w-5 rounded border-gray-300 text-teal focus:ring-teal focus:ring-offset-0"
-                                checked={isChecked}
-                                onChange={(e) => {
-                                  const current = field.value || [];
-                                  if (e.target.checked) {
-                                    field.onChange([...current, country.id]);
-                                  } else {
-                                    field.onChange(current.filter((id: number) => id !== country.id));
-                                  }
-                                }}
-                              />
-                            </div>
-                            <div className="ml-3 text-sm leading-6">
-                              <label htmlFor={checkboxId} className="font-medium text-gray-900 cursor-pointer">
-                                {country.name}
-                              </label>
-                            </div>
-                          </div>
-                        );
-                      })}
-                  </div>
-                )}
-              />
-            </div>
-            <p className="mt-2 text-xs text-gray-500">
-              Multi-destination packages appear in all selected countries' destination pages.
-            </p>
-          </div>
-
-          {/* Holiday Types */}
-          <div className="sm:col-span-6">
-            <div className="flex justify-between items-center">
-              <label className="block text-sm font-semibold text-gray-800">
-                Holiday Types
-              </label>
-            </div>
-            <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
-              <div className="mb-3">
-                <p className="text-sm text-gray-700">Select all holiday types that apply to this package:</p>
-              </div>
-              <Controller
-                name="holiday_type_ids"
-                control={control}
-                render={({ field }) => (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {holidayTypes?.map((type) => {
-                      const checkboxId = `holiday-type-${type.id}`;
-                      const isChecked = (field.value || []).includes(type.id);
-
-                      return (
-                        <div key={type.id} className="relative flex items-start">
-                          <div className="flex h-6 items-center">
-                            <input
-                              id={checkboxId}
-                              type="checkbox"
-                              className="h-5 w-5 rounded border-gray-300 text-teal focus:ring-teal focus:ring-offset-0"
-                              checked={isChecked}
-                              onChange={(e) => {
-                                const currentTypes = field.value || [];
-                                if (e.target.checked) {
-                                  field.onChange([...currentTypes, type.id]);
-                                } else {
-                                  field.onChange(currentTypes.filter((id) => id !== type.id));
-                                }
-                              }}
-                            />
-                          </div>
-                          <div className="ml-3 text-sm leading-6">
-                            <label htmlFor={checkboxId} className="font-medium text-gray-900 cursor-pointer">
-                              {type.name}
-                            </label>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              />
-              {errors.holiday_type_ids && (
-                <div className="mt-3 flex items-center text-sm text-red-600">
-                  <svg className="h-5 w-5 text-red-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  <span className="font-medium">{errors.holiday_type_ids.message}</span>
-                </div>
-              )}
-            </div>
-            <p className="mt-2 text-xs text-gray-500">
-              Holiday types help categorize packages and improve discoverability
-            </p>
-          </div>
-
-          {/* Tags */}
-          <div className="sm:col-span-6">
-            <Controller
-              name="tag_ids"
-              control={control}
-              render={({ field }) => (
-                <TagSelector
-                  tags={allTags}
-                  selectedTagIds={field.value || []}
-                  onChange={field.onChange}
-                  label="Content Tags"
-                  helperText="Tags categorize this package for dynamic filtering on the public site."
-                />
-              )}
-            />
-          </div>
-
-          {/* Package Image */}
-          <div className="sm:col-span-6">
-            <div className="flex justify-between items-center">
-              <label className="block text-sm font-semibold text-gray-800">
-                Package Image
-              </label>
-            </div>
-            <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
-              <div className="mb-3">
-                <p className="text-sm text-gray-700">Upload or select an image for this package:</p>
-              </div>
-              <ImageSelector
-                initialImageId={watch('image_id')}
-                onImageSelected={(imageId) => {
-                  console.log('Package image selected:', imageId);
-
-                  // Update the form value
-                  setValue('image_id', imageId);
-
-                  // Update the cover image state for both create and edit
-                  setCoverImageId(imageId ? parseInt(imageId) : null);
-
-                  // If we're editing an existing package, update the cover image immediately
-                  if (isEdit && packageId && imageId) {
-                    console.log('Immediately updating package cover image to:', imageId);
-                    apiClient.post(`/api/v1/packages/${packageId}/cover-image`, {
-                      image_id: imageId
-                    })
-                      .then(response => {
-                        console.log('Package cover image updated successfully:', response);
-
-                        // Force refresh the form data
-                        if (packageData) {
-                          packageData.image_id = imageId;
-                        }
-                      })
-                      .catch(error => {
-                        console.error('Error updating package cover image:', error);
-                      });
-                  } else if (!isEdit && imageId) {
-                    // For new packages, store the image ID to be used when creating the package
-                    console.log('Storing image ID for new package:', imageId);
-                  }
-                }}
-                variant="thumbnail"
-                className="mt-2"
-              />
-              {errors.image_id && (
-                <div className="mt-3 flex items-center text-sm text-red-600">
-                  <svg className="h-5 w-5 text-red-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  <span className="font-medium">{errors.image_id.message}</span>
-                </div>
-              )}
-            </div>
-            <p className="mt-2 text-xs text-gray-500">
-              Choose a high-quality image that represents this package. Recommended size: 1200x800 pixels.
-            </p>
-          </div>
-
-          {/* Inclusions */}
-          <div className="sm:col-span-6">
-            <div className="flex justify-between items-center">
-              <label className="block text-sm font-semibold text-gray-800">
-                Inclusions
-              </label>
-            </div>
-            <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
-              <div className="mb-3">
-                <p className="text-sm text-gray-700">Select all inclusions that apply to this package:</p>
-              </div>
-              <Controller
-                name="inclusion_ids"
-                control={control}
-                render={({ field }) => (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {inclusions?.map((inclusion) => {
-                      const checkboxId = `inclusion-${inclusion.id}`;
-                      const isChecked = (field.value || []).includes(inclusion.id);
-
-                      return (
-                        <div key={inclusion.id} className="relative flex items-start">
-                          <div className="flex h-6 items-center">
-                            <input
-                              id={checkboxId}
-                              type="checkbox"
-                              className="h-5 w-5 rounded border-gray-300 text-teal focus:ring-teal focus:ring-offset-0"
-                              checked={isChecked}
-                              onChange={(e) => {
-                                const currentInclusions = field.value || [];
-                                if (e.target.checked) {
-                                  field.onChange([...currentInclusions, inclusion.id]);
-                                } else {
-                                  field.onChange(currentInclusions.filter((id) => id !== inclusion.id));
-                                }
-                              }}
-                            />
-                          </div>
-                          <div className="ml-3 text-sm leading-6">
-                            <label htmlFor={checkboxId} className="font-medium text-gray-900 cursor-pointer flex items-center">
-                              {inclusion.icon && (
-                                <i className={`fas fa-${inclusion.icon} mr-2 text-teal`}></i>
-                              )}
-                              {inclusion.name}
-                              {inclusion.category && (
-                                <span className="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                                  {inclusion.category}
-                                </span>
-                              )}
-                            </label>
-                            {inclusion.description && (
-                              <p className="text-xs text-gray-500 mt-1">{inclusion.description}</p>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              />
-            </div>
-            <p className="mt-2 text-xs text-gray-500">
-              Select the inclusions that are part of this package. These will be displayed to customers.
-            </p>
-          </div>
-
-          {/* Exclusions */}
-          <div className="sm:col-span-6">
-            <div className="flex justify-between items-center">
-              <label className="block text-sm font-semibold text-gray-800">
-                Exclusions
-              </label>
-            </div>
-            <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
-              <div className="mb-3">
-                <p className="text-sm text-gray-700">Select all exclusions that apply to this package:</p>
-              </div>
-              <Controller
-                name="exclusion_ids"
-                control={control}
-                render={({ field }) => (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {exclusions?.map((exclusion) => {
-                      const checkboxId = `exclusion-${exclusion.id}`;
-                      const isChecked = (field.value || []).includes(exclusion.id);
-
-                      return (
-                        <div key={exclusion.id} className="relative flex items-start">
-                          <div className="flex h-6 items-center">
-                            <input
-                              id={checkboxId}
-                              type="checkbox"
-                              className="h-5 w-5 rounded border-gray-300 text-red-500 focus:ring-red-500 focus:ring-offset-0"
-                              checked={isChecked}
-                              onChange={(e) => {
-                                const currentExclusions = field.value || [];
-                                if (e.target.checked) {
-                                  field.onChange([...currentExclusions, exclusion.id]);
-                                } else {
-                                  field.onChange(currentExclusions.filter((id) => id !== exclusion.id));
-                                }
-                              }}
-                            />
-                          </div>
-                          <div className="ml-3 text-sm leading-6">
-                            <label htmlFor={checkboxId} className="font-medium text-gray-900 cursor-pointer flex items-center">
-                              {exclusion.icon && (
-                                <i className={`fas fa-${exclusion.icon} mr-2 text-red-500`}></i>
-                              )}
-                              {exclusion.name}
-                              {exclusion.category && (
-                                <span className="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                                  {exclusion.category}
-                                </span>
-                              )}
-                            </label>
-                            {exclusion.description && (
-                              <p className="text-xs text-gray-500 mt-1">{exclusion.description}</p>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              />
-            </div>
-            <p className="mt-2 text-xs text-gray-500">
-              Select the exclusions that are NOT part of this package. These will be displayed to customers.
-            </p>
-          </div>
-
-          {/* Blog Posts */}
-          <div className="sm:col-span-6">
-            <div className="flex justify-between items-center">
-              <label className="block text-sm font-semibold text-gray-800">
-                Related Blog Posts
-              </label>
-            </div>
-            <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
-              <div className="mb-3">
-                <p className="text-sm text-gray-700">Select blog posts to link to this package:</p>
-              </div>
-              {isLoadingBlogs ? (
-                <div className="flex items-center space-x-2 text-sm text-gray-500">
-                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-charcoal"></div>
-                  <span>Loading blogs...</span>
-                </div>
-              ) : blogs && blogs.length > 0 ? (
-                <Controller
-                  name="blog_post_ids"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                      {blogs.map((blog) => {
-                        const checkboxId = `blog-post-${blog.id}`;
-                        const isChecked = (field.value || []).includes(blog.id);
-
-                        return (
-                          <div key={blog.id} className="relative flex items-start p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors">
-                            <div className="flex h-6 items-center">
-                              <input
-                                id={checkboxId}
-                                type="checkbox"
-                                className="h-5 w-5 rounded border-gray-300 text-teal focus:ring-teal focus:ring-offset-0"
-                                checked={isChecked}
-                                onChange={(e) => {
-                                  const currentBlogs = field.value || [];
-                                  if (e.target.checked) {
-                                    field.onChange([...currentBlogs, blog.id]);
-                                  } else {
-                                    field.onChange(currentBlogs.filter((id) => id !== blog.id));
-                                  }
-                                }}
-                              />
-                            </div>
-                            <div className="ml-3 text-sm leading-6">
-                              <label htmlFor={checkboxId} className="font-medium text-gray-900 cursor-pointer flex flex-col">
-                                <span>{blog.title}</span>
-                                {blog.published_at && (
-                                  <span className="text-xs text-gray-500">
-                                    Published: {new Date(blog.published_at).toLocaleDateString()}
-                                  </span>
-                                )}
-                                {!blog.is_published && (
-                                  <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 w-fit">
-                                    Draft
-                                  </span>
-                                )}
-                              </label>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                />
-              ) : (
-                <p className="text-sm text-gray-500 italic">No blog posts found.</p>
-              )}
-            </div>
-            <p className="mt-2 text-xs text-gray-500">
-              Linked blog posts will be displayed as related content on the tour page
-            </p>
-          </div>
-
-          {/* Price Charts */}
-          <div className="sm:col-span-6">
-            <div className="flex justify-between items-center">
-              <label className="block text-sm font-semibold text-gray-800">
-                Price Charts
-              </label>
-            </div>
-            <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
-              <div className="mb-3">
-                <p className="text-sm text-gray-700">Manage seasonal pricing for this package:</p>
-              </div>
-              {isEdit && packageData?.id ? (
-                <PriceChartManager packageId={packageData.id} />
-              ) : (
-                <p className="text-sm text-gray-500">You can add price charts after saving the package.</p>
-              )}
-            </div>
-          </div>
-
-          {/* Gallery Management */}
-          <div className="sm:col-span-6">
-            <div className="flex justify-between items-center">
-              <label className="block text-sm font-semibold text-gray-800">
-                Gallery Images
-              </label>
-            </div>
-            <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
-              <div className="mb-3">
-                <p className="text-sm text-gray-700">Upload multiple images to create a gallery for this package:</p>
-              </div>
-              <GalleryManager
-                entityType="package"
-                entityId={packageData?.id}
-                images={galleryImages}
-                coverImageId={coverImageId}
-                onImagesChange={setGalleryImages}
-                onCoverImageChange={setCoverImageId}
-              />
-            </div>
-            <p className="mt-2 text-xs text-gray-500">
-              Upload high-quality images that showcase this package. The first image or selected cover image will be used as the main package image.
-            </p>
-          </div>
-
-          {/* Itinerary Management */}
-          {isEdit && packageData?.id && (
-            <div className="sm:col-span-6">
-              <div className="flex justify-between items-center">
-                <label className="block text-sm font-semibold text-gray-800">
-                  Package Itinerary
-                </label>
-              </div>
-              <div className="mt-2">
-                <SimpleItineraryManager
-                  entityType="package"
-                  entityId={packageData.id}
-                  countryId={watch('country_id')}
-                />
-              </div>
-              <p className="mt-2 text-xs text-gray-500">
-                Create a day-by-day itinerary for this package. This helps travelers understand what to expect each day.
-              </p>
-            </div>
-          )}
-
-          {/* FAQ Management */}
-          <div className="sm:col-span-6">
-            <div className="flex justify-between items-center">
-              <label className="block text-sm font-semibold text-gray-800">
-                Frequently Asked Questions
-              </label>
-              <button
-                type="button"
-                onClick={() => appendFaq({ question: '', answer: '' })}
-                className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-teal hover:bg-teal-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal"
-              >
-                <svg className="-ml-0.5 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                Add FAQ
-              </button>
-              {isEdit && (
+          <div className="space-y-1">
+            {SECTIONS.map((sec) => {
+              const isActive = activeSection === sec.id;
+              return (
                 <button
+                  key={sec.id}
                   type="button"
-                  disabled={isSavingFaqs}
-                  onClick={handleSaveFaqs}
-                  className="inline-flex items-center px-3 py-1.5 border border-teal text-xs font-medium rounded-full shadow-sm text-teal bg-white hover:bg-teal/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal disabled:opacity-50 transition-all duration-200"
+                  onClick={() => setActiveSection(sec.id)}
+                  className={`w-full flex items-center justify-between text-xs px-3.5 py-2.5 rounded-xl font-semibold transition-all text-left cursor-pointer ${
+                    isActive
+                      ? 'bg-primary text-white shadow-2xs scale-[1.01]'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
                 >
-                  {isSavingFaqs ? (
-                    <>
-                      <svg className="animate-spin -ml-0.5 mr-2 h-4 w-4 text-teal" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <svg className="-ml-0.5 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      Save FAQs
-                    </>
+                  <span className="flex items-center gap-2">
+                    <span>{sec.icon}</span>
+                    <span>{sec.label}</span>
+                  </span>
+                  {sec.badge !== undefined && (
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                      isActive ? 'bg-white/20 text-white' : 'bg-gray-150 text-gray-600'
+                    }`}>
+                      {sec.badge}
+                    </span>
                   )}
                 </button>
-              )}
-            </div>
-            <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-inset ring-gray-200">
-              <div className="mb-3">
-                <p className="text-sm text-gray-700">Add common questions and answers for this package:</p>
-              </div>
+              );
+            })}
+          </div>
 
-              {faqFields.length === 0 ? (
-                <div className="text-center py-6 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                  <p className="text-sm text-gray-500">No FAQs added yet.</p>
-                  <button
-                    type="button"
-                    onClick={() => appendFaq({ question: '', answer: '' })}
-                    className="mt-2 text-sm text-teal hover:text-teal-dark font-medium"
-                  >
-                    Add your first question
-                  </button>
+          <div className="pt-3 border-t border-gray-100 space-y-2 mt-2">
+            <button
+              type="button"
+              onClick={handleFormSubmit}
+              disabled={isSubmitting}
+              className="w-full py-2.5 px-4 bg-teal hover:bg-teal-dark text-white text-xs font-bold rounded-xl shadow-2xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              <span>{isSubmitting ? 'Saving...' : isEdit ? 'Save Package' : 'Create Package'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/admin/packages')}
+              className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-xl transition-all text-center cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+
+        {/* RIGHT MAIN CONTENT DISPLAY */}
+        <div className="flex-1 min-w-0 space-y-8 w-full">
+          <form onSubmit={handleFormSubmit} className="space-y-8">
+            {/* SECTION 1: BASIC DETAILS */}
+            {activeSection === 'basic' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 overflow-hidden p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>📝</span> Basic Details & Overview
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Package name, slug, pricing, duration, destinations, and cover image</p>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {faqFields.map((field, index) => (
-                    <div key={field.id} className="bg-gray-50 p-4 rounded-lg border border-gray-200 relative group">
-                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+
+                <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                  {/* Name */}
+                  <div className="sm:col-span-4">
+                    <label htmlFor="name" className="block text-sm font-semibold text-gray-800 mb-1">
+                      Package Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      placeholder="e.g. 7-Day Luxury Masai Mara Safari"
+                      className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl shadow-xs focus:ring-2 focus:ring-teal focus:border-transparent"
+                      {...register('name')}
+                    />
+                    {errors.name && <p className="mt-1 text-xs text-red-600 font-medium">{errors.name.message}</p>}
+                  </div>
+
+                  {/* Slug */}
+                  <div className="sm:col-span-4">
+                    <label htmlFor="slug" className="block text-sm font-semibold text-gray-800 mb-1">
+                      URL Slug <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="slug"
+                      placeholder="7-day-luxury-masai-mara-safari"
+                      className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl shadow-xs focus:ring-2 focus:ring-teal focus:border-transparent font-mono text-xs"
+                      {...register('slug')}
+                    />
+                    {errors.slug && <p className="mt-1 text-xs text-red-600 font-medium">{errors.slug.message}</p>}
+                  </div>
+
+                  {/* Package Type Radio Selector */}
+                  <div className="sm:col-span-6 bg-gradient-to-r from-amber-50/40 via-white to-teal-50/40 border border-gray-200 rounded-xl p-5 shadow-2xs">
+                    <label className="block text-base font-bold text-gray-900 mb-2">
+                      Package Category <span className="text-red-500">*</span>
+                    </label>
+                    <Controller
+                      name="package_type"
+                      control={control}
+                      render={({ field }) => (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div
+                            onClick={() => field.onChange('safari')}
+                            className={`cursor-pointer rounded-xl border-2 p-4 flex items-start space-x-3 transition-all ${
+                              field.value === 'safari'
+                                ? 'border-amber-600 bg-amber-50/80 shadow-2xs'
+                                : 'border-gray-200 bg-white hover:border-amber-300'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              id="type-safari"
+                              checked={field.value === 'safari'}
+                              onChange={() => field.onChange('safari')}
+                              className="h-4 w-4 text-amber-600 border-gray-300 focus:ring-amber-500 mt-1"
+                            />
+                            <div className="flex-1">
+                              <label htmlFor="type-safari" className="font-bold text-gray-900 cursor-pointer flex items-center justify-between">
+                                <span className="text-sm flex items-center gap-1.5">
+                                  <span>🦁</span> Safari Package
+                                </span>
+                              </label>
+                              <p className="text-xs text-gray-600 mt-1">Wildlife tours, national parks, and game reserve safaris.</p>
+                            </div>
+                          </div>
+
+                          <div
+                            onClick={() => field.onChange('holiday')}
+                            className={`cursor-pointer rounded-xl border-2 p-4 flex items-start space-x-3 transition-all ${
+                              field.value === 'holiday'
+                                ? 'border-teal bg-teal/10 shadow-2xs'
+                                : 'border-gray-200 bg-white hover:border-teal-light'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              id="type-holiday"
+                              checked={field.value === 'holiday'}
+                              onChange={() => field.onChange('holiday')}
+                              className="h-4 w-4 text-teal border-gray-300 focus:ring-teal mt-1"
+                            />
+                            <div className="flex-1">
+                              <label htmlFor="type-holiday" className="font-bold text-gray-900 cursor-pointer flex items-center justify-between">
+                                <span className="text-sm flex items-center gap-1.5">
+                                  <span>🏖️</span> Holiday Package
+                                </span>
+                              </label>
+                              <p className="text-xs text-gray-600 mt-1">Leisure getaways, beach holidays, and international tours.</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    />
+                  </div>
+
+                  {/* Summary */}
+                  <div className="sm:col-span-6">
+                    <label htmlFor="summary" className="block text-sm font-semibold text-gray-800 mb-1">
+                      Summary Overview
+                    </label>
+                    <textarea
+                      id="summary"
+                      rows={2}
+                      placeholder="Concise summary for card previews..."
+                      className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl shadow-xs focus:ring-2 focus:ring-teal"
+                      {...register('summary')}
+                    />
+                    {errors.summary && <p className="mt-1 text-xs text-red-600">{errors.summary.message}</p>}
+                  </div>
+
+                  {/* Main Description */}
+                  <div className="sm:col-span-6">
+                    <Controller
+                      name="description"
+                      control={control}
+                      render={({ field, fieldState }) => (
+                        <TinyMCEEditor
+                          value={field.value}
+                          onChange={field.onChange}
+                          label="Full Description"
+                          placeholder="Provide a detailed description of this package..."
+                          height={320}
+                          maxLength={5000}
+                          error={fieldState.error?.message}
+                          required
+                        />
+                      )}
+                    />
+                  </div>
+
+                  {/* Price & Duration */}
+                  <div className="sm:col-span-3">
+                    <label htmlFor="price" className="block text-sm font-semibold text-gray-800 mb-1">
+                      Base Price (USD per person) <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      id="price"
+                      min="0"
+                      step="0.01"
+                      placeholder="1200.00"
+                      className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl shadow-xs focus:ring-2 focus:ring-teal"
+                      {...register('price', { valueAsNumber: true })}
+                    />
+                    {errors.price && <p className="mt-1 text-xs text-red-600">{errors.price.message}</p>}
+                  </div>
+
+                  <div className="sm:col-span-3">
+                    <label htmlFor="duration_days" className="block text-sm font-semibold text-gray-800 mb-1">
+                      Duration (Days) <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      id="duration_days"
+                      min="1"
+                      placeholder="7"
+                      className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl shadow-xs focus:ring-2 focus:ring-teal"
+                      {...register('duration_days', { valueAsNumber: true })}
+                    />
+                    {errors.duration_days && <p className="mt-1 text-xs text-red-600">{errors.duration_days.message}</p>}
+                  </div>
+
+                  {/* Primary Country */}
+                  <div className="sm:col-span-3">
+                    <label htmlFor="country_id" className="block text-sm font-semibold text-gray-800 mb-1">
+                      Primary Destination <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="country_id"
+                      className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl shadow-xs focus:ring-2 focus:ring-teal"
+                      {...register('country_id', { valueAsNumber: true })}
+                    >
+                      <option value={0}>Select a country</option>
+                      {countries?.map((country) => (
+                        <option key={country.id} value={country.id}>{country.name}</option>
+                      ))}
+                    </select>
+                    {errors.country_id && <p className="mt-1 text-xs text-red-600">{errors.country_id.message}</p>}
+                  </div>
+
+                  {/* Additional Destinations */}
+                  <div className="sm:col-span-6 bg-gray-50/70 p-4 rounded-xl border border-gray-200/80">
+                    <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">
+                      Additional Covered Destinations
+                    </label>
+                    <Controller
+                      name="country_ids"
+                      control={control}
+                      render={({ field }) => (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          {countries
+                            ?.filter((c) => c.id !== watch('country_id'))
+                            .map((country) => {
+                              const isChecked = (field.value || []).includes(country.id);
+                              return (
+                                <label key={country.id} className="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    className="h-4 w-4 rounded border-gray-300 text-teal focus:ring-teal"
+                                    checked={isChecked}
+                                    onChange={(e) => {
+                                      const current = field.value || [];
+                                      if (e.target.checked) field.onChange([...current, country.id]);
+                                      else field.onChange(current.filter((id: number) => id !== country.id));
+                                    }}
+                                  />
+                                  <span>{country.name}</span>
+                                </label>
+                              );
+                            })}
+                        </div>
+                      )}
+                    />
+                  </div>
+
+                  {/* Holiday Types */}
+                  <div className="sm:col-span-6 bg-gray-50/70 p-4 rounded-xl border border-gray-200/80">
+                    <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">
+                      Holiday Types <span className="text-red-500">*</span>
+                    </label>
+                    <Controller
+                      name="holiday_type_ids"
+                      control={control}
+                      render={({ field }) => (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          {holidayTypes?.map((type) => {
+                            const isChecked = (field.value || []).includes(type.id);
+                            return (
+                              <label key={type.id} className="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  className="h-4 w-4 rounded border-gray-300 text-teal focus:ring-teal"
+                                  checked={isChecked}
+                                  onChange={(e) => {
+                                    const current = field.value || [];
+                                    if (e.target.checked) field.onChange([...current, type.id]);
+                                    else field.onChange(current.filter((id) => id !== type.id));
+                                  }}
+                                />
+                                <span>{type.name}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
+                    />
+                    {errors.holiday_type_ids && <p className="mt-2 text-xs text-red-600 font-medium">{errors.holiday_type_ids.message}</p>}
+                  </div>
+
+                  {/* Content Tags */}
+                  <div className="sm:col-span-6">
+                    <Controller
+                      name="tag_ids"
+                      control={control}
+                      render={({ field }) => (
+                        <TagSelector
+                          tags={allTags}
+                          selectedTagIds={field.value || []}
+                          onChange={field.onChange}
+                          label="Content Tags"
+                          helperText="Categorizes this package for dynamic filters."
+                        />
+                      )}
+                    />
+                  </div>
+
+                  {/* Main Image */}
+                  <div className="sm:col-span-6">
+                    <label className="block text-sm font-semibold text-gray-800 mb-2">Primary Cover Image</label>
+                    <ImageSelector
+                      initialImageId={watch('image_id')}
+                      onImageSelected={(imageId) => {
+                        setValue('image_id', imageId);
+                        setCoverImageId(imageId ? parseInt(imageId) : null);
+                        if (isEdit && packageId && imageId) {
+                          apiClient.post(`/api/v1/packages/${packageId}/cover-image`, { image_id: imageId });
+                        }
+                      }}
+                      variant="thumbnail"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* SECTION 2: DAY-BY-DAY ITINERARY */}
+            {activeSection === 'itinerary' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>🗓️</span> Day-by-Day Itinerary
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Configure the day-by-day travel schedule, activities, and meals</p>
+                </div>
+                {isEdit && packageData?.id ? (
+                  <SimpleItineraryManager
+                    entityType="package"
+                    entityId={packageData.id}
+                    countryId={watch('country_id')}
+                  />
+                ) : (
+                  <div className="p-6 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                    <p className="text-sm text-gray-500">Save the package first to manage day-by-day itinerary schedule.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SECTION 3: PRICE CHARTS */}
+            {activeSection === 'pricing' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>💵</span> Seasonal Price Charts & Tiers
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Define low season, peak season, and group rates</p>
+                </div>
+                {isEdit && packageData?.id ? (
+                  <PriceChartManager packageId={packageData.id} />
+                ) : (
+                  <div className="p-6 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                    <p className="text-sm text-gray-500">Save the package first to add seasonal pricing charts.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SECTION 4: INCLUSIONS & EXCLUSIONS */}
+            {activeSection === 'inclusions' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>✅</span> Inclusions & Exclusions
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Select items included in or excluded from this package price</p>
+                </div>
+
+                {/* Inclusions */}
+                <div>
+                  <label className="block text-xs font-bold text-teal uppercase tracking-wider mb-2">Included Items</label>
+                  <Controller
+                    name="inclusion_ids"
+                    control={control}
+                    render={({ field }) => (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-gray-50/70 p-4 rounded-xl border border-gray-200/80">
+                        {inclusions?.map((inc) => (
+                          <label key={inc.id} className="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 rounded border-gray-300 text-teal focus:ring-teal"
+                              checked={(field.value || []).includes(inc.id)}
+                              onChange={(e) => {
+                                const current = field.value || [];
+                                if (e.target.checked) field.onChange([...current, inc.id]);
+                                else field.onChange(current.filter((id) => id !== inc.id));
+                              }}
+                            />
+                            <span>{inc.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  />
+                </div>
+
+                {/* Exclusions */}
+                <div>
+                  <label className="block text-xs font-bold text-red-600 uppercase tracking-wider mb-2">Excluded Items</label>
+                  <Controller
+                    name="exclusion_ids"
+                    control={control}
+                    render={({ field }) => (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-gray-50/70 p-4 rounded-xl border border-gray-200/80">
+                        {exclusions?.map((exc) => (
+                          <label key={exc.id} className="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 rounded border-gray-300 text-red-500 focus:ring-red-500"
+                              checked={(field.value || []).includes(exc.id)}
+                              onChange={(e) => {
+                                const current = field.value || [];
+                                if (e.target.checked) field.onChange([...current, exc.id]);
+                                else field.onChange(current.filter((id) => id !== exc.id));
+                              }}
+                            />
+                            <span>{exc.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* SECTION 5: PHOTO GALLERY */}
+            {activeSection === 'gallery' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>🖼️</span> Package Photo Gallery
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Upload photos showcasing destinations, accommodations, and activities</p>
+                </div>
+                <GalleryManager
+                  entityType="package"
+                  entityId={packageData?.id}
+                  images={galleryImages}
+                  coverImageId={coverImageId}
+                  onImagesChange={setGalleryImages}
+                  onCoverImageChange={setCoverImageId}
+                />
+              </div>
+            )}
+
+            {/* SECTION 6: TRIGGERS & BLOGS */}
+            {activeSection === 'triggers_blogs' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>⚡</span> Conversion Triggers & Blog Posts
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">High-impact selling points and related blog articles</p>
+                </div>
+
+                {/* Conversion Triggers */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="block text-sm font-semibold text-gray-800">Conversion Triggers</label>
+                    <button
+                      type="button"
+                      onClick={() => appendTrigger({ value: '' })}
+                      className="px-3 py-1.5 bg-teal text-white text-xs font-bold rounded-lg shadow-2xs hover:bg-teal-dark transition-all cursor-pointer"
+                    >
+                      + Add Trigger
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {triggerFields.length === 0 ? (
+                      <p className="text-xs text-gray-500 italic py-2">No conversion triggers added yet.</p>
+                    ) : (
+                      triggerFields.map((field, index) => (
+                        <div key={field.id} className="flex items-center gap-3">
+                          <input
+                            {...register(`conversion_triggers.${index}.value`)}
+                            placeholder='e.g. "Pay 50% deposit now"'
+                            className="flex-1 px-3.5 py-2 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeTrigger(index)}
+                            className="text-red-500 hover:text-red-700 text-xs font-semibold px-2 py-1 cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Blog Posts */}
+                <div className="pt-4 border-t border-gray-100">
+                  <label className="block text-sm font-semibold text-gray-800 mb-2">Related Blog Posts</label>
+                  {isLoadingBlogs ? (
+                    <p className="text-xs text-gray-500">Loading blog posts...</p>
+                  ) : blogs && blogs.length > 0 ? (
+                    <Controller
+                      name="blog_post_ids"
+                      control={control}
+                      render={({ field }) => (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto pr-1">
+                          {blogs.map((blog) => {
+                            const isChecked = (field.value || []).includes(blog.id);
+                            return (
+                              <label key={blog.id} className="flex items-center gap-2 p-2.5 rounded-xl border border-gray-200/70 hover:bg-gray-50 text-xs font-medium cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  className="h-4 w-4 text-teal rounded border-gray-300"
+                                  checked={isChecked}
+                                  onChange={(e) => {
+                                    const current = field.value || [];
+                                    if (e.target.checked) field.onChange([...current, blog.id]);
+                                    else field.onChange(current.filter((id) => id !== blog.id));
+                                  }}
+                                />
+                                <span className="truncate">{blog.title}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
+                    />
+                  ) : (
+                    <p className="text-xs text-gray-500 italic">No blog posts available.</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* SECTION 7: FAQS & PUBLISHING */}
+            {activeSection === 'faqs_publish' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>❓</span> FAQs & Publication Settings
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Manage FAQs and control website visibility</p>
+                </div>
+
+                {/* FAQs */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="block text-sm font-semibold text-gray-800">Frequently Asked Questions</label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => appendFaq({ question: '', answer: '' })}
+                        className="px-3 py-1.5 bg-teal text-white text-xs font-bold rounded-lg shadow-2xs hover:bg-teal-dark transition-all cursor-pointer"
+                      >
+                        + Add FAQ
+                      </button>
+                      {isEdit && (
                         <button
                           type="button"
-                          onClick={() => confirmDeleteFaq(index)}
-                          className="p-1 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-200"
+                          disabled={isSavingFaqs}
+                          onClick={handleSaveFaqs}
+                          className="px-3 py-1.5 border border-teal text-teal text-xs font-bold rounded-lg hover:bg-teal/5 transition-all cursor-pointer disabled:opacity-50"
                         >
-                          <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
+                          {isSavingFaqs ? 'Saving...' : 'Save FAQs'}
                         </button>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div>
-                          <label htmlFor={`faqs.${index}.question`} className="block text-xs font-medium text-gray-700 mb-1">
-                            Question {index + 1}
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="e.g. Is transfer included?"
-                            className="block w-full px-3 py-2 text-sm border-gray-300 rounded-md shadow-sm focus:ring-teal focus:border-teal"
-                            {...register(`faqs.${index}.question` as const)}
-                          />
-                          {errors.faqs?.[index]?.question && (
-                            <p className="mt-1 text-xs text-red-600">{errors.faqs[index]?.question?.message}</p>
-                          )}
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">
-                            Answer
-                          </label>
-                          <Controller
-                            name={`faqs.${index}.answer` as const}
-                            control={control}
-                            render={({ field: controllerField }) => (
-                              <TinyMCEEditor
-                                value={controllerField.value}
-                                onChange={controllerField.onChange}
-                                label=""
-                                placeholder="Enter the answer..."
-                                height={200}
-                                required
-                              />
-                            )}
-                          />
-                          {errors.faqs?.[index]?.answer && (
-                            <p className="mt-1 text-xs text-red-600">{errors.faqs[index]?.answer?.message}</p>
-                          )}
-                        </div>
-                      </div>
+                      )}
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <p className="mt-2 text-xs text-gray-500">
-              FAQs help answer common customer questions and improve conversion rates.
-            </p>
-          </div>
+                  </div>
 
-          {/* Status */}
-          <div className="sm:col-span-6">
-            <div className="flex justify-between items-center">
-              <label className="block text-sm font-semibold text-gray-800">
-                Package Status
-              </label>
-            </div>
-            <div className="mt-2 bg-white p-6 rounded-lg shadow-sm ring-1 ring-gray-200 space-y-6">
-              {/* Featured Status */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-medium text-gray-800">Featured Package</h3>
-                  <p className="text-sm text-gray-500 mt-1">Display this package in the hero carousel on the packages page</p>
+                  <div className="space-y-4">
+                    {faqFields.length === 0 ? (
+                      <p className="text-xs text-gray-500 italic py-2">No FAQs added yet.</p>
+                    ) : (
+                      faqFields.map((field, index) => (
+                        <div key={field.id} className="bg-gray-50/80 p-4 rounded-xl border border-gray-200/80 space-y-3 relative">
+                          <button
+                            type="button"
+                            onClick={() => confirmDeleteFaq(index)}
+                            className="absolute top-3 right-3 text-red-500 hover:text-red-700 text-xs font-bold cursor-pointer"
+                          >
+                            Delete
+                          </button>
+                          <div>
+                            <label className="block text-xs font-bold text-gray-600 mb-1">Question {index + 1}</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Is airport transfer included?"
+                              className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal"
+                              {...register(`faqs.${index}.question` as const)}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-gray-600 mb-1">Answer</label>
+                            <Controller
+                              name={`faqs.${index}.answer` as const}
+                              control={control}
+                              render={({ field: cField }) => (
+                                <TinyMCEEditor
+                                  value={cField.value}
+                                  onChange={cField.onChange}
+                                  label=""
+                                  placeholder="Enter detailed answer..."
+                                  height={180}
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center bg-gray-50 px-4 py-2 rounded-lg">
-                  <span className={`mr-3 text-sm font-medium ${watch('is_featured') ? 'text-yellow-600' : 'text-gray-500'}`}>
-                    {watch('is_featured') ? 'Featured' : 'Not Featured'}
-                  </span>
-                  <button
-                    type="button"
-                    className={`${watch('is_featured') ? 'bg-yellow-500' : 'bg-gray-300'}
-                      relative inline-flex flex-shrink-0 h-7 w-14 border-2 border-transparent rounded-full
-                      cursor-pointer transition-all ease-in-out duration-200 focus:outline-none focus:ring-2
-                      focus:ring-offset-2 focus:ring-yellow-500 shadow-sm`}
-                    onClick={() => setValue('is_featured', !watch('is_featured'))}
-                  >
-                    <span className="sr-only">Toggle featured status</span>
-                    <span
-                      aria-hidden="true"
-                      className={`${watch('is_featured') ? 'translate-x-7' : 'translate-x-0'}
-                        pointer-events-none inline-block h-6 w-6 rounded-full bg-white shadow
-                        transform ring-0 transition ease-in-out duration-200 flex items-center justify-center`}
-                    >
-                      {watch('is_featured') ? (
-                        <svg className="h-3 w-3 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ) : (
-                        <svg className="h-3 w-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </span>
-                  </button>
+
+                {/* Publication Controls */}
+                <div className="pt-4 border-t border-gray-150 space-y-4">
+                  <div className="flex items-center justify-between bg-gray-50/70 p-4 rounded-xl border border-gray-200/80">
+                    <div>
+                      <span className="font-bold text-sm text-gray-900 block">Active Status</span>
+                      <span className="text-xs text-gray-500">Makes this package visible on public pages</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={watch('is_active')}
+                        onChange={(e) => setValue('is_active', e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal"></div>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center justify-between bg-gray-50/70 p-4 rounded-xl border border-gray-200/80">
+                    <div>
+                      <span className="font-bold text-sm text-gray-900 block">Featured Package</span>
+                      <span className="text-xs text-gray-500">Highlights this package in homepage featured carousels</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={watch('is_featured')}
+                        onChange={(e) => setValue('is_featured', e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center justify-between bg-gray-50/70 p-4 rounded-xl border border-gray-200/80">
+                    <div>
+                      <span className="font-bold text-sm text-gray-900 block">Special Hot Deal 🔥</span>
+                      <span className="text-xs text-gray-500">Displays a "Hot Deal" badge and includes in Deals section</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={watch('is_deal')}
+                        onChange={(e) => setValue('is_deal', e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
+                    </label>
+                  </div>
                 </div>
               </div>
-
-              {/* Deal Status */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-medium text-gray-800">Special Deal</h3>
-                  <p className="text-sm text-gray-500 mt-1">Mark this package as a "Hot Deal" to show it in the Deals section</p>
-                </div>
-                <div className="flex items-center bg-gray-50 px-4 py-2 rounded-lg">
-                  <span className={`mr-3 text-sm font-medium ${watch('is_deal') ? 'text-red-600' : 'text-gray-500'}`}>
-                    {watch('is_deal') ? 'Hot Deal 🔥' : 'Regular Package'}
-                  </span>
-                  <button
-                    type="button"
-                    className={`${watch('is_deal') ? 'bg-red-600' : 'bg-gray-300'}
-                      relative inline-flex flex-shrink-0 h-7 w-14 border-2 border-transparent rounded-full
-                      cursor-pointer transition-all ease-in-out duration-200 focus:outline-none focus:ring-2
-                      focus:ring-offset-2 focus:ring-red-500 shadow-sm`}
-                    onClick={() => setValue('is_deal', !watch('is_deal'))}
-                  >
-                    <span className="sr-only">Toggle deal status</span>
-                    <span
-                      aria-hidden="true"
-                      className={`${watch('is_deal') ? 'translate-x-7' : 'translate-x-0'}
-                        pointer-events-none inline-block h-6 w-6 rounded-full bg-white shadow
-                        transform ring-0 transition ease-in-out duration-200 flex items-center justify-center`}
-                    >
-                      {watch('is_deal') ? (
-                        <span className="text-[10px]">🔥</span>
-                      ) : (
-                        <svg className="h-3 w-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </span>
-                  </button>
-                  {/* Hidden input to register the is_deal field */}
-                  <input
-                    type="checkbox"
-                    className="hidden"
-                    {...register('is_deal')}
-                  />
-                </div>
-              </div>
-
-              {/* Active Status */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-medium text-gray-800">Publication Status</h3>
-                  <p className="text-sm text-gray-500 mt-1">Control whether this package is visible on the website</p>
-                </div>
-                <div className="flex items-center bg-gray-50 px-4 py-2 rounded-lg">
-                  <span className={`mr-3 text-sm font-medium ${watch('is_active') ? 'text-green-600' : 'text-gray-500'}`}>
-                    {watch('is_active') ? 'Active' : 'Inactive'}
-                  </span>
-                  <button
-                    type="button"
-                    className={`${watch('is_active') ? 'bg-teal' : 'bg-gray-300'}
-                      relative inline-flex flex-shrink-0 h-7 w-14 border-2 border-transparent rounded-full
-                      cursor-pointer transition-all ease-in-out duration-200 focus:outline-none focus:ring-2
-                      focus:ring-offset-2 focus:ring-teal shadow-sm`}
-                    onClick={() => setValue('is_active', !watch('is_active'))}
-                  >
-                    <span className="sr-only">Toggle visibility</span>
-                    <span
-                      aria-hidden="true"
-                      className={`${watch('is_active') ? 'translate-x-7' : 'translate-x-0'}
-                        pointer-events-none inline-block h-6 w-6 rounded-full bg-white shadow
-                        transform ring-0 transition ease-in-out duration-200 flex items-center justify-center`}
-                    >
-                      {watch('is_active') ? (
-                        <svg className="h-3 w-3 text-teal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      ) : (
-                        <svg className="h-3 w-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </span>
-                  </button>
-                  {/* Hidden input to register the is_active field */}
-                  <input
-                    type="checkbox"
-                    className="hidden"
-                    {...register('is_active')}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+            )}
+          </form>
         </div>
       </div>
 
-      {/* Form actions */}
-      <div className="sticky bottom-0 bg-white shadow-md px-8 py-5 border-t border-gray-200 z-10">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <button
-            type="button"
-            className="inline-flex items-center px-5 py-2.5 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal transition-all duration-200"
-            onClick={() => navigate('/admin/packages')}
-          >
-            <svg className="-ml-1 mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-            </svg>
-            Back to Packages
-          </button>
-
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-500">
-              {isSubmitting ? 'Saving changes...' : 'Ready to save'}
-            </span>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-teal hover:bg-teal-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal disabled:opacity-50 transition-all duration-200"
-            >
-              {isSubmitting ? (
-                <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Saving...
-                </span>
-              ) : (
-                <>
-                  <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  {isEdit ? 'Update Package' : 'Create Package'}
-                </>
-              )}
-            </button>
-            {/* Hidden input to register the is_featured field */}
-            <input
-              type="checkbox"
-              className="hidden"
-              {...register('is_featured')}
-            />
-          </div>
-        </div>
-      </div>
-      
       <ConfirmationModal
         isOpen={modalState.isOpen}
         onClose={() => {
@@ -1608,7 +1041,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
         cancelText={faqToDeleteIndex !== null ? 'Cancel' : ''}
         isLoading={isSavingFaqs}
       />
-    </form>
+    </div>
   );
 };
 

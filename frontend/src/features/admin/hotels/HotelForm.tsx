@@ -26,11 +26,10 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
   const { data: countries } = useCountries();
   const { data: hotelTypes } = useHotelTypes();
   const { data: allTags = [] } = useContentTags();
-  // For the form, we want to fetch as many amenities as possible to display them all
-  // Use a large limit for now. Ideally we'd have a non-paginated endpoint or "all" param.
   const { data: amenitiesData } = useAmenities(1, 100);
   const amenities = amenitiesData?.items || [];
 
+  const [activeSection, setActiveSection] = useState<string>('basic');
   const [formData, setFormData] = useState<HotelCreateInput & { is_active?: boolean; is_featured?: boolean }>({
     name: '',
     country_id: 0,
@@ -44,7 +43,6 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [coverImageId, setCoverImageId] = useState<number | null>(null);
 
-  // Set initial form data if editing an existing hotel
   useEffect(() => {
     if (initialData) {
       const {
@@ -62,7 +60,6 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
         tag_ids: tags?.map((t) => t.id) || initialData.tag_ids || []
       });
 
-      // Load existing gallery images
       if (id) {
         fetchGalleryImages(id);
       }
@@ -74,7 +71,6 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
       const response = await apiClient.get<GalleryImage[]>(`/api/v1/media?entity_type=hotel&entity_id=${hotelId}`);
       setGalleryImages(response);
 
-      // Set cover image if hotel has image_id
       if (initialData?.image_id) {
         setCoverImageId(parseInt(initialData.image_id));
       }
@@ -85,7 +81,6 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-
     setFormData(prev => ({
       ...prev,
       [name]: type === 'number' ? parseFloat(value) || 0 : value
@@ -94,7 +89,6 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-
     setFormData(prev => ({
       ...prev,
       [name]: checked
@@ -120,7 +114,6 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
 
   const handleAmenitiesChange = (amenityId: number, checked: boolean) => {
     const currentAmenityIds = formData.amenity_ids || [];
-
     setFormData(prev => ({
       ...prev,
       amenity_ids: checked
@@ -129,8 +122,8 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!formData.hotel_type_id) {
       alert('Please select a hotel type');
       return;
@@ -138,7 +131,6 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
     onSubmit(formData);
   };
 
-  // Group amenities by category
   const amenitiesByCategory = amenities?.reduce((acc, amenity) => {
     const category = amenity.category || 'Other';
     if (!acc[category]) {
@@ -148,326 +140,431 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
     return acc;
   }, {} as Record<string, Array<typeof amenities[number]>>);
 
+  const SECTIONS = [
+    { id: 'basic', label: 'Basic Info', icon: '📝' },
+    { id: 'location_times', label: 'Location & Times', icon: '🗺️' },
+    { id: 'amenities', label: 'Amenities', icon: '🛋️', badge: formData.amenity_ids?.length || 0 },
+    { id: 'description', label: 'Description', icon: '📄' },
+    { id: 'pricing', label: 'Price Charts', icon: '💵' },
+    { id: 'gallery', label: 'Photo Gallery', icon: '🖼️', badge: galleryImages.length },
+    { id: 'status', label: 'Publication Status', icon: '⚙️' },
+  ];
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-md">
-      {/* Basic Information */}
-      <div className="border-b pb-6">
-        <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Hotel Name *
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              required
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
-            />
+    <div className="space-y-6">
+      <div className="flex flex-col lg:flex-row gap-8 items-start relative">
+        {/* STICKY VERTICAL LEFT NAVIGATION */}
+        <div className="w-full lg:w-64 flex-shrink-0 sticky top-20 bg-white rounded-2xl border border-gray-200/80 p-3 shadow-2xs space-y-1.5 z-10">
+          <div className="px-3 py-2 border-b border-gray-100 mb-1">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">Hotel Sections</h3>
+            <p className="text-sm font-bold text-gray-900 truncate mt-0.5">{formData.name || 'New Hotel'}</p>
           </div>
 
-          <div>
-            <label htmlFor="country_id" className="block text-sm font-medium text-gray-700 mb-1">
-              Country *
-            </label>
-            <select
-              id="country_id"
-              name="country_id"
-              required
-              value={formData.country_id || ''}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
-            >
-              <option value="">Select a country</option>
-              {countries?.map((country) => (
-                <option key={country.id} value={country.id}>
-                  {country.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-              City
-            </label>
-            <input
-              type="text"
-              id="city"
-              name="city"
-              value={formData.city || ''}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="hotel_type_id" className="block text-sm font-medium text-gray-700 mb-1">
-              Hotel Type *
-            </label>
-            <select
-              id="hotel_type_id"
-              name="hotel_type_id"
-              required
-              value={formData.hotel_type_id || ''}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
-            >
-              <option value="">Select hotel type</option>
-              {hotelTypes?.map((hotelType) => (
-                <option key={hotelType.id} value={hotelType.id}>
-                  {hotelType.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Star Rating
-            </label>
-            <div className="flex">
-              {[1, 2, 3, 4, 5].map((star) => (
+          <div className="space-y-1">
+            {SECTIONS.map((sec) => {
+              const isActive = activeSection === sec.id;
+              return (
                 <button
-                  key={star}
+                  key={sec.id}
                   type="button"
-                  onClick={() => handleStarsChange(star)}
-                  className="focus:outline-none"
+                  onClick={() => setActiveSection(sec.id)}
+                  className={`w-full flex items-center justify-between text-xs px-3.5 py-2.5 rounded-xl font-semibold transition-all text-left cursor-pointer ${
+                    isActive
+                      ? 'bg-primary text-white shadow-2xs scale-[1.01]'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className={`h-6 w-6 ${star <= (formData.stars || 0) ? 'text-yellow-400' : 'text-gray-300'}`}
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
+                  <span className="flex items-center gap-2">
+                    <span>{sec.icon}</span>
+                    <span>{sec.label}</span>
+                  </span>
+                  {sec.badge !== undefined && (
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                      isActive ? 'bg-white/20 text-white' : 'bg-gray-150 text-gray-600'
+                    }`}>
+                      {sec.badge}
+                    </span>
+                  )}
                 </button>
-              ))}
-              <span className="ml-2 text-sm text-gray-600">{formData.stars} Star</span>
-            </div>
+              );
+            })}
           </div>
 
-          <div className="md:col-span-2">
-            <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-              Address
-            </label>
-            <textarea
-              id="address"
-              name="address"
-              rows={2}
-              value={formData.address || ''}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal focus:border-transparent"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Location Selection */}
-      <div className="border-b pb-6">
-        <h2 className="text-lg font-semibold mb-4">Hotel Location</h2>
-        <LocationPicker
-          initialLocation={
-            formData.latitude && formData.longitude
-              ? {
-                latitude: formData.latitude,
-                longitude: formData.longitude,
-                address: formData.address,
-                city: formData.city,
-              }
-              : undefined
-          }
-          onLocationSelect={handleLocationSelect}
-          height="350px"
-        />
-
-        {/* Display selected coordinates */}
-        {formData.latitude && formData.longitude && (
-          <div className="mt-4 p-3 bg-gray-50 rounded-md">
-            <p className="text-sm text-gray-600">
-              <strong>Selected Location:</strong> {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
-            </p>
-            {formData.address && (
-              <p className="text-sm text-gray-600 mt-1">
-                <strong>Address:</strong> {formData.address}
-              </p>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Check-in/Check-out Times */}
-      <div className="border-b pb-6">
-        <h2 className="text-lg font-semibold mb-4">Check-in/Check-out Information</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <TimeSelector
-              id="check_in_time"
-              name="check_in_time"
-              label="Check-in Time"
-              placeholder="Select check-in time"
-              value={formData.check_in_time || ''}
-              onChange={(time) => setFormData(prev => ({ ...prev, check_in_time: time }))}
-            />
-          </div>
-
-          <div>
-            <TimeSelector
-              id="check_out_time"
-              name="check_out_time"
-              label="Check-out Time"
-              placeholder="Select check-out time"
-              value={formData.check_out_time || ''}
-              onChange={(time) => setFormData(prev => ({ ...prev, check_out_time: time }))}
-            />
+          <div className="pt-3 border-t border-gray-100 space-y-2 mt-2">
+            <button
+              type="button"
+              onClick={() => handleSubmit()}
+              disabled={isLoading}
+              className="w-full py-2.5 px-4 bg-teal hover:bg-teal-dark text-white text-xs font-bold rounded-xl shadow-2xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              <span>{isLoading ? 'Saving...' : initialData ? 'Update Hotel' : 'Create Hotel'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/admin/hotels')}
+              className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-xl transition-all text-center cursor-pointer"
+            >
+              Cancel
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Hotel Amenities */}
-      <div className="border-b pb-6">
-        <h2 className="text-lg font-semibold mb-4">Amenities</h2>
-        {amenitiesByCategory && Object.keys(amenitiesByCategory).length > 0 ? (
-          <div className="space-y-6">
-            {Object.entries(amenitiesByCategory).map(([category, categoryAmenities]) => (
-              <div key={category}>
-                <h3 className="text-sm font-medium text-gray-700 mb-3">{category}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {categoryAmenities?.map((amenity) => (
-                    <div key={amenity.id} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id={`amenity-${amenity.id}`}
-                        checked={(formData.amenity_ids || []).includes(amenity.id)}
-                        onChange={(e) => handleAmenitiesChange(amenity.id, e.target.checked)}
-                        className="h-4 w-4 text-teal focus:ring-teal border-gray-300 rounded"
-                      />
-                      <label htmlFor={`amenity-${amenity.id}`} className="ml-2 block text-sm text-gray-700">
-                        {amenity.name}
-                      </label>
+        {/* RIGHT MAIN CONTENT DISPLAY */}
+        <div className="flex-1 min-w-0 space-y-8 w-full">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* SECTION 1: BASIC INFO */}
+            {activeSection === 'basic' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>📝</span> Basic Information
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Hotel name, star rating, address, and category tags</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-semibold text-gray-800 mb-1">
+                      Hotel Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      required
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="e.g. Grand Oasis Resort & Spa"
+                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="country_id" className="block text-sm font-semibold text-gray-800 mb-1">
+                      Country <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="country_id"
+                      name="country_id"
+                      required
+                      value={formData.country_id || ''}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal"
+                    >
+                      <option value="">Select a country</option>
+                      {countries?.map((country) => (
+                        <option key={country.id} value={country.id}>{country.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="city" className="block text-sm font-semibold text-gray-800 mb-1">City</label>
+                    <input
+                      type="text"
+                      id="city"
+                      name="city"
+                      value={formData.city || ''}
+                      onChange={handleChange}
+                      placeholder="e.g. Dubai"
+                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="hotel_type_id" className="block text-sm font-semibold text-gray-800 mb-1">
+                      Hotel Type <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="hotel_type_id"
+                      name="hotel_type_id"
+                      required
+                      value={formData.hotel_type_id || ''}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal"
+                    >
+                      <option value="">Select hotel type</option>
+                      {hotelTypes?.map((hotelType) => (
+                        <option key={hotelType.id} value={hotelType.id}>{hotelType.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-800 mb-1">Star Rating</label>
+                    <div className="flex items-center gap-1.5 bg-gray-50/70 p-2.5 rounded-xl border border-gray-200/80">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => handleStarsChange(star)}
+                          className="focus:outline-none cursor-pointer"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className={`h-6 w-6 ${star <= (formData.stars || 0) ? 'text-yellow-400' : 'text-gray-300'}`}
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        </button>
+                      ))}
+                      <span className="ml-2 text-xs font-bold text-gray-700">{formData.stars} Stars</span>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label htmlFor="address" className="block text-sm font-semibold text-gray-800 mb-1">Street Address</label>
+                    <textarea
+                      id="address"
+                      name="address"
+                      rows={2}
+                      value={formData.address || ''}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal"
+                    />
+                  </div>
+
+                  {/* Content Tags */}
+                  <div className="md:col-span-2">
+                    <TagSelector
+                      tags={allTags}
+                      selectedTagIds={formData.tag_ids || []}
+                      onChange={(newTagIds) => setFormData(prev => ({ ...prev, tag_ids: newTagIds }))}
+                      label="Content Tags"
+                      helperText="Categorize hotel for dynamic frontend filtering."
+                    />
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-gray-500">No amenities available. Please add amenities in the admin panel.</p>
-        )}
-      </div>
+            )}
 
-      {/* Description */}
-      <div className="border-b pb-6">
-        <h2 className="text-lg font-semibold mb-4">Description</h2>
-        <div className="mb-6">
-          <TinyMCEEditor
-            value={formData.summary || ''}
-            onChange={(content) => setFormData(prev => ({ ...prev, summary: content }))}
-            label="Summary"
-            helperText="Brief overview of the hotel (1-2 paragraphs)"
-            placeholder="Write a concise summary of the hotel..."
-            height={200}
-          />
+            {/* SECTION 2: LOCATION & TIMES */}
+            {activeSection === 'location_times' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>🗺️</span> Location & Check-in / Check-out Times
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Set map coordinates and check-in times</p>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-800 mb-2">Interactive Location Map</label>
+                    <LocationPicker
+                      initialLocation={
+                        formData.latitude && formData.longitude
+                          ? {
+                            latitude: formData.latitude,
+                            longitude: formData.longitude,
+                            address: formData.address,
+                            city: formData.city,
+                          }
+                          : undefined
+                      }
+                      onLocationSelect={handleLocationSelect}
+                      height="350px"
+                    />
+                    {formData.latitude && formData.longitude && (
+                      <div className="mt-3 p-3 bg-gray-50 rounded-xl border border-gray-200/80 text-xs text-gray-600">
+                        <strong>Coordinates:</strong> {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-100">
+                    <div>
+                      <TimeSelector
+                        id="check_in_time"
+                        name="check_in_time"
+                        label="Check-in Time"
+                        placeholder="e.g. 14:00"
+                        value={formData.check_in_time || ''}
+                        onChange={(time) => setFormData(prev => ({ ...prev, check_in_time: time }))}
+                      />
+                    </div>
+
+                    <div>
+                      <TimeSelector
+                        id="check_out_time"
+                        name="check_out_time"
+                        label="Check-out Time"
+                        placeholder="e.g. 11:00"
+                        value={formData.check_out_time || ''}
+                        onChange={(time) => setFormData(prev => ({ ...prev, check_out_time: time }))}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* SECTION 3: AMENITIES */}
+            {activeSection === 'amenities' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>🛋️</span> Hotel Amenities & Facilities
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Select all available guest amenities</p>
+                </div>
+
+                {amenitiesByCategory && Object.keys(amenitiesByCategory).length > 0 ? (
+                  <div className="space-y-6">
+                    {Object.entries(amenitiesByCategory).map(([category, categoryAmenities]) => (
+                      <div key={category} className="bg-gray-50/70 p-4 rounded-xl border border-gray-200/80 space-y-3">
+                        <h4 className="text-xs font-bold text-gray-600 uppercase tracking-wider">{category}</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          {categoryAmenities?.map((amenity) => (
+                            <label key={amenity.id} className="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                id={`amenity-${amenity.id}`}
+                                checked={(formData.amenity_ids || []).includes(amenity.id)}
+                                onChange={(e) => handleAmenitiesChange(amenity.id, e.target.checked)}
+                                className="h-4 w-4 text-teal focus:ring-teal border-gray-300 rounded"
+                              />
+                              <span>{amenity.name}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-500 italic">No amenities available.</p>
+                )}
+              </div>
+            )}
+
+            {/* SECTION 4: DESCRIPTION */}
+            {activeSection === 'description' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>📄</span> Hotel Description
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Summary and full hotel overview</p>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <TinyMCEEditor
+                      value={formData.summary || ''}
+                      onChange={(content) => setFormData(prev => ({ ...prev, summary: content }))}
+                      label="Summary Overview"
+                      helperText="Concise summary for card previews"
+                      placeholder="Write a short overview..."
+                      height={200}
+                    />
+                  </div>
+
+                  <div>
+                    <TinyMCEEditor
+                      value={formData.description || ''}
+                      onChange={(content) => setFormData(prev => ({ ...prev, description: content }))}
+                      label="Full Hotel Description"
+                      helperText="Comprehensive description of rooms, facilities, and unique features"
+                      placeholder="Write full hotel description..."
+                      height={350}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* SECTION 5: PRICE CHARTS */}
+            {activeSection === 'pricing' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>💵</span> Seasonal Price Charts
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Configure room rates and seasonal rate tables</p>
+                </div>
+                {initialData?.id ? (
+                  <PriceChartManager entityType="hotel" entityId={initialData.id} />
+                ) : (
+                  <div className="p-6 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                    <p className="text-sm text-gray-500">Save the hotel first to manage room rates and price charts.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SECTION 6: PHOTO GALLERY */}
+            {activeSection === 'gallery' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>🖼️</span> Hotel Photo Gallery
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Upload photos of rooms, grounds, and facilities</p>
+                </div>
+                <GalleryManager
+                  entityType="hotel"
+                  entityId={initialData?.id}
+                  images={galleryImages}
+                  coverImageId={coverImageId}
+                  onImagesChange={setGalleryImages}
+                  onCoverImageChange={setCoverImageId}
+                />
+              </div>
+            )}
+
+            {/* SECTION 7: STATUS */}
+            {activeSection === 'status' && (
+              <div className="bg-white shadow-sm rounded-2xl border border-gray-200/80 p-6 space-y-6">
+                <div className="border-b border-gray-150 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 font-playfair flex items-center gap-2">
+                    <span>⚙️</span> Publication Status
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Controls website visibility and featured status</p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between bg-gray-50/70 p-4 rounded-xl border border-gray-200/80">
+                    <div>
+                      <span className="font-bold text-sm text-gray-900 block">Active Status</span>
+                      <span className="text-xs text-gray-500">Makes this hotel visible on the website</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="is_active"
+                        checked={formData.is_active === true}
+                        onChange={handleCheckboxChange}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal"></div>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center justify-between bg-gray-50/70 p-4 rounded-xl border border-gray-200/80">
+                    <div>
+                      <span className="font-bold text-sm text-gray-900 block">Featured Hotel</span>
+                      <span className="text-xs text-gray-500">Displays in featured accommodation carousels</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="is_featured"
+                        checked={formData.is_featured === true}
+                        onChange={handleCheckboxChange}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            )}
+          </form>
         </div>
-
-        <div>
-          <TinyMCEEditor
-            value={formData.description || ''}
-            onChange={(content) => setFormData(prev => ({ ...prev, description: content }))}
-            label="Full Description"
-            helperText="Detailed description of the hotel, its amenities, location, and unique features"
-            placeholder="Provide a comprehensive description of the hotel..."
-            height={350}
-          />
-        </div>
       </div>
-
-      {/* Content Tags */}
-      <div className="border-b pb-6">
-        <TagSelector
-          tags={allTags}
-          selectedTagIds={formData.tag_ids || []}
-          onChange={(newTagIds) => setFormData(prev => ({ ...prev, tag_ids: newTagIds }))}
-          label="Content Tags"
-          helperText="Select tags to categorize this hotel for dynamic filtering across the application."
-        />
-      </div>
-
-      {/* Gallery Management */}
-      <div className="border-b pb-6">
-        <h2 className="text-lg font-semibold mb-4">Photo Gallery</h2>
-        <GalleryManager
-          entityType="hotel"
-          entityId={initialData?.id}
-          images={galleryImages}
-          coverImageId={coverImageId}
-          onImagesChange={setGalleryImages}
-          onCoverImageChange={setCoverImageId}
-        />
-      </div>
-
-      {/* Status */}
-      {initialData && (
-        <div className="space-y-3">
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="is_active"
-              name="is_active"
-              checked={formData.is_active === true}
-              onChange={handleCheckboxChange}
-              className="h-4 w-4 text-teal focus:ring-teal border-gray-300 rounded"
-            />
-            <label htmlFor="is_active" className="ml-2 block text-sm text-gray-700">
-              Active
-            </label>
-          </div>
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="is_featured"
-              name="is_featured"
-              checked={formData.is_featured === true}
-              onChange={handleCheckboxChange}
-              className="h-4 w-4 text-teal focus:ring-teal border-gray-300 rounded"
-            />
-            <label htmlFor="is_featured" className="ml-2 block text-sm text-gray-700">
-              Featured
-            </label>
-          </div>
-        </div>
-      )}
-
-      {initialData?.id && (
-        <div className="bg-white shadow rounded-lg p-6 mt-8">
-          <PriceChartManager entityType="hotel" entityId={initialData.id} />
-        </div>
-      )}
-
-      {/* Form Actions */}
-      <div className="flex justify-end space-x-4 mt-8">
-
-        <button
-          type="button"
-          onClick={() => navigate('/admin/hotels')}
-          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={isLoading}
-          className={`px-4 py-2 bg-teal text-white rounded-md hover:bg-teal-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal ${isLoading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-        >
-          {isLoading ? 'Saving...' : initialData ? 'Update Hotel' : 'Create Hotel'}
-        </button>
-      </div>
-    </form>
+    </div>
   );
 };
 

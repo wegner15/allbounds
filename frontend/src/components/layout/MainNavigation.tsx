@@ -311,8 +311,8 @@ const MainNavigation: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom Tier: Navigation Links & Search */}
-      <div className="bg-white">
+      {/* Bottom Tier: Navigation Links & Search — strictly hidden on mobile */}
+      <div className="hidden lg:block bg-white">
 
         <div className="fluid-container">
           <div className="flex items-center justify-between h-14">
@@ -342,7 +342,7 @@ const MainNavigation: React.FC = () => {
             </div>
 
             {/* Navigation Links */}
-            <nav className="flex items-center space-x-0 xl:space-x-1">
+            <nav className="hidden lg:flex items-center space-x-0 xl:space-x-1">
               {navItems.map((item) => (
                 <div key={item.path} className="relative group">
                   {item.hasDropdown ? (

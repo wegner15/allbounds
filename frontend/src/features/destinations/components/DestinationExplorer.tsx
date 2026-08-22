@@ -49,21 +49,29 @@ export const getTagCategoryMeta = (tag: ContentTag): TagCategoryMeta => {
     return CATEGORY_MAP.budget;
   }
 
-  // Traveler / Audience heuristic (Couples, Families, Honeymooners, etc.)
+  // Duration heuristic (e.g. 4-7 Days, 1-3 Days, 7-10 Days, Weekend, etc.)
+  if (name.includes('day') || name.includes('night') || name.includes('week') || /\d+-\d+/.test(name)) {
+    return CATEGORY_MAP.duration;
+  }
+
+  // Traveler / Audience heuristic (Couples, Families, Honeymooners, Groups, Luxury Travelers, etc.)
   if (
     name.includes('couple') ||
     name.includes('family') ||
     name.includes('families') ||
+    name.includes('familes') ||
     name.includes('honeymoon') ||
     name.includes('solo') ||
     name.includes('friend') ||
     name.includes('group') ||
-    name.includes('adult')
+    name.includes('adult') ||
+    name.includes('traveler') ||
+    name.includes('kid')
   ) {
     return CATEGORY_MAP.traveler_type;
   }
 
-  // Vibe / Theme heuristic (Beach, Safari, Luxury, Adventure, etc.)
+  // Vibe / Theme heuristic (Beach, Safari, Luxury, Adventure, Romance, City Getaways, etc.)
   if (
     name.includes('beach') ||
     name.includes('safari') ||
@@ -75,7 +83,14 @@ export const getTagCategoryMeta = (tag: ContentTag): TagCategoryMeta => {
     name.includes('shopping') ||
     name.includes('wellness') ||
     name.includes('mountain') ||
-    name.includes('island')
+    name.includes('island') ||
+    name.includes('romance') ||
+    name.includes('romantic') ||
+    name.includes('city') ||
+    name.includes('getaway') ||
+    name.includes('desert') ||
+    name.includes('historic') ||
+    name.includes('wildlife')
   ) {
     return CATEGORY_MAP.vibe;
   }
@@ -95,6 +110,75 @@ export const groupTagsByCategory = (tags: ContentTag[]): { meta: TagCategoryMeta
   });
 
   return Object.values(groupsRecord).sort((a, b) => a.meta.order - b.meta.order);
+};
+
+interface GroupedSectionTagFiltersProps {
+  tags: ContentTag[];
+  selectedTagIds: number[];
+  totalItemCount: number;
+  onSelectTag: (tagId: number) => void;
+  onClearAll: () => void;
+}
+
+const GroupedSectionTagFilters: React.FC<GroupedSectionTagFiltersProps> = ({
+  tags,
+  selectedTagIds,
+  totalItemCount,
+  onSelectTag,
+  onClearAll,
+}) => {
+  if (tags.length === 0) return null;
+  const grouped = groupTagsByCategory(tags);
+
+  return (
+    <div className="bg-white p-3.5 md:p-4 rounded-2xl border border-gray-200/70 shadow-2xs mb-6 space-y-3">
+      <div className="flex items-center justify-between border-b border-gray-100 pb-2.5">
+        <div className="flex items-center gap-2">
+          <TagIcon className="w-4 h-4 text-primary" />
+          <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Filter Tags</span>
+        </div>
+        <button
+          type="button"
+          onClick={onClearAll}
+          className={`text-xs px-3.5 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+            selectedTagIds.length === 0
+              ? 'bg-primary text-white shadow-2xs'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
+        >
+          All ({totalItemCount})
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-2.5">
+        {grouped.map((group) => (
+          <div key={group.meta.key} className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5 mr-1 bg-gray-50 px-2.5 py-1 rounded-md border border-gray-150 flex-shrink-0">
+              <span className="text-xs">{group.meta.icon}</span>
+              <span>{group.meta.label}:</span>
+            </span>
+            {group.tags.map((tag) => {
+              const isSelected = selectedTagIds.includes(tag.id);
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() => onSelectTag(tag.id)}
+                  className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-primary text-white shadow-2xs font-semibold'
+                      : 'bg-gray-100/80 text-gray-700 hover:bg-gray-200 hover:text-gray-900'
+                  }`}
+                >
+                  {tag.name}
+                </button>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 interface DestinationExplorerProps {
@@ -509,39 +593,13 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
               </div>
 
               {/* ATTRACTIONS RELEVANT SECTION FILTERS */}
-              {attractionTags.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2 mb-6 bg-white p-3 rounded-xl border border-gray-200/60 shadow-2xs">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-1 flex items-center gap-1">
-                    <TagIcon className="w-3.5 h-3.5 text-primary" /> Tags:
-                  </span>
-                  <button
-                    onClick={() => setSelectedAttractionTagIds([])}
-                    className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-                      selectedAttractionTagIds.length === 0
-                        ? 'bg-primary text-white shadow-2xs'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                  >
-                    All ({rawAttractions.length})
-                  </button>
-                  {attractionTags.map((tag) => {
-                    const isSelected = selectedAttractionTagIds.includes(tag.id);
-                    return (
-                      <button
-                        key={tag.id}
-                        onClick={() => toggleFilter(tag.id, selectedAttractionTagIds, setSelectedAttractionTagIds)}
-                        className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-primary text-white shadow-2xs'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        {tag.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+              <GroupedSectionTagFilters
+                tags={attractionTags}
+                selectedTagIds={selectedAttractionTagIds}
+                totalItemCount={rawAttractions.length}
+                onSelectTag={(id) => toggleFilter(id, selectedAttractionTagIds, setSelectedAttractionTagIds)}
+                onClearAll={() => setSelectedAttractionTagIds([])}
+              />
 
               {filteredAttractions.length > 0 ? (
                 <>
@@ -588,39 +646,13 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
               </div>
 
               {/* ACTIVITIES RELEVANT SECTION FILTERS */}
-              {activityTags.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2 mb-6 bg-white p-3 rounded-xl border border-gray-200/60 shadow-2xs">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-1 flex items-center gap-1">
-                    <TagIcon className="w-3.5 h-3.5 text-primary" /> Tags:
-                  </span>
-                  <button
-                    onClick={() => setSelectedActivityTagIds([])}
-                    className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-                      selectedActivityTagIds.length === 0
-                        ? 'bg-primary text-white shadow-2xs'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                  >
-                    All ({rawActivities.length})
-                  </button>
-                  {activityTags.map((tag) => {
-                    const isSelected = selectedActivityTagIds.includes(tag.id);
-                    return (
-                      <button
-                        key={tag.id}
-                        onClick={() => toggleFilter(tag.id, selectedActivityTagIds, setSelectedActivityTagIds)}
-                        className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-primary text-white shadow-2xs'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        {tag.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+              <GroupedSectionTagFilters
+                tags={activityTags}
+                selectedTagIds={selectedActivityTagIds}
+                totalItemCount={rawActivities.length}
+                onSelectTag={(id) => toggleFilter(id, selectedActivityTagIds, setSelectedActivityTagIds)}
+                onClearAll={() => setSelectedActivityTagIds([])}
+              />
 
               {filteredActivities.length > 0 ? (
                 <>
@@ -667,39 +699,13 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
               </div>
 
               {/* PACKAGES RELEVANT SECTION FILTERS */}
-              {packageTags.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2 mb-6 bg-white p-3 rounded-xl border border-gray-200/60 shadow-2xs">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-1 flex items-center gap-1">
-                    <TagIcon className="w-3.5 h-3.5 text-primary" /> Tags:
-                  </span>
-                  <button
-                    onClick={() => setSelectedPackageTagIds([])}
-                    className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-                      selectedPackageTagIds.length === 0
-                        ? 'bg-primary text-white shadow-2xs'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                  >
-                    All ({rawPackages.length})
-                  </button>
-                  {packageTags.map((tag) => {
-                    const isSelected = selectedPackageTagIds.includes(tag.id);
-                    return (
-                      <button
-                        key={tag.id}
-                        onClick={() => toggleFilter(tag.id, selectedPackageTagIds, setSelectedPackageTagIds)}
-                        className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-primary text-white shadow-2xs'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        {tag.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+              <GroupedSectionTagFilters
+                tags={packageTags}
+                selectedTagIds={selectedPackageTagIds}
+                totalItemCount={rawPackages.length}
+                onSelectTag={(id) => toggleFilter(id, selectedPackageTagIds, setSelectedPackageTagIds)}
+                onClearAll={() => setSelectedPackageTagIds([])}
+              />
 
               {filteredPackages.length > 0 ? (
                 <>
@@ -746,39 +752,13 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
               </div>
 
               {/* HOTELS RELEVANT SECTION FILTERS */}
-              {hotelTags.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2 mb-6 bg-white p-3 rounded-xl border border-gray-200/60 shadow-2xs">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-1 flex items-center gap-1">
-                    <TagIcon className="w-3.5 h-3.5 text-primary" /> Tags:
-                  </span>
-                  <button
-                    onClick={() => setSelectedHotelTagIds([])}
-                    className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-                      selectedHotelTagIds.length === 0
-                        ? 'bg-primary text-white shadow-2xs'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                  >
-                    All ({rawHotels.length})
-                  </button>
-                  {hotelTags.map((tag) => {
-                    const isSelected = selectedHotelTagIds.includes(tag.id);
-                    return (
-                      <button
-                        key={tag.id}
-                        onClick={() => toggleFilter(tag.id, selectedHotelTagIds, setSelectedHotelTagIds)}
-                        className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-primary text-white shadow-2xs'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        {tag.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+              <GroupedSectionTagFilters
+                tags={hotelTags}
+                selectedTagIds={selectedHotelTagIds}
+                totalItemCount={rawHotels.length}
+                onSelectTag={(id) => toggleFilter(id, selectedHotelTagIds, setSelectedHotelTagIds)}
+                onClearAll={() => setSelectedHotelTagIds([])}
+              />
 
               {filteredHotels.length > 0 ? (
                 <>

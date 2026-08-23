@@ -259,8 +259,8 @@ const HeroSection: React.FC = () => {
       <div className="relative z-20 max-w-[1600px] mx-auto px-4 h-full flex flex-col justify-center items-center pt-16">
 
         {/* Headline */}
-        <div className="text-center mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-playfair font-bold text-white mb-4 leading-tight drop-shadow-xl tracking-wide max-w-5xl mx-auto">
+        <div className="text-center mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 w-full px-2">
+          <h1 className="text-[clamp(1.05rem,3.2vw,3.2rem)] whitespace-nowrap font-playfair font-bold text-white mb-4 leading-tight drop-shadow-xl tracking-normal sm:tracking-wide w-full text-center">
             Your Dream Holiday. Designed. Booked. Perfected.
           </h1>
           <p className="text-base md:text-lg text-gray-200 font-lato max-w-3xl mx-auto font-light leading-relaxed">

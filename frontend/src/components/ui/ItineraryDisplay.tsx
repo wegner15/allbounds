@@ -1,6 +1,7 @@
 import React from 'react';
 import { useItinerary } from '../../lib/hooks/useItinerary';
 import type { EntityType, ItineraryItem } from '../../lib/types/itinerary';
+import { RichTextDisplay } from './RichTextDisplay';
 
 interface ItineraryDisplayProps {
   entityType: EntityType;
@@ -116,7 +117,7 @@ const ItineraryDayCard: React.FC<ItineraryDayCardProps> = ({ item, isLast }) => 
             </div>
             
             {item.description && (
-              <p className="text-gray-600 mb-4">{item.description}</p>
+              <RichTextDisplay content={item.description} className="text-gray-600 mb-4 prose-sm" />
             )}
             
             {item.location && (

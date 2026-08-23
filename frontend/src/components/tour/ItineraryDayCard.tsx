@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import OptimizedImage from '../ui/OptimizedImage';
+import { RichTextDisplay } from '../ui/RichTextDisplay';
 import { getResponsiveImageSizes } from '../../utils/imageUtils';
 import type {
   ItineraryItemDetail,
@@ -122,7 +123,7 @@ const ItineraryDayCard: React.FC<ItineraryDayCardProps> = ({
           {/* Description */}
           {description && (
             <div className="mt-3 sm:mt-4 text-sm sm:text-base text-gray-700 leading-relaxed">
-              <div dangerouslySetInnerHTML={{ __html: description }} />
+              <RichTextDisplay content={description} className="text-gray-700 text-sm sm:text-base leading-relaxed prose-p:my-2 prose-ul:my-2 prose-ol:my-2" />
             </div>
           )}
 

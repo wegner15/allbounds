@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { getTravelGuide } from '../data/travelGuidesData';
 import { useTravelGuideCategories, useDestinationGuideItems } from '../../../lib/hooks/useTravelGuides';
+import { RichTextDisplay } from '../../../components/ui/RichTextDisplay';
 
 interface TravelGuideSectionProps {
   countrySlug?: string;
@@ -160,9 +161,10 @@ const TravelGuideSection: React.FC<TravelGuideSectionProps> = ({ countrySlug, co
             <h3 className="text-lg font-bold text-gray-900 mb-2 font-playfair group-hover:text-primary transition-colors duration-300">
               {item.title}
             </h3>
-            <p className="text-gray-600 text-sm leading-relaxed flex-grow">
-              {item.content}
-            </p>
+            <RichTextDisplay
+              content={item.content}
+              className="text-gray-600 text-sm leading-relaxed flex-grow prose-p:my-1 prose-ul:my-1 prose-ol:my-1"
+            />
           </div>
         ))}
       </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useItinerary, useCreateItineraryItem, useDeleteItineraryItem, useUpdateItineraryItem } from '../../lib/hooks/useItinerary';
 import type { EntityType, ItineraryItem, ItineraryActivity } from '../../lib/types/itinerary';
 import LocationPicker from '../LocationPicker';
+import TinyMCEEditor from '../ui/TinyMCEEditor';
 import { useHotels } from '../../lib/hooks/useHotels';
 import { useAttractions } from '../../lib/hooks/useAttractions';
 import { useActivities } from '../../lib/hooks/useActivities';
@@ -226,15 +227,12 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description (Optional)
-              </label>
-              <textarea
+              <TinyMCEEditor
                 value={newDayDescription}
-                onChange={(e) => setNewDayDescription(e.target.value)}
-                placeholder="Brief description of the day..."
-                rows={2}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal focus:border-teal"
+                onChange={setNewDayDescription}
+                label="Description (Optional)"
+                placeholder="Detailed description of the day, highlights, activities, and schedule..."
+                height={260}
               />
             </div>
             <div>
@@ -404,15 +402,12 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
 
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Accommodation Notes (Optional)
-              </label>
-              <textarea
+              <TinyMCEEditor
                 value={newDayAccommodationNotes}
-                onChange={(e) => setNewDayAccommodationNotes(e.target.value)}
+                onChange={setNewDayAccommodationNotes}
+                label="Accommodation Notes (Optional)"
                 placeholder="Special accommodation notes..."
-                rows={2}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal focus:border-teal"
+                height={180}
               />
             </div>
             <div className="flex space-x-2">
@@ -450,7 +445,10 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
                     Day {item.day_number}: {item.title}
                   </h4>
                   {item.description && (
-                    <p className="mt-1 text-sm text-gray-600">{item.description}</p>
+                    <div
+                      className="mt-1 text-sm text-gray-600 prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: item.description }}
+                    />
                   )}
                   {item.location && (
                     <p className="mt-1 text-sm text-gray-500">

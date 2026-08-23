@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Edit2, Trash2, X, Check, ArrowUp, ArrowDown, Sparkles } from 'lucide-react';
+import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
 import {
   useTravelGuideCategories,
   useDestinationGuideItems,
@@ -322,16 +323,13 @@ export const CountryTravelGuideEditor: React.FC<CountryTravelGuideEditorProps> =
 
               {/* Content Description */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
-                  Description / Content *
-                </label>
-                <textarea
-                  required
-                  rows={4}
-                  placeholder="Enter detailed recommendation or tip for travelers..."
+                <TinyMCEEditor
                   value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  className="w-full text-sm border border-gray-200 rounded-lg p-2.5 focus:ring-primary focus:border-primary"
+                  onChange={(content) => setFormData({ ...formData, content })}
+                  label="Description / Content *"
+                  placeholder="Enter detailed recommendation or tip for travelers..."
+                  height={240}
+                  required
                 />
               </div>
 

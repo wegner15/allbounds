@@ -359,20 +359,27 @@ class HotelService:
         
         return result
     
-    def get_hotel(self, db: Session, hotel_id: int) -> Optional[Hotel]:
+    def get_hotel(self, db: Session, hotel_id: int, include_inactive: bool = True) -> Optional[Hotel]:
         """
         Retrieve a specific hotel by ID.
+        By default, include_inactive is True so admin operations work.
         """
-        return db.query(Hotel).filter(Hotel.id == hotel_id, Hotel.is_active == True).first()
+        query = db.query(Hotel).filter(Hotel.id == hotel_id)
+        if not include_inactive:
+            query = query.filter(Hotel.is_active == True)
+        return query.first()
     
-    def get_hotel_by_slug(self, db: Session, slug: str) -> Optional[Hotel]:
+    def get_hotel_by_slug(self, db: Session, slug: str, include_inactive: bool = False) -> Optional[Hotel]:
         """
         Retrieve a specific hotel by slug with media assets.
         """
-        return db.query(Hotel).options(
+        query = db.query(Hotel).options(
             joinedload(Hotel.media_assets),
             joinedload(Hotel.price_charts)
-        ).filter(Hotel.slug == slug, Hotel.is_active == True).first()
+        ).filter(Hotel.slug == slug)
+        if not include_inactive:
+            query = query.filter(Hotel.is_active == True)
+        return query.first()
     
     def get_hotel_details_by_slug(self, db: Session, slug: str) -> Optional[Dict[str, Any]]:
         """

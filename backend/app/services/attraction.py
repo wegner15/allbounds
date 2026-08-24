@@ -156,11 +156,12 @@ class AttractionService:
             .all()
         )
     
-    def get_attraction(self, db: Session, attraction_id: int) -> Optional[Attraction]:
+    def get_attraction(self, db: Session, attraction_id: int, include_inactive: bool = True) -> Optional[Attraction]:
         """
         Retrieve a specific attraction by ID with details.
+        By default, include_inactive is True so admin operations (editing, reactivating) work.
         """
-        return (
+        query = (
             db.query(Attraction)
             .options(
                 joinedload(Attraction.country),
@@ -170,15 +171,17 @@ class AttractionService:
                 joinedload(Attraction.group_trips), # Explicitly load group trips
                 joinedload(Attraction.tags), # Explicitly load tags
             )
-            .filter(Attraction.id == attraction_id, Attraction.is_active == True)
-            .first()
+            .filter(Attraction.id == attraction_id)
         )
+        if not include_inactive:
+            query = query.filter(Attraction.is_active == True)
+        return query.first()
     
-    def get_attraction_by_slug(self, db: Session, slug: str) -> Optional[Attraction]:
+    def get_attraction_by_slug(self, db: Session, slug: str, include_inactive: bool = False) -> Optional[Attraction]:
         """
         Retrieve a specific attraction by slug with details.
         """
-        return (
+        query = (
             db.query(Attraction)
             .options(
                 joinedload(Attraction.country),
@@ -188,9 +191,11 @@ class AttractionService:
                 joinedload(Attraction.group_trips), # Explicitly load group trips
                 joinedload(Attraction.tags), # Explicitly load tags
             )
-            .filter(Attraction.slug == slug, Attraction.is_active == True)
-            .first()
+            .filter(Attraction.slug == slug)
         )
+        if not include_inactive:
+            query = query.filter(Attraction.is_active == True)
+        return query.first()
     
     def create_attraction(self, db: Session, attraction_create: AttractionCreate) -> Attraction:
         """

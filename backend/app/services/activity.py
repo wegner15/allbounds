@@ -78,27 +78,34 @@ class ActivityService:
 
         return items, total
     
-    def get_activity(self, db: Session, activity_id: int) -> Optional[Activity]:
+    def get_activity(self, db: Session, activity_id: int, include_inactive: bool = True) -> Optional[Activity]:
         """
         Retrieve a specific activity by ID.
+        By default, include_inactive is True so admin operations work.
         """
-        return db.query(Activity).filter(Activity.id == activity_id, Activity.is_active == True).options(
+        query = db.query(Activity).filter(Activity.id == activity_id).options(
             joinedload(Activity.cover_image),
             joinedload(Activity.media_assets),
             joinedload(Activity.countries),
             joinedload(Activity.tags)
-        ).first()
+        )
+        if not include_inactive:
+            query = query.filter(Activity.is_active == True)
+        return query.first()
     
-    def get_activity_by_slug(self, db: Session, slug: str) -> Optional[Activity]:
+    def get_activity_by_slug(self, db: Session, slug: str, include_inactive: bool = False) -> Optional[Activity]:
         """
         Retrieve a specific activity by slug.
         """
-        return db.query(Activity).filter(Activity.slug == slug, Activity.is_active == True).options(
+        query = db.query(Activity).filter(Activity.slug == slug).options(
             joinedload(Activity.cover_image),
             joinedload(Activity.media_assets),
             joinedload(Activity.countries),
             joinedload(Activity.tags)
-        ).first()
+        )
+        if not include_inactive:
+            query = query.filter(Activity.is_active == True)
+        return query.first()
     
     def get_activities_by_country(self, db: Session, country_id: int, skip: int = 0, limit: int = 100) -> List[Activity]:
         """

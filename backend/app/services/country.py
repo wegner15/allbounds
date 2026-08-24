@@ -155,17 +155,21 @@ class CountryService:
             HolidayType.is_active == True
         ).group_by(Country.id).offset(skip).limit(limit).all()
 
-    def get_country(self, db: Session, country_id: int) -> Optional[Country]:
+    def get_country(self, db: Session, country_id: int, include_inactive: bool = True) -> Optional[Country]:
         """
         Retrieve a specific country by ID.
+        By default, include_inactive is True so admin operations work.
         """
-        return db.query(Country).filter(Country.id == country_id, Country.is_active == True).first()
+        query = db.query(Country).filter(Country.id == country_id)
+        if not include_inactive:
+            query = query.filter(Country.is_active == True)
+        return query.first()
 
     def get_country_for_admin(self, db: Session, country_id: int) -> Optional[Country]:
         """
-        Retrieve a specific country by ID for admin purposes (does not check is_active).
+        Retrieve a specific country by ID for admin purposes.
         """
-        return db.query(Country).filter(Country.id == country_id).first()
+        return self.get_country(db, country_id=country_id, include_inactive=True)
     
     def get_country_by_slug(self, db: Session, slug: str) -> Optional[Country]:
         """

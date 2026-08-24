@@ -21,20 +21,24 @@ class RegionService:
             .filter(Region.is_active == True)\
             .offset(skip).limit(limit).all()
     
-    def get_region(self, db: Session, region_id: int) -> Optional[Region]:
+    def get_region(self, db: Session, region_id: int, include_inactive: bool = True) -> Optional[Region]:
         """
         Retrieve a specific region by ID.
+        By default, include_inactive is True so admin operations work.
         """
-        return db.query(Region).filter(Region.id == region_id, Region.is_active == True).first()
+        query = db.query(Region).filter(Region.id == region_id)
+        if not include_inactive:
+            query = query.filter(Region.is_active == True)
+        return query.first()
     
-    def get_region_with_countries(self, db: Session, region_id: int) -> Optional[Region]:
+    def get_region_with_countries(self, db: Session, region_id: int, include_inactive: bool = True) -> Optional[Region]:
         """
         Retrieve a specific region by ID with its associated countries.
         """
-        return db.query(Region)\
-            .options(joinedload(Region.countries))\
-            .filter(Region.id == region_id, Region.is_active == True)\
-            .first()
+        query = db.query(Region).options(joinedload(Region.countries)).filter(Region.id == region_id)
+        if not include_inactive:
+            query = query.filter(Region.is_active == True)
+        return query.first()
     
     def get_region_by_slug(self, db: Session, slug: str) -> Optional[Region]:
         """

@@ -161,11 +161,12 @@ class GroupTripService:
             GroupTrip.is_active == True
         ).offset(skip).limit(limit).all()
 
-    def get_group_trip(self, db: Session, group_trip_id: int) -> Optional[GroupTrip]:
+    def get_group_trip(self, db: Session, group_trip_id: int, include_inactive: bool = True) -> Optional[GroupTrip]:
         """
         Retrieve a specific group trip by ID.
+        By default, include_inactive is True so admin operations work.
         """
-        return db.query(GroupTrip).options(
+        query = db.query(GroupTrip).options(
             joinedload(GroupTrip.departures),
             joinedload(GroupTrip.price_charts),
             joinedload(GroupTrip.country),
@@ -174,13 +175,16 @@ class GroupTripService:
             joinedload(GroupTrip.inclusion_items),
             joinedload(GroupTrip.exclusion_items),
             joinedload(GroupTrip.tags)
-        ).filter(GroupTrip.id == group_trip_id, GroupTrip.is_active == True).first()
+        ).filter(GroupTrip.id == group_trip_id)
+        if not include_inactive:
+            query = query.filter(GroupTrip.is_active == True)
+        return query.first()
     
-    def get_group_trip_by_slug(self, db: Session, slug: str) -> Optional[GroupTrip]:
+    def get_group_trip_by_slug(self, db: Session, slug: str, include_inactive: bool = False) -> Optional[GroupTrip]:
         """
         Retrieve a specific group trip by slug.
         """
-        return db.query(GroupTrip).options(
+        query = db.query(GroupTrip).options(
             joinedload(GroupTrip.departures),
             joinedload(GroupTrip.price_charts),
             joinedload(GroupTrip.country),
@@ -189,7 +193,10 @@ class GroupTripService:
             joinedload(GroupTrip.inclusion_items),
             joinedload(GroupTrip.exclusion_items),
             joinedload(GroupTrip.tags)
-        ).filter(GroupTrip.slug == slug, GroupTrip.is_active == True).first()
+        ).filter(GroupTrip.slug == slug)
+        if not include_inactive:
+            query = query.filter(GroupTrip.is_active == True)
+        return query.first()
 
     
     def get_similar_group_trips(self, db: Session, group_trip_id: int, limit: int = 4) -> List[GroupTrip]:

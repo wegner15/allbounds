@@ -4,6 +4,7 @@ import SeoHead from '../../../components/seo/SeoHead';
 
 const VisaApplicationPage: React.FC = () => {
     const [isSuccess, setIsSuccess] = useState(false);
+    const [checklistSent, setChecklistSent] = useState(false);
 
     return (
         <>
@@ -113,20 +114,26 @@ const VisaApplicationPage: React.FC = () => {
                                 <p className="text-gray-600 mb-6 font-semibold">
                                     Get a <span className="text-primary italic">Free</span> Visa Checklist emailed directly to you so you can prepare your documents in advance.
                                 </p>
-                                <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); alert("Thanks! Your checklist is on its way."); }}>
-                                    <input
-                                        type="email"
-                                        placeholder="Enter your email address"
-                                        required
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-50"
-                                    />
-                                    <button
-                                        type="submit"
-                                        className="w-full bg-white text-charcoal border-2 border-charcoal font-bold py-3 px-6 rounded-xl hover:bg-charcoal hover:text-white transition-colors duration-300"
-                                    >
-                                        Email Me The Checklist
-                                    </button>
-                                </form>
+                                {checklistSent ? (
+                                    <div className="bg-emerald-50 text-emerald-800 p-4 rounded-xl border border-emerald-200 text-sm font-medium">
+                                        ✓ Thanks! Your visa checklist is on its way to your inbox.
+                                    </div>
+                                ) : (
+                                    <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); setChecklistSent(true); }}>
+                                        <input
+                                            type="email"
+                                            placeholder="Enter your email address"
+                                            required
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-50 text-sm"
+                                        />
+                                        <button
+                                            type="submit"
+                                            className="w-full bg-white text-charcoal border-2 border-charcoal font-bold py-3 px-6 rounded-xl hover:bg-charcoal hover:text-white transition-colors duration-300"
+                                        >
+                                            Email Me The Checklist
+                                        </button>
+                                    </form>
+                                )}
                             </div>
 
                             {/* Testimonial Widget */}

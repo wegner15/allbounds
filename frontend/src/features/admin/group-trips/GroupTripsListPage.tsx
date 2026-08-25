@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom';
 import { useDeleteGroupTrip, usePaginatedGroupTrips } from '../../../lib/hooks/useGroupTrips';
 import CountryFilterSelect from '../../../components/ui/CountryFilterSelect';
 import CloudflareImage from '../../../components/ui/CloudflareImage';
+import ErrorModal from '../../../components/ui/ErrorModal';
 
 const GroupTripsListPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCountryId, setSelectedCountryId] = useState<number | undefined>(undefined);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
@@ -62,9 +64,10 @@ const GroupTripsListPage: React.FC = () => {
     try {
       await deleteGroupTrip.mutateAsync(groupTripId);
       setDeleteConfirmId(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to delete group trip:', err);
-      alert('Failed to delete group trip. Please try again.');
+      const msg = err?.response?.data?.detail || err?.message || 'Failed to delete group trip. Please try again.';
+      setErrorMessage(msg);
     }
   };
 
@@ -411,6 +414,14 @@ const GroupTripsListPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Error Modal */}
+      <ErrorModal
+        isOpen={!!errorMessage}
+        onClose={() => setErrorMessage(null)}
+        title="Action Failed"
+        message={errorMessage || ''}
+      />
     </>
   );
 };

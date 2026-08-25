@@ -313,19 +313,14 @@ const HeroSection: React.FC = () => {
             </div>
 
             {/* Dates Section */}
-            <div className="flex-1 w-full md:w-auto relative border border-gray-100 rounded-xl px-4 py-3 hover:border-gray-300 transition-colors bg-gray-50/50">
-              <label className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
-                <Calendar className="w-4 h-4 text-teal" />
-                {activeTab === 'things_to_do' ? 'When' : 'Travel Dates'}
-              </label>
-              <div className="w-full h-[24px]">
-                <DateRangePicker
-                  range={dateRange}
-                  setRange={handleDateRangeSelect}
-                  variant="transparent"
-                  className="h-full"
-                />
-              </div>
+            <div className="flex-1 w-full md:w-auto relative border border-gray-100 rounded-xl px-4 py-3 hover:border-gray-300 transition-colors bg-gray-50/50 cursor-pointer">
+              <DateRangePicker
+                range={dateRange}
+                setRange={handleDateRangeSelect}
+                variant="transparent"
+                label={activeTab === 'things_to_do' ? 'When' : 'Travel Dates'}
+                className="w-full"
+              />
             </div>
 
             {/* Third Section: Guests or Activity Type */}

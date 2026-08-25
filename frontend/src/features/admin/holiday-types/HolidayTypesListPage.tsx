@@ -6,6 +6,7 @@ import { GripVertical, Save, RefreshCw } from 'lucide-react';
 import { useDeleteHolidayType, useHolidayTypes, useReorderHolidayTypes } from '../../../lib/hooks/useHolidayTypes';
 import CloudflareImage from '../../../components/ui/CloudflareImage';
 import type { HolidayType } from '../../../lib/types/api';
+import ErrorModal from '../../../components/ui/ErrorModal';
 
 const HolidayTypesListPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -13,6 +14,7 @@ const HolidayTypesListPage: React.FC = () => {
   const deleteHolidayType = useDeleteHolidayType();
   const reorderHolidayTypes = useReorderHolidayTypes();
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Local state for draggable items
   const [orderedItems, setOrderedItems] = useState<HolidayType[]>([]);
@@ -30,9 +32,10 @@ const HolidayTypesListPage: React.FC = () => {
     try {
       await deleteHolidayType.mutateAsync(id);
       setDeleteConfirmId(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to delete holiday type:', err);
-      alert('Failed to delete holiday type. Please try again.');
+      const msg = err?.response?.data?.detail || err?.message || 'Failed to delete holiday type. Please try again.';
+      setErrorMessage(msg);
     }
   };
 
@@ -55,9 +58,10 @@ const HolidayTypesListPage: React.FC = () => {
       }));
       await reorderHolidayTypes.mutateAsync(orders);
       setHasOrderChanged(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to save order:', err);
-      alert('Failed to save order. Please try again.');
+      const msg = err?.response?.data?.detail || err?.message || 'Failed to save order. Please try again.';
+      setErrorMessage(msg);
     }
   };
 
@@ -318,6 +322,14 @@ const HolidayTypesListPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Error Modal */}
+      <ErrorModal
+        isOpen={!!errorMessage}
+        onClose={() => setErrorMessage(null)}
+        title="Action Failed"
+        message={errorMessage || ''}
+      />
     </>
   );
 };

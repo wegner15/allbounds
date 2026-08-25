@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useDeletePackage, usePaginatedPackages, usePatchPackage } from '../../../lib/hooks/usePackages';
 import CloudflareImage from '../../../components/ui/CloudflareImage';
 import CountryFilterSelect from '../../../components/ui/CountryFilterSelect';
+import ErrorModal from '../../../components/ui/ErrorModal';
 
 const PackagesListPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -11,6 +12,7 @@ const PackagesListPage: React.FC = () => {
   const [selectedPackageType, setSelectedPackageType] = useState<'all' | 'safari' | 'holiday'>('all');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Debounce search input
   useEffect(() => {
@@ -51,9 +53,25 @@ const PackagesListPage: React.FC = () => {
     try {
       await deletePackage.mutateAsync(id);
       setDeleteConfirmId(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to delete package:', err);
-      alert('Failed to delete package. Please try again.');
+      const msg = err?.response?.data?.detail || err?.message || 'Failed to delete package. Please try again.';
+      setErrorMessage(msg);
+    }
+  };
+
+  const handleUpdateType = async () => {
+    if (!packageTypeModal.packageItem) return;
+    try {
+      await patchPackage.mutateAsync({
+        id: packageTypeModal.packageItem.id,
+        data: { package_type: packageTypeModal.selectedType },
+      });
+      setPackageTypeModal({ isOpen: false, packageItem: null, selectedType: 'safari' });
+    } catch (err: any) {
+      console.error('Failed to update package type:', err);
+      const msg = err?.response?.data?.detail || err?.message || 'Failed to update package type. Please try again.';
+      setErrorMessage(msg);
     }
   };
 
@@ -678,20 +696,7 @@ const PackagesListPage: React.FC = () => {
               <button
                 type="button"
                 disabled={patchPackage.isPending}
-                onClick={async () => {
-                  if (packageTypeModal.packageItem) {
-                    try {
-                      await patchPackage.mutateAsync({
-                        id: packageTypeModal.packageItem.id,
-                        data: { package_type: packageTypeModal.selectedType }
-                      });
-                      setPackageTypeModal({ isOpen: false, packageItem: null, selectedType: 'safari' });
-                    } catch (err) {
-                      console.error('Failed to update package type:', err);
-                      alert('Failed to update package type. Please try again.');
-                    }
-                  }
-                }}
+                onClick={handleUpdateType}
                 className="px-5 py-2 text-sm font-bold text-white bg-teal hover:bg-teal-dark rounded-lg transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50"
               >
                 {patchPackage.isPending ? (
@@ -707,6 +712,14 @@ const PackagesListPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Error Modal */}
+      <ErrorModal
+        isOpen={!!errorMessage}
+        onClose={() => setErrorMessage(null)}
+        title="Action Failed"
+        message={errorMessage || ''}
+      />
     </>
   );
 };

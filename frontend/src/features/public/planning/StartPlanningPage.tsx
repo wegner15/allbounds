@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import SeoHead from '../../../components/seo/SeoHead';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../components/ui/DialogComponent';
+import ErrorModal from '../../../components/ui/ErrorModal';
 
 // Import Wizard Steps
 import Step1Region from './components/Step1Region';
@@ -88,7 +89,8 @@ const StartPlanningPage: React.FC = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<number>(getInitialStep);
   const [state, setState] = useState<PlanningState>(getInitialState);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Save to local storage whenever state or step changes
   useEffect(() => {
@@ -154,9 +156,10 @@ const StartPlanningPage: React.FC = () => {
       localStorage.removeItem(LOCAL_STORAGE_STEP_KEY);
       
       setShowSuccessModal(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to submit inquiry", error);
-      alert('Sorry, there was an error submitting your inquiry. Please try again later.');
+      const msg = error?.response?.data?.detail || error?.message || 'Sorry, there was an error submitting your inquiry. Please try again later.';
+      setSubmitError(msg);
     }
   };
 
@@ -268,6 +271,13 @@ const StartPlanningPage: React.FC = () => {
           </button>
         </DialogContent>
       </Dialog>
+
+      <ErrorModal
+        isOpen={!!submitError}
+        onClose={() => setSubmitError(null)}
+        title="Submission Error"
+        message={submitError || ''}
+      />
     </div>
   );
 };

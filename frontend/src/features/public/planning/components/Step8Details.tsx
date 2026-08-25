@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { PlanningState } from '../StartPlanningPage';
 import { Star } from 'lucide-react';
+import ErrorModal from '../../../../components/ui/ErrorModal';
 
 interface Step8Props {
   state: PlanningState;
@@ -9,11 +10,12 @@ interface Step8Props {
 }
 
 const Step8Details: React.FC<Step8Props> = ({ state, updateState, onSubmit }) => {
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!state.firstName || !state.lastName || !state.email) {
-      alert("Please fill in all required fields (First Name, Last Name, Email)");
+      setValidationError("Please fill in all required fields (First Name, Last Name, Email)");
       return;
     }
     onSubmit();
@@ -148,6 +150,13 @@ const Step8Details: React.FC<Step8Props> = ({ state, updateState, onSubmit }) =>
           </form>
         </div>
       </div>
+
+      <ErrorModal
+        isOpen={!!validationError}
+        onClose={() => setValidationError(null)}
+        title="Required Fields"
+        message={validationError || ''}
+      />
     </div>
   );
 };

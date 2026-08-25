@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useCreateContent, useUpdateContent, useContent } from '../../../lib/hooks/useContent';
 import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
+import ErrorModal from '../../../components/ui/ErrorModal';
 
 const contentSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
@@ -99,6 +100,8 @@ const ContentForm: React.FC<ContentFormProps> = ({ initialData }) => {
     }
   }, [existingContent, initialData, isEditing, reset]);
 
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const onSubmit = async (data: ContentFormData) => {
     setIsSubmitting(true);
     try {
@@ -111,9 +114,10 @@ const ContentForm: React.FC<ContentFormProps> = ({ initialData }) => {
         await createContentMutation.mutateAsync(data);
       }
       navigate('/admin/content');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving content page:', error);
-      alert('Failed to save content page. Please try again.');
+      const msg = error?.response?.data?.detail || error?.message || 'Failed to save content page. Please try again.';
+      setErrorMessage(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -299,6 +303,13 @@ const ContentForm: React.FC<ContentFormProps> = ({ initialData }) => {
           </button>
         </div>
       </form>
+
+      <ErrorModal
+        isOpen={!!errorMessage}
+        onClose={() => setErrorMessage(null)}
+        title="Form Error"
+        message={errorMessage || ''}
+      />
     </div>
   );
 };

@@ -12,6 +12,7 @@ import GalleryManager from '../../../components/admin/GalleryManager';
 import TinyMCEEditor from '../../../components/ui/TinyMCEEditor';
 import TagSelector from '../../../components/admin/TagSelector';
 import { useContentTags } from '../../../lib/hooks/useContentTags';
+import ErrorModal from '../../../components/ui/ErrorModal';
 import type { Hotel, HotelCreateInput, HotelUpdateInput } from '../../../lib/hooks/useHotels';
 import type { GalleryImage } from '../../../lib/types/api';
 
@@ -122,10 +123,12 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
     }));
   };
 
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!formData.hotel_type_id) {
-      alert('Please select a hotel type');
+      setErrorMessage('Please select a hotel type before saving.');
       return;
     }
     onSubmit(formData);
@@ -564,6 +567,13 @@ const HotelForm: React.FC<HotelFormProps> = ({ initialData, onSubmit, isLoading 
           </form>
         </div>
       </div>
+
+      <ErrorModal
+        isOpen={!!errorMessage}
+        onClose={() => setErrorMessage(null)}
+        title="Validation Error"
+        message={errorMessage || ''}
+      />
     </div>
   );
 };

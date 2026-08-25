@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import SeoHead from '../../../components/seo/SeoHead';
@@ -8,6 +8,7 @@ import { getCloudflareImageUrl } from '../../../utils/cloudflareImageUtils';
 
 const BlogDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [copied, setCopied] = useState(false);
   const { data: blog, isLoading, error } = useBlog(slug!);
   const { data: relatedBlogs, isLoading: relatedLoading } = useRelatedBlogs(blog?.id);
 
@@ -248,8 +249,8 @@ const BlogDetailPage: React.FC = () => {
                    onClick={async () => {
                      try {
                        await navigator.clipboard.writeText(window.location.href);
-                       // You could add a toast notification here
-                       alert('Link copied to clipboard!');
+                       setCopied(true);
+                       setTimeout(() => setCopied(false), 2500);
                       } catch {
                         // Fallback for older browsers
                         const textArea = document.createElement('textarea');
@@ -258,15 +259,21 @@ const BlogDetailPage: React.FC = () => {
                         textArea.select();
                         document.execCommand('copy');
                         document.body.removeChild(textArea);
-                        alert('Link copied to clipboard!');
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2500);
                       }
                    }}
-                   className="text-gray-400 hover:text-gray-600 transition-colors"
+                   className="text-gray-400 hover:text-gray-600 transition-colors relative flex items-center gap-1.5"
                    title="Copy link"
                  >
                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                    </svg>
+                   {copied && (
+                     <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-charcoal text-white text-xs px-2 py-1 rounded shadow-md whitespace-nowrap animate-in fade-in duration-200">
+                       Copied!
+                     </span>
+                   )}
                  </button>
                </div>
              </div>

@@ -7,6 +7,8 @@ import { useHotels } from '../../lib/hooks/useHotels';
 import { useAttractions } from '../../lib/hooks/useAttractions';
 import { useActivities } from '../../lib/hooks/useActivities';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/DialogComponent';
+import ConfirmationModal from '../ui/ConfirmationModal';
+import ErrorModal from '../ui/ErrorModal';
 
 interface SimpleItineraryManagerProps {
   entityType: EntityType;
@@ -23,6 +25,9 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
 }) => {
   const [isAddingDay, setIsAddingDay] = useState(false);
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const [newDayTitle, setNewDayTitle] = useState('');
   const [newDayDescription, setNewDayDescription] = useState('');
   const [newDayLocation, setNewDayLocation] = useState('');
@@ -42,8 +47,6 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
   const { data: activities = [], isLoading: isLoadingActivities } = useActivities(countryId);
 
   const resetForm = () => {
-    setIsAddingDay(false);
-    setEditingItemId(null);
     setNewDayTitle('');
     setNewDayDescription('');
     setNewDayLocation('');
@@ -53,9 +56,11 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
     setNewDayAttractionIds([]);
     setNewDayLinkedActivityIds([]);
     setNewDayAccommodationNotes('');
+    setIsAddingDay(false);
+    setEditingItemId(null);
   };
 
-  const handleEditDay = (item: ItineraryItem) => {
+  const handleStartEdit = (item: ItineraryItem) => {
     setEditingItemId(item.id);
     setNewDayTitle(item.title);
     setNewDayDescription(item.description || '');
@@ -71,7 +76,7 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
 
   const handleUpdateDay = async () => {
     if (!editingItemId || !newDayTitle.trim()) {
-      alert('Please enter a day title');
+      setErrorMessage('Please enter a day title before updating.');
       return;
     }
 
@@ -93,31 +98,18 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
 
       // Reset form
       resetForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating itinerary day:', error);
-      alert('Failed to update itinerary day. Please try again.');
+      const msg = error?.response?.data?.detail || error?.message || 'Failed to update itinerary day. Please try again.';
+      setErrorMessage(msg);
     }
   };
 
   const handleAddDay = async () => {
     if (!newDayTitle.trim()) {
-      alert('Please enter a day title');
+      setErrorMessage('Please enter a day title before saving.');
       return;
     }
-
-    console.log('Creating new itinerary day:', {
-      entityType,
-      entityId,
-      title: newDayTitle,
-      description: newDayDescription,
-      location: newDayLocation,
-      latitude: newDayLatitude ? parseFloat(newDayLatitude) : undefined,
-      longitude: newDayLongitude ? parseFloat(newDayLongitude) : undefined,
-      hotel_ids: newDayHotelIds,
-      attraction_ids: newDayAttractionIds,
-      linked_activity_ids: newDayLinkedActivityIds,
-      accommodation_notes: newDayAccommodationNotes,
-    });
 
     try {
       const nextDayNumber = itinerary ? itinerary.items.length + 1 : 1;
@@ -140,25 +132,21 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
 
       // Reset form
       resetForm();
-
-      console.log('Successfully created itinerary day');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create itinerary day:', error);
-      alert('Failed to create itinerary day. Please try again.');
+      const msg = error?.response?.data?.detail || error?.message || 'Failed to create itinerary day. Please try again.';
+      setErrorMessage(msg);
     }
   };
 
   const handleDeleteDay = async (itemId: number) => {
-    if (!confirm('Are you sure you want to delete this day?')) {
-      return;
-    }
-
     try {
       await deleteItem.mutateAsync(itemId);
-      console.log('Successfully deleted itinerary day');
-    } catch (error) {
+      setDeleteConfirmId(null);
+    } catch (error: any) {
       console.error('Failed to delete itinerary day:', error);
-      alert('Failed to delete itinerary day. Please try again.');
+      const msg = error?.response?.data?.detail || error?.message || 'Failed to delete itinerary day. Please try again.';
+      setErrorMessage(msg);
     }
   };
 
@@ -560,8 +548,8 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
                     <div className="flex space-x-2 mt-4 pt-4 border-t border-gray-100">
                       <button
                         type="button"
-                        onClick={() => handleEditDay(item)}
-                        className="text-blue-600 hover:text-blue-800"
+                        onClick={() => handleStartEdit(item)}
+                        className="text-blue-600 hover:text-blue-800 flex items-center"
                         title="Edit day"
                       >
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -571,8 +559,8 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleDeleteDay(item.id)}
-                        className="text-red-600 hover:text-red-800 ml-4"
+                        onClick={() => setDeleteConfirmId(item.id)}
+                        className="text-red-600 hover:text-red-800 ml-4 flex items-center"
                         title="Delete day"
                       >
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -610,6 +598,29 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
           )}
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmId !== null && (
+        <ConfirmationModal
+          isOpen={deleteConfirmId !== null}
+          onClose={() => setDeleteConfirmId(null)}
+          onConfirm={() => handleDeleteDay(deleteConfirmId)}
+          title="Confirm Delete Day"
+          message="Are you sure you want to delete this itinerary day? This action cannot be undone."
+          confirmText="Delete"
+          cancelText="Cancel"
+          isLoading={deleteItem.isPending}
+          variant="danger"
+        />
+      )}
+
+      {/* Error Modal */}
+      <ErrorModal
+        isOpen={!!errorMessage}
+        onClose={() => setErrorMessage(null)}
+        title="Action Failed"
+        message={errorMessage || ''}
+      />
     </div>
   );
 };

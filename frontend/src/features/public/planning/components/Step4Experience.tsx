@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useHolidayTypes } from '../../../../lib/hooks/useHolidayTypes';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../../utils/imageUtils';
+import ErrorModal from '../../../../components/ui/ErrorModal';
 import type { PlanningState } from '../StartPlanningPage';
 
 interface Step4Props {
@@ -11,6 +12,7 @@ interface Step4Props {
 
 const Step4Experience: React.FC<Step4Props> = ({ state, updateState, onNext }) => {
   const { data: holidayTypes, isLoading } = useHolidayTypes();
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const toggleExperience = (id: number) => {
     const current = [...state.experiences];
@@ -30,7 +32,7 @@ const Step4Experience: React.FC<Step4Props> = ({ state, updateState, onNext }) =
 
   const handleNext = () => {
     if (state.experiences.length === 0 && !state.experiencesNotSure) {
-      alert("Please select at least one experience or choose 'Not sure'");
+      setValidationError("Please select at least one experience or choose 'Not sure'");
       return;
     }
     onNext();
@@ -102,6 +104,13 @@ const Step4Experience: React.FC<Step4Props> = ({ state, updateState, onNext }) =
           );
         })}
       </div>
+
+      <ErrorModal
+        isOpen={!!validationError}
+        onClose={() => setValidationError(null)}
+        title="Selection Required"
+        message={validationError || ''}
+      />
     </div>
   );
 };

@@ -5,12 +5,14 @@ import Button from '../../../components/ui/Button';
 import { getCloudflareImageUrl } from '../../../utils/imageUtils';
 import { usePaginatedActivities, useDeleteActivity } from '../../../lib/hooks/useActivities';
 import CountryFilterSelect from '../../../components/ui/CountryFilterSelect';
+import ErrorModal from '../../../components/ui/ErrorModal';
 
 const ActivityListPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCountryId, setSelectedCountryId] = useState<number | undefined>(undefined);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
@@ -40,9 +42,10 @@ const ActivityListPage: React.FC = () => {
     try {
       await deleteActivity.mutateAsync(id);
       setDeleteConfirmId(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to delete activity:', error);
-      alert('Failed to delete activity. Please try again.');
+      const msg = error?.response?.data?.detail || error?.message || 'Failed to delete activity. Please try again.';
+      setErrorMessage(msg);
     }
   };
 
@@ -328,6 +331,14 @@ const ActivityListPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Error Modal */}
+      <ErrorModal
+        isOpen={!!errorMessage}
+        onClose={() => setErrorMessage(null)}
+        title="Action Failed"
+        message={errorMessage || ''}
+      />
     </div>
   );
 };

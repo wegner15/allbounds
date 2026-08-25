@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useContentPages, useDeleteContent, usePublishContent, useUnpublishContent } from '../../../lib/hooks/useContent';
+import ConfirmationModal from '../../../components/ui/ConfirmationModal';
+import ErrorModal from '../../../components/ui/ErrorModal';
 
 const ContentListPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const { data: contentPages, isLoading, error } = useContentPages();
   const deleteContentMutation = useDeleteContent();
   const publishContentMutation = usePublishContent();
@@ -15,31 +20,33 @@ const ContentListPage: React.FC = () => {
   ) || [];
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this content page?')) {
-      try {
-        await deleteContentMutation.mutateAsync(id);
-      } catch (error) {
-        console.error('Error deleting content page:', error);
-        alert('Failed to delete content page');
-      }
+    try {
+      await deleteContentMutation.mutateAsync(id);
+      setDeleteConfirmId(null);
+    } catch (error: any) {
+      console.error('Error deleting content page:', error);
+      const msg = error?.response?.data?.detail || error?.message || 'Failed to delete content page';
+      setErrorMessage(msg);
     }
   };
 
   const handlePublish = async (id: number) => {
     try {
       await publishContentMutation.mutateAsync(id);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error publishing content page:', error);
-      alert('Failed to publish content page');
+      const msg = error?.response?.data?.detail || error?.message || 'Failed to publish content page';
+      setErrorMessage(msg);
     }
   };
 
   const handleUnpublish = async (id: number) => {
     try {
       await unpublishContentMutation.mutateAsync(id);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error unpublishing content page:', error);
-      alert('Failed to unpublish content page');
+      const msg = error?.response?.data?.detail || error?.message || 'Failed to unpublish content page';
+      setErrorMessage(msg);
     }
   };
 
@@ -212,11 +219,11 @@ const ContentListPage: React.FC = () => {
                               </svg>
                             </Link>
                              <button
-                               onClick={() => handleDelete(page.id)}
+                               onClick={() => setDeleteConfirmId(page.id)}
                                disabled={deleteContentMutation.isPending}
                                className="text-red-600 hover:text-red-900 disabled:opacity-50"
                               title="Delete"
-                            >
+                             >
                               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                               </svg>
@@ -232,6 +239,29 @@ const ContentListPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmId !== null && (
+        <ConfirmationModal
+          isOpen={deleteConfirmId !== null}
+          onClose={() => setDeleteConfirmId(null)}
+          onConfirm={() => handleDelete(deleteConfirmId)}
+          title="Confirm Delete"
+          message="Are you sure you want to delete this content page? This action cannot be undone."
+          confirmText="Delete"
+          cancelText="Cancel"
+          isLoading={deleteContentMutation.isPending}
+          variant="danger"
+        />
+      )}
+
+      {/* Error Modal */}
+      <ErrorModal
+        isOpen={!!errorMessage}
+        onClose={() => setErrorMessage(null)}
+        title="Action Failed"
+        message={errorMessage || ''}
+      />
     </div>
   );
 };

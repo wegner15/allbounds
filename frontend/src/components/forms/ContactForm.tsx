@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -41,19 +41,37 @@ const ContactForm: React.FC = () => {
     },
   });
 
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
   const onSubmit = async (data: ContactFormData) => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
     console.log('Form submitted:', data);
     reset();
-    alert('Thank you for your message! We will get back to you soon.');
+    setIsSubmitted(true);
   };
 
   return (
     <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
       <h2 className="text-2xl font-playfair font-bold text-charcoal mb-6">Contact Us</h2>
       
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {isSubmitted ? (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-6 rounded-xl text-center space-y-4">
+          <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+            ✓
+          </div>
+          <h3 className="text-lg font-bold text-emerald-900 font-playfair">Message Sent!</h3>
+          <p className="text-sm">Thank you for your message! Our travel team will get back to you soon.</p>
+          <button
+            type="button"
+            onClick={() => setIsSubmitted(false)}
+            className="px-4 py-2 bg-emerald-700 text-white rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-emerald-800 transition-colors"
+          >
+            Send Another Message
+          </button>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <FormGroup>
             <FormInput
@@ -156,6 +174,7 @@ const ContactForm: React.FC = () => {
           </Button>
         </div>
       </form>
+      )}
     </div>
   );
 };

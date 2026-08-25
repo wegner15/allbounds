@@ -5,12 +5,14 @@ import { usePaginatedHotels, useDeleteHotel } from '../../../lib/hooks/useHotels
 import type { Hotel } from '../../../lib/hooks/useHotels';
 import CountryFilterSelect from '../../../components/ui/CountryFilterSelect';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
+import ErrorModal from '../../../components/ui/ErrorModal';
 
 const HotelsListPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCountryId, setSelectedCountryId] = useState<number | undefined>(undefined);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
@@ -40,9 +42,10 @@ const HotelsListPage: React.FC = () => {
     try {
       await deleteHotel.mutateAsync(id);
       setDeleteConfirmId(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to delete hotel:', error);
-      alert('Failed to delete hotel. Please try again.');
+      const msg = error?.response?.data?.detail || error?.message || 'Failed to delete hotel. Please try again.';
+      setErrorMessage(msg);
     }
   };
 
@@ -331,6 +334,14 @@ const HotelsListPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Error Modal */}
+      <ErrorModal
+        isOpen={!!errorMessage}
+        onClose={() => setErrorMessage(null)}
+        title="Action Failed"
+        message={errorMessage || ''}
+      />
     </div>
   );
 };

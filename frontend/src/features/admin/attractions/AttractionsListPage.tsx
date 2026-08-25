@@ -5,12 +5,14 @@ import { usePaginatedAttractions, useDeleteAttraction, usePatchAttraction } from
 import type { Attraction } from '../../../lib/hooks/useAttractions';
 import CountryFilterSelect from '../../../components/ui/CountryFilterSelect';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
+import ErrorModal from '../../../components/ui/ErrorModal';
 
 const AttractionsListPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCountryId, setSelectedCountryId] = useState<number | undefined>(undefined);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [updatingItems, setUpdatingItems] = useState<Record<string, boolean>>({});
@@ -46,9 +48,10 @@ const AttractionsListPage: React.FC = () => {
         id,
         data: { [field]: !currentValue },
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error(`Failed to update ${field}:`, err);
-      alert(`Failed to update ${field}. Please try again.`);
+      const msg = err?.response?.data?.detail || err?.message || `Failed to update ${field}. Please try again.`;
+      setErrorMessage(msg);
     } finally {
       setUpdatingItems(prev => ({ ...prev, [key]: false }));
     }
@@ -60,9 +63,10 @@ const AttractionsListPage: React.FC = () => {
     try {
       await deleteAttraction.mutateAsync(id);
       setDeleteConfirmId(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to delete attraction:', error);
-      alert('Failed to delete attraction. Please try again.');
+      const msg = error?.response?.data?.detail || error?.message || 'Failed to delete attraction. Please try again.';
+      setErrorMessage(msg);
     }
   };
 
@@ -424,6 +428,14 @@ const AttractionsListPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Error Modal */}
+      <ErrorModal
+        isOpen={!!errorMessage}
+        onClose={() => setErrorMessage(null)}
+        title="Action Failed"
+        message={errorMessage || ''}
+      />
     </div>
   );
 };

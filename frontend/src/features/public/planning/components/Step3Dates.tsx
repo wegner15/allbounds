@@ -1,5 +1,6 @@
-import React, { useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import type { PlanningState } from '../StartPlanningPage';
+import ErrorModal from '../../../../components/ui/ErrorModal';
 
 interface Step3Props {
   state: PlanningState;
@@ -8,9 +9,10 @@ interface Step3Props {
 }
 
 const Step3Dates: React.FC<Step3Props> = ({ state, updateState, onNext }) => {
+  const [validationError, setValidationError] = useState<string | null>(null);
   const currentYear = new Date().getFullYear();
   const years = [currentYear.toString(), (currentYear + 1).toString(), (currentYear + 2).toString(), (currentYear + 3).toString()];
-  
+
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
@@ -45,15 +47,15 @@ const Step3Dates: React.FC<Step3Props> = ({ state, updateState, onNext }) => {
     // Basic validation
     if (state.dateType === 'idea') {
       if (!state.year) {
-        alert("Please select a year");
+        setValidationError("Please select a year");
         return;
       }
       if (!state.month) {
-        alert("Please select a month or 'Not sure'");
+        setValidationError("Please select a month or 'Not sure'");
         return;
       }
       if (!state.duration) {
-        alert("Please select a duration");
+        setValidationError("Please select a duration");
         return;
       }
     }
@@ -213,6 +215,13 @@ const Step3Dates: React.FC<Step3Props> = ({ state, updateState, onNext }) => {
           Next <span className="ml-2">→</span>
         </button>
       </div>
+
+      <ErrorModal
+        isOpen={!!validationError}
+        onClose={() => setValidationError(null)}
+        title="Selection Required"
+        message={validationError || ''}
+      />
     </div>
   );
 };

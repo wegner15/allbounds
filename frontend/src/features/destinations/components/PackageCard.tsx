@@ -16,6 +16,22 @@ const PackageCard: React.FC<PackageCardProps> = React.memo(({ package: pkg }) =>
     ? DOMPurify.sanitize(pkg.summary || pkg.description || '')
     : '';
 
+  // Extract conversion triggers and legacy flags
+  const rawTriggers: string[] = Array.isArray(pkg.conversion_triggers)
+    ? pkg.conversion_triggers.filter(t => typeof t === 'string' && t.trim().length > 0)
+    : [];
+
+  const triggersList = [...rawTriggers];
+  if (pkg.is_deal && !triggersList.some(t => /deal|sale|discount/i.test(t))) {
+    triggersList.unshift('Hot Deal');
+  }
+  if (pkg.is_featured && !triggersList.some(t => /featured/i.test(t))) {
+    triggersList.push('Featured');
+  }
+
+  const primaryTrigger = triggersList[0];
+  const secondaryTrigger = triggersList.length > 1 ? triggersList[1] : null;
+
   return (
     <article className="group bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] flex flex-col h-full">
       <Link
@@ -41,24 +57,43 @@ const PackageCard: React.FC<PackageCardProps> = React.memo(({ package: pkg }) =>
             </div>
           )}
 
-          {/* Deal Badge */}
-          {pkg.is_deal && (
-            <div className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md z-10 flex items-center gap-1" role="status" aria-label="Special deal">
-              <span className="animate-pulse">🔥</span> Hot Deal
+          {/* Primary Badge Overlay (Top Left) */}
+          {primaryTrigger && (
+            <div
+              className={`absolute top-3 left-3 text-xs font-bold px-3 py-1 rounded-full shadow-md z-10 flex items-center gap-1 ${
+                /deal|sale|discount/i.test(primaryTrigger)
+                  ? 'bg-red-600 text-white'
+                  : /featured|popular|bestseller|best seller/i.test(primaryTrigger)
+                    ? 'bg-amber-400 text-gray-900 font-bold'
+                    : 'bg-teal text-white font-bold'
+              }`}
+              role="status"
+            >
+              {/deal|sale|discount/i.test(primaryTrigger) && <span className="animate-pulse">🔥</span>}
+              {/featured|popular|bestseller|best seller/i.test(primaryTrigger) && <span>⭐</span>}
+              {!/deal|sale|discount|featured|popular|bestseller|best seller/i.test(primaryTrigger) && <span>⚡</span>}
+              {primaryTrigger}
             </div>
           )}
 
-          {/* Featured Badge */}
-          {pkg.is_featured && (
-            <div className="absolute top-3 right-3 bg-yellow-400 text-gray-900 text-xs font-semibold px-3 py-1 rounded-full shadow-md z-10" role="status" aria-label="Featured package">
-              Featured
+          {/* Secondary Badge Overlay (Top Right) */}
+          {secondaryTrigger && (
+            <div
+              className={`absolute top-3 right-3 text-xs font-bold px-3 py-1 rounded-full shadow-md z-10 flex items-center gap-1 ${
+                /featured|popular|bestseller|best seller/i.test(secondaryTrigger)
+                  ? 'bg-amber-400 text-gray-900 font-bold'
+                  : 'bg-charcoal/80 text-white backdrop-blur-xs font-semibold'
+              }`}
+              role="status"
+            >
+              {secondaryTrigger}
             </div>
           )}
         </div>
 
         {/* Content */}
         <div className="p-4 flex flex-col flex-grow">
-          {/* Destinations */}
+          {/* Destinations & Holiday Types */}
           <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
             <div className="flex items-center gap-1.5 flex-wrap">
               {/* Primary destination */}
@@ -89,6 +124,21 @@ const PackageCard: React.FC<PackageCardProps> = React.memo(({ package: pkg }) =>
               </span>
             )}
           </div>
+
+          {/* Conversion Triggers Pills (In-Card Display) */}
+          {rawTriggers.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-2.5">
+              {rawTriggers.map((trigger, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 border border-amber-200/80 text-[11px] font-bold px-2.5 py-0.5 rounded-md uppercase tracking-wider shadow-2xs"
+                >
+                  <span className="text-amber-500">⚡</span>
+                  {trigger}
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* Package Name - H3 for proper heading hierarchy */}
           <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-teal-600 transition-colors leading-tight font-playfair">

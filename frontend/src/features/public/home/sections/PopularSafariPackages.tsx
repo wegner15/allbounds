@@ -146,6 +146,17 @@ const PopularSafariPackages: React.FC = () => {
                       🦁 Safari
                     </div>
 
+                    {/* Conversion Trigger / Featured Badge (Top Right) */}
+                    {(trip.conversion_triggers && trip.conversion_triggers.length > 0) ? (
+                      <div className="absolute top-3 right-3 bg-amber-400 text-gray-900 text-xs font-bold px-3 py-1 rounded-full shadow-md z-10 flex items-center gap-1">
+                        <span>⭐</span> {trip.conversion_triggers[0]}
+                      </div>
+                    ) : trip.is_featured ? (
+                      <div className="absolute top-3 right-3 bg-yellow-400 text-gray-900 text-xs font-semibold px-3 py-1 rounded-full shadow-md z-10">
+                        Featured
+                      </div>
+                    ) : null}
+
                     {/* Duration Badge */}
                     {trip.duration_days && (
                       <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-md">

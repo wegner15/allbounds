@@ -455,62 +455,130 @@ const PackagesPage: React.FC = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {currentPackages.map(pkg => (
-                    <div key={pkg.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                      <Link to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}`}>
-                        <img
-                          src={getImageUrlWithFallback(pkg.image_id, IMAGE_VARIANTS.MEDIUM)}
-                          alt={pkg.name}
-                          className="w-full h-64 object-cover"
-                        />
-                      </Link>
-                      <div className="p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          {pkg.country && (
-                            <div className="flex items-center text-sm font-medium text-gray-700">
-                              <svg className="w-4 h-4 mr-1 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                              </svg>
-                              {pkg.country.name}
+                  {currentPackages.map(pkg => {
+                    const rawTriggers: string[] = Array.isArray(pkg.conversion_triggers)
+                      ? pkg.conversion_triggers.filter(t => typeof t === 'string' && t.trim().length > 0)
+                      : [];
+
+                    const triggersList = [...rawTriggers];
+                    if (pkg.is_deal && !triggersList.some(t => /deal|sale|discount/i.test(t))) {
+                      triggersList.unshift('Hot Deal');
+                    }
+                    if (pkg.is_featured && !triggersList.some(t => /featured/i.test(t))) {
+                      triggersList.push('Featured');
+                    }
+
+                    const primaryTrigger = triggersList[0];
+                    const secondaryTrigger = triggersList.length > 1 ? triggersList[1] : null;
+
+                    return (
+                      <div key={pkg.id} className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.01] flex flex-col h-full group">
+                        <Link to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}`} className="relative block h-64 overflow-hidden bg-gray-100">
+                          <img
+                            src={getImageUrlWithFallback(pkg.image_id, IMAGE_VARIANTS.MEDIUM)}
+                            alt={pkg.name}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+
+                          {/* Primary Badge Overlay (Top Left) */}
+                          {primaryTrigger && (
+                            <div
+                              className={`absolute top-3 left-3 text-xs font-bold px-3 py-1 rounded-full shadow-md z-10 flex items-center gap-1 ${
+                                /deal|sale|discount/i.test(primaryTrigger)
+                                  ? 'bg-red-600 text-white'
+                                  : /featured|popular|bestseller|best seller/i.test(primaryTrigger)
+                                    ? 'bg-amber-400 text-gray-900 font-bold'
+                                    : 'bg-teal text-white font-bold'
+                              }`}
+                            >
+                              {/deal|sale|discount/i.test(primaryTrigger) && <span className="animate-pulse">🔥</span>}
+                              {/featured|popular|bestseller|best seller/i.test(primaryTrigger) && <span>⭐</span>}
+                              {!/deal|sale|discount|featured|popular|bestseller|best seller/i.test(primaryTrigger) && <span>⚡</span>}
+                              {primaryTrigger}
                             </div>
                           )}
-                          {pkg.holiday_types && pkg.holiday_types.length > 0 && (
-                            <span className="inline-block bg-butter text-charcoal text-xs px-2 py-1 rounded font-medium">
-                              {pkg.holiday_types[0].name}
-                            </span>
+
+                          {/* Secondary Badge Overlay (Top Right) */}
+                          {secondaryTrigger && (
+                            <div
+                              className={`absolute top-3 right-3 text-xs font-bold px-3 py-1 rounded-full shadow-md z-10 flex items-center gap-1 ${
+                                /featured|popular|bestseller|best seller/i.test(secondaryTrigger)
+                                  ? 'bg-amber-400 text-gray-900 font-bold'
+                                  : 'bg-charcoal/80 text-white backdrop-blur-xs font-semibold'
+                              }`}
+                            >
+                              {secondaryTrigger}
+                            </div>
                           )}
-                        </div>
-                        <Link to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}`} className="block">
-                          <h3 className="text-lg font-medium text-charcoal hover:text-primary-dark transition-colors mb-2">
-                            {pkg.name}
-                          </h3>
                         </Link>
-                        <div
-                          className="text-gray-600 text-sm mb-4 line-clamp-2"
-                          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pkg.summary || pkg.description || '') }}
-                        />
-                        <div className="flex justify-between items-center">
-                          <PackagePriceDisplay packageId={pkg.id} basePrice={pkg.price} />
-                          <div className="text-sm text-gray-600">{pkg.duration_days} days</div>
-                        </div>
-                        {pkg.rating && (
-                          <div className="mt-2 flex items-center">
-                            <div className="flex text-yellow-400">
-                              {[...Array(5)].map((_, i) => (
-                                <svg key={i} className={`w-4 h-4 ${i < Math.floor(pkg.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20">
-                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        <div className="p-5 flex flex-col flex-grow">
+                          <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+                            {pkg.country && (
+                              <div className="flex items-center text-xs font-bold uppercase tracking-wider text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-100">
+                                <svg className="w-3.5 h-3.5 mr-1 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
+                                {pkg.country.name}
+                              </div>
+                            )}
+                            {pkg.holiday_types && pkg.holiday_types.length > 0 && (
+                              <span className="inline-block bg-gray-100 text-gray-700 text-xs px-2.5 py-1 rounded-full font-medium border border-gray-200">
+                                {pkg.holiday_types[0].name}
+                              </span>
+                            )}
+                          </div>
+
+                          <Link to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}`} className="block">
+                            <h3 className="text-xl font-bold text-gray-900 hover:text-teal transition-colors mb-2 leading-tight font-playfair">
+                              {pkg.name}
+                            </h3>
+                          </Link>
+
+                          {/* Conversion Triggers Pills */}
+                          {rawTriggers.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 my-2">
+                              {rawTriggers.map((trigger, i) => (
+                                <span
+                                  key={i}
+                                  className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 border border-amber-200/80 text-[11px] font-bold px-2.5 py-0.5 rounded-md uppercase tracking-wider shadow-2xs"
+                                >
+                                  <span className="text-amber-500">⚡</span>
+                                  {trigger}
+                                </span>
                               ))}
                             </div>
-                            <span className="ml-1 text-sm text-gray-600">
-                              {pkg.rating} ({pkg.review_count || 0} reviews)
-                            </span>
+                          )}
+
+                          <div
+                            className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed flex-grow"
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pkg.summary || pkg.description || '') }}
+                          />
+
+                          <div className="flex justify-between items-center pt-4 border-t border-gray-100 mt-auto">
+                            <PackagePriceDisplay packageId={pkg.id} basePrice={pkg.price} />
+                            <div className="text-sm font-semibold text-gray-500 bg-gray-50 px-2.5 py-1 rounded-md border border-gray-200">
+                              {pkg.duration_days} days
+                            </div>
                           </div>
-                        )}
+                          {pkg.rating && (
+                            <div className="mt-3 flex items-center pt-2 border-t border-gray-100">
+                              <div className="flex text-yellow-400">
+                                {[...Array(5)].map((_, i) => (
+                                  <svg key={i} className={`w-4 h-4 ${i < Math.floor(pkg.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                  </svg>
+                                ))}
+                              </div>
+                              <span className="ml-1 text-xs text-gray-600 font-medium">
+                                {pkg.rating} ({pkg.review_count || 0} reviews)
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 

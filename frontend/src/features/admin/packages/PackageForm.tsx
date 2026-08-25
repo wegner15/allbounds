@@ -17,6 +17,7 @@ import GalleryManager from '../../../components/admin/GalleryManager';
 import PriceChartManager from '../../../components/admin/PriceChartManager';
 import { SimpleItineraryManager } from '../../../components/admin/SimpleItineraryManager';
 import TagSelector from '../../../components/admin/TagSelector';
+import ConversionTriggersManager from '../../../components/admin/ConversionTriggersManager';
 import type { GalleryImage } from '../../../lib/types/api';
 import ConfirmationModal from '../../../components/ui/ConfirmationModal';
 
@@ -810,42 +811,8 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                   <p className="text-xs text-gray-500 mt-1">High-impact selling points and related blog articles</p>
                 </div>
 
-                {/* Conversion Triggers */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="block text-sm font-semibold text-gray-800">Conversion Triggers</label>
-                    <button
-                      type="button"
-                      onClick={() => appendTrigger({ value: '' })}
-                      className="px-3 py-1.5 bg-teal text-white text-xs font-bold rounded-lg shadow-2xs hover:bg-teal-dark transition-all cursor-pointer"
-                    >
-                      + Add Trigger
-                    </button>
-                  </div>
-
-                  <div className="space-y-3">
-                    {triggerFields.length === 0 ? (
-                      <p className="text-xs text-gray-500 italic py-2">No conversion triggers added yet.</p>
-                    ) : (
-                      triggerFields.map((field, index) => (
-                        <div key={field.id} className="flex items-center gap-3">
-                          <input
-                            {...register(`conversion_triggers.${index}.value`)}
-                            placeholder='e.g. "Pay 50% deposit now"'
-                            className="flex-1 px-3.5 py-2 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeTrigger(index)}
-                            className="text-red-500 hover:text-red-700 text-xs font-semibold px-2 py-1 cursor-pointer"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
+                {/* Conversion Triggers Manager */}
+                <ConversionTriggersManager control={control} register={register} />
 
                 {/* Blog Posts */}
                 <div className="pt-4 border-t border-gray-100">

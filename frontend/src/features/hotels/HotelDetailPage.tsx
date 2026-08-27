@@ -202,7 +202,10 @@ const HotelDetailPage: React.FC = () => {
               {/* Seasonal Pricing Section */}
               {activePriceCharts && activePriceCharts.length > 0 && (
                 <div id="pricing" className="mb-8">
-                  <SeasonalPricingTable priceCharts={activePriceCharts} title="Hotel Seasonal Room Rates" />
+                  <SeasonalPricingTable
+                    priceCharts={activePriceCharts}
+                    title="Hotel Seasonal Room Rates"
+                  />
                 </div>
               )}
 

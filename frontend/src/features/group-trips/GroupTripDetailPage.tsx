@@ -315,11 +315,16 @@ const GroupTripDetailPage: React.FC = () => {
               )}
 
               {/* Seasonal Pricing Section */}
-              {activePriceCharts && activePriceCharts.length > 0 && (
-                <div id="pricing" className="mb-6">
-                  <SeasonalPricingTable priceCharts={activePriceCharts} title="Group Trip Seasonal Pricing" />
-                </div>
-              )}
+              <div id="pricing" className="mb-6">
+                <SeasonalPricingTable
+                  priceCharts={activePriceCharts}
+                  basePrice={tripDetail.price}
+                  durationDays={tripDetail.duration_days}
+                  title="Group Trip Seasonal Pricing"
+                  onEnquire={() => setShowBookingForm(true)}
+                  onCustomize={() => setShowBookingForm(true)}
+                />
+              </div>
 
 
               {/* Itinerary Section */}

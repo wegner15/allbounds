@@ -70,6 +70,13 @@ const PackageDetailPageNew: React.FC = () => {
       sections.push({ id: 'gallery', label: 'Gallery' });
     }
 
+    // Always include Pricing section
+    sections.push({ id: 'pricing', label: 'Pricing' });
+
+    if (packageDetail.reviews && packageDetail.reviews.length > 0) {
+      sections.push({ id: 'reviews', label: 'Reviews' });
+    }
+
     return sections;
   }, [packageDetail]);
 
@@ -273,11 +280,15 @@ const PackageDetailPageNew: React.FC = () => {
               )}
 
               {/* Seasonal Pricing Section */}
-              {activePriceCharts && activePriceCharts.length > 0 && (
-                <div id="pricing" className="mb-6 md:mb-8 scroll-mt-20">
-                  <SeasonalPricingTable priceCharts={activePriceCharts} />
-                </div>
-              )}
+              <div id="pricing" className="mb-6 md:mb-8 scroll-mt-20">
+                <SeasonalPricingTable
+                  priceCharts={activePriceCharts}
+                  basePrice={packageDetail.price}
+                  durationDays={packageDetail.duration_days}
+                  onEnquire={() => setShowInquiryForm(true)}
+                  onCustomize={() => setShowBookingForm(true)}
+                />
+              </div>
 
               {/* Reviews Section */}
               {packageDetail.reviews && (

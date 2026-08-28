@@ -27,8 +27,11 @@ export const getCloudflareImageUrl = (imageId: string | null | undefined, varian
     return null;
   }
   
-  // If imageId is already a full URL, return it as is
+  // If imageId is already a full Cloudflare delivery URL, ensure it uses the requested variant
   if (imageId.startsWith('http')) {
+    if (imageId.includes('imagedelivery.net')) {
+      return imageId.replace(/\/(thumbnail|medium|large|small|public)$/, `/${variant}`);
+    }
     return imageId;
   }
   

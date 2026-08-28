@@ -69,7 +69,7 @@ const GroupTripDetailPage: React.FC = () => {
         id: -1, // Use negative ID to distinguish from gallery images
         filename: 'cover-image',
         alt_text: `${tripDetail.name} - Cover Image`,
-        file_path: getImageUrlWithFallback(tripDetail.cover_image, IMAGE_VARIANTS.LARGE),
+        file_path: getImageUrlWithFallback(tripDetail.cover_image, IMAGE_VARIANTS.PUBLIC),
       });
     }
 
@@ -79,6 +79,7 @@ const GroupTripDetailPage: React.FC = () => {
         images.push({
           ...img,
           filename: img.file_path,
+          file_path: getImageUrlWithFallback(img.file_path, IMAGE_VARIANTS.PUBLIC),
         });
       });
     }

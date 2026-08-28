@@ -85,6 +85,8 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
             src={currentImage.file_path}
             alt={currentImage.alt_text || currentImage.filename}
             className="w-full h-full object-cover cursor-pointer"
+            loading="eager"
+            decoding="async"
             onClick={openFullscreen}
           />
 

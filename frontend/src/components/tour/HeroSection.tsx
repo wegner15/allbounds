@@ -188,7 +188,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ packageData, onBookNowClick }
         <div className="max-w-[1600px] mx-auto px-4 pb-6 md:pb-12">
 
           {/* Tour Title */}
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-playfair font-bold text-white mb-3 md:mb-4 leading-tight animate-slide-up drop-shadow-lg">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-playfair font-bold text-white mb-3 leading-tight animate-slide-up drop-shadow-lg tracking-tight">
             {packageData.name}
           </h1>
 

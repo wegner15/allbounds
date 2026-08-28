@@ -183,8 +183,8 @@ const AttractionDetailPage: React.FC = () => {
           {/* Main Content */}
           <div className="lg:col-span-2">
             {/* Header */}
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            <div className="mb-6">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2.5 font-playfair tracking-tight leading-tight">
                 {attraction.name}
               </h1>
 

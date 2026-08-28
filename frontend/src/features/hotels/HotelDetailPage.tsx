@@ -105,7 +105,7 @@ const HotelDetailPage: React.FC = () => {
             <div className="container mx-auto">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-4xl md:text-6xl font-playfair text-white mb-4">{hotel.name}</h1>
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-playfair font-bold text-white mb-3 tracking-tight leading-tight">{hotel.name}</h1>
                   <div className="flex items-center space-x-4 text-white/90">
                     {hotel.stars && (
                       <div className="flex text-yellow-400 text-lg">

@@ -100,10 +100,10 @@ const HotelDetailPage: React.FC = () => {
 
       {/* Hero Section - Header & Gallery */}
       <div className="bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="mb-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 font-playfair">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-6">
+          <div className="mb-5">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2.5">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 font-playfair tracking-tight leading-tight">
                 {hotel.name}
               </h1>
               {hotel.stars && (

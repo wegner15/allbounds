@@ -21,3 +21,4 @@ export * from './LoadingSkeletons';
 // Additional tour components
 export { default as ItineraryMap } from './ItineraryMap';
 export { default as RecommendedTours } from './RecommendedTours';
+export { default as BlogsSection } from './BlogsSection';

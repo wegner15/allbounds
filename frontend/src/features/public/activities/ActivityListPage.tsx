@@ -210,7 +210,7 @@ const ActivityListPage: React.FC = () => {
                         src={
                           act.image_id
                             ? getImageUrlWithFallback(act.image_id, IMAGE_VARIANTS.MEDIUM)
-                            : act.image_url || 'https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=600&q=80'
+                            : act.image_url || '/home-heros/hero3.webp'
                         }
                         alt={act.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

@@ -238,7 +238,7 @@ const PackagesListPage: React.FC = () => {
                             variant="medium"
                             alt={pkg.name}
                             className="h-10 w-10 rounded-md object-cover"
-                            placeholder="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=40&h=40&q=80"
+                            placeholder="/home-heros/hero4.jpeg"
                           />
                         </div>
                         <div className="ml-4">

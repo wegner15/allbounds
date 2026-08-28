@@ -148,7 +148,7 @@ const SpecialTopDeals: React.FC = () => {
                         src={getImageUrlWithFallback(
                           deal.image_id,
                           IMAGE_VARIANTS.MEDIUM,
-                          'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=400&q=80'
+                          '/home-heros/hero4.jpeg'
                         )}
                         alt={deal.name}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"

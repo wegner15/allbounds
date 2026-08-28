@@ -58,7 +58,7 @@ const TopTrendingDestinations: React.FC = () => {
                   }`}
               >
                 <img
-                  src={getImageUrlWithFallback(destination.image_id, IMAGE_VARIANTS.LARGE, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=800&q=80')}
+                  src={getImageUrlWithFallback(destination.image_id, IMAGE_VARIANTS.LARGE, '/home-heros/hero2.webp')}
                   alt={destination.name}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />

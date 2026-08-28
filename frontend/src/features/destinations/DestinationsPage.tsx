@@ -33,7 +33,7 @@ const DestinationsPage: React.FC = () => {
 
       {/* Hero Section */}
       <div className="bg-cover bg-center h-80 md:h-96 flex items-center justify-center relative"
-        style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80)' }}>
+        style={{ backgroundImage: 'url(/home-heros/hero1.jpeg)' }}>
         <div className="absolute inset-0 bg-black/50"></div>
         <div className="text-center text-white p-4 relative z-10">
           <h1 className="text-4xl md:text-6xl font-playfair font-bold text-white mb-4 drop-shadow-xl">Discover Amazing Destinations</h1>
@@ -95,7 +95,7 @@ const DestinationsPage: React.FC = () => {
                   <div key={region.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col h-full">
                     <Link to={`/destinations/regions/${region.slug}`}>
                       <img
-                        src={getImageUrlWithFallback(region.image_id || region.image_url, IMAGE_VARIANTS.LARGE, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')}
+                        src={getImageUrlWithFallback(region.image_id || region.image_url, IMAGE_VARIANTS.LARGE, '/home-heros/hero2.webp')}
                         alt={region.name}
                         className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                       />
@@ -162,7 +162,7 @@ const DestinationsPage: React.FC = () => {
                       <div key={country.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col h-full">
                         <Link to={`/destinations/countries/${country.slug}`}>
                           <img
-                            src={getImageUrlWithFallback(country.image_id || country.image_url, IMAGE_VARIANTS.LARGE, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')}
+                            src={getImageUrlWithFallback(country.image_id || country.image_url, IMAGE_VARIANTS.LARGE, '/home-heros/hero1.jpeg')}
                             alt={country.name}
                             className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                           />

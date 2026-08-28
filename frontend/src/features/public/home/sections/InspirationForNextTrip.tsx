@@ -65,7 +65,7 @@ const InspirationForNextTrip: React.FC = () => {
                         src={getImageUrlWithFallback(
                           article.cover_image_id,
                           IMAGE_VARIANTS.MEDIUM,
-                          'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80'
+                          '/home-heros/hero2.webp'
                         )}
                         alt={article.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -98,7 +98,7 @@ const InspirationForNextTrip: React.FC = () => {
                         src={getImageUrlWithFallback(
                           article.cover_image_id,
                           IMAGE_VARIANTS.THUMBNAIL,
-                          'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=400&q=80'
+                          '/home-heros/hero1.jpeg'
                         )}
                         alt={article.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

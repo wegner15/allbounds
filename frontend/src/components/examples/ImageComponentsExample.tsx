@@ -120,7 +120,7 @@ const ImageComponentsExample: React.FC = () => {
             <h3 className="text-lg font-medium mb-2">With Fallback URL</h3>
             <CloudflareImageDisplay
               imageId=""
-              fallbackUrl="https://images.unsplash.com/photo-1506744038136-46273834b3fb"
+              fallbackUrl="/home-heros/hero1.jpeg"
               alt="Fallback image"
               className="w-full h-48 rounded-lg"
             />

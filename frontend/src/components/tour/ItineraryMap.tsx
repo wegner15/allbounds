@@ -118,7 +118,7 @@ const ItineraryMap: React.FC<ItineraryMapProps> = ({ itineraryItems, packageName
           <div className="text-center p-4 bg-gradient-to-br from-success/10 to-success/5 rounded-lg border border-success/20 col-span-2 md:col-span-1">
             <div className="text-2xl font-bold text-success font-playfair">
               {itineraryItems.reduce((acc, item) => 
-                acc + (item.attractions?.length || 0) + (item.custom_activities?.length || 0), 0
+                acc + (item.attractions?.length || 0) + (item.custom_activities?.length || 0) + (item.linked_activities?.length || 0), 0
               )}
             </div>
             <div className="text-xs text-gray-600 font-medium uppercase tracking-wide mt-1">Activities</div>

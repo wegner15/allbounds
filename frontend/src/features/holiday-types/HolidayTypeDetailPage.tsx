@@ -165,7 +165,7 @@ const HolidayTypeDetailPage: React.FC = () => {
         title={`${holidayType.name} Holidays`}
         description={holidayType.description || undefined}
         canonicalPath={`/holiday-types/${holidayType.slug}`}
-        image={`https://source.unsplash.com/random/1200x630/?${holidayType.name.toLowerCase()}`}
+        image="/home-heros/hero3.webp"
       />
 
       {/* Enhanced Hero Section */}
@@ -178,11 +178,11 @@ const HolidayTypeDetailPage: React.FC = () => {
               alt={holidayType.name}
               className="w-full h-full"
               objectFit="cover"
-              placeholder={`https://source.unsplash.com/random/1920x1080/?${holidayType.name.toLowerCase()}`}
+              placeholder="/home-heros/hero3.webp"
             />
           ) : (
             <img
-              src={`https://source.unsplash.com/random/1920x1080/?${holidayType.name.toLowerCase()}`}
+              src="/home-heros/hero3.webp"
               alt={holidayType.name}
               className="w-full h-full object-cover"
             />
@@ -269,10 +269,10 @@ const HolidayTypeDetailPage: React.FC = () => {
       <div className="bg-paper">
         {/* Introduction Section */}
         <div className="py-16 bg-white border-b border-gray-100">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
+          <div className="container mx-auto px-4 md:px-8">
+            <div className="max-w-6xl mx-auto text-center">
               <div
-                className="text-xl md:text-2xl text-charcoal leading-relaxed font-playfair"
+                className="text-lg md:text-xl lg:text-2xl text-charcoal leading-relaxed font-playfair px-2 sm:px-6"
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(holidayType.description || '') }}
               />
             </div>

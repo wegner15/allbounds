@@ -125,14 +125,14 @@ const RegionDetailPage: React.FC = () => {
         title={region.name}
         description={region.description || `Explore ${region.name} with Allbound Vacations`}
         canonicalPath={`/regions/${region.slug}`}
-        image={getImageUrlWithFallback(region.image_id || region.image_url, IMAGE_VARIANTS.LARGE, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80')}
+        image={getImageUrlWithFallback(region.image_id || region.image_url, IMAGE_VARIANTS.LARGE, '/home-heros/hero2.webp')}
       />
 
       <div className="bg-paper min-h-screen">
         {/* Hero Section */}
         <div className="relative h-96 md:h-[500px]">
           <img
-            src={getImageUrlWithFallback(region.image_id || region.image_url, IMAGE_VARIANTS.LARGE, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80')}
+            src={getImageUrlWithFallback(region.image_id || region.image_url, IMAGE_VARIANTS.LARGE, '/home-heros/hero2.webp')}
             alt={region.name}
             className="w-full h-full object-cover"
           />
@@ -212,7 +212,7 @@ const RegionDetailPage: React.FC = () => {
                         <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                           <div className="relative h-48">
                             <img
-                              src={getImageUrlWithFallback(country.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80')}
+                              src={getImageUrlWithFallback(country.image_id, IMAGE_VARIANTS.MEDIUM, '/home-heros/hero1.jpeg')}
                               alt={country.name}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />
@@ -264,7 +264,7 @@ const RegionDetailPage: React.FC = () => {
                         <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                           <div className="relative h-48">
                             <img
-                              src={getImageUrlWithFallback(pkg.image_id || pkg.image_url, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80')}
+                              src={getImageUrlWithFallback(pkg.image_id || pkg.image_url, IMAGE_VARIANTS.MEDIUM, '/home-heros/hero4.jpeg')}
                               alt={pkg.name}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />
@@ -321,7 +321,7 @@ const RegionDetailPage: React.FC = () => {
                         <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                           <div className="relative h-48">
                             <img
-                              src={getImageUrlWithFallback(trip.image_id || trip.image_url, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80')}
+                              src={getImageUrlWithFallback(trip.image_id || trip.image_url, IMAGE_VARIANTS.MEDIUM, '/group_trips.jpeg')}
                               alt={trip.name}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />

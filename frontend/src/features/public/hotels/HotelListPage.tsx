@@ -261,7 +261,7 @@ const HotelListPage: React.FC = () => {
                         {/* Hotel Image */}
                         <div className="h-56 relative overflow-hidden">
                           <img
-                            src={getImageUrlWithFallback(hotel.image_id || hotel.image_url, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')}
+                            src={getImageUrlWithFallback(hotel.image_id || hotel.image_url, IMAGE_VARIANTS.MEDIUM, '/home-heros/hero4.jpeg')}
                             alt={hotel.name}
                             className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                           />
@@ -340,7 +340,7 @@ const HotelListPage: React.FC = () => {
                       {/* Hotel Image (Same generic card structure) */}
                       <div className="h-56 relative overflow-hidden">
                         <img
-                          src={getImageUrlWithFallback(hotel.image_id || hotel.image_url, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')}
+                          src={getImageUrlWithFallback(hotel.image_id || hotel.image_url, IMAGE_VARIANTS.MEDIUM, '/home-heros/hero4.jpeg')}
                           alt={hotel.name}
                           className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                         />

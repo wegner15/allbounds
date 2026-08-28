@@ -139,7 +139,13 @@ const ItinerarySection: React.FC<ItinerarySectionProps> = ({ itineraryItems }) =
             </div>
             <div className="text-center bg-gradient-to-br from-accent/10 to-accent/5 rounded-xl p-4 border border-accent/20">
               <div className="text-3xl sm:text-4xl font-bold text-accent mb-1 font-playfair">
-                {new Set(sortedItems.flatMap(item => item.custom_activities?.map(a => a.id) || [])).size}
+                {new Set(
+                  sortedItems.flatMap(item => [
+                    ...(item.linked_activities?.map(a => `linked-${a.id}`) || []),
+                    ...(item.custom_activities?.map(a => `custom-${a.id}`) || []),
+                    ...((item as any).activities?.map((a: any) => `act-${a.id}`) || [])
+                  ])
+                ).size}
               </div>
               <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Activities</div>
             </div>

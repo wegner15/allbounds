@@ -48,7 +48,7 @@ const SimilarGroupTrips: React.FC<SimilarGroupTripsProps> = ({ groupTripId, limi
                 src={
                   trip.image_id
                     ? getImageUrlWithFallback(trip.image_id, IMAGE_VARIANTS.MEDIUM)
-                    : trip.image_url || 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=600&q=80'
+                    : trip.image_url || '/group_trips.jpeg'
                 }
                 alt={trip.name}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"

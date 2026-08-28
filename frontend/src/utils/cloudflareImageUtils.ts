@@ -48,24 +48,36 @@ export const isCloudflareImageId = (str: string | null | undefined): boolean => 
  * @param fallbackUrl A fallback URL to use if no image is found
  * @returns The best available image URL
  */
+export const DEFAULT_FALLBACK_IMAGE = '/home-heros/hero1.jpeg';
+
 export const getEntityImageUrl = (
   entity: unknown,
-  fallbackUrl: string = 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=80'
+  fallbackUrl: string = DEFAULT_FALLBACK_IMAGE
 ): string => {
+  const safeFallback = fallbackUrl && !fallbackUrl.includes('unsplash.com') ? fallbackUrl : DEFAULT_FALLBACK_IMAGE;
+
   // Try cover_image first (might be a Cloudflare ID or full URL)
   if ((entity as any)?.cover_image) {
-    return isCloudflareImageId((entity as any).cover_image)
-      ? getCloudflareImageUrl((entity as any).cover_image, 'medium')
-      : (entity as any).cover_image;
+    const cover = (entity as any).cover_image;
+    if (isCloudflareImageId(cover)) {
+      return getCloudflareImageUrl(cover, 'medium');
+    }
+    if (typeof cover === 'string' && !cover.includes('source.unsplash.com')) {
+      return cover;
+    }
   }
 
   // Then try image_id
   if ((entity as any)?.image_id) {
-    return isCloudflareImageId((entity as any).image_id)
-      ? getCloudflareImageUrl((entity as any).image_id, 'medium')
-      : (entity as any).image_id;
+    const imgId = (entity as any).image_id;
+    if (isCloudflareImageId(imgId)) {
+      return getCloudflareImageUrl(imgId, 'medium');
+    }
+    if (typeof imgId === 'string' && !imgId.includes('source.unsplash.com')) {
+      return imgId;
+    }
   }
   
   // Finally use the fallback
-  return fallbackUrl;
+  return safeFallback;
 };

@@ -134,7 +134,7 @@ const PopularSafariPackages: React.FC = () => {
                       src={getImageUrlWithFallback(
                         trip.image_id,
                         IMAGE_VARIANTS.MEDIUM,
-                        'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=600&q=80'
+                        '/home-heros/hero5.jpeg'
                       )}
                       alt={trip.name}
                       className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500"

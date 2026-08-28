@@ -65,7 +65,7 @@ describe('OptimizedImage', () => {
     await waitFor(() => {
       const image = screen.getByAltText('Missing image') as HTMLImageElement;
       expect(image.src).toBeTruthy();
-      expect(image.src).toContain('unsplash.com'); // Default fallback
+      expect(image.src).toContain('/home-heros/hero1.jpeg'); // Default local fallback
     });
   });
 

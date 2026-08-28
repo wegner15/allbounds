@@ -313,7 +313,7 @@ const AttractionDetailPage: React.FC = () => {
                       <div key={trip.id} className="flex-shrink-0 w-80 bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                         <Link to={`/group-trips/${trip.slug}`}>
                           <img
-                            src={getImageUrlWithFallback(trip.cover_image, IMAGE_VARIANTS.MEDIUM, 'https://source.unsplash.com/random/600x400/?group,travel')}
+                            src={getImageUrlWithFallback(trip.cover_image, IMAGE_VARIANTS.MEDIUM, '/group_trips.jpeg')}
                             alt={trip.name}
                             className="w-full h-48 object-cover"
                           />

@@ -14,6 +14,7 @@ import PriceChartDisplay from '../../components/ui/PriceChartDisplay';
 import PackageBookingForm from '../../components/forms/PackageBookingForm';
 import InquiryForm from '../../components/forms/InquiryForm';
 import SimilarPackages from '../../components/recommendations/SimilarPackages';
+import { BlogsSection } from '../../components/tour';
 
 // Import types from API
 
@@ -405,6 +406,13 @@ const PackageDetailPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Related Blogs Section */}
+        {packageDetail.blog_posts && packageDetail.blog_posts.length > 0 && (
+          <div className="mb-8">
+            <BlogsSection blogs={packageDetail.blog_posts} />
+          </div>
+        )}
 
         {/* Similar Packages Section */}
         <SimilarPackages packageId={packageDetail.id} limit={4} />

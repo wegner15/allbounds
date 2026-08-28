@@ -472,6 +472,8 @@ export interface ItineraryActivityDetail {
 export interface ActivitySummary {
   id: number;
   name: string;
+  slug?: string;
+  summary?: string;
   description?: string;
   duration_minutes?: number;
 }
@@ -637,8 +639,11 @@ export interface GroupTripDeparture {
 export interface BlogPost extends BaseModel {
   title: string;
   content: string;
+  summary?: string;
   slug: string;
   cover_image_id?: string;
+  cover_image_url?: string;
+  is_published?: boolean;
   is_active: boolean;
   is_featured: boolean;
   author_id?: number;

@@ -18,7 +18,7 @@ const VisaApplicationPage: React.FC = () => {
                 {/* Hero Section */}
                 <div className="relative h-[400px] md:h-[500px] bg-charcoal overflow-hidden flex items-center justify-center">
                     <img
-                        src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80"
+                        src="/fly-book-hero.jpeg"
                         alt="Passport and Visa"
                         className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay"
                     />

@@ -55,9 +55,9 @@ const Step8Details: React.FC<Step8Props> = ({ state, updateState, onSubmit }) =>
 
             <div className="border-t border-blue-200 pt-6">
               <div className="flex -space-x-2 mb-3">
-                <img className="w-10 h-10 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80" alt="Reviewer" />
-                <img className="w-10 h-10 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" alt="Reviewer" />
-                <img className="w-10 h-10 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Reviewer" />
+                <div className="w-10 h-10 rounded-full border-2 border-white bg-primary text-white font-bold flex items-center justify-center text-xs shadow-sm">JD</div>
+                <div className="w-10 h-10 rounded-full border-2 border-white bg-teal text-white font-bold flex items-center justify-center text-xs shadow-sm">SM</div>
+                <div className="w-10 h-10 rounded-full border-2 border-white bg-amber-500 text-white font-bold flex items-center justify-center text-xs shadow-sm">AK</div>
               </div>
               <p className="text-sm font-bold text-gray-900 mb-1">Our guests rate us excellent</p>
               <div className="flex items-center text-sm">

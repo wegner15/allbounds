@@ -47,7 +47,7 @@ const HolidayTypesPage: React.FC = () => {
       />
 
       {/* Hero Section */}
-      <div className="bg-cover bg-center h-64 md:h-80 flex items-center justify-center" style={{ backgroundImage: 'url(https://source.unsplash.com/random/1600x900/?vacation)' }}>
+      <div className="bg-cover bg-center h-64 md:h-80 flex items-center justify-center" style={{ backgroundImage: 'url(/home-heros/hero1.jpeg)' }}>
         <div className="text-center text-white p-4 bg-black bg-opacity-50 rounded">
           <h1 className="text-3xl md:text-4xl font-playfair mb-2">Holiday Types</h1>
           <p className="text-lg md:text-xl">Find your perfect vacation style</p>
@@ -80,11 +80,11 @@ const HolidayTypesPage: React.FC = () => {
                       alt={holidayType.name}
                       className="w-full h-full"
                       objectFit="cover"
-                      placeholder={`https://source.unsplash.com/random/600x400/?${holidayType.name.toLowerCase()}`}
+                      placeholder="/home-heros/hero3.webp"
                     />
                   ) : (
                     <img
-                      src={`https://source.unsplash.com/random/600x400/?${holidayType.name.toLowerCase()}`}
+                      src="/home-heros/hero3.webp"
                       alt={holidayType.name}
                       className="w-full h-full object-cover"
                     />

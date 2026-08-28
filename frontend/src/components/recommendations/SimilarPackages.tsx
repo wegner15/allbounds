@@ -48,7 +48,7 @@ const SimilarPackages: React.FC<SimilarPackagesProps> = ({ packageId, limit = 4 
                 src={
                   pkg.image_id
                     ? getImageUrlWithFallback(pkg.image_id, IMAGE_VARIANTS.MEDIUM)
-                    : pkg.image_url || 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=600&q=80'
+                    : pkg.image_url || '/home-heros/hero4.jpeg'
                 }
                 alt={pkg.name}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"

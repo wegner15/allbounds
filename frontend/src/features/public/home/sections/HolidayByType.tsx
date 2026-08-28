@@ -73,7 +73,7 @@ const HolidayByType: React.FC = () => {
             {isLoading ? renderSkeletons() : holidayTypes?.map(type => (
               <div key={type.id} className="relative h-80 min-w-[280px] md:min-w-[350px] lg:min-w-[380px] rounded-lg overflow-hidden group snap-start shrink-0 shadow-sm hover:shadow-xl transition-shadow duration-300">
                 <img
-                  src={getImageUrlWithFallback(type.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=600&q=80')}
+                  src={getImageUrlWithFallback(type.image_id, IMAGE_VARIANTS.MEDIUM, '/home-heros/hero3.webp')}
                   alt={type.name}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />

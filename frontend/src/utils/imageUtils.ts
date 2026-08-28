@@ -42,6 +42,8 @@ export const getCloudflareImageUrl = (imageId: string | null | undefined, varian
  * @param fallbackUrl - Fallback URL if imageId is not available
  * @returns The image URL or fallback
  */
+export const DEFAULT_LOCAL_IMAGE = '/home-heros/hero1.jpeg';
+
 export const getImageUrlWithFallback = (
   imageId: string | null | undefined, 
   variant: string = 'public',
@@ -49,12 +51,16 @@ export const getImageUrlWithFallback = (
 ): string => {
   const cloudflareUrl = getCloudflareImageUrl(imageId ? normalizeImageId(imageId) : imageId, variant);
   
-  if (cloudflareUrl) {
+  if (cloudflareUrl && !cloudflareUrl.includes('source.unsplash.com')) {
     return cloudflareUrl;
   }
   
-  // Return fallback or a default placeholder
-  return fallbackUrl || `https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80`;
+  // Return fallback if not unsplash, or a local default image
+  if (fallbackUrl && !fallbackUrl.includes('unsplash.com')) {
+    return fallbackUrl;
+  }
+
+  return DEFAULT_LOCAL_IMAGE;
 };
 
 /**

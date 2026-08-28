@@ -23,12 +23,12 @@ const Step1Region: React.FC<Step1Props> = ({ state, updateState, onNext }) => {
   // Add standard images for common regions if backend doesn't provide them
   const getRegionImage = (regionName: string) => {
     const lowerName = regionName.toLowerCase();
-    if (lowerName.includes('africa')) return 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&q=80&w=800'; // Lion
-    if (lowerName.includes('asia')) return 'https://images.unsplash.com/photo-1464817739973-0128fe77aaa1?auto=format&fit=crop&q=80&w=800'; // Tiger's Nest/Asia
-    if (lowerName.includes('latin america') || lowerName.includes('south america')) return 'https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&q=80&w=800'; // Machu Picchu / Andes
-    if (lowerName.includes('europe')) return 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&q=80&w=800'; // Paris/Europe
-    if (lowerName.includes('antarctica')) return 'https://images.unsplash.com/photo-1518002054494-3a6f94352e9d?auto=format&fit=crop&q=80&w=800'; // Ice
-    return 'https://images.unsplash.com/photo-1488646953014-c8cb4b524d55?auto=format&fit=crop&q=80&w=800'; // Default landscape
+    if (lowerName.includes('africa')) return '/home-heros/hero5.jpeg';
+    if (lowerName.includes('asia')) return '/home-heros/hero3.webp';
+    if (lowerName.includes('latin america') || lowerName.includes('south america')) return '/home-heros/hero2.webp';
+    if (lowerName.includes('europe')) return '/home-heros/hero1.jpeg';
+    if (lowerName.includes('antarctica')) return '/home-heros/hero3.webp';
+    return '/home-heros/hero1.jpeg';
   };
 
   return (

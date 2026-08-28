@@ -110,7 +110,7 @@ const RecommendedHotels: React.FC = () => {
                       src={hotel.image_url || getImageUrlWithFallback(
                         hotel.image_id,
                         IMAGE_VARIANTS.MEDIUM,
-                        'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80'
+                        '/home-heros/hero4.jpeg'
                       )}
                       alt={hotel.name}
                       className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"

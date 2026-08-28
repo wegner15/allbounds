@@ -62,6 +62,19 @@ const INDEX_CONFIG: Record<string, { label: string; route: (hit: MeilisearchHit)
   },
 };
 
+const DEFAULT_LOCAL_IMAGES: Record<string, string> = {
+  activities: '/home-heros/hero3.webp',
+  attractions: '/home-heros/hero1.jpeg',
+  packages: '/home-heros/hero4.jpeg',
+  group_trips: '/group_trips.jpeg',
+  accommodations: '/home-heros/hero4.jpeg',
+  countries: '/home-heros/hero1.jpeg',
+  regions: '/home-heros/hero2.webp',
+  blog_posts: '/home-heros/hero1.jpeg',
+  hotel_types: '/home-heros/hero4.jpeg',
+  default: '/home-heros/hero1.jpeg',
+};
+
 const SearchPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -123,25 +136,28 @@ const SearchPage: React.FC = () => {
 
   // Get image URL for a hit
   const getImageUrl = (hit: MeilisearchHit, index: string): string => {
-    const directUrl = hit.image_url || hit.cover_image_url;
-    if (directUrl) {
+    const directUrl = hit.image_url || hit.cover_image_url || (typeof hit.cover_image === 'string' && hit.cover_image.startsWith('http') ? hit.cover_image : null) || (hit.cover_image as any)?.url;
+    if (directUrl && !directUrl.includes('source.unsplash.com')) {
       return directUrl;
     }
 
-    // Check for image_id, cover_image (attractions), or cover_image_id (blog posts)
-    const imageId = hit.image_id || hit.cover_image_id;
+    // Check for image_id, cover_image (attractions), cover_image_id (blog posts/activities), or country_image_id
+    const imageId = hit.image_id || hit.cover_image_id || (hit.cover_image as any)?.id || (typeof hit.cover_image === 'string' ? hit.cover_image : null) || hit.country_image_id;
     if (imageId) {
       if (typeof imageId === 'string' && imageId.startsWith('http')) {
-        return imageId;
+        if (!imageId.includes('source.unsplash.com')) {
+          return imageId;
+        }
+      } else {
+        const normalizedId = typeof imageId === 'string' && imageId.startsWith('cloudflare://')
+          ? imageId.replace('cloudflare://', '')
+          : String(imageId);
+        const cfUrl = getCloudflareImageUrl(normalizedId, 'medium');
+        if (cfUrl) return cfUrl;
       }
-      const normalizedId = typeof imageId === 'string' && imageId.startsWith('cloudflare://')
-        ? imageId.replace('cloudflare://', '')
-        : String(imageId);
-      return getCloudflareImageUrl(normalizedId, 'medium');
     }
-    // Fallback to Unsplash based on type
-    const searchTerm = hit.name || hit.title || index;
-    return `https://source.unsplash.com/600x400/?${encodeURIComponent(searchTerm)}`;
+    // Fallback to local default image based on entity type
+    return DEFAULT_LOCAL_IMAGES[index] || DEFAULT_LOCAL_IMAGES.default;
   };
 
   // Get title for a hit
@@ -189,14 +205,17 @@ const SearchPage: React.FC = () => {
     return (
       <div key={`${index}-${hit.id}`} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
         <Link to={route}>
-          <div className="relative h-48 overflow-hidden">
+          <div className="relative h-48 overflow-hidden bg-gray-100">
             <img
               src={imageUrl}
               alt={title}
               className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                target.src = `https://source.unsplash.com/600x400/?travel,${encodeURIComponent(title)}`;
+                const fallback = DEFAULT_LOCAL_IMAGES[index] || DEFAULT_LOCAL_IMAGES.default;
+                if (!target.src.endsWith(fallback)) {
+                  target.src = fallback;
+                }
               }}
             />
             <div className="absolute top-3 right-3 bg-teal text-paper px-3 py-1 rounded-full text-xs font-lato font-semibold">

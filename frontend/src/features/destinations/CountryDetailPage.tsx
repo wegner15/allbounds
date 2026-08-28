@@ -193,7 +193,7 @@ const CountryDetailPage: React.FC = () => {
                       <Link key={pkg.id} to={`/packages/${pkg.slug}`} className="group">
                         <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                           <img
-                            src={getImageUrlWithFallback(pkg.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=400&q=80')}
+                            src={getImageUrlWithFallback(pkg.image_id, IMAGE_VARIANTS.MEDIUM, '/home-heros/hero4.jpeg')}
                             alt={pkg.name}
                             className="w-full h-32 object-cover"
                           />
@@ -231,7 +231,7 @@ const CountryDetailPage: React.FC = () => {
                       <Link key={trip.id} to={`/group-trips/${trip.slug}`} className="group">
                         <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                           <img
-                            src={getImageUrlWithFallback(trip.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=400&q=80')}
+                            src={getImageUrlWithFallback(trip.image_id, IMAGE_VARIANTS.MEDIUM, '/group_trips.jpeg')}
                             alt={trip.name}
                             className="w-full h-32 object-cover"
                           />
@@ -297,7 +297,7 @@ const CountryDetailPage: React.FC = () => {
                       <Link key={attraction.id} to={`/attractions/${attraction.slug}`} className="group">
                         <div className="flex space-x-3 p-3 border rounded-lg hover:shadow-md transition-shadow">
                           <img
-                            src={getImageUrlWithFallback(attraction.cover_image || attraction.image_id, IMAGE_VARIANTS.THUMBNAIL, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=100&q=80')}
+                            src={getImageUrlWithFallback(attraction.cover_image || attraction.image_id, IMAGE_VARIANTS.THUMBNAIL, '/home-heros/hero1.jpeg')}
                             alt={attraction.name}
                             className="w-16 h-16 object-cover rounded"
                           />
@@ -329,7 +329,7 @@ const CountryDetailPage: React.FC = () => {
                       <Link key={hotel.id} to={`/hotels/${hotel.slug}`} className="group">
                         <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                           <img
-                            src={getImageUrlWithFallback(hotel.cover_image || hotel.image_id || hotel.image_url, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=80')}
+                            src={getImageUrlWithFallback(hotel.cover_image || hotel.image_id || hotel.image_url, IMAGE_VARIANTS.MEDIUM, '/home-heros/hero4.jpeg')}
                             alt={hotel.name}
                             className="w-full h-32 object-cover"
                           />
@@ -442,7 +442,7 @@ const CountryDetailPage: React.FC = () => {
                     {country.accommodations.slice(0, 6).map(hotel => (
                       <div key={hotel.id} className="flex space-x-3 p-2 border rounded hover:shadow-sm transition-shadow">
                         <img
-                          src={getImageUrlWithFallback(hotel.image_url, IMAGE_VARIANTS.THUMBNAIL, 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=100&q=80')}
+                          src={getImageUrlWithFallback(hotel.image_url, IMAGE_VARIANTS.THUMBNAIL, '/home-heros/hero4.jpeg')}
                           alt={hotel.name}
                           className="w-12 h-12 object-cover rounded"
                         />

@@ -197,7 +197,8 @@ class PackageService:
         """
         return db.query(Package).options(
             joinedload(Package.country),
-            selectinload(Package.countries)
+            selectinload(Package.countries),
+            selectinload(Package.blog_posts)
             # Removed joinedload(Package.holiday_types) - causes circular loading
         ).filter(Package.id == package_id).first()
     
@@ -207,7 +208,8 @@ class PackageService:
         """
         return db.query(Package).options(
             selectinload(Package.price_charts),
-            selectinload(Package.country)
+            selectinload(Package.country),
+            selectinload(Package.blog_posts)
         ).filter(Package.slug == slug, Package.is_active == True).first()
 
     
@@ -253,6 +255,8 @@ class PackageService:
             joinedload(Package.reviews),
             # Load price charts
             joinedload(Package.price_charts),
+            # Load linked blog posts
+            selectinload(Package.blog_posts),
         ).filter(
             Package.slug == slug,
             Package.is_active == True
@@ -303,6 +307,14 @@ class PackageService:
             if package.attractions:
                 for attraction in package.attractions:
                     set_attraction_image_url(attraction)
+            
+            # Populate cover_image_url for linked blog posts
+            if getattr(package, 'blog_posts', None):
+                for blog in package.blog_posts:
+                    cover_image_url = None
+                    if getattr(blog, 'cover_image_id', None):
+                        cover_image_url = self._get_cloudflare_image_url(blog.cover_image_id)
+                    setattr(blog, 'cover_image_url', cover_image_url)
         
         return package
     

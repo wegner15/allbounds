@@ -110,7 +110,7 @@ const TrendingActivities: React.FC = () => {
                     src={
                       activity.cover_image?.storage_key
                         ? `${import.meta.env.VITE_CLOUDFLARE_IMAGES_DELIVERY_URL}/${activity.cover_image.storage_key}/medium`
-                        : activity.image_url || 'https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&w=600&q=80'
+                        : activity.image_url || '/home-heros/hero3.webp'
                     }
                     alt={activity.name}
                     className="w-full h-48 object-cover"

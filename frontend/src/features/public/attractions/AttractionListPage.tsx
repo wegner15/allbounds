@@ -282,7 +282,7 @@ const AttractionListPage: React.FC = () => {
               <div key={attraction.id} className="bg-white rounded-2xl shadow-lg overflow-hidden group transform hover:-translate-y-1 transition-all duration-300 flex flex-col">
                 <Link to={`/attractions/${attraction.slug}`} className="block h-48 md:h-56 overflow-hidden">
                   <img
-                    src={getImageUrlWithFallback(attraction.cover_image || attraction.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')}
+                    src={getImageUrlWithFallback(attraction.cover_image || attraction.image_id, IMAGE_VARIANTS.MEDIUM, '/home-heros/hero1.jpeg')}
                     alt={attraction.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />

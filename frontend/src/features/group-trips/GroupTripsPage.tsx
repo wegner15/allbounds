@@ -302,7 +302,7 @@ const GroupTripsPage: React.FC = () => {
                     <div key={trip.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
                       <Link to={`/group-trips/${trip.slug}`}>
                         <img
-                          src={getImageUrlWithFallback(trip.image_id, IMAGE_VARIANTS.LARGE, 'https://source.unsplash.com/random/1000x800/?group,travel')}
+                          src={getImageUrlWithFallback(trip.image_id, IMAGE_VARIANTS.LARGE, '/group_trips.jpeg')}
                           alt={trip.name}
                           className="w-full h-72 object-cover"
                         />

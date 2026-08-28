@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useComprehensivePackageBySlug, useRecommendedPackages } from '../../lib/hooks/usePackages';
-import { HeroSection, OverviewSection, ItinerarySection, InclusionsExclusionsSection, HotelsSection, AttractionsSection, GallerySection, ReviewsSection, BookingSidebar, StickyNavigation, RecommendedTours } from '../../components/tour';
+import { HeroSection, OverviewSection, ItinerarySection, InclusionsExclusionsSection, HotelsSection, AttractionsSection, GallerySection, ReviewsSection, BookingSidebar, StickyNavigation, RecommendedTours, BlogsSection } from '../../components/tour';
 import ItineraryMapLeaflet from '../../components/tour/ItineraryMapLeaflet';
 import { PackageDetailSkeleton } from '../../components/tour/LoadingSkeletons';
 import ErrorDisplay from '../../components/tour/ErrorDisplay';
@@ -62,12 +62,12 @@ const PackageDetailPageNew: React.FC = () => {
       sections.push({ id: 'map', label: 'Map' });
     }
 
-    if (packageDetail.reviews && packageDetail.reviews.length > 0) {
-      sections.push({ id: 'reviews', label: 'Reviews' });
-    }
-
     if (packageDetail.media_assets && packageDetail.media_assets.length > 0) {
       sections.push({ id: 'gallery', label: 'Gallery' });
+    }
+
+    if (packageDetail.blog_posts && packageDetail.blog_posts.length > 0) {
+      sections.push({ id: 'blogs', label: 'Stories & Guides' });
     }
 
     // Always include Pricing section
@@ -279,6 +279,13 @@ const PackageDetailPageNew: React.FC = () => {
                 </div>
               )}
 
+              {/* Related Travel Stories & Blog Articles */}
+              {packageDetail.blog_posts && packageDetail.blog_posts.length > 0 && (
+                <div className="mb-6 md:mb-8">
+                  <BlogsSection blogs={packageDetail.blog_posts} />
+                </div>
+              )}
+
               {/* Seasonal Pricing Section */}
               <div id="pricing" className="mb-6 md:mb-8 scroll-mt-20">
                 <SeasonalPricingTable
@@ -291,8 +298,7 @@ const PackageDetailPageNew: React.FC = () => {
               </div>
 
               {/* Reviews Section */}
-              {packageDetail.reviews && (
-
+              {packageDetail.reviews && packageDetail.reviews.length > 0 && (
                 <div className="mb-6 md:mb-8">
                   <ReviewsSection reviews={packageDetail.reviews} />
                 </div>

@@ -46,12 +46,11 @@ const MonthlyVisitRating: React.FC<MonthlyVisitRatingProps> = ({ ratings }) => {
           return (
             <div
               key={month}
-              className="rounded-lg p-3 text-center"
+              className="rounded-lg p-2.5 text-center flex items-center justify-center shadow-xs"
               style={style}
               title={rating ? `${month}: ${rating}` : `${month}: No data`}
             >
-              <div className="text-sm font-medium">{month.substring(0, 3)}</div>
-              <div className="text-xs mt-1 capitalize">{rating || 'No data'}</div>
+              <div className="text-sm font-semibold">{month.substring(0, 3)}</div>
             </div>
           );
         })}

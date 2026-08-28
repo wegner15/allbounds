@@ -157,7 +157,7 @@ const HotelsListPage: React.FC = () => {
                             src={getImageUrlWithFallback(
                               hotel.image_id,
                               IMAGE_VARIANTS.THUMBNAIL,
-                              hotel.cover_image || hotel.image_url || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=100&q=80'
+                              hotel.cover_image || hotel.image_url || '/home-heros/hero4.jpeg'
                             )}
                             alt={hotel.name}
                           />

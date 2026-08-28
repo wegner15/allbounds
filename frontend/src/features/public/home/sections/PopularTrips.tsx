@@ -105,7 +105,7 @@ const PopularTrips: React.FC = () => {
               <div key={trip.id} className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 group flex-shrink-0 w-80">
                 <div className="relative">
                   <img
-                    src={getImageUrlWithFallback(trip.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&w=600&q=80')}
+                    src={getImageUrlWithFallback(trip.image_id, IMAGE_VARIANTS.MEDIUM, '/group_trips.jpeg')}
                     alt={trip.name}
                     className="w-full h-96 object-cover"
                   />

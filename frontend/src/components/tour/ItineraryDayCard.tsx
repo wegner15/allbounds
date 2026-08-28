@@ -7,7 +7,8 @@ import type {
   ItineraryItemDetail,
   HotelSummary,
   AttractionSummary,
-  ItineraryActivityDetail
+  ItineraryActivityDetail,
+  ActivitySummary
 } from '../../lib/types/api';
 import {
   ChevronDown,
@@ -36,6 +37,7 @@ const ItineraryDayCard: React.FC<ItineraryDayCardProps> = ({
     location,
     description,
     custom_activities,
+    linked_activities,
     hotels,
     attractions,
     accommodation_notes
@@ -47,6 +49,8 @@ const ItineraryDayCard: React.FC<ItineraryDayCardProps> = ({
   const hasBreakfast = meals.some(m => m.meal_type?.toLowerCase() === 'breakfast');
   const hasLunch = meals.some(m => m.meal_type?.toLowerCase() === 'lunch');
   const hasDinner = meals.some(m => m.meal_type?.toLowerCase() === 'dinner');
+
+  const hasActivities = (custom_activities && custom_activities.length > 0) || (linked_activities && linked_activities.length > 0);
 
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-xl hover:border-primary/30 animate-fade-in">
@@ -128,14 +132,17 @@ const ItineraryDayCard: React.FC<ItineraryDayCardProps> = ({
           )}
 
           {/* Activities Timeline */}
-          {custom_activities && custom_activities.length > 0 && (
+          {hasActivities && (
             <div className="mt-4 sm:mt-5 md:mt-6">
               <h4 className="text-base sm:text-lg font-semibold text-charcoal mb-3 sm:mb-4 font-playfair">Activities</h4>
               <div className="space-y-4">
-                {custom_activities
+                {linked_activities && linked_activities.map((activity) => (
+                  <LinkedActivityItem key={`linked-${activity.id}`} activity={activity} />
+                ))}
+                {custom_activities && custom_activities
                   .sort((a, b) => a.order_index - b.order_index)
                   .map((activity) => (
-                    <ActivityItem key={activity.id} activity={activity} />
+                    <ActivityItem key={`custom-${activity.id}`} activity={activity} />
                   ))}
               </div>
             </div>
@@ -169,6 +176,37 @@ const ItineraryDayCard: React.FC<ItineraryDayCardProps> = ({
           )}
         </div>
       )}
+    </div>
+  );
+};
+
+// Linked Activity Item Component
+const LinkedActivityItem: React.FC<{ activity: ActivitySummary }> = ({ activity }) => {
+  const durationText = activity.duration_minutes
+    ? activity.duration_minutes >= 60
+      ? `${(activity.duration_minutes / 60).toFixed(activity.duration_minutes % 60 === 0 ? 0 : 1)}h`
+      : `${activity.duration_minutes}m`
+    : null;
+
+  return (
+    <div className="flex gap-3 pl-4 border-l-2 border-primary relative before:absolute before:left-[-5px] before:top-2 before:w-2 before:h-2 before:rounded-full before:bg-primary before:shadow-md">
+      <div className="flex-1">
+        <h5 className="font-semibold text-charcoal">{activity.name}</h5>
+        {(activity.summary || activity.description) && (
+          <div
+            className="text-sm text-gray-600 mt-1.5 leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: activity.summary || activity.description || '' }}
+          />
+        )}
+        {durationText && (
+          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+            <span className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md font-medium">
+              <Clock className="w-3.5 h-3.5 mr-1" />
+              {durationText}
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

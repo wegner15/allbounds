@@ -8,6 +8,7 @@ from app.models.country import Country
 from app.models.activity import Activity
 from app.models.attraction import Attraction
 from app.models.accommodation import Accommodation
+from app.models.hotel import Hotel
 from app.models.package import Package
 from app.models.group_trip import GroupTrip
 from app.models.blog import BlogPost
@@ -88,7 +89,9 @@ class SearchService:
     def _resolve_activity_image_url(self, activity: Activity) -> Optional[str]:
         """
         Resolve a search-friendly image URL for an activity.
+        Checks cover image, gallery media assets, linked attractions, and country image fallback.
         """
+        # 1. Check direct cover_image
         cover_image = getattr(activity, 'cover_image', None)
         image_url = self._resolve_media_image_url(cover_image)
         if image_url:
@@ -102,9 +105,34 @@ class SearchService:
             db = SessionLocal()
             try:
                 media_asset = db.query(MediaAsset).filter(MediaAsset.id == cover_image_id).first()
-                return self._resolve_media_image_url(media_asset)
+                image_url = self._resolve_media_image_url(media_asset)
+                if image_url:
+                    return image_url
             finally:
                 db.close()
+
+        # 2. Check media_assets gallery
+        media_assets = getattr(activity, 'media_assets', None)
+        if media_assets:
+            for asset in media_assets:
+                image_url = self._resolve_media_image_url(asset)
+                if image_url:
+                    return image_url
+
+        # 3. Check linked attractions
+        attractions = getattr(activity, 'attractions', None)
+        if attractions:
+            for attr in attractions:
+                image_url = self._resolve_attraction_image_url(attr)
+                if image_url:
+                    return image_url
+
+        # 4. Fallback to primary country's image
+        countries = getattr(activity, 'countries', None)
+        if countries and len(countries) > 0:
+            primary_country = countries[0]
+            if primary_country and getattr(primary_country, 'image_id', None):
+                return self._resolve_cloudflare_image_url(primary_country.image_id)
 
         return None
 
@@ -128,6 +156,10 @@ class SearchService:
                 return legacy_cover
             from app.core.cloudflare_config import cloudflare_settings
             return f"{cloudflare_settings.delivery_url}/{legacy_cover}/medium"
+
+        # Fallback to country image
+        if getattr(attraction, 'country', None) and getattr(attraction.country, 'image_id', None):
+            return self._resolve_cloudflare_image_url(attraction.country.image_id)
 
         return None
 
@@ -323,6 +355,8 @@ class SearchService:
         """
         activities = db.query(Activity).filter(Activity.is_active == True).options(
             joinedload(Activity.cover_image),
+            joinedload(Activity.media_assets),
+            joinedload(Activity.attractions),
             joinedload(Activity.countries),
         ).all()
         
@@ -331,6 +365,14 @@ class SearchService:
             countries = list(activity.countries or [])
             primary_country = countries[0] if countries else None
             countries_payload = self._build_country_list_payload(countries)
+
+            # Resolve storage key / cloudflare UUID if available
+            storage_key = None
+            if activity.cover_image and getattr(activity.cover_image, 'storage_key', None):
+                storage_key = activity.cover_image.storage_key
+            elif activity.media_assets and len(activity.media_assets) > 0:
+                storage_key = getattr(activity.media_assets[0], 'storage_key', None)
+
             documents.append({
                 'id': activity.id,
                 'name': activity.name,
@@ -338,7 +380,8 @@ class SearchService:
                 'description': activity.description,
                 'slug': activity.slug,
                 'image_url': self._resolve_activity_image_url(activity),
-                'cover_image_id': activity.cover_image_id,
+                'image_id': storage_key,
+                'cover_image_id': storage_key or activity.cover_image_id,
                 'country_id': primary_country.id if primary_country else None,
                 'country_name': primary_country.name if primary_country else None,
                 'country_slug': primary_country.slug if primary_country else None,
@@ -396,7 +439,7 @@ class SearchService:
     
     def index_accommodations(self, db: Session) -> bool:
         """
-        Index all active accommodations.
+        Index all active accommodations and hotels.
         
         Args:
             db: Database session
@@ -404,24 +447,60 @@ class SearchService:
         Returns:
             bool: True if accommodations were indexed successfully, False otherwise
         """
-        accommodations = db.query(Accommodation).filter(Accommodation.is_active == True).all()
-        
         documents = []
-        for accommodation in accommodations:
+
+        # Index hotels from Hotel model
+        hotels = db.query(Hotel).filter(Hotel.is_active == True).options(
+            joinedload(Hotel.country),
+        ).all()
+        for hotel in hotels:
+            country_payload = self._build_country_payload(hotel.country)
             documents.append({
-                'id': accommodation.id,
-                'name': accommodation.name,
-                'summary': accommodation.summary,
-                'description': accommodation.description,
-                'slug': accommodation.slug,
-                'country_id': accommodation.country_id,
-                'stars': accommodation.stars,
-                'address': accommodation.address,
-                'is_active': accommodation.is_active
+                'id': hotel.id,
+                'name': hotel.name,
+                'summary': hotel.summary,
+                'description': hotel.description,
+                'slug': hotel.slug,
+                'country_id': hotel.country_id,
+                'country_name': hotel.country.name if hotel.country else None,
+                'country_slug': hotel.country.slug if hotel.country else None,
+                'country_image_id': hotel.country.image_id if hotel.country else None,
+                'country': country_payload,
+                'stars': hotel.stars,
+                'city': hotel.city,
+                'address': hotel.address,
+                'price_category': hotel.price_category,
+                'image_id': hotel.image_id,
+                'image_url': self._resolve_cloudflare_image_url(hotel.image_id),
+                'is_active': hotel.is_active
             })
 
+        # Also index any legacy accommodations if present and not overlapping
+        accommodations = db.query(Accommodation).filter(Accommodation.is_active == True).options(
+            joinedload(Accommodation.country),
+        ).all()
+        existing_ids = {d['id'] for d in documents}
+        for accommodation in accommodations:
+            if accommodation.id not in existing_ids:
+                country_payload = self._build_country_payload(accommodation.country)
+                documents.append({
+                    'id': accommodation.id,
+                    'name': accommodation.name,
+                    'summary': accommodation.summary,
+                    'description': accommodation.description,
+                    'slug': accommodation.slug,
+                    'country_id': accommodation.country_id,
+                    'country_name': accommodation.country.name if accommodation.country else None,
+                    'country_slug': accommodation.country.slug if accommodation.country else None,
+                    'country_image_id': accommodation.country.image_id if accommodation.country else None,
+                    'country': country_payload,
+                    'stars': accommodation.stars,
+                    'address': accommodation.address,
+                    'is_active': accommodation.is_active
+                })
+
         if not documents:
-            logger.info("No active accommodations found to index")
+            logger.info("No active accommodations/hotels found to index")
             return True
         
         return self.meilisearch_client.add_documents(self.ACCOMMODATION_INDEX, documents)
@@ -436,7 +515,9 @@ class SearchService:
         Returns:
             bool: True if packages were indexed successfully, False otherwise
         """
-        packages = db.query(Package).filter(Package.is_active == True).all()
+        packages = db.query(Package).filter(Package.is_active == True).options(
+            joinedload(Package.country),
+        ).all()
         
         documents = []
         for package in packages:
@@ -449,6 +530,7 @@ class SearchService:
             if package.exclusion_items:
                 exclusion_items_text = ", ".join([exc.name for exc in package.exclusion_items])
             
+            country_payload = self._build_country_payload(package.country)
             documents.append({
                 'id': package.id,
                 'name': package.name,
@@ -456,6 +538,10 @@ class SearchService:
                 'description': package.description,
                 'slug': package.slug,
                 'country_id': package.country_id,
+                'country_name': package.country.name if package.country else None,
+                'country_slug': package.country.slug if package.country else None,
+                'country_image_id': package.country.image_id if package.country else None,
+                'country': country_payload,
                 'duration_days': package.duration_days,
                 'price': package.price,
                 'image_id': package.image_id,
@@ -481,7 +567,9 @@ class SearchService:
         Returns:
             bool: True if group trips were indexed successfully, False otherwise
         """
-        group_trips = db.query(GroupTrip).filter(GroupTrip.is_active == True).all()
+        group_trips = db.query(GroupTrip).filter(GroupTrip.is_active == True).options(
+            joinedload(GroupTrip.country),
+        ).all()
         
         documents = []
         for group_trip in group_trips:
@@ -494,6 +582,7 @@ class SearchService:
             if group_trip.exclusion_items:
                 exclusion_items_text = ", ".join([exc.name for exc in group_trip.exclusion_items])
             
+            country_payload = self._build_country_payload(group_trip.country)
             documents.append({
                 'id': group_trip.id,
                 'name': group_trip.name,
@@ -501,6 +590,10 @@ class SearchService:
                 'description': group_trip.description,
                 'slug': group_trip.slug,
                 'country_id': group_trip.country_id,
+                'country_name': group_trip.country.name if group_trip.country else None,
+                'country_slug': group_trip.country.slug if group_trip.country else None,
+                'country_image_id': group_trip.country.image_id if group_trip.country else None,
+                'country': country_payload,
                 'duration_days': group_trip.duration_days,
                 'price': group_trip.price,
                 'image_id': group_trip.image_id,
@@ -912,6 +1005,10 @@ class SearchService:
             'description': package.description,
             'slug': package.slug,
             'country_id': package.country_id,
+            'country_name': package.country.name if getattr(package, 'country', None) else None,
+            'country_slug': package.country.slug if getattr(package, 'country', None) else None,
+            'country_image_id': package.country.image_id if getattr(package, 'country', None) else None,
+            'country': self._build_country_payload(getattr(package, 'country', None)),
             'duration_days': package.duration_days,
             'price': package.price,
             'image_id': package.image_id,
@@ -953,6 +1050,10 @@ class SearchService:
             'description': group_trip.description,
             'slug': group_trip.slug,
             'country_id': group_trip.country_id,
+            'country_name': group_trip.country.name if getattr(group_trip, 'country', None) else None,
+            'country_slug': group_trip.country.slug if getattr(group_trip, 'country', None) else None,
+            'country_image_id': group_trip.country.image_id if getattr(group_trip, 'country', None) else None,
+            'country': self._build_country_payload(getattr(group_trip, 'country', None)),
             'duration_days': group_trip.duration_days,
             'price': group_trip.price,
             'image_id': group_trip.image_id,

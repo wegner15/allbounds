@@ -103,7 +103,7 @@ const TrendingAttractions: React.FC = () => {
                 className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 group block flex-shrink-0 w-80"
               >
                 <img
-                  src={getImageUrlWithFallback(attraction.cover_image || attraction.image_id, IMAGE_VARIANTS.MEDIUM, 'https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&w=600&q=80')}
+                  src={getImageUrlWithFallback(attraction.cover_image || attraction.image_id, IMAGE_VARIANTS.MEDIUM, '/home-heros/hero1.jpeg')}
                   alt={attraction.name}
                   className="w-full h-40 object-cover"
                 />

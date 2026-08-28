@@ -72,19 +72,15 @@ const BestTimeToVisitSection: React.FC<BestTimeToVisitSectionProps> = React.memo
             <div
               key={month}
               className={`
-                relative rounded-lg py-2 px-1 text-center transition-all duration-200 cursor-default
+                relative rounded-lg py-2.5 px-1 text-center transition-all duration-200 cursor-default
                 ${getRatingColor(rating)}
-                group flex flex-col justify-center items-center h-12
+                group flex justify-center items-center h-10 shadow-xs hover:shadow-sm
               `}
+              title={`${month}: ${rating}`}
             >
               {/* Month name */}
-              <div className="text-xs font-bold leading-tight">
+              <div className="text-xs sm:text-sm font-semibold tracking-wide">
                 {month.substring(0, 3)}
-              </div>
-
-              {/* Rating label */}
-              <div className="text-[10px] font-medium opacity-90 leading-tight">
-                {rating === 'unknown' ? 'N/A' : rating.substring(0, 4)}
               </div>
 
               {/* Tooltip for month-specific notes */}

@@ -206,12 +206,12 @@ const HolidayTypesListPage: React.FC = () => {
                                         alt={holidayType.name}
                                         className="h-10 w-10"
                                         objectFit="cover"
-                                        placeholder="https://source.unsplash.com/random/100x100/?holiday"
+                                        placeholder="/home-heros/hero3.webp"
                                       />
                                     ) : (
                                       <img
                                         className="h-10 w-10 object-cover"
-                                        src="https://source.unsplash.com/random/100x100/?holiday"
+                                        src="/home-heros/hero3.webp"
                                         alt={holidayType.name}
                                       />
                                     )}

@@ -105,6 +105,8 @@ class ItineraryActivityDetail(BaseModel):
 class ActivitySummary(BaseModel):
     id: int
     name: str
+    slug: Optional[str] = None
+    summary: Optional[str] = None
     description: Optional[str] = None
     duration_minutes: Optional[int] = None
     
@@ -179,6 +181,21 @@ class PriceChartDetail(BaseModel):
         from_attributes = True
 
 
+class BlogPostSummary(BaseModel):
+    id: int
+    title: str
+    slug: str
+    summary: Optional[str] = None
+    cover_image_id: Optional[str] = None
+    cover_image_url: Optional[str] = None
+    published_at: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+    is_published: bool = True
+    
+    class Config:
+        from_attributes = True
+
+
 # Main comprehensive package detail response
 class PackageDetailResponse(BaseModel):
     """
@@ -210,6 +227,7 @@ class PackageDetailResponse(BaseModel):
     attractions: List[AttractionSummary] = []
     reviews: List[ReviewDetail] = []
     price_charts: List[PriceChartDetail] = []
+    blog_posts: List[BlogPostSummary] = []
     
     class Config:
         from_attributes = True

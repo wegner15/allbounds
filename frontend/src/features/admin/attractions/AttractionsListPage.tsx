@@ -181,7 +181,7 @@ const AttractionsListPage: React.FC = () => {
                             src={getImageUrlWithFallback(
                               attraction.image_id,
                               IMAGE_VARIANTS.THUMBNAIL,
-                              attraction.cover_image || 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=100&q=80'
+                              attraction.cover_image || '/home-heros/hero1.jpeg'
                             )}
                             alt={attraction.name}
                           />

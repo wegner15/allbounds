@@ -25,13 +25,13 @@ const Step5Accommodation: React.FC<Step5Props> = ({ state, updateState, onNext }
   const getStyleImage = (name: string) => {
     const lowerName = name.toLowerCase();
     if (lowerName.includes('classic') || lowerName.includes('budget') || lowerName.includes('camp')) {
-      return 'https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&q=80&w=800'; // Safari Camp / Classic
+      return '/home-heros/hero5.jpeg';
     }
     if (lowerName.includes('luxury') || lowerName.includes('premium')) {
-      return 'https://images.unsplash.com/photo-1542314831-c6a4d1409e1c?auto=format&fit=crop&q=80&w=800'; // Luxury Safari Lodge
+      return '/home-heros/hero4.jpeg';
     }
     // Mid-range / default
-    return 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&q=80&w=800'; // Mid-range resort
+    return '/home-heros/hero4.jpeg';
   };
 
   const getStyleDescription = (name: string) => {

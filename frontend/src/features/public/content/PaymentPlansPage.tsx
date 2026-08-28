@@ -15,7 +15,7 @@ const PaymentPlansPage: React.FC = () => {
             <div className="relative h-[400px] flex items-center justify-center text-center text-white">
                 <div className="absolute inset-0 bg-blue-600 overflow-hidden">
                     <img
-                        src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2000&q=80"
+                        src="/home-heros/hero2.webp"
                         alt="Tropical Beach"
                         className="w-full h-full object-cover opacity-60"
                     />

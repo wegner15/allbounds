@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import OptimizedImage from '../../../components/ui/OptimizedImage';
 import { getResponsiveImageSizes } from '../../../utils/imageUtils';
 import type { CountryWithDetails } from '../../../lib/types/api';
-import DestinationBookingModal from '../../../components/forms/DestinationBookingModal';
 
 interface DestinationHeroSectionProps {
   country: CountryWithDetails;
 }
 
 const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo(({ country }) => {
-  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const displaySummary = country.summary
+    ? country.summary.replace(/There is no question too small\.?\s*/gi, '').trim() || 'Start planning your dream trip by talking to our Destination Specialists.'
+    : 'Start planning your dream trip by talking to our Destination Specialists.';
 
   return (
     <section
@@ -66,44 +67,22 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
 
           {/* Summary/Description */}
           <div className="mb-8 md:mb-10">
-            {country.summary ? (
-              <p className="text-lg md:text-xl text-white max-w-3xl mx-auto leading-relaxed drop-shadow-md">
-                {country.summary}
-              </p>
-            ) : (
-              <p className="text-lg md:text-xl text-white max-w-3xl mx-auto leading-relaxed drop-shadow-md">
-                There is no question too small. Start planning your dream trip by talking to our Destination Specialists.
-              </p>
-            )}
+            <p className="text-lg md:text-xl text-white max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+              {displaySummary}
+            </p>
           </div>
 
-          {/* Call to Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
-            <button
-              type="button"
-              onClick={() => setBookingModalOpen(true)}
-              className="px-8 py-3.5 bg-primary hover:bg-primary-dark text-white font-bold tracking-wider transition-all duration-300 uppercase text-sm md:text-base rounded-md shadow-xl hover:scale-105 active:scale-95 cursor-pointer min-w-[180px]"
-            >
-              Book {country.name}
-            </button>
-
+          {/* Call to Action Button */}
+          <div className="flex items-center justify-center">
             <Link
               to={`/destinations/${country.slug}/book`}
-              className="px-8 py-3.5 border-2 border-white text-white font-semibold tracking-wider hover:bg-white hover:text-black transition-all duration-300 uppercase text-sm md:text-base rounded-md min-w-[180px]"
+              className="px-8 py-3.5 bg-white hover:bg-gray-100 text-gray-900 font-bold tracking-wider transition-all duration-300 uppercase text-sm md:text-base rounded-md shadow-xl hover:scale-105 active:scale-95 cursor-pointer min-w-[200px] inline-block"
             >
-              Inquire Destination
+              Start Planning
             </Link>
           </div>
         </div>
       </div>
-
-      {/* Booking Modal */}
-      <DestinationBookingModal
-        isOpen={bookingModalOpen}
-        onClose={() => setBookingModalOpen(false)}
-        defaultDestination={country.name}
-        countryId={country.id}
-      />
     </section>
   );
 });

@@ -19,6 +19,7 @@ import SimilarGroupTrips from '../../components/recommendations/SimilarGroupTrip
 
 
 // Utils
+import { Clock, DollarSign, MapPin } from 'lucide-react';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils';
 import { format } from 'date-fns';
 
@@ -68,8 +69,6 @@ const GroupTripDetailPage: React.FC = () => {
         id: -1, // Use negative ID to distinguish from gallery images
         filename: 'cover-image',
         alt_text: `${tripDetail.name} - Cover Image`,
-        title: tripDetail.name,
-        caption: 'Cover Image',
         file_path: getImageUrlWithFallback(tripDetail.cover_image, IMAGE_VARIANTS.LARGE),
       });
     }
@@ -197,51 +196,50 @@ const GroupTripDetailPage: React.FC = () => {
 
       {/* Hero Section with Image Carousel */}
       {carouselImages.length > 0 && (
-        <div className="relative h-96 md:h-[500px] lg:h-[600px] overflow-hidden">
+        <div className="relative h-[280px] sm:h-[340px] md:h-[380px] lg:h-[400px] overflow-hidden">
           <ImageCarousel
             images={carouselImages}
             autoPlay={true}
             showThumbnails={false}
+            showInfoOverlay={false}
             className="h-full"
           />
-          <div className="absolute inset-0 bg-black/30"></div>
-          <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+          {/* Gradient Overlay for high visibility */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-black/15 pointer-events-none" />
+          
+          <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 lg:p-7 text-white z-10">
             <div className="container mx-auto">
               <Breadcrumb
                 items={[
                   { label: 'Group Trips', path: '/group-trips' },
-                  { label: tripDetail.country.name, path: `/countries/${tripDetail.country.slug}` },
+                  { label: tripDetail.country.name, path: `/destinations/${tripDetail.country.slug}` },
                   { label: tripDetail.name },
                 ]}
-                className="mb-4 text-white"
+                variant="dark"
+                className="mb-2 sm:mb-3"
               />
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-playfair font-bold mb-4 text-white drop-shadow-lg">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-playfair font-bold mb-3 text-white drop-shadow-md tracking-tight">
                 {tripDetail.name}
               </h1>
-              <div className="flex flex-wrap items-center gap-4 text-white/90">
+              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-white">
                 {tripDetail.duration_days && (
-                  <span className="flex items-center">
-                    <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {tripDetail.duration_days} days
-                  </span>
+                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs sm:text-sm font-semibold border border-white/25 shadow-xs">
+                    <Clock className="w-3.5 h-3.5 mr-1.5 text-teal-300" />
+                    <span>{tripDetail.duration_days} days</span>
+                  </div>
                 )}
                 {tripDetail.price && (
-                  <span className="flex items-center">
-                    <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                    </svg>
-                    From ${tripDetail.price} per person
-                  </span>
+                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs sm:text-sm font-semibold border border-white/25 shadow-xs">
+                    <DollarSign className="w-3.5 h-3.5 mr-1 text-emerald-300" />
+                    <span>From ${tripDetail.price} per person</span>
+                  </div>
                 )}
-                <span className="flex items-center">
-                  <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  {tripDetail.country.name}
-                </span>
+                {tripDetail.country && (
+                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs sm:text-sm font-semibold border border-white/25 shadow-xs">
+                    <MapPin className="w-3.5 h-3.5 mr-1.5 text-amber-300" />
+                    <span>{tripDetail.country.name}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

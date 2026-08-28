@@ -14,6 +14,7 @@ interface ImageCarouselProps {
   }>;
   className?: string;
   showThumbnails?: boolean;
+  showInfoOverlay?: boolean;
   autoPlay?: boolean;
   autoPlayInterval?: number;
 }
@@ -22,6 +23,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
   images,
   className = "",
   showThumbnails = true,
+  showInfoOverlay = false,
   autoPlay = false,
   autoPlayInterval = 5000,
 }) => {
@@ -94,7 +96,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
           </div>
           
           {/* Image Info Overlay */}
-          {(currentImage.title || currentImage.caption) && (
+          {showInfoOverlay && (currentImage.title || currentImage.caption) && (
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
               {currentImage.title && (
                 <h3 className="text-white text-lg font-semibold mb-1">

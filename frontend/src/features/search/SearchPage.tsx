@@ -23,7 +23,10 @@ const INDEX_CONFIG: Record<string, { label: string; route: (hit: MeilisearchHit)
   },
   packages: {
     label: 'Packages',
-    route: (hit) => `/packages/${hit.country?.slug || 'unknown'}/${hit.slug}`
+    route: (hit) => {
+      const countrySlug = hit.country_slug || hit.country?.slug || hit.countries?.[0]?.slug;
+      return countrySlug ? `/packages/${countrySlug}/${hit.slug}` : `/packages/${hit.slug}`;
+    }
   },
   group_trips: {
     label: 'Group Trips',
@@ -31,7 +34,10 @@ const INDEX_CONFIG: Record<string, { label: string; route: (hit: MeilisearchHit)
   },
   activities: {
     label: 'Activities',
-    route: (hit) => `/activities/${hit.country_slug || hit.countries?.[0]?.slug || hit.slug}`
+    route: (hit) => {
+      const countrySlug = hit.country_slug || hit.country?.slug || hit.countries?.[0]?.slug;
+      return countrySlug ? `/activities/${countrySlug}/${hit.slug}` : `/activities/${hit.slug}`;
+    }
   },
   attractions: {
     label: 'Attractions',
@@ -42,7 +48,10 @@ const INDEX_CONFIG: Record<string, { label: string; route: (hit: MeilisearchHit)
   },
   accommodations: {
     label: 'Accommodations',
-    route: (hit) => `/hotels/${hit.country?.slug || 'unknown'}/${hit.slug}`
+    route: (hit) => {
+      const countrySlug = hit.country_slug || hit.country?.slug || hit.countries?.[0]?.slug;
+      return countrySlug ? `/hotels/${countrySlug}/${hit.slug}` : `/hotels/${hit.slug}`;
+    }
   },
   blog_posts: {
     label: 'Blog Posts',
@@ -50,15 +59,15 @@ const INDEX_CONFIG: Record<string, { label: string; route: (hit: MeilisearchHit)
   },
   hotel_types: {
     label: 'Hotel Types',
-    route: (hit) => `/hotels/${hit.slug}`
+    route: () => `/hotels`
   },
   inclusions: {
     label: 'Inclusions',
-    route: (hit) => `#`
+    route: () => `#`
   },
   exclusions: {
     label: 'Exclusions',
-    route: (hit) => `#`
+    route: () => `#`
   },
 };
 

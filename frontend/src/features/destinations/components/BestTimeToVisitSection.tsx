@@ -1,4 +1,5 @@
 import React from 'react';
+import { Lightbulb } from 'lucide-react';
 import type { CountryVisitInfo } from '../../../lib/types/api';
 
 interface BestTimeToVisitSectionProps {
@@ -137,14 +138,19 @@ const BestTimeToVisitSection: React.FC<BestTimeToVisitSectionProps> = React.memo
         </div>
       </div>
 
-      {/* General Notes */}
+      {/* General Notes / Travel Tips */}
       {visitInfo.general_notes && (
-        <div className="border-t border-gray-200 pt-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Travel Tips
-          </h3>
+        <div className="mt-6 p-5 sm:p-6 bg-gradient-to-br from-[#f0f6f4] via-[#f7faf9] to-[#edf4f1] rounded-xl border border-[#d8e7e1] shadow-xs">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="w-8 h-8 rounded-lg bg-teal-600/10 flex items-center justify-center text-teal-700 flex-shrink-0">
+              <Lightbulb className="w-4 h-4" />
+            </div>
+            <h3 className="text-base sm:text-lg font-bold font-playfair text-charcoal">
+              Travel Tips
+            </h3>
+          </div>
           <div
-            className="text-gray-700 leading-relaxed prose prose-sm max-w-none"
+            className="text-gray-700 leading-relaxed prose prose-sm max-w-none prose-p:my-1.5 prose-ul:my-1.5 prose-li:my-0.5 text-sm sm:text-base"
             dangerouslySetInnerHTML={{ __html: visitInfo.general_notes }}
           />
         </div>

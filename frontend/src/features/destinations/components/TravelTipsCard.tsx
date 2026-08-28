@@ -36,8 +36,8 @@ const TravelTipsCard: React.FC<TravelTipsCardProps> = React.memo(({ countryName 
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+    <div className="bg-gradient-to-br from-[#f0f6f4] via-[#f7faf9] to-[#edf4f1] rounded-2xl border border-[#d8e7e1] shadow-xs p-6">
+      <h3 className="text-lg font-bold font-playfair text-charcoal mb-4">
         Travel Tips for {countryName}
       </h3>
       
@@ -45,7 +45,7 @@ const TravelTipsCard: React.FC<TravelTipsCardProps> = React.memo(({ countryName 
         {defaultTips.map((tip, index) => (
           <div
             key={index}
-            className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+            className="flex items-start gap-3 p-3 bg-white/70 backdrop-blur-xs rounded-xl border border-white/80 shadow-2xs hover:bg-white transition-colors duration-200"
           >
             <div className="flex-shrink-0 mt-0.5">
               {tip.icon}
@@ -57,7 +57,7 @@ const TravelTipsCard: React.FC<TravelTipsCardProps> = React.memo(({ countryName 
         ))}
       </div>
 
-      <div className="mt-6 pt-6 border-t border-gray-200">
+      <div className="mt-6 pt-5 border-t border-[#d8e7e1]">
         <p className="text-xs text-gray-500 text-center">
           Always check official government travel advisories before your trip
         </p>

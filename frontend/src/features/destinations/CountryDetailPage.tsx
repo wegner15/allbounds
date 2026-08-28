@@ -466,23 +466,23 @@ const CountryDetailPage: React.FC = () => {
               )}
 
               {/* Travel Tips */}
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-charcoal mb-4">Travel Tips</h3>
-                <div className="space-y-3 text-sm text-gray-600">
-                  <div className="flex items-start space-x-2">
-                    <span className="text-teal">💡</span>
+              <div className="bg-gradient-to-br from-[#f0f6f4] via-[#f7faf9] to-[#edf4f1] rounded-xl border border-[#d8e7e1] shadow-xs p-6">
+                <h3 className="text-lg font-bold font-playfair text-charcoal mb-4">Travel Tips</h3>
+                <div className="space-y-3 text-sm text-gray-700">
+                  <div className="flex items-start space-x-2.5 p-2.5 bg-white/70 backdrop-blur-xs rounded-lg border border-white/80">
+                    <span className="text-base">💡</span>
                     <p>Best time to visit varies by region - contact us for seasonal advice</p>
                   </div>
-                  <div className="flex items-start space-x-2">
-                    <span className="text-teal">🛂</span>
+                  <div className="flex items-start space-x-2.5 p-2.5 bg-white/70 backdrop-blur-xs rounded-lg border border-white/80">
+                    <span className="text-base">🛂</span>
                     <p>Check visa requirements before traveling</p>
                   </div>
-                  <div className="flex items-start space-x-2">
-                    <span className="text-teal">💉</span>
+                  <div className="flex items-start space-x-2.5 p-2.5 bg-white/70 backdrop-blur-xs rounded-lg border border-white/80">
+                    <span className="text-base">💉</span>
                     <p>Consult your doctor about recommended vaccinations</p>
                   </div>
-                  <div className="flex items-start space-x-2">
-                    <span className="text-teal">📱</span>
+                  <div className="flex items-start space-x-2.5 p-2.5 bg-white/70 backdrop-blur-xs rounded-lg border border-white/80">
+                    <span className="text-base">📱</span>
                     <p>Consider local SIM cards or international roaming plans</p>
                   </div>
                 </div>

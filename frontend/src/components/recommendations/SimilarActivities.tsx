@@ -49,6 +49,24 @@ const SimilarActivities: React.FC<SimilarActivitiesProps> = ({
     return null;
   }
 
+  const getActivityImageUrl = (act: ActivityResponse): string => {
+    const rawImage =
+      act.cover_image?.storage_key ||
+      act.cover_image?.url ||
+      act.cover_image?.file_path ||
+      (typeof act.cover_image === 'string' ? act.cover_image : null) ||
+      act.media_assets?.[0]?.storage_key ||
+      act.media_assets?.[0]?.url ||
+      act.media_assets?.[0]?.file_path ||
+      (act as any).image_id ||
+      (act as any).image_url;
+
+    if (rawImage) {
+      return getImageUrlWithFallback(rawImage, IMAGE_VARIANTS.MEDIUM, '/home-heros/hero3.webp');
+    }
+    return '/home-heros/hero3.webp';
+  };
+
   return (
     <div className="py-12 border-t border-gray-200 mt-12">
       <div className="flex items-center justify-between mb-6">
@@ -72,6 +90,7 @@ const SimilarActivities: React.FC<SimilarActivitiesProps> = ({
         {similarActivities.map((act: ActivityResponse) => {
           const primaryCountry = act.countries?.[0];
           const countrySlug = primaryCountry?.slug || 'explore';
+          const imageUrl = getActivityImageUrl(act);
 
           return (
             <Link
@@ -81,13 +100,10 @@ const SimilarActivities: React.FC<SimilarActivitiesProps> = ({
             >
               <div className="relative h-48 overflow-hidden bg-gray-100">
                 <img
-                  src={
-                    act.image_id
-                      ? getImageUrlWithFallback(act.image_id, IMAGE_VARIANTS.MEDIUM)
-                      : act.image_url || '/home-heros/hero3.webp'
-                  }
+                  src={imageUrl}
                   alt={act.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 {primaryCountry && (

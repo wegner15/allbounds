@@ -48,6 +48,24 @@ const SimilarAttractions: React.FC<SimilarAttractionsProps> = ({
     return null;
   }
 
+  const getAttractionImageUrl = (att: Attraction): string => {
+    const rawImage =
+      att.image_id ||
+      (typeof att.cover_image === 'string' ? att.cover_image : null) ||
+      (att.cover_image as any)?.storage_key ||
+      (att.cover_image as any)?.url ||
+      (att.cover_image as any)?.file_path ||
+      (att as any).media_assets?.[0]?.storage_key ||
+      (att as any).media_assets?.[0]?.url ||
+      (att as any).media_assets?.[0]?.file_path ||
+      (att as any).image_url;
+
+    if (rawImage) {
+      return getImageUrlWithFallback(rawImage, IMAGE_VARIANTS.MEDIUM, '/home-heros/hero1.jpeg');
+    }
+    return '/home-heros/hero1.jpeg';
+  };
+
   return (
     <div className="py-12 border-t border-gray-200 mt-12">
       <div className="flex items-center justify-between mb-6">
@@ -70,6 +88,7 @@ const SimilarAttractions: React.FC<SimilarAttractionsProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {similarAttractions.map((att: Attraction) => {
           const countrySlug = att.country?.slug || 'explore';
+          const imageUrl = getAttractionImageUrl(att);
 
           return (
             <Link
@@ -79,13 +98,10 @@ const SimilarAttractions: React.FC<SimilarAttractionsProps> = ({
             >
               <div className="relative h-48 overflow-hidden bg-gray-100">
                 <img
-                  src={
-                    att.image_id
-                      ? getImageUrlWithFallback(att.image_id, IMAGE_VARIANTS.MEDIUM)
-                      : att.cover_image || (att as any).image_url || '/home-heros/hero1.jpeg'
-                  }
+                  src={imageUrl}
                   alt={att.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 {att.country && (

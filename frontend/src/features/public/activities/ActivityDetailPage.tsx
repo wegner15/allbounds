@@ -246,23 +246,23 @@ const ActivityDetailPage: React.FC = () => {
 
             {/* Hero Section - Header & Gallery */}
             <div className="bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="mb-8">
-                        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-playfair">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-6">
+                    <div className="mb-5">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2.5 font-playfair tracking-tight">
                             {activity.name}
                         </h1>
 
-                        <div className="flex flex-wrap items-center gap-6 text-gray-600">
+                        <div className="flex flex-wrap items-center gap-5 text-gray-600 text-sm">
                             {activity.countries && activity.countries.length > 0 && (
                                 <div className="flex items-center">
-                                    <MapPin className="h-5 w-5 mr-2 text-teal-600" />
+                                    <MapPin className="h-4 w-4 mr-1.5 text-teal-600" />
                                     <span>{activity.countries.map(c => c.name).join(', ')}</span>
                                 </div>
                             )}
 
                             {(activity as any).duration_minutes && (
                                 <div className="flex items-center">
-                                    <Clock className="h-5 w-5 mr-2 text-teal-600" />
+                                    <Clock className="h-4 w-4 mr-1.5 text-teal-600" />
                                     <span>
                                         {Math.floor((activity as any).duration_minutes / 60) > 0 ? `${Math.floor((activity as any).duration_minutes / 60)}h ` : ''}
                                         {(activity as any).duration_minutes % 60 > 0 ? `${(activity as any).duration_minutes % 60}m` : ''}
@@ -274,7 +274,7 @@ const ActivityDetailPage: React.FC = () => {
                             {/* Calculate "From Price" based on available packages */}
                             {trips && trips.packages && trips.packages.length > 0 && (
                                 <div className="flex items-center">
-                                    <DollarSign className="h-5 w-5 mr-2 text-teal-600" />
+                                    <DollarSign className="h-4 w-4 mr-1 text-teal-600" />
                                     <span className="font-semibold text-gray-900">
                                         From ${Math.min(...trips.packages.map(p => p.price))}
                                     </span>
@@ -284,7 +284,7 @@ const ActivityDetailPage: React.FC = () => {
                     </div>
 
                     {/* Grid Gallery */}
-                    <GridGallery images={allImages} className="mb-8" />
+                    <GridGallery images={allImages} className="mb-4" />
                 </div>
             </div>
 

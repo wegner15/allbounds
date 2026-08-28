@@ -54,7 +54,7 @@ const GridGallery: React.FC<GridGalleryProps> = ({ images, className = "" }) => 
     return (
         <div className={`grid-gallery relative ${className}`}>
             {/* 5-Photo Hero Grid Container */}
-            <div className="relative overflow-hidden rounded-2xl h-[320px] sm:h-[400px] md:h-[460px] lg:h-[500px]">
+            <div className="relative overflow-hidden rounded-2xl h-[240px] sm:h-[290px] md:h-[340px] lg:h-[380px]">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-2.5 sm:gap-3 h-full">
                     {/* Primary Featured Image (Left - 50% width on desktop) */}
                     <div

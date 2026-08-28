@@ -134,28 +134,28 @@ const AttractionDetailPage: React.FC = () => {
 
       {/* Hero Section - Header & Gallery */}
       <div className="bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-playfair">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-6">
+          <div className="mb-5">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2.5 font-playfair tracking-tight">
               {attraction?.name}
             </h1>
 
-            <div className="flex flex-wrap items-center gap-6 text-gray-600">
+            <div className="flex flex-wrap items-center gap-5 text-gray-600 text-sm">
               <div className="flex items-center">
-                <MapPin className="h-5 w-5 mr-2 text-teal-600" />
+                <MapPin className="h-4 w-4 mr-1.5 text-teal-600" />
                 <span>{attraction?.city && `${attraction.city}, `}{attraction?.country?.name}</span>
               </div>
 
               {attraction?.duration_minutes && (
                 <div className="flex items-center">
-                  <Clock className="h-5 w-5 mr-2 text-teal-600" />
+                  <Clock className="h-4 w-4 mr-1.5 text-teal-600" />
                   <span>{Math.floor(attraction.duration_minutes / 60)}h {attraction.duration_minutes % 60}m visit</span>
                 </div>
               )}
 
               {attraction?.price !== undefined && (
                 <div className="flex items-center">
-                  <DollarSign className="h-5 w-5 mr-2 text-teal-600" />
+                  <DollarSign className="h-4 w-4 mr-1 text-teal-600" />
                   <span className="font-semibold text-gray-900">From ${attraction.price}</span>
                 </div>
               )}
@@ -163,7 +163,7 @@ const AttractionDetailPage: React.FC = () => {
           </div>
 
           {/* Grid Gallery */}
-          <GridGallery images={getAllImages} className="mb-8" />
+          <GridGallery images={getAllImages} className="mb-4" />
         </div>
       </div>
 

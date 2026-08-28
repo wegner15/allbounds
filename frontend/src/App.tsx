@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { createBrowserRouter, RouterProvider, Outlet, useSearchParams } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet, useSearchParams, ScrollRestoration } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/api';
@@ -11,6 +11,7 @@ import SeoHead from './components/seo/SeoHead';
 // Import layout components
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
+import ScrollToTop from './components/layout/ScrollToTop';
 
 // Import feature pages
 import { DestinationBookingPage } from './features/public/planning/DestinationBookingPage';
@@ -273,6 +274,8 @@ const MainLayout = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <ScrollToTop />
+      <ScrollRestoration />
       <Header navigationItems={navigationItems} />
       <main className="flex-grow">
         <Outlet />

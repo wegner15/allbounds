@@ -21,6 +21,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const location = useLocation();
   const { user, handleLogout } = useAuthHook();
+  const mainRef = React.useRef<HTMLElement>(null);
+
+  React.useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTop = 0;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+  }, [location.pathname]);
 
   const navigation: NavItem[] = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: 'chart-bar' },
@@ -463,7 +471,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
         </div>
 
         {/* Page content */}
-        <main className="flex-1 relative overflow-y-auto focus:outline-none">
+        <main ref={mainRef} className="flex-1 relative overflow-y-auto focus:outline-none">
           <div className="py-4">
             <div className="max-w-none px-4 sm:px-6 lg:px-8">
               {children}

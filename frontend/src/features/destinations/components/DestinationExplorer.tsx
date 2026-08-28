@@ -831,45 +831,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 )}
               </div>
 
-              {/* SECTION 1: CATEGORY NAVIGATION TABS */}
-              <div>
-                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2.5">
-                  Category
-                </h4>
-                <div className="space-y-1">
-                  {[
-                    { id: 'all', label: 'Overview' },
-                    { id: 'attractions', label: `Attractions (${rawAttractions.length})` },
-                    { id: 'activities', label: `Activities (${rawActivities.length})` },
-                    { id: 'packages', label: `Packages (${rawPackages.length})` },
-                    { id: 'hotels', label: `Accommodation (${rawHotels.length})` },
-                  ].map((cat) => {
-                    const isSelected = activeTab === cat.id;
-                    return (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        onClick={() => {
-                          if (onTabChange) onTabChange(cat.id);
-                          else {
-                            if (cat.id === 'all') navigate(`/destinations/${destinationSlug}`);
-                            else navigate(`/destinations/${destinationSlug}/${cat.id}`);
-                          }
-                        }}
-                        className={`w-full flex items-center justify-between text-xs px-3 py-2 rounded-lg font-medium transition-all text-left cursor-pointer ${
-                          isSelected
-                            ? 'bg-primary text-white font-bold shadow-2xs'
-                            : 'text-gray-700 hover:bg-gray-100'
-                        }`}
-                      >
-                        <span>{cat.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* SECTION 2: TAG FILTERS FOR ACTIVE CATEGORY (GROUPED BY CATEGORY) */}
+              {/* SECTION 1: TAG FILTERS FOR ACTIVE CATEGORY (GROUPED BY CATEGORY) */}
               {currentCategoryTags.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between pb-1 border-b border-gray-200/80">
@@ -935,7 +897,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 </div>
               )}
 
-              {/* SECTION 3: CATEGORY SPECIFIC ATTRIBUTE FILTERS */}
+              {/* SECTION 2: CATEGORY SPECIFIC ATTRIBUTE FILTERS */}
               {/* Packages Duration Filter */}
               {activeTab === 'packages' && (
                 <div>
@@ -1034,6 +996,44 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* SECTION 3: CATEGORY NAVIGATION TABS */}
+              <div className="pt-4 border-t border-gray-150">
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2.5">
+                  Category
+                </h4>
+                <div className="space-y-1">
+                  {[
+                    { id: 'all', label: 'Overview' },
+                    { id: 'attractions', label: `Attractions (${rawAttractions.length})` },
+                    { id: 'activities', label: `Activities (${rawActivities.length})` },
+                    { id: 'packages', label: `Packages (${rawPackages.length})` },
+                    { id: 'hotels', label: `Accommodation (${rawHotels.length})` },
+                  ].map((cat) => {
+                    const isSelected = activeTab === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => {
+                          if (onTabChange) onTabChange(cat.id);
+                          else {
+                            if (cat.id === 'all') navigate(`/destinations/${destinationSlug}`);
+                            else navigate(`/destinations/${destinationSlug}/${cat.id}`);
+                          }
+                        }}
+                        className={`w-full flex items-center justify-between text-xs px-3 py-2 rounded-lg font-medium transition-all text-left cursor-pointer ${
+                          isSelected
+                            ? 'bg-primary text-white font-bold shadow-2xs'
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        <span>{cat.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </aside>
 
             {/* MAIN RESULTS CONTENT AREA */}

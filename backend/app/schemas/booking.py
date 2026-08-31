@@ -44,6 +44,14 @@ class BookingBase(BaseModel):
     source: str = Field(..., description="How they found us (website, social, referral, etc.)")
     partner_code: Optional[str] = Field(None, description="Partner or referral code applied")
 
+    # Selected Price Chart & Accommodation Options
+    price_chart_id: Optional[int] = Field(None, description="Selected price chart / season ID")
+    selected_hotel_id: Optional[int] = Field(None, description="Selected hotel option ID")
+    selected_hotel_name: Optional[str] = Field(None, description="Selected hotel name")
+    selected_hotel_supplement: Optional[float] = Field(0.0, description="Hotel price supplement per person")
+    selected_room_type: Optional[str] = Field(None, description="Selected room type")
+    calculated_total_price: Optional[float] = Field(None, description="Calculated total price in USD")
+
 
 class BookingCreate(BookingBase):
     travelers: List[BookingTravelerCreate] = Field(default_factory=list, description="List of travelers")

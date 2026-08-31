@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../api';
+import type { PriceChartHotelOption } from '../types/api';
 
 export interface PriceChart {
   id: number;
@@ -13,6 +14,7 @@ export interface PriceChart {
   booking_price?: number;
   notes?: string;
   is_active: boolean;
+  hotel_options?: PriceChartHotelOption[];
   created_at: string;
   updated_at: string;
 }
@@ -28,6 +30,7 @@ export interface PriceChartCreateInput {
   booking_price?: number;
   notes?: string;
   is_active?: boolean;
+  hotel_options?: PriceChartHotelOption[];
 }
 
 export interface PriceChartUpdateInput {
@@ -38,6 +41,7 @@ export interface PriceChartUpdateInput {
   booking_price?: number;
   notes?: string;
   is_active?: boolean;
+  hotel_options?: PriceChartHotelOption[];
 }
 
 

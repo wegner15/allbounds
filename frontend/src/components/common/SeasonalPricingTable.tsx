@@ -1,12 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { format, parseISO } from 'date-fns';
 import {
   FileText,
   Info,
   Sliders,
   X,
-  ArrowRight
+  ArrowRight,
+  Hotel as HotelIcon,
+  Star,
+  Check,
+  Sparkles
 } from 'lucide-react';
+import type { PriceChartHotelOption } from '../../lib/types/api';
 
 export interface SeasonalPricingTableProps {
   priceCharts?: any[];
@@ -16,21 +21,22 @@ export interface SeasonalPricingTableProps {
   subtitle?: string;
   currency?: string;
   depositPercentage?: number | string;
-  onEnquire?: (tierOrChart?: any) => void;
-  onCustomize?: () => void;
+  onEnquire?: (tierOrChart?: any, selectedHotel?: PriceChartHotelOption | null) => void;
+  onCustomize?: (tierOrChart?: any, selectedHotel?: PriceChartHotelOption | null) => void;
 }
 
 interface PricingRowData {
   id: string | number;
   category: string;
   travelPeriod: string;
-  price2Pax: number;
-  price4Pax: number;
-  price6Pax: number;
+  basePrice2Pax: number;
+  basePrice4Pax: number;
+  basePrice6Pax: number;
   deposit: string;
   availability: string;
   notes?: string;
   rawChart?: any;
+  hotelOptions: PriceChartHotelOption[];
 }
 
 export const SeasonalPricingTable: React.FC<SeasonalPricingTableProps> = ({
@@ -38,13 +44,14 @@ export const SeasonalPricingTable: React.FC<SeasonalPricingTableProps> = ({
   basePrice,
   durationDays,
   title = "Seasonal Rates & Pricing",
-  subtitle = "Compare package rates, inclusions and payment options for your selected travel period.",
+  subtitle = "Compare package rates, inclusions, hotel accommodation options, and payment options for your selected travel period.",
   currency = "USD",
   depositPercentage = "25%",
   onEnquire,
   onCustomize
 }) => {
   const [selectedNoteChart, setSelectedNoteChart] = useState<any | null>(null);
+  const [selectedHotelsByChart, setSelectedHotelsByChart] = useState<Record<string | number, PriceChartHotelOption | null>>({});
 
   // Determine current year for fallback dates
   const currentYear = new Date().getFullYear();
@@ -54,8 +61,8 @@ export const SeasonalPricingTable: React.FC<SeasonalPricingTableProps> = ({
     return `$${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   };
 
-  // Build rows from priceCharts or standard 3-tier matrix (Luxury, Mid-Range, Budget)
-  const rows: PricingRowData[] = React.useMemo(() => {
+  // Build rows from priceCharts or fallback matrix
+  const rows: PricingRowData[] = useMemo(() => {
     const activeCharts = (priceCharts || []).filter(c => c.is_active !== false);
 
     if (activeCharts.length > 0) {
@@ -76,22 +83,22 @@ export const SeasonalPricingTable: React.FC<SeasonalPricingTableProps> = ({
           id: chart.id || `chart-${idx}`,
           category: chart.title || 'Standard',
           travelPeriod,
-          price2Pax: p2,
-          price4Pax: p4,
-          price6Pax: p6,
+          basePrice2Pax: p2,
+          basePrice4Pax: p4,
+          basePrice6Pax: p6,
           deposit: depositText,
           availability: chart.availability || 'Available',
           notes: chart.notes,
-          rawChart: chart
+          rawChart: chart,
+          hotelOptions: (chart.hotel_options || []).filter((opt: PriceChartHotelOption) => opt.is_active !== false)
         };
       });
     }
 
-    // Default 3-tier breakdown if no charts provided (matching design spec)
+    // Default 3-tier breakdown if no charts provided
     const midBase = basePrice && basePrice > 0 ? basePrice : 2065;
     const luxuryBase = Math.round(midBase * 1.605);
     const budgetBase = Math.round(midBase * 0.55);
-
     const defaultTravelPeriod = `Jan 01 – Dec 31, ${currentYear}`;
 
     return [
@@ -99,40 +106,72 @@ export const SeasonalPricingTable: React.FC<SeasonalPricingTableProps> = ({
         id: 'tier-luxury',
         category: 'Luxury',
         travelPeriod: defaultTravelPeriod,
-        price2Pax: luxuryBase,
-        price4Pax: Math.round(luxuryBase * 0.864),
-        price6Pax: Math.round(luxuryBase * 0.758),
+        basePrice2Pax: luxuryBase,
+        basePrice4Pax: Math.round(luxuryBase * 0.864),
+        basePrice6Pax: Math.round(luxuryBase * 0.758),
         deposit: typeof depositPercentage === 'number' ? `${depositPercentage}%` : depositPercentage,
         availability: 'Available',
+        hotelOptions: []
       },
       {
         id: 'tier-midrange',
         category: 'Mid-Range',
         travelPeriod: defaultTravelPeriod,
-        price2Pax: midBase,
-        price4Pax: Math.round(midBase * 0.864),
-        price6Pax: Math.round(midBase * 0.748),
+        basePrice2Pax: midBase,
+        basePrice4Pax: Math.round(midBase * 0.864),
+        basePrice6Pax: Math.round(midBase * 0.748),
         deposit: typeof depositPercentage === 'number' ? `${depositPercentage}%` : depositPercentage,
         availability: 'Available',
+        hotelOptions: []
       },
       {
         id: 'tier-budget',
         category: 'Budget',
         travelPeriod: defaultTravelPeriod,
-        price2Pax: budgetBase,
-        price4Pax: Math.round(budgetBase * 0.867),
-        price6Pax: Math.round(budgetBase * 0.762),
+        basePrice2Pax: budgetBase,
+        basePrice4Pax: Math.round(budgetBase * 0.867),
+        basePrice6Pax: Math.round(budgetBase * 0.762),
         deposit: typeof depositPercentage === 'number' ? `${depositPercentage}%` : depositPercentage,
         availability: 'Available',
+        hotelOptions: []
       }
     ];
   }, [priceCharts, basePrice, currentYear, depositPercentage]);
 
+  // Helper to get active selected hotel for a row
+  const getSelectedHotelForRow = (row: PricingRowData): PriceChartHotelOption | null => {
+    if (selectedHotelsByChart[row.id] !== undefined) {
+      return selectedHotelsByChart[row.id];
+    }
+    if (row.hotelOptions && row.hotelOptions.length > 0) {
+      const defaultOpt = row.hotelOptions.find(opt => opt.is_default) || row.hotelOptions[0];
+      return defaultOpt;
+    }
+    return null;
+  };
+
+  const handleSelectHotel = (rowId: string | number, opt: PriceChartHotelOption | null) => {
+    setSelectedHotelsByChart(prev => ({
+      ...prev,
+      [rowId]: opt
+    }));
+  };
+
   const handleEnquire = (row: PricingRowData) => {
+    const selectedHotel = getSelectedHotelForRow(row);
+    const supplement = selectedHotel?.price_supplement || 0;
+    const finalPayload = {
+      ...(row.rawChart || row),
+      selectedHotel,
+      calculated_price: row.basePrice2Pax + supplement,
+      price: row.basePrice2Pax + supplement,
+      price_chart_id: row.rawChart?.id
+    };
+
     if (onEnquire) {
-      onEnquire(row.rawChart || row);
+      onEnquire(finalPayload, selectedHotel);
     } else if (onCustomize) {
-      onCustomize();
+      onCustomize(finalPayload, selectedHotel);
     }
   };
 
@@ -164,124 +203,170 @@ export const SeasonalPricingTable: React.FC<SeasonalPricingTableProps> = ({
         </div>
       </div>
 
-      {/* Main Pricing Table Container */}
-      <div className="overflow-x-auto rounded-xl border border-gray-300 shadow-xs">
-        <table className="w-full text-left border-collapse min-w-[700px]">
-          <thead>
-            {/* Top Header Row */}
-            <tr className="bg-gray-50 border-b border-gray-300 text-xs font-bold text-gray-800 tracking-wider">
-              <th scope="col" rowSpan={2} className="py-3 px-4 border-r border-gray-300 uppercase text-center md:text-left align-middle font-bold text-gray-900 bg-gray-100/70">
-                PACKAGE<br />CATEGORY
-              </th>
-              <th scope="col" rowSpan={2} className="py-3 px-4 border-r border-gray-300 uppercase text-center align-middle font-bold text-gray-900 bg-gray-100/70">
-                TRAVEL<br />PERIOD
-              </th>
-              <th scope="col" colSpan={3} className="py-2.5 px-4 border-r border-gray-300 uppercase text-center font-bold text-gray-900 bg-gray-100/90">
-                PRICE FROM ({currency} PER PERSON)
-              </th>
-              <th scope="col" rowSpan={2} className="py-3 px-4 border-r border-gray-300 uppercase text-center align-middle font-bold text-gray-900 bg-gray-100/70">
-                BOOKING<br />DEPOSIT
-              </th>
-              <th scope="col" rowSpan={2} className="py-3 px-4 border-r border-gray-300 uppercase text-center align-middle font-bold text-gray-900 bg-gray-100/70">
-                AVAILABILITY
-              </th>
-              <th scope="col" rowSpan={2} className="py-3 px-4 uppercase text-center align-middle font-bold text-gray-900 bg-gray-100/70">
-                ACTION
-              </th>
-            </tr>
+      {/* Main Pricing Rows */}
+      <div className="space-y-6">
+        {rows.map((row) => {
+          const selectedHotel = getSelectedHotelForRow(row);
+          const supplement = selectedHotel?.price_supplement || 0;
+          const p2 = row.basePrice2Pax + supplement;
+          const p4 = row.basePrice4Pax + supplement;
+          const p6 = row.basePrice6Pax + supplement;
 
-            {/* Sub Header for PAX Tiers */}
-            <tr className="bg-gray-50/90 border-b border-gray-300 text-xs font-bold text-gray-800 tracking-wider">
-              <th scope="col" className="py-2 px-3 border-r border-gray-300 text-center bg-gray-50 font-bold">
-                2 PAX
-              </th>
-              <th scope="col" className="py-2 px-3 border-r border-gray-300 text-center bg-gray-50 font-bold">
-                4 PAX
-              </th>
-              <th scope="col" className="py-2 px-3 border-r border-gray-300 text-center bg-gray-50 font-bold">
-                6 PAX
-              </th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-gray-300 text-sm">
-            {rows.map((row) => (
-              <tr
-                key={row.id}
-                className="hover:bg-teal/5 transition-colors duration-150 group"
-              >
-                {/* Package Category */}
-                <td className="py-4 px-4 border-r border-gray-300 font-bold text-gray-900 whitespace-nowrap">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-base font-serif">{row.category}</span>
+          return (
+            <div
+              key={row.id}
+              className="rounded-xl border border-gray-200 hover:border-teal/50 bg-white transition-all overflow-hidden shadow-xs hover:shadow-sm"
+            >
+              {/* Top Row Header & Prices Table */}
+              <div className="p-4 sm:p-5 bg-gradient-to-r from-gray-50/90 to-white flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-gray-100">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-serif font-bold text-gray-900">{row.category}</span>
                     {row.notes && (
                       <button
                         type="button"
                         onClick={() => setSelectedNoteChart(row.rawChart || row)}
                         className="p-1 text-teal hover:text-teal-dark hover:bg-teal/10 rounded transition-colors"
-                        title="View details & notes"
+                        title="View details & inclusions"
                       >
-                        <FileText className="w-3.5 h-3.5" />
+                        <FileText className="w-4 h-4" />
                       </button>
                     )}
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold text-emerald-800 bg-emerald-50 rounded-full border border-emerald-200">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      {row.availability}
+                    </span>
                   </div>
-                </td>
+                  <p className="text-xs text-gray-500 font-medium mt-0.5">
+                    Travel Period: <span className="text-gray-700 font-semibold">{row.travelPeriod}</span>
+                  </p>
+                </div>
 
-                {/* Travel Period */}
-                <td className="py-4 px-4 border-r border-gray-300 text-center text-gray-700 font-medium whitespace-nowrap">
-                  {row.travelPeriod}
-                </td>
+                {/* PAX Price Tiers */}
+                <div className="flex flex-wrap items-center gap-3 sm:gap-6 bg-white px-4 py-2 rounded-lg border border-gray-100 shadow-2xs">
+                  <div className="text-center">
+                    <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">2 PAX</div>
+                    <div className="text-base font-bold text-gray-900">
+                      {formatPrice(p2)} <span className="text-[11px] text-gray-400 font-normal">pp</span>
+                    </div>
+                  </div>
+                  <div className="h-6 w-px bg-gray-200 hidden sm:block" />
+                  <div className="text-center">
+                    <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">4 PAX</div>
+                    <div className="text-base font-bold text-gray-900">
+                      {formatPrice(p4)} <span className="text-[11px] text-gray-400 font-normal">pp</span>
+                    </div>
+                  </div>
+                  <div className="h-6 w-px bg-gray-200 hidden sm:block" />
+                  <div className="text-center">
+                    <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">6 PAX</div>
+                    <div className="text-base font-bold text-gray-900">
+                      {formatPrice(p6)} <span className="text-[11px] text-gray-400 font-normal">pp</span>
+                    </div>
+                  </div>
+                </div>
 
-                {/* 2 PAX Price */}
-                <td className="py-4 px-3 border-r border-gray-300 text-center font-bold text-gray-900 whitespace-nowrap">
-                  <span>{formatPrice(row.price2Pax)}</span>
-                  <span className="text-xs text-gray-500 font-normal ml-1">pp</span>
-                </td>
+                {/* Action */}
+                <button
+                  type="button"
+                  onClick={() => handleEnquire(row)}
+                  className="w-full lg:w-auto inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-teal hover:bg-teal-dark text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-sm hover:shadow transition-all"
+                >
+                  <span>Book / Enquire</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
 
-                {/* 4 PAX Price */}
-                <td className="py-4 px-3 border-r border-gray-300 text-center font-bold text-gray-900 whitespace-nowrap">
-                  <span>{formatPrice(row.price4Pax)}</span>
-                  <span className="text-xs text-gray-500 font-normal ml-1">pp</span>
-                </td>
+              {/* Hotel Accommodation Options Selector */}
+              {row.hotelOptions && row.hotelOptions.length > 0 && (
+                <div className="p-4 bg-gray-50/60">
+                  <div className="flex items-center gap-1.5 mb-2.5">
+                    <HotelIcon className="w-4 h-4 text-teal" />
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">
+                      Select Accommodation Option:
+                    </span>
+                    <span className="text-xs text-gray-400 ml-1">(Prices update in real time)</span>
+                  </div>
 
-                {/* 6 PAX Price */}
-                <td className="py-4 px-3 border-r border-gray-300 text-center font-bold text-gray-900 whitespace-nowrap">
-                  <span>{formatPrice(row.price6Pax)}</span>
-                  <span className="text-xs text-gray-500 font-normal ml-1">pp</span>
-                </td>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {row.hotelOptions.map((opt, oIdx) => {
+                      const isSelected = selectedHotel?.hotel_id === opt.hotel_id;
+                      const hotelObj = opt.hotel;
 
-                {/* Booking Deposit */}
-                <td className="py-4 px-4 border-r border-gray-300 text-center font-semibold text-gray-800 whitespace-nowrap">
-                  {row.deposit}
-                </td>
+                      return (
+                        <div
+                          key={opt.hotel_id || oIdx}
+                          onClick={() => handleSelectHotel(row.id, opt)}
+                          className={`cursor-pointer rounded-xl p-3 border transition-all flex items-center justify-between gap-3 ${
+                            isSelected
+                              ? 'bg-white border-teal ring-2 ring-teal/30 shadow-xs'
+                              : 'bg-white/80 hover:bg-white border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                              {hotelObj?.image_url || hotelObj?.cover_image ? (
+                                <img
+                                  src={hotelObj.image_url || hotelObj.cover_image}
+                                  alt={hotelObj?.name || 'Hotel'}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <HotelIcon className="w-5 h-5 text-gray-400" />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1">
+                                <span className="font-bold text-xs text-gray-900 truncate">
+                                  {hotelObj?.name || `Hotel Option #${opt.hotel_id}`}
+                                </span>
+                                {hotelObj?.stars && (
+                                  <span className="inline-flex items-center text-[10px] font-semibold text-amber-600 flex-shrink-0">
+                                    <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400 mr-0.5" />
+                                    {hotelObj.stars}★
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[11px] text-gray-500 truncate">
+                                {opt.room_type || hotelObj?.city || 'Standard Accommodation'}
+                              </div>
+                            </div>
+                          </div>
 
-                {/* Availability */}
-                <td className="py-4 px-4 border-r border-gray-300 text-center whitespace-nowrap">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-emerald-800 bg-emerald-50 rounded-full border border-emerald-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    {row.availability}
-                  </span>
-                </td>
-
-                {/* Action CTA */}
-                <td className="py-4 px-4 text-center whitespace-nowrap">
-                  <button
-                    type="button"
-                    onClick={() => handleEnquire(row)}
-                    className="inline-flex items-center justify-center text-xs font-bold text-teal-700 hover:text-teal-900 hover:underline uppercase tracking-wider py-1.5 px-3 rounded hover:bg-teal/10 transition-colors cursor-pointer border border-transparent hover:border-teal/20"
-                  >
-                    ENQUIRE
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                          <div className="text-right flex-shrink-0">
+                            {opt.price_supplement > 0 ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                +${opt.price_supplement} pp
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-teal/10 text-teal border border-teal/20">
+                                Included
+                              </span>
+                            )}
+                            <div className="mt-1 flex justify-end">
+                              <div
+                                className={`w-4 h-4 rounded-full flex items-center justify-center border transition-colors ${
+                                  isSelected ? 'bg-teal border-teal text-white' : 'border-gray-300 bg-white'
+                                }`}
+                              >
+                                {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Notice below Table */}
       <p className="mt-4 text-xs md:text-sm text-gray-700 leading-relaxed font-sans">
-        <span className="font-bold text-gray-900">Please Note:</span> Prices are per person and vary based on the number of travelers. Larger groups enjoy lower per-person rates.
+        <span className="font-bold text-gray-900">Please Note:</span> Rates are per person based on group size. Accommodation tier upgrades automatically adjust per person rates and deposit totals.
       </p>
 
       {/* Flexible Payment Options Section */}
@@ -310,7 +395,7 @@ export const SeasonalPricingTable: React.FC<SeasonalPricingTableProps> = ({
           </li>
           <li className="flex items-start">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-gray-700 mt-2 mr-3 flex-shrink-0" />
-            <span>Final pricing may vary according to travel dates, hotel availability, seasonality, room type, and selected inclusions.</span>
+            <span>Final pricing includes chosen hotel tier supplements, park fees, and ground transport.</span>
           </li>
         </ul>
       </div>
@@ -326,7 +411,7 @@ export const SeasonalPricingTable: React.FC<SeasonalPricingTableProps> = ({
 
         <button
           type="button"
-          onClick={() => onCustomize ? onCustomize() : (onEnquire && onEnquire({ type: 'custom' }))}
+          onClick={() => onCustomize ? onCustomize({ type: 'custom' }) : (onEnquire && onEnquire({ type: 'custom' }))}
           className="inline-flex items-center space-x-2 px-6 py-3 bg-amber-400 hover:bg-amber-500 text-gray-900 font-bold text-xs md:text-sm tracking-wider uppercase rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer transform hover:-translate-y-0.5"
         >
           <Sliders className="w-4 h-4 text-gray-900" />
@@ -362,7 +447,7 @@ export const SeasonalPricingTable: React.FC<SeasonalPricingTableProps> = ({
             <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 text-sm text-gray-700 leading-relaxed space-y-2">
               <div className="flex items-center space-x-2 text-teal font-semibold text-xs uppercase tracking-wider mb-1">
                 <Info className="w-4 h-4" />
-                <span>Rate Notes & Conditions</span>
+                <span>Rate Notes & Inclusions</span>
               </div>
               <p className="whitespace-pre-line text-gray-800">{selectedNoteChart.notes || 'Standard seasonal rates apply.'}</p>
             </div>

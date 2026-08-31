@@ -54,6 +54,12 @@ class BookingService:
             source=booking.source,
             partner_id=partner_id,
             partner_code=partner_code,
+            price_chart_id=booking.price_chart_id,
+            selected_hotel_id=booking.selected_hotel_id,
+            selected_hotel_name=booking.selected_hotel_name,
+            selected_hotel_supplement=booking.selected_hotel_supplement or 0.0,
+            selected_room_type=booking.selected_room_type,
+            calculated_total_price=booking.calculated_total_price,
         )
         db.add(db_booking)
         db.flush()  # Get the booking ID

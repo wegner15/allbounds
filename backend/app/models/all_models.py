@@ -17,7 +17,7 @@ from app.models.hotel import Hotel
 from app.models.hotel_type import HotelType
 from app.models.activity import Activity
 from app.models.package import Package, PackageHolidayType
-from app.models.package_price_chart import PackagePriceChart
+from app.models.package_price_chart import PackagePriceChart, PackagePriceChartHotel
 from app.models.inclusion_exclusion import Inclusion, Exclusion
 from app.models.group_trip import GroupTrip, GroupTripDeparture
 from app.models.review import Review
@@ -37,7 +37,7 @@ from app.models.flight_booking import FlightBooking, FlightPassenger
 from app.models.email_log import EmailLog
 from app.models.partner import Partner
 
-from app.models.group_trip_price_chart import GroupTripPriceChart
+from app.models.group_trip_price_chart import GroupTripPriceChart, GroupTripPriceChartHotel
 from app.models.hotel_price_chart import HotelPriceChart
 
 # This ensures all models are imported in the correct order
@@ -45,9 +45,9 @@ __all__ = [
     'User', 'Role', 'Permission',
     'Region', 'Country', 'HolidayType',
     'Attraction', 'Accommodation', 'Amenity', 'Hotel', 'HotelType', 'Activity',
-    'Package', 'PackageHolidayType', 'PackagePriceChart',
+    'Package', 'PackageHolidayType', 'PackagePriceChart', 'PackagePriceChartHotel',
     'Inclusion', 'Exclusion',
-    'GroupTrip', 'GroupTripDeparture', 'GroupTripPriceChart', 'HotelPriceChart',
+    'GroupTrip', 'GroupTripDeparture', 'GroupTripPriceChart', 'GroupTripPriceChartHotel', 'HotelPriceChart',
     'Review', 'BlogPost', 'Tag', 'ContentPage',
     'MediaAsset', 'AuditLog', 'SeoMeta',
     'ItineraryItem', 'ItineraryActivity',

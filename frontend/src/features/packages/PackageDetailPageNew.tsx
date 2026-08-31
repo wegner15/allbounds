@@ -18,6 +18,8 @@ const PackageDetailPageNew: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [showInquiryForm, setShowInquiryForm] = useState(false);
+  const [selectedBookingChart, setSelectedBookingChart] = useState<any | null>(null);
+  const [selectedBookingHotel, setSelectedBookingHotel] = useState<any | null>(null);
 
   // Fetch comprehensive package details
   const { data: packageDetail, isLoading, error, refetch } = useComprehensivePackageBySlug(slug!);
@@ -25,6 +27,18 @@ const PackageDetailPageNew: React.FC = () => {
   const activePriceCharts = (packageDetail?.price_charts && packageDetail.price_charts.length > 0)
     ? packageDetail.price_charts
     : (fetchedPriceCharts || []);
+
+  const handleOpenBooking = (chart?: any, hotel?: any) => {
+    setSelectedBookingChart(chart || null);
+    setSelectedBookingHotel(hotel || null);
+    setShowBookingForm(true);
+  };
+
+  const handleOpenInquiry = (chart?: any, hotel?: any) => {
+    setSelectedBookingChart(chart || null);
+    setSelectedBookingHotel(hotel || null);
+    setShowInquiryForm(true);
+  };
 
 
   // Fetch recommended packages from the same country
@@ -292,8 +306,8 @@ const PackageDetailPageNew: React.FC = () => {
                   priceCharts={activePriceCharts}
                   basePrice={packageDetail.price}
                   durationDays={packageDetail.duration_days}
-                  onEnquire={() => setShowInquiryForm(true)}
-                  onCustomize={() => setShowBookingForm(true)}
+                  onEnquire={(chart, hotel) => handleOpenInquiry(chart, hotel)}
+                  onCustomize={(chart, hotel) => handleOpenBooking(chart, hotel)}
                 />
               </div>
 
@@ -313,8 +327,8 @@ const PackageDetailPageNew: React.FC = () => {
                   price={packageDetail.price}
                   durationDays={packageDetail.duration_days}
                   priceCharts={activePriceCharts}
-                  onBookNow={() => setShowBookingForm(true)}
-                  onRequestQuote={() => setShowInquiryForm(true)}
+                  onBookNow={(chart, hotel) => handleOpenBooking(chart, hotel)}
+                  onRequestQuote={(chart, hotel) => handleOpenInquiry(chart, hotel)}
                 />
               </div>
             </aside>
@@ -326,13 +340,13 @@ const PackageDetailPageNew: React.FC = () => {
         <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 sm:p-4 shadow-lg z-40 safe-area-inset-bottom">
           <div className="flex gap-2 sm:gap-3 max-w-screen-md mx-auto">
             <button
-              onClick={() => setShowBookingForm(true)}
+              onClick={() => handleOpenBooking()}
               className="flex-1 bg-primary hover:bg-primary-dark active:bg-primary-dark text-white font-semibold py-3.5 px-4 sm:px-6 rounded-lg transition-colors touch-manipulation min-h-[48px]"
             >
               Book Now
             </button>
             <button
-              onClick={() => setShowInquiryForm(true)}
+              onClick={() => handleOpenInquiry()}
               className="flex-1 bg-quote-btn hover:bg-quote-btn-dark active:bg-quote-btn-dark text-white font-semibold py-3.5 px-4 sm:px-6 rounded-lg transition-colors touch-manipulation min-h-[48px]"
             >
               Request Quote
@@ -355,10 +369,18 @@ const PackageDetailPageNew: React.FC = () => {
         <PackageBookingForm
           packageData={packageDetail as any}
           isOpen={showBookingForm}
-          onClose={() => setShowBookingForm(false)}
+          initialPriceChart={selectedBookingChart}
+          initialHotelOption={selectedBookingHotel}
+          onClose={() => {
+            setShowBookingForm(false);
+            setSelectedBookingChart(null);
+            setSelectedBookingHotel(null);
+          }}
           onSuccess={() => {
             console.log('Booking submitted successfully');
             setShowBookingForm(false);
+            setSelectedBookingChart(null);
+            setSelectedBookingHotel(null);
           }}
         />
       )}

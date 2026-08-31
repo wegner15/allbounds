@@ -253,8 +253,8 @@ class PackageService:
             joinedload(Package.attractions),
             # Load reviews (only approved ones)
             joinedload(Package.reviews),
-            # Load price charts
-            joinedload(Package.price_charts),
+            # Load price charts with hotel options
+            joinedload(Package.price_charts).joinedload(PackagePriceChart.hotel_options).joinedload(PackagePriceChartHotel.hotel),
             # Load linked blog posts
             selectinload(Package.blog_posts),
         ).filter(
@@ -265,6 +265,8 @@ class PackageService:
         if package:
             # Helper to set image_url on hotel objects
             def set_hotel_image_url(hotel):
+                if not hotel:
+                    return
                 image_url = None
                 if hotel.image_id:
                     image_url = self._get_cloudflare_image_url(hotel.image_id)
@@ -274,10 +276,14 @@ class PackageService:
                             if media.storage_key:
                                 image_url = self._get_cloudflare_image_url(media.storage_key)
                                 break
+                elif getattr(hotel, 'cover_image', None):
+                    image_url = hotel.cover_image
                 setattr(hotel, 'image_url', image_url)
  
             # Helper to set image_url on attraction objects
             def set_attraction_image_url(attraction):
+                if not attraction:
+                    return
                 image_url = None
                 if attraction.image_id:
                     image_url = self._get_cloudflare_image_url(attraction.image_id)
@@ -303,6 +309,14 @@ class PackageService:
             if package.hotels:
                 for hotel in package.hotels:
                     set_hotel_image_url(hotel)
+
+            # Populate image_url for price chart hotel options
+            if package.price_charts:
+                for chart in package.price_charts:
+                    if getattr(chart, 'hotel_options', None):
+                        for opt in chart.hotel_options:
+                            if opt.hotel:
+                                set_hotel_image_url(opt.hotel)
             
             if package.attractions:
                 for attraction in package.attractions:

@@ -1,8 +1,9 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Hotel as HotelIcon, Star, Check } from 'lucide-react';
 
 // Components
 import Button from '../ui/Button';
@@ -15,7 +16,7 @@ import CountrySelect from '../ui/CountrySelect';
 import { apiClient } from '../../lib/api';
 
 // Types
-import type { GroupTrip, GroupTripWithGallery, Traveler, BookingCreate } from '../../lib/types/api';
+import type { GroupTrip, GroupTripWithGallery, Traveler, BookingCreate, PriceChartHotelOption, PriceChartDetail } from '../../lib/types/api';
 
 // Validation schema
 const travelerSchema = z.object({
@@ -36,6 +37,11 @@ const bookingSchema = z.object({
   source: z.string().min(1, 'Please tell us how you found us'),
   departure_id: z.number().optional(),
   partner_code: z.string().optional().nullable(),
+  price_chart_id: z.number().optional().nullable(),
+  selected_hotel_id: z.number().optional().nullable(),
+  selected_hotel_name: z.string().optional().nullable(),
+  selected_hotel_supplement: z.number().optional().nullable(),
+  selected_room_type: z.string().optional().nullable(),
 }).refine((data) => {
   const totalTravelers = data.travelers.length;
   const expectedTravelers = data.number_of_adults + data.number_of_children;
@@ -57,21 +63,62 @@ const bookingSchema = z.object({
 type BookingFormData = z.infer<typeof bookingSchema>;
 
 interface GroupTripBookingFormProps {
-  groupTripData: GroupTrip | GroupTripWithGallery;
+  groupTripData: GroupTrip | GroupTripWithGallery | any;
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  initialPriceChart?: any;
+  initialHotelOption?: PriceChartHotelOption | null;
 }
 
 const GroupTripBookingForm: React.FC<GroupTripBookingFormProps> = ({
   groupTripData,
   isOpen,
   onClose,
-  onSuccess
+  onSuccess,
+  initialPriceChart,
+  initialHotelOption
 }) => {
   const [step, setStep] = useState<'details' | 'travelers' | 'confirmation'>('details');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // Available price charts and hotel options
+  const availablePriceCharts = useMemo<PriceChartDetail[]>(() => {
+    return (groupTripData?.price_charts || []).filter((c: any) => c.is_active !== false);
+  }, [groupTripData]);
+
+  const [selectedChartId, setSelectedChartId] = useState<number | null>(() => {
+    return initialPriceChart?.id || (availablePriceCharts.length > 0 ? availablePriceCharts[0].id : null);
+  });
+
+  const selectedChart = useMemo(() => {
+    return availablePriceCharts.find(c => c.id === selectedChartId) || initialPriceChart || null;
+  }, [availablePriceCharts, selectedChartId, initialPriceChart]);
+
+  const availableHotelOptions = useMemo<PriceChartHotelOption[]>(() => {
+    if (selectedChart?.hotel_options && selectedChart.hotel_options.length > 0) {
+      return selectedChart.hotel_options.filter((opt: PriceChartHotelOption) => opt.is_active !== false);
+    }
+    return [];
+  }, [selectedChart]);
+
+  const [selectedHotel, setSelectedHotel] = useState<PriceChartHotelOption | null>(() => {
+    if (initialHotelOption) return initialHotelOption;
+    if (availableHotelOptions.length > 0) {
+      return availableHotelOptions.find(opt => opt.is_default) || availableHotelOptions[0];
+    }
+    return null;
+  });
+
+  // Keep selectedHotel synchronized
+  useEffect(() => {
+    if (initialHotelOption) {
+      setSelectedHotel(initialHotelOption);
+    } else if (availableHotelOptions.length > 0 && !selectedHotel) {
+      setSelectedHotel(availableHotelOptions.find(opt => opt.is_default) || availableHotelOptions[0]);
+    }
+  }, [initialHotelOption, availableHotelOptions, selectedHotel]);
 
   // Partner Referral states
   const [validatedPartner, setValidatedPartner] = useState<{ name: string; discount_percent: number } | null>(null);
@@ -103,6 +150,11 @@ const GroupTripBookingForm: React.FC<GroupTripBookingFormProps> = ({
       source: 'website',
       departure_id: groupTripData.departures?.[0]?.id,
       partner_code: localStorage.getItem('partner_code') || '',
+      price_chart_id: selectedChartId,
+      selected_hotel_id: selectedHotel?.hotel_id,
+      selected_hotel_name: selectedHotel?.hotel?.name,
+      selected_hotel_supplement: selectedHotel?.price_supplement || 0,
+      selected_room_type: selectedHotel?.room_type,
     },
   });
 
@@ -117,6 +169,13 @@ const GroupTripBookingForm: React.FC<GroupTripBookingFormProps> = ({
 
   const watchedAdults = watch('number_of_adults') || 0;
   const watchedChildren = watch('number_of_children') || 0;
+
+  // Calculate live total price
+  const baseRatePerPerson = selectedChart?.price || groupTripData?.price || 0;
+  const hotelSupplement = selectedHotel?.price_supplement || 0;
+  const ratePerAdult = baseRatePerPerson + hotelSupplement;
+  const ratePerChild = Math.round(ratePerAdult * 0.7);
+  const calculatedTotal = (ratePerAdult * watchedAdults) + (ratePerChild * watchedChildren);
 
   // Update travelers array when adult/child counts change
   useEffect(() => {
@@ -141,18 +200,7 @@ const GroupTripBookingForm: React.FC<GroupTripBookingFormProps> = ({
         remove(currentTravelers - 1 - i);
       }
     }
-
-    // Update traveler types
-    fields.forEach((field, index) => {
-      const isChild = index >= watchedAdults;
-      if (isChild && field.traveler_type !== 'child') {
-        setValue(`travelers.${index}.traveler_type`, 'child');
-      } else if (!isChild && field.traveler_type !== 'adult') {
-        setValue(`travelers.${index}.traveler_type`, 'adult');
-        setValue(`travelers.${index}.age`, undefined);
-      }
-    });
-  }, [watchedAdults, watchedChildren, fields, append, remove, setValue]);
+  }, [watchedAdults, watchedChildren, fields.length, append, remove]);
 
   // Validate partner code function
   const handleValidatePartnerCode = useCallback(async (code: string) => {
@@ -161,34 +209,28 @@ const GroupTripBookingForm: React.FC<GroupTripBookingFormProps> = ({
       setPartnerValidationMessage(null);
       return;
     }
+
     setIsValidatingPartner(true);
     setPartnerValidationMessage(null);
+
     try {
       const res = await apiClient.get<{ valid: boolean; name: string; discount_percent: number }>(
-        `/api/v1/partners/validate/${code.trim()}`
+        `/partners/validate/${encodeURIComponent(code.trim().toUpperCase())}`
       );
       if (res && res.valid) {
         setValidatedPartner(res);
-        setPartnerValidationMessage(`✓ Referral discount applied: ${res.name} (${res.discount_percent}% client discount)`);
+        setPartnerValidationMessage(`✓ Promo code applied: ${res.name} (${res.discount_percent}% discount)`);
       } else {
         setValidatedPartner(null);
         setPartnerValidationMessage('✗ Invalid referral code');
       }
-    } catch (err) {
+    } catch {
       setValidatedPartner(null);
       setPartnerValidationMessage('✗ Invalid referral code');
     } finally {
       setIsValidatingPartner(false);
     }
   }, []);
-
-  // Check initial code on mount if available
-  useEffect(() => {
-    const initialCode = localStorage.getItem('partner_code');
-    if (initialCode && isOpen) {
-      handleValidatePartnerCode(initialCode);
-    }
-  }, [isOpen, handleValidatePartnerCode]);
 
   const bookingMutation = useMutation({
     mutationFn: async (data: BookingFormData) => {
@@ -207,9 +249,15 @@ const GroupTripBookingForm: React.FC<GroupTripBookingFormProps> = ({
         source: data.source,
         departure_id: data.departure_id,
         partner_code: data.partner_code || undefined,
+        price_chart_id: selectedChart?.id,
+        selected_hotel_id: selectedHotel?.hotel_id,
+        selected_hotel_name: selectedHotel?.hotel?.name,
+        selected_hotel_supplement: selectedHotel?.price_supplement || 0,
+        selected_room_type: selectedHotel?.room_type,
+        calculated_total_price: calculatedTotal,
       };
 
-      return apiClient.post('/api/v1/bookings/', bookingData);
+      return apiClient.post('/bookings/', bookingData);
     },
     onSuccess: () => {
       setIsSuccess(true);
@@ -331,46 +379,29 @@ const GroupTripBookingForm: React.FC<GroupTripBookingFormProps> = ({
           </button>
         </div>
 
-        {/* Progress Indicator */}
-        <div className="px-6 py-4 bg-gray-50">
-          <div className="flex items-center space-x-4">
-            <div className={`flex items-center ${step === 'details' ? 'text-primary' : 'text-gray-400'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                step === 'details' ? 'bg-primary text-white' : 'bg-gray-200'
-              }`}>
-                1
-              </div>
-              <span className="ml-2 text-sm font-medium">Details</span>
-            </div>
-            <div className={`flex-1 h-px ${step === 'travelers' || step === 'confirmation' ? 'bg-primary' : 'bg-gray-200'}`} />
-            <div className={`flex items-center ${step === 'travelers' ? 'text-primary' : 'text-gray-400'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                step === 'travelers' || step === 'confirmation' ? 'bg-primary text-white' : 'bg-gray-200'
-              }`}>
-                2
-              </div>
-              <span className="ml-2 text-sm font-medium">Travelers</span>
-            </div>
-            <div className={`flex-1 h-px ${step === 'confirmation' ? 'bg-primary' : 'bg-gray-200'}`} />
-            <div className={`flex items-center ${step === 'confirmation' ? 'text-primary' : 'text-gray-400'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                step === 'confirmation' ? 'bg-primary text-white' : 'bg-gray-200'
-              }`}>
-                3
-              </div>
-              <span className="ml-2 text-sm font-medium">Confirm</span>
-            </div>
+        {/* Progress Bar */}
+        <div className="px-6 pt-4">
+          <div className="flex items-center justify-between text-xs font-semibold text-gray-500">
+            <span className={step === 'details' ? 'text-teal font-bold' : 'text-gray-400'}>1. Details & Hotel</span>
+            <span className={step === 'travelers' ? 'text-teal font-bold' : 'text-gray-400'}>2. Travelers</span>
+            <span className={step === 'confirmation' ? 'text-teal font-bold' : 'text-gray-400'}>3. Confirm</span>
+          </div>
+          <div className="w-full bg-gray-100 h-1.5 rounded-full mt-2 overflow-hidden">
+            <div
+              className="bg-teal h-full transition-all duration-300"
+              style={{ width: step === 'details' ? '33.3%' : step === 'travelers' ? '66.6%' : '100%' }}
+            />
           </div>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
           {step === 'details' && (
             <div className="space-y-6">
               {/* Departure Selection */}
               {groupTripData.departures && groupTripData.departures.length > 1 && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
                     Select Departure Date
                   </label>
                   <FormSelect
@@ -378,7 +409,7 @@ const GroupTripBookingForm: React.FC<GroupTripBookingFormProps> = ({
                     {...register('departure_id', { valueAsNumber: true })}
                     error={errors.departure_id}
                   >
-                    {groupTripData.departures.map((departure) => (
+                    {groupTripData.departures.map((departure: any) => (
                       <option key={departure.id} value={departure.id}>
                         {new Date(departure.start_date).toLocaleDateString()} - {new Date(departure.end_date).toLocaleDateString()} ({departure.available_spots} spots available)
                       </option>
@@ -386,6 +417,128 @@ const GroupTripBookingForm: React.FC<GroupTripBookingFormProps> = ({
                   </FormSelect>
                 </div>
               )}
+
+              {/* Travel Season / Price Chart */}
+              {availablePriceCharts.length > 0 && (
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                    Selected Travel Season / Rate Tier
+                  </label>
+                  <select
+                    value={selectedChartId || ''}
+                    onChange={(e) => setSelectedChartId(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm font-semibold text-gray-900 focus:ring-2 focus:ring-teal focus:border-teal outline-none"
+                  >
+                    {availablePriceCharts.map(c => (
+                      <option key={c.id} value={c.id}>
+                        {c.title} — ${c.price.toLocaleString()} per person
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Accommodation Options */}
+              {availableHotelOptions.length > 0 && (
+                <div className="p-4 bg-gray-50/80 rounded-xl border border-gray-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-1.5">
+                      <HotelIcon className="w-4 h-4 text-teal" />
+                      <span className="text-xs font-bold text-gray-800 uppercase tracking-wider">
+                        Choose Accommodation Tier
+                      </span>
+                    </div>
+                    {selectedHotel && (
+                      <span className="text-xs font-semibold text-teal">
+                        {selectedHotel.price_supplement > 0 ? `+$${selectedHotel.price_supplement} pp` : 'Base Rate'}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {availableHotelOptions.map((opt, idx) => {
+                      const isSelected = selectedHotel?.hotel_id === opt.hotel_id;
+                      const hotelObj = opt.hotel;
+
+                      return (
+                        <div
+                          key={opt.hotel_id || idx}
+                          onClick={() => setSelectedHotel(opt)}
+                          className={`cursor-pointer p-3 rounded-xl border transition-all flex items-center justify-between gap-3 ${
+                            isSelected
+                              ? 'bg-white border-teal ring-2 ring-teal/30 shadow-xs'
+                              : 'bg-white hover:bg-gray-100 border-gray-200'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                              {hotelObj?.image_url || hotelObj?.cover_image ? (
+                                <img
+                                  src={hotelObj.image_url || hotelObj.cover_image}
+                                  alt={hotelObj?.name || 'Hotel'}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <HotelIcon className="w-5 h-5 text-gray-400" />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1">
+                                <span className="font-bold text-xs text-gray-900 truncate">
+                                  {hotelObj?.name || `Hotel #${opt.hotel_id}`}
+                                </span>
+                                {hotelObj?.stars && (
+                                  <span className="inline-flex items-center text-[10px] font-semibold text-amber-500 flex-shrink-0">
+                                    <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400 mr-0.5" />
+                                    {hotelObj.stars}★
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[11px] text-gray-500 block truncate">
+                                {opt.room_type || 'Standard Accommodation'}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="text-right flex-shrink-0">
+                            <span className={`text-xs font-bold ${opt.price_supplement > 0 ? 'text-amber-700' : 'text-teal'}`}>
+                              {opt.price_supplement > 0 ? `+$${opt.price_supplement}` : 'Included'}
+                            </span>
+                            <div className="mt-1 flex justify-end">
+                              <div
+                                className={`w-4 h-4 rounded-full flex items-center justify-center border transition-colors ${
+                                  isSelected ? 'bg-teal border-teal text-white' : 'border-gray-300 bg-white'
+                                }`}
+                              >
+                                {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Live Price Estimation Banner */}
+              <div className="p-4 bg-teal/5 rounded-xl border border-teal/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                  <span className="text-xs text-gray-500 font-medium block">Live Price Estimate</span>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-2xl font-bold text-gray-900 font-serif">
+                      ${calculatedTotal.toLocaleString()}
+                    </span>
+                    <span className="text-xs text-gray-600 font-medium">total for {watchedAdults + watchedChildren} traveler(s)</span>
+                  </div>
+                  <span className="text-[11px] text-teal-dark font-medium">
+                    (${ratePerAdult.toLocaleString()} / adult)
+                  </span>
+                </div>
+                <span className="text-xs font-semibold text-teal bg-teal/10 px-2.5 py-1 rounded-full">
+                  Locked upon deposit
+                </span>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Controller
@@ -424,11 +577,11 @@ const GroupTripBookingForm: React.FC<GroupTripBookingFormProps> = ({
                    placeholder="Enter your phone number"
                  />
                 <CountrySelect
-                   label="Country of Origin"
-                   value={watch('country_of_origin')}
-                   onChange={(value) => setValue('country_of_origin', value)}
-                   error={errors.country_of_origin}
-                   placeholder="Select your country"
+                    label="Country of Origin"
+                    value={watch('country_of_origin')}
+                    onChange={(value) => setValue('country_of_origin', value)}
+                    error={errors.country_of_origin}
+                    placeholder="Select your country"
                 />
               </div>
 
@@ -595,9 +748,19 @@ const GroupTripBookingForm: React.FC<GroupTripBookingFormProps> = ({
                 <h3 className="text-lg font-medium mb-4">Booking Summary</h3>
                 <div className="space-y-2 text-sm">
                   <div><strong>Group Trip:</strong> {groupTripData.name}</div>
+                  {selectedChart && (
+                    <div><strong>Travel Period / Season:</strong> {selectedChart.title}</div>
+                  )}
+                  {selectedHotel && (
+                    <div><strong>Accommodation Tier:</strong> {selectedHotel.hotel?.name || 'Selected Hotel'} ({selectedHotel.room_type || 'Standard'}) {selectedHotel.price_supplement > 0 ? `+$${selectedHotel.price_supplement} pp` : '[Included]'}</div>
+                  )}
                   <div><strong>Contact:</strong> {watch('contact_name')} ({watch('contact_email')})</div>
                   <div><strong>Travelers:</strong> {watch('number_of_adults')} adults, {watch('number_of_children')} children</div>
                   <div><strong>Country:</strong> {watch('country_of_origin')}</div>
+                  <div className="pt-2 border-t font-semibold flex justify-between">
+                    <span>Estimated Total Price:</span>
+                    <span className="text-teal text-base font-bold">${calculatedTotal.toLocaleString()} USD</span>
+                  </div>
                   {watch('special_requests') && (
                     <div><strong>Special Requests:</strong> {watch('special_requests')}</div>
                   )}

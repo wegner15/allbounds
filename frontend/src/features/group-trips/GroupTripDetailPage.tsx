@@ -28,6 +28,8 @@ const GroupTripDetailPage: React.FC = () => {
   const addRecentlyViewed = useAppStore((state) => state.addRecentlyViewed);
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [showBookingForm, setShowBookingForm] = React.useState(false);
+  const [selectedBookingChart, setSelectedBookingChart] = React.useState<any | null>(null);
+  const [selectedBookingHotel, setSelectedBookingHotel] = React.useState<any | null>(null);
 
   // Fetch group trip details with gallery
   const { data: tripDetail, isLoading, error } = useGroupTripDetailsBySlug(slug || '');
@@ -35,6 +37,12 @@ const GroupTripDetailPage: React.FC = () => {
   const activePriceCharts = (tripDetail?.price_charts && tripDetail.price_charts.length > 0)
     ? tripDetail.price_charts
     : (fetchedPriceCharts || []);
+
+  const handleOpenBooking = (chart?: any, hotel?: any) => {
+    setSelectedBookingChart(chart || null);
+    setSelectedBookingHotel(hotel || null);
+    setShowBookingForm(true);
+  };
 
 
   // Handle scroll to show/hide sticky card
@@ -320,8 +328,8 @@ const GroupTripDetailPage: React.FC = () => {
                   basePrice={tripDetail.price}
                   durationDays={tripDetail.duration_days}
                   title="Group Trip Seasonal Pricing"
-                  onEnquire={() => setShowBookingForm(true)}
-                  onCustomize={() => setShowBookingForm(true)}
+                  onEnquire={(chart, hotel) => handleOpenBooking(chart, hotel)}
+                  onCustomize={(chart, hotel) => handleOpenBooking(chart, hotel)}
                 />
               </div>
 
@@ -411,7 +419,7 @@ const GroupTripDetailPage: React.FC = () => {
                 variant="primary"
                 size="lg"
                 className="w-full mt-6"
-                onClick={() => setShowBookingForm(true)}
+                onClick={() => handleOpenBooking()}
               >
                 Join This Trip
               </Button>
@@ -427,10 +435,18 @@ const GroupTripDetailPage: React.FC = () => {
       <GroupTripBookingForm
         groupTripData={tripDetail}
         isOpen={showBookingForm}
-        onClose={() => setShowBookingForm(false)}
+        initialPriceChart={selectedBookingChart}
+        initialHotelOption={selectedBookingHotel}
+        onClose={() => {
+          setShowBookingForm(false);
+          setSelectedBookingChart(null);
+          setSelectedBookingHotel(null);
+        }}
         onSuccess={() => {
-          // Could show a success message here
           console.log('Group trip booking submitted successfully');
+          setShowBookingForm(false);
+          setSelectedBookingChart(null);
+          setSelectedBookingHotel(null);
         }}
       />
     </>

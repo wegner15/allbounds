@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '../ui/Button';
-import type { PriceChartDetail } from '../../lib/types/api';
+import type { PriceChartDetail, PriceChartHotelOption } from '../../lib/types/api';
 import { 
   Calendar, 
   Users, 
@@ -12,7 +12,10 @@ import {
   Facebook,
   Twitter,
   Copy,
-  Check
+  Check,
+  Hotel as HotelIcon,
+  Star,
+  ChevronDown
 } from 'lucide-react';
 
 interface BookingSidebarProps {
@@ -20,8 +23,8 @@ interface BookingSidebarProps {
   price?: number;
   durationDays?: number;
   priceCharts?: PriceChartDetail[];
-  onBookNow?: () => void;
-  onRequestQuote?: () => void;
+  onBookNow?: (chart?: PriceChartDetail | null, hotel?: PriceChartHotelOption | null) => void;
+  onRequestQuote?: (chart?: PriceChartDetail | null, hotel?: PriceChartHotelOption | null) => void;
 }
 
 const BookingSidebar: React.FC<BookingSidebarProps> = ({
@@ -32,38 +35,61 @@ const BookingSidebar: React.FC<BookingSidebarProps> = ({
   onBookNow,
   onRequestQuote,
 }) => {
+  const activeCharts = useMemo(() => {
+    return (priceCharts || []).filter(chart => chart.is_active !== false);
+  }, [priceCharts]);
+
+  const [selectedChartId, setSelectedChartId] = useState<number | null>(() => {
+    return activeCharts.length > 0 ? activeCharts[0].id : null;
+  });
+
+  const selectedChart = useMemo(() => {
+    return activeCharts.find(c => c.id === selectedChartId) || (activeCharts.length > 0 ? activeCharts[0] : null);
+  }, [activeCharts, selectedChartId]);
+
+  const hotelOptions = useMemo(() => {
+    return (selectedChart?.hotel_options || []).filter(opt => opt.is_active !== false);
+  }, [selectedChart]);
+
+  const [selectedHotelOption, setSelectedHotelOption] = useState<PriceChartHotelOption | null>(() => {
+    if (hotelOptions.length > 0) {
+      return hotelOptions.find(opt => opt.is_default) || hotelOptions[0];
+    }
+    return null;
+  });
+
+  // Keep selected hotel option synced when chart changes
+  React.useEffect(() => {
+    if (hotelOptions.length > 0) {
+      const defaultOpt = hotelOptions.find(opt => opt.is_default) || hotelOptions[0];
+      setSelectedHotelOption(defaultOpt);
+    } else {
+      setSelectedHotelOption(null);
+    }
+  }, [selectedChartId, hotelOptions]);
+
   const [showPriceChart, setShowPriceChart] = useState(false);
+  const [showHotelMenu, setShowHotelMenu] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Calculate lowest price from price charts or use base price
-  const lowestPrice = React.useMemo(() => {
-    if (priceCharts && priceCharts.length > 0) {
-      const activePrices = priceCharts
-        .filter(chart => chart.is_active)
-        .map(chart => chart.price);
-      
-      if (activePrices.length > 0) {
-        return Math.min(...activePrices);
-      }
-    }
-    return price || 0;
-  }, [priceCharts, price]);
+  // Dynamic calculated price per person
+  const currentBasePrice = selectedChart?.price || price || 0;
+  const currentSupplement = selectedHotelOption?.price_supplement || 0;
+  const calculatedPricePerPerson = currentBasePrice + currentSupplement;
 
   const handleBookNow = () => {
     if (onBookNow) {
-      onBookNow();
+      onBookNow(selectedChart, selectedHotelOption);
     } else {
-      // Default behavior: navigate to booking form
       window.location.href = `/packages/${packageSlug}/book`;
     }
   };
 
   const handleRequestQuote = () => {
     if (onRequestQuote) {
-      onRequestQuote();
+      onRequestQuote(selectedChart, selectedHotelOption);
     } else {
-      // Default behavior: navigate to inquiry form
       window.location.href = `/contact?package=${packageSlug}`;
     }
   };
@@ -97,50 +123,105 @@ const BookingSidebar: React.FC<BookingSidebarProps> = ({
       <div className="bg-white rounded-xl shadow-xl p-5 sm:p-6 border border-gray-100">
         {/* Price Display */}
         <div className="mb-5 sm:mb-6">
-          <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-xs sm:text-sm text-gray-500 font-medium uppercase tracking-wide">From</span>
+          <div className="flex items-baseline justify-between gap-2 mb-1">
+            <span className="text-xs sm:text-sm text-gray-500 font-medium uppercase tracking-wide">
+              {selectedHotelOption?.price_supplement ? 'Estimated Rate' : 'From'}
+            </span>
+            {activeCharts.length > 1 && (
+              <span className="text-[11px] font-semibold text-teal bg-teal/10 px-2 py-0.5 rounded-full">
+                {selectedChart?.title || 'Seasonal Rate'}
+              </span>
+            )}
           </div>
+
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl sm:text-4xl font-bold text-charcoal font-playfair">
-              ${lowestPrice?.toLocaleString() || 'N/A'}
+            <span className="text-3xl sm:text-4xl font-bold text-charcoal font-playfair transition-all">
+              ${calculatedPricePerPerson ? calculatedPricePerPerson.toLocaleString() : (price || 0).toLocaleString()}
             </span>
             <span className="text-sm sm:text-base text-gray-600 font-medium">per person</span>
           </div>
-          
-          {/* Price Chart Dropdown */}
-          {priceCharts && priceCharts.length > 0 && (
-            <button
-              onClick={() => setShowPriceChart(!showPriceChart)}
-              className="mt-2 text-sm text-primary hover:text-primary-dark font-medium flex items-center gap-1 transition-colors"
-            >
-              View price chart
-              <svg
-                className={`w-4 h-4 transition-transform duration-200 ${showPriceChart ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
+
+          {/* Breakdown if supplement selected */}
+          {selectedHotelOption && selectedHotelOption.price_supplement > 0 && (
+            <div className="text-[11px] text-gray-500 mt-1 flex items-center gap-1 font-medium">
+              <span>Tour: ${currentBasePrice.toLocaleString()}</span>
+              <span>+</span>
+              <span className="text-teal font-bold">{selectedHotelOption.hotel?.name || 'Hotel Upgrade'}: +${selectedHotelOption.price_supplement.toLocaleString()}</span>
+            </div>
           )}
 
-          {showPriceChart && priceCharts && priceCharts.length > 0 && (
-            <div className="mt-3 p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-lg space-y-2.5 border border-gray-200 animate-slide-down">
-              {priceCharts.map((chart) => (
-                <div key={chart.id} className="flex justify-between items-start text-sm border-b border-gray-100 last:border-0 pb-2 mb-2 last:pb-0 last:mb-0">
-                  <div className="flex flex-col">
-                    <span className="font-bold text-charcoal">{chart.title}</span>
-                    <span className="text-gray-500 text-xs font-medium">
-                      {new Date(chart.start_date).toLocaleDateString()} - {new Date(chart.end_date).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="text-right">
-                    <span className="block font-bold text-primary">${chart.price.toLocaleString()}</span>
-                    <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Per Person</span>
-                  </div>
-                </div>
-              ))}
+          {/* Season Selector Dropdown if multiple active price charts */}
+          {activeCharts.length > 1 && (
+            <div className="mt-3">
+              <label className="block text-[11px] font-bold text-gray-600 uppercase tracking-wider mb-1">
+                Select Travel Season
+              </label>
+              <select
+                value={selectedChartId || ''}
+                onChange={(e) => setSelectedChartId(Number(e.target.value))}
+                className="w-full text-xs font-semibold px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:ring-1 focus:ring-teal outline-none"
+              >
+                {activeCharts.map(chart => (
+                  <option key={chart.id} value={chart.id}>
+                    {chart.title} (${chart.price.toLocaleString()}/pp)
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Accommodation Option Selector in Sidebar */}
+          {hotelOptions.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1">
+                  <HotelIcon className="w-3.5 h-3.5 text-teal" />
+                  Accommodation Tier
+                </span>
+                <span className="text-[10px] text-teal font-semibold">
+                  {hotelOptions.length} available
+                </span>
+              </div>
+
+              <div className="space-y-1.5">
+                {hotelOptions.map((opt, idx) => {
+                  const isSelected = selectedHotelOption?.hotel_id === opt.hotel_id;
+                  const hotelName = opt.hotel?.name || `Hotel Option #${opt.hotel_id}`;
+
+                  return (
+                    <button
+                      key={opt.hotel_id || idx}
+                      type="button"
+                      onClick={() => setSelectedHotelOption(opt)}
+                      className={`w-full text-left p-2.5 rounded-lg border text-xs transition-all flex items-center justify-between gap-2 ${
+                        isSelected
+                          ? 'bg-teal/5 border-teal shadow-2xs font-semibold text-teal-dark'
+                          : 'bg-white hover:bg-gray-50 border-gray-200 text-gray-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div
+                          className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border flex-shrink-0 ${
+                            isSelected ? 'bg-teal border-teal text-white' : 'border-gray-300 bg-white'
+                          }`}
+                        >
+                          {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                        </div>
+                        <span className="truncate">{hotelName}</span>
+                        {opt.hotel?.stars && (
+                          <span className="text-[10px] text-amber-500 flex-shrink-0">
+                            {opt.hotel.stars}★
+                          </span>
+                        )}
+                      </div>
+
+                      <span className="flex-shrink-0 text-[11px] font-bold">
+                        {opt.price_supplement > 0 ? `+$${opt.price_supplement}` : 'Incl.'}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

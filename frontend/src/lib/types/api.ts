@@ -9,6 +9,31 @@ export interface BaseModel {
   updated_at: string;
 }
 
+export interface PriceChartHotelSummary {
+  id: number;
+  name: string;
+  slug: string;
+  stars?: number;
+  address?: string;
+  city?: string;
+  price_category?: string;
+  image_url?: string;
+  cover_image?: string;
+  summary?: string;
+}
+
+export interface PriceChartHotelOption {
+  id?: number;
+  price_chart_id?: number;
+  hotel_id: number;
+  price_supplement: number;
+  room_type?: string;
+  is_default: boolean;
+  is_active: boolean;
+  order_index?: number;
+  hotel?: PriceChartHotelSummary;
+}
+
 export interface PriceChart extends BaseModel {
   package_id?: number;
   group_trip_id?: number;
@@ -20,6 +45,7 @@ export interface PriceChart extends BaseModel {
   booking_price?: number;
   notes?: string;
   is_active: boolean;
+  hotel_options?: PriceChartHotelOption[];
 }
 
 
@@ -529,7 +555,10 @@ export interface PriceChartDetail {
   start_date: string;
   end_date: string;
   price: number;
+  booking_price?: number;
+  notes?: string;
   is_active: boolean;
+  hotel_options?: PriceChartHotelOption[];
 }
 
 export interface PackageDetailResponse {
@@ -568,15 +597,13 @@ export interface InclusionExclusionItem {
 }
 
 export interface PackageItineraryDay {
-  day: number;
-  title: string;
-  description: string;
-  activities: {
-    id: string;
+  day?: number;
+  title?: string;
+  description?: string;
+  activities?: {
     time?: string;
     title: string;
     description?: string;
-    location?: string;
     duration?: string;
     image?: string;
   }[];
@@ -775,6 +802,12 @@ export interface Booking extends BaseModel {
   partner_id?: number;
   partner_code?: string;
   partner?: Partner;
+  price_chart_id?: number;
+  selected_hotel_id?: number;
+  selected_hotel_name?: string;
+  selected_hotel_supplement?: number;
+  selected_room_type?: string;
+  calculated_total_price?: number;
 }
 
 export interface BookingCreate {
@@ -792,6 +825,12 @@ export interface BookingCreate {
   source: string;
   departure_id?: number;
   partner_code?: string;
+  price_chart_id?: number;
+  selected_hotel_id?: number;
+  selected_hotel_name?: string;
+  selected_hotel_supplement?: number;
+  selected_room_type?: string;
+  calculated_total_price?: number;
 }
 
 // Inquiry types

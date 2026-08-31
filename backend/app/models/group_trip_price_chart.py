@@ -21,3 +21,31 @@ class GroupTripPriceChart(Base):
 
     # Relationship with GroupTrip
     group_trip = relationship("GroupTrip", back_populates="price_charts")
+
+    # Relationship with Hotel options / supplements
+    hotel_options = relationship(
+        "GroupTripPriceChartHotel",
+        back_populates="price_chart",
+        cascade="all, delete-orphan",
+        order_by="GroupTripPriceChartHotel.order_index"
+    )
+
+
+class GroupTripPriceChartHotel(Base):
+    __tablename__ = "group_trip_price_chart_hotels"
+
+    id = Column(Integer, primary_key=True, index=True)
+    price_chart_id = Column(Integer, ForeignKey("group_trip_price_charts.id", ondelete="CASCADE"), nullable=False)
+    hotel_id = Column(Integer, ForeignKey("hotels.id", ondelete="CASCADE"), nullable=False)
+    price_supplement = Column(Float, default=0.0, nullable=False)
+    room_type = Column(String(100), nullable=True)
+    is_default = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
+    order_index = Column(Integer, default=0)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    price_chart = relationship("GroupTripPriceChart", back_populates="hotel_options")
+    hotel = relationship("Hotel")

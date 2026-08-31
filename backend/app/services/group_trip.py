@@ -166,9 +166,10 @@ class GroupTripService:
         Retrieve a specific group trip by ID.
         By default, include_inactive is True so admin operations work.
         """
+        from app.models.group_trip_price_chart import GroupTripPriceChart, GroupTripPriceChartHotel
         query = db.query(GroupTrip).options(
             joinedload(GroupTrip.departures),
-            joinedload(GroupTrip.price_charts),
+            joinedload(GroupTrip.price_charts).joinedload(GroupTripPriceChart.hotel_options).joinedload(GroupTripPriceChartHotel.hotel),
             joinedload(GroupTrip.country),
             joinedload(GroupTrip.countries),
             joinedload(GroupTrip.holiday_types),
@@ -184,9 +185,10 @@ class GroupTripService:
         """
         Retrieve a specific group trip by slug.
         """
+        from app.models.group_trip_price_chart import GroupTripPriceChart, GroupTripPriceChartHotel
         query = db.query(GroupTrip).options(
             joinedload(GroupTrip.departures),
-            joinedload(GroupTrip.price_charts),
+            joinedload(GroupTrip.price_charts).joinedload(GroupTripPriceChart.hotel_options).joinedload(GroupTripPriceChartHotel.hotel),
             joinedload(GroupTrip.country),
             joinedload(GroupTrip.countries),
             joinedload(GroupTrip.holiday_types),

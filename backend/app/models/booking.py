@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey, JSON
+from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey, JSON, Float
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
@@ -33,6 +33,14 @@ class Booking(Base):
     # Partner/Promo Referral
     partner_id = Column(Integer, ForeignKey("partners.id"), nullable=True)
     partner_code = Column(String(50), nullable=True)
+
+    # Selected Price Chart & Accommodation Options
+    price_chart_id = Column(Integer, nullable=True)
+    selected_hotel_id = Column(Integer, ForeignKey("hotels.id"), nullable=True)
+    selected_hotel_name = Column(String(255), nullable=True)
+    selected_hotel_supplement = Column(Float, default=0.0, nullable=True)
+    selected_room_type = Column(String(100), nullable=True)
+    calculated_total_price = Column(Float, nullable=True)
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())

@@ -36,11 +36,10 @@ class HotelPriceChartService:
                 rate_dict = rate.model_dump(exclude_unset=True)
                 if rate_dict.get("price_per_night") is None and rate_dict.get("price") and rate_dict.get("nights"):
                     rate_dict["price_per_night"] = round(rate_dict["price"] / rate_dict["nights"], 2)
-                night_rate = HotelPriceChartNightRate(
-                    price_chart_id=db_chart.id,
-                    order_index=rate_dict.get("order_index", idx),
-                    **rate_dict
-                )
+                rate_dict["price_chart_id"] = db_chart.id
+                if rate_dict.get("order_index") is None:
+                    rate_dict["order_index"] = idx
+                night_rate = HotelPriceChartNightRate(**rate_dict)
                 db.add(night_rate)
 
         db.commit()
@@ -69,11 +68,10 @@ class HotelPriceChartService:
                 rate_dict = rate.model_dump(exclude_unset=True)
                 if rate_dict.get("price_per_night") is None and rate_dict.get("price") and rate_dict.get("nights"):
                     rate_dict["price_per_night"] = round(rate_dict["price"] / rate_dict["nights"], 2)
-                night_rate = HotelPriceChartNightRate(
-                    price_chart_id=price_chart_id,
-                    order_index=rate_dict.get("order_index", idx),
-                    **rate_dict
-                )
+                rate_dict["price_chart_id"] = price_chart_id
+                if rate_dict.get("order_index") is None:
+                    rate_dict["order_index"] = idx
+                night_rate = HotelPriceChartNightRate(**rate_dict)
                 db.add(night_rate)
 
         db.commit()

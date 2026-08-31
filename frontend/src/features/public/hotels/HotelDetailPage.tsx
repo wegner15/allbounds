@@ -389,57 +389,29 @@ const HotelDetailPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Most Popular Facilities Section */}
-              {popularAmenities.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-sm p-8 border border-amber-100/60 bg-gradient-to-br from-white to-amber-50/20">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">✨</span>
-                      <h2 className="text-2xl font-bold text-gray-900 font-playfair">Most Popular Facilities</h2>
-                    </div>
-                    <span className="text-xs font-semibold uppercase tracking-wider bg-amber-100/70 text-amber-800 px-2.5 py-1 rounded-full border border-amber-200/60">
-                      Guest Highlights
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500 mb-5">Key features and amenities most appreciated by guests staying here</p>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                    {popularAmenities.map((amenity) => (
-                      <div
-                        key={amenity.id}
-                        className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-gray-200/80 shadow-xs hover:shadow-md hover:border-teal/50 transition-all duration-200"
-                      >
-                        <div className="p-2 rounded-lg bg-teal/10 text-teal-700 shrink-0">
-                          {renderAmenityIcon(amenity.icon, amenity.name)}
-                        </div>
-                        <div className="min-w-0">
-                          <span className="text-xs sm:text-sm font-semibold text-gray-900 truncate block">
-                            {amenity.name}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* Seasonal Stay Rates Matrix Table */}
-              {activePriceCharts.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-5 mb-6">
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900 font-playfair flex items-center gap-2">
-                        Seasonal Stay Rates & Packages
-                      </h2>
-                      <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                        Select your travel season and stay duration for instant pricing and direct booking
-                      </p>
-                    </div>
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-5 mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 font-playfair flex items-center gap-2">
+                      Seasonal Stay Rates & Packages
+                    </h2>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                      Select your travel season and stay duration for instant pricing and direct booking
+                    </p>
+                  </div>
+                  {activePriceCharts.length > 0 ? (
                     <span className="self-start sm:self-auto text-xs font-semibold px-3 py-1 bg-teal/10 text-teal-800 rounded-full border border-teal/20">
                       {activePriceCharts.length} {activePriceCharts.length === 1 ? 'Season Rate' : 'Seasonal Rates'} Available
                     </span>
-                  </div>
+                  ) : (
+                    <span className="self-start sm:self-auto text-xs font-semibold px-3 py-1 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
+                      Inquiry Available
+                    </span>
+                  )}
+                </div>
 
+                {activePriceCharts.length > 0 ? (
                   <div className="overflow-x-auto -mx-6 sm:mx-0 px-6 sm:px-0">
                     <table className="w-full border-collapse border border-gray-200 rounded-xl overflow-hidden text-left">
                       <thead>
@@ -553,6 +525,65 @@ const HotelDetailPage: React.FC = () => {
                         })}
                       </tbody>
                     </table>
+                  </div>
+                ) : (
+                  <div className="p-6 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                      <h4 className="font-bold text-gray-900 text-base font-playfair">Tailored Rates & Availability Upon Request</h4>
+                      <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                        Seasonal night packages for {hotel.name} can be reserved directly or customized to your stay dates.
+                      </p>
+                    </div>
+                    <div className="flex gap-2.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setShowBookingForm(true)}
+                        className="px-5 py-2.5 bg-quote-btn hover:bg-quote-btn-dark text-white text-xs font-bold rounded-xl shadow-sm transition-all"
+                      >
+                        Book This Stay
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowInquiryForm(true)}
+                        className="px-5 py-2.5 border border-gray-300 hover:border-gray-400 text-gray-800 text-xs font-bold rounded-xl bg-white transition-all"
+                      >
+                        Send Inquiry
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Most Popular Facilities Section */}
+              {popularAmenities.length > 0 && (
+                <div className="bg-white rounded-2xl shadow-sm p-8 border border-amber-100/60 bg-gradient-to-br from-white to-amber-50/20">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">✨</span>
+                      <h2 className="text-2xl font-bold text-gray-900 font-playfair">Most Popular Facilities</h2>
+                    </div>
+                    <span className="text-xs font-semibold uppercase tracking-wider bg-amber-100/70 text-amber-800 px-2.5 py-1 rounded-full border border-amber-200/60">
+                      Guest Highlights
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mb-5">Key features and amenities most appreciated by guests staying here</p>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    {popularAmenities.map((amenity) => (
+                      <div
+                        key={amenity.id}
+                        className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-gray-200/80 shadow-xs hover:shadow-md hover:border-teal/50 transition-all duration-200"
+                      >
+                        <div className="p-2 rounded-lg bg-teal/10 text-teal-700 shrink-0">
+                          {renderAmenityIcon(amenity.icon, amenity.name)}
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-xs sm:text-sm font-semibold text-gray-900 truncate block">
+                            {amenity.name}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}

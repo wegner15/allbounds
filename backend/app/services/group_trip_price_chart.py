@@ -25,10 +25,12 @@ class GroupTripPriceChartService:
             if hasattr(chart, 'hotel_options') and chart.hotel_options:
                 for opt in chart.hotel_options:
                     if opt.hotel:
-                        if opt.hotel.image_id and not getattr(opt.hotel, 'image_url', None):
-                            setattr(opt.hotel, 'image_url', self._get_cloudflare_image_url(opt.hotel.image_id))
-                        elif not getattr(opt.hotel, 'image_url', None) and opt.hotel.cover_image:
-                            setattr(opt.hotel, 'image_url', opt.hotel.cover_image)
+                        image_id = getattr(opt.hotel, 'image_id', None)
+                        cover_image = getattr(opt.hotel, 'cover_image', None)
+                        if image_id and not getattr(opt.hotel, 'image_url', None):
+                            setattr(opt.hotel, 'image_url', self._get_cloudflare_image_url(image_id))
+                        elif cover_image and not getattr(opt.hotel, 'image_url', None):
+                            setattr(opt.hotel, 'image_url', cover_image)
 
     def get_price_charts_by_group_trip(self, db: Session, group_trip_id: int) -> List[GroupTripPriceChart]:
         charts = db.query(GroupTripPriceChart).options(

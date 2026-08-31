@@ -141,6 +141,22 @@ const renderAmenityIcon = (icon?: string, name?: string) => {
   return <Check className="w-5 h-5" />;
 };
 
+const getCategoryIcon = (category: string) => {
+  const cat = category.toLowerCase();
+  if (cat.includes('room') || cat.includes('bedroom')) return <Bed className="w-4 h-4" />;
+  if (cat.includes('bath') || cat.includes('toilet')) return <Bath className="w-4 h-4" />;
+  if (cat.includes('din') || cat.includes('food') || cat.includes('restaurant') || cat.includes('kitchen')) return <Utensils className="w-4 h-4" />;
+  if (cat.includes('drink') || cat.includes('bar')) return <Wine className="w-4 h-4" />;
+  if (cat.includes('wellness') || cat.includes('spa') || cat.includes('fitness') || cat.includes('gym')) return <Sparkles className="w-4 h-4" />;
+  if (cat.includes('pool') || cat.includes('beach') || cat.includes('water')) return <Waves className="w-4 h-4" />;
+  if (cat.includes('view') || cat.includes('outdoor') || cat.includes('garden')) return <Mountain className="w-4 h-4" />;
+  if (cat.includes('service') || cat.includes('front desk') || cat.includes('reception') || cat.includes('concierge')) return <Bell className="w-4 h-4" />;
+  if (cat.includes('media') || cat.includes('tech') || cat.includes('entertainment')) return <Tv className="w-4 h-4" />;
+  if (cat.includes('business')) return <Briefcase className="w-4 h-4" />;
+  if (cat.includes('transport') || cat.includes('parking') || cat.includes('airport')) return <Car className="w-4 h-4" />;
+  return <Sparkles className="w-4 h-4" />;
+};
+
 const HotelDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: hotel, isLoading, error } = useHotelBySlug(slug!);
@@ -383,42 +399,71 @@ const HotelDetailPage: React.FC = () => {
 
               {/* All Hotel Amenities Section */}
               {hotel.amenities && hotel.amenities.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-sm p-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6 font-playfair">All Hotel Facilities & Amenities</h2>
-
-                  {/* Categorize amenities */}
-                  {Object.entries(
-                    hotel.amenities.reduce((acc, amenity) => {
-                      const category = amenity.category || 'General';
-                      if (!acc[category]) acc[category] = [];
-                      acc[category].push(amenity);
-                      return acc;
-                    }, {} as Record<string, typeof hotel.amenities>)
-                  ).map(([category, items]) => (
-                    <div key={category} className="mb-8 last:mb-0">
-                      <h3 className="text-lg font-bold text-gray-800 mb-4 border-l-4 border-primary pl-3">
-                        {category}
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {items.map((amenity) => (
-                          <div
-                            key={amenity.id}
-                            className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group hover:bg-white hover:shadow-md transition-all duration-300"
-                          >
-                            <div className="bg-primary-light/40 p-2 rounded-lg text-primary-dark group-hover:bg-primary group-hover:text-white transition-colors duration-300">
-                              {renderAmenityIcon(amenity.icon, amenity.name)}
-                            </div>
-                            <div>
-                              <span className="text-sm font-semibold text-gray-900 block">{amenity.name}</span>
-                              {amenity.description && (
-                                <span className="text-xs text-gray-500 line-clamp-1">{amenity.description}</span>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-5 mb-6">
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900 font-playfair">Hotel Amenities & Facilities</h2>
+                      <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                        All room features, dining services, and on-site guest conveniences
+                      </p>
                     </div>
-                  ))}
+                    <span className="self-start sm:self-auto text-xs font-semibold px-3 py-1 bg-teal/10 text-teal-800 rounded-full border border-teal/20">
+                      {hotel.amenities.length} total amenities
+                    </span>
+                  </div>
+
+                  {/* Clustered Category Cards Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-start">
+                    {Object.entries(
+                      hotel.amenities.reduce((acc, amenity) => {
+                        const category = amenity.category || 'General';
+                        if (!acc[category]) acc[category] = [];
+                        acc[category].push(amenity);
+                        return acc;
+                      }, {} as Record<string, typeof hotel.amenities>)
+                    ).map(([category, items]) => (
+                      <div
+                        key={category}
+                        className="rounded-xl border border-gray-200/90 bg-gray-50/50 hover:bg-white hover:border-teal/40 hover:shadow-sm transition-all duration-200 p-5 flex flex-col h-full"
+                      >
+                        {/* Category Card Header */}
+                        <div className="flex items-center justify-between gap-3 pb-3 mb-3.5 border-b border-gray-200/80">
+                          <div className="flex items-center gap-2.5">
+                            <div className="p-2 rounded-lg bg-teal/10 text-teal shrink-0">
+                              {getCategoryIcon(category)}
+                            </div>
+                            <h3 className="text-base font-bold text-gray-900 font-playfair tracking-tight">
+                              {category}
+                            </h3>
+                          </div>
+                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white border border-gray-200 text-gray-600 shadow-2xs">
+                            {items.length}
+                          </span>
+                        </div>
+
+                        {/* Scannable list of items under this category */}
+                        <ul className="space-y-2.5 text-sm text-gray-700 flex-1">
+                          {items.map((amenity) => (
+                            <li key={amenity.id} className="flex items-start gap-2.5 group">
+                              <span className="mt-0.5 p-0.5 rounded-full bg-teal/10 text-teal group-hover:bg-teal group-hover:text-white transition-colors shrink-0">
+                                <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <span className="text-xs sm:text-sm font-medium text-gray-800 group-hover:text-gray-950 transition-colors block leading-snug">
+                                  {amenity.name}
+                                </span>
+                                {amenity.description && (
+                                  <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2 leading-tight">
+                                    {amenity.description}
+                                  </p>
+                                )}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 

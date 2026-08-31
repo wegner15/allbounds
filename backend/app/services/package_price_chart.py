@@ -102,7 +102,7 @@ class PackagePriceChartService:
                 db.add(hotel_opt)
 
         db.commit()
-        db.refresh(db_price_chart)
+        db.expire_all()
         return self.get_price_chart_by_id(db, db_price_chart.id) or db_price_chart
     
     def update_price_chart(self, db: Session, price_chart_id: int, price_chart_data: PackagePriceChartUpdate) -> Optional[PackagePriceChart]:
@@ -121,7 +121,7 @@ class PackagePriceChartService:
         # Update hotel options if explicitly passed
         if price_chart_data.hotel_options is not None:
             # Remove existing options and replace with new ones
-            db.query(PackagePriceChartHotel).filter(PackagePriceChartHotel.price_chart_id == price_chart_id).delete()
+            db.query(PackagePriceChartHotel).filter(PackagePriceChartHotel.price_chart_id == price_chart_id).delete(synchronize_session=False)
             for idx, opt in enumerate(price_chart_data.hotel_options):
                 hotel_opt = PackagePriceChartHotel(
                     price_chart_id=price_chart_id,
@@ -135,6 +135,7 @@ class PackagePriceChartService:
                 db.add(hotel_opt)
 
         db.commit()
+        db.expire_all()
         return self.get_price_chart_by_id(db, price_chart_id)
     
     def delete_price_chart(self, db: Session, price_chart_id: int) -> bool:

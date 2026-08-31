@@ -81,7 +81,7 @@ class GroupTripPriceChartService:
                 db.add(hotel_opt)
 
         db.commit()
-        db.refresh(db_chart)
+        db.expire_all()
         return self.get_price_chart_by_id(db, db_chart.id) or db_chart
 
     def update_price_chart(self, db: Session, price_chart_id: int, price_chart_data: GroupTripPriceChartUpdate) -> Optional[GroupTripPriceChart]:
@@ -97,7 +97,7 @@ class GroupTripPriceChartService:
             db_chart.booking_price = db_chart.price
 
         if price_chart_data.hotel_options is not None:
-            db.query(GroupTripPriceChartHotel).filter(GroupTripPriceChartHotel.price_chart_id == price_chart_id).delete()
+            db.query(GroupTripPriceChartHotel).filter(GroupTripPriceChartHotel.price_chart_id == price_chart_id).delete(synchronize_session=False)
             for idx, opt in enumerate(price_chart_data.hotel_options):
                 hotel_opt = GroupTripPriceChartHotel(
                     price_chart_id=price_chart_id,
@@ -111,6 +111,7 @@ class GroupTripPriceChartService:
                 db.add(hotel_opt)
 
         db.commit()
+        db.expire_all()
         return self.get_price_chart_by_id(db, price_chart_id)
 
     def delete_price_chart(self, db: Session, price_chart_id: int) -> bool:

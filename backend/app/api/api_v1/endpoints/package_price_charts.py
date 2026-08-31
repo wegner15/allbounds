@@ -62,7 +62,8 @@ def create_price_chart(
     Create a new price chart.
     """
     result = package_price_chart_service.create_price_chart(db, price_chart_data)
-    invalidate_cache_pattern(f"*price-charts*")
+    invalidate_cache_pattern("cache:*price*")
+    invalidate_cache_pattern("cache:*package*")
     return result
 
 @router.put("/price-charts/{price_chart_id}", response_model=PackagePriceChartResponse)
@@ -77,7 +78,8 @@ def update_price_chart(
     updated_price_chart = package_price_chart_service.update_price_chart(db, price_chart_id, price_chart_data)
     if not updated_price_chart:
         raise HTTPException(status_code=404, detail="Price chart not found")
-    invalidate_cache_pattern(f"*price-charts*")
+    invalidate_cache_pattern("cache:*price*")
+    invalidate_cache_pattern("cache:*package*")
     return updated_price_chart
 
 @router.delete("/price-charts/{price_chart_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -91,5 +93,6 @@ def delete_price_chart(
     deleted = package_price_chart_service.delete_price_chart(db, price_chart_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Price chart not found")
-    invalidate_cache_pattern(f"*price-charts*")
+    invalidate_cache_pattern("cache:*price*")
+    invalidate_cache_pattern("cache:*package*")
     return None

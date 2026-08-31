@@ -283,6 +283,7 @@ export interface Amenity extends BaseModel {
   description?: string;
   icon?: string;
   category?: string;
+  is_popular?: boolean;
   is_active: boolean;
 }
 
@@ -291,6 +292,7 @@ export interface AmenityCreate {
   description?: string;
   icon?: string;
   category?: string;
+  is_popular?: boolean;
 }
 
 export type AmenityUpdate = Partial<AmenityCreate> & {

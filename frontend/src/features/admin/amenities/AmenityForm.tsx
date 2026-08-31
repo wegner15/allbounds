@@ -224,6 +224,25 @@ const AmenityForm: React.FC<AmenityFormProps> = ({
         </div>
       </div>
 
+      <div className="bg-amber-50/50 border border-amber-200/70 rounded-xl p-4">
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            id="is_popular"
+            {...register('is_popular')}
+            className="h-4 w-4 text-teal focus:ring-teal border-gray-300 rounded mt-0.5"
+          />
+          <div>
+            <span className="text-sm font-semibold text-gray-900 block">
+              Mark as Popular Facility ⭐
+            </span>
+            <span className="text-xs text-gray-600">
+              When checked, this facility will be prominently featured under "Most Popular Facilities" at the top of hotel detail pages.
+            </span>
+          </div>
+        </label>
+      </div>
+
       <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
         <Button
           type="button"

@@ -107,6 +107,12 @@ const AmenitiesListPage: React.FC = () => {
                             scope="col"
                             className="px-3 py-3.5 text-left text-sm font-semibold text-charcoal"
                           >
+                            Popular
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-3 py-3.5 text-left text-sm font-semibold text-charcoal"
+                          >
                             Status
                           </th>
                           <th
@@ -133,6 +139,15 @@ const AmenitiesListPage: React.FC = () => {
                             </td>
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                               {amenity.icon || '-'}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              {amenity.is_popular ? (
+                                <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
+                                  ⭐ Popular
+                                </span>
+                              ) : (
+                                <span className="text-gray-400 text-xs">—</span>
+                              )}
                             </td>
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                               <span

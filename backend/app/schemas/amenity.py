@@ -8,6 +8,7 @@ class AmenityBase(BaseModel):
     description: Optional[str] = Field(None, description="Description of the amenity")
     icon: Optional[str] = Field(None, description="Icon class or identifier for the amenity", example="wifi")
     category: Optional[str] = Field(None, description="Category of the amenity", example="General")
+    is_popular: Optional[bool] = Field(False, description="Whether this is a popular facility featured at the top")
 
 
 class AmenityCreate(AmenityBase):
@@ -19,11 +20,13 @@ class AmenityUpdate(BaseModel):
     description: Optional[str] = Field(None, description="Description of the amenity")
     icon: Optional[str] = Field(None, description="Icon class or identifier for the amenity")
     category: Optional[str] = Field(None, description="Category of the amenity")
+    is_popular: Optional[bool] = Field(None, description="Whether this is a popular facility featured at the top")
     is_active: Optional[bool] = Field(None, description="Whether the amenity is active")
 
 
 class AmenityResponse(AmenityBase):
     id: int
+    is_popular: bool = False
     is_active: bool
     created_at: datetime
     updated_at: Optional[datetime] = None

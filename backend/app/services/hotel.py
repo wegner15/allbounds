@@ -441,6 +441,8 @@ class HotelService:
             "stars": hotel.stars,
             "address": hotel.address,
             "city": hotel.city,
+            "latitude": hotel.latitude,
+            "longitude": hotel.longitude,
             "price_category": hotel.price_category,
             "country_id": hotel.country_id,
             "amenities": [
@@ -449,7 +451,8 @@ class HotelService:
                     "name": amenity.name,
                     "icon": amenity.icon,
                     "category": amenity.category,
-                    "description": amenity.description
+                    "description": amenity.description,
+                    "is_popular": getattr(amenity, 'is_popular', False),
                 } for amenity in hotel.amenities if amenity.is_active
             ] if hotel.amenities else [],
             "amenity_ids": [amenity.id for amenity in hotel.amenities] if hotel.amenities else [],

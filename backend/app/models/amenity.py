@@ -13,6 +13,7 @@ class Amenity(Base):
     description = Column(Text, nullable=True)
     icon = Column(String(100), nullable=True)  # For frontend icon display
     category = Column(String(50), nullable=True)  # e.g., "General", "Room", "Bathroom", "Services"
+    is_popular = Column(Boolean, default=False)  # Highlighted under Most Popular Facilities
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

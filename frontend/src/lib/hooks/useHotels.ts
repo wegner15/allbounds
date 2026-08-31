@@ -7,6 +7,7 @@ export interface Amenity {
   icon?: string;
   category?: string;
   description?: string;
+  is_popular?: boolean;
 }
 
 export interface Hotel {

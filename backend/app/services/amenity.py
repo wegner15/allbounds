@@ -50,6 +50,7 @@ class AmenityService:
             description=amenity_create.description,
             icon=amenity_create.icon,
             category=amenity_create.category,
+            is_popular=amenity_create.is_popular if amenity_create.is_popular is not None else False,
         )
         db.add(db_amenity)
         db.commit()

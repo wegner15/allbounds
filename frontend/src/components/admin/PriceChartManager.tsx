@@ -333,7 +333,16 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
             </button>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
+                e.preventDefault();
+                e.stopPropagation();
+                handleSubmit(onSubmit)(e);
+              }
+            }}
+            className="space-y-6"
+          >
             <div className="space-y-1">
               <label htmlFor="title" className="block text-sm font-semibold text-gray-700">
                 Season / Chart Title *
@@ -726,14 +735,19 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
                 Cancel
               </button>
               <button
-                type="submit"
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSubmit(onSubmit)(e);
+                }}
                 disabled={isSubmitting}
                 className="px-6 py-2 border border-transparent rounded-lg text-sm font-semibold text-white bg-teal hover:bg-teal-dark disabled:opacity-50 transition-colors"
               >
                 {isSubmitting ? 'Saving...' : editingChart ? 'Update Price Chart' : 'Create Price Chart'}
               </button>
             </div>
-          </form>
+          </div>
         </div>
       )}
 

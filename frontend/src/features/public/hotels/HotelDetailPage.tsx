@@ -397,7 +397,7 @@ const HotelDetailPage: React.FC = () => {
                 </div>
               )}
 
-              {/* All Hotel Amenities Section */}
+              {/* All Hotel Amenities Section - Horizontal Layout */}
               {hotel.amenities && hotel.amenities.length > 0 && (
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-5 mb-6">
@@ -412,8 +412,8 @@ const HotelDetailPage: React.FC = () => {
                     </span>
                   </div>
 
-                  {/* Clustered Category Cards Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-start">
+                  {/* Horizontal Category Rows */}
+                  <div className="divide-y divide-gray-100">
                     {Object.entries(
                       hotel.amenities.reduce((acc, amenity) => {
                         const category = amenity.category || 'General';
@@ -424,27 +424,27 @@ const HotelDetailPage: React.FC = () => {
                     ).map(([category, items]) => (
                       <div
                         key={category}
-                        className="rounded-xl border border-gray-200/90 bg-gray-50/50 hover:bg-white hover:border-teal/40 hover:shadow-sm transition-all duration-200 p-5 flex flex-col h-full"
+                        className="py-5 first:pt-0 last:pb-0 grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-6 items-start"
                       >
-                        {/* Category Card Header */}
-                        <div className="flex items-center justify-between gap-3 pb-3 mb-3.5 border-b border-gray-200/80">
-                          <div className="flex items-center gap-2.5">
-                            <div className="p-2 rounded-lg bg-teal/10 text-teal shrink-0">
-                              {getCategoryIcon(category)}
-                            </div>
-                            <h3 className="text-base font-bold text-gray-900 font-playfair tracking-tight">
+                        {/* Category Left Header (Horizontal Anchor) */}
+                        <div className="md:col-span-4 lg:col-span-3 flex items-center gap-2.5">
+                          <div className="p-2 rounded-lg bg-teal/10 text-teal shrink-0">
+                            {getCategoryIcon(category)}
+                          </div>
+                          <div>
+                            <h3 className="text-sm sm:text-base font-bold text-gray-900 font-playfair tracking-tight">
                               {category}
                             </h3>
+                            <span className="text-[11px] text-gray-400 font-medium">
+                              {items.length} {items.length === 1 ? 'item' : 'items'}
+                            </span>
                           </div>
-                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white border border-gray-200 text-gray-600 shadow-2xs">
-                            {items.length}
-                          </span>
                         </div>
 
-                        {/* Scannable list of items under this category */}
-                        <ul className="space-y-2.5 text-sm text-gray-700 flex-1">
+                        {/* Category Amenities Grid (Spanning horizontal width) */}
+                        <div className="md:col-span-8 lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-2.5">
                           {items.map((amenity) => (
-                            <li key={amenity.id} className="flex items-start gap-2.5 group">
+                            <div key={amenity.id} className="flex items-start gap-2 group">
                               <span className="mt-0.5 p-0.5 rounded-full bg-teal/10 text-teal group-hover:bg-teal group-hover:text-white transition-colors shrink-0">
                                 <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                               </span>
@@ -453,14 +453,14 @@ const HotelDetailPage: React.FC = () => {
                                   {amenity.name}
                                 </span>
                                 {amenity.description && (
-                                  <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2 leading-tight">
+                                  <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-1 leading-tight">
                                     {amenity.description}
                                   </p>
                                 )}
                               </div>
-                            </li>
+                            </div>
                           ))}
-                        </ul>
+                        </div>
                       </div>
                     ))}
                   </div>

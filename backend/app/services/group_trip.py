@@ -4,6 +4,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.group_trip import GroupTrip, GroupTripDeparture
+from app.models.group_trip_price_chart import GroupTripPriceChart, GroupTripPriceChartHotel
 from app.models.media import MediaAsset
 from app.models.inclusion_exclusion import Inclusion, Exclusion
 from app.models.blog import Tag

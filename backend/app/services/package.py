@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import or_
 
 from app.models.package import Package
+from app.models.package_price_chart import PackagePriceChart, PackagePriceChartHotel
 from app.models.media import MediaAsset
 from app.models.holiday_type import HolidayType
 from app.models.inclusion_exclusion import Inclusion, Exclusion

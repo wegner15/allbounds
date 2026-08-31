@@ -3,7 +3,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, parseISO, isAfter, isBefore, addMonths } from 'date-fns';
-import { Plus, Trash2, Hotel as HotelIcon, Star, Check, Sparkles, X } from 'lucide-react';
+import { Plus, Trash2, Hotel as HotelIcon, Star, Check, Sparkles, X, Moon, Calendar, Clock } from 'lucide-react';
 import {
   useEntityPriceCharts,
   useCreateEntityPriceChart,
@@ -13,7 +13,7 @@ import {
   type PriceChartEntityType
 } from '../../lib/hooks/usePackagePriceCharts';
 import { useHotels } from '../../lib/hooks/useHotels';
-import type { PriceChartHotelOption } from '../../lib/types/api';
+import type { PriceChartHotelOption, HotelPriceChartNightRate } from '../../lib/types/api';
 
 const priceChartSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
@@ -57,11 +57,19 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
   const [editingChart, setEditingChart] = useState<EditingChart | null>(null);
   const [hotelOptions, setHotelOptions] = useState<PriceChartHotelOption[]>([]);
 
-  // Hotel addition staging state
+  // Hotel addition staging state (for tour packages)
   const [stagedHotelId, setStagedHotelId] = useState<number | ''>('');
   const [stagedRoomType, setStagedRoomType] = useState<string>('Standard Room');
   const [stagedSupplement, setStagedSupplement] = useState<number>(0);
   const [stagedIsDefault, setStagedIsDefault] = useState<boolean>(false);
+
+  // Hotel Night Rates Matrix state (for hotels)
+  const [nightRates, setNightRates] = useState<HotelPriceChartNightRate[]>([]);
+  const [stagedNights, setStagedNights] = useState<number>(3);
+  const [stagedNightPrice, setStagedNightPrice] = useState<number | ''>(450);
+  const [stagedNightRoomType, setStagedNightRoomType] = useState<string>('Standard Room');
+  const [stagedNightMealPlan, setStagedNightMealPlan] = useState<string>('Bed & Breakfast');
+
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
 
   const { register, handleSubmit, reset, setValue, control, watch, formState: { errors, isSubmitting } } = useForm<PriceChartFormData>({
@@ -86,6 +94,85 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
       setValue('end_date', newEndDate);
     }
   }, [watchedStartDate, watchedEndDate, setValue]);
+
+  // Handle preset nights selection for hotels
+  const applyPresetNights = (nights: number) => {
+    setStagedNights(nights);
+    const existingRate = nightRates.find(r => r.nights === nights);
+    if (existingRate) {
+      setStagedNightPrice(existingRate.price);
+      setStagedNightRoomType(existingRate.room_type || 'Standard Room');
+      setStagedNightMealPlan(existingRate.meal_plan || 'Bed & Breakfast');
+    } else {
+      const existingPerNight = nightRates.length > 0 && nightRates[0].price_per_night ? nightRates[0].price_per_night : 150;
+      setStagedNightPrice(Math.round(existingPerNight * nights));
+    }
+  };
+
+  const handleAddNightRate = () => {
+    if (!stagedNights || stagedNights <= 0 || stagedNightPrice === '' || Number(stagedNightPrice) <= 0) {
+      alert('Please enter a valid number of nights and price');
+      return;
+    }
+
+    const priceNum = Number(stagedNightPrice);
+    const existingIdx = nightRates.findIndex(nr => nr.nights === stagedNights && (nr.room_type || '') === stagedNightRoomType.trim());
+    
+    const newRate: HotelPriceChartNightRate = {
+      nights: stagedNights,
+      price: priceNum,
+      price_per_night: Math.round((priceNum / stagedNights) * 100) / 100,
+      room_type: stagedNightRoomType.trim() || 'Standard Room',
+      meal_plan: stagedNightMealPlan.trim() || 'Bed & Breakfast',
+      is_default: nightRates.length === 0,
+      is_active: true,
+      order_index: nightRates.length
+    };
+
+    let updated: HotelPriceChartNightRate[];
+    if (existingIdx >= 0) {
+      updated = [...nightRates];
+      updated[existingIdx] = newRate;
+    } else {
+      updated = [...nightRates, newRate];
+    }
+
+    updated.sort((a, b) => a.nights - b.nights);
+    setNightRates(updated);
+
+    // Auto sync base price in form if unset or 0
+    const formPrice = watch('price');
+    if (!formPrice || formPrice === 0) {
+      setValue('price', priceNum);
+    }
+  };
+
+  const handleRemoveNightRate = (index: number) => {
+    const updated = nightRates.filter((_, idx) => idx !== index);
+    if (updated.length > 0 && !updated.some(nr => nr.is_default)) {
+      updated[0].is_default = true;
+    }
+    setNightRates(updated);
+  };
+
+  const handleUpdateNightRate = (index: number, field: keyof HotelPriceChartNightRate, value: any) => {
+    const updated = [...nightRates];
+    if (field === 'is_default' && value === true) {
+      updated.forEach((nr, idx) => {
+        nr.is_default = idx === index;
+      });
+    } else {
+      updated[index] = { ...updated[index], [field]: value };
+      if (field === 'price' || field === 'nights') {
+        const p = field === 'price' ? Number(value) : updated[index].price;
+        const n = field === 'nights' ? Number(value) : updated[index].nights;
+        if (p && n) {
+          updated[index].price_per_night = Math.round((p / n) * 100) / 100;
+        }
+      }
+    }
+    setNightRates(updated);
+  };
 
   const handleSelectHotelForStaging = (hotelId: number | '') => {
     setStagedHotelId(hotelId);
@@ -181,15 +268,33 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
           }))
         : undefined;
 
+      const cleanNightRates = entityType === 'hotel'
+        ? nightRates.map((nr, idx) => ({
+            nights: Number(nr.nights),
+            price: Number(nr.price),
+            price_per_night: nr.price_per_night ? Number(nr.price_per_night) : Math.round((Number(nr.price) / Number(nr.nights)) * 100) / 100,
+            room_type: nr.room_type || 'Standard Room',
+            meal_plan: nr.meal_plan || 'Bed & Breakfast',
+            is_default: Boolean(nr.is_default),
+            is_active: nr.is_active !== false,
+            order_index: idx,
+          }))
+        : undefined;
+
+      const effectivePrice = data.price > 0 
+        ? data.price 
+        : (cleanNightRates && cleanNightRates.length > 0 ? cleanNightRates[0].price : 0);
+
       const payload: any = {
         title: data.title,
         start_date: data.start_date,
         end_date: data.end_date,
-        price: data.price,
-        booking_price: data.booking_price !== undefined && !isNaN(data.booking_price) ? data.booking_price : data.price,
+        price: effectivePrice,
+        booking_price: data.booking_price !== undefined && !isNaN(data.booking_price) ? data.booking_price : effectivePrice,
         notes: data.notes || '',
         is_active: data.is_active,
-        hotel_options: cleanHotelOptions
+        hotel_options: cleanHotelOptions,
+        night_rates: cleanNightRates
       };
 
       if (editingChart) {
@@ -210,6 +315,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
       await refetch();
       reset();
       setHotelOptions([]);
+      setNightRates([]);
       setShowForm(false);
       setEditingChart(null);
       handleCancelStaging();
@@ -234,6 +340,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
 
     setEditingChart({ id: chart.id, data: formData });
     setHotelOptions(chart.hotel_options ? [...chart.hotel_options] : []);
+    setNightRates(chart.night_rates ? [...chart.night_rates] : []);
     handleCancelStaging();
 
     Object.entries(formData).forEach(([key, value]) => {
@@ -257,6 +364,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
   const handleCancel = () => {
     reset();
     setHotelOptions([]);
+    setNightRates([]);
     setShowForm(false);
     setEditingChart(null);
     handleCancelStaging();
@@ -705,6 +813,200 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
               </div>
             )}
 
+            {/* Hotel Night Rates Matrix Builder Section (for entityType === 'hotel') */}
+            {entityType === 'hotel' && (
+              <div className="p-5 bg-teal/5 rounded-xl border border-teal/20 space-y-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Moon className="w-5 h-5 text-teal" />
+                      <h4 className="font-bold text-gray-900 text-base">Stay Durations & Night Rates Matrix</h4>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-0.5">
+                      Configure custom rates for various night stay durations (e.g. 3 Nights, 4 Nights, 5 Nights, 7 Nights). These populate the public pricing table columns.
+                    </p>
+                  </div>
+                  {nightRates.length > 0 && (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-teal/10 text-teal-dark border border-teal/20">
+                      {nightRates.length} {nightRates.length === 1 ? 'Duration Tier' : 'Duration Tiers'}
+                    </span>
+                  )}
+                </div>
+
+                {/* Preset Quick-Add Chips */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-bold text-gray-500 flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-teal" /> Quick Presets:
+                  </span>
+                  {[3, 4, 5, 7, 10, 14].map(n => {
+                    const exists = nightRates.some(r => r.nights === n);
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => applyPresetNights(n)}
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                          exists 
+                            ? 'bg-teal text-white border-teal shadow-xs' 
+                            : 'bg-white text-gray-700 border-gray-300 hover:border-teal hover:text-teal'
+                        }`}
+                      >
+                        {n} Nights {exists ? '✓' : ''}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Staging / Input row for adding a duration tier */}
+                <div className="p-4 bg-white rounded-xl border border-gray-200 shadow-2xs space-y-3">
+                  <div className="text-xs font-bold text-gray-800 flex items-center justify-between">
+                    <span>Add / Configure Stay Duration Tier</span>
+                    {stagedNights && stagedNightPrice && Number(stagedNightPrice) > 0 && (
+                      <span className="text-teal font-semibold">
+                        = ${(Number(stagedNightPrice) / stagedNights).toFixed(2)}/night
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-gray-600 mb-1">
+                        Number of Nights *
+                      </label>
+                      <div className="relative">
+                        <Moon className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="number"
+                          min="1"
+                          max="90"
+                          value={stagedNights}
+                          onChange={(e) => setStagedNights(parseInt(e.target.value) || 1)}
+                          className="w-full pl-8 pr-2.5 py-1.5 border border-gray-300 rounded-lg text-xs font-bold bg-white focus:ring-1 focus:ring-teal outline-none"
+                          placeholder="e.g. 3"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-gray-600 mb-1">
+                        Total Price (USD) *
+                      </label>
+                      <div className="relative">
+                        <span className="absolute inset-y-0 left-0 pl-2.5 flex items-center text-gray-500 text-xs font-bold">$</span>
+                        <input
+                          type="number"
+                          step="1"
+                          min="0"
+                          value={stagedNightPrice}
+                          onChange={(e) => setStagedNightPrice(e.target.value === '' ? '' : parseFloat(e.target.value))}
+                          className="w-full pl-7 pr-2.5 py-1.5 border border-gray-300 rounded-lg text-xs font-bold text-gray-900 bg-white focus:ring-1 focus:ring-teal outline-none"
+                          placeholder="e.g. 450"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-gray-600 mb-1">
+                        Room / Suite Category
+                      </label>
+                      <input
+                        type="text"
+                        value={stagedNightRoomType}
+                        onChange={(e) => setStagedNightRoomType(e.target.value)}
+                        placeholder="e.g. Standard Room, Ocean Villa"
+                        className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg text-xs bg-white focus:ring-1 focus:ring-teal outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-gray-600 mb-1">
+                        Meal Plan
+                      </label>
+                      <input
+                        type="text"
+                        value={stagedNightMealPlan}
+                        onChange={(e) => setStagedNightMealPlan(e.target.value)}
+                        placeholder="e.g. Bed & Breakfast, All-Inclusive"
+                        className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg text-xs bg-white focus:ring-1 focus:ring-teal outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-2">
+                    <button
+                      type="button"
+                      onClick={handleAddNightRate}
+                      className="px-4 py-1.5 bg-teal hover:bg-teal-dark text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add / Update {stagedNights} Nights Tier
+                    </button>
+                  </div>
+                </div>
+
+                {/* List of Configured Night Tiers for this Season */}
+                {nightRates.length > 0 ? (
+                  <div className="space-y-2">
+                    <div className="text-xs font-bold text-gray-700">Configured Duration Rates for this Season:</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {nightRates.map((nr, idx) => (
+                        <div
+                          key={idx}
+                          className={`p-3.5 rounded-xl border transition-all ${
+                            nr.is_default ? 'bg-teal/10 border-teal shadow-xs' : 'bg-white border-gray-200 shadow-2xs'
+                          } flex flex-col justify-between gap-2`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="px-2 py-0.5 rounded-md bg-teal/10 text-teal-dark text-xs font-extrabold">
+                                {nr.nights} Nights
+                              </span>
+                              {nr.is_default && (
+                                <span className="text-[10px] uppercase tracking-wider font-bold bg-teal text-white px-1.5 py-0.5 rounded">
+                                  Default
+                                </span>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveNightRate(idx)}
+                              className="text-gray-400 hover:text-red-600 p-1 transition-colors"
+                              title="Remove tier"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          <div className="flex items-baseline justify-between border-t border-gray-100 pt-2">
+                            <div>
+                              <div className="text-sm font-extrabold text-gray-900">
+                                USD {nr.price.toLocaleString()}
+                              </div>
+                              <div className="text-[11px] text-gray-500 font-medium">
+                                ~${(nr.price / nr.nights).toFixed(0)}/night
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-[11px] font-semibold text-gray-700">
+                                {nr.room_type || 'Standard'}
+                              </div>
+                              <div className="text-[10px] text-teal-dark font-medium">
+                                {nr.meal_plan || 'Bed & Breakfast'}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 border border-dashed border-teal/30 bg-white/70 rounded-xl text-center text-gray-500 text-xs">
+                    No night duration rates added yet. Click one of the quick preset buttons above or enter duration tiers to populate the rate matrix.
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex items-center space-x-3">
               <Controller
                 name="is_active"
@@ -765,7 +1067,9 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
             </div>
             <h3 className="text-base font-bold text-gray-900">No seasonal price charts yet</h3>
             <p className="mt-1 text-sm text-gray-500 max-w-sm mx-auto">
-              Create seasonal rates and attach hotel upgrade tiers for customers to choose during booking.
+              {entityType === 'hotel' 
+                ? 'Create seasonal rate periods and define variable stay durations (3 Nights, 4 Nights, 5 Nights, 7 Nights).'
+                : 'Create seasonal rates and attach hotel upgrade tiers for customers to choose during booking.'}
             </p>
             <div className="mt-5">
               <button
@@ -773,6 +1077,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
                 onClick={() => {
                   reset();
                   setHotelOptions([]);
+                  setNightRates([]);
                   handleCancelStaging();
                   setShowForm(true);
                 }}
@@ -803,6 +1108,11 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
                   {isTourEntity && (
                     <th scope="col" className="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase tracking-wider">
                       Attached Hotel Options
+                    </th>
+                  )}
+                  {entityType === 'hotel' && (
+                    <th scope="col" className="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase tracking-wider">
+                      Stay Durations (Nights & Rates)
                     </th>
                   )}
                   <th scope="col" className="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase tracking-wider">
@@ -859,6 +1169,24 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
                           </div>
                         ) : (
                           <span className="text-xs text-gray-400 italic">Standard (No specific hotels attached)</span>
+                        )}
+                      </td>
+                    )}
+                    {entityType === 'hotel' && (
+                      <td className="px-6 py-4">
+                        {chart.night_rates && chart.night_rates.length > 0 ? (
+                          <div className="flex flex-wrap gap-1.5 max-w-md">
+                            {chart.night_rates.map((nr, nIdx) => (
+                              <span
+                                key={nIdx}
+                                className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-teal/10 text-teal-dark border border-teal/20"
+                              >
+                                {nr.nights} Nts: ${nr.price.toLocaleString()}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">1 Tier (${chart.price.toLocaleString()})</span>
                         )}
                       </td>
                     )}

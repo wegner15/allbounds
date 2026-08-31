@@ -38,7 +38,10 @@ import {
   Bed,
   Bike,
   Check,
+  Calendar,
+  ArrowRight,
 } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
 import { TextDisplay } from '../../../components/ui/RichTextDisplay';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -162,6 +165,29 @@ const HotelDetailPage: React.FC = () => {
   const { data: hotel, isLoading, error } = useHotelBySlug(slug!);
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [showInquiryForm, setShowInquiryForm] = useState(false);
+
+  const [selectedPriceChart, setSelectedPriceChart] = useState<any>(null);
+  const [selectedNightRate, setSelectedNightRate] = useState<any>(null);
+
+  // Active seasonal price charts
+  const activePriceCharts = useMemo(() => {
+    return (hotel?.price_charts || []).filter((pc: any) => pc.is_active !== false);
+  }, [hotel?.price_charts]);
+
+  // Extract all unique night durations across active charts (e.g. [3, 4, 5, 7])
+  const uniqueNightDurations = useMemo(() => {
+    const set = new Set<number>();
+    activePriceCharts.forEach((pc: any) => {
+      if (pc.night_rates && pc.night_rates.length > 0) {
+        pc.night_rates.forEach((nr: any) => {
+          if (nr.is_active !== false && nr.nights) {
+            set.add(Number(nr.nights));
+          }
+        });
+      }
+    });
+    return Array.from(set).sort((a, b) => a - b);
+  }, [activePriceCharts]);
 
   // Group all images for the gallery
   const getAllImages = useMemo(() => {
@@ -397,6 +423,140 @@ const HotelDetailPage: React.FC = () => {
                 </div>
               )}
 
+              {/* Seasonal Stay Rates Matrix Table */}
+              {activePriceCharts.length > 0 && (
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-5 mb-6">
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900 font-playfair flex items-center gap-2">
+                        Seasonal Stay Rates & Packages
+                      </h2>
+                      <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                        Select your travel season and stay duration for instant pricing and direct booking
+                      </p>
+                    </div>
+                    <span className="self-start sm:self-auto text-xs font-semibold px-3 py-1 bg-teal/10 text-teal-800 rounded-full border border-teal/20">
+                      {activePriceCharts.length} {activePriceCharts.length === 1 ? 'Season Rate' : 'Seasonal Rates'} Available
+                    </span>
+                  </div>
+
+                  <div className="overflow-x-auto -mx-6 sm:mx-0 px-6 sm:px-0">
+                    <table className="w-full border-collapse border border-gray-200 rounded-xl overflow-hidden text-left">
+                      <thead>
+                        <tr className="bg-slate-50 border-b border-gray-200">
+                          <th className="py-4 px-5 text-sm font-bold text-gray-900 min-w-[200px]">
+                            Season / Date range
+                          </th>
+                          {uniqueNightDurations.length > 0 ? (
+                            uniqueNightDurations.map((nights) => (
+                              <th key={nights} className="py-4 px-4 text-sm font-bold text-gray-900 text-center whitespace-nowrap min-w-[130px]">
+                                {nights} Nights
+                              </th>
+                            ))
+                          ) : (
+                            <th className="py-4 px-4 text-sm font-bold text-gray-900 text-center min-w-[130px]">
+                              Base Rate
+                            </th>
+                          )}
+                          <th className="py-4 px-5 text-sm font-bold text-gray-900 text-right min-w-[120px]">
+                            Action
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 bg-white">
+                        {activePriceCharts.map((chart: any) => {
+                          const startDateStr = chart.start_date ? format(parseISO(chart.start_date), 'MMM dd, yyyy') : '';
+                          const endDateStr = chart.end_date ? format(parseISO(chart.end_date), 'MMM dd, yyyy') : '';
+
+                          return (
+                            <tr key={chart.id} className="hover:bg-teal/5 transition-colors group">
+                              {/* Column 1: Season & Date Range */}
+                              <td className="py-4 px-5 align-middle">
+                                <div className="font-bold text-base text-gray-900 group-hover:text-teal transition-colors">
+                                  {chart.title}
+                                </div>
+                                {(startDateStr || endDateStr) && (
+                                  <div className="text-xs text-gray-500 font-medium mt-0.5 flex items-center gap-1">
+                                    <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                    <span>{startDateStr} – {endDateStr}</span>
+                                  </div>
+                                )}
+                                {chart.notes && (
+                                  <p className="text-[11px] text-gray-400 mt-1 line-clamp-1 italic">
+                                    {chart.notes}
+                                  </p>
+                                )}
+                              </td>
+
+                              {/* Night Duration Columns */}
+                              {uniqueNightDurations.length > 0 ? (
+                                uniqueNightDurations.map((nights) => {
+                                  const matchRate = (chart.night_rates || []).find((nr: any) => Number(nr.nights) === nights && nr.is_active !== false);
+
+                                  if (matchRate) {
+                                    return (
+                                      <td key={nights} className="py-4 px-3 text-center align-middle">
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setSelectedPriceChart(chart);
+                                            setSelectedNightRate(matchRate);
+                                            setShowBookingForm(true);
+                                          }}
+                                          className="w-full p-2.5 rounded-xl border border-gray-200/80 bg-gray-50 hover:bg-white hover:border-teal hover:shadow-md transition-all duration-200 text-center group/cell"
+                                        >
+                                          <div className="text-sm font-extrabold text-gray-900 group-hover/cell:text-teal transition-colors">
+                                            USD {matchRate.price.toLocaleString()}
+                                          </div>
+                                          <div className="text-[10px] text-gray-500 font-medium mt-0.5">
+                                            ~${(matchRate.price / nights).toFixed(0)}/nt
+                                          </div>
+                                          {matchRate.room_type && (
+                                            <div className="text-[10px] text-gray-600 truncate max-w-[120px] mx-auto mt-0.5">
+                                              {matchRate.room_type}
+                                            </div>
+                                          )}
+                                        </button>
+                                      </td>
+                                    );
+                                  }
+
+                                  return (
+                                    <td key={nights} className="py-4 px-3 text-center align-middle text-gray-300 font-medium text-sm">
+                                      —
+                                    </td>
+                                  );
+                                })
+                              ) : (
+                                <td className="py-4 px-4 text-center align-middle font-bold text-gray-900 text-sm">
+                                  USD {chart.price.toLocaleString()}
+                                </td>
+                              )}
+
+                              {/* Column: Action / Book */}
+                              <td className="py-4 px-5 text-right align-middle">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedPriceChart(chart);
+                                    setSelectedNightRate(chart.night_rates && chart.night_rates.length > 0 ? chart.night_rates[0] : null);
+                                    setShowBookingForm(true);
+                                  }}
+                                  className="inline-flex items-center gap-1 px-4 py-2 bg-quote-btn hover:bg-quote-btn-dark text-white text-xs font-bold rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95 whitespace-nowrap"
+                                >
+                                  <span>Book Stay</span>
+                                  <ArrowRight className="w-3.5 h-3.5" />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
               {/* All Hotel Amenities Section - Horizontal Layout */}
               {hotel.amenities && hotel.amenities.length > 0 && (
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
@@ -614,6 +774,8 @@ const HotelDetailPage: React.FC = () => {
               updated_at: hotel.updated_at,
             } as any}
             bookingType="hotel"
+            initialPriceChart={selectedPriceChart}
+            initialNightRate={selectedNightRate}
             isOpen={showBookingForm}
             onClose={() => setShowBookingForm(false)}
             onSuccess={() => {

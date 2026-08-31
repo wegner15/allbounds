@@ -50,6 +50,8 @@ class BookingBase(BaseModel):
     selected_hotel_name: Optional[str] = Field(None, description="Selected hotel name")
     selected_hotel_supplement: Optional[float] = Field(0.0, description="Hotel price supplement per person")
     selected_room_type: Optional[str] = Field(None, description="Selected room type")
+    selected_meal_plan: Optional[str] = Field(None, description="Selected meal plan")
+    number_of_nights: Optional[int] = Field(None, description="Number of nights for stay")
     calculated_total_price: Optional[float] = Field(None, description="Calculated total price in USD")
 
 
@@ -60,6 +62,10 @@ class BookingCreate(BookingBase):
 class BookingUpdate(BaseModel):
     status: Optional[str] = Field(None, description="Booking status")
     special_requests: Optional[str] = Field(None, description="Update special requests")
+    number_of_nights: Optional[int] = Field(None, description="Number of nights")
+    selected_meal_plan: Optional[str] = Field(None, description="Selected meal plan")
+    selected_room_type: Optional[str] = Field(None, description="Selected room type")
+    calculated_total_price: Optional[float] = Field(None, description="Calculated total price in USD")
 
 
 class BookingResponse(BookingBase):

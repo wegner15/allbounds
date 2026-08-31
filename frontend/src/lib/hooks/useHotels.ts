@@ -163,6 +163,7 @@ export interface HotelDetails extends Hotel {
     file_path: string;
   }>;
   amenities?: Amenity[];
+  price_charts?: any[];
 }
 
 // Hook for fetching hotel details by slug

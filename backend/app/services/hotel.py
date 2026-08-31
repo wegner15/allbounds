@@ -2,6 +2,7 @@ from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.hotel import Hotel
+from app.models.hotel_price_chart import HotelPriceChart, HotelPriceChartNightRate
 from app.models.country import Country
 from app.models.amenity import Amenity
 from app.models.blog import Tag
@@ -387,7 +388,7 @@ class HotelService:
         """
         hotel = db.query(Hotel).options(
             joinedload(Hotel.media_assets),
-            joinedload(Hotel.price_charts),
+            joinedload(Hotel.price_charts).joinedload(HotelPriceChart.night_rates),
             joinedload(Hotel.country),
             joinedload(Hotel.hotel_type),
             joinedload(Hotel.amenities),
@@ -486,6 +487,19 @@ class HotelService:
                     "booking_price": float(pc.booking_price) if pc.booking_price is not None else float(pc.price) if pc.price else 0,
                     "notes": pc.notes,
                     "is_active": pc.is_active,
+                    "night_rates": [
+                        {
+                            "id": nr.id,
+                            "nights": nr.nights,
+                            "price": float(nr.price) if nr.price else 0,
+                            "price_per_night": float(nr.price_per_night) if nr.price_per_night is not None else round(float(nr.price)/nr.nights, 2) if nr.price and nr.nights else 0,
+                            "room_type": nr.room_type,
+                            "meal_plan": nr.meal_plan,
+                            "is_default": nr.is_default,
+                            "order_index": nr.order_index,
+                            "is_active": nr.is_active,
+                        } for nr in getattr(pc, 'night_rates', []) if getattr(nr, 'is_active', True)
+                    ] if getattr(pc, 'night_rates', None) else [],
                 } for pc in hotel.price_charts if pc.is_active
             ] if hotel.price_charts else [],
             "country": {

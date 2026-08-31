@@ -40,6 +40,8 @@ class Booking(Base):
     selected_hotel_name = Column(String(255), nullable=True)
     selected_hotel_supplement = Column(Float, default=0.0, nullable=True)
     selected_room_type = Column(String(100), nullable=True)
+    selected_meal_plan = Column(String(100), nullable=True)
+    number_of_nights = Column(Integer, nullable=True)
     calculated_total_price = Column(Float, nullable=True)
 
     # Timestamps

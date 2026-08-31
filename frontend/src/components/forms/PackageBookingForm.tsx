@@ -69,6 +69,8 @@ interface PackageBookingFormProps {
   bookingType?: 'package' | 'group_trip' | 'hotel';
   initialPriceChart?: any;
   initialHotelOption?: PriceChartHotelOption | null;
+  initialNightRate?: any;
+  initialNights?: number;
 }
 
 const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
@@ -78,7 +80,9 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
   onSuccess,
   bookingType = 'package',
   initialPriceChart,
-  initialHotelOption
+  initialHotelOption,
+  initialNightRate,
+  initialNights
 }) => {
   const [step, setStep] = useState<'details' | 'travelers' | 'confirmation'>('details');
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -97,7 +101,35 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
     return availablePriceCharts.find(c => c.id === selectedChartId) || initialPriceChart || null;
   }, [availablePriceCharts, selectedChartId, initialPriceChart]);
 
+  // For hotel night rates
+  const availableNightRates = useMemo<any[]>(() => {
+    if (bookingType === 'hotel' && selectedChart?.night_rates && selectedChart.night_rates.length > 0) {
+      return selectedChart.night_rates.filter((nr: any) => nr.is_active !== false);
+    }
+    return [];
+  }, [bookingType, selectedChart]);
+
+  const [selectedNightRate, setSelectedNightRate] = useState<any>(() => {
+    if (initialNightRate) return initialNightRate;
+    if (availableNightRates.length > 0) {
+      return availableNightRates.find((nr: any) => nr.is_default) || availableNightRates[0];
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (initialNightRate) {
+      setSelectedNightRate(initialNightRate);
+    } else if (availableNightRates.length > 0) {
+      const match = availableNightRates.find((nr: any) => nr.id === selectedNightRate?.id) || 
+                    availableNightRates.find((nr: any) => nr.is_default) || 
+                    availableNightRates[0];
+      setSelectedNightRate(match);
+    }
+  }, [initialNightRate, availableNightRates]);
+
   const availableHotelOptions = useMemo<PriceChartHotelOption[]>(() => {
+    if (bookingType === 'hotel') return [];
     if (selectedChart?.hotel_options && selectedChart.hotel_options.length > 0) {
       return selectedChart.hotel_options.filter((opt: PriceChartHotelOption) => opt.is_active !== false);
     }
@@ -113,7 +145,7 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
       }));
     }
     return [];
-  }, [selectedChart, packageData]);
+  }, [bookingType, selectedChart, packageData]);
 
   const [selectedHotel, setSelectedHotel] = useState<PriceChartHotelOption | null>(() => {
     if (initialHotelOption) return initialHotelOption;
@@ -182,10 +214,13 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
   const watchedChildren = watch('number_of_children') || 0;
 
   // Calculate live total price
-  const baseRatePerPerson = selectedChart?.price || packageData?.price || 0;
-  const hotelSupplement = selectedHotel?.price_supplement || 0;
+  const isHotelBooking = bookingType === 'hotel';
+  const baseRatePerPerson = isHotelBooking
+    ? (selectedNightRate?.price || selectedChart?.price || packageData?.price || 0)
+    : (selectedChart?.price || packageData?.price || 0);
+  const hotelSupplement = isHotelBooking ? 0 : (selectedHotel?.price_supplement || 0);
   const ratePerAdult = baseRatePerPerson + hotelSupplement;
-  const ratePerChild = Math.round(ratePerAdult * 0.7);
+  const ratePerChild = isHotelBooking ? Math.round(ratePerAdult * 0.5) : Math.round(ratePerAdult * 0.7);
   const calculatedTotal = (ratePerAdult * watchedAdults) + (ratePerChild * watchedChildren);
 
   // Update travelers array when adult/child counts change
@@ -261,10 +296,12 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
         source: data.source,
         partner_code: data.partner_code || undefined,
         price_chart_id: selectedChart?.id,
-        selected_hotel_id: selectedHotel?.hotel_id,
-        selected_hotel_name: selectedHotel?.hotel?.name,
-        selected_hotel_supplement: selectedHotel?.price_supplement || 0,
-        selected_room_type: selectedHotel?.room_type,
+        selected_hotel_id: isHotelBooking ? packageData.id : selectedHotel?.hotel_id,
+        selected_hotel_name: isHotelBooking ? packageData.name : selectedHotel?.hotel?.name,
+        selected_hotel_supplement: isHotelBooking ? 0 : (selectedHotel?.price_supplement || 0),
+        selected_room_type: isHotelBooking ? (selectedNightRate?.room_type || 'Standard Room') : selectedHotel?.room_type,
+        selected_meal_plan: isHotelBooking ? selectedNightRate?.meal_plan : undefined,
+        number_of_nights: isHotelBooking ? (selectedNightRate?.nights || initialNights) : undefined,
         calculated_total_price: calculatedTotal,
       };
 
@@ -476,6 +513,71 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
                             <span className={`text-xs font-bold ${opt.price_supplement > 0 ? 'text-amber-700' : 'text-teal'}`}>
                               {opt.price_supplement > 0 ? `+$${opt.price_supplement}` : 'Included'}
                             </span>
+                            <div className="mt-1 flex justify-end">
+                              <div
+                                className={`w-4 h-4 rounded-full flex items-center justify-center border transition-colors ${
+                                  isSelected ? 'bg-teal border-teal text-white' : 'border-gray-300 bg-white'
+                                }`}
+                              >
+                                {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Hotel Night Stay Duration Packages (When booking a hotel) */}
+              {isHotelBooking && availableNightRates.length > 0 && (
+                <div className="p-4 bg-gray-50/80 rounded-xl border border-gray-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-gray-800 uppercase tracking-wider">
+                      Select Stay Duration & Room Package
+                    </span>
+                    {selectedNightRate && (
+                      <span className="text-xs font-semibold text-teal">
+                        {selectedNightRate.nights} Nights Stay
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {availableNightRates.map((nr: any, idx: number) => {
+                      const isSelected = selectedNightRate?.id === nr.id || (!selectedNightRate && idx === 0);
+
+                      return (
+                        <div
+                          key={nr.id || idx}
+                          onClick={() => setSelectedNightRate(nr)}
+                          className={`cursor-pointer p-3.5 rounded-xl border transition-all flex items-center justify-between gap-3 ${
+                            isSelected
+                              ? 'bg-white border-teal ring-2 ring-teal/30 shadow-xs'
+                              : 'bg-white hover:bg-gray-100 border-gray-200'
+                          }`}
+                        >
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-gray-900 bg-teal/10 text-teal-dark px-2 py-0.5 rounded">
+                                {nr.nights} Nights
+                              </span>
+                              {nr.room_type && (
+                                <span className="text-xs font-semibold text-gray-800 truncate max-w-[140px]">
+                                  {nr.room_type}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[11px] text-gray-500 mt-1">
+                              {nr.meal_plan || 'Bed & Breakfast'} • ~${(nr.price / nr.nights).toFixed(0)}/nt
+                            </div>
+                          </div>
+
+                          <div className="text-right flex-shrink-0">
+                            <div className="text-sm font-bold text-gray-900">
+                              USD {nr.price.toLocaleString()}
+                            </div>
                             <div className="mt-1 flex justify-end">
                               <div
                                 className={`w-4 h-4 rounded-full flex items-center justify-center border transition-colors ${

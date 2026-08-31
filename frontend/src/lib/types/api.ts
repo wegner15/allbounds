@@ -34,6 +34,19 @@ export interface PriceChartHotelOption {
   hotel?: PriceChartHotelSummary;
 }
 
+export interface HotelPriceChartNightRate {
+  id?: number;
+  price_chart_id?: number;
+  nights: number;
+  price: number;
+  price_per_night?: number;
+  room_type?: string;
+  meal_plan?: string;
+  is_default?: boolean;
+  order_index?: number;
+  is_active?: boolean;
+}
+
 export interface PriceChart extends BaseModel {
   package_id?: number;
   group_trip_id?: number;
@@ -46,6 +59,7 @@ export interface PriceChart extends BaseModel {
   notes?: string;
   is_active: boolean;
   hotel_options?: PriceChartHotelOption[];
+  night_rates?: HotelPriceChartNightRate[];
 }
 
 
@@ -830,6 +844,8 @@ export interface BookingCreate {
   selected_hotel_name?: string;
   selected_hotel_supplement?: number;
   selected_room_type?: string;
+  selected_meal_plan?: string;
+  number_of_nights?: number;
   calculated_total_price?: number;
 }
 

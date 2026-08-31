@@ -59,6 +59,8 @@ class BookingService:
             selected_hotel_name=booking.selected_hotel_name,
             selected_hotel_supplement=booking.selected_hotel_supplement or 0.0,
             selected_room_type=booking.selected_room_type,
+            selected_meal_plan=booking.selected_meal_plan,
+            number_of_nights=booking.number_of_nights,
             calculated_total_price=booking.calculated_total_price,
         )
         db.add(db_booking)

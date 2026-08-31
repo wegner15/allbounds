@@ -169,16 +169,22 @@ class ReviewDetail(BaseModel):
         from_attributes = True
 
 
+from app.schemas.package_price_chart import PriceChartHotelOptionResponse
+
 class PriceChartDetail(BaseModel):
     id: int
     title: str
     start_date: datetime
     end_date: datetime
     price: float
+    booking_price: Optional[float] = None
+    notes: Optional[str] = None
     is_active: bool
+    hotel_options: List[PriceChartHotelOptionResponse] = []
     
     class Config:
         from_attributes = True
+        extra = 'ignore'
 
 
 class BlogPostSummary(BaseModel):

@@ -3,7 +3,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, parseISO, isAfter, isBefore, addMonths } from 'date-fns';
-import { Plus, Trash2, Hotel as HotelIcon, Star } from 'lucide-react';
+import { Plus, Trash2, Hotel as HotelIcon, Star, Check, Sparkles, X } from 'lucide-react';
 import {
   useEntityPriceCharts,
   useCreateEntityPriceChart,
@@ -47,18 +47,22 @@ interface EditingChart {
 
 const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entityType = 'package', entityId }) => {
   const targetId = entityId || packageId || 0;
-  const { data: priceCharts, isLoading } = useEntityPriceCharts(entityType, targetId);
+  const { data: priceCharts, isLoading, refetch } = useEntityPriceCharts(entityType, targetId);
   const { data: hotelsList = [] } = useHotels();
   const createPriceChart = useCreateEntityPriceChart(entityType);
+  const updatePriceChart = useUpdateEntityPriceChart(entityType);
   const deletePriceChart = useDeleteEntityPriceChart(entityType);
 
   const [showForm, setShowForm] = useState(false);
   const [editingChart, setEditingChart] = useState<EditingChart | null>(null);
-  const [currentPriceChartId, setCurrentPriceChartId] = useState<number | null>(null);
   const [hotelOptions, setHotelOptions] = useState<PriceChartHotelOption[]>([]);
-  const [selectedNewHotelId, setSelectedNewHotelId] = useState<number | ''>('');
 
-  const updatePriceChart = useUpdateEntityPriceChart(entityType, currentPriceChartId || 0);
+  // Hotel addition staging state
+  const [stagedHotelId, setStagedHotelId] = useState<number | ''>('');
+  const [stagedRoomType, setStagedRoomType] = useState<string>('Standard Room');
+  const [stagedSupplement, setStagedSupplement] = useState<number>(0);
+  const [stagedIsDefault, setStagedIsDefault] = useState<boolean>(false);
+  const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
 
   const { register, handleSubmit, reset, setValue, control, watch, formState: { errors, isSubmitting } } = useForm<PriceChartFormData>({
     resolver: zodResolver(priceChartSchema),
@@ -83,9 +87,18 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
     }
   }, [watchedStartDate, watchedEndDate, setValue]);
 
-  const handleAddHotelOption = () => {
-    if (!selectedNewHotelId) return;
-    const hotel = hotelsList.find(h => h.id === Number(selectedNewHotelId));
+  const handleSelectHotelForStaging = (hotelId: number | '') => {
+    setStagedHotelId(hotelId);
+    if (hotelId) {
+      setStagedRoomType('Standard Room');
+      setStagedSupplement(0);
+      setStagedIsDefault(hotelOptions.length === 0);
+    }
+  };
+
+  const handleConfirmAddStagedHotel = () => {
+    if (!stagedHotelId) return;
+    const hotel = hotelsList.find(h => h.id === Number(stagedHotelId));
     if (!hotel) return;
 
     if (hotelOptions.some(opt => opt.hotel_id === hotel.id)) {
@@ -93,12 +106,13 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
       return;
     }
 
-    const isFirst = hotelOptions.length === 0;
+    const shouldBeDefault = stagedIsDefault || hotelOptions.length === 0;
+
     const newOption: PriceChartHotelOption = {
       hotel_id: hotel.id,
-      price_supplement: 0,
-      room_type: 'Standard Room',
-      is_default: isFirst,
+      price_supplement: Number(stagedSupplement) || 0,
+      room_type: stagedRoomType.trim() || 'Standard Room',
+      is_default: shouldBeDefault,
       is_active: true,
       order_index: hotelOptions.length,
       hotel: {
@@ -114,8 +128,24 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
       }
     };
 
-    setHotelOptions([...hotelOptions, newOption]);
-    setSelectedNewHotelId('');
+    let updated = [...hotelOptions];
+    if (shouldBeDefault) {
+      updated = updated.map(opt => ({ ...opt, is_default: false }));
+    }
+    setHotelOptions([...updated, newOption]);
+
+    // Reset staging
+    setStagedHotelId('');
+    setStagedRoomType('Standard Room');
+    setStagedSupplement(0);
+    setStagedIsDefault(false);
+  };
+
+  const handleCancelStaging = () => {
+    setStagedHotelId('');
+    setStagedRoomType('Standard Room');
+    setStagedSupplement(0);
+    setStagedIsDefault(false);
   };
 
   const handleRemoveHotelOption = (index: number) => {
@@ -140,8 +170,18 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
 
   const onSubmit = async (data: PriceChartFormData) => {
     try {
+      const cleanHotelOptions = (entityType === 'package' || entityType === 'group_trip')
+        ? hotelOptions.map((opt, idx) => ({
+            hotel_id: Number(opt.hotel_id),
+            price_supplement: Number(opt.price_supplement) || 0,
+            room_type: opt.room_type || 'Standard Room',
+            is_default: Boolean(opt.is_default),
+            is_active: opt.is_active !== false,
+            order_index: idx,
+          }))
+        : undefined;
+
       const payload: any = {
-        entityId: targetId,
         title: data.title,
         start_date: data.start_date,
         end_date: data.end_date,
@@ -149,21 +189,35 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
         booking_price: data.booking_price !== undefined && !isNaN(data.booking_price) ? data.booking_price : data.price,
         notes: data.notes || '',
         is_active: data.is_active,
-        hotel_options: (entityType === 'package' || entityType === 'group_trip') ? hotelOptions : undefined
+        hotel_options: cleanHotelOptions
       };
 
       if (editingChart) {
-        await updatePriceChart.mutateAsync(payload);
-        setEditingChart(null);
+        await updatePriceChart.mutateAsync({
+          entityId: targetId,
+          priceChartId: editingChart.id,
+          ...payload
+        });
+        setSaveSuccessMsg(`Price chart "${data.title}" updated successfully!`);
       } else {
-        await createPriceChart.mutateAsync(payload);
+        await createPriceChart.mutateAsync({
+          entityId: targetId,
+          ...payload
+        });
+        setSaveSuccessMsg(`Price chart "${data.title}" created successfully!`);
       }
+
+      await refetch();
       reset();
       setHotelOptions([]);
       setShowForm(false);
-      setCurrentPriceChartId(null);
+      setEditingChart(null);
+      handleCancelStaging();
+
+      setTimeout(() => setSaveSuccessMsg(null), 4000);
     } catch (error) {
       console.error('Error saving price chart:', error);
+      alert('Failed to save price chart. Please check the form and try again.');
     }
   };
 
@@ -179,8 +233,8 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
     };
 
     setEditingChart({ id: chart.id, data: formData });
-    setCurrentPriceChartId(chart.id);
     setHotelOptions(chart.hotel_options ? [...chart.hotel_options] : []);
+    handleCancelStaging();
 
     Object.entries(formData).forEach(([key, value]) => {
       setValue(key as keyof PriceChartFormData, value as any);
@@ -193,6 +247,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
     if (window.confirm('Are you sure you want to delete this price chart? This action cannot be undone.')) {
       try {
         await deletePriceChart.mutateAsync({ priceChartId: chartId, entityId: targetId });
+        await refetch();
       } catch (error) {
         console.error('Error deleting price chart:', error);
       }
@@ -204,7 +259,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
     setHotelOptions([]);
     setShowForm(false);
     setEditingChart(null);
-    setCurrentPriceChartId(null);
+    handleCancelStaging();
   };
 
   const getStatusBadge = (chart: PriceChart) => {
@@ -223,9 +278,17 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
   };
 
   const isTourEntity = entityType === 'package' || entityType === 'group_trip';
+  const stagedHotelObj = stagedHotelId ? hotelsList.find(h => h.id === Number(stagedHotelId)) : null;
 
   return (
     <div className="space-y-6">
+      {saveSuccessMsg && (
+        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl flex items-center gap-2 text-sm font-medium animate-fade-in">
+          <Check className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+          <span>{saveSuccessMsg}</span>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
         <div>
           <h2 className="text-xl font-bold text-gray-900">Seasonal Rates & Price Charts</h2>
@@ -239,6 +302,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
             onClick={() => {
               reset();
               setHotelOptions([]);
+              handleCancelStaging();
               setShowForm(true);
             }}
             className="inline-flex items-center px-4 py-2.5 bg-teal hover:bg-teal-dark text-white text-sm font-semibold rounded-lg shadow-sm transition-colors duration-200"
@@ -305,7 +369,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
 
               <div className="space-y-1">
                 <label htmlFor="booking_price" className="block text-sm font-semibold text-gray-700">
-                  Booking Deposit Price (USD) <span className="text-gray-400 font-normal">(Optional)</span>
+                  Deposit / Booking Rate (USD) <span className="text-gray-400 font-normal">(Optional)</span>
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 font-bold">$</span>
@@ -313,9 +377,11 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
                     type="number"
                     step="0.01"
                     id="booking_price"
-                    {...register('booking_price', { valueAsNumber: true })}
+                    {...register('booking_price', {
+                      setValueAs: (v) => (v === '' || isNaN(v) ? undefined : parseFloat(v)),
+                    })}
                     className="block w-full pl-8 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal focus:border-teal outline-none"
-                    placeholder="Defaults to full price"
+                    placeholder="Defaults to Base Price if blank"
                   />
                 </div>
               </div>
@@ -362,8 +428,9 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
               />
             </div>
 
+            {/* Hotel Options Section */}
             {isTourEntity && (
-              <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-4">
+              <div className="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                   <div>
                     <div className="flex items-center gap-2">
@@ -371,11 +438,17 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
                       <h4 className="font-bold text-gray-900 text-base">Attached Hotel Options & Supplements</h4>
                     </div>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      Add hotels that travelers can select for this season. Set a $0 supplement for standard/included hotels, or a positive amount (e.g. +$350) for luxury upgrades.
+                      Attach hotels that travelers can select for this season. Set a $0 supplement for included/standard hotels, or an extra amount (e.g. +$350) for luxury upgrades.
                     </p>
                   </div>
+                  {hotelOptions.length > 0 && (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-teal/10 text-teal-dark">
+                      {hotelOptions.length} {hotelOptions.length === 1 ? 'Hotel Attached' : 'Hotels Attached'}
+                    </span>
+                  )}
                 </div>
 
+                {/* List of Already Attached Hotels */}
                 {hotelOptions.length > 0 ? (
                   <div className="space-y-2.5">
                     {hotelOptions.map((opt, idx) => {
@@ -383,12 +456,12 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
                       return (
                         <div
                           key={opt.hotel_id || idx}
-                          className={`p-3.5 rounded-lg border transition-all ${
-                            opt.is_default ? 'bg-teal/5 border-teal' : 'bg-white border-gray-200'
+                          className={`p-4 rounded-xl border transition-all ${
+                            opt.is_default ? 'bg-teal/5 border-teal shadow-xs' : 'bg-white border-gray-200 shadow-2xs'
                           } flex flex-col md:flex-row items-start md:items-center justify-between gap-3`}
                         >
-                          <div className="flex items-center gap-3 min-w-[200px]">
-                            <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                          <div className="flex items-center gap-3 min-w-[220px]">
+                            <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center border border-gray-200">
                               {hotelObj?.image_url || hotelObj?.cover_image ? (
                                 <img
                                   src={hotelObj.image_url || hotelObj.cover_image}
@@ -400,7 +473,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
                               )}
                             </div>
                             <div>
-                              <div className="flex items-center gap-1.5">
+                              <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className="font-bold text-sm text-gray-900">{hotelObj?.name || `Hotel #${opt.hotel_id}`}</span>
                                 {hotelObj?.stars && (
                                   <span className="inline-flex items-center text-xs font-semibold text-amber-600">
@@ -409,38 +482,45 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
                                   </span>
                                 )}
                               </div>
-                              <span className="text-xs text-gray-500">{hotelObj?.city || 'Selected Accommodation'}</span>
+                              <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
+                                <span>{hotelObj?.city || 'Accommodation Option'}</span>
+                                {opt.is_default && (
+                                  <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold bg-teal text-white">
+                                    Default (Base)
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full md:w-auto flex-1 max-w-xl">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto flex-1 max-w-xl">
                             <div>
-                              <label className="block text-[11px] font-medium text-gray-600 mb-0.5">Room / Tier Label</label>
+                              <label className="block text-[11px] font-medium text-gray-600 mb-1">Room / Tier Label</label>
                               <input
                                 type="text"
                                 value={opt.room_type || ''}
                                 onChange={(e) => handleUpdateHotelOption(idx, 'room_type', e.target.value)}
-                                placeholder="e.g. Luxury Tent"
-                                className="w-full px-2.5 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-teal outline-none"
+                                placeholder="e.g. Standard, Luxury Tent"
+                                className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg text-xs bg-white focus:ring-1 focus:ring-teal outline-none"
                               />
                             </div>
 
                             <div>
-                              <label className="block text-[11px] font-medium text-gray-600 mb-0.5">Extra Cost (+USD)</label>
+                              <label className="block text-[11px] font-medium text-gray-600 mb-1">Extra Cost (+USD / person)</label>
                               <div className="relative">
-                                <span className="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-400 text-xs font-bold">+$</span>
+                                <span className="absolute inset-y-0 left-0 pl-2.5 flex items-center text-gray-500 text-xs font-bold">+$</span>
                                 <input
                                   type="number"
                                   step="0.01"
                                   min="0"
                                   value={opt.price_supplement}
                                   onChange={(e) => handleUpdateHotelOption(idx, 'price_supplement', parseFloat(e.target.value) || 0)}
-                                  className="w-full pl-6 pr-2 py-1.5 border border-gray-300 rounded text-xs font-semibold focus:ring-1 focus:ring-teal outline-none"
+                                  className="w-full pl-7 pr-2 py-1.5 border border-gray-300 rounded-lg text-xs font-semibold bg-white focus:ring-1 focus:ring-teal outline-none"
                                 />
                               </div>
                             </div>
 
-                            <div className="flex items-center justify-between sm:justify-start gap-2 pt-4">
+                            <div className="flex items-center justify-between sm:justify-start gap-2 pt-4 sm:pt-5">
                               <label className="flex items-center gap-1.5 cursor-pointer">
                                 <input
                                   type="radio"
@@ -457,7 +537,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
                           <button
                             type="button"
                             onClick={() => handleRemoveHotelOption(idx)}
-                            className="p-1.5 text-gray-400 hover:text-red-600 rounded transition-colors self-end md:self-center"
+                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors self-end md:self-center"
                             title="Remove hotel option"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -467,35 +547,151 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
                     })}
                   </div>
                 ) : (
-                  <div className="p-4 border border-dashed border-gray-300 rounded-lg text-center bg-white text-gray-500 text-xs">
-                    No hotel options attached yet. Add hotel options below to offer accommodation choices to customers.
+                  <div className="p-4 border border-dashed border-gray-300 rounded-xl text-center bg-white text-gray-500 text-xs">
+                    No hotel options attached yet. Select a hotel below to configure and attach accommodation choices.
                   </div>
                 )}
 
-                <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-gray-200">
-                  <select
-                    value={selectedNewHotelId}
-                    onChange={(e) => setSelectedNewHotelId(e.target.value ? Number(e.target.value) : '')}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-teal focus:border-teal outline-none"
-                  >
-                    <option value="">-- Choose a hotel to attach --</option>
-                    {hotelsList
-                      .filter(h => !hotelOptions.some(opt => opt.hotel_id === h.id))
-                      .map((h) => (
-                        <option key={h.id} value={h.id}>
-                          {h.name} {h.stars ? `(${h.stars}★)` : ''} {h.city ? `— ${h.city}` : ''}
-                        </option>
-                      ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={handleAddHotelOption}
-                    disabled={!selectedNewHotelId}
-                    className="px-4 py-2 bg-charcoal hover:bg-charcoal/90 disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add Hotel Tier
-                  </button>
+                {/* Hotel Selector & Staging Form */}
+                <div className="pt-3 border-t border-slate-200 space-y-3">
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-gray-700">
+                      Select Hotel to Attach
+                    </label>
+                    <select
+                      value={stagedHotelId}
+                      onChange={(e) => handleSelectHotelForStaging(e.target.value ? Number(e.target.value) : '')}
+                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-teal focus:border-teal outline-none"
+                    >
+                      <option value="">-- Choose a hotel from directory to attach --</option>
+                      {hotelsList
+                        .filter(h => !hotelOptions.some(opt => opt.hotel_id === h.id))
+                        .map((h) => (
+                          <option key={h.id} value={h.id}>
+                            {h.name} {h.stars ? `(${h.stars}★)` : ''} {h.city ? `— ${h.city}` : ''}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+
+                  {/* Dedicated Staging Area for Configuring Hotel Additionals Before Attaching */}
+                  {stagedHotelObj && (
+                    <div className="p-4 bg-teal/5 border border-teal/30 rounded-xl space-y-4 animate-fade-in">
+                      <div className="flex items-center justify-between pb-3 border-b border-teal/20">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-white overflow-hidden flex items-center justify-center border border-teal/20">
+                            {stagedHotelObj.image_url || stagedHotelObj.cover_image ? (
+                              <img
+                                src={stagedHotelObj.image_url || stagedHotelObj.cover_image}
+                                alt={stagedHotelObj.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <HotelIcon className="w-5 h-5 text-teal" />
+                            )}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-sm text-gray-900">{stagedHotelObj.name}</span>
+                              {stagedHotelObj.stars && (
+                                <span className="text-xs font-semibold text-amber-600">
+                                  ★ {stagedHotelObj.stars}
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-xs text-gray-500">{stagedHotelObj.city || 'Selected Hotel'}</span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleCancelStaging}
+                          className="text-gray-400 hover:text-gray-600 p-1"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="block text-xs font-semibold text-gray-700">
+                            Room / Tier Label *
+                          </label>
+                          <input
+                            type="text"
+                            value={stagedRoomType}
+                            onChange={(e) => setStagedRoomType(e.target.value)}
+                            placeholder="e.g. Standard Room, Luxury Tent, Suite"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-teal outline-none"
+                          />
+                          <div className="flex gap-1.5 flex-wrap pt-1">
+                            {['Standard Room', 'Luxury Safari Tent', 'Deluxe Suite', 'Executive Villa'].map(chip => (
+                              <button
+                                key={chip}
+                                type="button"
+                                onClick={() => setStagedRoomType(chip)}
+                                className="px-2 py-0.5 bg-white border border-gray-200 rounded text-[11px] text-gray-600 hover:border-teal hover:text-teal transition-colors"
+                              >
+                                {chip}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="block text-xs font-semibold text-gray-700">
+                            Price Supplement (+USD per person)
+                          </label>
+                          <div className="relative">
+                            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 font-bold text-sm">+$</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={stagedSupplement}
+                              onChange={(e) => setStagedSupplement(parseFloat(e.target.value) || 0)}
+                              className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold bg-white focus:ring-2 focus:ring-teal outline-none"
+                              placeholder="0.00"
+                            />
+                          </div>
+                          <p className="text-[11px] text-gray-500 pt-0.5">
+                            Set 0 for included standard hotel, or positive supplement (e.g. +$350) for luxury upgrade.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pt-2">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={stagedIsDefault}
+                            onChange={(e) => setStagedIsDefault(e.target.checked)}
+                            className="h-4 w-4 text-teal focus:ring-teal rounded border-gray-300"
+                          />
+                          <span className="text-xs font-medium text-gray-700">
+                            Set as default selected accommodation for this season
+                          </span>
+                        </label>
+
+                        <div className="flex gap-2 w-full sm:w-auto justify-end">
+                          <button
+                            type="button"
+                            onClick={handleCancelStaging}
+                            className="px-3.5 py-1.5 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleConfirmAddStagedHotel}
+                            className="px-4 py-1.5 bg-teal hover:bg-teal-dark text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-sm"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            Attach Hotel Option
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -541,6 +737,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
         </div>
       )}
 
+      {/* Existing Price Charts List */}
       <div className="bg-white shadow-sm rounded-xl overflow-hidden border border-gray-200">
         {isLoading ? (
           <div className="text-center py-16">
@@ -562,6 +759,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
                 onClick={() => {
                   reset();
                   setHotelOptions([]);
+                  handleCancelStaging();
                   setShowForm(true);
                 }}
                 className="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-lg text-white bg-teal hover:bg-teal-dark transition-colors"
@@ -633,14 +831,15 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
                             {chart.hotel_options.map((opt, oIdx) => (
                               <span
                                 key={oIdx}
-                                className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium border ${
+                                className={`inline-flex items-center px-2 py-1 rounded-md text-[11px] font-medium border ${
                                   opt.is_default
-                                    ? 'bg-teal/10 text-teal-dark border-teal/30'
+                                    ? 'bg-teal/10 text-teal-dark border-teal/30 font-semibold'
                                     : 'bg-gray-100 text-gray-700 border-gray-200'
                                 }`}
                               >
                                 {opt.hotel?.name || `Hotel #${opt.hotel_id}`}
-                                {opt.price_supplement > 0 ? ` (+${opt.price_supplement})` : ' (Incl.)'}
+                                {opt.room_type ? ` (${opt.room_type})` : ''}
+                                {opt.price_supplement > 0 ? ` +$${opt.price_supplement}` : ' (Incl.)'}
                               </span>
                             ))}
                           </div>

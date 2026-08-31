@@ -29,6 +29,8 @@ class PriceChartHotelOptionBase(BaseModel):
     is_active: bool = Field(default=True, description="Whether this option is active")
     order_index: int = Field(default=0, description="Display order index")
 
+    model_config = ConfigDict(from_attributes=True, extra='ignore')
+
 
 class PriceChartHotelOptionCreate(PriceChartHotelOptionBase):
     price_chart_id: Optional[int] = Field(None, description="ID of the price chart")
@@ -41,6 +43,8 @@ class PriceChartHotelOptionUpdate(BaseModel):
     is_default: Optional[bool] = None
     is_active: Optional[bool] = None
     order_index: Optional[int] = None
+
+    model_config = ConfigDict(from_attributes=True, extra='ignore')
 
 
 class PriceChartHotelOptionResponse(PriceChartHotelOptionBase):
@@ -61,6 +65,8 @@ class PackagePriceChartBase(BaseModel):
     price: float = Field(..., description="Price in USD for this period", ge=0)
     booking_price: Optional[float] = Field(None, description="Optional booking/deposit price in USD (defaults to price if blank)", ge=0)
     notes: Optional[str] = Field(None, description="Optional notes relevant to this price period")
+
+    model_config = ConfigDict(from_attributes=True, extra='ignore')
 
     @field_validator('end_date')
     @classmethod
@@ -87,6 +93,8 @@ class PackagePriceChartUpdate(BaseModel):
     notes: Optional[str] = Field(None, description="Optional notes relevant to this price period")
     is_active: Optional[bool] = Field(None, description="Whether the price chart is active")
     hotel_options: Optional[List[PriceChartHotelOptionBase]] = Field(None, description="Hotel options with supplements")
+
+    model_config = ConfigDict(from_attributes=True, extra='ignore')
 
     @field_validator('end_date')
     @classmethod

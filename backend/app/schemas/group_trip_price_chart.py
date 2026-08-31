@@ -18,6 +18,8 @@ class GroupTripPriceChartBase(BaseModel):
     booking_price: Optional[float] = Field(None, description="Optional booking/deposit price in USD", ge=0)
     notes: Optional[str] = Field(None, description="Optional notes relevant to this price period")
 
+    model_config = ConfigDict(from_attributes=True, extra='ignore')
+
     @field_validator('end_date')
     @classmethod
     def end_date_must_be_after_start_date(cls, v, info):
@@ -31,6 +33,8 @@ class GroupTripPriceChartCreate(GroupTripPriceChartBase):
     is_active: Optional[bool] = Field(True, description="Whether active")
     hotel_options: Optional[List[PriceChartHotelOptionBase]] = Field(default_factory=list, description="Hotel options with supplements")
 
+    model_config = ConfigDict(from_attributes=True, extra='ignore')
+
 
 class GroupTripPriceChartUpdate(BaseModel):
     title: Optional[str] = None
@@ -41,6 +45,8 @@ class GroupTripPriceChartUpdate(BaseModel):
     notes: Optional[str] = None
     is_active: Optional[bool] = None
     hotel_options: Optional[List[PriceChartHotelOptionBase]] = Field(None, description="Hotel options with supplements")
+
+    model_config = ConfigDict(from_attributes=True, extra='ignore')
 
     @field_validator('end_date')
     @classmethod

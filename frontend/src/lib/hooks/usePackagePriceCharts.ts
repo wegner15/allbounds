@@ -158,18 +158,24 @@ export const useCreateEntityPriceChart = (entityType: PriceChartEntityType) => {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: [entityType, variables.entityId, 'price-charts'] });
+      queryClient.invalidateQueries({ queryKey: [entityType, variables.entityId] });
+      queryClient.invalidateQueries({ queryKey: ['packages'] });
+      queryClient.invalidateQueries({ queryKey: ['group-trips'] });
     },
   });
 };
 
-export const useUpdateEntityPriceChart = (entityType: PriceChartEntityType, priceChartId: number) => {
+export const useUpdateEntityPriceChart = (entityType: PriceChartEntityType) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ entityId, ...priceChart }: PriceChartUpdateInput & { entityId: number }) => {
+    mutationFn: async ({ entityId, priceChartId, ...priceChart }: PriceChartUpdateInput & { entityId: number; priceChartId: number }) => {
       return apiClient.put<PriceChart>(getEntityItemEndpoint(entityType, priceChartId), priceChart);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: [entityType, variables.entityId, 'price-charts'] });
+      queryClient.invalidateQueries({ queryKey: [entityType, variables.entityId] });
+      queryClient.invalidateQueries({ queryKey: ['packages'] });
+      queryClient.invalidateQueries({ queryKey: ['group-trips'] });
     },
   });
 };
@@ -183,6 +189,9 @@ export const useDeleteEntityPriceChart = (entityType: PriceChartEntityType) => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [entityType, data.entityId, 'price-charts'] });
+      queryClient.invalidateQueries({ queryKey: [entityType, data.entityId] });
+      queryClient.invalidateQueries({ queryKey: ['packages'] });
+      queryClient.invalidateQueries({ queryKey: ['group-trips'] });
     },
   });
 };

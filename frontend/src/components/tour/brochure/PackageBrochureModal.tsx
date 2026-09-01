@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Download, Printer, X, FileText, Loader2, Sparkles } from 'lucide-react';
 import type { PackageDetailResponse, PriceChartDetail } from '../../../lib/types/api';
 import { PackageBrochureDocument } from './PackageBrochureDocument';
@@ -21,12 +21,30 @@ export const PackageBrochureModal: React.FC<PackageBrochureModalProps> = ({
   const { generatePdf, printBrochure, isGenerating, progress, statusMessage } = usePackageBrochurePdf();
   const renderTargetId = `brochure-render-target-${packageData.id}`;
 
-  // Keyboard close + body scroll lock
+  const [navTop, setNavTop] = useState(68);
+
+  // Keyboard close + body scroll lock + measure real navbar height
   useEffect(() => {
     if (!isOpen) return;
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handler);
     document.body.style.overflow = 'hidden';
+
+    // Measure the actual height of the top navigation so the modal sits below it
+    const measureNav = () => {
+      // Try common nav selectors in priority order
+      const nav =
+        document.querySelector('header') ||
+        document.querySelector('nav') ||
+        document.querySelector('[role="banner"]');
+      if (nav) {
+        const rect = nav.getBoundingClientRect();
+        // Use the bottom of the nav relative to the viewport
+        setNavTop(Math.round(rect.bottom));
+      }
+    };
+    measureNav();
+
     return () => {
       document.removeEventListener('keydown', handler);
       document.body.style.overflow = '';
@@ -79,7 +97,7 @@ export const PackageBrochureModal: React.FC<PackageBrochureModalProps> = ({
      */
     <div
       className="fixed inset-x-0 bottom-0 z-40 bg-gray-950/75 backdrop-blur-sm"
-      style={{ top: '68px' }}
+      style={{ top: `${navTop}px` }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="brochure-modal-title"

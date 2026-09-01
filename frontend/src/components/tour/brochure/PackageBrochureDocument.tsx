@@ -213,8 +213,8 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
             </div>
             <div>
               <span className="text-[11px] text-amber-300 font-bold block leading-none mb-1">Scan for Live Tour Dossier</span>
-              <span className="font-medium text-gray-300 tracking-wide text-[10px] block">www.allbounds.com</span>
-              <span className="font-medium text-gray-300 tracking-wide text-[10px] block">info@allbounds.com</span>
+              <span className="font-medium text-gray-300 tracking-wide text-[10px] block">www.allboundvacations.com</span>
+              <span className="font-medium text-gray-300 tracking-wide text-[10px] block">bookings@allboundvacations.com</span>
             </div>
           </div>
           <span className="text-amber-300/80 font-serif italic text-sm">Bespoke African Journeys</span>
@@ -278,7 +278,7 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
             </div>
           )}
         </div>
-        <PageFooter left={`AllBounds Travel Ltd • Tour Dossier: ${packageData.name}`} right="Page 02" />
+        <PageFooter left={`AllBounds Vacations • Tour Dossier: ${packageData.name}`} right="Page 02" />
       </Page>
 
       {/* PAGES 3+: DAY-BY-DAY ITINERARY */}
@@ -303,35 +303,184 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
               ];
 
               return (
-                <div key={item.id || dIdx} className="bg-gray-50/90 border border-gray-200 border-l-4 border-l-teal rounded-xl p-4 shadow-2xs">
-                  <div className="flex items-center gap-2.5 mb-2.5 pb-2 border-b border-gray-200/70">
-                    <span className="bg-teal text-white text-[10px] font-bold px-2.5 py-0.5 rounded-md tracking-wider shadow-2xs flex-shrink-0">DAY {dayNumber}</span>
-                    <h3 className="text-sm font-bold font-playfair text-gray-900 leading-snug">{cleanTitle}</h3>
+                <div
+                  key={item.id || dIdx}
+                  style={{
+                    background: '#f9fafb',
+                    border: '1px solid #e5e7eb',
+                    borderLeft: '4px solid #0d9488',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    marginBottom: '0', // handled by space-y on parent
+                  }}
+                >
+                  {/* ── Day Header ── */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      paddingBottom: '10px',
+                      marginBottom: '10px',
+                      borderBottom: '1px solid #e5e7eb',
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        background: '#0d9488',
+                        color: '#ffffff',
+                        fontSize: '10px',
+                        fontWeight: '700',
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        letterSpacing: '0.08em',
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0,
+                        lineHeight: '1.4',
+                      }}
+                    >
+                      DAY {dayNumber}
+                    </span>
+                    <h3
+                      style={{
+                        margin: 0,
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: '#111827',
+                        lineHeight: '1.3',
+                        fontFamily: 'Playfair Display, Georgia, serif',
+                      }}
+                    >
+                      {cleanTitle}
+                    </h3>
                   </div>
-                  <div className="text-[11px] text-gray-600 leading-relaxed mb-3 text-justify" dangerouslySetInnerHTML={{ __html: item.description || 'Enjoy a full day of guided excursions and wilderness discovery.' }} />
-                  <div className="grid grid-cols-2 gap-2.5 mb-2">
-                    <div className="flex items-center gap-2 text-gray-700 bg-white px-3 py-2 rounded-lg border border-gray-150 shadow-2xs">
-                      <Utensils className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                      <span className="text-[10px] font-semibold leading-tight">{mealText}</span>
+
+                  {/* ── Description ── */}
+                  <div
+                    className="text-justify"
+                    style={{ fontSize: '11px', color: '#4b5563', lineHeight: '1.65', marginBottom: '12px' }}
+                    dangerouslySetInnerHTML={{
+                      __html: item.description || 'Enjoy a full day of guided excursions and wilderness discovery.',
+                    }}
+                  />
+
+                  {/* ── Meal & Stay Pills ── */}
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: '10px',
+                      marginBottom: nonMealActivities.length > 0 ? '10px' : '0',
+                    }}
+                  >
+                    {/* Meals pill */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        background: '#ffffff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        padding: '8px 10px',
+                      }}
+                    >
+                      <svg
+                        width="13" height="13" viewBox="0 0 24 24" fill="none"
+                        stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                        style={{ flexShrink: 0, display: 'block' }}
+                      >
+                        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+                        <path d="M7 2v20" />
+                        <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+                      </svg>
+                      <span
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: '600',
+                          color: '#374151',
+                          lineHeight: '1.3',
+                        }}
+                      >
+                        {mealText}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-2 text-gray-700 bg-white px-3 py-2 rounded-lg border border-gray-150 shadow-2xs">
-                      <HotelIcon className="w-3.5 h-3.5 text-teal flex-shrink-0" />
-                      <span className="text-[10px] font-semibold leading-tight">{stayText}</span>
+
+                    {/* Stay pill */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        background: '#ffffff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        padding: '8px 10px',
+                      }}
+                    >
+                      <svg
+                        width="13" height="13" viewBox="0 0 24 24" fill="none"
+                        stroke="#0d9488" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                        style={{ flexShrink: 0, display: 'block' }}
+                      >
+                        <path d="M3 22V9l9-7 9 7v13" />
+                        <path d="M9 22V12h6v10" />
+                      </svg>
+                      <span
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: '600',
+                          color: '#374151',
+                          lineHeight: '1.3',
+                        }}
+                      >
+                        {stayText}
+                      </span>
                     </div>
                   </div>
+
+                  {/* ── Activities ── */}
                   {nonMealActivities.length > 0 && (
-                    <div className="flex flex-wrap gap-1 items-center">
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400 mr-1">Activities:</span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', alignItems: 'center' }}>
+                      <span
+                        style={{
+                          fontSize: '9px',
+                          fontWeight: '700',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.08em',
+                          color: '#9ca3af',
+                          marginRight: '4px',
+                        }}
+                      >
+                        Activities:
+                      </span>
                       {nonMealActivities.map((name, i) => (
-                        <span key={i} className="text-[9px] bg-teal-50 text-teal-800 border border-teal-200/70 px-1.5 py-0.5 rounded-md font-medium">✓ {name}</span>
+                        <span
+                          key={i}
+                          style={{
+                            fontSize: '9px',
+                            background: '#f0fdfa',
+                            color: '#115e59',
+                            border: '1px solid #99f6e4',
+                            padding: '2px 6px',
+                            borderRadius: '5px',
+                            fontWeight: '500',
+                            lineHeight: '1.4',
+                            display: 'inline-block',
+                          }}
+                        >
+                          ✓ {name}
+                        </span>
                       ))}
                     </div>
                   )}
                 </div>
               );
+
             })}
           </div>
-          <PageFooter left="AllBounds Travel Ltd • Detailed Daily Itinerary" right={`Page ${String(pageIndex + 3).padStart(2, '0')}`} />
+          <PageFooter left="AllBounds Vacations • Detailed Daily Itinerary" right={`Page ${String(pageIndex + 3).padStart(2, '0')}`} />
         </Page>
       ))}
 
@@ -404,7 +553,7 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
             </div>
           </div>
         </div>
-        <PageFooter left="AllBounds Travel Ltd • Accommodations & Terms" right="Official Brochure" />
+        <PageFooter left="AllBounds Vacations • Accommodations & Terms" right="Official Brochure" />
       </Page>
 
       {/* FINAL PAGE: PRICING & BOOKING (BACK COVER) */}
@@ -490,13 +639,13 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
             <h3 className="text-sm font-bold font-playfair text-white mb-1">Speak With An AllBounds Safari Specialist</h3>
             <p className="text-[11px] text-gray-200 mb-3 leading-relaxed">Have questions or ready to book? Our destination experts are available 7 days a week to assist you.</p>
             <div className="grid grid-cols-3 gap-2 text-xs">
-              <div className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-amber-300" /><span className="font-semibold text-white text-[11px]">+1 (800) 555-BOUNDS</span></div>
-              <div className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-amber-300" /><span className="font-semibold text-white text-[11px]">info@allbounds.com</span></div>
-              <div className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5 text-amber-300" /><span className="font-semibold text-white text-[11px]">www.allbounds.com</span></div>
+              <div className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-amber-300" /><span className="font-semibold text-white text-[11px]">+256 782 594 008</span></div>
+              <div className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-amber-300" /><span className="font-semibold text-white text-[11px]">bookings@allboundvacations.com</span></div>
+              <div className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5 text-amber-300" /><span className="font-semibold text-white text-[11px]">www.allboundvacations.com</span></div>
             </div>
           </div>
         </div>
-        <PageFooter dark left={`© ${currentYear} AllBounds Travel & Expeditions Ltd. All rights reserved.`} right="Crafting Unforgettable African Journeys" />
+        <PageFooter dark left={`© ${currentYear} AllBounds Vacations. All rights reserved.`} right="Crafting Unforgettable African Journeys" />
       </Page>
     </div>
   );

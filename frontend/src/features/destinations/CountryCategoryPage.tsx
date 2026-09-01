@@ -16,7 +16,7 @@ import HotelsTab from './tabs/HotelsTab';
 import ActivitiesTab from './tabs/ActivitiesTab';
 import { DestinationExplorer } from './components/DestinationExplorer';
 
-type CategoryType = 'packages' | 'group-trips' | 'attractions' | 'hotels' | 'activities';
+type CategoryType = 'packages' | 'hotel-packages' | 'group-trips' | 'attractions' | 'hotels' | 'activities';
 
 const CountryCategoryPage: React.FC = () => {
     const { slug, category } = useParams<{ slug: string; category: CategoryType }>();
@@ -112,10 +112,11 @@ const CountryCategoryPage: React.FC = () => {
 
     const getCategoryLabel = () => {
         switch (category) {
-            case 'packages': return 'Travel Packages';
+            case 'packages': return 'Tour Packages';
+            case 'hotel-packages': return 'Hotel Packages';
             case 'group-trips': return 'Group Trips';
             case 'attractions': return 'Attractions';
-            case 'hotels': return 'Hotels';
+            case 'hotels': return 'Accommodations';
             case 'activities': return 'Activities';
             default: return 'Category';
         }
@@ -125,6 +126,8 @@ const CountryCategoryPage: React.FC = () => {
         switch (category) {
             case 'packages':
                 return `Discover the ultimate handpicked travel packages and custom tours across ${country.name}. From thrilling wildlife safaris in famous national reserves to cultural expeditions, luxury beach retreats, and adventure-filled itineraries, we design journeys that suit your unique style.`;
+            case 'hotel-packages':
+                return `Discover handpicked hotel packages and luxury safari lodge stays with seasonal rates and night packages in ${country.name}. Enjoy curated accommodations with all-inclusive amenities and tailored stays.`;
             case 'group-trips':
                 return `Join a vibrant community of explorers on our scheduled small-group departures to ${country.name}. Perfect for solo travelers, couples, or friends looking to travel together, our group tours offer an affordable, social, and expertly-guided way to discover iconic destinations.`;
             case 'attractions':
@@ -140,10 +143,11 @@ const CountryCategoryPage: React.FC = () => {
 
     const subNavSections = [
         { id: 'overview', label: 'Overview' },
-        { id: 'activities', label: 'Experiences' },
-        { id: 'packages', label: 'Featured Packages' },
-        { id: 'hotels', label: 'Where to Stay' },
         { id: 'attractions', label: 'Must-See Attractions' },
+        { id: 'activities', label: 'Experiences' },
+        { id: 'packages', label: 'Tour Packages' },
+        { id: 'hotel-packages', label: 'Hotel Packages' },
+        { id: 'hotels', label: 'Where to Stay' },
         { id: 'group-trips', label: 'Group Trips' },
     ];
 

@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict, Any
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.models.hotel import Hotel
 from app.models.hotel_price_chart import HotelPriceChart, HotelPriceChartNightRate
@@ -43,39 +43,79 @@ class HotelService:
         elif first_media.storage_key:
             return self._get_cloudflare_image_url(first_media.storage_key)
         return first_media.file_path
+
+    def _serialize_price_charts(self, hotel: Hotel) -> List[Dict[str, Any]]:
+        """
+        Serialize active price charts with night rates for a hotel.
+        """
+        if not hasattr(hotel, 'price_charts') or not hotel.price_charts:
+            return []
+        
+        result = []
+        for pc in hotel.price_charts:
+            if not getattr(pc, 'is_active', True):
+                continue
+            
+            night_rates_list = []
+            if hasattr(pc, 'night_rates') and pc.night_rates:
+                for nr in pc.night_rates:
+                    if getattr(nr, 'is_active', True):
+                        night_rates_list.append({
+                            "id": nr.id,
+                            "price_chart_id": pc.id,
+                            "nights": nr.nights,
+                            "price": float(nr.price) if nr.price else 0.0,
+                            "price_per_night": float(nr.price_per_night) if nr.price_per_night is not None else round(float(nr.price) / nr.nights, 2) if nr.price and nr.nights else 0.0,
+                            "room_type": nr.room_type,
+                            "meal_plan": nr.meal_plan,
+                            "is_default": getattr(nr, 'is_default', False),
+                            "order_index": getattr(nr, 'order_index', 0),
+                            "is_active": nr.is_active,
+                            "created_at": nr.created_at,
+                            "updated_at": nr.updated_at,
+                        })
+            
+            result.append({
+                "id": pc.id,
+                "hotel_id": pc.hotel_id,
+                "title": pc.title,
+                "start_date": pc.start_date.isoformat() if hasattr(pc.start_date, 'isoformat') else pc.start_date,
+                "end_date": pc.end_date.isoformat() if hasattr(pc.end_date, 'isoformat') else pc.end_date,
+                "price": float(pc.price) if pc.price else 0.0,
+                "booking_price": float(pc.booking_price) if pc.booking_price is not None else float(pc.price) if pc.price else 0.0,
+                "notes": pc.notes,
+                "is_active": pc.is_active,
+                "night_rates": night_rates_list,
+                "created_at": pc.created_at,
+                "updated_at": pc.updated_at,
+            })
+        return result
     
     def get_hotels(self, db: Session, skip: int = 0, limit: int = 100, recommended: Optional[bool] = None, country: Optional[str] = None, tag: Optional[str] = None) -> List[Dict[str, Any]]:
         """
-        Retrieve all hotels with pagination and optional filtering, including cover images.
+        Retrieve all hotels with pagination and optional filtering, including cover images and price charts.
         Hotels are ordered by creation date (newest first).
         """
-        # NOTE: We intentionally do NOT joinedload media_assets here.
-        # The list view only needs the primary image_id (already on the hotel row).
-        # Loading all gallery media assets for every hotel in a list was very expensive.
-        # We DO joinedload amenities to prevent N+1 queries (one query per hotel).
         query = db.query(Hotel).options(
             joinedload(Hotel.country),
             joinedload(Hotel.amenities),
-            joinedload(Hotel.tags)
+            joinedload(Hotel.tags),
+            selectinload(Hotel.price_charts).selectinload(HotelPriceChart.night_rates)
         ).filter(Hotel.is_active == True)
 
         if recommended is not None and recommended:
-            # For now, recommended means all active hotels (can be enhanced later with a recommended field)
             pass  # No additional filtering needed
 
         if country:
-            # Join with country to filter by country name
             query = query.join(Hotel.country).filter(Country.name.ilike(f"%{country}%"))
             
         if tag:
             query = query.filter(Hotel.tags.any(Tag.slug == tag))
 
-        # Order by created_at descending (newest first)
         query = query.order_by(Hotel.created_at.desc())
 
         hotels = query.offset(skip).limit(limit).all()
 
-        # Format hotels with cover images
         result = []
         for hotel in hotels:
             cover_image_url = self._resolve_cover_image_url(db, hotel)
@@ -117,6 +157,7 @@ class HotelService:
                     }
                     for tag in hotel.tags
                 ] if hotel.tags else [],
+                "price_charts": self._serialize_price_charts(hotel),
                 "created_at": hotel.created_at,
                 "updated_at": hotel.updated_at,
             }
@@ -144,7 +185,8 @@ class HotelService:
         query = db.query(Hotel).options(
             joinedload(Hotel.country),
             joinedload(Hotel.amenities),
-            joinedload(Hotel.tags)
+            joinedload(Hotel.tags),
+            selectinload(Hotel.price_charts).selectinload(HotelPriceChart.night_rates)
         )
 
         if not include_inactive:
@@ -219,6 +261,7 @@ class HotelService:
                     }
                     for tag_item in hotel.tags
                 ] if hotel.tags else [],
+                "price_charts": self._serialize_price_charts(hotel),
                 "created_at": hotel.created_at,
                 "updated_at": hotel.updated_at,
             }
@@ -228,19 +271,19 @@ class HotelService:
     
     def get_hotels_by_country(self, db: Session, country_id: int, skip: int = 0, limit: int = 100) -> List[Dict[str, Any]]:
         """
-        Retrieve all hotels for a specific country with pagination, including cover images.
+        Retrieve all hotels for a specific country with pagination, including cover images and price charts.
         Hotels are ordered by creation date (newest first).
         """
         hotels = db.query(Hotel).options(
             joinedload(Hotel.country),
             joinedload(Hotel.amenities),
-            joinedload(Hotel.tags)
+            joinedload(Hotel.tags),
+            selectinload(Hotel.price_charts).selectinload(HotelPriceChart.night_rates)
         ).filter(
             Hotel.country_id == country_id,
             Hotel.is_active == True
         ).order_by(Hotel.created_at.desc()).offset(skip).limit(limit).all()
         
-        # Format hotels — use image_id only, no media_assets loading
         result = []
         for hotel in hotels:
             cover_image_url = self._resolve_cover_image_url(db, hotel)
@@ -281,6 +324,7 @@ class HotelService:
                     }
                     for tag in hotel.tags
                 ] if hotel.tags else [],
+                "price_charts": self._serialize_price_charts(hotel),
                 "created_at": hotel.created_at,
                 "updated_at": hotel.updated_at,
             }
@@ -290,13 +334,14 @@ class HotelService:
     
     def get_featured_hotels(self, db: Session, skip: int = 0, limit: int = 100, country: Optional[str] = None, tag: Optional[str] = None) -> List[Dict[str, Any]]:
         """
-        Retrieve featured hotels with cover images, optionally filtered by country and tag.
+        Retrieve featured hotels with cover images and price charts, optionally filtered by country and tag.
         Hotels are ordered by creation date (newest first).
         """
         query = db.query(Hotel).options(
             joinedload(Hotel.country),
             joinedload(Hotel.amenities),
-            joinedload(Hotel.tags)
+            joinedload(Hotel.tags),
+            selectinload(Hotel.price_charts).selectinload(HotelPriceChart.night_rates)
         ).filter(
             Hotel.is_active == True,
             Hotel.is_featured == True
@@ -310,7 +355,6 @@ class HotelService:
 
         hotels = query.order_by(Hotel.created_at.desc()).offset(skip).limit(limit).all()
         
-        # Format hotels — use image_id only, no media_assets loading
         result = []
         for hotel in hotels:
             cover_image_url = self._resolve_cover_image_url(db, hotel)
@@ -353,6 +397,7 @@ class HotelService:
                     }
                     for tag in hotel.tags
                 ] if hotel.tags else [],
+                "price_charts": self._serialize_price_charts(hotel),
                 "created_at": hotel.created_at,
                 "updated_at": hotel.updated_at,
             }

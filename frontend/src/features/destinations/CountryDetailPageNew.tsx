@@ -263,7 +263,8 @@ const CountryDetailPageNew: React.FC = () => {
             { id: 'best-time', label: 'Best Time to Visit' },
             { id: 'section-attractions', label: 'Attractions' },
             { id: 'section-activities', label: 'Activities' },
-            { id: 'section-packages', label: 'Packages' },
+            { id: 'section-packages', label: 'Tour Packages' },
+            { id: 'section-hotel-packages', label: 'Hotel Packages' },
             { id: 'section-hotels', label: 'Accommodation' },
             { id: 'explore', label: 'Explore' },
           ]}

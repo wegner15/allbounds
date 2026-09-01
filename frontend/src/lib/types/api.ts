@@ -339,7 +339,34 @@ export type AmenityUpdate = Partial<AmenityCreate> & {
   is_active?: boolean;
 };
 
-// Hotel types
+// Hotel Price Chart Night Rate type
+export interface HotelPriceChartNightRate {
+  id?: number;
+  price_chart_id?: number;
+  nights: number;
+  price: number;
+  price_per_night?: number;
+  room_type?: string;
+  meal_plan?: string;
+  is_default?: boolean;
+  order_index?: number;
+  is_active?: boolean;
+}
+
+// Hotel Price Chart type
+export interface HotelPriceChart {
+  id: number;
+  hotel_id?: number;
+  title: string;
+  start_date: string;
+  end_date: string;
+  price: number;
+  booking_price?: number;
+  notes?: string;
+  is_active?: boolean;
+  night_rates?: HotelPriceChartNightRate[];
+}
+
 // Hotel types
 export interface Hotel extends BaseModel {
   name: string;
@@ -352,6 +379,7 @@ export interface Hotel extends BaseModel {
   hotel_type?: HotelType;
   image_url?: string;
   image_id?: string;
+  cover_image?: string;
   is_active: boolean;
   address?: string;
   city?: string;
@@ -365,7 +393,8 @@ export interface Hotel extends BaseModel {
   check_out_time?: string;
   latitude?: number;
   longitude?: number;
-  price_charts?: PriceChart[];
+  price_charts?: HotelPriceChart[];
+  lowestPrice?: number | null;
 }
 
 

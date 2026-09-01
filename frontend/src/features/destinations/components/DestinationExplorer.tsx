@@ -8,7 +8,7 @@ import { useAttractions } from '../../../lib/hooks/useAttractions';
 import { useContentTags } from '../../../lib/hooks/useContentTags';
 import type { ContentTag } from '../../../lib/types/content-tag';
 
-import HotelCard from './HotelCard';
+import HotelCard, { calculateHotelLowestPrice } from './HotelCard';
 import PackageCard from './PackageCard';
 import ActivityCard from './ActivityCard';
 import AttractionCard from './AttractionCard';
@@ -192,7 +192,7 @@ interface DestinationExplorerProps {
   attractions?: any[];
 }
 
-type ExplorerTab = 'all' | 'hotels' | 'packages' | 'activities' | 'attractions';
+type ExplorerTab = 'all' | 'packages' | 'hotel-packages' | 'hotels' | 'activities' | 'attractions';
 
 export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
   countryId,
@@ -213,12 +213,14 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
   const { data: contentTags = [] } = useContentTags({ include_inactive: false });
 
   // Per-section Tag Filter States
+  const [selectedHotelPackageTagIds, setSelectedHotelPackageTagIds] = useState<number[]>([]);
   const [selectedHotelTagIds, setSelectedHotelTagIds] = useState<number[]>([]);
   const [selectedPackageTagIds, setSelectedPackageTagIds] = useState<number[]>([]);
   const [selectedActivityTagIds, setSelectedActivityTagIds] = useState<number[]>([]);
   const [selectedAttractionTagIds, setSelectedAttractionTagIds] = useState<number[]>([]);
 
   // Per-section in-place visible count states (default 9 items each)
+  const [hotelPackageVisibleCount, setHotelPackageVisibleCount] = useState(9);
   const [hotelVisibleCount, setHotelVisibleCount] = useState(9);
   const [packageVisibleCount, setPackageVisibleCount] = useState(9);
   const [activityVisibleCount, setActivityVisibleCount] = useState(9);
@@ -242,11 +244,12 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
 
   // Reset visible counts when filters or search change
   useEffect(() => {
+    setHotelPackageVisibleCount(9);
     setHotelVisibleCount(9);
     setPackageVisibleCount(9);
     setActivityVisibleCount(9);
     setAttractionVisibleCount(9);
-  }, [searchQuery, selectedHotelTagIds, selectedPackageTagIds, selectedActivityTagIds, selectedAttractionTagIds, hotelStars, packageDurations, activityIntensities, attractionTypes]);
+  }, [searchQuery, selectedHotelPackageTagIds, selectedHotelTagIds, selectedPackageTagIds, selectedActivityTagIds, selectedAttractionTagIds, hotelStars, packageDurations, activityIntensities, attractionTypes]);
 
   // Unconditional data fetching ensures full items (with embedded tags) are loaded immediately on page load
   const { data: fetchedHotels, isLoading: hotelsLoading } = useHotels(countryId);
@@ -290,11 +293,23 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
 
   // Raw lists per category
   const rawHotels = useMemo(() => hotels?.filter((h: any) => (h.country_id === undefined || h.country_id === countryId) && h.is_active) || [], [hotels, countryId]);
+  
+  // Hotel Packages: only hotels with valid calculated lowest prices
+  const rawHotelPackages = useMemo(() => {
+    return rawHotels
+      .map((h: any) => {
+        const lowestPrice = calculateHotelLowestPrice(h);
+        return { ...h, lowestPrice };
+      })
+      .filter((h: any) => h.lowestPrice !== null && h.lowestPrice > 0);
+  }, [rawHotels]);
+
   const rawPackages = useMemo(() => packages?.filter((p: any) => p.is_active) || [], [packages]);
   const rawActivities = useMemo(() => activities?.filter((a: any) => a.is_active) || [], [activities]);
   const rawAttractions = useMemo(() => attractions?.filter((a: any) => a.is_active) || [], [attractions]);
 
   // Section-specific tags (only tags with attached items in that category)
+  const hotelPackageTags = useMemo(() => getTagsForItems(rawHotelPackages), [contentTags, rawHotelPackages]);
   const hotelTags = useMemo(() => getTagsForItems(rawHotels), [contentTags, rawHotels]);
   const packageTags = useMemo(() => getTagsForItems(rawPackages), [contentTags, rawPackages]);
   const activityTags = useMemo(() => getTagsForItems(rawActivities), [contentTags, rawActivities]);
@@ -330,7 +345,20 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
   // FILTERING LOGIC PER SECTION
   // ----------------------------------------------------
 
-  // 1. Hotels
+  // 1. Hotel Packages (Hotels with prices)
+  const filteredHotelPackages = useMemo(() => {
+    return rawHotelPackages.filter((hotel: any) => {
+      if (!matchesSectionTags(hotel, selectedHotelPackageTagIds)) return false;
+      if (searchQuery && !hotel.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
+          !(hotel.summary || '').toLowerCase().includes(searchQuery.toLowerCase())) {
+        return false;
+      }
+      if (hotelStars.length > 0 && (!hotel.stars || !hotelStars.includes(hotel.stars))) return false;
+      return true;
+    });
+  }, [rawHotelPackages, searchQuery, selectedHotelPackageTagIds, hotelStars]);
+
+  // 2. Accommodations (All Hotels)
   const filteredHotels = useMemo(() => {
     return rawHotels.filter((hotel: any) => {
       if (!matchesSectionTags(hotel, selectedHotelTagIds)) return false;
@@ -343,7 +371,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
     });
   }, [rawHotels, searchQuery, selectedHotelTagIds, hotelStars]);
 
-  // 2. Packages
+  // 3. Tour Packages
   const filteredPackages = useMemo(() => {
     return rawPackages.filter((pkg: any) => {
       if (!matchesSectionTags(pkg, selectedPackageTagIds)) return false;
@@ -363,7 +391,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
     });
   }, [rawPackages, searchQuery, selectedPackageTagIds, packageDurations]);
 
-  // 3. Activities
+  // 4. Activities
   const filteredActivities = useMemo(() => {
     return rawActivities.filter((activity: any) => {
       if (!matchesSectionTags(activity, selectedActivityTagIds)) return false;
@@ -382,7 +410,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
     });
   }, [rawActivities, searchQuery, selectedActivityTagIds, activityIntensities]);
 
-  // 4. Attractions
+  // 5. Attractions
   const filteredAttractions = useMemo(() => {
     return rawAttractions.filter((attraction: any) => {
       if (!matchesSectionTags(attraction, selectedAttractionTagIds)) return false;
@@ -402,7 +430,18 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
     });
   }, [rawAttractions, searchQuery, selectedAttractionTagIds, attractionTypes]);
 
-  // In-place "Load More" Handlers per section (Zero scroll movement, no URL link changes)
+  // In-place "Load More" Handlers per section
+  const handleLoadMoreHotelPackages = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.blur();
+    const currentScrollY = window.scrollY;
+    setHotelPackageVisibleCount(prev => prev + 9);
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: currentScrollY, behavior: 'instant' as ScrollBehavior });
+    });
+  };
+
   const handleLoadMoreHotels = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -450,6 +489,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
   const isOverview = activeTab === 'all';
 
   const resetAllFilters = () => {
+    setSelectedHotelPackageTagIds([]);
     setSelectedHotelTagIds([]);
     setSelectedPackageTagIds([]);
     setSelectedActivityTagIds([]);
@@ -463,12 +503,13 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
 
   // Dedicated Category Listing mode items
   const currentCategoryList = useMemo(() => {
+    if (activeTab === 'hotel-packages') return filteredHotelPackages;
     if (activeTab === 'hotels') return filteredHotels;
     if (activeTab === 'packages') return filteredPackages;
     if (activeTab === 'activities') return filteredActivities;
     if (activeTab === 'attractions') return filteredAttractions;
     return [];
-  }, [activeTab, filteredHotels, filteredPackages, filteredActivities, filteredAttractions]);
+  }, [activeTab, filteredHotelPackages, filteredHotels, filteredPackages, filteredActivities, filteredAttractions]);
 
   const [categoryVisibleCount, setCategoryVisibleCount] = useState(9);
   const visibleCategoryItems = useMemo(() => {
@@ -488,34 +529,38 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
 
   // Tag helpers for active dedicated category
   const currentCategoryTags = useMemo(() => {
+    if (activeTab === 'hotel-packages') return hotelPackageTags;
     if (activeTab === 'hotels') return hotelTags;
     if (activeTab === 'packages') return packageTags;
     if (activeTab === 'activities') return activityTags;
     if (activeTab === 'attractions') return attractionTags;
     return [];
-  }, [activeTab, hotelTags, packageTags, activityTags, attractionTags]);
+  }, [activeTab, hotelPackageTags, hotelTags, packageTags, activityTags, attractionTags]);
 
   const groupedCategoryTags = useMemo(() => {
     return groupTagsByCategory(currentCategoryTags);
   }, [currentCategoryTags]);
 
   const selectedTagIdsForCurrentCategory = useMemo(() => {
+    if (activeTab === 'hotel-packages') return selectedHotelPackageTagIds;
     if (activeTab === 'hotels') return selectedHotelTagIds;
     if (activeTab === 'packages') return selectedPackageTagIds;
     if (activeTab === 'activities') return selectedActivityTagIds;
     if (activeTab === 'attractions') return selectedAttractionTagIds;
     return [];
-  }, [activeTab, selectedHotelTagIds, selectedPackageTagIds, selectedActivityTagIds, selectedAttractionTagIds]);
+  }, [activeTab, selectedHotelPackageTagIds, selectedHotelTagIds, selectedPackageTagIds, selectedActivityTagIds, selectedAttractionTagIds]);
 
   const toggleTagForCurrentCategory = (tagId: number) => {
-    if (activeTab === 'hotels') toggleFilter(tagId, selectedHotelTagIds, setSelectedHotelTagIds);
+    if (activeTab === 'hotel-packages') toggleFilter(tagId, selectedHotelPackageTagIds, setSelectedHotelPackageTagIds);
+    else if (activeTab === 'hotels') toggleFilter(tagId, selectedHotelTagIds, setSelectedHotelTagIds);
     else if (activeTab === 'packages') toggleFilter(tagId, selectedPackageTagIds, setSelectedPackageTagIds);
     else if (activeTab === 'activities') toggleFilter(tagId, selectedActivityTagIds, setSelectedActivityTagIds);
     else if (activeTab === 'attractions') toggleFilter(tagId, selectedAttractionTagIds, setSelectedAttractionTagIds);
   };
 
   const hasActiveFilters = useMemo(() => {
-    return selectedHotelTagIds.length > 0 ||
+    return selectedHotelPackageTagIds.length > 0 ||
+      selectedHotelTagIds.length > 0 ||
       selectedPackageTagIds.length > 0 ||
       selectedActivityTagIds.length > 0 ||
       selectedAttractionTagIds.length > 0 ||
@@ -524,7 +569,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
       activityIntensities.length > 0 ||
       attractionTypes.length > 0 ||
       searchQuery !== '';
-  }, [selectedHotelTagIds, selectedPackageTagIds, selectedActivityTagIds, selectedAttractionTagIds, hotelStars, packageDurations, activityIntensities, attractionTypes, searchQuery]);
+  }, [selectedHotelPackageTagIds, selectedHotelTagIds, selectedPackageTagIds, selectedActivityTagIds, selectedAttractionTagIds, hotelStars, packageDurations, activityIntensities, attractionTypes, searchQuery]);
 
   useEffect(() => {
     setCategoryVisibleCount(9);
@@ -731,14 +776,71 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
               )}
             </section>
 
-            {/* SECTION 4: ACCOMMODATION (HOTELS) */}
+            {/* SECTION 4: HOTEL PACKAGES (HOTELS WITH PRICES) */}
+            <section id="section-hotel-packages" className="scroll-mt-28">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 pb-2 border-b border-gray-200/80 gap-2">
+                <div>
+                  <h2 className="text-2xl font-bold font-playfair text-gray-900 flex items-center gap-2">
+                    <span>🏨</span> Hotel Packages in {countryName}
+                  </h2>
+                  <p className="text-xs md:text-sm text-gray-500 mt-0.5">Resort packages, safari lodges, and luxury stays with seasonal rates</p>
+                </div>
+                {filteredHotelPackages.length > hotelPackageVisibleCount && (
+                  <Link
+                    to={`/destinations/${destinationSlug}/hotel-packages`}
+                    className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors cursor-pointer"
+                  >
+                    <span>Load More ({filteredHotelPackages.length - hotelPackageVisibleCount} remaining)</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                )}
+              </div>
+
+              {/* HOTEL PACKAGES RELEVANT SECTION FILTERS */}
+              <GroupedSectionTagFilters
+                tags={hotelPackageTags}
+                selectedTagIds={selectedHotelPackageTagIds}
+                totalItemCount={rawHotelPackages.length}
+                onSelectTag={(id) => toggleFilter(id, selectedHotelPackageTagIds, setSelectedHotelPackageTagIds)}
+                onClearAll={() => setSelectedHotelPackageTagIds([])}
+              />
+
+              {filteredHotelPackages.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-5 gap-6">
+                    {filteredHotelPackages.slice(0, hotelPackageVisibleCount).map((hotel: any) => (
+                      <HotelCard
+                        key={hotel.id}
+                        hotel={{ ...hotel, country: hotel.country || { slug: destinationSlug } }}
+                        isHotelPackage={true}
+                      />
+                    ))}
+                  </div>
+                  {filteredHotelPackages.length > hotelPackageVisibleCount && (
+                    <div className="mt-8 text-center">
+                      <Link
+                        to={`/destinations/${destinationSlug}/hotel-packages`}
+                        className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-2xs hover:shadow-md active:scale-95 text-sm cursor-pointer"
+                      >
+                        <span>Load More Hotel Packages ({filteredHotelPackages.length - hotelPackageVisibleCount} remaining)</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </Link>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="text-gray-500 text-sm italic py-4">No hotel packages with seasonal prices currently available in {countryName}.</p>
+              )}
+            </section>
+
+            {/* SECTION 5: ACCOMMODATION (ALL HOTELS) */}
             <section id="section-hotels" className="scroll-mt-28">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 pb-2 border-b border-gray-200/80 gap-2">
                 <div>
                   <h2 className="text-2xl font-bold font-playfair text-gray-900 flex items-center gap-2">
-                    <span>🏨</span> Accommodation in {countryName}
+                    <span>🏡</span> Accommodations in {countryName}
                   </h2>
-                  <p className="text-xs md:text-sm text-gray-500 mt-0.5">Top rated lodges, luxury camps, and boutique hotels</p>
+                  <p className="text-xs md:text-sm text-gray-500 mt-0.5">All top rated lodges, luxury camps, boutique hotels, and guesthouses</p>
                 </div>
                 {filteredHotels.length > hotelVisibleCount && (
                   <Link
@@ -767,6 +869,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                       <HotelCard
                         key={hotel.id}
                         hotel={{ ...hotel, country: hotel.country || { slug: destinationSlug } }}
+                        isHotelPackage={false}
                       />
                     ))}
                   </div>
@@ -817,7 +920,13 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
               <div className="flex items-center justify-between pb-3 border-b border-gray-150">
                 <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
                   <Filter className="w-4 h-4 text-primary" />
-                  <span>Filter {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</span>
+                  <span>
+                    Filter {
+                      activeTab === 'hotel-packages' ? 'Hotel Packages' :
+                      activeTab === 'hotels' ? 'Accommodation' :
+                      activeTab.charAt(0).toUpperCase() + activeTab.slice(1)
+                    }
+                  </span>
                 </h3>
                 {hasActiveFilters && (
                   <button
@@ -842,7 +951,8 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                     {selectedTagIdsForCurrentCategory.length > 0 && (
                       <button
                         onClick={() => {
-                          if (activeTab === 'hotels') setSelectedHotelTagIds([]);
+                          if (activeTab === 'hotel-packages') setSelectedHotelPackageTagIds([]);
+                          else if (activeTab === 'hotels') setSelectedHotelTagIds([]);
                           else if (activeTab === 'packages') setSelectedPackageTagIds([]);
                           else if (activeTab === 'activities') setSelectedActivityTagIds([]);
                           else if (activeTab === 'attractions') setSelectedAttractionTagIds([]);
@@ -933,8 +1043,8 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 </div>
               )}
 
-              {/* Hotels Star Rating Filter */}
-              {activeTab === 'hotels' && (
+              {/* Hotels / Hotel Packages Star Rating Filter */}
+              {(activeTab === 'hotels' || activeTab === 'hotel-packages') && (
                 <div>
                   <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2.5">
                     Star Rating
@@ -1007,7 +1117,8 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                     { id: 'all', label: 'Overview' },
                     { id: 'attractions', label: `Attractions (${rawAttractions.length})` },
                     { id: 'activities', label: `Activities (${rawActivities.length})` },
-                    { id: 'packages', label: `Packages (${rawPackages.length})` },
+                    { id: 'packages', label: `Tour Packages (${rawPackages.length})` },
+                    { id: 'hotel-packages', label: `Hotel Packages (${rawHotelPackages.length})` },
                     { id: 'hotels', label: `Accommodation (${rawHotels.length})` },
                   ].map((cat) => {
                     const isSelected = activeTab === cat.id;
@@ -1063,9 +1174,22 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
               {/* RESULTS GRID */}
               {visibleCategoryItems.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-5 gap-6">
+                  {activeTab === 'hotel-packages' &&
+                    (visibleCategoryItems as typeof filteredHotelPackages).map((hotel) => (
+                      <HotelCard
+                        key={hotel.id}
+                        hotel={{ ...hotel, country: hotel.country || { slug: destinationSlug } }}
+                        isHotelPackage={true}
+                      />
+                    ))}
+
                   {activeTab === 'hotels' &&
                     (visibleCategoryItems as typeof filteredHotels).map((hotel) => (
-                      <HotelCard key={hotel.id} hotel={{ ...hotel, country: hotel.country || { slug: destinationSlug } }} />
+                      <HotelCard
+                        key={hotel.id}
+                        hotel={{ ...hotel, country: hotel.country || { slug: destinationSlug } }}
+                        isHotelPackage={false}
+                      />
                     ))}
 
                   {activeTab === 'packages' &&

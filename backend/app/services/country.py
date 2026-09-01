@@ -186,6 +186,7 @@ class CountryService:
         from app.models.group_trip import GroupTrip, GroupTripDeparture
         from app.models.activity import Activity
         from app.models.hotel import Hotel
+        from app.models.hotel_price_chart import HotelPriceChart, HotelPriceChartNightRate
 
         country = db.query(Country).options(
             selectinload(Country.region),
@@ -196,7 +197,7 @@ class CountryService:
             selectinload(Country.accommodations),
             selectinload(Country.hotels).selectinload(Hotel.media_assets),
             selectinload(Country.hotels).selectinload(Hotel.amenities),
-            selectinload(Country.hotels).selectinload(Hotel.price_charts),
+            selectinload(Country.hotels).selectinload(Hotel.price_charts).selectinload(HotelPriceChart.night_rates),
             selectinload(Country.activities).selectinload(Activity.cover_image),
             selectinload(Country.media_assets),
             selectinload(Country.visit_info)
@@ -345,6 +346,19 @@ class CountryService:
                             "booking_price": float(pc.booking_price) if pc.booking_price is not None else float(pc.price) if pc.price else 0,
                             "notes": pc.notes,
                             "is_active": pc.is_active,
+                            "night_rates": [
+                                {
+                                    "id": nr.id,
+                                    "nights": nr.nights,
+                                    "price": float(nr.price) if nr.price else 0,
+                                    "price_per_night": float(nr.price_per_night) if nr.price_per_night is not None else round(float(nr.price) / nr.nights, 2) if nr.price and nr.nights else 0,
+                                    "room_type": nr.room_type,
+                                    "meal_plan": nr.meal_plan,
+                                    "is_default": nr.is_default,
+                                    "order_index": nr.order_index,
+                                    "is_active": nr.is_active,
+                                } for nr in getattr(pc, 'night_rates', []) if getattr(nr, 'is_active', True)
+                            ] if getattr(pc, 'night_rates', None) else [],
                         } for pc in hotel.price_charts if pc.is_active
                     ] if hasattr(hotel, 'price_charts') and hotel.price_charts else [],
                 }

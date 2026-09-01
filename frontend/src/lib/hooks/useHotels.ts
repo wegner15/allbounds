@@ -51,6 +51,8 @@ export interface Hotel {
   tag_ids?: number[];
   is_active: boolean;
   is_featured: boolean;
+  price_charts?: any[];
+  lowestPrice?: number | null;
   created_at: string;
   updated_at: string;
 }

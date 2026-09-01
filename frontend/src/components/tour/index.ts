@@ -22,3 +22,8 @@ export * from './LoadingSkeletons';
 export { default as ItineraryMap } from './ItineraryMap';
 export { default as RecommendedTours } from './RecommendedTours';
 export { default as BlogsSection } from './BlogsSection';
+
+// Tour brochure components
+export { PackageBrochureDocument } from './brochure/PackageBrochureDocument';
+export { PackageBrochureModal } from './brochure/PackageBrochureModal';
+

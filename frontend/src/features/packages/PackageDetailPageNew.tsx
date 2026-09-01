@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useComprehensivePackageBySlug, useRecommendedPackages } from '../../lib/hooks/usePackages';
-import { HeroSection, OverviewSection, ItinerarySection, InclusionsExclusionsSection, HotelsSection, AttractionsSection, GallerySection, ReviewsSection, BookingSidebar, StickyNavigation, RecommendedTours, BlogsSection } from '../../components/tour';
+import { HeroSection, OverviewSection, ItinerarySection, InclusionsExclusionsSection, HotelsSection, AttractionsSection, GallerySection, ReviewsSection, BookingSidebar, StickyNavigation, RecommendedTours, BlogsSection, PackageBrochureModal } from '../../components/tour';
 import ItineraryMapLeaflet from '../../components/tour/ItineraryMapLeaflet';
 import { PackageDetailSkeleton } from '../../components/tour/LoadingSkeletons';
 import ErrorDisplay from '../../components/tour/ErrorDisplay';
@@ -18,6 +18,7 @@ const PackageDetailPageNew: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [showInquiryForm, setShowInquiryForm] = useState(false);
+  const [showBrochureModal, setShowBrochureModal] = useState(false);
   const [selectedBookingChart, setSelectedBookingChart] = useState<any | null>(null);
   const [selectedBookingHotel, setSelectedBookingHotel] = useState<any | null>(null);
 
@@ -176,6 +177,7 @@ const PackageDetailPageNew: React.FC = () => {
         <HeroSection
           packageData={packageDetail}
           onBookNowClick={() => setShowBookingForm(true)}
+          onDownloadBrochureClick={() => setShowBrochureModal(true)}
         />
 
         {/* Package Context Section (Breadcrumbs, Tags, Summary) */}
@@ -329,6 +331,7 @@ const PackageDetailPageNew: React.FC = () => {
                   priceCharts={activePriceCharts}
                   onBookNow={(chart, hotel) => handleOpenBooking(chart, hotel)}
                   onRequestQuote={(chart, hotel) => handleOpenInquiry(chart, hotel)}
+                  onDownloadBrochure={() => setShowBrochureModal(true)}
                 />
               </div>
             </aside>
@@ -351,6 +354,13 @@ const PackageDetailPageNew: React.FC = () => {
             >
               Request Quote
             </button>
+            <button
+              onClick={() => setShowBrochureModal(true)}
+              className="px-3 bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-800 font-semibold rounded-lg transition-colors touch-manipulation min-h-[48px] flex items-center justify-center text-xs"
+              title="Download Brochure"
+            >
+              Brochure
+            </button>
           </div>
         </div>
 
@@ -363,6 +373,16 @@ const PackageDetailPageNew: React.FC = () => {
           />
         )}
       </div>
+
+      {/* Package Brochure Download & Preview Modal */}
+      {packageDetail && (
+        <PackageBrochureModal
+          isOpen={showBrochureModal}
+          onClose={() => setShowBrochureModal(false)}
+          packageData={packageDetail}
+          priceCharts={activePriceCharts}
+        />
+      )}
 
       {/* Booking Form Modal */}
       {packageDetail && (

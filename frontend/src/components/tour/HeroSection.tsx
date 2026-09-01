@@ -3,7 +3,8 @@ import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import {
   CalendarIcon,
   CurrencyDollarIcon,
-  MapPinIcon
+  MapPinIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/react/24/solid';
 import Breadcrumb from '../layout/Breadcrumb';
 import OptimizedImage from '../ui/OptimizedImage';
@@ -17,9 +18,10 @@ import type {
 interface HeroSectionProps {
   packageData: PackageDetailResponse;
   onBookNowClick: () => void;
+  onDownloadBrochureClick?: () => void;
 }
 
-const HeroSection: React.FC<HeroSectionProps> = ({ packageData, onBookNowClick }) => {
+const HeroSection: React.FC<HeroSectionProps> = ({ packageData, onBookNowClick, onDownloadBrochureClick }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Prepare images array - use media_assets if available, otherwise fallback to image_id
@@ -221,6 +223,19 @@ const HeroSection: React.FC<HeroSectionProps> = ({ packageData, onBookNowClick }
                   From ${lowestPrice.toFixed(2)}
                 </span>
               </div>
+            )}
+
+            {/* Download PDF Brochure Button */}
+            {onDownloadBrochureClick && (
+              <button
+                type="button"
+                onClick={onDownloadBrochureClick}
+                className="flex items-center space-x-2 bg-white/20 hover:bg-white/30 backdrop-blur-md px-3.5 py-2 rounded-lg border border-white/40 text-white font-semibold text-sm transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer shadow-lg ml-auto"
+                aria-label="Download PDF brochure"
+              >
+                <ArrowDownTrayIcon className="w-4 h-4 text-amber-300" />
+                <span>Download Brochure (PDF)</span>
+              </button>
             )}
           </div>
         </div>

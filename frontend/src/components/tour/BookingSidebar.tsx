@@ -15,7 +15,8 @@ import {
   Check,
   Hotel as HotelIcon,
   Star,
-  ChevronDown
+  ChevronDown,
+  FileDown
 } from 'lucide-react';
 
 interface BookingSidebarProps {
@@ -25,6 +26,7 @@ interface BookingSidebarProps {
   priceCharts?: PriceChartDetail[];
   onBookNow?: (chart?: PriceChartDetail | null, hotel?: PriceChartHotelOption | null) => void;
   onRequestQuote?: (chart?: PriceChartDetail | null, hotel?: PriceChartHotelOption | null) => void;
+  onDownloadBrochure?: () => void;
 }
 
 const BookingSidebar: React.FC<BookingSidebarProps> = ({
@@ -34,6 +36,7 @@ const BookingSidebar: React.FC<BookingSidebarProps> = ({
   priceCharts = [],
   onBookNow,
   onRequestQuote,
+  onDownloadBrochure,
 }) => {
   const activeCharts = useMemo(() => {
     return (priceCharts || []).filter(chart => chart.is_active !== false);
@@ -246,6 +249,17 @@ const BookingSidebar: React.FC<BookingSidebarProps> = ({
           >
             Request Quote
           </Button>
+
+          {onDownloadBrochure && (
+            <button
+              type="button"
+              onClick={onDownloadBrochure}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-teal-50 hover:bg-teal-100/90 active:scale-95 border border-teal-200 text-teal-900 font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer shadow-2xs"
+            >
+              <FileDown className="w-4 h-4 text-teal" />
+              <span>Download PDF Brochure</span>
+            </button>
+          )}
         </div>
 
         {/* Quick Facts */}

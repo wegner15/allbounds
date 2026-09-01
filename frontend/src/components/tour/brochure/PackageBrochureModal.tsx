@@ -3,6 +3,7 @@ import { Download, Printer, X, FileText, Loader2, Sparkles } from 'lucide-react'
 import type { PackageDetailResponse, PriceChartDetail } from '../../../lib/types/api';
 import { PackageBrochureDocument } from './PackageBrochureDocument';
 import { usePackageBrochurePdf } from '../../../lib/hooks/usePackageBrochurePdf';
+// PDF component is lazy-imported inside handleDownload to keep the bundle lean
 
 interface PackageBrochureModalProps {
   isOpen: boolean;
@@ -34,9 +35,38 @@ export const PackageBrochureModal: React.FC<PackageBrochureModalProps> = ({
 
   if (!isOpen) return null;
 
+  const destinationSlug = packageData.country?.slug || 'destinations';
+  const tourUrl =
+    typeof window !== 'undefined' && window.location?.origin
+      ? `${window.location.origin}/packages/${destinationSlug}/${packageData.slug}`
+      : `https://allboundvacations.com/packages/${destinationSlug}/${packageData.slug}`;
+
   const handleDownload = async () => {
     try {
-      await generatePdf(renderTargetId, packageData.name);
+      // Pre-generate QR code as a data URL (works in the pdf() renderer)
+      let qrDataUrl: string | undefined;
+      try {
+        const QRCode = (await import('qrcode')).default;
+        qrDataUrl = await QRCode.toDataURL(tourUrl, {
+          width: 200,
+          margin: 1,
+          color: { dark: '#042f2e', light: '#ffffff' },
+        });
+      } catch {
+        console.warn('QR code generation skipped');
+      }
+
+      // Lazy import the react-pdf Document component
+      const { PackageBrochurePdf } = await import('./PackageBrochurePdf');
+
+      await generatePdf(
+        <PackageBrochurePdf
+          packageData={packageData}
+          priceCharts={priceCharts}
+          qrCodeDataUrl={qrDataUrl}
+        />,
+        packageData.name
+      );
     } catch (error) {
       console.error('Failed to download brochure:', error);
     }

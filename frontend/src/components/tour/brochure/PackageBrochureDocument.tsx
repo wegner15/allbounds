@@ -14,8 +14,10 @@ import {
   Users, 
   Utensils, 
   Hotel as HotelIcon,
-  Sparkles
+  Sparkles,
+  QrCode
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import type { PackageDetailResponse, PriceChartDetail } from '../../../lib/types/api';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 
@@ -38,12 +40,46 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
     ? getImageUrlWithFallback(packageData.image_id, IMAGE_VARIANTS.LARGE)
     : 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=1200&q=80';
 
-  // Group itinerary into pages of 2 days per page to maintain clean pagination without overflow
+  const destinationSlug = packageData.country?.slug || 'destinations';
+  const tourUrl = typeof window !== 'undefined' && window.location?.origin
+    ? `${window.location.origin}/packages/${destinationSlug}/${packageData.slug}`
+    : `https://allbounds.com/packages/${destinationSlug}/${packageData.slug}`;
+
+  // Helper to sanitize title and remove redundant "Day X:" prefixes
+  const sanitizeDayTitle = (title: string, dayNum: number) => {
+    if (!title) return `Day ${dayNum} Exploration`;
+    return title.replace(/^day\s*\d+\s*[:\-–—]\s*/i, '').trim();
+  };
+
+  // Dynamically group itinerary items into pages based on content weight so cards never overflow or get cut off
   const itineraryItems = packageData.itinerary_items || [];
-  const daysPerPage = 2;
   const itineraryPages: typeof itineraryItems[] = [];
-  for (let i = 0; i < itineraryItems.length; i += daysPerPage) {
-    itineraryPages.push(itineraryItems.slice(i, i + daysPerPage));
+  
+  let currentPage: typeof itineraryItems = [];
+  let currentHeight = 0;
+  // Standard A4 usable vertical space (1123px - 140px header/footer/padding)
+  const MAX_PAGE_CONTENT_HEIGHT = 800;
+
+  itineraryItems.forEach((item, index) => {
+    const textLen = (item.description || '').replace(/<[^>]*>/g, '').length;
+    const hasActivities =
+      (item.custom_activities && item.custom_activities.some((a) => !a.is_meal)) ||
+      (item.linked_activities && item.linked_activities.length > 0);
+    // Base card height ~110px + ~18px per 80 chars of text + 24px for activities
+    const estimatedHeight = 110 + Math.ceil(textLen / 80) * 18 + (hasActivities ? 24 : 0);
+
+    if (currentPage.length > 0 && currentHeight + estimatedHeight > MAX_PAGE_CONTENT_HEIGHT) {
+      itineraryPages.push(currentPage);
+      currentPage = [item];
+      currentHeight = estimatedHeight;
+    } else {
+      currentPage.push(item);
+      currentHeight += estimatedHeight;
+    }
+  });
+
+  if (currentPage.length > 0) {
+    itineraryPages.push(currentPage);
   }
 
   // Calculate starting price
@@ -78,10 +114,10 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
         </div>
 
         {/* Decorative Gold Inner Frame */}
-        <div className="absolute inset-6 border border-amber-400/30 rounded-2xl pointer-events-none z-10" />
+        <div className="absolute inset-5 border border-amber-400/30 rounded-2xl pointer-events-none z-10" />
 
         {/* Cover Header */}
-        <header className="relative z-20 pt-12 px-12 flex items-center justify-between">
+        <header className="relative z-20 pt-10 px-10 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-teal/90 border border-amber-400/40 flex items-center justify-center shadow-lg">
               <Compass className="w-6 h-6 text-amber-300" />
@@ -102,9 +138,9 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
         </header>
 
         {/* Cover Main Hero Content */}
-        <main className="relative z-20 px-12 py-8 my-auto">
+        <main className="relative z-20 px-10 py-6 my-auto">
           {/* Destination Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal/80 border border-teal/40 text-xs font-bold text-white mb-5 shadow-md">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal/80 border border-teal/40 text-xs font-bold text-white mb-4 shadow-md">
             <MapPin className="w-3.5 h-3.5 text-amber-300" />
             <span>{packageData.country?.name || 'Exclusive Destination'}</span>
             {packageData.holiday_types && packageData.holiday_types.length > 0 && (
@@ -116,24 +152,24 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
           </div>
 
           {/* Tour Title */}
-          <h1 className="text-4xl font-bold font-playfair leading-tight text-white mb-4 text-shadow-lg max-w-[650px]">
+          <h1 className="text-3xl sm:text-4xl font-bold font-playfair leading-tight text-white mb-3 text-shadow-lg max-w-[650px]">
             {packageData.name}
           </h1>
 
           {/* Summary Quote */}
           {packageData.summary && (
-            <p className="text-sm text-gray-200 leading-relaxed font-light mb-8 max-w-[600px] line-clamp-3 italic border-l-2 border-amber-400/80 pl-4 py-1">
+            <p className="text-xs sm:text-sm text-gray-200 leading-relaxed font-light mb-6 max-w-[600px] line-clamp-3 italic border-l-2 border-amber-400/80 pl-3 py-1">
               &ldquo;{packageData.summary}&rdquo;
             </p>
           )}
 
           {/* Key Metric Highlight Cards */}
-          <div className="grid grid-cols-4 gap-3 bg-gray-900/85 backdrop-blur-md p-4 rounded-xl border border-white/15 shadow-2xl">
+          <div className="grid grid-cols-4 gap-2.5 bg-gray-900/85 backdrop-blur-md p-3.5 rounded-xl border border-white/15 shadow-2xl">
             <div className="border-r border-white/10 pr-2">
               <span className="text-[10px] uppercase font-bold text-amber-400 block tracking-wider">
                 Duration
               </span>
-              <span className="text-base font-bold text-white block mt-0.5">
+              <span className="text-sm sm:text-base font-bold text-white block mt-0.5">
                 {packageData.duration_days} Days
               </span>
               <span className="text-[10px] text-gray-300">
@@ -145,7 +181,7 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
               <span className="text-[10px] uppercase font-bold text-amber-400 block tracking-wider">
                 Starting Rate
               </span>
-              <span className="text-base font-bold text-white block mt-0.5">
+              <span className="text-sm sm:text-base font-bold text-white block mt-0.5">
                 {startingPrice ? `$${startingPrice.toLocaleString()}` : 'On Request'}
               </span>
               <span className="text-[10px] text-gray-300">Per Person</span>
@@ -155,7 +191,7 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
               <span className="text-[10px] uppercase font-bold text-amber-400 block tracking-wider">
                 Travel Style
               </span>
-              <span className="text-base font-bold text-white block mt-0.5 truncate">
+              <span className="text-sm sm:text-base font-bold text-white block mt-0.5 truncate">
                 {packageData.holiday_types?.[0]?.name || 'Guided Safari'}
               </span>
               <span className="text-[10px] text-gray-300">All-Inclusive</span>
@@ -165,7 +201,7 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
               <span className="text-[10px] uppercase font-bold text-amber-400 block tracking-wider">
                 Departures
               </span>
-              <span className="text-base font-bold text-white block mt-0.5">
+              <span className="text-sm sm:text-base font-bold text-white block mt-0.5">
                 Year-Round
               </span>
               <span className="text-[10px] text-gray-300">Private & Custom</span>
@@ -174,10 +210,20 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
         </main>
 
         {/* Cover Footer */}
-        <footer className="relative z-20 pb-10 px-12 flex items-center justify-between text-xs text-gray-400 border-t border-white/10 pt-4">
-          <span className="font-medium text-gray-300 tracking-wide">
-            www.allbounds.com • Inquiries: info@allbounds.com
-          </span>
+        <footer className="relative z-20 pb-8 px-10 flex items-center justify-between text-xs text-gray-400 border-t border-white/10 pt-3">
+          <div className="flex items-center gap-3">
+            <div className="bg-white p-1 rounded-md shadow-xs flex-shrink-0">
+              <QRCodeSVG value={tourUrl} size={36} level="M" />
+            </div>
+            <div>
+              <span className="text-[10px] text-amber-300 font-bold block leading-none mb-0.5">
+                Scan for Live Tour Dossier
+              </span>
+              <span className="font-medium text-gray-300 tracking-wide text-[10px] block">
+                www.allbounds.com • Inquiries: info@allbounds.com
+              </span>
+            </div>
+          </div>
           <span className="text-amber-300/80 font-serif italic text-xs">
             Bespoke African Journeys
           </span>
@@ -188,31 +234,31 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
       {/* PAGE 2: TOUR OVERVIEW, TRIP MATRIX & HIGHLIGHTS                           */}
       {/* ========================================================================= */}
       <div
-        className="brochure-page relative flex flex-col justify-between p-12 bg-white"
+        className="brochure-page relative flex flex-col justify-between p-8 bg-white"
         style={{ width: '794px', height: '1123px', maxHeight: '1123px', pageBreakAfter: 'always' }}
       >
         {/* Page Header */}
-        <div className="flex items-center justify-between pb-4 border-b-2 border-teal/20">
+        <div className="flex items-center justify-between pb-3 border-b-2 border-teal/20">
           <div className="flex items-center gap-2 text-teal">
             <Compass className="w-5 h-5" />
             <span className="text-sm font-bold uppercase tracking-wider font-playfair">AllBounds Expeditions</span>
           </div>
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
+          <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">
             Tour Overview & Facts • Page 02
           </span>
         </div>
 
-        {/* Main Body */}
-        <div className="my-auto space-y-6">
+        {/* Main Body - Space Optimized */}
+        <div className="space-y-4 pt-2">
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-widest text-teal block mb-1">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-teal block mb-0.5">
               Executive Itinerary Overview
             </span>
-            <h2 className="text-2xl font-bold font-playfair text-gray-900 mb-3">
+            <h2 className="text-xl font-bold font-playfair text-gray-900 mb-2">
               About This Extraordinary Journey
             </h2>
             <div
-              className="text-xs text-gray-600 leading-relaxed space-y-2 text-justify"
+              className="text-xs text-gray-600 leading-relaxed space-y-1.5 text-justify"
               dangerouslySetInnerHTML={{
                 __html: packageData.description || packageData.summary || 'An immersive adventure crafted for discerning travelers seeking unforgettable memories.',
               }}
@@ -221,34 +267,34 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
 
           {/* Quick Tour Matrix (6-cell grid) */}
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-900 mb-2 flex items-center gap-1.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-900 mb-1.5 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-teal" />
               <span>Trip Facts At A Glance</span>
             </h3>
-            <div className="grid grid-cols-3 gap-2.5 bg-gray-50 border border-gray-200/80 rounded-xl p-3.5 text-xs">
+            <div className="grid grid-cols-3 gap-2 bg-gray-50 border border-gray-200/80 rounded-xl p-3 text-xs">
               <div className="p-2 bg-white rounded-lg border border-gray-150">
-                <span className="text-[10px] font-bold text-gray-400 uppercase block">Destination</span>
-                <span className="font-bold text-gray-900 mt-0.5 block">{packageData.country?.name || 'Africa'}</span>
+                <span className="text-[9px] font-bold text-gray-400 uppercase block">Destination</span>
+                <span className="font-bold text-gray-900 mt-0.5 block truncate">{packageData.country?.name || 'Africa'}</span>
               </div>
               <div className="p-2 bg-white rounded-lg border border-gray-150">
-                <span className="text-[10px] font-bold text-gray-400 uppercase block">Duration</span>
+                <span className="text-[9px] font-bold text-gray-400 uppercase block">Duration</span>
                 <span className="font-bold text-gray-900 mt-0.5 block">{packageData.duration_days} Days / {Math.max(1, packageData.duration_days - 1)} Nights</span>
               </div>
               <div className="p-2 bg-white rounded-lg border border-gray-150">
-                <span className="text-[10px] font-bold text-gray-400 uppercase block">Group Type</span>
-                <span className="font-bold text-gray-900 mt-0.5 block">Private Tailored Tour</span>
+                <span className="text-[9px] font-bold text-gray-400 uppercase block">Group Type</span>
+                <span className="font-bold text-gray-900 mt-0.5 block truncate">Private Tailored Tour</span>
               </div>
               <div className="p-2 bg-white rounded-lg border border-gray-150">
-                <span className="text-[10px] font-bold text-gray-400 uppercase block">Physical Rating</span>
+                <span className="text-[9px] font-bold text-gray-400 uppercase block">Physical Rating</span>
                 <span className="font-bold text-gray-900 mt-0.5 block">Moderate (All Ages)</span>
               </div>
               <div className="p-2 bg-white rounded-lg border border-gray-150">
-                <span className="text-[10px] font-bold text-gray-400 uppercase block">Best Travel Season</span>
+                <span className="text-[9px] font-bold text-gray-400 uppercase block">Best Travel Season</span>
                 <span className="font-bold text-gray-900 mt-0.5 block">Year-Round Availability</span>
               </div>
               <div className="p-2 bg-white rounded-lg border border-gray-150">
-                <span className="text-[10px] font-bold text-gray-400 uppercase block">Transport Vehicle</span>
-                <span className="font-bold text-gray-900 mt-0.5 block">4x4 Custom Safari Land Cruiser</span>
+                <span className="text-[9px] font-bold text-gray-400 uppercase block">Transport Vehicle</span>
+                <span className="font-bold text-gray-900 mt-0.5 block truncate">4x4 Safari Land Cruiser</span>
               </div>
             </div>
           </div>
@@ -256,19 +302,19 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
           {/* Key Expedition Highlights */}
           {packageData.attractions && packageData.attractions.length > 0 && (
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-gray-900 mb-2 flex items-center gap-1.5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-gray-900 mb-1.5 flex items-center gap-1.5">
                 <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
                 <span>Featured Attractions & Landmarks</span>
               </h3>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 {packageData.attractions.slice(0, 6).map((attr, idx) => (
                   <div key={idx} className="flex items-start gap-2 p-2 bg-teal-50/50 rounded-lg border border-teal-100/70">
-                    <span className="w-5 h-5 rounded-full bg-teal text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="w-4 h-4 rounded-full bg-teal text-white text-[9px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                       {idx + 1}
                     </span>
-                    <div>
-                      <span className="font-bold text-gray-900 block">{attr.name}</span>
-                      {attr.city && <span className="text-[10px] text-gray-500">{attr.city}</span>}
+                    <div className="min-w-0">
+                      <span className="font-bold text-gray-900 block truncate">{attr.name}</span>
+                      {attr.city && <span className="text-[9px] text-gray-500 truncate block">{attr.city}</span>}
                     </div>
                   </div>
                 ))}
@@ -278,14 +324,14 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
 
           {/* Featured Image Banner */}
           {packageData.media_assets && packageData.media_assets.length > 0 && (
-            <div className="rounded-xl overflow-hidden h-36 border border-gray-200 shadow-sm relative">
+            <div className="rounded-xl overflow-hidden h-32 border border-gray-200 shadow-xs relative">
               <img
                 src={getImageUrlWithFallback(packageData.media_assets[0].image_id, IMAGE_VARIANTS.MEDIUM)}
                 alt="Safari Landmark"
                 className="w-full h-full object-cover"
                 crossOrigin="anonymous"
               />
-              <div className="absolute bottom-2 left-3 bg-gray-900/80 backdrop-blur-xs text-white text-[10px] font-semibold px-2.5 py-1 rounded-md">
+              <div className="absolute bottom-2 left-3 bg-gray-900/80 backdrop-blur-xs text-white text-[9px] font-semibold px-2 py-0.5 rounded-md">
                 Experience authentic wilderness encounters
               </div>
             </div>
@@ -293,7 +339,7 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
         </div>
 
         {/* Page Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-200 text-[10px] text-gray-400">
+        <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-200 text-[10px] text-gray-400">
           <span>AllBounds Travel Ltd • Tour Dossier: {packageData.name}</span>
           <span>Page 02</span>
         </div>
@@ -305,101 +351,112 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
       {itineraryPages.map((pageDays, pageIndex) => (
         <div
           key={pageIndex}
-          className="brochure-page relative flex flex-col justify-between p-12 bg-white"
+          className="brochure-page relative flex flex-col justify-between p-8 bg-white"
           style={{ width: '794px', height: '1123px', maxHeight: '1123px', pageBreakAfter: 'always' }}
         >
           {/* Page Header */}
-          <div className="flex items-center justify-between pb-4 border-b-2 border-teal/20">
+          <div className="flex items-center justify-between pb-3 border-b-2 border-teal/20">
             <div className="flex items-center gap-2 text-teal">
               <Compass className="w-5 h-5" />
               <span className="text-sm font-bold uppercase tracking-wider font-playfair">{packageData.name}</span>
             </div>
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
+            <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">
               Daily Itinerary • Page {String(pageIndex + 3).padStart(2, '0')}
             </span>
           </div>
 
-          {/* Day-by-Day Timeline Items */}
-          <div className="my-auto space-y-6">
-            {pageDays.map((item, dIdx) => (
-              <div key={dIdx} className="bg-gray-50/80 border border-gray-200/90 rounded-xl p-5 relative shadow-xs">
-                {/* Day Header Badge */}
-                <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200/80">
-                  <div className="flex items-center gap-2.5">
-                    <span className="bg-teal text-white text-xs font-bold px-3 py-1 rounded-md tracking-wider shadow-xs">
-                      DAY {item.day_number || (pageIndex * daysPerPage + dIdx + 1)}
-                    </span>
-                    <h3 className="text-base font-bold font-playfair text-gray-900">
-                      {item.title}
-                    </h3>
-                  </div>
-                </div>
+          {/* Day-by-Day Timeline Items - Space Optimized & No Cutoffs */}
+          <div className="space-y-3 pt-2">
+            {pageDays.map((item, dIdx) => {
+              const dayNumber = item.day_number || (dIdx + 1);
+              const cleanTitle = sanitizeDayTitle(item.title, dayNumber);
+              const mealText =
+                item.custom_activities && item.custom_activities.some((a) => a.is_meal)
+                  ? item.custom_activities.filter((a) => a.is_meal).map((a) => a.meal_type || a.activity_title).join(', ')
+                  : 'Breakfast, Lunch & Dinner';
+              const stayText =
+                item.hotels && item.hotels.length > 0
+                  ? item.hotels.map((h) => h.name).join(', ')
+                  : item.accommodation_notes || 'Luxury Safari Lodge';
 
-                {/* Day Narrative Description */}
+              return (
                 <div
-                  className="text-xs text-gray-600 leading-relaxed mb-4 text-justify"
-                  dangerouslySetInnerHTML={{
-                    __html: item.description || 'Enjoy a full day of guided excursions and discovery.',
-                  }}
-                />
-
-                {/* Day Inclusions & Details Badges */}
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-200/60 text-xs">
-                  {/* Meals */}
-                  <div className="flex items-center gap-1.5 text-gray-700 bg-white p-2 rounded-lg border border-gray-150">
-                    <Utensils className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                    <span className="text-[11px] font-semibold">
-                      Meals: {
-                        item.custom_activities && item.custom_activities.some(a => a.is_meal)
-                          ? item.custom_activities.filter(a => a.is_meal).map(a => a.meal_type || a.activity_title).join(', ')
-                          : 'Breakfast, Lunch & Dinner'
-                      }
-                    </span>
+                  key={item.id || dIdx}
+                  className="bg-gray-50/90 border border-gray-200/90 border-l-4 border-l-teal rounded-xl p-3.5 relative shadow-2xs"
+                >
+                  {/* Day Header Badge & Clean Title */}
+                  <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-gray-200/70">
+                    <div className="flex items-center gap-2.5">
+                      <span className="bg-teal text-white text-[10px] font-bold px-2.5 py-0.5 rounded-md tracking-wider shadow-2xs flex-shrink-0">
+                        DAY {dayNumber}
+                      </span>
+                      <h3 className="text-sm font-bold font-playfair text-gray-900 leading-snug">
+                        {cleanTitle}
+                      </h3>
+                    </div>
                   </div>
 
-                  {/* Accommodation */}
-                  <div className="flex items-center gap-1.5 text-gray-700 bg-white p-2 rounded-lg border border-gray-150 truncate">
-                    <HotelIcon className="w-3.5 h-3.5 text-teal flex-shrink-0" />
-                    <span className="text-[11px] font-semibold truncate">
-                      Stay: {
-                        item.hotels && item.hotels.length > 0
-                          ? item.hotels.map(h => h.name).join(', ')
-                          : item.accommodation_notes || 'Luxury Safari Lodge'
-                      }
-                    </span>
+                  {/* Day Narrative Description */}
+                  <div
+                    className="text-[11px] text-gray-600 leading-relaxed mb-2.5 text-justify"
+                    dangerouslySetInnerHTML={{
+                      __html: item.description || 'Enjoy a full day of guided excursions and wilderness discovery.',
+                    }}
+                  />
+
+                  {/* Day Inclusions & Details Badges - Unclipped & Roomy */}
+                  <div className="grid grid-cols-2 gap-2 pt-1.5 border-t border-gray-200/60">
+                    {/* Meals */}
+                    <div className="flex items-center gap-2 text-gray-700 bg-white px-2.5 py-1.5 rounded-lg border border-gray-150 shadow-2xs min-h-[32px]">
+                      <Utensils className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                      <span className="text-[10px] font-semibold truncate leading-tight">
+                        Meals: {mealText}
+                      </span>
+                    </div>
+
+                    {/* Accommodation */}
+                    <div className="flex items-center gap-2 text-gray-700 bg-white px-2.5 py-1.5 rounded-lg border border-gray-150 shadow-2xs min-h-[32px]">
+                      <HotelIcon className="w-3.5 h-3.5 text-teal flex-shrink-0" />
+                      <span className="text-[10px] font-semibold truncate leading-tight">
+                        Stay: {stayText}
+                      </span>
+                    </div>
                   </div>
+
+                  {/* Activities included on this day */}
+                  {((item.custom_activities && item.custom_activities.some((a) => !a.is_meal)) ||
+                    (item.linked_activities && item.linked_activities.length > 0)) && (
+                    <div className="mt-2 flex flex-wrap gap-1 items-center">
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400 mr-1">
+                        Activities:
+                      </span>
+                      {item.custom_activities
+                        ?.filter((a) => !a.is_meal)
+                        .map((act, aIdx) => (
+                          <span
+                            key={`custom-${aIdx}`}
+                            className="text-[9px] bg-teal-50 text-teal-800 border border-teal-200/70 px-1.5 py-0.5 rounded-md font-medium"
+                          >
+                            ✓ {act.activity_title}
+                          </span>
+                        ))}
+                      {item.linked_activities?.map((act, aIdx) => (
+                        <span
+                          key={`linked-${aIdx}`}
+                          className="text-[9px] bg-teal-50 text-teal-800 border border-teal-200/70 px-1.5 py-0.5 rounded-md font-medium"
+                        >
+                          ✓ {act.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-
-                {/* Activities included on this day */}
-                {((item.custom_activities && item.custom_activities.some(a => !a.is_meal)) || (item.linked_activities && item.linked_activities.length > 0)) && (
-                  <div className="mt-3 flex flex-wrap gap-1.5 items-center">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mr-1">
-                      Day Activities:
-                    </span>
-                    {item.custom_activities?.filter(a => !a.is_meal).map((act, aIdx) => (
-                      <span
-                        key={`custom-${aIdx}`}
-                        className="text-[10px] bg-teal-50 text-teal-800 border border-teal-200/70 px-2 py-0.5 rounded-md font-medium"
-                      >
-                        ✓ {act.activity_title}
-                      </span>
-                    ))}
-                    {item.linked_activities?.map((act, aIdx) => (
-                      <span
-                        key={`linked-${aIdx}`}
-                        className="text-[10px] bg-teal-50 text-teal-800 border border-teal-200/70 px-2 py-0.5 rounded-md font-medium"
-                      >
-                        ✓ {act.name}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Page Footer */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-200 text-[10px] text-gray-400">
+          <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-200 text-[10px] text-gray-400">
             <span>AllBounds Travel Ltd • Detailed Daily Itinerary</span>
             <span>Page {String(pageIndex + 3).padStart(2, '0')}</span>
           </div>
@@ -410,7 +467,7 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
       {/* PAGE: ACCOMMODATIONS & INCLUSIONS / EXCLUSIONS                            */}
       {/* ========================================================================= */}
       <div
-        className="brochure-page relative flex flex-col justify-between p-12 bg-white"
+        className="brochure-page relative flex flex-col justify-between p-8 bg-white"
         style={{
           width: '794px',
           height: '1123px',
@@ -419,32 +476,32 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
         }}
       >
         {/* Page Header */}
-        <div className="flex items-center justify-between pb-4 border-b-2 border-teal/20">
+        <div className="flex items-center justify-between pb-3 border-b-2 border-teal/20">
           <div className="flex items-center gap-2 text-teal">
             <Compass className="w-5 h-5" />
             <span className="text-sm font-bold uppercase tracking-wider font-playfair">Lodging & Terms</span>
           </div>
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
+          <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">
             Accommodations & Inclusions
           </span>
         </div>
 
-        {/* Main Body */}
-        <div className="my-auto space-y-6">
+        {/* Main Body - Space Optimized */}
+        <div className="space-y-4 pt-2">
           {/* Featured Accommodations */}
           {packageData.hotels && packageData.hotels.length > 0 && (
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-widest text-teal block mb-1">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-teal block mb-0.5">
                 Handpicked Lodges & Resorts
               </span>
-              <h2 className="text-xl font-bold font-playfair text-gray-900 mb-3">
+              <h2 className="text-lg font-bold font-playfair text-gray-900 mb-2">
                 Where You Will Stay
               </h2>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2.5">
                 {packageData.hotels.slice(0, 4).map((hotel, hIdx) => (
-                  <div key={hIdx} className="bg-gray-50 border border-gray-200 rounded-xl p-3 flex gap-3 items-center">
+                  <div key={hIdx} className="bg-gray-50 border border-gray-200 rounded-xl p-2.5 flex gap-2.5 items-center">
                     {hotel.image_url || hotel.image_id ? (
-                      <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200">
+                      <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200">
                         <img
                           src={hotel.image_url || getImageUrlWithFallback(hotel.image_id, IMAGE_VARIANTS.THUMBNAIL)}
                           alt={hotel.name}
@@ -453,18 +510,18 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
                         />
                       </div>
                     ) : (
-                      <div className="w-16 h-16 rounded-lg bg-teal/10 flex items-center justify-center flex-shrink-0">
-                        <HotelIcon className="w-6 h-6 text-teal" />
+                      <div className="w-14 h-14 rounded-lg bg-teal/10 flex items-center justify-center flex-shrink-0">
+                        <HotelIcon className="w-5 h-5 text-teal" />
                       </div>
                     )}
                     <div className="min-w-0">
-                      <div className="flex items-center gap-1 text-amber-500 mb-0.5">
+                      <div className="flex items-center gap-0.5 text-amber-500 mb-0.5">
                         {[...Array(hotel.stars || 4)].map((_, i) => (
-                          <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                          <Star key={i} className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
                         ))}
                       </div>
                       <h4 className="text-xs font-bold text-gray-900 truncate">{hotel.name}</h4>
-                      <p className="text-[10px] text-gray-500 truncate">{hotel.city || packageData.country?.name}</p>
+                      <p className="text-[9px] text-gray-500 truncate">{hotel.city || packageData.country?.name}</p>
                     </div>
                   </div>
                 ))}
@@ -474,17 +531,17 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
 
           {/* Inclusions vs Exclusions Two-Column Comparison */}
           <div>
-            <h2 className="text-xl font-bold font-playfair text-gray-900 mb-3">
+            <h2 className="text-lg font-bold font-playfair text-gray-900 mb-2">
               What Is Included In Your Package
             </h2>
-            <div className="grid grid-cols-2 gap-4 text-xs">
+            <div className="grid grid-cols-2 gap-3 text-xs">
               {/* Inclusions */}
-              <div className="bg-emerald-50/60 border border-emerald-200/80 rounded-xl p-4">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-800 mb-2.5 flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <div className="bg-emerald-50/60 border border-emerald-200/80 rounded-xl p-3.5">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-800 mb-2 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Package Inclusions</span>
                 </h3>
-                <ul className="space-y-2">
+                <ul className="space-y-1.5">
                   {(packageData.inclusion_items && packageData.inclusion_items.length > 0
                     ? packageData.inclusion_items.map((inc) => inc.name)
                     : [
@@ -497,7 +554,7 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
                         'Emergency medical evacuation insurance cover',
                       ]
                   ).map((text, i) => (
-                    <li key={i} className="flex items-start gap-1.5 text-gray-700 text-[11px] leading-tight">
+                    <li key={i} className="flex items-start gap-1.5 text-gray-700 text-[10px] leading-tight">
                       <span className="text-emerald-600 font-bold">✓</span>
                       <span>{text}</span>
                     </li>
@@ -506,12 +563,12 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
               </div>
 
               {/* Exclusions */}
-              <div className="bg-rose-50/60 border border-rose-200/80 rounded-xl p-4">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-rose-800 mb-2.5 flex items-center gap-1.5">
-                  <XCircle className="w-4 h-4 text-rose-600" />
+              <div className="bg-rose-50/60 border border-rose-200/80 rounded-xl p-3.5">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-rose-800 mb-2 flex items-center gap-1.5">
+                  <XCircle className="w-3.5 h-3.5 text-rose-600" />
                   <span>Package Exclusions</span>
                 </h3>
-                <ul className="space-y-2">
+                <ul className="space-y-1.5">
                   {(packageData.exclusion_items && packageData.exclusion_items.length > 0
                     ? packageData.exclusion_items.map((exc) => exc.name)
                     : [
@@ -524,7 +581,7 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
                         'Laundry and personal spending items',
                       ]
                   ).map((text, i) => (
-                    <li key={i} className="flex items-start gap-1.5 text-gray-700 text-[11px] leading-tight">
+                    <li key={i} className="flex items-start gap-1.5 text-gray-700 text-[10px] leading-tight">
                       <span className="text-rose-500 font-bold">✕</span>
                       <span>{text}</span>
                     </li>
@@ -536,7 +593,7 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
         </div>
 
         {/* Page Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-200 text-[10px] text-gray-400">
+        <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-200 text-[10px] text-gray-400">
           <span>AllBounds Travel Ltd • Accommodations & Terms</span>
           <span>Official Brochure</span>
         </div>
@@ -546,54 +603,54 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
       {/* FINAL PAGE: SEASONAL RATES & BOOKING DOSSIER (BACK COVER)                */}
       {/* ========================================================================= */}
       <div
-        className="brochure-page relative flex flex-col justify-between p-12 bg-gray-900 text-white"
+        className="brochure-page relative flex flex-col justify-between p-8 bg-gray-900 text-white"
         style={{ width: '794px', height: '1123px', maxHeight: '1123px', pageBreakAfter: 'avoid' }}
       >
         {/* Page Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-white/15">
+        <div className="flex items-center justify-between pb-3 border-b border-white/15">
           <div className="flex items-center gap-2">
             <Compass className="w-5 h-5 text-amber-400" />
             <span className="text-sm font-bold uppercase tracking-wider font-playfair text-white">AllBounds Expeditions</span>
           </div>
-          <span className="text-xs font-semibold text-amber-300/80 uppercase tracking-widest">
+          <span className="text-[11px] font-semibold text-amber-300/80 uppercase tracking-widest">
             Pricing & Booking Dossier
           </span>
         </div>
 
-        {/* Main Body */}
-        <div className="my-auto space-y-6">
+        {/* Main Body - Space Optimized */}
+        <div className="space-y-4 pt-2">
           {/* Seasonal Pricing Schedule */}
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-widest text-amber-400 block mb-1">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400 block mb-0.5">
               Guaranteed Departures & Rates
             </span>
-            <h2 className="text-2xl font-bold font-playfair text-white mb-3">
+            <h2 className="text-xl font-bold font-playfair text-white mb-2">
               Seasonal Pricing Schedule
             </h2>
 
             {activeCharts.length > 0 ? (
               <div className="overflow-hidden rounded-xl border border-white/20 bg-gray-950/60 shadow-xl">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-teal/80 text-white uppercase text-[10px] tracking-wider border-b border-white/10">
+                  <thead className="bg-teal/80 text-white uppercase text-[9px] tracking-wider border-b border-white/10">
                     <tr>
-                      <th className="py-2.5 px-4 font-bold">Season / Travel Window</th>
-                      <th className="py-2.5 px-4 font-bold">Dates</th>
-                      <th className="py-2.5 px-4 font-bold text-right">Price (Per Person)</th>
+                      <th className="py-2 px-3 font-bold">Season / Travel Window</th>
+                      <th className="py-2 px-3 font-bold">Dates</th>
+                      <th className="py-2 px-3 font-bold text-right">Price (Per Person)</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/10 text-gray-200">
                     {activeCharts.map((chart, cIdx) => (
                       <tr key={cIdx} className="hover:bg-white/5 transition-colors">
-                        <td className="py-3 px-4 font-bold text-white flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-amber-400" />
-                          <span>{chart.title}</span>
+                        <td className="py-2 px-3 font-bold text-white flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                          <span className="text-[11px]">{chart.title}</span>
                         </td>
-                        <td className="py-3 px-4 text-gray-300">
+                        <td className="py-2 px-3 text-gray-300 text-[11px]">
                           {chart.start_date && chart.end_date
                             ? `${chart.start_date} – ${chart.end_date}`
                             : 'Year-Round'}
                         </td>
-                        <td className="py-3 px-4 text-right font-bold text-amber-300 text-sm">
+                        <td className="py-2 px-3 text-right font-bold text-amber-300 text-xs">
                           ${(chart.price || packageData.price || 0).toLocaleString()}
                         </td>
                       </tr>
@@ -602,7 +659,7 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
                 </table>
               </div>
             ) : (
-              <div className="p-4 bg-white/5 border border-white/10 rounded-xl text-center">
+              <div className="p-3 bg-white/5 border border-white/10 rounded-xl text-center">
                 <p className="text-xs text-gray-300">
                   Standard Starting Rate: <strong className="text-amber-400 text-sm">${(packageData.price || 0).toLocaleString()} USD</strong> per person sharing. Custom quotes tailored upon request.
                 </p>
@@ -611,60 +668,81 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
           </div>
 
           {/* How to Book in 3 Steps */}
-          <div className="bg-white/5 border border-white/10 rounded-xl p-5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-amber-300 mb-3 flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-amber-400" />
+          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
               <span>Easy 3-Step Booking & Customization</span>
             </h3>
-            <div className="grid grid-cols-3 gap-3 text-xs text-gray-300">
-              <div className="p-2.5 bg-gray-950/50 rounded-lg border border-white/10">
-                <span className="text-amber-400 font-bold text-sm block mb-1">01. Request Quote</span>
-                <p className="text-[11px] text-gray-400 leading-tight">
+            <div className="grid grid-cols-3 gap-2.5 text-xs text-gray-300">
+              <div className="p-2 bg-gray-950/50 rounded-lg border border-white/10">
+                <span className="text-amber-400 font-bold text-xs block mb-0.5">01. Request Quote</span>
+                <p className="text-[10px] text-gray-400 leading-tight">
                   Contact our safari specialists with your preferred travel dates and party size.
                 </p>
               </div>
-              <div className="p-2.5 bg-gray-950/50 rounded-lg border border-white/10">
-                <span className="text-amber-400 font-bold text-sm block mb-1">02. Tailor Itinerary</span>
-                <p className="text-[11px] text-gray-400 leading-tight">
+              <div className="p-2 bg-gray-950/50 rounded-lg border border-white/10">
+                <span className="text-amber-400 font-bold text-xs block mb-0.5">02. Tailor Itinerary</span>
+                <p className="text-[10px] text-gray-400 leading-tight">
                   Customize lodges, flights, and activities to match your personal travel vision.
                 </p>
               </div>
-              <div className="p-2.5 bg-gray-950/50 rounded-lg border border-white/10">
-                <span className="text-amber-400 font-bold text-sm block mb-1">03. Secure & Embark</span>
-                <p className="text-[11px] text-gray-400 leading-tight">
+              <div className="p-2 bg-gray-950/50 rounded-lg border border-white/10">
+                <span className="text-amber-400 font-bold text-xs block mb-0.5">03. Secure & Embark</span>
+                <p className="text-[10px] text-gray-400 leading-tight">
                   Confirm your reservation with flexible payment terms and 24/7 in-country support.
                 </p>
               </div>
             </div>
           </div>
 
+          {/* Instant QR Code Direct Link Card */}
+          <div className="flex items-center justify-between gap-4 bg-gray-950/80 p-3 rounded-xl border border-amber-400/30 shadow-lg">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <QrCode className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-[10px] uppercase font-bold tracking-wider text-amber-400">
+                  Instant Online Tour Access
+                </span>
+              </div>
+              <h4 className="text-xs font-bold text-white mb-0.5">
+                Scan To View Real-Time Dates & Book Online
+              </h4>
+              <p className="text-[9px] text-gray-400 truncate font-mono">
+                {tourUrl}
+              </p>
+            </div>
+            <div className="bg-white p-1.5 rounded-lg shadow-sm flex-shrink-0">
+              <QRCodeSVG value={tourUrl} size={54} level="M" fgColor="#042f2e" />
+            </div>
+          </div>
+
           {/* Official Contact Box */}
-          <div className="bg-gradient-to-r from-teal/90 to-teal-950/90 border border-amber-400/40 rounded-xl p-5 shadow-2xl">
-            <h3 className="text-sm font-bold font-playfair text-white mb-2 text-shadow-sm">
+          <div className="bg-gradient-to-r from-teal/90 to-teal-950/90 border border-amber-400/40 rounded-xl p-4 shadow-xl">
+            <h3 className="text-xs font-bold font-playfair text-white mb-1 text-shadow-sm">
               Speak With An AllBounds Safari Specialist
             </h3>
-            <p className="text-xs text-gray-200 mb-4 leading-relaxed">
+            <p className="text-[11px] text-gray-200 mb-3 leading-relaxed">
               Have questions or ready to book this itinerary? Our destination experts are available 7 days a week to assist you.
             </p>
-            <div className="grid grid-cols-3 gap-3 text-xs">
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-amber-300" />
-                <span className="font-semibold text-white">+1 (800) 555-BOUNDS</span>
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5 text-amber-300" />
+                <span className="font-semibold text-white text-[11px]">+1 (800) 555-BOUNDS</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-amber-300" />
-                <span className="font-semibold text-white">info@allbounds.com</span>
+              <div className="flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-amber-300" />
+                <span className="font-semibold text-white text-[11px]">info@allbounds.com</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-amber-300" />
-                <span className="font-semibold text-white">www.allbounds.com</span>
+              <div className="flex items-center gap-1.5">
+                <Globe className="w-3.5 h-3.5 text-amber-300" />
+                <span className="font-semibold text-white text-[11px]">www.allbounds.com</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Back Cover Footer */}
-        <footer className="pt-4 border-t border-white/15 flex items-center justify-between text-[10px] text-gray-400">
+        <footer className="mt-auto pt-3 border-t border-white/15 flex items-center justify-between text-[10px] text-gray-400">
           <span>© {currentYear} AllBounds Travel & Expeditions Ltd. All rights reserved.</span>
           <span className="text-amber-400/90 font-serif italic">Crafting Unforgettable African Journeys</span>
         </footer>

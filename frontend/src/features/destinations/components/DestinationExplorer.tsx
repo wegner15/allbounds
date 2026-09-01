@@ -600,7 +600,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
       </div>
 
       {/* MAIN CONTENT AREA (ORDER: ATTRACTIONS -> ACTIVITIES -> PACKAGES -> ACCOMMODATION) */}
-      <div className="w-full space-y-12">
+      <div className="w-full space-y-6 md:space-y-8">
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
             {[...Array(6)].map((_, i) => (
@@ -615,7 +615,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
           /* ==================================================== */
           /* CATEGORY-BASED OVERVIEW (IN-PLACE SECTION LOAD MORE) */
           /* ==================================================== */
-          <div className="space-y-16">
+          <div className="space-y-8 md:space-y-10">
             
             {/* SECTION 1: TOP THINGS TO DO & ATTRACTIONS */}
             <section id="section-attractions" className="scroll-mt-28">

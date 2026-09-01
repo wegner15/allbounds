@@ -235,25 +235,25 @@ const PackageDetailPageNew: React.FC = () => {
         )}
 
         {/* Main Content - Two Column Layout */}
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 pb-24 lg:pb-8">
-          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-5 pb-20 lg:pb-6">
+          <div className="flex flex-col lg:flex-row gap-5 lg:gap-6">
             {/* Left Column - Main Content */}
             <main className="flex-1 lg:w-2/3 min-w-0" role="main" aria-label="Tour package details">
               {/* Overview Section */}
-              <div className="mb-6 md:mb-8">
+              <div className="mb-4 md:mb-5">
                 <OverviewSection packageData={packageDetail} />
               </div>
 
               {/* Itinerary Section */}
               {packageDetail.itinerary_items && packageDetail.itinerary_items.length > 0 && (
-                <div className="mb-6 md:mb-8">
+                <div className="mb-4 md:mb-5">
                   <ItinerarySection itineraryItems={packageDetail.itinerary_items} />
                 </div>
               )}
 
               {/* Inclusions/Exclusions Section */}
               {(packageDetail.inclusion_items?.length > 0 || packageDetail.exclusion_items?.length > 0) && (
-                <div className="mb-6 md:mb-8">
+                <div className="mb-4 md:mb-5">
                   <InclusionsExclusionsSection
                     inclusions={packageDetail.inclusion_items || []}
                     exclusions={packageDetail.exclusion_items || []}
@@ -263,21 +263,21 @@ const PackageDetailPageNew: React.FC = () => {
 
               {/* Hotels Section */}
               {packageDetail.hotels && packageDetail.hotels.length > 0 && (
-                <div className="mb-6 md:mb-8">
+                <div className="mb-4 md:mb-5">
                   <HotelsSection hotels={packageDetail.hotels} />
                 </div>
               )}
 
               {/* Attractions Section */}
               {packageDetail.attractions && packageDetail.attractions.length > 0 && (
-                <div className="mb-6 md:mb-8">
+                <div className="mb-4 md:mb-5">
                   <AttractionsSection attractions={packageDetail.attractions} />
                 </div>
               )}
 
               {/* Itinerary Map Section */}
               {packageDetail.itinerary_items && packageDetail.itinerary_items.length > 0 && (
-                <div id="map" className="mb-6 md:mb-8 scroll-mt-20">
+                <div id="map" className="mb-4 md:mb-5 scroll-mt-20">
                   <ItineraryMapLeaflet
                     itineraryItems={packageDetail.itinerary_items}
                     packageName={packageDetail.name}
@@ -287,7 +287,7 @@ const PackageDetailPageNew: React.FC = () => {
 
               {/* Gallery Section */}
               {packageDetail.media_assets && packageDetail.media_assets.length > 0 && (
-                <div className="mb-6 md:mb-8">
+                <div className="mb-4 md:mb-5">
                   <GallerySection
                     images={packageDetail.media_assets}
                     title={packageDetail.name}
@@ -297,13 +297,13 @@ const PackageDetailPageNew: React.FC = () => {
 
               {/* Related Travel Stories & Blog Articles */}
               {packageDetail.blog_posts && packageDetail.blog_posts.length > 0 && (
-                <div className="mb-6 md:mb-8">
+                <div className="mb-4 md:mb-5">
                   <BlogsSection blogs={packageDetail.blog_posts} />
                 </div>
               )}
 
               {/* Seasonal Pricing Section */}
-              <div id="pricing" className="mb-6 md:mb-8 scroll-mt-20">
+              <div id="pricing" className="mb-4 md:mb-5 scroll-mt-20">
                 <SeasonalPricingTable
                   priceCharts={activePriceCharts}
                   basePrice={packageDetail.price}
@@ -315,7 +315,7 @@ const PackageDetailPageNew: React.FC = () => {
 
               {/* Reviews Section */}
               {packageDetail.reviews && packageDetail.reviews.length > 0 && (
-                <div className="mb-6 md:mb-8">
+                <div className="mb-4 md:mb-5">
                   <ReviewsSection reviews={packageDetail.reviews} />
                 </div>
               )}

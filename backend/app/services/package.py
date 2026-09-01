@@ -228,34 +228,34 @@ class PackageService:
         from app.models.activity import Activity
         
         package = db.query(Package).options(
-            # Load country
+            # Load country (many-to-one is safe for joinedload)
             joinedload(Package.country),
-            # Load additional countries
-            joinedload(Package.countries),
-            # Load holiday types
-            joinedload(Package.holiday_types),
-            # Load media assets
-            joinedload(Package.media_assets),
-            # Load tags
-            joinedload(Package.tags),
-            # Load itinerary items with nested relationships
-            joinedload(Package.itinerary_items).joinedload(ItineraryItem.hotels).joinedload(Hotel.amenities),
-            joinedload(Package.itinerary_items).joinedload(ItineraryItem.hotels).joinedload(Hotel.media_assets),
-            joinedload(Package.itinerary_items).joinedload(ItineraryItem.attractions),
-            joinedload(Package.itinerary_items).joinedload(ItineraryItem.custom_activities),
-            joinedload(Package.itinerary_items).joinedload(ItineraryItem.linked_activities),
-            # Load inclusions and exclusions
-            joinedload(Package.inclusion_items),
-            joinedload(Package.exclusion_items),
-            # Load hotels with amenities
-            joinedload(Package.hotels).joinedload(Hotel.amenities),
-            joinedload(Package.hotels).joinedload(Hotel.media_assets),
-            # Load attractions
-            joinedload(Package.attractions),
-            # Load reviews (only approved ones)
-            joinedload(Package.reviews),
-            # Load price charts with hotel options
-            joinedload(Package.price_charts).joinedload(PackagePriceChart.hotel_options).joinedload(PackagePriceChartHotel.hotel),
+            # Load additional countries (collection)
+            selectinload(Package.countries),
+            # Load holiday types (collection)
+            selectinload(Package.holiday_types),
+            # Load media assets (collection)
+            selectinload(Package.media_assets),
+            # Load tags (collection)
+            selectinload(Package.tags),
+            # Load itinerary items with nested relationships (collections)
+            selectinload(Package.itinerary_items).selectinload(ItineraryItem.hotels).selectinload(Hotel.amenities),
+            selectinload(Package.itinerary_items).selectinload(ItineraryItem.hotels).selectinload(Hotel.media_assets),
+            selectinload(Package.itinerary_items).selectinload(ItineraryItem.attractions),
+            selectinload(Package.itinerary_items).selectinload(ItineraryItem.custom_activities),
+            selectinload(Package.itinerary_items).selectinload(ItineraryItem.linked_activities),
+            # Load inclusions and exclusions (collections)
+            selectinload(Package.inclusion_items),
+            selectinload(Package.exclusion_items),
+            # Load hotels with amenities (collections)
+            selectinload(Package.hotels).selectinload(Hotel.amenities),
+            selectinload(Package.hotels).selectinload(Hotel.media_assets),
+            # Load attractions (collection)
+            selectinload(Package.attractions),
+            # Load reviews (only approved ones) (collection)
+            selectinload(Package.reviews),
+            # Load price charts with hotel options (collections)
+            selectinload(Package.price_charts).selectinload(PackagePriceChart.hotel_options).joinedload(PackagePriceChartHotel.hotel),
             # Load linked blog posts
             selectinload(Package.blog_posts),
         ).filter(

@@ -30,7 +30,7 @@ class UpdateFaqsRequest(BaseModel):
 router = APIRouter()
 
 @router.get("/", response_model=List[PackageListResponse])
-@cache_endpoint(ttl=300)
+@cache_endpoint(ttl=86400)
 def get_packages(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -117,7 +117,7 @@ def get_paginated_packages(
     }
 
 @router.get("/country/{country_id}", response_model=List[PackageWithCountryResponse])
-@cache_endpoint(ttl=300)
+@cache_endpoint(ttl=86400)
 def get_packages_by_country(
     country_id: int,
     db: Session = Depends(get_db),
@@ -133,7 +133,7 @@ def get_packages_by_country(
     return [PackageWithCountryResponse.from_orm(pkg) for pkg in packages]
 
 @router.get("/featured", response_model=List[PackageWithCountryResponse])
-@cache_endpoint(ttl=300)
+@cache_endpoint(ttl=86400)
 def get_featured_packages(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -150,7 +150,7 @@ def get_featured_packages(
     return [PackageWithCountryResponse.from_orm(pkg) for pkg in packages]
 
 @router.get("/{package_id}", response_model=PackageWithCountryResponse)
-@cache_endpoint(ttl=300)
+@cache_endpoint(ttl=86400)
 def get_package(
     package_id: int,
     db: Session = Depends(get_db),
@@ -164,7 +164,7 @@ def get_package(
     return package
 
 @router.get("/slug/{slug}", response_model=PackageWithCountryResponse)
-@cache_endpoint(ttl=300)
+@cache_endpoint(ttl=86400)
 def get_package_by_slug(
     slug: str,
     db: Session = Depends(get_db),
@@ -178,7 +178,7 @@ def get_package_by_slug(
     return package
 
 @router.get("/details/{slug}")
-@cache_endpoint(ttl=300)
+@cache_endpoint(ttl=86400)
 def get_package_details_by_slug(
     slug: str,
     db: Session = Depends(get_db),
@@ -192,7 +192,7 @@ def get_package_details_by_slug(
     return package_details
 
 @router.get("/comprehensive/{slug}", response_model=PackageDetailResponse)
-@cache_endpoint(ttl=600)
+@cache_endpoint(ttl=604800)
 def get_comprehensive_package_by_slug(
     slug: str,
     db: Session = Depends(get_db),
@@ -233,7 +233,7 @@ def get_comprehensive_package_by_slug(
     return package
 
 @router.get("/{package_id}/similar", response_model=List[PackageWithCountryResponse])
-@cache_endpoint(ttl=300)
+@cache_endpoint(ttl=86400)
 def get_similar_packages(
     package_id: int,
     db: Session = Depends(get_db),

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import SeoHead from '../../components/seo/SeoHead';
+import { buildAbsoluteUrl, SITE_NAME, SITE_URL } from '../../lib/seo-config';
 
 // Components
 import Button from '../../components/ui/Button';
@@ -191,9 +192,31 @@ const PackagesPage: React.FC = () => {
   return (
     <>
       <SeoHead
-        title="Vacation Packages"
+        title="Tour Packages"
         description="Browse handpicked vacation packages, compare destinations, and find your next travel experience with Allbound Vacations."
         canonicalPath="/packages"
+        structuredData={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'CollectionPage',
+            name: 'Tour Packages',
+            description: 'Browse handpicked vacation packages, compare destinations, and find your next travel experience with Allbound Vacations.',
+            url: buildAbsoluteUrl('/packages'),
+            provider: {
+              '@type': 'TravelAgency',
+              name: SITE_NAME,
+              url: SITE_URL,
+            },
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+              { '@type': 'ListItem', position: 2, name: 'Packages', item: buildAbsoluteUrl('/packages') },
+            ],
+          },
+        ]}
       />
       <div className="min-h-screen bg-gray-50">
 

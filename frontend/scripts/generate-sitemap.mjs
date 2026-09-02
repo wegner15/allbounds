@@ -18,8 +18,7 @@ const SITE_URL = normalizeBaseUrl(
 const API_BASE_URL = normalizeBaseUrl(
   process.env.API_BASE_URL ||
     process.env.VITE_PROD_BASE_URL ||
-    process.env.VITE_API_BASE_URL ||
-    'http://localhost:8005/api/v1'
+    'https://api.allboundtravel.com/api/v1'
 );
 
 const staticRoutes = [
@@ -85,6 +84,9 @@ async function main() {
   for (const item of packages) {
     if (item?.slug) {
       urls.push(makeUrl(`/packages/${item.slug}`, item.updated_at, 'weekly', '0.9'));
+      if (item.country?.slug) {
+        urls.push(makeUrl(`/packages/${item.country.slug}/${item.slug}`, item.updated_at, 'weekly', '0.9'));
+      }
     }
   }
 
@@ -168,7 +170,11 @@ async function fetchList(path) {
 function joinApiUrl(path) {
   const normalizedBase = API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`;
   const normalizedPath = path.replace(/^\/+/, '');
-  return new URL(normalizedPath, normalizedBase).toString();
+  const url = new URL(normalizedPath, normalizedBase);
+  if (!url.searchParams.has('limit')) {
+    url.searchParams.set('limit', '200');
+  }
+  return url.toString();
 }
 
 function normalizeList(data) {

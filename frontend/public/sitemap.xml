@@ -16,26 +16,332 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/activities/balloon-safari-dubai</loc>
-    <lastmod>2025-11-07</lastmod>
+    <loc>https://allboundvacations.com/activities/a-journey-on-rovos-rail</loc>
+    <lastmod>2026-05-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/activities/big-bus-tour-dubai</loc>
-    <lastmod>2025-11-07</lastmod>
+    <loc>https://allboundvacations.com/activities/active-storms-river-tsitsikamma-forest-tsitsikamma-national-park</loc>
+    <lastmod>2026-05-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/activities/bird-watching</loc>
-    <lastmod>2025-11-04</lastmod>
+    <loc>https://allboundvacations.com/activities/albertine-rift-birdwatching-albertine-rift</loc>
+    <lastmod>2026-05-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/activities/chimpanzee-trekking</loc>
-    <lastmod>2025-10-17</lastmod>
+    <loc>https://allboundvacations.com/activities/aphrodisias-and-its-ancient-ruins-tour-pamukkale</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/baraka-natural-aquarium</loc>
+    <lastmod>2025-12-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/batwa-cultural-experience-bwindi-impenetrable-national-park</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/beach-holidays</loc>
+    <lastmod>2025-11-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/beach-relaxation-shela-beach</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/bigodi-wetland-swamp-walk-bigodi-wetland-sanctuary</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/bird-watching-aberdare-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/bird-watching-amboseli-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/bird-watching-lake-nakuru-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/bird-watching-mount-kenya-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/bird-watching-nairobi-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/bird-watching-samburu-national-reserve</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/bird-watching-tsavo-east-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/birdwatching-kibale-national-park</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/birdwatching-kidepo-valley-national-park</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/birdwatching-lake-bunyonyi</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/birdwatching-lake-mburo-national-park</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/birdwatching-murchison-falls-national-park</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/birdwatching-queen-elizabeth-national-park</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/birdwatching-ziwa-rhino-sanctuary</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/blue-lagoon-catamaran-cruise</loc>
+    <lastmod>2025-12-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/blue-mosque-guided-tour-istanbul</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/blue-safari-dhow-sailing-island-tour-zanzibar</loc>
+    <lastmod>2025-12-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/blue-safari-submarine</loc>
+    <lastmod>2025-12-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/boat-cruise-on-lake-mburo-lake-mburo</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/boat-cruise-to-the-base-of-the-falls-murchison-falls</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/boat-cruise-to-the-source-of-the-nile-source-of-the-nile</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/bosphorus-cruise-istanbul</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/boulders-beach-penguin-colony-boulders-beach</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/bungee-jumping-jinja</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/bush-dinners-sundowners-maasai-mara-national-reserve</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/butterfly-watching-kibale-national-park</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/camping-alpine-experiences-mount-kenya-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/canoeing-lake-bunyonyi</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/cape-peninsula-scenic-tour-cape-town</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/cape-town-city-tour-cape-town</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/cape-town-helicopter-tour-cape-town</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/cape-town-sunset-yacht-cruise-cape-town</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/chimpanzee-habituation-experience-kibale-national-park</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/chimpanzee-tracking-kyambura-gorge-kyambura-gorge</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/chimpanzee-trekking-kibale-national-park</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/colobus-monkey-sanctuary-visits-colobus-conservation</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/community-visits-bwindi-impenetrable-national-park</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/cookery-course-at-a-local-home-cappadocia</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/crater-lakes-exploration-crater-lakes-region</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/cultural-community-visits-kibale</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/cultural-experiences-queen-elizabeth-national-park-region</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/cultural-visits-karamojong-communities-karamojong</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/cultural-visits-lake-bunyonyi</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/cultural-visits-samburu-people</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/cycling-safaris-lake-mburo-national-park</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/day-trip-to-la-digue</loc>
+    <lastmod>2025-12-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -46,20 +352,248 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://allboundvacations.com/activities/dhow-sailing-sunset-cruises-lamu-island</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/diving-in-tumbatu</loc>
+    <lastmod>2025-12-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/donkey-rides-lamu-island</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/drakensberg-mountains-hiking-drakensberg-mountains</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/drakensberg-mountains-trip-drakensberg-mountains</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/dream-boats-floating-cafe</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://allboundvacations.com/activities/dubai-city-tour</loc>
     <lastmod>2025-11-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/activities/dubai-parks-and-resortst</loc>
-    <lastmod>2025-11-07</lastmod>
+    <loc>https://allboundvacations.com/activities/dubai-parks-and-resorts</loc>
+    <lastmod>2026-08-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/activities/gorilla-tracking</loc>
-    <lastmod>2025-11-04</lastmod>
+    <loc>https://allboundvacations.com/activities/eden-island-semi-submarine-tour</loc>
+    <lastmod>2025-12-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/excursion-to-hagia-sophia-istanbul</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/explore-ancient-ephesus-alacati</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/fishing-in-zanzibar</loc>
+    <lastmod>2025-12-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/fishing-lake-mburo</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/fishing-trips-seafood-experiences-lamu-island</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/flamingo-viewing-lake-nakuru-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/forest-walks-primate-tracking-kibale-national-park</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/franschhoek-wine-tram-franschhoek</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/full-day-visit-to-gallipoli-battlefields-and-troy-canakkale</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/galana-river-views-galana-river</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/game-drives-aberdare-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/game-drives-amboseli-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/game-drives-big-five-masai-mara-national-reserve</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/game-drives-kasenyi-plains-ishasha-sector-queen-elizabeth-national-park</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/game-drives-kidepo-valley-national-park</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/game-drives-lake-mburo-national-park</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/game-drives-lake-nakuru-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/game-drives-murchison-falls-national-park</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/game-drives-nairobi-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/game-drives-samburu-national-reserve</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/game-drives-tsavo-east-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/game-viewing-safaris</loc>
+    <lastmod>2025-11-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/glass-bottom-boat-adventure</loc>
+    <lastmod>2025-12-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/golden-monkey-tracking</loc>
+    <lastmod>2025-12-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/gorilla-habituation-experience-bwindi-impenetrable-national-park</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/great-migration-viewing-seasonal-maasai-mara-national-reserve</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/guided-excursion-to-termessos-antalya</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/guided-forest-walks-bwindi-impenetrable-national-park</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/guided-nature-walks-amboseli-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/guided-tour-of-antalya-museum-perge-and-aspendos-antalya</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/guided-tour-of-suleymaniye-mosque-istanbul</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/guided-visit-to-cukurcuma-and-the-museum-of-innocence-istanbul</loc>
+    <lastmod>2026-04-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -70,14 +604,392 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://allboundvacations.com/activities/half-day-in-shopping</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://allboundvacations.com/activities/helicopter-ride-palm-tour</loc>
     <lastmod>2025-11-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/activities/morning-aquaventure-and-lost-chambers-tour</loc>
-    <lastmod>2025-11-12</lastmod>
+    <loc>https://allboundvacations.com/activities/horseback-riding-jinja</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/horseback-safaris-lake-mburo-national-park</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/hot-air-balloon-safaris-maasai-mara-national-reserve</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/hot-air-balloon-safaris-murchison-falls-national-park</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/ile-aux-cerfs-full-day-tour</loc>
+    <lastmod>2025-12-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/island-hopping-lake-bunyonyi</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/jetpack-dubai</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/johannesburg-city-soweto-tour-johannesburg</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/johannesburg-soweto-apartheid-museum-tour-johannesburg</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/jozani-forest-national-park-zanzibar</loc>
+    <lastmod>2025-12-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/kayaking-river-nile</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/kaymakli-underground-city-cappadocia</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/kazinga-channel-boat-cruise-kazinga-channel</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/kirstenbosch-national-botanical-garden</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/kite-surfing-jet-skiing-diani-beach</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/knysna-lagoon-cruise-knysna</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/kruger-national-park-safari-kruger-national-park</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/kwazulu-natal-battlefields-tour</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/kwazulu-natal-midlands-tour-kwazulu-natal-midlands</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/lamu-cultural-festivals-lamu-cultural-festival</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/maasai-cultural-visits-amboseli</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/maasai-cultural-visits-maasai-people</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/mahe-day-trip</loc>
+    <lastmod>2025-12-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/mountain-climbing-mount-kenya-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/mountain-hiking-aberdare-ranges</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/museums-of-cape-town-cape-town</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/nature-walks-kidepo-valley-national-park</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/nature-walks-lake-bunyonyi</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/nature-walks-murchison-falls-national-park</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/nature-walks-queen-elizabeth-national-park</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/nature-walks-ziwa-rhino-sanctuary</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/night-wildlife-viewing-lodges-aberdare-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/nile-delta-boat-safari-nile-delta</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/oudtshoorn-cango-caves-tour-cango-caves</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/pamukkale-hierapolis-tour</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/photography-amboseli-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/photography-mount-kenya-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/photography-safaris-kidepo-valley-national-park</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/photography-safaris-maasai-mara-national-reserve</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/photography-safaris-samburu-national-reserve</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/photography-tsavo-east-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/picnic-photography-nairobi-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/plettenberg-bay-safari-plettenberg-bay</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/plettenberg-bay-sailing-sea-kayaking-plettenberg-bay</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/predator-tracking-kidepo-valley-national-park</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/pretoria-city-tour-pretoria</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/quad-biking-jinja</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/rhino-sanctuary-visits-ngulia-rhino-sanctuary</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/rhino-tracking-on-foot-ziwa-rhino-sanctuary</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/river-walks-ewaso-nyiro-river</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/robben-island-tour-cape-town</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/rock-pool</loc>
+    <lastmod>2025-12-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/sani-pass-lesotho-trip-lesotho</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/scenic-seaplane-tour</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/scenic-viewpoints-baboon-cliff-baboon-cliff</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/shark-cage-diving-gansbaai</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/shopping-tour-dubai</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/snorkeling-and-dolphin-tour</loc>
+    <lastmod>2025-12-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/snorkeling-kayaking-lamu-archipelago</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/spice-market-tour-istanbul</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/spice-tour</loc>
+    <lastmod>2025-11-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/sport-fishing</loc>
+    <lastmod>2025-12-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/sport-fishing-nile-perch-river-nile</loc>
+    <lastmod>2026-05-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -94,19 +1006,277 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://allboundvacations.com/activities/sunset-cruises-river-nile</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/swahili-cultural-tours-lamu-old-town</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/swimming-lake-bunyonyi</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/table-mountain-tour-table-mountain</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/the-north-tour</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/the-south-tour</loc>
+    <lastmod>2025-12-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/top-of-the-falls-hike-murchison-falls</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/tour-of-dolmabahce-palace-istanbul</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/tour-of-the-basilica-cistern-istanbul</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/tour-of-the-grand-bazaar-istanbul</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/tree-climbing-lion-tracking-ishasha-ishasha-secto</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/trekking-hiking-routes-mount-kenya-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/trip-to-the-goreme-open-air-museum-cappadocia</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/trip-to-the-museum-of-anatolian-civilisations-ankara</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/trip-to-the-topkapi-palace-istanbul</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/trout-fishing-aberdare-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/tsitsikamma-forest-trip-tsitsikamma-forest</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/tsitsikamma-storms-river-adventure-tsitsikamma-national-park</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/undersea-walk-north-coast</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/ushaka-marine-world-ushaka-marine-world</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/visit-david-sheldrick-wildlife-trust-david-sheldrick-wildlife-trust</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/visit-giraffe-centre-giraffe-centre</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/visit-lugard-falls-lugard-falls</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/visit-to-hierapolis-and-pamukkale-travertines-pamukkale</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/visit-to-mevlana-museum-and-karatay-madrasa-konya</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/walk-with-lions-at-casela-nature-parks</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/walking-safaris-lake-mburo-national-park</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/waterfall-visits-karuru-falls</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/white-water-rafting-river-nile</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/wildlife-viewing-mount-kenya-national-park</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/winelands-tasting-on-horseback-tour-franschhoek</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/winelands-tour-stellenbosch</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/yoga-wellness-retreats-lamu-island</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/zanzibar-dolphin-safari</loc>
+    <lastmod>2025-11-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/activities/zanzibar-sunset-cruise</loc>
+    <lastmod>2025-12-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://allboundvacations.com/attractions</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/aberdare-national-park</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/abu-simbel-temples</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/adventure-cove-waterpark</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/akagera-national-park</loc>
+    <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/amboseli-game-reserve</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/amboseli-national-park</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/antalya</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/aquaria-klcc</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/artscience-museum</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/arusha-national-park</loc>
+    <lastmod>2026-08-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -117,32 +1287,182 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/attractions/burj-khalifa</loc>
-    <lastmod>2025-11-05</lastmod>
+    <loc>https://allboundvacations.com/attractions/batam-ferry</loc>
+    <lastmod>2026-03-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/attractions/bwindi-forest-national-park</loc>
-    <lastmod>2025-11-12</lastmod>
+    <loc>https://allboundvacations.com/attractions/batu-caves</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/bibliotheca-alexandrina</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/black-river-gorges-national-park</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/bo-kaap</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/bodrum</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/boulders-beach</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/bukit-bintang</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/burj-khalifa</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/bwindi-impenetrable-national-park</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/camps-bay-beach</loc>
+    <lastmod>2026-05-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/cap-malheureux</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/cape-point</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/cappadocia</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/casela-nature-parks</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/caudan-waterfront</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/central-market-kuala-lumpur</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/chamarel-seven-colored-earth</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/chamarel-waterfall</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/changuu-island-prison-island</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/chapmans-peak-drive</loc>
+    <lastmod>2026-05-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/chinatown-singapore</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/chumbe-island</loc>
+    <lastmod>2026-02-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/chyulu-hills-national-park</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/citadel-of-qaitbay</loc>
+    <lastmod>2026-04-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/desert-safari</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/diani-beach</loc>
+    <lastmod>2026-08-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/dinner-at-the-sky</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/dolphin-bay-at-aquaventure-world</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/dolphin-world-hurghada</loc>
+    <lastmod>2026-04-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -154,49 +1474,43 @@
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/dubai-creek</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/dubai-dolphinarium</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/dubai-festival-city-mall</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/dubai-frame</loc>
-    <lastmod>2025-11-12</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://allboundvacations.com/attractions/dubai-garden-glow</loc>
-    <lastmod>2025-11-07</lastmod>
+    <lastmod>2026-08-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/dubai-gold-souk</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/dubai-ice-rink</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/dubai-marina</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -208,79 +1522,547 @@
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/dubai-outlet-mall</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/dubai-parks-and-resorts</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/entebbe</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/ephesus</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/fethiye</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/flacq-market</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/gardens-by-the-bay</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/genting-highlands</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/gishwati-mukura-national-park</loc>
+    <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/global-village</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/gobekli-tepe</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/gombe-stream-national-park</loc>
+    <lastmod>2026-02-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/grand-baie</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/grand-bassin-ganga-talao</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/grand-egyptian-museum</loc>
+    <lastmod>2026-05-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/great-sphinx-of-giza</loc>
+    <lastmod>2026-05-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/hot-air-balloon-luxor</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/hurghada</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/hurghada-grand-aquarium</loc>
+    <lastmod>2026-04-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/ile-aux-cerfs</loc>
+    <lastmod>2026-04-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/illusion-city-dubai</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/img-worlds-of-adventure</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/istanbul</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/izmir</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/jalan-alor</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/jewel-changi-airport</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/jinja-source-of-the-nile</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/jozani-forest</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/kampala</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/karnak-temple</loc>
+    <lastmod>2026-05-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/khan-el-khalili</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/kibale-forest-national-park</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/kidepo-valley-national-park</loc>
+    <lastmod>2026-02-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/kidzania-dubai</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/kigali-city</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/kigali-genocide-memorial</loc>
+    <lastmod>2026-05-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/kings-palace-museum</loc>
+    <lastmod>2026-05-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/kirstenbosch-botanical-gardens</loc>
+    <lastmod>2026-05-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/kite-beach</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/kizimkazi-zanzibar</loc>
+    <lastmod>2026-02-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/kl-bird-park</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/kl-tower</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/kusadasi</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/kyambura-gorge</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/la-croisette</loc>
+    <lastmod>2026-04-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/la-perle-by-dragone</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/lake-bunyonyi</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/lake-kivu</loc>
+    <lastmod>2026-05-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/lake-manyara-national-park</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/lake-mburo-national-park</loc>
+    <lastmod>2026-08-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/lake-nakuru-national-park</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/lamu-island</loc>
+    <lastmod>2026-08-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/legoland-water-park</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/luxor-temple</loc>
+    <lastmod>2026-04-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/madame-tussauds-singapore</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/mahale-mountains-national-park</loc>
+    <lastmod>2026-02-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/malindi-beach</loc>
+    <lastmod>2026-08-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/mall-of-the-emirates</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/mandai-wildlife-reserve</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/marina-bay-sands</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/marina-bay-sands-skypark</loc>
+    <lastmod>2026-03-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/masai-mara</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/merdeka-square</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/merlion-park</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/mgahinga-gorilla-national-park</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/mikumi-national-park</loc>
+    <lastmod>2026-02-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/mnemba-island</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/mont-choisy-beach</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/mount-ararat</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/mount-elgon</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/mount-kenya-national-park</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/mtkilimanjaro</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/murchison-falls-national-park</loc>
+    <lastmod>2026-08-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/museum-of-the-future</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/nairobi-national-park</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/national-mosque-of-malaysia</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/ngamba-island-chimpanzee-sanctuary</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/ngorongoro-crater</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/nile-dinner-cruise</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/nile-river-cruise</loc>
+    <lastmod>2026-05-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/nungwi-beach</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/nyali-beach</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/nyungwe-forest-national-park</loc>
+    <lastmod>2026-05-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/olduvai-gorge</loc>
+    <lastmod>2026-02-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/paje-beach</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/pamukkale</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/perdana-botanical-gardens</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/petronas-twin-towers</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/philae-temple</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/pian-upe-wildlife-reserve</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/port-louis-central-market</loc>
+    <lastmod>2026-04-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -291,38 +2073,206 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://allboundvacations.com/attractions/queen-elizabeth-national-park</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/ras-mohamed-cruises</loc>
+    <lastmod>2026-04-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/robben-island</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/ruaha-national-park</loc>
+    <lastmod>2026-02-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/rugezi-wetlands</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/rwenzori-mountains</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/samburu-national-reserve</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/sea-aquarium</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/selous-game-reserve</loc>
+    <lastmod>2026-02-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/semuliki-natioanl-park</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/serengeti-national-park</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/sharm-el-sheikh</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/shimba-hills-national-reserve</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/singapore-botanic-gardens</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/singapore-flyer</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/singapore-oceanarium</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/singapore-river-cruise</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/singapore-zoo</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/sir-seewoosagur-ramgoolam-botanical-garden</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/siwa-oasis</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://allboundvacations.com/attractions/ski-dubai</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/sky-views-observatory</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/skyline-luge-sentosa</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/snow-city-singapore</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/stellenbosch-franschhoek</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/stone-town</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/sultan-abdul-samad-building</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/sunway-lagoon-theme-park</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/table-mountain</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/tarangire-national-park</loc>
+    <lastmod>2026-08-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/the-beach-jbr</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/the-dubai-fountain</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/the-dubai-mall</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/the-emirates-golf-club</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -334,19 +2284,97 @@
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/the-green-planet-dubai</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/the-view-at-the-palm</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/thean-hou-temple</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/trou-aux-biches</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/trou-aux-cerfs</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/troy</loc>
+    <lastmod>2026-04-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/tsavo-east-national-park</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/tsavo-west-national-park</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/universal-studios-singapore</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/va-waterfront</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/valley-of-the-kings</loc>
+    <lastmod>2026-05-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/volcanoes-national-park</loc>
+    <lastmod>2026-05-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/watamu-beach</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/white-desert</loc>
+    <lastmod>2026-04-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/attractions/wild-waldi-water-park</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/attractions/wings-of-time</loc>
+    <lastmod>2026-03-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -376,6 +2404,12 @@
   <url>
     <loc>https://allboundvacations.com/blog/best-honeymoon-destinations-for-2025</loc>
     <lastmod>2025-11-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/blog/best-time-to-visit-uganda</loc>
+    <lastmod>2026-03-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
@@ -419,614 +2453,722 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://allboundvacations.com/destinations/bali-indonesia</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/destinations/bali-indonesia/activities</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/destinations/bali-indonesia/attractions</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/destinations/bali-indonesia/group-trips</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/destinations/bali-indonesia/hotels</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/destinations/bali-indonesia/packages</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://allboundvacations.com/destinations/dubai</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/dubai/activities</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/dubai/attractions</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/dubai/group-trips</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/dubai/hotels</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/dubai/packages</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/egypt</loc>
-    <lastmod>2025-10-14</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/egypt/activities</loc>
-    <lastmod>2025-10-14</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/egypt/attractions</loc>
-    <lastmod>2025-10-14</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/egypt/group-trips</loc>
-    <lastmod>2025-10-14</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/egypt/hotels</loc>
-    <lastmod>2025-10-14</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/egypt/packages</loc>
-    <lastmod>2025-10-14</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/greece</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/greece/activities</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/greece/attractions</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/greece/group-trips</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/greece/hotels</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/greece/packages</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/destinations/hong-kong</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/destinations/hong-kong/activities</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/destinations/hong-kong/attractions</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/destinations/hong-kong/group-trips</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/destinations/hong-kong/hotels</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/destinations/hong-kong/packages</loc>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/kenya</loc>
-    <lastmod>2025-10-11</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/kenya/activities</loc>
-    <lastmod>2025-10-11</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/kenya/attractions</loc>
-    <lastmod>2025-10-11</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/kenya/group-trips</loc>
-    <lastmod>2025-10-11</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/kenya/hotels</loc>
-    <lastmod>2025-10-11</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/kenya/packages</loc>
-    <lastmod>2025-10-11</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/malaysia</loc>
-    <lastmod>2025-10-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/malaysia/activities</loc>
-    <lastmod>2025-10-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/malaysia/attractions</loc>
-    <lastmod>2025-10-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/malaysia/group-trips</loc>
-    <lastmod>2025-10-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/malaysia/hotels</loc>
-    <lastmod>2025-10-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/malaysia/packages</loc>
-    <lastmod>2025-10-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/maldives</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/maldives/activities</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/maldives/attractions</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/maldives/group-trips</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/maldives/hotels</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/maldives/packages</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/mauritius</loc>
-    <lastmod>2025-11-11</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/mauritius/activities</loc>
-    <lastmod>2025-11-11</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/mauritius/attractions</loc>
-    <lastmod>2025-11-11</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/mauritius/group-trips</loc>
-    <lastmod>2025-11-11</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/mauritius/hotels</loc>
-    <lastmod>2025-11-11</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/mauritius/packages</loc>
-    <lastmod>2025-11-11</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/qatar-1</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/qatar-1/activities</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/qatar-1/attractions</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/qatar-1/group-trips</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/qatar-1/hotels</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/qatar-1/packages</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/destinations/rwanda</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/destinations/rwanda/activities</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/destinations/rwanda/attractions</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/destinations/rwanda/group-trips</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/destinations/rwanda/hotels</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/destinations/rwanda/packages</loc>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/seychelles</loc>
-    <lastmod>2025-10-20</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/seychelles/activities</loc>
-    <lastmod>2025-10-20</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/seychelles/attractions</loc>
-    <lastmod>2025-10-20</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/seychelles/group-trips</loc>
-    <lastmod>2025-10-20</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/seychelles/hotels</loc>
-    <lastmod>2025-10-20</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/seychelles/packages</loc>
-    <lastmod>2025-10-20</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/singapore</loc>
-    <lastmod>2025-10-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/singapore/activities</loc>
-    <lastmod>2025-10-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/singapore/attractions</loc>
-    <lastmod>2025-10-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/singapore/group-trips</loc>
-    <lastmod>2025-10-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/singapore/hotels</loc>
-    <lastmod>2025-10-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/singapore/packages</loc>
-    <lastmod>2025-10-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/south-africa</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/south-africa/activities</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/south-africa/attractions</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/south-africa/group-trips</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/south-africa/hotels</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/south-africa/packages</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/destinations/taiwan</loc>
-    <lastmod>2025-10-29</lastmod>
+    <loc>https://allboundvacations.com/destinations/tanzania</loc>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/destinations/taiwan/activities</loc>
-    <lastmod>2025-10-29</lastmod>
+    <loc>https://allboundvacations.com/destinations/tanzania/activities</loc>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/destinations/taiwan/attractions</loc>
-    <lastmod>2025-10-29</lastmod>
+    <loc>https://allboundvacations.com/destinations/tanzania/attractions</loc>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/destinations/taiwan/group-trips</loc>
-    <lastmod>2025-10-29</lastmod>
+    <loc>https://allboundvacations.com/destinations/tanzania/group-trips</loc>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/destinations/taiwan/hotels</loc>
-    <lastmod>2025-10-29</lastmod>
+    <loc>https://allboundvacations.com/destinations/tanzania/hotels</loc>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/destinations/taiwan/packages</loc>
-    <lastmod>2025-10-29</lastmod>
+    <loc>https://allboundvacations.com/destinations/tanzania/packages</loc>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/thailand</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/thailand/activities</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/thailand/attractions</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/thailand/group-trips</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/thailand/hotels</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/thailand/packages</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/turkey</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/turkey/activities</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/turkey/attractions</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/turkey/group-trips</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/turkey/hotels</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/turkey/packages</loc>
-    <lastmod>2025-11-15</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/uganda</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/uganda/activities</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/uganda/attractions</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/uganda/group-trips</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/uganda/hotels</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/uganda/packages</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/vietnam</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/vietnam/activities</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/vietnam/attractions</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/vietnam/group-trips</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/vietnam/hotels</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/vietnam/packages</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/zanzibar</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/zanzibar/activities</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/zanzibar/attractions</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/zanzibar/group-trips</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/zanzibar/hotels</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/zanzibar/packages</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1048,7 +3190,7 @@
   </url>
   <url>
     <loc>https://allboundvacations.com/group-trips/dubai-new-year-getaway</loc>
-    <lastmod>2025-11-13</lastmod>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1060,7 +3202,7 @@
   </url>
   <url>
     <loc>https://allboundvacations.com/group-trips/girls-trip-singapore-and-malaysia</loc>
-    <lastmod>2025-11-06</lastmod>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1078,7 +3220,7 @@
   </url>
   <url>
     <loc>https://allboundvacations.com/group-trips/rotary-taipei-2026-exclusive-package</loc>
-    <lastmod>2025-11-13</lastmod>
+    <lastmod>2026-07-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1094,74 +3236,86 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://allboundvacations.com/holiday-types/african-safaris</loc>
+    <lastmod>2026-02-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://allboundvacations.com/holiday-types/beach-holidays</loc>
-    <lastmod>2025-10-23</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/holiday-types/city-break</loc>
-    <lastmod>2025-11-17</lastmod>
+    <lastmod>2026-02-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/holiday-types/destination-weddings</loc>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/holiday-types/educational-trips</loc>
-    <lastmod>2025-10-10</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/holiday-types/family-holidays</loc>
-    <lastmod>2025-10-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://allboundvacations.com/holiday-types/hicking</loc>
-    <lastmod>2025-10-08</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/holiday-types/honeymoons</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/holiday-types/incentives-and-conferences</loc>
-    <lastmod>2025-10-08</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/holiday-types/luxury-holidays</loc>
-    <lastmod>2025-10-08</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/holiday-types/multi-centre-holidays</loc>
-    <lastmod>2025-10-10</lastmod>
+    <lastmod>2026-02-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/holiday-types/private-air-charter</loc>
+    <lastmod>2026-09-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/holiday-types/religious-tours</loc>
-    <lastmod>2025-10-10</lastmod>
+    <lastmod>2026-02-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/holiday-types/safari</loc>
-    <lastmod>2025-10-10</lastmod>
+    <lastmod>2026-02-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/holiday-types/sports-travel</loc>
-    <lastmod>2025-10-23</lastmod>
+    <lastmod>2026-02-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1171,8 +3325,56 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://allboundvacations.com/hotels/acacia-farm-lodge</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/ahg-dreams-bay-beach-hotel</loc>
+    <lastmod>2026-07-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/ahg-dreams-bay-beach-hotel-adults-only</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/al-khoory-executive-hotel</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://allboundvacations.com/hotels/aloft-al-mina</loc>
-    <lastmod>2025-11-06</lastmod>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/aloft-dubai-creek</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/aloft-palm-jumeirah</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/anantara-maia-seychelles-villas</loc>
+    <lastmod>2026-05-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/anelia-resort-spa</loc>
+    <lastmod>2026-09-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1189,8 +3391,62 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/hotels/avani-ibn-battuta</loc>
-    <lastmod>2025-11-06</lastmod>
+    <loc>https://allboundvacations.com/hotels/atlantis-the-palm</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/atlantis-the-royal</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/avani-ibn-battuta-dubai-hotel</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/azal-pyramids-hotel</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/baobab-waves</loc>
+    <lastmod>2026-08-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/barcelo-cairo-pyramids-hotel</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/berjaya-times-square-kuala-lumpur</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/burj-al-arab-dubai</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/burunge-tented-lodge</loc>
+    <lastmod>2026-03-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/cairo-steigenberger-pyramids</loc>
+    <lastmod>2026-03-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1201,26 +3457,152 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://allboundvacations.com/hotels/citymax-bur-dubai</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/cleopatra-luxury-hotel</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/coin-de-mire-attitude-hotel</loc>
+    <lastmod>2026-03-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/concord-el-salam-hotel</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://allboundvacations.com/hotels/copthorne-hotel-dubai</loc>
-    <lastmod>2025-11-06</lastmod>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/crowne-plaza-jumeirah</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/diani-reef-beach-resort-spa</loc>
+    <lastmod>2026-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/dorset-regency-kuala-lumpur</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/doubletree-by-hilton-dubai-m-square-hotel-residences</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/eileens-trees-inn</loc>
+    <lastmod>2026-03-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/escarpment-luxury-lodge</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/farm-of-dreams-lodge-lmanyara</loc>
+    <lastmod>2026-03-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/forest-hill-hotel</loc>
+    <lastmod>2026-03-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/four-point-hotel</loc>
+    <lastmod>2026-03-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/hotels/four-points-by-sheraton</loc>
-    <lastmod>2025-11-06</lastmod>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/four-seasons-resort-seychelles</loc>
+    <lastmod>2026-04-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/gafy-resort-aqua-park</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/gold-zanzibar-beach-house-spa</loc>
+    <lastmod>2026-02-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/gorilla-forest-camp</loc>
+    <lastmod>2026-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/hotels/grand-excelsior-hotel</loc>
-    <lastmod>2025-11-06</lastmod>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/grand-melia-arusha</loc>
+    <lastmod>2026-03-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/grand-oasis-resort</loc>
+    <lastmod>2026-03-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/hotels/hemingways-watamu</loc>
-    <lastmod>2025-11-05</lastmod>
+    <lastmod>2026-03-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/hilton-cairo-grand-nile-hotel</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/hilton-hurgahda-plaza</loc>
+    <lastmod>2026-03-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1237,26 +3619,446 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://allboundvacations.com/hotels/holiday-inn-express-dubai-internet-city</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/home-suite-hotels-sea-point</loc>
+    <lastmod>2026-05-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/hotel-englishpoint</loc>
+    <lastmod>2026-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/hotel-royal-kuala-lumpur</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://allboundvacations.com/hotels/hyatt-regency-galleria-residence-dubai</loc>
-    <lastmod>2025-11-09</lastmod>
+    <lastmod>2026-08-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/ibis-al-rigga</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/ibis-deira-creekside-dubai</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/ibis-klcc</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/ibis-style-fraser-business-park</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/intercontinental-mauritius-resort</loc>
+    <lastmod>2026-07-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/ishasha-wilderness-camp</loc>
+    <lastmod>2026-04-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/jacaranda-indian-ocean-beach-resort</loc>
+    <lastmod>2026-04-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/jw-marriot</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/katikati-tented-camp</loc>
+    <lastmod>2026-03-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/kendwa-rocks-beach-hotel</loc>
+    <lastmod>2026-07-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/kibale-canopy-lodge</loc>
+    <lastmod>2026-03-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/kibo-palace-hotel</loc>
+    <lastmod>2026-03-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/kiota-camps</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/kitela-lodge</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/kobe-suite-resort</loc>
+    <lastmod>2026-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/kubu-kubu-tented-lodge</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/kwanza-resort-zanzibar</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/kyambura-gorge-lodge</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/lagoon-beach-hotel-spa</loc>
+    <lastmod>2026-05-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/lake-manyara-serena-safari-lodge</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/lake-manyara-tortilis-camp</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/lapita-dubai-parks-and-resorts-autograph-collection</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/le-meridien-ile-maurice</loc>
+    <lastmod>2026-03-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/le-mersenne-zanzibar</loc>
+    <lastmod>2026-07-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/leisure-lodge-beach-golf-resort</loc>
+    <lastmod>2026-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/lily-palm-resort</loc>
+    <lastmod>2026-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/lux-belle-mare</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/lux-grand-baie-resort-residences</loc>
+    <lastmod>2026-03-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/lux-grand-gaube-resort-villas</loc>
+    <lastmod>2026-03-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/lux-le-morne-resort</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/lux-marijani</loc>
+    <lastmod>2026-07-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/hotels/mara-serena-safari-lodge</loc>
-    <lastmod>2025-10-16</lastmod>
+    <lastmod>2026-03-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/hotels/mercure-hotel-suites</loc>
-    <lastmod>2025-11-06</lastmod>
+    <loc>https://allboundvacations.com/hotels/maramboi-tented-lodge</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/marriott-executive-apartments-dubai-creek</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/marriott-marquis-dubai-creek</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/matemwe-sands-beach-resort</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/medina-palms</loc>
+    <lastmod>2026-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/melia-serengeti-lodge</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/mercure-dubai-barsha-heights-hotel-suites-and-apartments</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/mercure-hurghada-hotel</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/mihingo-lodge</loc>
+    <lastmod>2026-04-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/mina-mark-aqua-park</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/mirima-lodge</loc>
+    <lastmod>2026-08-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/mount-meru-hotel</loc>
+    <lastmod>2026-03-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/movenpick-hotel-apartments-downtown-dubai</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/ndali-lodge</loc>
+    <lastmod>2026-04-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/neptune-palm-beach-boutique-resort-spa</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/new-eagles-aqua-park</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/ngorongoro-serena-safari-lodge</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/ngorongoro-sopa-lodge</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/nile-safari-lodge</loc>
+    <lastmod>2026-03-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/nimali-africa-tarangire-camp</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/no5-boutique-hotel</loc>
+    <lastmod>2026-03-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/novotel-sharm-hotel</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/octagon-lodge-l-manyara</loc>
+    <lastmod>2026-03-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/octagon-lodge-ngorongoro</loc>
+    <lastmod>2026-03-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/octagon-lodge-tarangire</loc>
+    <lastmod>2026-03-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/ole-serai-luxury-camps</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/pakulala-luxury-safari-camp</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/paradise-beach-resort-spa</loc>
+    <lastmod>2026-07-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/pullman-deira-city-centre</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/radisson-blu-azuri-resort-spa</loc>
+    <lastmod>2026-03-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/radisson-blu-hotel-dubai-deira-creek</loc>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/radisson-blu-hotel-waterfront</loc>
+    <lastmod>2026-05-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/reef-oasis-blue-bay-resort</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/riu-palace-hotel</loc>
+    <lastmod>2026-07-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://allboundvacations.com/hotels/rove-downtown</loc>
-    <lastmod>2025-11-07</lastmod>
+    <lastmod>2026-08-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/royal-zanzibar-beach-resort</loc>
+    <lastmod>2026-04-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/sansi-kendwa-beach-resort</loc>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1267,8 +4069,188 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://allboundvacations.com/hotels/sarova-mara-game-camp</loc>
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/sarova-whitesands-beach-resort-spa</loc>
+    <lastmod>2026-06-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/savoy-seychelles-resort-spa</loc>
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/sea-cliff-resort-spa-zanzibar</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/serena-beach-resort-spa</loc>
+    <lastmod>2026-04-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/serena-safari-lodge</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/serengeti-sopa-lodge</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/southern-palms-beach-resort</loc>
+    <lastmod>2026-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/stay-inn-pyramids-hotel</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/sunset-kendwa-beach-hotel</loc>
+    <lastmod>2026-02-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/swahili-beach-resort</loc>
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/swiss-garden-kuala-lumpur</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/swiss-inn-hurghada-resort</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://allboundvacations.com/hotels/swissotel-al-ghurair-dubai</loc>
-    <lastmod>2025-11-06</lastmod>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/tarangire-safari-lodge</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/tarangire-sopa-lodge</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/tembo-kiwengwa-resort</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/the-charming-lonno-lodge</loc>
+    <lastmod>2026-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/the-grand-hotel-hurghada</loc>
+    <lastmod>2026-05-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/the-mora-zanzibar</loc>
+    <lastmod>2026-07-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/the-table-bay-hotel</loc>
+    <lastmod>2026-05-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/toa-hotel-and-spa-zanzibar</loc>
+    <lastmod>2026-04-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/tui-blue-bahari-zanzibar</loc>
+    <lastmod>2026-05-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/tukaone-camps</loc>
+    <lastmod>2026-03-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/turaco-nungwi-resort</loc>
+    <lastmod>2026-02-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/twiga-beach-resort-spa</loc>
+    <lastmod>2026-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/veranda-grand-baie-hotel-spa</loc>
+    <lastmod>2026-07-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/voyager-beach-resort</loc>
+    <lastmod>2026-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/westin-kuala-lumpur</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/wildwaters-lodge</loc>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/hotels/xperience-st-george-hotel</loc>
+    <lastmod>2026-03-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1278,7 +4260,27 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://allboundvacations.com/packages/05-day-cairo-and-luxor-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/08-day-cairo-luxor-and-hurghada-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://allboundvacations.com/packages/08-day-cairo-nile-cruise-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/08-day-sharm-el-sheikh-holidays</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/08day-cairo-nile-cruise-and-alexandria-package</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1288,12 +4290,167 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://allboundvacations.com/packages/10-days-turkish-delight-vacation-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/11-day-cairo-nile-cruise-and-red-sea-holidays</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/11-day-cairo-nile-cruise-and-sharm-el-sheikh-holidays</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/14-day-ultimate-uganda-luxury-safari-gorillas-chimpanzees-big-five-murchison-falls-adventure</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/3-night-luxury-south-africa-cruise-escape-aboard-msc-armonia</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://allboundvacations.com/packages/3-nights-zanzibar-package</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/packages/4-nights-mauritius-package</loc>
+    <loc>https://allboundvacations.com/packages/5-day-best-of-dubai</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/5-day-dubai-highlights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/5-day-dubai-signature-experience</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/5-day-tanzania-wildlife-safari-adventure</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/5-days-cape-town-vineyard-escape</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/5-days-taste-of-turkey-vacation</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/6-day-dubai-educational-trip</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/6-day-dubai-family-adventure</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/6-day-dubai-family-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/6-day-dubai-thrills-family-magic</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/6-day-rwanda-primate-safari</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/7-day-dubai-discovery-experience</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/7-day-ultimate-dubai-explorer</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/8-day-abu-dhabi-dubai-signature-experience</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/8-day-cairo-aswan-abu-simbel-luxor</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/8-day-cairo-sharm-el-sheikh-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/8-day-dubai-abu-dhabi-luxury-holiday</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/8-day-dubai-abu-dhabi-luxury-holiday-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/8-day-hurghada-holidays</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/8-day-seven-churches-of-revelation-tour</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/8-days-cape-town-luxury-escape</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/8-days-cape-town-winelands-durban-lesotho-adventure</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/8-days-cape-town-winelands-johannesburg-soweto-experience</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/atlantis-family-escape</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/beach-honeymoon-dubai</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/bucket-list-adventure-gorilla-encounters-in-bwindi</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/bwindi-fly-in-gorilla-safari</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -1303,12 +4460,652 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://allboundvacations.com/packages/coin-de-mire-attitude-hotel-4-nights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/desert-romance-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai-abu-dhabi-family</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai-abu-dhabi-honeymoon</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai-abu-dhabi-luxury-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai-adventure-theme-parks</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai-anniversarybirthday-romance</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai-desert-ocean-combo</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai-elite-lifestyle</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai-express-escape-4-days-3-nights</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai-honeymoon-bliss</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai-luxury-adventure</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai-luxury-city-beach-combo</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai-millionaire-experience</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai-royal-experience</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/5-day-best-of-dubai</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/5-day-dubai-highlights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/5-day-dubai-signature-experience</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/6-day-dubai-educational-trip</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/6-day-dubai-family-adventure</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/6-day-dubai-family-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/6-day-dubai-thrills-family-magic</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/7-day-dubai-discovery-experience</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/7-day-ultimate-dubai-explorer</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/8-day-abu-dhabi-dubai-signature-experience</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/8-day-dubai-abu-dhabi-luxury-holiday</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/8-day-dubai-abu-dhabi-luxury-holiday-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/atlantis-family-escape</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/beach-honeymoon-dubai</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/desert-romance-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/dubai-abu-dhabi-family</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/dubai-abu-dhabi-honeymoon</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/dubai-abu-dhabi-luxury-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/dubai-adventure-theme-parks</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/dubai-anniversarybirthday-romance</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/dubai-desert-ocean-combo</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/dubai-elite-lifestyle</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/dubai-express-escape-4-days-3-nights</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/dubai-honeymoon-bliss</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/dubai-luxury-adventure</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/dubai-luxury-city-beach-combo</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/dubai-millionaire-experience</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/dubai-royal-experience</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/family-fun-dubai</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/kids-adventure-dubai</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/luxury-couple-retreat</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/luxury-honeymoon-dubai</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/luxury-shopping-dubai</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/premium-family-holiday</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/romantic-dubai-escape</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/theme-park-family</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/ultra-luxury-dubai</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/vip-dubai-experience</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/dubai/waterpark-adventure</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/egypt/05-day-cairo-and-luxor-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/egypt/08-day-cairo-luxor-and-hurghada-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/egypt/08-day-cairo-nile-cruise-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/egypt/08-day-sharm-el-sheikh-holidays</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/egypt/08day-cairo-nile-cruise-and-alexandria-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/egypt/10-day-cairo-nile-cruise-hurghada-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/egypt/11-day-cairo-nile-cruise-and-red-sea-holidays</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/egypt/11-day-cairo-nile-cruise-and-sharm-el-sheikh-holidays</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/egypt/8-day-cairo-aswan-abu-simbel-luxor</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/egypt/8-day-cairo-sharm-el-sheikh-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/egypt/8-day-hurghada-holidays</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/egypt/cairo-and-nile-cruise-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/epic-uganda-safari-8-days-of-gorilla-trekking-chimpanzees-big-game</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/family-fun-dubai</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/highland-to-savannah-safari</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/kenya/highland-to-savannah-safari</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/kenya/southern-palms-beach-resort</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/kenya/swahili-beach</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/kenya/the-sands-at-nomad</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/kenya/trip-to-maisai-mara</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/kids-adventure-dubai</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/le-meridien-ile-maurice-4-nights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/lux-belle-mare-4-nights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/lux-grand-baie-4-nights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/luxury-couple-retreat</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/luxury-honeymoon-dubai</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/luxury-shopping-dubai</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/luxury-uganda-honeymoon-safari-10-day-fly-in-gorilla-trekking-wildlife-adventure</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/mauritius/coin-de-mire-attitude-hotel-4-nights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/mauritius/le-meridien-ile-maurice-4-nights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/mauritius/lux-belle-mare-4-nights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/mauritius/lux-grand-baie-4-nights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/mauritius/sunrise-attitude-hotel-4-nights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/mauritius/tamassa-bel-ombre-4-nights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/mauritius/the-st-regis-le-morne-resort-4-nights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/mauritius/the-westin-turtle-bay-resort-spa-4-nights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/mauritius/veranda-tamarin-4-nights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/premium-family-holiday</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/primate-expedition-6-days-uganda-chimpanzees-gorillas-safari</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/romantic-dubai-escape</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/rwanda/6-day-rwanda-primate-safari</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/singapore-malaysia-bali-holiday-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/singapore/singapore-malaysia-bali-holiday-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/south-africa/3-night-luxury-south-africa-cruise-escape-aboard-msc-armonia</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/south-africa/5-days-cape-town-vineyard-escape</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/south-africa/8-days-cape-town-luxury-escape</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/south-africa/8-days-cape-town-winelands-durban-lesotho-adventure</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/south-africa/8-days-cape-town-winelands-johannesburg-soweto-experience</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/southern-palms-beach-resort</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/sunrise-attitude-hotel-4-nights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/swahili-beach</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/tamassa-bel-ombre-4-nights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/tanzania/5-day-tanzania-wildlife-safari-adventure</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/the-mora-zanzibar</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/the-sands-at-nomad</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/the-st-regis-le-morne-resort-4-nights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/the-westin-turtle-bay-resort-spa-4-nights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/theme-park-family</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://allboundvacations.com/packages/trip-to-maisai-mara</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/packages/ultimate-highland-to-savannah-safari</loc>
+    <loc>https://allboundvacations.com/packages/turkey/10-days-turkish-delight-vacation-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/turkey/5-days-taste-of-turkey-vacation</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/turkey/8-day-seven-churches-of-revelation-tour</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/uganda/14-day-ultimate-uganda-luxury-safari-gorillas-chimpanzees-big-five-murchison-falls-adventure</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/uganda/bucket-list-adventure-gorilla-encounters-in-bwindi</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/uganda/bwindi-fly-in-gorilla-safari</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/uganda/epic-uganda-safari-8-days-of-gorilla-trekking-chimpanzees-big-game</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/uganda/luxury-uganda-honeymoon-safari-10-day-fly-in-gorilla-trekking-wildlife-adventure</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/uganda/primate-expedition-6-days-uganda-chimpanzees-gorillas-safari</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/uganda/ultimate-uganda-safari-10-days-of-gorillas-chimpanzees-big-five-wildlife</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/ultimate-uganda-safari-10-days-of-gorillas-chimpanzees-big-five-wildlife</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/ultra-luxury-dubai</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/veranda-tamarin-4-nights-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/vip-dubai-experience</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/waterpark-adventure</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/zanzibar/3-nights-zanzibar-package</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://allboundvacations.com/packages/zanzibar/the-mora-zanzibar</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>

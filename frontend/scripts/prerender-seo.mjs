@@ -16,8 +16,7 @@ const SITE_URL = (
 const API_BASE_URL = (
   process.env.API_BASE_URL ||
   process.env.VITE_PROD_BASE_URL ||
-  process.env.VITE_API_BASE_URL ||
-  'http://localhost:8005/api/v1'
+  'https://api.allboundtravel.com/api/v1'
 ).replace(/\/+$/, '');
 
 const CLOUDFLARE_DELIVERY_URL = 'https://imagedelivery.net/4J4CgzUI_LpQRpA_N1TErQ';
@@ -305,8 +304,9 @@ const staticPages = [
 
 async function fetchList(path) {
   try {
-    const url = `${API_BASE_URL}/${path.replace(/^\/+/, '')}`;
-    const res = await fetch(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(5000) });
+    const sep = path.includes('?') ? '&' : '?';
+    const url = `${API_BASE_URL}/${path.replace(/^\/+/, '')}${sep}limit=200`;
+    const res = await fetch(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(8000) });
     if (!res.ok) return [];
     const data = await res.json();
     if (Array.isArray(data)) return data;

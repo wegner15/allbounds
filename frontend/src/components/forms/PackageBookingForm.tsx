@@ -155,14 +155,26 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
     return null;
   });
 
+  // Keep selectedChartId synchronized with initialPriceChart prop
+  useEffect(() => {
+    if (initialPriceChart?.id) {
+      setSelectedChartId(initialPriceChart.id);
+    } else if (isOpen && availablePriceCharts.length > 0) {
+      setSelectedChartId(availablePriceCharts[0].id);
+    }
+  }, [initialPriceChart, availablePriceCharts, isOpen]);
+
   // Keep selectedHotel synchronized
   useEffect(() => {
     if (initialHotelOption) {
       setSelectedHotel(initialHotelOption);
+    } else if (initialPriceChart) {
+      // If a specific price chart is chosen without a hotel option (e.g. Winter), clear hotel selection
+      setSelectedHotel(null);
     } else if (availableHotelOptions.length > 0 && !selectedHotel) {
       setSelectedHotel(availableHotelOptions.find(opt => opt.is_default) || availableHotelOptions[0]);
     }
-  }, [initialHotelOption, availableHotelOptions, selectedHotel]);
+  }, [initialHotelOption, initialPriceChart, availableHotelOptions, selectedHotel]);
 
   // Partner Referral states
   const [validatedPartner, setValidatedPartner] = useState<{ name: string; discount_percent: number } | null>(null);
@@ -211,6 +223,24 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
   const handlePhoneChange = useCallback((value: string) => {
     setValue('contact_phone', value);
   }, [setValue]);
+
+  // Keep form values in sync with state
+  useEffect(() => {
+    if (selectedChartId) {
+      setValue('price_chart_id', selectedChartId);
+    }
+    if (selectedHotel) {
+      setValue('selected_hotel_id', selectedHotel.hotel_id);
+      setValue('selected_hotel_name', selectedHotel.hotel?.name);
+      setValue('selected_hotel_supplement', selectedHotel.price_supplement || 0);
+      setValue('selected_room_type', selectedHotel.room_type);
+    } else {
+      setValue('selected_hotel_id', undefined);
+      setValue('selected_hotel_name', undefined);
+      setValue('selected_hotel_supplement', 0);
+      setValue('selected_room_type', undefined);
+    }
+  }, [selectedChartId, selectedHotel, setValue]);
 
   const watchedAdults = watch('number_of_adults') || 0;
   const watchedChildren = watch('number_of_children') || 0;

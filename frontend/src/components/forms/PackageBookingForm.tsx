@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -155,26 +155,49 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
     return null;
   });
 
-  // Keep selectedChartId synchronized with initialPriceChart prop
-  useEffect(() => {
-    if (initialPriceChart?.id) {
-      setSelectedChartId(initialPriceChart.id);
-    } else if (isOpen && availablePriceCharts.length > 0) {
-      setSelectedChartId(availablePriceCharts[0].id);
-    }
-  }, [initialPriceChart, availablePriceCharts, isOpen]);
+  const prevIsOpenRef = useRef(false);
+  const prevInitialChartIdRef = useRef<number | null | undefined>(undefined);
+  const prevInitialHotelRef = useRef<any>(undefined);
 
-  // Keep selectedHotel synchronized
+  // Initialize/Synchronize selection only when modal opens or external props change
   useEffect(() => {
-    if (initialHotelOption) {
-      setSelectedHotel(initialHotelOption);
-    } else if (initialPriceChart) {
-      // If a specific price chart is chosen without a hotel option (e.g. Winter), clear hotel selection
-      setSelectedHotel(null);
-    } else if (availableHotelOptions.length > 0 && !selectedHotel) {
-      setSelectedHotel(availableHotelOptions.find(opt => opt.is_default) || availableHotelOptions[0]);
+    const justOpened = isOpen && !prevIsOpenRef.current;
+    const chartChanged = initialPriceChart?.id !== prevInitialChartIdRef.current;
+    const hotelChanged = initialHotelOption !== prevInitialHotelRef.current;
+
+    if (isOpen && (justOpened || chartChanged || hotelChanged)) {
+      if (initialPriceChart?.id) {
+        setSelectedChartId(initialPriceChart.id);
+      } else if (availablePriceCharts.length > 0 && justOpened) {
+        setSelectedChartId(availablePriceCharts[0].id);
+      }
+
+      if (initialHotelOption !== undefined && initialHotelOption !== null) {
+        setSelectedHotel(initialHotelOption);
+      } else if (initialPriceChart && !initialHotelOption) {
+        // If external chart has no hotel option specified (e.g. Winter), clear selection
+        setSelectedHotel(null);
+      } else if (availableHotelOptions.length > 0 && justOpened) {
+        setSelectedHotel(availableHotelOptions.find(opt => opt.is_default) || availableHotelOptions[0]);
+      }
     }
-  }, [initialHotelOption, initialPriceChart, availableHotelOptions, selectedHotel]);
+
+    prevIsOpenRef.current = isOpen;
+    prevInitialChartIdRef.current = initialPriceChart?.id;
+    prevInitialHotelRef.current = initialHotelOption;
+  }, [isOpen, initialPriceChart, initialHotelOption, availablePriceCharts, availableHotelOptions]);
+
+  // If user switches the season dropdown inside the modal, ensure selectedHotel is valid for that season
+  useEffect(() => {
+    if (selectedHotel && availableHotelOptions.length > 0) {
+      const isStillAvailable = availableHotelOptions.some(opt => opt.hotel_id === selectedHotel.hotel_id);
+      if (!isStillAvailable) {
+        setSelectedHotel(availableHotelOptions.find(opt => opt.is_default) || availableHotelOptions[0] || null);
+      }
+    } else if (availableHotelOptions.length === 0) {
+      setSelectedHotel(null);
+    }
+  }, [selectedChartId, availableHotelOptions]);
 
   // Partner Referral states
   const [validatedPartner, setValidatedPartner] = useState<{ name: string; discount_percent: number } | null>(null);

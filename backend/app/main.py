@@ -107,6 +107,22 @@ async def database_pool_status():
     }
 
 @app.middleware("http")
+async def add_cloudflare_cache_header(request: Request, call_next):
+    """Add Cloudflare cache header for public frontend GET requests."""
+    response = await call_next(request)
+    
+    if request.method == "GET" and "authorization" not in request.headers:
+        path = request.url.path
+        
+        # Don't cache admin, paginated, auth, or health routes
+        admin_paths = ["/paginated", "/auth", "/users", "/bookings", "/email-logs", "/stats", "/visa-applications", "/metrics", "/health"]
+        
+        if path.startswith(f"{settings.API_V1_STR}/") and not any(p in path for p in admin_paths):
+            response.headers["Cache-Control"] = "public, max-age=3600"
+            
+    return response
+
+@app.middleware("http")
 async def add_correlation_id_header(request: Request, call_next):
     """Add correlation ID header to response."""
     response = await call_next(request)

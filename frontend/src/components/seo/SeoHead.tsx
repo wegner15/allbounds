@@ -35,6 +35,8 @@ export interface SeoHeadProps {
   modifiedTime?: string;
   /** Author name for article:author */
   author?: string;
+  /** Theme color for mobile browser toolbars (default: #2D3748) */
+  themeColor?: string;
   structuredData?: StructuredData | StructuredData[];
   children?: React.ReactNode;
 }
@@ -62,6 +64,7 @@ const SeoHead: React.FC<SeoHeadProps> = ({
   publishedTime,
   modifiedTime,
   author,
+  themeColor,
   structuredData,
   children,
 }) => {
@@ -95,7 +98,9 @@ const SeoHead: React.FC<SeoHeadProps> = ({
       <meta name="description" content={metaDescription} />
       {keywordContent && <meta name="keywords" content={keywordContent} />}
       <meta name="robots" content={noIndex ? 'noindex, nofollow' : 'index, follow'} />
+      <meta name="theme-color" content={themeColor || '#2D3748'} />
       <link rel="canonical" href={canonical} />
+      <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
       {/* Open Graph — core */}
       <meta property="og:type" content={type} />

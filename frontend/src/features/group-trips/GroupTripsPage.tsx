@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import DOMPurify from 'dompurify';
 import SeoHead from '../../components/seo/SeoHead';
+import { buildAbsoluteUrl, SITE_NAME, SITE_URL } from '../../lib/seo-config';
 
 // Components
 import Button from '../../components/ui/Button';
@@ -192,8 +193,30 @@ const GroupTripsPage: React.FC = () => {
     <div className="bg-paper min-h-screen">
       <SeoHead
         title="Group Trips"
-        description="Join our scheduled group trips to destinations across Africa and beyond."
+        description="Join our scheduled group trips and expeditions with fellow travelers to extraordinary destinations across Africa and beyond."
         canonicalPath="/group-trips"
+        structuredData={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'CollectionPage',
+            name: 'Group Trips',
+            description: 'Join our scheduled group trips and expeditions with fellow travelers to extraordinary destinations across Africa and beyond.',
+            url: buildAbsoluteUrl('/group-trips'),
+            provider: {
+              '@type': 'TravelAgency',
+              name: SITE_NAME,
+              url: SITE_URL,
+            },
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+              { '@type': 'ListItem', position: 2, name: 'Group Trips', item: buildAbsoluteUrl('/group-trips') },
+            ],
+          },
+        ]}
       />
 
       {/* Featured Group Trips Carousel */}

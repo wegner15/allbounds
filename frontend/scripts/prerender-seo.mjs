@@ -338,6 +338,14 @@ function renderHtml(template, { title, heading, description, canonicalUrl, image
     html = html.replace('</head>', `    <link rel="canonical" href="${safeUrl}" />\n  </head>`);
   }
 
+  // Ensure theme-color and SVG favicon are present
+  if (!html.includes('name="theme-color"')) {
+    html = html.replace('</head>', '    <meta name="theme-color" content="#2D3748" />\n  </head>');
+  }
+  if (!html.includes('type="image/svg+xml"')) {
+    html = html.replace('</head>', '    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />\n  </head>');
+  }
+
   // Replace Open Graph meta tags
   html = html.replace(/<meta property="og:type" content=".*?" \/>/, `<meta property="og:type" content="${type}" />`);
   html = html.replace(/<meta property="og:url" content=".*?" \/>/, `<meta property="og:url" content="${safeUrl}" />`);

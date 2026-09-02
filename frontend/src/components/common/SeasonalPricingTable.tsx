@@ -128,6 +128,28 @@ export const SeasonalPricingTable: React.FC<SeasonalPricingTableProps> = ({
   // =========================================================================
   const isHolidayPackage = packageType !== 'safari';
 
+  // Compute true lowest starting from price across all active seasons and options
+  const calculatedStartingPrice = useMemo(() => {
+    const prices: number[] = [];
+    activePriceCharts.forEach((chart: any) => {
+      if (typeof chart.price === 'number' && chart.price > 0) {
+        prices.push(chart.price);
+      }
+      if (Array.isArray(chart.hotel_options)) {
+        chart.hotel_options.forEach((opt: any) => {
+          if (opt.is_active !== false && typeof opt.price_supplement === 'number') {
+            const p = (chart.price || 0) + opt.price_supplement;
+            if (p > 0) prices.push(p);
+          }
+        });
+      }
+    });
+    if (prices.length > 0) {
+      return Math.min(...prices);
+    }
+    return basePrice || 0;
+  }, [activePriceCharts, basePrice]);
+
   if (isHolidayPackage) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200/90 p-5 sm:p-7 md:p-8 my-8 text-gray-800 animate-fade-in">
@@ -136,7 +158,7 @@ export const SeasonalPricingTable: React.FC<SeasonalPricingTableProps> = ({
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[11px] uppercase font-bold tracking-wider text-teal-800 bg-teal/10 px-2.5 py-0.5 rounded-full border border-teal/20">
-                Starting from USD {basePrice.toLocaleString()} / person
+                Starting from USD {calculatedStartingPrice.toLocaleString()} / person
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 font-playfair tracking-tight">
@@ -227,24 +249,31 @@ export const SeasonalPricingTable: React.FC<SeasonalPricingTableProps> = ({
 
                       {/* Column(s): Pricing Tiers / Rates */}
                       {uniqueHotelTiers.length > 0 ? (
-                        uniqueHotelTiers.map((tier) => {
+                        uniqueHotelTiers.map((tier, tIdx) => {
                           const matchOpt = (chart.hotel_options || []).find(
                             (opt: PriceChartHotelOption) =>
                               (opt.room_type === tier.label || opt.hotel?.name === tier.label) &&
                               opt.is_active !== false
                           );
 
-                          if (matchOpt) {
-                            const finalPrice = (chart.price || basePrice) + (matchOpt.price_supplement || 0);
+                          // If the chart has NO attached hotel options at all (e.g. Winter with standard base rate),
+                          // display the base seasonal rate in the primary column instead of an empty dash!
+                          const shouldFallbackToBase = !matchOpt && (!chart.hotel_options || chart.hotel_options.length === 0) && tIdx === 0;
+
+                          if (matchOpt || shouldFallbackToBase) {
+                            const optToUse = matchOpt || null;
+                            const finalPrice = optToUse
+                              ? (chart.price || basePrice) + (optToUse.price_supplement || 0)
+                              : (chart.price || basePrice);
                             const perDay = durationDays && durationDays > 0 ? Math.round(finalPrice / durationDays) : null;
 
                             return (
                               <td key={tier.label} className="py-4 px-3 text-center align-middle">
                                 <button
                                   type="button"
-                                  onClick={() => handleSelectRate(chart, matchOpt)}
+                                  onClick={() => handleSelectRate(chart, optToUse)}
                                   className="w-full p-3 rounded-xl border border-gray-200/80 bg-gray-50 hover:bg-white hover:border-teal hover:shadow-md transition-all duration-200 text-center group/cell cursor-pointer"
-                                  title={`Book ${chart.title} - ${tier.label}`}
+                                  title={`Book ${chart.title} - ${optToUse?.room_type || optToUse?.hotel?.name || 'Standard Rate'}`}
                                 >
                                   <div className="text-base font-extrabold text-gray-900 group-hover/cell:text-teal transition-colors">
                                     USD {finalPrice.toLocaleString()}
@@ -258,12 +287,17 @@ export const SeasonalPricingTable: React.FC<SeasonalPricingTableProps> = ({
                                   <div className="text-[10px] text-teal-800 font-semibold mt-0.5">
                                     Min. 2 travellers
                                   </div>
+                                  {shouldFallbackToBase && (
+                                    <div className="text-[10px] text-gray-500 italic mt-0.5">
+                                      Standard Base Rate
+                                    </div>
+                                  )}
                                 </button>
                               </td>
                             );
                           }
 
-                          // Option not available for this chart
+                          // Option not available for this specific tier
                           return (
                             <td key={tier.label} className="py-4 px-3 text-center align-middle text-gray-300 font-medium text-sm">
                               —

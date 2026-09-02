@@ -1,6 +1,7 @@
 import React, { lazy, Suspense, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import SeoHead from '../../components/seo/SeoHead';
+import { buildAbsoluteUrl, SITE_NAME, SITE_URL } from '../../lib/seo-config';
 
 // Hooks
 import { useCountryDetails } from '../../lib/hooks/useCountries';
@@ -234,6 +235,37 @@ const CountryDetailPageNew: React.FC = () => {
         description={pageDescription}
         canonicalPath={`/destinations/${country.slug}`}
         image={pageImage}
+        type="article"
+        keywords={[
+          country.name,
+          country.region?.name,
+          'destination', 'travel', 'vacation', 'tour',
+        ].filter(Boolean) as string[]}
+        structuredData={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'TouristDestination',
+            name: country.name,
+            description: pageDescription,
+            image: pageImage,
+            url: buildAbsoluteUrl(`/destinations/${country.slug}`),
+            includesAttraction: (country.attractions || []).slice(0, 5).map((a: any) => ({
+              '@type': 'TouristAttraction',
+              name: a.name,
+            })),
+            provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+              { '@type': 'ListItem', position: 2, name: 'Destinations', item: buildAbsoluteUrl('/destinations') },
+              ...(country.region ? [{ '@type': 'ListItem', position: 3, name: country.region.name, item: buildAbsoluteUrl(`/regions/${country.region.slug}`) }] : []),
+              { '@type': 'ListItem', position: country.region ? 4 : 3, name: country.name, item: buildAbsoluteUrl(`/destinations/${country.slug}`) },
+            ],
+          },
+        ]}
       />
 
       {/* Skip to Content Link for Keyboard Navigation */}

@@ -1,10 +1,61 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
+import path from 'path'
+import { createRequire } from 'module'
 
-// https://vitejs.dev/config/
+// vite-plugin-prerender is CJS-only; use createRequire for safe ESM interop.
+// Only loaded at production build time to avoid Puppeteer download during dev.
+let VitePluginPrerender: any = null;
+let PuppeteerRenderer: any = null;
+if (process.env.NODE_ENV === 'production' || process.env.PRERENDER === '1') {
+  try {
+    const _require = createRequire(import.meta.url);
+    const prerender = _require('vite-plugin-prerender');
+    VitePluginPrerender = prerender;
+    PuppeteerRenderer = prerender.PuppeteerRenderer;
+  } catch (_) {
+    // Plugin not available — skip prerendering
+  }
+}
+
+// Static routes to pre-render at build time.
+// Crawlers (Facebook, Twitter, Slack, WhatsApp) fetch raw HTML — prerendering
+// ensures they see correct meta tags instead of the empty index.html shell.
+const PRERENDER_ROUTES = [
+  '/',
+  '/packages',
+  '/destinations',
+  '/blog',
+  '/activities',
+  '/attractions',
+  '/hotels',
+  '/group-trips',
+  '/holiday-types',
+  '/about-us',
+  '/contact-us',
+  '/visa-application',
+  '/flights',
+  '/search',
+  '/payment-plans',
+];
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    ...(VitePluginPrerender && PuppeteerRenderer
+      ? [
+          VitePluginPrerender({
+            staticDir: path.join(__dirname, 'dist'),
+            routes: PRERENDER_ROUTES,
+            renderer: new PuppeteerRenderer({
+              renderAfterDocumentEvent: 'render-event',
+              headless: true,
+            }),
+          }),
+        ]
+      : []),
+  ],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),

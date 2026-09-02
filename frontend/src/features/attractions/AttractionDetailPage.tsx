@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import DOMPurify from 'dompurify';
 import SeoHead from '../../components/seo/SeoHead';
+import { buildAbsoluteUrl, SITE_NAME, SITE_URL } from '../../lib/seo-config';
 import { useAttractionTrips } from '../../hooks/useAttractionTrips';
 import { RichTextDisplay } from '../../components/ui/RichTextDisplay';
 import Button from '../../components/ui/Button';
@@ -116,6 +117,36 @@ const AttractionDetailPage: React.FC = () => {
         title={attraction?.name || 'Attraction'}
         description={attraction?.description || `Explore ${attraction?.name || 'this attraction'} with Allbound Vacations.`}
         canonicalPath={`/attractions/${slug}`}
+        image={getAllImages[0]?.file_path || undefined}
+        type="article"
+        keywords={[
+          attraction?.name || 'attraction',
+          attraction?.country?.name,
+          'attraction', 'sightseeing', 'travel',
+        ].filter(Boolean) as string[]}
+        structuredData={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'TouristAttraction',
+            name: attraction?.name,
+            description: attraction?.description?.substring(0, 300) || undefined,
+            image: getAllImages[0]?.file_path || undefined,
+            url: buildAbsoluteUrl(`/attractions/${slug}`),
+            provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+            containedInPlace: attraction?.country
+              ? { '@type': 'Country', name: attraction.country.name }
+              : undefined,
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+              { '@type': 'ListItem', position: 2, name: 'Attractions', item: buildAbsoluteUrl('/attractions') },
+              { '@type': 'ListItem', position: 3, name: attraction?.name || 'Attraction', item: buildAbsoluteUrl(`/attractions/${slug}`) },
+            ],
+          },
+        ]}
       />
       <div className="min-h-screen bg-gray-50">
       {/* Breadcrumb Section */}

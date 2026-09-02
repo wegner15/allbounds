@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useActivityBySlug, useActivityTrips } from '../../../lib/hooks/useActivities';
 import DOMPurify from 'dompurify';
 import SeoHead from '../../../components/seo/SeoHead';
+import { buildAbsoluteUrl, SITE_NAME, SITE_URL } from '../../../lib/seo-config';
 import GridGallery from '../../../components/ui/GridGallery';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 import FromPriceDisplay from '../../../components/ui/FromPriceDisplay';
@@ -190,6 +191,37 @@ const ActivityDetailPage: React.FC = () => {
                 title={activity.name}
                 description={activity.summary || activity.description?.substring(0, 160) || undefined}
                 canonicalPath={`/activities/${slug}`}
+                image={activity.cover_image?.file_path || activity.image_url || undefined}
+                type="article"
+                keywords={[
+                  activity.name,
+                  ...(activity.countries?.map((c: any) => c.name) || []),
+                  'activity', 'travel', 'experience',
+                ]}
+                structuredData={[
+                  {
+                    '@context': 'https://schema.org',
+                    '@type': 'TouristAttraction',
+                    name: activity.name,
+                    description: activity.summary || activity.description?.substring(0, 300) || undefined,
+                    image: activity.cover_image?.file_path || activity.image_url || undefined,
+                    url: buildAbsoluteUrl(`/activities/${slug}`),
+                    touristType: ['Activity', 'Experience'],
+                    provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+                    containedInPlace: activity.countries?.[0]
+                      ? { '@type': 'Country', name: activity.countries[0].name }
+                      : undefined,
+                  },
+                  {
+                    '@context': 'https://schema.org',
+                    '@type': 'BreadcrumbList',
+                    itemListElement: [
+                      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+                      { '@type': 'ListItem', position: 2, name: 'Activities', item: buildAbsoluteUrl('/activities') },
+                      { '@type': 'ListItem', position: 3, name: activity.name, item: buildAbsoluteUrl(`/activities/${slug}`) },
+                    ],
+                  },
+                ]}
             />
 
             {/* Breadcrumb */}

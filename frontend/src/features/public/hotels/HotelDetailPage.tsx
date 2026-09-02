@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useHotelBySlug } from '../../../lib/hooks/useHotels';
 import SeoHead from '../../../components/seo/SeoHead';
+import { buildAbsoluteUrl, SITE_NAME, SITE_URL } from '../../../lib/seo-config';
 import PackageBookingForm from '../../../components/forms/PackageBookingForm';
 import InquiryForm from '../../../components/forms/InquiryForm';
 import Breadcrumb from '../../../components/layout/Breadcrumb';
@@ -286,6 +287,48 @@ const HotelDetailPage: React.FC = () => {
         title={hotel.name}
         description={hotel.summary || hotel.description || `Stay at ${hotel.name} with Allbound Vacations.`}
         canonicalPath={`/hotels/${hotel.slug}`}
+        image={hotel.cover_image || undefined}
+        type="article"
+        keywords={[
+          hotel.name,
+          hotel.country?.name,
+          hotel.hotel_type?.name,
+          'hotel', 'accommodation', 'stay', 'lodge',
+        ].filter(Boolean) as string[]}
+        structuredData={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'LodgingBusiness',
+            name: hotel.name,
+            description: hotel.summary || hotel.description || undefined,
+            image: hotel.cover_image || undefined,
+            url: buildAbsoluteUrl(`/hotels/${hotel.slug}`),
+            starRating: hotel.stars ? { '@type': 'Rating', ratingValue: hotel.stars } : undefined,
+            address: hotel.country ? {
+              '@type': 'PostalAddress',
+              addressCountry: hotel.country.slug?.toUpperCase() || hotel.country.name,
+            } : undefined,
+            containedInPlace: hotel.country ? {
+              '@type': 'Country',
+              name: hotel.country.name,
+            } : undefined,
+            amenityFeature: (hotel.amenities || []).slice(0, 10).map((a: any) => ({
+              '@type': 'LocationFeatureSpecification',
+              name: a.name,
+              value: true,
+            })),
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+              { '@type': 'ListItem', position: 2, name: 'Hotels', item: buildAbsoluteUrl('/hotels') },
+              ...(hotel.country ? [{ '@type': 'ListItem', position: 3, name: hotel.country.name, item: buildAbsoluteUrl(`/destinations/${hotel.country.slug}`) }] : []),
+              { '@type': 'ListItem', position: hotel.country ? 4 : 3, name: hotel.name, item: buildAbsoluteUrl(`/hotels/${hotel.slug}`) },
+            ],
+          },
+        ]}
       />
       <div className="min-h-screen bg-gray-50">
         {/* Breadcrumb Section */}

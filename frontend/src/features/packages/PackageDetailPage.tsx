@@ -104,7 +104,7 @@ const PackageDetailPage: React.FC = () => {
         description={packageDetail.description || undefined}
         canonicalPath={`/packages/${packageDetail.slug}`}
         image={packageDetail?.image_id ? getImageUrlWithFallback(packageDetail.image_id, IMAGE_VARIANTS.LARGE) : undefined}
-        type="product"
+        type="article"
       />
 
       <div className="container mx-auto px-4 py-8">

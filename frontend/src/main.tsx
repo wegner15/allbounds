@@ -10,8 +10,13 @@ if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
 
 window.scrollTo(0, 0);
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const root = document.getElementById('root')!;
+ReactDOM.createRoot(root).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
-)
+);
+
+// Notify vite-plugin-prerender that React has mounted and meta tags are in the DOM.
+// This fires after React renders synchronously — react-helmet-async updates <head> before this.
+document.dispatchEvent(new Event('render-event'));

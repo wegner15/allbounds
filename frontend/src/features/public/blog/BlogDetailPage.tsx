@@ -6,6 +6,7 @@ import { RichTextDisplay } from '../../../components/ui/RichTextDisplay';
 import { useBlogBySlug as useBlog, useRelatedBlogs } from '../../../lib/hooks/useBlogs';
 import { getCloudflareImageUrl } from '../../../utils/cloudflareImageUtils';
 import { MapPin, Clock, Compass, ArrowRight } from 'lucide-react';
+import { buildAbsoluteUrl, SITE_NAME, SITE_URL } from '../../../lib/seo-config';
 
 const BlogDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -89,6 +90,38 @@ const BlogDetailPage: React.FC = () => {
         canonicalPath={`/blog/${blog.slug}`}
         image={pageImage}
         type="article"
+        publishedTime={blog.created_at || undefined}
+        modifiedTime={blog.updated_at || blog.created_at || undefined}
+        author={SITE_NAME}
+        structuredData={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            headline: blog.title,
+            description: pageDescription,
+            image: pageImage,
+            url: buildAbsoluteUrl(`/blog/${blog.slug}`),
+            datePublished: blog.created_at || undefined,
+            dateModified: blog.updated_at || blog.created_at || undefined,
+            author: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+            publisher: {
+              '@type': 'Organization',
+              name: SITE_NAME,
+              url: SITE_URL,
+              logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo/main_logo.png` },
+            },
+            mainEntityOfPage: { '@type': 'WebPage', '@id': buildAbsoluteUrl(`/blog/${blog.slug}`) },
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+              { '@type': 'ListItem', position: 2, name: 'Blog', item: buildAbsoluteUrl('/blog') },
+              { '@type': 'ListItem', position: 3, name: blog.title, item: buildAbsoluteUrl(`/blog/${blog.slug}`) },
+            ],
+          },
+        ]}
       />
       <div className="min-h-screen bg-white">
       {/* Breadcrumb */}

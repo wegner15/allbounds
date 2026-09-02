@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useGroupTripDetailsBySlug } from '../../lib/hooks/useGroupTrips';
 import { useAppStore } from '../../lib/store';
 import SeoHead from '../../components/seo/SeoHead';
+import { buildAbsoluteUrl, SITE_NAME, SITE_URL } from '../../lib/seo-config';
 
 // Components
 import Breadcrumb from '../../components/layout/Breadcrumb';
@@ -156,6 +157,36 @@ const GroupTripDetailPage: React.FC = () => {
         description={tripDetail.description || undefined}
         canonicalPath={`/group-trips/${tripDetail.slug}`}
         image={tripDetail?.cover_image ? getImageUrlWithFallback(tripDetail.cover_image, IMAGE_VARIANTS.LARGE) : undefined}
+        type="article"
+        keywords={[
+          tripDetail.name,
+          tripDetail.country?.name,
+          'group trip', 'group travel', 'tour',
+        ].filter(Boolean) as string[]}
+        structuredData={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'TouristTrip',
+            name: tripDetail.name,
+            description: tripDetail.description || undefined,
+            image: tripDetail?.cover_image ? getImageUrlWithFallback(tripDetail.cover_image, IMAGE_VARIANTS.LARGE) : undefined,
+            url: buildAbsoluteUrl(`/group-trips/${tripDetail.slug}`),
+            provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+            touristType: ['Group Travel'],
+            itinerary: tripDetail.duration_days
+              ? { '@type': 'ItemList', numberOfItems: tripDetail.duration_days }
+              : undefined,
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+              { '@type': 'ListItem', position: 2, name: 'Group Trips', item: buildAbsoluteUrl('/group-trips') },
+              { '@type': 'ListItem', position: 3, name: tripDetail.name, item: buildAbsoluteUrl(`/group-trips/${tripDetail.slug}`) },
+            ],
+          },
+        ]}
       />
 
       {/* Sticky Trip Info Card */}

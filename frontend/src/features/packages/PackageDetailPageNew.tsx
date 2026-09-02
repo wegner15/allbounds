@@ -12,6 +12,7 @@ import Breadcrumb from '../../components/layout/Breadcrumb';
 import SeasonalPricingTable from '../../components/common/SeasonalPricingTable';
 import { useEntityPriceCharts } from '../../lib/hooks/usePackagePriceCharts';
 import SeoHead from '../../components/seo/SeoHead';
+import { buildAbsoluteUrl, SITE_NAME } from '../../lib/seo-config';
 import type { HolidayTypeSummary } from '../../lib/types/api';
 
 const PackageDetailPageNew: React.FC = () => {
@@ -154,6 +155,48 @@ const PackageDetailPageNew: React.FC = () => {
     );
   }
 
+  // Build JSON-LD structured data for this tour package
+  const packageJsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'TouristTrip',
+      name: packageDetail.name,
+      description: packageDetail.summary ||
+        (packageDetail.description?.replace(/<[^>]*>/g, '').substring(0, 300)) ||
+        `Explore ${packageDetail.name} - ${packageDetail.duration_days} days in ${packageDetail.country.name}`,
+      image: packageDetail.image_id ? getImageUrlWithFallback(packageDetail.image_id, IMAGE_VARIANTS.LARGE) : undefined,
+      url: buildAbsoluteUrl(`/packages/${packageDetail.slug}`),
+      provider: {
+        '@type': 'TravelAgency',
+        name: SITE_NAME,
+        url: 'https://allboundvacations.com',
+      },
+      touristType: packageDetail.holiday_types?.map(ht => ht.name) || ['Travel'],
+      itinerary: packageDetail.duration_days
+        ? { '@type': 'ItemList', numberOfItems: packageDetail.duration_days }
+        : undefined,
+      offers: activePriceCharts && activePriceCharts.length > 0
+        ? activePriceCharts.slice(0, 1).map((chart: any) => ({
+            '@type': 'Offer',
+            price: chart.base_price ?? chart.price ?? '',
+            priceCurrency: 'USD',
+            availability: 'https://schema.org/InStock',
+            url: buildAbsoluteUrl(`/packages/${packageDetail.slug}`),
+          }))
+        : undefined,
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://allboundvacations.com' },
+        { '@type': 'ListItem', position: 2, name: 'Packages', item: buildAbsoluteUrl('/packages') },
+        { '@type': 'ListItem', position: 3, name: packageDetail.country.name, item: buildAbsoluteUrl(`/destinations/${packageDetail.country.slug}`) },
+        { '@type': 'ListItem', position: 4, name: packageDetail.name, item: buildAbsoluteUrl(`/packages/${packageDetail.slug}`) },
+      ],
+    },
+  ];
+
   return (
     <>
       <SeoHead
@@ -161,15 +204,16 @@ const PackageDetailPageNew: React.FC = () => {
         description={packageDetail.summary || packageDetail.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `Explore ${packageDetail.name} - ${packageDetail.duration_days} days in ${packageDetail.country.name}`}
         canonicalPath={`/packages/${packageDetail.slug}`}
         image={packageDetail.image_id ? getImageUrlWithFallback(packageDetail.image_id, IMAGE_VARIANTS.LARGE) : undefined}
-        type="product"
+        type="article"
         keywords={[
           packageDetail.name,
           packageDetail.country.name,
           'tour package',
           'travel',
           'vacation',
-          ...(packageDetail.holiday_types?.map(ht => ht.name) || []),
+          ...(packageDetail.holiday_types?.map((ht: HolidayTypeSummary) => ht.name) || []),
         ]}
+        structuredData={packageJsonLd}
       />
 
       <div className="min-h-screen bg-gray-50">

@@ -143,6 +143,9 @@ const BookingSidebar: React.FC<BookingSidebarProps> = ({
             </span>
             <span className="text-sm sm:text-base text-gray-600 font-medium">per person</span>
           </div>
+          <div className="text-[11px] text-gray-500 font-medium mt-0.5">
+            Based on min. 2 travellers sharing
+          </div>
 
           {/* Breakdown if supplement selected */}
           {selectedHotelOption && selectedHotelOption.price_supplement > 0 && (

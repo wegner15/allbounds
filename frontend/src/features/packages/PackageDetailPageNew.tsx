@@ -308,6 +308,7 @@ const PackageDetailPageNew: React.FC = () => {
                   priceCharts={activePriceCharts}
                   basePrice={packageDetail.price}
                   durationDays={packageDetail.duration_days}
+                  packageType={packageDetail.package_type}
                   onEnquire={(chart, hotel) => handleOpenInquiry(chart, hotel)}
                   onCustomize={(chart, hotel) => handleOpenBooking(chart, hotel)}
                 />

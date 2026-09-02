@@ -187,9 +187,11 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
       contact_email: '',
       contact_phone: '',
       country_of_origin: '',
-      number_of_adults: 1,
+      number_of_adults: bookingType === 'hotel' ? 1 : 2,
       number_of_children: 0,
-      travelers: [{ full_name: '', traveler_type: 'adult' }],
+      travelers: bookingType === 'hotel' 
+        ? [{ full_name: '', traveler_type: 'adult' }]
+        : [{ full_name: '', traveler_type: 'adult' }, { full_name: '', traveler_type: 'adult' }],
       special_requests: '',
       source: 'website',
       partner_code: localStorage.getItem('partner_code') || '',

@@ -1,5 +1,5 @@
 from typing import List, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload
 from datetime import datetime
 
 from app.models.blog import BlogPost, Tag
@@ -77,9 +77,18 @@ class BlogService:
         post_id: int
     ) -> Optional[BlogPost]:
         """
-        Get a blog post by ID.
+        Get a blog post by ID with tags, author, and packages loaded.
         """
-        return db.query(BlogPost).filter(BlogPost.id == post_id).first()
+        return (
+            db.query(BlogPost)
+            .options(
+                selectinload(BlogPost.tags),
+                selectinload(BlogPost.author),
+                selectinload(BlogPost.packages).joinedload(Package.country),
+            )
+            .filter(BlogPost.id == post_id)
+            .first()
+        )
 
     def get_blog_post_by_slug(
         self, 
@@ -87,9 +96,21 @@ class BlogService:
         slug: str
     ) -> Optional[BlogPost]:
         """
-        Get a blog post by slug.
+        Get a blog post by slug with tags, author, and active packages loaded.
         """
-        return db.query(BlogPost).filter(BlogPost.slug == slug).first()
+        post = (
+            db.query(BlogPost)
+            .options(
+                selectinload(BlogPost.tags),
+                selectinload(BlogPost.author),
+                selectinload(BlogPost.packages).joinedload(Package.country),
+            )
+            .filter(BlogPost.slug == slug)
+            .first()
+        )
+        if post and post.packages:
+            post.packages = [p for p in post.packages if p.is_active]
+        return post
 
     def create_blog_post(
         self,

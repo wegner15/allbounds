@@ -520,6 +520,7 @@ class PackageService:
             is_deal=package_create.is_deal or False,
             package_type=package_create.package_type or "safari",
             faqs=package_create.faqs,
+            highlights=package_create.highlights,
             conversion_triggers=package_create.conversion_triggers,
             slug=slug,
         )

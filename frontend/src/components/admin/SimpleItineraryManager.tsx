@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useItinerary, useCreateItineraryItem, useDeleteItineraryItem, useUpdateItineraryItem } from '../../lib/hooks/useItinerary';
 import type { EntityType, ItineraryItem, ItineraryActivity } from '../../lib/types/itinerary';
 import LocationPicker from '../LocationPicker';
@@ -14,6 +14,8 @@ interface SimpleItineraryManagerProps {
   entityType: EntityType;
   entityId: number;
   countryId?: number;
+  countryIds?: number[];
+  countries?: any[];
   readonly?: boolean;
 }
 
@@ -21,6 +23,8 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
   entityType,
   entityId,
   countryId,
+  countryIds,
+  countries,
   readonly = false
 }) => {
   const [isAddingDay, setIsAddingDay] = useState(false);
@@ -38,13 +42,74 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
   const [newDayLinkedActivityIds, setNewDayLinkedActivityIds] = useState<number[]>([]);
   const [newDayAccommodationNotes, setNewDayAccommodationNotes] = useState('');
 
+  // Destination country support for multi-country packages
+  const effectiveCountryIds = useMemo(() => {
+    if (countryIds && countryIds.length > 0) return countryIds;
+    if (countryId) return [countryId];
+    return [];
+  }, [countryIds, countryId]);
+
+  const isMultiCountry = effectiveCountryIds.length > 1;
+  const [activeCountryFilter, setActiveCountryFilter] = useState<number | 'all'>('all');
+
   const { data: itinerary, isLoading: isLoadingItinerary, error } = useItinerary(entityType, entityId);
   const createItem = useCreateItineraryItem();
   const updateItem = useUpdateItineraryItem();
   const deleteItem = useDeleteItineraryItem();
-  const { data: hotels = [], isLoading: isLoadingHotels } = useHotels(countryId);
-  const { data: attractions = [], isLoading: isLoadingAttractions } = useAttractions(countryId ? { country_id: countryId } : undefined);
-  const { data: activities = [], isLoading: isLoadingActivities } = useActivities(countryId);
+
+  // If multi-country, query without restricting to single country so all tour destinations are fetched
+  const queryCountryId = isMultiCountry ? undefined : countryId;
+  const { data: rawHotels = [], isLoading: isLoadingHotels } = useHotels(queryCountryId);
+  const { data: rawAttractions = [], isLoading: isLoadingAttractions } = useAttractions(
+    queryCountryId ? { country_id: queryCountryId } : undefined
+  );
+  const { data: rawActivities = [], isLoading: isLoadingActivities } = useActivities(queryCountryId);
+
+  // Filter items to only those belonging to the package's destinations if multi-country
+  const relevantHotels = useMemo(() => {
+    if (!isMultiCountry || effectiveCountryIds.length === 0) return rawHotels;
+    const allowed = new Set(effectiveCountryIds);
+    return rawHotels.filter((h) => allowed.has(h.country_id));
+  }, [rawHotels, isMultiCountry, effectiveCountryIds]);
+
+  const relevantAttractions = useMemo(() => {
+    if (!isMultiCountry || effectiveCountryIds.length === 0) return rawAttractions;
+    const allowed = new Set(effectiveCountryIds);
+    return rawAttractions.filter((a) => allowed.has(a.country_id));
+  }, [rawAttractions, isMultiCountry, effectiveCountryIds]);
+
+  const relevantActivities = useMemo(() => {
+    if (!isMultiCountry || effectiveCountryIds.length === 0) return rawActivities;
+    const allowed = new Set(effectiveCountryIds);
+    return rawActivities.filter((a) => {
+      if (a.countries && a.countries.length > 0) {
+        return a.countries.some((c) => allowed.has(c.id));
+      }
+      const singleCId = (a as any).country_id;
+      return singleCId ? allowed.has(singleCId) : true;
+    });
+  }, [rawActivities, isMultiCountry, effectiveCountryIds]);
+
+  // Scoped lists based on active country filter
+  const displayedHotels = useMemo(() => {
+    if (activeCountryFilter === 'all') return relevantHotels;
+    return relevantHotels.filter((h) => h.country_id === activeCountryFilter);
+  }, [relevantHotels, activeCountryFilter]);
+
+  const displayedAttractions = useMemo(() => {
+    if (activeCountryFilter === 'all') return relevantAttractions;
+    return relevantAttractions.filter((a) => a.country_id === activeCountryFilter);
+  }, [relevantAttractions, activeCountryFilter]);
+
+  const displayedActivities = useMemo(() => {
+    if (activeCountryFilter === 'all') return relevantActivities;
+    return relevantActivities.filter((a) => {
+      if (a.countries && a.countries.length > 0) {
+        return a.countries.some((c) => c.id === activeCountryFilter);
+      }
+      return (a as any).country_id === activeCountryFilter;
+    });
+  }, [relevantActivities, activeCountryFilter]);
 
   const resetForm = () => {
     setNewDayTitle('');
@@ -274,19 +339,80 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
               </div>
             </div>
 
+            {/* Destination / Country Filter for Multi-Country Packages */}
+            {isMultiCountry && (
+              <div className="p-3.5 bg-teal/5 border border-teal/20 rounded-xl mb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2.5">
+                  <span className="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>🌍</span> Filter Services by Destination
+                  </span>
+                  <span className="text-[11px] text-teal-800 font-semibold">
+                    Multi-Country Tour ({effectiveCountryIds.length} destinations)
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setActiveCountryFilter('all')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      activeCountryFilter === 'all'
+                        ? 'bg-teal text-white shadow-xs'
+                        : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                    }`}
+                  >
+                    All Destinations ({relevantHotels.length + relevantAttractions.length + relevantActivities.length})
+                  </button>
+                  {effectiveCountryIds.map((cId) => {
+                    const countryObj = countries?.find((c: any) => c.id === cId);
+                    const name = countryObj?.name || `Country #${cId}`;
+                    const isPrimary = cId === countryId;
+                    const isSelected = activeCountryFilter === cId;
+                    return (
+                      <button
+                        key={cId}
+                        type="button"
+                        onClick={() => setActiveCountryFilter(cId)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                          isSelected
+                            ? 'bg-teal text-white shadow-xs'
+                            : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                        }`}
+                      >
+                        <span>{name}</span>
+                        {isPrimary && (
+                          <span
+                            className={`text-[10px] px-1 rounded font-normal ${
+                              isSelected ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
+                            }`}
+                          >
+                            Primary
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Hotels Multi-Select */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Hotels
-              </label>
-              <div className="border border-gray-300 rounded-md p-2 max-h-40 overflow-y-auto">
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Hotels
+                </label>
+                <span className="text-xs text-gray-500 font-medium">
+                  {newDayHotelIds.length} selected
+                </span>
+              </div>
+              <div className="border border-gray-300 rounded-md p-2 max-h-44 overflow-y-auto">
                 {isLoadingHotels ? (
                   <p className="text-sm text-gray-500">Loading hotels...</p>
-                ) : hotels.length === 0 ? (
-                  <p className="text-sm text-gray-500">No hotels found.</p>
+                ) : displayedHotels.length === 0 ? (
+                  <p className="text-sm text-gray-500">No hotels found for selected destination.</p>
                 ) : (
-                  hotels.map((hotel) => (
-                    <label key={hotel.id} className="flex items-center space-x-2 py-1">
+                  displayedHotels.map((hotel) => (
+                    <label key={hotel.id} className="flex items-center space-x-2 py-1 hover:bg-gray-50 rounded px-1 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={newDayHotelIds.includes(hotel.id)}
@@ -299,9 +425,14 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
                         }}
                         className="rounded border-gray-300 text-teal focus:ring-teal"
                       />
-                      <span className="text-sm text-gray-700">
-                        {hotel.name}
+                      <span className="text-sm text-gray-700 flex-1 truncate">
+                        <span className="font-medium">{hotel.name}</span>
                         {hotel.city && <span className="text-gray-500"> - {hotel.city}</span>}
+                        {isMultiCountry && hotel.country?.name && (
+                          <span className="text-[10px] bg-teal/10 text-teal-800 font-semibold px-1.5 py-0.5 rounded ml-1.5">
+                            {hotel.country.name}
+                          </span>
+                        )}
                         {hotel.stars && (
                           <span className="text-yellow-500 ml-1">
                             {'★'.repeat(Math.floor(hotel.stars))}
@@ -316,17 +447,22 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
 
             {/* Attractions Multi-Select */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Attractions
-              </label>
-              <div className="border border-gray-300 rounded-md p-2 max-h-40 overflow-y-auto">
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Attractions
+                </label>
+                <span className="text-xs text-gray-500 font-medium">
+                  {newDayAttractionIds.length} selected
+                </span>
+              </div>
+              <div className="border border-gray-300 rounded-md p-2 max-h-44 overflow-y-auto">
                 {isLoadingAttractions ? (
                   <p className="text-sm text-gray-500">Loading attractions...</p>
-                ) : attractions.length === 0 ? (
-                  <p className="text-sm text-gray-500">No attractions found.</p>
+                ) : displayedAttractions.length === 0 ? (
+                  <p className="text-sm text-gray-500">No attractions found for selected destination.</p>
                 ) : (
-                  attractions.map((attraction) => (
-                    <label key={attraction.id} className="flex items-center space-x-2 py-1">
+                  displayedAttractions.map((attraction) => (
+                    <label key={attraction.id} className="flex items-center space-x-2 py-1 hover:bg-gray-50 rounded px-1 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={newDayAttractionIds.includes(attraction.id)}
@@ -339,9 +475,14 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
                         }}
                         className="rounded border-gray-300 text-teal focus:ring-teal"
                       />
-                      <span className="text-sm text-gray-700">
-                        {attraction.name}
+                      <span className="text-sm text-gray-700 flex-1 truncate">
+                        <span className="font-medium">{attraction.name}</span>
                         {attraction.city && <span className="text-gray-500"> - {attraction.city}</span>}
+                        {isMultiCountry && attraction.country?.name && (
+                          <span className="text-[10px] bg-teal/10 text-teal-800 font-semibold px-1.5 py-0.5 rounded ml-1.5">
+                            {attraction.country.name}
+                          </span>
+                        )}
                         {attraction.duration_minutes && (
                           <span className="text-gray-500 ml-1">
                             ({attraction.duration_minutes}min)
@@ -356,17 +497,22 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
 
             {/* Activities Multi-Select */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Activities
-              </label>
-              <div className="border border-gray-300 rounded-md p-2 max-h-40 overflow-y-auto">
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Activities
+                </label>
+                <span className="text-xs text-gray-500 font-medium">
+                  {newDayLinkedActivityIds.length} selected
+                </span>
+              </div>
+              <div className="border border-gray-300 rounded-md p-2 max-h-44 overflow-y-auto">
                 {isLoadingActivities ? (
                   <p className="text-sm text-gray-500">Loading activities...</p>
-                ) : activities.length === 0 ? (
-                  <p className="text-sm text-gray-500">No activities found.</p>
+                ) : displayedActivities.length === 0 ? (
+                  <p className="text-sm text-gray-500">No activities found for selected destination.</p>
                 ) : (
-                  activities.map((activity) => (
-                    <label key={activity.id} className="flex items-center space-x-2 py-1">
+                  displayedActivities.map((activity) => (
+                    <label key={activity.id} className="flex items-center space-x-2 py-1 hover:bg-gray-50 rounded px-1 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={newDayLinkedActivityIds.includes(activity.id)}
@@ -379,8 +525,13 @@ export const SimpleItineraryManager: React.FC<SimpleItineraryManagerProps> = ({
                         }}
                         className="rounded border-gray-300 text-teal focus:ring-teal"
                       />
-                      <span className="text-sm text-gray-700">
-                        {activity.name}
+                      <span className="text-sm text-gray-700 flex-1 truncate">
+                        <span className="font-medium">{activity.name}</span>
+                        {isMultiCountry && activity.countries && activity.countries.length > 0 && (
+                          <span className="text-[10px] bg-teal/10 text-teal-800 font-semibold px-1.5 py-0.5 rounded ml-1.5">
+                            {activity.countries.map(c => c.name).join(', ')}
+                          </span>
+                        )}
                       </span>
                     </label>
                   ))

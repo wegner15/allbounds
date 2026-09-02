@@ -5,6 +5,7 @@ import SeoHead from '../../../components/seo/SeoHead';
 import { RichTextDisplay } from '../../../components/ui/RichTextDisplay';
 import { useBlogBySlug as useBlog, useRelatedBlogs } from '../../../lib/hooks/useBlogs';
 import { getCloudflareImageUrl } from '../../../utils/cloudflareImageUtils';
+import { MapPin, Clock, Compass, ArrowRight } from 'lucide-react';
 
 const BlogDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -280,6 +281,100 @@ const BlogDetailPage: React.FC = () => {
           </div>
         </footer>
       </article>
+
+      {/* Featured Travel Packages Linked to Article */}
+      {blog.packages && blog.packages.length > 0 && (
+        <section className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-b border-gray-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary-dark text-xs font-bold uppercase tracking-wider mb-2">
+                <Compass className="w-3.5 h-3.5" />
+                <span>Featured Tours</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold font-playfair text-charcoal">
+                Tours & Packages Mentioned in This Story
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Experience the destinations and activities featured in this guide with our curated travel packages
+              </p>
+            </div>
+            <Link
+              to="/packages"
+              className="inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:text-primary-dark transition-colors self-start sm:self-auto"
+            >
+              <span>Explore All Tours</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {blog.packages.map((pkg) => (
+              <div
+                key={pkg.id}
+                className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200/80 flex flex-col hover:-translate-y-1"
+              >
+                <Link to={`/packages/${pkg.slug}`} className="block relative h-52 sm:h-56 overflow-hidden bg-gray-100">
+                  {pkg.image_id ? (
+                    <img
+                      src={getCloudflareImageUrl(pkg.image_id, 'medium')}
+                      alt={pkg.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
+                      <Compass className="w-10 h-10" />
+                    </div>
+                  )}
+                  {pkg.country && (
+                    <span className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur-sm text-xs font-bold text-charcoal shadow-sm flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-primary" />
+                      {pkg.country.name}
+                    </span>
+                  )}
+                  <span className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-charcoal/80 backdrop-blur-sm text-white text-xs font-medium flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    {pkg.duration_days} Days
+                  </span>
+                </Link>
+
+                <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
+                  <div>
+                    <Link to={`/packages/${pkg.slug}`}>
+                      <h3 className="text-lg font-bold font-playfair text-charcoal group-hover:text-primary transition-colors line-clamp-2 mb-2">
+                        {pkg.name}
+                      </h3>
+                    </Link>
+                    {pkg.summary && (
+                      <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 leading-relaxed mb-4">
+                        {pkg.summary}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="pt-4 border-t border-gray-100 flex items-center justify-between mt-auto">
+                    <div>
+                      <span className="text-[11px] text-gray-500 uppercase tracking-wider block font-medium">Starting from</span>
+                      <span className="text-base sm:text-lg font-extrabold text-charcoal">
+                        ${pkg.price?.toLocaleString()}
+                        <span className="text-xs font-normal text-gray-500 ml-1">/ person</span>
+                      </span>
+                    </div>
+
+                    <Link
+                      to={`/packages/${pkg.slug}`}
+                      className="inline-flex items-center gap-1 px-3.5 py-2 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95"
+                    >
+                      <span>View Tour</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Related Articles */}
       {relatedBlogs && relatedBlogs.length > 0 && !relatedLoading && (

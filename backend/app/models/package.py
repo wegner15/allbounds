@@ -34,6 +34,7 @@ class Package(Base):
     inclusions = Column(Text, nullable=True)
     exclusions = Column(Text, nullable=True)
     faqs = Column(JSON, nullable=True)  # List of {question: str, answer: str}
+    highlights = Column(JSON, nullable=True)  # List of strings for tour highlights
     image_id = Column(String(255), nullable=True)  # Cloudflare image ID
     slug = Column(String(100), unique=True, index=True, nullable=False)
     is_active = Column(Boolean, default=True)

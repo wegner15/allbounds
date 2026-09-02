@@ -219,6 +219,7 @@ class PackageDetailResponse(BaseModel):
     is_active: bool
     is_featured: bool
     package_type: str = "safari"
+    highlights: Optional[List[str]] = None
     created_at: datetime
     updated_at: datetime
     

@@ -25,6 +25,7 @@ class PackageBase(BaseModel):
     is_deal: Optional[bool] = Field(False, description="Whether the package is marked as a special deal")
     package_type: Optional[str] = Field("safari", description="Package type: 'safari' or 'holiday'")
     faqs: Optional[List[dict]] = Field(None, description="List of FAQs ({question: str, answer: str})")
+    highlights: Optional[List[str]] = Field(None, description="Key tour highlights and unique selling points")
     conversion_triggers: Optional[List[str]] = Field(None, description="List of conversion triggers for the package")
     
 # Schema for creating a new Package
@@ -60,6 +61,7 @@ class PackageUpdate(BaseModel):
     exclusion_ids: Optional[List[int]] = Field(None, description="List of exclusion IDs to associate with this package")
     blog_post_ids: Optional[List[int]] = Field(None, description="List of blog post IDs to associate with this package")
     faqs: Optional[List[dict]] = Field(None, description="List of FAQs")
+    highlights: Optional[List[str]] = Field(None, description="Key tour highlights and unique selling points")
     conversion_triggers: Optional[List[str]] = Field(None, description="List of conversion triggers")
     country_ids: Optional[List[int]] = Field(None, description="List of additional country IDs (multiple destinations)")
     tag_ids: Optional[List[int]] = Field(None, description="List of tag IDs to associate with this package")

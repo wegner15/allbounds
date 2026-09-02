@@ -167,7 +167,7 @@ const InclusionExclusionGrid: React.FC<InclusionExclusionGridProps> = ({
       {/* Exclusions Column */}
       <div className="mt-6 lg:mt-0 animate-fade-in">
         <h3 className="text-xl sm:text-2xl font-semibold text-charcoal mb-4 sm:mb-6 flex items-center gap-3 font-playfair">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-rose-500 to-rose-700 flex items-center justify-center flex-shrink-0 shadow-md shadow-rose-500/20">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-primary via-primary-dark to-primary flex items-center justify-center flex-shrink-0 shadow-md shadow-primary/25">
             <X className="w-4 h-4 sm:w-5 sm:h-5 text-white stroke-[2.5]" />
           </div>
           <span>What's Not Included</span>
@@ -209,13 +209,13 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, items, type }) =>
       className={`rounded-xl border transition-all duration-200 p-4 sm:p-5 flex flex-col ${
         isInclusion
           ? 'border-emerald-100/90 bg-emerald-50/25 hover:bg-white hover:border-emerald-300/80 hover:shadow-sm'
-          : 'border-rose-100/90 bg-rose-50/25 hover:bg-white hover:border-rose-300/80 hover:shadow-sm'
+          : 'border-primary/30 bg-primary/5 hover:bg-white hover:border-primary hover:shadow-sm'
       }`}
     >
       {/* Category Card Header */}
       <div
         className={`flex items-center justify-between gap-3 pb-3 mb-3.5 border-b ${
-          isInclusion ? 'border-emerald-100/80' : 'border-rose-100/80'
+          isInclusion ? 'border-emerald-100/80' : 'border-primary/20'
         }`}
       >
         <div className="flex items-center gap-2.5">
@@ -223,7 +223,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, items, type }) =>
             className={`p-2 rounded-lg shrink-0 ${
               isInclusion
                 ? 'bg-emerald-500/10 text-emerald-600'
-                : 'bg-rose-500/10 text-rose-600'
+                : 'bg-primary/20 text-charcoal'
             }`}
           >
             {getCategoryIcon(category)}
@@ -236,7 +236,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, items, type }) =>
           className={`text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white border shadow-2xs ${
             isInclusion
               ? 'border-emerald-200/80 text-emerald-700'
-              : 'border-rose-200/80 text-rose-700'
+              : 'border-primary/30 text-charcoal'
           }`}
         >
           {items.length} {items.length === 1 ? 'item' : 'items'}
@@ -278,7 +278,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, type }) => {
           className={`mt-0.5 p-1 rounded-full shrink-0 transition-colors ${
             isInclusion
               ? 'bg-emerald-500/15 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white'
-              : 'bg-rose-500/15 text-rose-600 group-hover:bg-rose-600 group-hover:text-white'
+              : 'bg-primary/20 text-charcoal group-hover:bg-primary-dark group-hover:text-white'
           }`}
         >
           {hasCustomIcon ? (

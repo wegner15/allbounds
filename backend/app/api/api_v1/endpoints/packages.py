@@ -230,6 +230,10 @@ def get_comprehensive_package_by_slug(
             key=lambda x: x.start_date
         )
     
+    # Filter active and published blog posts
+    if package.blog_posts:
+        package.blog_posts = [b for b in package.blog_posts if b.is_active and b.is_published]
+    
     return package
 
 @router.get("/{package_id}/similar", response_model=List[PackageWithCountryResponse])

@@ -9,6 +9,24 @@ interface OverviewSectionProps {
 export const OverviewSection: React.FC<OverviewSectionProps> = ({ packageData }) => {
   // Extract key tour highlights, experiences, attractions, and unique selling points
   const tourHighlights = React.useMemo(() => {
+    // 1. If custom highlights are configured by admin, prioritize them directly
+    if (packageData.highlights && Array.isArray(packageData.highlights) && packageData.highlights.length > 0) {
+      const customItems = packageData.highlights
+        .map((h) =>
+          typeof h === 'string'
+            ? h
+                .replace(/<[^>]*>/g, '')
+                .trim()
+                .replace(/^[-•*–—\s]+/, '')
+            : ''
+        )
+        .filter((h) => h.length > 0);
+
+      if (customItems.length > 0) {
+        return customItems;
+      }
+    }
+
     const items: string[] = [];
     const seen = new Set<string>();
 

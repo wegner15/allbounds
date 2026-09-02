@@ -196,9 +196,9 @@ export const useUpdatePackage = (id: number) => {
     },
     onSuccess: (data) => {
       queryClient.setQueryData(['package', id], data);
-      // Invalidate all packages queries
+      // Invalidate all package queries (including comprehensive by slug)
+      queryClient.invalidateQueries({ queryKey: ['package'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['packages'], exact: false });
-      // Also invalidate package details queries
       queryClient.invalidateQueries({ queryKey: ['package-details'], exact: false });
     },
   });
@@ -214,9 +214,9 @@ export const usePatchPackage = () => {
     },
     onSuccess: (data, variables) => {
       queryClient.setQueryData(['package', variables.id], data);
-      // Invalidate all packages queries to refresh lists
+      // Invalidate all package queries (including comprehensive by slug)
+      queryClient.invalidateQueries({ queryKey: ['package'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['packages'], exact: false });
-      // Also invalidate package details queries
       queryClient.invalidateQueries({ queryKey: ['package-details'], exact: false });
     },
   });

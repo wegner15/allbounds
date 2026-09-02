@@ -15,6 +15,7 @@ from app.services.blog import blog_service
 from app.services.audit import create_audit_log
 from app.auth.dependencies import get_current_active_superuser, get_current_user, get_current_user_optional
 from app.utils.slug import create_slug
+from app.core.redis_cache import invalidate_cache_pattern
 
 router = APIRouter()
 
@@ -146,6 +147,7 @@ def create_blog_post(
         entity_type="blog_post",
         entity_id=blog_post.id
     )
+    invalidate_cache_pattern("cache:*")
 
     return BlogPostResponse.model_validate(blog_post)
 
@@ -184,6 +186,7 @@ def update_blog_post(
         entity_type="blog_post",
         entity_id=post_id
     )
+    invalidate_cache_pattern("cache:*")
 
     return BlogPostResponse.model_validate(blog_post)
 
@@ -210,6 +213,7 @@ def delete_blog_post(
         entity_type="blog_post",
         entity_id=post_id
     )
+    invalidate_cache_pattern("cache:*")
 
     return BlogPostResponse.model_validate(blog_post)
 
@@ -236,6 +240,7 @@ def publish_blog_post(
         entity_type="blog_post",
         entity_id=post_id
     )
+    invalidate_cache_pattern("cache:*")
 
     return BlogPostResponse.model_validate(blog_post)
 
@@ -262,6 +267,7 @@ def unpublish_blog_post(
         entity_type="blog_post",
         entity_id=post_id
     )
+    invalidate_cache_pattern("cache:*")
 
     return BlogPostResponse.model_validate(blog_post)
 

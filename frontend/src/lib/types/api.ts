@@ -445,6 +445,7 @@ export interface Package extends BaseModel {
   blog_posts?: BlogPost[];
   rating?: number;
   review_count?: number;
+  highlights?: string[];
   faqs?: { question: string; answer: string }[];
   conversion_triggers?: string[];
   countries?: Country[];      // additional destinations (multi-destination)
@@ -617,6 +618,7 @@ export interface PackageDetailResponse {
   is_featured: boolean;
   is_deal: boolean;
   package_type?: 'safari' | 'holiday' | string;
+  highlights?: string[];
   created_at: string;
   updated_at: string;
   country: CountrySummary;

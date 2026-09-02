@@ -47,6 +47,7 @@ const packageSchema = z.object({
     question: z.string().min(1, 'Question is required'),
     answer: z.string().min(1, 'Answer is required'),
   })).optional(),
+  highlights_raw: z.string().optional(),
   conversion_triggers: z.array(z.object({
     value: z.string().min(1, 'Trigger text is required'),
   })).optional(),
@@ -121,6 +122,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
         is_featured: packageData.is_featured,
         is_deal: packageData.is_deal || false,
         package_type: packageData.package_type || 'safari',
+        highlights_raw: packageData.highlights && Array.isArray(packageData.highlights) ? packageData.highlights.join('\n') : '',
         faqs: packageData.faqs || [],
         conversion_triggers: packageData.conversion_triggers?.map((t: string) => ({ value: t })) || [],
       }
@@ -143,6 +145,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
         is_featured: false,
         is_deal: false,
         package_type: 'safari',
+        highlights_raw: '',
         faqs: [],
         conversion_triggers: [],
       },
@@ -249,13 +252,23 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
     setServerError(null);
 
     try {
+      const parseLines = (raw?: string): string[] => {
+        if (!raw) return [];
+        return raw
+          .split('\n')
+          .map(line => line.trim().replace(/^[-•*–—\s]+/, ''))
+          .filter(line => line.length > 0);
+      };
+
       const payload = {
         ...formData,
+        highlights: parseLines(formData.highlights_raw),
         is_featured: watch('is_featured'),
         is_deal: watch('is_deal'),
         image_id: formData.image_id || undefined,
         conversion_triggers: formData.conversion_triggers?.map(t => t.value) || []
       };
+      delete (payload as any).highlights_raw;
 
       if (isEdit) {
         await updatePackageMutation.mutateAsync(payload);
@@ -496,6 +509,31 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                     {errors.summary && <p className="mt-1 text-xs text-red-600">{errors.summary.message}</p>}
                   </div>
 
+                  {/* Tour Highlights */}
+                  <div className="sm:col-span-6 bg-amber-50/40 border border-amber-200/80 rounded-xl p-4 sm:p-5">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label htmlFor="highlights_raw" className="block text-sm font-bold text-gray-900 flex items-center gap-2">
+                        <span>✨</span> Tour Highlights / Key Experiences
+                      </label>
+                      <span className="text-[11px] font-medium text-amber-900 bg-amber-100 px-2 py-0.5 rounded-md border border-amber-200">
+                        Why Choose This Tour Section
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-2.5">
+                      Enter each highlight or unique selling point on a new line. These will be displayed as the bullet points in the public <strong>"Why Choose This Tour?"</strong> section.
+                    </p>
+                    <textarea
+                      id="highlights_raw"
+                      rows={4}
+                      placeholder="6-day family Dubai adventure with desert safari & luxury dhow cruise&#10;Dubai Marina Dhow Cruise Dinner with skyline views&#10;Dubai Aquarium, Underwater Zoo & Penguin Cove admission&#10;Dubai Parks & Resorts 1-day pass with private transfers"
+                      className="block w-full px-4 py-2.5 text-sm font-mono border border-gray-300 rounded-xl shadow-xs focus:ring-2 focus:ring-teal bg-white"
+                      {...register('highlights_raw')}
+                    />
+                    <p className="text-[11px] text-gray-500 mt-1.5">
+                      Tip: If left blank, highlights will automatically be generated from your summary and itinerary day titles.
+                    </p>
+                  </div>
+
                   {/* Main Description */}
                   <div className="sm:col-span-6">
                     <Controller
@@ -685,6 +723,8 @@ const PackageForm: React.FC<PackageFormProps> = ({ packageData }) => {
                     entityType="package"
                     entityId={packageData.id}
                     countryId={watch('country_id')}
+                    countryIds={[watch('country_id'), ...(watch('country_ids') || [])].filter(Boolean)}
+                    countries={countries}
                   />
                 ) : (
                   <div className="p-6 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">

@@ -69,7 +69,10 @@ const SeoHead: React.FC<SeoHeadProps> = ({
   children,
 }) => {
   const fullTitle = normalizeTitle(title, siteName);
-  const metaDescription = description?.trim() || DEFAULT_DESCRIPTION;
+  const rawDescription = description?.trim() || DEFAULT_DESCRIPTION;
+  const metaDescription = rawDescription.length > 158
+    ? `${rawDescription.substring(0, 155).trim()}...`
+    : rawDescription;
 
   // Always produce an absolute canonical URL
   const canonical = canonicalUrl

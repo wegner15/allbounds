@@ -32,13 +32,14 @@ function getImageUrl(imageId, variant = 'large') {
   return `${CLOUDFLARE_DELIVERY_URL}/${cleanId}/${variant}`;
 }
 
-function cleanText(text, maxLength = 160) {
+function cleanText(text, maxLength = 155) {
   if (!text) return '';
-  return text
+  const clean = text
     .replace(/<[^>]*>/g, ' ')
     .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, maxLength);
+    .trim();
+  if (clean.length <= maxLength) return clean;
+  return `${clean.slice(0, maxLength - 3).trim()}...`;
 }
 
 function escapeHtml(str) {
@@ -429,10 +430,12 @@ async function main() {
   for (const pkg of packages) {
     if (!pkg?.slug) continue;
     const path = `/packages/${pkg.slug}`;
+    const countrySlug = pkg.country?.slug;
+    const canonicalPath = countrySlug ? `/packages/${countrySlug}/${pkg.slug}` : path;
     const title = `${pkg.name} | ${SITE_NAME}`;
     const description = cleanText(pkg.summary || pkg.description) || `Explore ${pkg.name} with ${SITE_NAME}.`;
     const image = getImageUrl(pkg.image_id || pkg.cover_image);
-    const canonicalUrl = `${SITE_URL}${path}`;
+    const canonicalUrl = `${SITE_URL}${canonicalPath}`;
     const jsonLd = [
       {
         '@context': 'https://schema.org',
@@ -447,12 +450,17 @@ async function main() {
         { name: 'Home', url: '/' },
         { name: 'Packages', url: '/packages' },
         ...(pkg.country ? [{ name: pkg.country.name, url: `/destinations/${pkg.country.slug}` }] : []),
-        { name: pkg.name, url: path },
+        { name: pkg.name, url: canonicalPath },
       ]),
     ];
     const html = renderHtml(template, { title, heading: pkg.name, description, canonicalUrl, image, type: 'article', jsonLd });
     await writePage(path, html);
     count++;
+
+    if (countrySlug) {
+      await writePage(canonicalPath, html);
+      count++;
+    }
   }
 
   // Blog Posts

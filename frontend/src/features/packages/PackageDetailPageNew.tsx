@@ -16,7 +16,7 @@ import { buildAbsoluteUrl, SITE_NAME } from '../../lib/seo-config';
 import type { HolidayTypeSummary } from '../../lib/types/api';
 
 const PackageDetailPageNew: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug, destination } = useParams<{ slug: string; destination?: string }>();
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [showBrochureModal, setShowBrochureModal] = useState(false);
@@ -155,17 +155,27 @@ const PackageDetailPageNew: React.FC = () => {
     );
   }
 
+  const destinationSlug = destination || packageDetail.country?.slug;
+  const canonicalPackagePath = destinationSlug
+    ? `/packages/${destinationSlug}/${packageDetail.slug}`
+    : `/packages/${packageDetail.slug}`;
+
+  const rawDescription = packageDetail.summary ||
+    packageDetail.description?.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() ||
+    `Explore ${packageDetail.name} - ${packageDetail.duration_days} days in ${packageDetail.country.name}`;
+  const metaDescription = rawDescription.length > 155
+    ? `${rawDescription.substring(0, 152).trim()}...`
+    : rawDescription;
+
   // Build JSON-LD structured data for this tour package
   const packageJsonLd = [
     {
       '@context': 'https://schema.org',
       '@type': 'TouristTrip',
       name: packageDetail.name,
-      description: packageDetail.summary ||
-        (packageDetail.description?.replace(/<[^>]*>/g, '').substring(0, 300)) ||
-        `Explore ${packageDetail.name} - ${packageDetail.duration_days} days in ${packageDetail.country.name}`,
+      description: metaDescription,
       image: packageDetail.image_id ? getImageUrlWithFallback(packageDetail.image_id, IMAGE_VARIANTS.LARGE) : undefined,
-      url: buildAbsoluteUrl(`/packages/${packageDetail.slug}`),
+      url: buildAbsoluteUrl(canonicalPackagePath),
       provider: {
         '@type': 'TravelAgency',
         name: SITE_NAME,
@@ -181,7 +191,7 @@ const PackageDetailPageNew: React.FC = () => {
             price: chart.base_price ?? chart.price ?? '',
             priceCurrency: 'USD',
             availability: 'https://schema.org/InStock',
-            url: buildAbsoluteUrl(`/packages/${packageDetail.slug}`),
+            url: buildAbsoluteUrl(canonicalPackagePath),
           }))
         : undefined,
     },
@@ -192,7 +202,7 @@ const PackageDetailPageNew: React.FC = () => {
         { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://allboundvacations.com' },
         { '@type': 'ListItem', position: 2, name: 'Packages', item: buildAbsoluteUrl('/packages') },
         { '@type': 'ListItem', position: 3, name: packageDetail.country.name, item: buildAbsoluteUrl(`/destinations/${packageDetail.country.slug}`) },
-        { '@type': 'ListItem', position: 4, name: packageDetail.name, item: buildAbsoluteUrl(`/packages/${packageDetail.slug}`) },
+        { '@type': 'ListItem', position: 4, name: packageDetail.name, item: buildAbsoluteUrl(canonicalPackagePath) },
       ],
     },
   ];
@@ -201,8 +211,8 @@ const PackageDetailPageNew: React.FC = () => {
     <>
       <SeoHead
         title={packageDetail.name}
-        description={packageDetail.summary || packageDetail.description?.replace(/<[^>]*>/g, '').substring(0, 160) || `Explore ${packageDetail.name} - ${packageDetail.duration_days} days in ${packageDetail.country.name}`}
-        canonicalPath={`/packages/${packageDetail.slug}`}
+        description={metaDescription}
+        canonicalPath={canonicalPackagePath}
         image={packageDetail.image_id ? getImageUrlWithFallback(packageDetail.image_id, IMAGE_VARIANTS.LARGE) : undefined}
         type="article"
         keywords={[

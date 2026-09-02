@@ -11,7 +11,7 @@ export const DEFAULT_OG_IMAGE_WIDTH = 1200;
 export const DEFAULT_OG_IMAGE_HEIGHT = 630;
 export const DEFAULT_LOCALE = 'en_US';
 export const DEFAULT_DESCRIPTION =
-  'Discover extraordinary destinations and create unforgettable travel experiences with Allbound Vacations. Explore tour packages, group trips, hotels, and activities across Africa and beyond.';
+  'Discover extraordinary destinations with Allbound Vacations. Explore curated safari packages, luxury stays, and unforgettable group trips across Africa and beyond.';
 
 /**
  * Build an absolute canonical URL from a relative path.

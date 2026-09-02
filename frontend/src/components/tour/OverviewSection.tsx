@@ -1,40 +1,108 @@
 import React from 'react';
 import type { PackageDetailResponse } from '../../lib/types/api';
-import { Clock, Users, TrendingUp, MapPin, Calendar, Award } from 'lucide-react';
+import { Clock, Users, TrendingUp, Sparkles, Check } from 'lucide-react';
 
 interface OverviewSectionProps {
   packageData: PackageDetailResponse;
 }
 
 export const OverviewSection: React.FC<OverviewSectionProps> = ({ packageData }) => {
-  // Extract highlights from inclusions and attractions
-  const highlights = React.useMemo(() => {
+  // Extract key tour highlights, experiences, attractions, and unique selling points
+  const tourHighlights = React.useMemo(() => {
     const items: string[] = [];
-    
-    // Add featured inclusions as highlights
-    if (packageData.inclusion_items && packageData.inclusion_items.length > 0) {
-      packageData.inclusion_items.slice(0, 3).forEach(inclusion => {
-        items.push(inclusion.name);
-      });
-    }
-    
-    // Add featured attractions as highlights
-    if (packageData.attractions && packageData.attractions.length > 0) {
-      packageData.attractions.slice(0, 3).forEach(attraction => {
-        items.push(`Visit ${attraction.name}`);
-      });
-    }
-    
-    // Add hotel highlights
-    if (packageData.hotels && packageData.hotels.length > 0) {
-      const starRatings = packageData.hotels.filter(h => h.stars).map(h => h.stars);
-      if (starRatings.length > 0) {
-        const avgStars = Math.round(starRatings.reduce((a, b) => (a || 0) + (b || 0), 0) / starRatings.length);
-        items.push(`${avgStars}-Star Accommodations`);
+    const seen = new Set<string>();
+
+    const addItem = (text: string) => {
+      if (!text) return;
+      const clean = text
+        .replace(/<[^>]*>/g, '')
+        .trim()
+        .replace(/^[-•*–—\s]+/, '')
+        .replace(/\s+/g, ' ');
+
+      const key = clean.toLowerCase();
+      if (clean.length >= 10 && clean.length <= 220 && !seen.has(key)) {
+        seen.add(key);
+        items.push(clean);
+      }
+    };
+
+    // 1. Extract explicit list items (<li>) from description if present
+    if (packageData.description) {
+      const liMatches = packageData.description.match(/<li[^>]*>(.*?)<\/li>/gi);
+      if (liMatches && liMatches.length > 0) {
+        liMatches.forEach((li) => {
+          const text = li.replace(/<[^>]*>/g, '').trim();
+          if (text.length > 12 && text.length < 180) {
+            addItem(text);
+          }
+        });
       }
     }
-    
-    return items.slice(0, 6); // Limit to 6 highlights
+
+    // 2. Extract key experience sentences from summary (similar to Activity Highlights)
+    if (packageData.summary && items.length < 5) {
+      const sentences = packageData.summary
+        .split(/(?<=[.!?])\s+|\n+/)
+        .map((s) => s.trim().replace(/^[•\-\*\s]+/, ''))
+        .filter((s) => s.length > 15 && s.length < 180);
+      sentences.forEach((s) => addItem(s));
+    }
+
+    // 3. Extract key experiences from itinerary day titles
+    if (packageData.itinerary_items && packageData.itinerary_items.length > 0 && items.length < 6) {
+      packageData.itinerary_items.forEach((day) => {
+        if (day.title) {
+          const cleanTitle = day.title.replace(/^Day\s*\d+[:\s\-]*/i, '').trim();
+          const lower = cleanTitle.toLowerCase();
+          const isGenericLogistics =
+            lower === 'departure' ||
+            lower === 'airport transfer' ||
+            lower === 'flight home' ||
+            lower === 'check-out';
+
+          if (cleanTitle.length > 10 && !isGenericLogistics) {
+            addItem(cleanTitle);
+          }
+        }
+      });
+    }
+
+    // 4. Attractions highlights
+    if (packageData.attractions && packageData.attractions.length > 0 && items.length < 6) {
+      const attractionNames = packageData.attractions.slice(0, 4).map((a) => a.name);
+      if (attractionNames.length > 0) {
+        addItem(`Visit iconic attractions including ${attractionNames.join(', ')}`);
+      }
+    }
+
+    // 5. Accommodations USP
+    if (packageData.hotels && packageData.hotels.length > 0 && items.length < 6) {
+      const hotelNames = packageData.hotels.slice(0, 2).map((h) => h.name).join(' & ');
+      const stars = packageData.hotels.filter((h) => h.stars).map((h) => h.stars!);
+      if (stars.length > 0) {
+        const avgStars = Math.round(stars.reduce((a, b) => a + b, 0) / stars.length);
+        addItem(`Handpicked ${avgStars}-star accommodations (${hotelNames}) with daily breakfast`);
+      } else {
+        addItem(`Handpicked accommodations (${hotelNames}) selected for comfort and prime location`);
+      }
+    }
+
+    // 6. Curated itinerary & seamless experience USPs
+    if (items.length < 5) {
+      const dest = packageData.country?.name || 'your destination';
+      addItem(
+        `Carefully crafted ${packageData.duration_days || 8}-day itinerary designed to maximize your time in ${dest}`
+      );
+    }
+
+    if (items.length < 6) {
+      addItem(
+        `Expert local guides and dedicated private transportation for a seamless, hassle-free journey`
+      );
+    }
+
+    return items.slice(0, 7);
   }, [packageData]);
 
   // Determine group size (placeholder logic - can be enhanced)
@@ -109,99 +177,46 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({ packageData })
           </div>
         </div>
 
-        {/* Highlights Grid */}
-        {highlights.length > 0 && (
-          <div className="mb-6 md:mb-8">
-            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-charcoal mb-4 sm:mb-5 flex items-center font-playfair">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-accent to-accent-dark rounded-lg flex items-center justify-center mr-3 shadow-md">
-                <Award className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-              </div>
-              Tour Highlights
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {highlights.map((highlight, index) => (
-                <div
-                  key={index}
-                  className="flex items-start p-4 sm:p-5 bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-xl border border-gray-200 hover:border-primary/40 hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
-                >
-                  <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center mr-3 mt-0.5 shadow-sm">
-                    <svg
-                      className="w-3.5 h-3.5 text-white"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="3"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <span className="text-sm font-semibold text-charcoal leading-relaxed">
-                    {highlight}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* "Why Choose This Tour" Callout Box */}
-        <div className="bg-gradient-to-br from-primary via-primary-dark to-primary rounded-2xl p-6 sm:p-7 md:p-10 text-white shadow-2xl border border-primary-light/20 relative overflow-hidden">
+        {/* Tour Highlights & "Why Choose This Tour" Callout Box */}
+        <div className="bg-gradient-to-br from-primary via-primary-dark to-primary rounded-2xl p-6 sm:p-7 md:p-9 text-white shadow-xl border border-primary-light/20 relative overflow-hidden">
           {/* Decorative background pattern */}
-          <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -translate-y-32 translate-x-32" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full translate-y-24 -translate-x-24" />
           </div>
           
-          <div className="relative flex flex-col sm:flex-row items-start">
-            <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-4 sm:mb-0 sm:mr-5 shadow-lg">
-              <MapPin className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+          <div className="relative flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+            <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-md">
+              <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
             </div>
-            <div className="flex-1">
-              <h3 className="text-2xl sm:text-3xl font-playfair font-bold mb-4 drop-shadow-md">
-                Why Choose This Tour?
-              </h3>
-              <div className="space-y-2 text-teal-50 text-sm sm:text-base">
-                <p className="flex items-start">
-                  <Calendar className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>
-                    Carefully crafted {packageData.duration_days}-day itinerary designed to maximize your experience
+            <div className="flex-1 w-full">
+              <div className="mb-4 sm:mb-5">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-[11px] uppercase font-bold tracking-wider text-teal-200 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/15">
+                    Tour Highlights
                   </span>
-                </p>
-                {packageData.hotels && packageData.hotels.length > 0 && (
-                  <p className="flex items-start">
-                    <Award className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>
-                      Handpicked accommodations ensuring comfort and authentic local experiences
-                    </span>
-                  </p>
-                )}
-                {packageData.inclusion_items && packageData.inclusion_items.length > 0 && (
-                  <p className="flex items-start">
-                    <svg
-                      className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>
-                      Comprehensive inclusions with {packageData.inclusion_items.length}+ features for a hassle-free journey
-                    </span>
-                  </p>
-                )}
-                <p className="flex items-start">
-                  <Users className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>
-                    Expert local guides who bring destinations to life with insider knowledge
-                  </span>
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-playfair font-bold text-white drop-shadow-sm">
+                  Why Choose This Tour?
+                </h3>
+                <p className="text-teal-100/90 text-xs sm:text-sm font-medium mt-1">
+                  Key experiences, top attractions, and unique highlights of this journey
                 </p>
               </div>
+
+              {/* Structured Highlights List */}
+              <ul className="space-y-3 text-teal-50 text-sm sm:text-base leading-relaxed">
+                {tourHighlights.map((highlight, index) => (
+                  <li key={index} className="flex items-start gap-3 group">
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-white/20 flex items-center justify-center mt-0.5 text-white shadow-2xs">
+                      <Check className="w-3 h-3 stroke-[2.5]" />
+                    </span>
+                    <span className="flex-1 text-white/95 pt-0.5">
+                      {highlight}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
@@ -209,3 +224,4 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({ packageData })
     </section>
   );
 };
+

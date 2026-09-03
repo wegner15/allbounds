@@ -93,6 +93,11 @@ async function main() {
   for (const item of hotels) {
     if (item?.slug) {
       urls.push(makeUrl(`/hotels/${item.slug}`, item.updated_at, 'weekly', '0.7'));
+      const countrySlug = item.country?.slug || (typeof item.country === 'string' ? item.country.toLowerCase() : undefined);
+      if (countrySlug) {
+        urls.push(makeUrl(`/hotels/${countrySlug}/${item.slug}`, item.updated_at, 'weekly', '0.7'));
+        urls.push(makeUrl(`/destinations/${countrySlug}/hotels/${item.slug}`, item.updated_at, 'weekly', '0.7'));
+      }
     }
   }
 

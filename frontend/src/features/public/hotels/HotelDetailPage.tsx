@@ -162,7 +162,7 @@ const getCategoryIcon = (category: string) => {
 };
 
 const HotelDetailPage: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug, destination } = useParams<{ slug: string; destination?: string }>();
   const { data: hotel, isLoading, error } = useHotelBySlug(slug!);
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [showInquiryForm, setShowInquiryForm] = useState(false);
@@ -281,12 +281,24 @@ const HotelDetailPage: React.FC = () => {
     );
   }
 
+  const destinationSlug = destination || hotel.country?.slug;
+  const canonicalHotelPath = destinationSlug
+    ? `/hotels/${destinationSlug}/${hotel.slug}`
+    : `/hotels/${hotel.slug}`;
+
+  const rawHotelDescription = hotel.summary ||
+    hotel.description?.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() ||
+    `Stay at ${hotel.name} in ${hotel.country?.name || 'Africa'} with Allbound Vacations.`;
+  const hotelDescription = rawHotelDescription.length > 155
+    ? `${rawHotelDescription.substring(0, 152).trim()}...`
+    : rawHotelDescription;
+
   return (
     <>
       <SeoHead
         title={hotel.name}
-        description={hotel.summary || hotel.description || `Stay at ${hotel.name} with Allbound Vacations.`}
-        canonicalPath={`/hotels/${hotel.slug}`}
+        description={hotelDescription}
+        canonicalPath={canonicalHotelPath}
         image={hotel.cover_image || undefined}
         type="article"
         keywords={[
@@ -300,9 +312,9 @@ const HotelDetailPage: React.FC = () => {
             '@context': 'https://schema.org',
             '@type': 'LodgingBusiness',
             name: hotel.name,
-            description: hotel.summary || hotel.description || undefined,
+            description: hotelDescription,
             image: hotel.cover_image || undefined,
-            url: buildAbsoluteUrl(`/hotels/${hotel.slug}`),
+            url: buildAbsoluteUrl(canonicalHotelPath),
             starRating: hotel.stars ? { '@type': 'Rating', ratingValue: hotel.stars } : undefined,
             address: hotel.country ? {
               '@type': 'PostalAddress',
@@ -325,7 +337,7 @@ const HotelDetailPage: React.FC = () => {
               { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
               { '@type': 'ListItem', position: 2, name: 'Hotels', item: buildAbsoluteUrl('/hotels') },
               ...(hotel.country ? [{ '@type': 'ListItem', position: 3, name: hotel.country.name, item: buildAbsoluteUrl(`/destinations/${hotel.country.slug}`) }] : []),
-              { '@type': 'ListItem', position: hotel.country ? 4 : 3, name: hotel.name, item: buildAbsoluteUrl(`/hotels/${hotel.slug}`) },
+              { '@type': 'ListItem', position: hotel.country ? 4 : 3, name: hotel.name, item: buildAbsoluteUrl(canonicalHotelPath) },
             ],
           },
         ]}

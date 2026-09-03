@@ -526,10 +526,12 @@ async function main() {
   for (const hotel of hotels) {
     if (!hotel?.slug) continue;
     const path = `/hotels/${hotel.slug}`;
+    const countrySlug = hotel.country?.slug || (typeof hotel.country === 'string' ? hotel.country.toLowerCase() : undefined);
+    const canonicalPath = countrySlug ? `/hotels/${countrySlug}/${hotel.slug}` : path;
     const title = `${hotel.name} | ${SITE_NAME}`;
-    const description = cleanText(hotel.summary || hotel.description) || `Book your stay at ${hotel.name}.`;
-    const image = getImageUrl(hotel.cover_image);
-    const canonicalUrl = `${SITE_URL}${path}`;
+    const description = cleanText(hotel.summary || hotel.description) || `Book your luxury stay at ${hotel.name} with ${SITE_NAME}.`;
+    const image = getImageUrl(hotel.cover_image || hotel.image_id || hotel.media_assets?.[0]?.file_path);
+    const canonicalUrl = `${SITE_URL}${canonicalPath}`;
     const jsonLd = [
       {
         '@context': 'https://schema.org',
@@ -539,16 +541,28 @@ async function main() {
         image,
         url: canonicalUrl,
         starRating: hotel.stars ? { '@type': 'Rating', ratingValue: hotel.stars } : undefined,
+        address: hotel.country ? {
+          '@type': 'PostalAddress',
+          addressCountry: hotel.country.name || hotel.country,
+        } : undefined,
       },
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
         { name: 'Hotels', url: '/hotels' },
-        { name: hotel.name, url: path },
+        ...(countrySlug ? [{ name: hotel.country?.name || countrySlug, url: `/destinations/${countrySlug}` }] : []),
+        { name: hotel.name, url: canonicalPath },
       ]),
     ];
     const html = renderHtml(template, { title, heading: hotel.name, description, canonicalUrl, image, type: 'article', jsonLd });
     await writePage(path, html);
     count++;
+
+    if (countrySlug) {
+      await writePage(canonicalPath, html);
+      count++;
+      await writePage(`/destinations/${countrySlug}/hotels/${hotel.slug}`, html);
+      count++;
+    }
   }
 
   // Activities
@@ -612,8 +626,8 @@ async function main() {
     if (!trip?.slug) continue;
     const path = `/group-trips/${trip.slug}`;
     const title = `${trip.name} | ${SITE_NAME}`;
-    const description = cleanText(trip.description) || `Join the ${trip.name} group expedition.`;
-    const image = getImageUrl(trip.cover_image);
+    const description = cleanText(trip.summary || trip.description) || `Join the ${trip.name} group expedition with ${SITE_NAME}.`;
+    const image = getImageUrl(trip.cover_image || trip.image_id || trip.media_assets?.[0]?.file_path);
     const canonicalUrl = `${SITE_URL}${path}`;
     const jsonLd = [
       {
@@ -623,10 +637,14 @@ async function main() {
         description,
         image,
         url: canonicalUrl,
+        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        touristType: ['Group Travel', 'Expedition'],
+        itinerary: trip.duration_days ? { '@type': 'ItemList', numberOfItems: trip.duration_days } : undefined,
       },
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
         { name: 'Group Trips', url: '/group-trips' },
+        ...(trip.country ? [{ name: trip.country.name, url: `/destinations/${trip.country.slug}` }] : []),
         { name: trip.name, url: path },
       ]),
     ];

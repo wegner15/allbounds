@@ -150,12 +150,21 @@ const GroupTripDetailPage: React.FC = () => {
     );
   }
 
+  const rawTripDescription = tripDetail.summary ||
+    tripDetail.description?.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() ||
+    `Join the ${tripDetail.name} scheduled group expedition with Allbound Vacations.`;
+  const tripDescription = rawTripDescription.length > 155
+    ? `${rawTripDescription.substring(0, 152).trim()}...`
+    : rawTripDescription;
+
+  const canonicalTripPath = `/group-trips/${tripDetail.slug}`;
+
   return (
     <>
       <SeoHead
         title={tripDetail.name}
-        description={tripDetail.description || undefined}
-        canonicalPath={`/group-trips/${tripDetail.slug}`}
+        description={tripDescription}
+        canonicalPath={canonicalTripPath}
         image={tripDetail?.cover_image ? getImageUrlWithFallback(tripDetail.cover_image, IMAGE_VARIANTS.LARGE) : undefined}
         type="article"
         keywords={[
@@ -168,9 +177,9 @@ const GroupTripDetailPage: React.FC = () => {
             '@context': 'https://schema.org',
             '@type': 'TouristTrip',
             name: tripDetail.name,
-            description: tripDetail.description || undefined,
+            description: tripDescription,
             image: tripDetail?.cover_image ? getImageUrlWithFallback(tripDetail.cover_image, IMAGE_VARIANTS.LARGE) : undefined,
-            url: buildAbsoluteUrl(`/group-trips/${tripDetail.slug}`),
+            url: buildAbsoluteUrl(canonicalTripPath),
             provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
             touristType: ['Group Travel'],
             itinerary: tripDetail.duration_days
@@ -183,7 +192,8 @@ const GroupTripDetailPage: React.FC = () => {
             itemListElement: [
               { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
               { '@type': 'ListItem', position: 2, name: 'Group Trips', item: buildAbsoluteUrl('/group-trips') },
-              { '@type': 'ListItem', position: 3, name: tripDetail.name, item: buildAbsoluteUrl(`/group-trips/${tripDetail.slug}`) },
+              ...(tripDetail.country ? [{ '@type': 'ListItem', position: 3, name: tripDetail.country.name, item: buildAbsoluteUrl(`/destinations/${tripDetail.country.slug}`) }] : []),
+              { '@type': 'ListItem', position: tripDetail.country ? 4 : 3, name: tripDetail.name, item: buildAbsoluteUrl(canonicalTripPath) },
             ],
           },
         ]}

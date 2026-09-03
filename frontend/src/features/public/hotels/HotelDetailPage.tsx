@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { useHotelBySlug } from '../../../lib/hooks/useHotels';
 import SeoHead from '../../../components/seo/SeoHead';
 import { buildAbsoluteUrl, SITE_NAME, SITE_URL } from '../../../lib/seo-config';
@@ -163,6 +163,7 @@ const getCategoryIcon = (category: string) => {
 
 const HotelDetailPage: React.FC = () => {
   const { slug, destination } = useParams<{ slug: string; destination?: string }>();
+  const location = useLocation();
   const { data: hotel, isLoading, error } = useHotelBySlug(slug!);
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [showInquiryForm, setShowInquiryForm] = useState(false);
@@ -282,9 +283,9 @@ const HotelDetailPage: React.FC = () => {
   }
 
   const destinationSlug = destination || hotel.country?.slug;
-  const canonicalHotelPath = destinationSlug
-    ? `/hotels/${destinationSlug}/${hotel.slug}`
-    : `/hotels/${hotel.slug}`;
+  const canonicalHotelPath = location.pathname.startsWith('/destinations')
+    ? `/destinations/${destinationSlug}/hotels/${hotel.slug}`
+    : (destinationSlug ? `/hotels/${destinationSlug}/${hotel.slug}` : `/hotels/${hotel.slug}`);
 
   const rawHotelDescription = hotel.summary ||
     hotel.description?.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() ||

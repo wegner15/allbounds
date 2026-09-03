@@ -31,9 +31,23 @@ function getImageUrl(imageId, variant = 'large') {
   return `${CLOUDFLARE_DELIVERY_URL}/${cleanId}/${variant}`;
 }
 
+function decodeHtmlEntities(str) {
+  if (!str) return '';
+  return str
+    .replace(/&rsquo;|&lsquo;/g, "'")
+    .replace(/&rdquo;|&ldquo;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&nbsp;/g, ' ');
+}
+
 function cleanText(text, maxLength = 155) {
   if (!text) return '';
-  const clean = text
+  const decoded = decodeHtmlEntities(text);
+  const clean = decoded
     .replace(/<[^>]*>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -527,19 +541,22 @@ async function main() {
     if (!hotel?.slug) continue;
     const path = `/hotels/${hotel.slug}`;
     const countrySlug = hotel.country?.slug || (typeof hotel.country === 'string' ? hotel.country.toLowerCase() : undefined);
-    const canonicalPath = countrySlug ? `/hotels/${countrySlug}/${hotel.slug}` : path;
-    const title = `${hotel.name} | ${SITE_NAME}`;
-    const description = cleanText(hotel.summary || hotel.description) || `Book your luxury stay at ${hotel.name} with ${SITE_NAME}.`;
+    const destPath = countrySlug ? `/destinations/${countrySlug}/hotels/${hotel.slug}` : undefined;
+    const nestedHotelPath = countrySlug ? `/hotels/${countrySlug}/${hotel.slug}` : undefined;
+    const title = `${hotel.name.trim()} | ${SITE_NAME}`;
+    const description = cleanText(hotel.summary || hotel.description) || `Book your luxury stay at ${hotel.name.trim()} with ${SITE_NAME}.`;
     const image = getImageUrl(hotel.cover_image || hotel.image_id || hotel.media_assets?.[0]?.file_path);
-    const canonicalUrl = `${SITE_URL}${canonicalPath}`;
-    const jsonLd = [
+
+    // 1. Root /hotels/:slug
+    const rootCanonical = `${SITE_URL}${path}`;
+    const rootJsonLd = [
       {
         '@context': 'https://schema.org',
         '@type': 'LodgingBusiness',
-        name: hotel.name,
+        name: hotel.name.trim(),
         description,
         image,
-        url: canonicalUrl,
+        url: rootCanonical,
         starRating: hotel.stars ? { '@type': 'Rating', ratingValue: hotel.stars } : undefined,
         address: hotel.country ? {
           '@type': 'PostalAddress',
@@ -549,18 +566,64 @@ async function main() {
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
         { name: 'Hotels', url: '/hotels' },
-        ...(countrySlug ? [{ name: hotel.country?.name || countrySlug, url: `/destinations/${countrySlug}` }] : []),
-        { name: hotel.name, url: canonicalPath },
+        { name: hotel.name.trim(), url: path },
       ]),
     ];
-    const html = renderHtml(template, { title, heading: hotel.name, description, canonicalUrl, image, type: 'article', jsonLd });
-    await writePage(path, html);
+    await writePage(path, renderHtml(template, { title, heading: hotel.name.trim(), description, canonicalUrl: rootCanonical, image, type: 'article', jsonLd: rootJsonLd }));
     count++;
 
     if (countrySlug) {
-      await writePage(canonicalPath, html);
+      // 2. Nested /hotels/:country/:slug
+      const nestedCanonical = `${SITE_URL}${nestedHotelPath}`;
+      const nestedJsonLd = [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'LodgingBusiness',
+          name: hotel.name.trim(),
+          description,
+          image,
+          url: nestedCanonical,
+          starRating: hotel.stars ? { '@type': 'Rating', ratingValue: hotel.stars } : undefined,
+          address: hotel.country ? {
+            '@type': 'PostalAddress',
+            addressCountry: hotel.country.name || hotel.country,
+          } : undefined,
+        },
+        makeBreadcrumbs([
+          { name: 'Home', url: '/' },
+          { name: 'Hotels', url: '/hotels' },
+          { name: hotel.country?.name || countrySlug, url: `/destinations/${countrySlug}` },
+          { name: hotel.name.trim(), url: nestedHotelPath },
+        ]),
+      ];
+      await writePage(nestedHotelPath, renderHtml(template, { title, heading: hotel.name.trim(), description, canonicalUrl: nestedCanonical, image, type: 'article', jsonLd: nestedJsonLd }));
       count++;
-      await writePage(`/destinations/${countrySlug}/hotels/${hotel.slug}`, html);
+
+      // 3. /destinations/:country/hotels/:slug
+      const destCanonical = `${SITE_URL}${destPath}`;
+      const destJsonLd = [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'LodgingBusiness',
+          name: hotel.name.trim(),
+          description,
+          image,
+          url: destCanonical,
+          starRating: hotel.stars ? { '@type': 'Rating', ratingValue: hotel.stars } : undefined,
+          address: hotel.country ? {
+            '@type': 'PostalAddress',
+            addressCountry: hotel.country.name || hotel.country,
+          } : undefined,
+        },
+        makeBreadcrumbs([
+          { name: 'Home', url: '/' },
+          { name: 'Destinations', url: '/destinations' },
+          { name: hotel.country?.name || countrySlug, url: `/destinations/${countrySlug}` },
+          { name: 'Hotels', url: `/destinations/${countrySlug}/hotels` },
+          { name: hotel.name.trim(), url: destPath },
+        ]),
+      ];
+      await writePage(destPath, renderHtml(template, { title, heading: hotel.name.trim(), description, canonicalUrl: destCanonical, image, type: 'article', jsonLd: destJsonLd }));
       count++;
     }
   }
@@ -569,56 +632,163 @@ async function main() {
   for (const act of activities) {
     if (!act?.slug) continue;
     const path = `/activities/${act.slug}`;
-    const title = `${act.name} | ${SITE_NAME}`;
-    const description = cleanText(act.summary || act.description) || `Experience ${act.name} with ${SITE_NAME}.`;
-    const image = getImageUrl(act.cover_image_id || act.image_id || act.cover_image?.file_path);
-    const canonicalUrl = `${SITE_URL}${path}`;
-    const jsonLd = [
+    const countrySlug = act.country?.slug || act.countries?.[0]?.slug || (typeof act.country === 'string' ? act.country.toLowerCase() : undefined);
+    const destPath = countrySlug ? `/destinations/${countrySlug}/activities/${act.slug}` : undefined;
+    const nestedActPath = countrySlug ? `/activities/${countrySlug}/${act.slug}` : undefined;
+    const title = `${act.name.trim()} | ${SITE_NAME}`;
+    const description = cleanText(act.summary || act.description) || `Experience ${act.name.trim()} with ${SITE_NAME}.`;
+    const image = getImageUrl(act.cover_image_id || act.image_id || act.cover_image?.file_path || act.media_assets?.[0]?.file_path);
+
+    // 1. Root /activities/:slug
+    const rootCanonical = `${SITE_URL}${path}`;
+    const rootJsonLd = [
       {
         '@context': 'https://schema.org',
         '@type': 'TouristAttraction',
-        name: act.name,
+        name: act.name.trim(),
         description,
         image,
-        url: canonicalUrl,
+        url: rootCanonical,
+        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
       },
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
         { name: 'Activities', url: '/activities' },
-        { name: act.name, url: path },
+        { name: act.name.trim(), url: path },
       ]),
     ];
-    const html = renderHtml(template, { title, heading: act.name, description, canonicalUrl, image, type: 'article', jsonLd });
-    await writePage(path, html);
+    await writePage(path, renderHtml(template, { title, heading: act.name.trim(), description, canonicalUrl: rootCanonical, image, type: 'article', jsonLd: rootJsonLd }));
     count++;
+
+    if (countrySlug) {
+      // 2. Nested /activities/:country/:slug
+      const nestedCanonical = `${SITE_URL}${nestedActPath}`;
+      const nestedJsonLd = [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'TouristAttraction',
+          name: act.name.trim(),
+          description,
+          image,
+          url: nestedCanonical,
+          provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        },
+        makeBreadcrumbs([
+          { name: 'Home', url: '/' },
+          { name: 'Activities', url: '/activities' },
+          { name: act.country?.name || countrySlug, url: `/destinations/${countrySlug}` },
+          { name: act.name.trim(), url: nestedActPath },
+        ]),
+      ];
+      await writePage(nestedActPath, renderHtml(template, { title, heading: act.name.trim(), description, canonicalUrl: nestedCanonical, image, type: 'article', jsonLd: nestedJsonLd }));
+      count++;
+
+      // 3. /destinations/:country/activities/:slug
+      const destCanonical = `${SITE_URL}${destPath}`;
+      const destJsonLd = [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'TouristAttraction',
+          name: act.name.trim(),
+          description,
+          image,
+          url: destCanonical,
+          provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        },
+        makeBreadcrumbs([
+          { name: 'Home', url: '/' },
+          { name: 'Destinations', url: '/destinations' },
+          { name: act.country?.name || countrySlug, url: `/destinations/${countrySlug}` },
+          { name: 'Activities', url: `/destinations/${countrySlug}/activities` },
+          { name: act.name.trim(), url: destPath },
+        ]),
+      ];
+      await writePage(destPath, renderHtml(template, { title, heading: act.name.trim(), description, canonicalUrl: destCanonical, image, type: 'article', jsonLd: destJsonLd }));
+      count++;
+    }
   }
 
   // Attractions
   for (const att of attractions) {
     if (!att?.slug) continue;
     const path = `/attractions/${att.slug}`;
-    const title = `${att.name} | ${SITE_NAME}`;
-    const description = cleanText(att.description) || `Visit ${att.name} with ${SITE_NAME}.`;
-    const image = getImageUrl(att.image_id || att.cover_image);
-    const canonicalUrl = `${SITE_URL}${path}`;
-    const jsonLd = [
+    const countrySlug = att.country?.slug || (typeof att.country === 'string' ? att.country.toLowerCase() : undefined);
+    const destPath = countrySlug ? `/destinations/${countrySlug}/attractions/${att.slug}` : undefined;
+    const nestedAttPath = countrySlug ? `/attractions/${countrySlug}/${att.slug}` : undefined;
+    const title = `${att.name.trim()} | ${SITE_NAME}`;
+    const description = cleanText(att.summary || att.description) || `Visit ${att.name.trim()} with ${SITE_NAME}.`;
+    const image = getImageUrl(att.image_id || att.cover_image || att.media_assets?.[0]?.file_path);
+
+    // 1. Root /attractions/:slug
+    const rootCanonical = `${SITE_URL}${path}`;
+    const rootJsonLd = [
       {
         '@context': 'https://schema.org',
         '@type': 'TouristAttraction',
-        name: att.name,
+        name: att.name.trim(),
         description,
         image,
-        url: canonicalUrl,
+        url: rootCanonical,
+        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        containedInPlace: att.country ? { '@type': 'Country', name: att.country.name || att.country } : undefined,
       },
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
         { name: 'Attractions', url: '/attractions' },
-        { name: att.name, url: path },
+        { name: att.name.trim(), url: path },
       ]),
     ];
-    const html = renderHtml(template, { title, heading: att.name, description, canonicalUrl, image, type: 'article', jsonLd });
-    await writePage(path, html);
+    await writePage(path, renderHtml(template, { title, heading: att.name.trim(), description, canonicalUrl: rootCanonical, image, type: 'article', jsonLd: rootJsonLd }));
     count++;
+
+    if (countrySlug) {
+      // 2. Nested /attractions/:country/:slug
+      const nestedCanonical = `${SITE_URL}${nestedAttPath}`;
+      const nestedJsonLd = [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'TouristAttraction',
+          name: att.name.trim(),
+          description,
+          image,
+          url: nestedCanonical,
+          provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+          containedInPlace: att.country ? { '@type': 'Country', name: att.country.name || att.country } : undefined,
+        },
+        makeBreadcrumbs([
+          { name: 'Home', url: '/' },
+          { name: 'Attractions', url: '/attractions' },
+          { name: att.country?.name || countrySlug, url: `/destinations/${countrySlug}` },
+          { name: att.name.trim(), url: nestedAttPath },
+        ]),
+      ];
+      await writePage(nestedAttPath, renderHtml(template, { title, heading: att.name.trim(), description, canonicalUrl: nestedCanonical, image, type: 'article', jsonLd: nestedJsonLd }));
+      count++;
+
+      // 3. /destinations/:country/attractions/:slug
+      const destCanonical = `${SITE_URL}${destPath}`;
+      const destJsonLd = [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'TouristAttraction',
+          name: att.name.trim(),
+          description,
+          image,
+          url: destCanonical,
+          provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+          containedInPlace: att.country ? { '@type': 'Country', name: att.country.name || att.country } : undefined,
+        },
+        makeBreadcrumbs([
+          { name: 'Home', url: '/' },
+          { name: 'Destinations', url: '/destinations' },
+          { name: att.country?.name || countrySlug, url: `/destinations/${countrySlug}` },
+          { name: 'Attractions', url: `/destinations/${countrySlug}/attractions` },
+          { name: att.name.trim(), url: destPath },
+        ]),
+      ];
+      await writePage(destPath, renderHtml(template, { title, heading: att.name.trim(), description, canonicalUrl: destCanonical, image, type: 'article', jsonLd: destJsonLd }));
+      count++;
+    }
   }
 
   // Group Trips

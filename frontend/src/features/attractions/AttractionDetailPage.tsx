@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { MapPin, Clock, DollarSign, ChevronLeft, ChevronRight } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -40,7 +40,8 @@ const AttractionDetailPage: React.FC = () => {
     fixLeafletDefaultIcon();
   }, []);
 
-  const { slug } = useParams<{ slug: string }>();
+  const { slug, destination } = useParams<{ slug: string; destination?: string }>();
+  const location = useLocation();
   const { data: attractionData, isLoading, error } = useAttractionTrips(slug || '');
   const {
     attraction,
@@ -111,16 +112,28 @@ const AttractionDetailPage: React.FC = () => {
     );
   }
 
+  const destinationSlug = destination || attraction?.country?.slug;
+  const canonicalAttractionPath = location.pathname.startsWith('/destinations')
+    ? `/destinations/${destinationSlug}/attractions/${slug}`
+    : (destinationSlug ? `/attractions/${destinationSlug}/${slug}` : `/attractions/${slug}`);
+
+  const rawAttractionDesc = attraction?.summary ||
+    attraction?.description?.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() ||
+    `Explore ${attraction?.name?.trim() || 'this attraction'} with Allbound Vacations.`;
+  const attractionDesc = rawAttractionDesc.length > 155
+    ? `${rawAttractionDesc.substring(0, 152).trim()}...`
+    : rawAttractionDesc;
+
   return (
     <>
       <SeoHead
-        title={attraction?.name || 'Attraction'}
-        description={attraction?.description || `Explore ${attraction?.name || 'this attraction'} with Allbound Vacations.`}
-        canonicalPath={`/attractions/${slug}`}
+        title={attraction?.name?.trim() || 'Attraction'}
+        description={attractionDesc}
+        canonicalPath={canonicalAttractionPath}
         image={getAllImages[0]?.file_path || undefined}
         type="article"
         keywords={[
-          attraction?.name || 'attraction',
+          attraction?.name?.trim() || 'attraction',
           attraction?.country?.name,
           'attraction', 'sightseeing', 'travel',
         ].filter(Boolean) as string[]}
@@ -128,10 +141,10 @@ const AttractionDetailPage: React.FC = () => {
           {
             '@context': 'https://schema.org',
             '@type': 'TouristAttraction',
-            name: attraction?.name,
-            description: attraction?.description?.substring(0, 300) || undefined,
+            name: attraction?.name?.trim(),
+            description: attractionDesc,
             image: getAllImages[0]?.file_path || undefined,
-            url: buildAbsoluteUrl(`/attractions/${slug}`),
+            url: buildAbsoluteUrl(canonicalAttractionPath),
             provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
             containedInPlace: attraction?.country
               ? { '@type': 'Country', name: attraction.country.name }
@@ -143,7 +156,8 @@ const AttractionDetailPage: React.FC = () => {
             itemListElement: [
               { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
               { '@type': 'ListItem', position: 2, name: 'Attractions', item: buildAbsoluteUrl('/attractions') },
-              { '@type': 'ListItem', position: 3, name: attraction?.name || 'Attraction', item: buildAbsoluteUrl(`/attractions/${slug}`) },
+              ...(destinationSlug ? [{ '@type': 'ListItem', position: 3, name: attraction?.country?.name || destinationSlug, item: buildAbsoluteUrl(`/destinations/${destinationSlug}`) }] : []),
+              { '@type': 'ListItem', position: destinationSlug ? 4 : 3, name: attraction?.name?.trim() || 'Attraction', item: buildAbsoluteUrl(canonicalAttractionPath) },
             ],
           },
         ]}

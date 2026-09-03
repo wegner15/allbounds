@@ -104,12 +104,22 @@ async function main() {
   for (const item of attractions) {
     if (item?.slug) {
       urls.push(makeUrl(`/attractions/${item.slug}`, item.updated_at, 'weekly', '0.7'));
+      const countrySlug = item.country?.slug || (typeof item.country === 'string' ? item.country.toLowerCase() : undefined);
+      if (countrySlug) {
+        urls.push(makeUrl(`/attractions/${countrySlug}/${item.slug}`, item.updated_at, 'weekly', '0.7'));
+        urls.push(makeUrl(`/destinations/${countrySlug}/attractions/${item.slug}`, item.updated_at, 'weekly', '0.7'));
+      }
     }
   }
 
   for (const item of activities) {
     if (item?.slug) {
       urls.push(makeUrl(`/activities/${item.slug}`, item.updated_at, 'weekly', '0.7'));
+      const countrySlug = item.country?.slug || item.countries?.[0]?.slug || (typeof item.country === 'string' ? item.country.toLowerCase() : undefined);
+      if (countrySlug) {
+        urls.push(makeUrl(`/activities/${countrySlug}/${item.slug}`, item.updated_at, 'weekly', '0.7'));
+        urls.push(makeUrl(`/destinations/${countrySlug}/activities/${item.slug}`, item.updated_at, 'weekly', '0.7'));
+      }
     }
   }
 

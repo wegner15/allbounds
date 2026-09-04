@@ -90,10 +90,16 @@ class BlogPost(Base):
         """
         Generate the cover image URL from cover_image_id if available.
         """
+        if hasattr(self, '_cover_image_url') and self._cover_image_url is not None:
+            return self._cover_image_url
         if self.cover_image_id:
             from app.core.cloudflare_config import cloudflare_settings
             return f"{cloudflare_settings.delivery_url}/{self.cover_image_id}/medium"
         return None
+
+    @cover_image_url.setter
+    def cover_image_url(self, value: Optional[str]) -> None:
+        self._cover_image_url = value
 
 class Tag(Base):
     """Shared content tag used for filtering across all entity types."""

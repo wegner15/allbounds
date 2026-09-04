@@ -329,7 +329,10 @@ class PackageService:
                     cover_image_url = None
                     if getattr(blog, 'cover_image_id', None):
                         cover_image_url = self._get_cloudflare_image_url(blog.cover_image_id)
-                    setattr(blog, 'cover_image_url', cover_image_url)
+                    try:
+                        setattr(blog, 'cover_image_url', cover_image_url)
+                    except AttributeError:
+                        pass
         
         return package
     

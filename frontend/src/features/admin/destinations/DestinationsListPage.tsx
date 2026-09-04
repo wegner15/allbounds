@@ -377,7 +377,7 @@ const DestinationsListPage: React.FC = () => {
                            Edit
                          </Link>
                          <Link
-                           to={`/countries/${country.slug}`}
+                           to={`/destinations/${country.slug}`}
                            target="_blank"
                            rel="noopener noreferrer"
                            className="text-gray-600 hover:text-gray-900 mr-4"

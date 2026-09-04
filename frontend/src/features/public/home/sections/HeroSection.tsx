@@ -139,7 +139,7 @@ const HeroSection: React.FC = () => {
                 url: hit.slug ? `/${indexName === 'packages' ? 'packages' :
                   indexName === 'group_trips' ? 'group-trips' :
                     indexName === 'accommodations' ? 'hotels' :
-                      indexName === 'countries' ? 'destinations/countries' :
+                      indexName === 'countries' ? 'destinations' :
                         indexName === 'regions' ? 'destinations/regions' :
                           indexName === 'attractions' ? 'attractions' :
                             indexName // Default fallback

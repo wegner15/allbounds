@@ -237,7 +237,7 @@ const PackageDetailPageNew: React.FC = () => {
               <Breadcrumb
                 items={[
                   { label: 'Packages', path: '/packages' },
-                  { label: packageDetail.country.name, path: `/countries/${packageDetail.country.slug}` },
+                  { label: packageDetail.country.name, path: `/destinations/${packageDetail.country.slug}` },
                   { label: packageDetail.name }
                 ]}
                 variant="light"

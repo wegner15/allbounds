@@ -87,7 +87,7 @@ const RegionsPage: React.FC = () => {
                                                 {region.countries.slice(0, 5).map(country => (
                                                     <Link
                                                         key={country.id}
-                                                        to={`/destinations/countries/${country.slug}`}
+                                                        to={`/destinations/${country.slug}`}
                                                         className="text-xs bg-teal-50 text-teal-700 border border-teal-100 px-2 py-1 rounded hover:bg-teal-100 transition-colors"
                                                     >
                                                         {country.name}

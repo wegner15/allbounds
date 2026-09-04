@@ -206,7 +206,7 @@ const RegionDetailPage: React.FC = () => {
                     {region.countries.map(country => (
                       <Link
                         key={country.id}
-                        to={`/destinations/countries/${country.slug}`}
+                        to={`/destinations/${country.slug}`}
                         className="group block"
                       >
                         <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">

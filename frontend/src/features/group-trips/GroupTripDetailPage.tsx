@@ -302,7 +302,7 @@ const GroupTripDetailPage: React.FC = () => {
           <Breadcrumb
             items={[
               { label: 'Group Trips', path: '/group-trips' },
-              { label: tripDetail.country.name, path: `/countries/${tripDetail.country.slug}` },
+              { label: tripDetail.country.name, path: `/destinations/${tripDetail.country.slug}` },
               { label: tripDetail.name },
             ]}
             className="mb-6"

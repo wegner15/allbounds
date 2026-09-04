@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { createBrowserRouter, RouterProvider, Outlet, useSearchParams, ScrollRestoration } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet, useSearchParams, ScrollRestoration, Navigate, useParams } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/api';
@@ -157,19 +157,10 @@ import EditTagPage from './features/admin/tags/EditTagPage';
 // Placeholder pages for routes we haven't fully implemented yet
 
 
-const CountriesPage = () => (
-  <>
-    <SeoHead
-      title="Countries"
-      description="Explore countries with unique cultures and experiences."
-      canonicalPath="/countries"
-    />
-    <div>
-      <h1 className="text-4xl font-playfair mb-6">Discover Countries</h1>
-      <p className="text-lg mb-4">Explore countries with unique cultures and experiences.</p>
-    </div>
-  </>
-);
+const CountrySlugRedirect = () => {
+  const { slug } = useParams<{ slug: string }>();
+  return <Navigate to={`/destinations/${slug || ''}`} replace />;
+};
 
 const StaysPage = () => (
   <>
@@ -350,13 +341,14 @@ const router = createBrowserRouter([
       { path: 'destinations/:slug/book', element: <DestinationBookingPage /> },
       { path: 'destinations', element: <DestinationsPage /> },
       { path: 'destinations/regions/:slug', element: <RegionDetailPage /> },
-      { path: 'destinations/countries/:slug', element: <CountryDetailPageNew /> },
+      { path: 'destinations/countries/:slug', element: <CountrySlugRedirect /> },
       { path: 'destinations/:slug', element: <CountryDetailPageNew /> },
       { path: 'destinations/:slug/:category', element: <CountryCategoryPage /> },
       { path: 'destinations-old/:slug', element: <CountryDetailPage /> },
       { path: 'regions', element: <RegionsPage /> },
       { path: 'regions/:slug', element: <RegionDetailPage /> },
-      { path: 'countries', element: <CountriesPage /> },
+      { path: 'countries/:slug', element: <CountrySlugRedirect /> },
+      { path: 'countries', element: <Navigate to="/destinations" replace /> },
       { path: 'packages', element: <PackagesPage /> },
       { path: 'packages/:destination/:slug', element: <PackageDetailPageNew /> },
       { path: 'packages/:slug', element: <PackageDetailPageNew /> },

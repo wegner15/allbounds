@@ -281,7 +281,7 @@ const CountriesListPage: React.FC = () => {
                           Visit Info
                         </Link>
                         <Link
-                          to={`/countries/${country.slug}`}
+                          to={`/destinations/${country.slug}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal"

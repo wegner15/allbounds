@@ -36,7 +36,6 @@ const staticRoutes = [
   { path: '/payment-plans', changefreq: 'monthly', priority: '0.5' },
   { path: '/visa-application', changefreq: 'monthly', priority: '0.5' },
   { path: '/flights', changefreq: 'monthly', priority: '0.5' },
-  { path: '/countries', changefreq: 'monthly', priority: '0.4' },
   { path: '/regions', changefreq: 'monthly', priority: '0.4' },
   { path: '/stays', changefreq: 'monthly', priority: '0.4' },
 ];

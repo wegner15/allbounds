@@ -301,7 +301,7 @@ const CountryForm: React.FC<CountryFormProps> = ({ countryData, isEdit = false }
                         fullWidth
                         variant="filled"
                         placeholder="e.g. france"
-                        helperText="Used in the URL: example.com/countries/your-slug"
+                        helperText="Used in the URL: example.com/destinations/your-slug"
                         {...register('slug')}
                       />
                     </FormGroup>

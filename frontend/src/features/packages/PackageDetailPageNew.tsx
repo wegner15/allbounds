@@ -82,10 +82,6 @@ const PackageDetailPageNew: React.FC = () => {
       sections.push({ id: 'gallery', label: 'Gallery' });
     }
 
-    if (packageDetail.blog_posts && packageDetail.blog_posts.length > 0) {
-      sections.push({ id: 'blogs', label: 'Stories & Guides' });
-    }
-
     // Always include Pricing section
     sections.push({ id: 'pricing', label: 'Pricing' });
 
@@ -349,13 +345,6 @@ const PackageDetailPageNew: React.FC = () => {
                 </div>
               )}
 
-              {/* Related Travel Stories & Blog Articles */}
-              {packageDetail.blog_posts && packageDetail.blog_posts.length > 0 && (
-                <div className="mb-4 md:mb-5">
-                  <BlogsSection blogs={packageDetail.blog_posts} />
-                </div>
-              )}
-
               {/* Seasonal Pricing Section */}
               <div id="pricing" className="mb-4 md:mb-5 scroll-mt-20">
                 <SeasonalPricingTable
@@ -426,6 +415,11 @@ const PackageDetailPageNew: React.FC = () => {
             title="Similar Tours You Might Like"
             subtitle={`Explore more amazing tours in ${packageDetail.country.name}`}
           />
+        )}
+
+        {/* Related Travel Stories & Blog Articles - Standalone Section after Similar Packages */}
+        {packageDetail.blog_posts && packageDetail.blog_posts.length > 0 && (
+          <BlogsSection blogs={packageDetail.blog_posts} />
         )}
       </div>
 

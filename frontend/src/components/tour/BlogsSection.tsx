@@ -19,10 +19,10 @@ const BlogsSection: React.FC<BlogsSectionProps> = ({
   }
 
   return (
-    <section id="blogs" className="py-8 sm:py-10 md:py-12 bg-gradient-to-b from-white to-gray-50 scroll-mt-20" aria-labelledby="blogs-heading">
-      <div className="container mx-auto px-0">
+    <section id="blogs" className="py-12 md:py-16 bg-white border-t border-gray-100" aria-labelledby="blogs-heading">
+      <div className="container mx-auto px-4">
         {/* Section Header */}
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 md:mb-8 px-4">
+        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 md:mb-10">
           <div className="mb-4 sm:mb-0">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center shadow-lg" aria-hidden="true">
@@ -50,7 +50,7 @@ const BlogsSection: React.FC<BlogsSectionProps> = ({
         </header>
 
         {/* Blogs Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4" role="list" aria-label="Related blog articles">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8" role="list" aria-label="Related blog articles">
           {blogs.map((blog) => (
             <article 
               key={blog.id} 
@@ -107,7 +107,7 @@ const BlogsSection: React.FC<BlogsSectionProps> = ({
 
         {/* Mobile View All Link */}
         {showViewAll && (
-          <div className="md:hidden mt-6 sm:mt-8 text-center px-4">
+          <div className="md:hidden mt-6 sm:mt-8 text-center">
             <Link
               to="/blog"
               className="inline-flex items-center gap-2 text-primary hover:text-primary-dark active:text-primary-dark font-medium transition-colors px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:bg-gray-50 active:bg-gray-100 touch-manipulation min-h-[44px]"

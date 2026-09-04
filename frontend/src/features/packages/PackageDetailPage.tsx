@@ -407,15 +407,15 @@ const PackageDetailPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Similar Packages Section */}
+        <SimilarPackages packageId={packageDetail.id} limit={4} />
+
         {/* Related Blogs Section */}
         {packageDetail.blog_posts && packageDetail.blog_posts.length > 0 && (
           <div className="mb-8">
             <BlogsSection blogs={packageDetail.blog_posts} />
           </div>
         )}
-
-        {/* Similar Packages Section */}
-        <SimilarPackages packageId={packageDetail.id} limit={4} />
       </div>
 
       {/* Booking Form Modal */}

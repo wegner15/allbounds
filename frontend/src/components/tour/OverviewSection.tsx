@@ -137,7 +137,7 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({ packageData })
     <section id="overview" className="scroll-mt-20 animate-fade-in" aria-labelledby="overview-heading">
       <article className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 border border-gray-100">
         {/* Section Header */}
-        <h2 id="overview-heading" className="text-2xl sm:text-3xl md:text-4xl font-playfair font-bold text-charcoal mb-4 md:mb-6">
+        <h2 id="overview-heading" className="text-3xl md:text-4xl font-playfair font-bold text-charcoal mb-4 md:mb-6">
           Tour Overview
         </h2>
 

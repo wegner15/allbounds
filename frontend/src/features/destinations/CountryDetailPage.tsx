@@ -134,7 +134,7 @@ const CountryDetailPage: React.FC = () => {
             <div className="lg:col-span-3">
               {/* Country Overview */}
               <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-                <h2 className="text-2xl font-playfair text-charcoal mb-4">About {country.name}</h2>
+                <h2 className="text-3xl md:text-4xl font-playfair font-bold text-charcoal mb-4">About {country.name}</h2>
                 <div
                   className="text-gray-700 leading-relaxed mb-6 prose prose-lg max-w-none"
                   dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(country.description || '') }}

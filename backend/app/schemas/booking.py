@@ -25,7 +25,7 @@ class BookingTravelerResponse(BookingTravelerBase):
 
 # Booking schemas
 class BookingBase(BaseModel):
-    booking_type: str = Field(..., description="Type of booking: 'package' or 'group_trip'")
+    booking_type: str = Field(..., description="Type of booking: 'package', 'group_trip' or 'hotel'")
     entity_id: int = Field(..., description="ID of the package or group trip")
     entity_slug: str = Field(..., description="Slug of the package or group trip")
 

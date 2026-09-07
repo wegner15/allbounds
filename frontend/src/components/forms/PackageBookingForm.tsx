@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Hotel as HotelIcon, Star, Check } from 'lucide-react';
+import { Hotel as HotelIcon, Star, Check, AlertCircle } from 'lucide-react';
 
 // Components
 import Button from '../ui/Button';
@@ -16,24 +16,55 @@ import CountrySelect from '../ui/CountrySelect';
 import { apiClient } from '../../lib/api';
 
 // Types
-import type { Package, PackageWithGallery, Traveler, BookingCreate, PriceChartHotelOption, PriceChartDetail } from '../../lib/types/api';
+import type { Package, PackageWithGallery, BookingCreate, PriceChartHotelOption, PriceChartDetail } from '../../lib/types/api';
 
-// Validation schema
+// Validation schemas
 const travelerSchema = z.object({
-  full_name: z.string().min(2, 'Full name must be at least 2 characters'),
+  full_name: z.string().trim().min(2, 'Full legal name must be at least 2 characters'),
   traveler_type: z.enum(['adult', 'child']),
-  age: z.number().optional(),
+  age: z.number().optional().nullable(),
+});
+
+const step1Schema = z.object({
+  contact_name: z.string().trim().min(2, 'Contact name must be at least 2 characters'),
+  contact_email: z.string().trim().email('Valid email address is required'),
+  contact_phone: z.string().trim().min(7, 'Valid phone number is required (min 7 digits)'),
+  country_of_origin: z.string().trim().min(2, 'Please select your country of origin'),
+  number_of_adults: z.number().min(1, 'At least 1 adult is required'),
+  number_of_children: z.number().min(0, 'Number of children is required'),
+  source: z.string().min(1, 'Please tell us how you found us'),
+});
+
+const step2Schema = z.object({
+  number_of_adults: z.number().min(1),
+  number_of_children: z.number().min(0),
+  travelers: z.array(travelerSchema).min(1, 'At least one traveler is required'),
+}).refine((data) => {
+  const totalTravelers = data.travelers.length;
+  const expectedTravelers = data.number_of_adults + data.number_of_children;
+  return totalTravelers === expectedTravelers;
+}, {
+  message: "Number of travelers doesn't match adults + children count",
+  path: ["travelers"],
+}).refine((data) => {
+  const childrenWithoutAge = data.travelers.filter(
+    t => t.traveler_type === 'child' && (!t.age || t.age <= 0)
+  );
+  return childrenWithoutAge.length === 0;
+}, {
+  message: "All children must have a valid age specified",
+  path: ["travelers"],
 });
 
 const bookingSchema = z.object({
-  contact_name: z.string().min(2, 'Contact name is required'),
-  contact_email: z.string().email('Valid email is required'),
-  contact_phone: z.string().min(10, 'Valid phone number is required'),
-  country_of_origin: z.string().min(2, 'Country of origin is required'),
+  contact_name: z.string().trim().min(2, 'Contact name is required'),
+  contact_email: z.string().trim().email('Valid email is required'),
+  contact_phone: z.string().trim().min(7, 'Valid phone number is required'),
+  country_of_origin: z.string().trim().min(2, 'Country of origin is required'),
   number_of_adults: z.number().min(1, 'At least 1 adult is required'),
   number_of_children: z.number().min(0, 'Number of children is required'),
   travelers: z.array(travelerSchema).min(1, 'At least one traveler is required'),
-  special_requests: z.string().optional(),
+  special_requests: z.string().optional().nullable(),
   source: z.string().min(1, 'Please tell us how you found us'),
   partner_code: z.string().optional().nullable(),
   price_chart_id: z.number().optional().nullable(),
@@ -49,7 +80,6 @@ const bookingSchema = z.object({
   message: "Number of travelers doesn't match adults + children count",
   path: ["travelers"],
 }).refine((data) => {
-  // Validate that all children have ages
   const childrenWithoutAge = data.travelers.filter(
     t => t.traveler_type === 'child' && (!t.age || t.age <= 0)
   );
@@ -203,6 +233,7 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
   const [validatedPartner, setValidatedPartner] = useState<{ name: string; discount_percent: number } | null>(null);
   const [isValidatingPartner, setIsValidatingPartner] = useState(false);
   const [partnerValidationMessage, setPartnerValidationMessage] = useState<string | null>(null);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   const {
     register,
@@ -210,9 +241,9 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
     handleSubmit,
     watch,
     setValue,
-    trigger,
     getValues,
     setError,
+    clearErrors,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<BookingFormData>({
@@ -244,7 +275,7 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
   });
 
   const handlePhoneChange = useCallback((value: string) => {
-    setValue('contact_phone', value);
+    setValue('contact_phone', value, { shouldValidate: true });
   }, [setValue]);
 
   // Keep form values in sync with state
@@ -264,6 +295,19 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
       setValue('selected_room_type', undefined);
     }
   }, [selectedChartId, selectedHotel, setValue]);
+
+  // Auto-fill lead traveler name from contact name if traveler 1 name is empty or matches previous contact name
+  const watchedContactName = watch('contact_name');
+  const prevContactNameRef = useRef('');
+  useEffect(() => {
+    const currentTraveler0 = getValues('travelers.0.full_name');
+    if (!currentTraveler0 || currentTraveler0 === prevContactNameRef.current) {
+      if (watchedContactName) {
+        setValue('travelers.0.full_name', watchedContactName);
+      }
+    }
+    prevContactNameRef.current = watchedContactName || '';
+  }, [watchedContactName, setValue, getValues]);
 
   const watchedAdults = watch('number_of_adults') || 0;
   const watchedChildren = watch('number_of_children') || 0;
@@ -363,47 +407,85 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
       return apiClient.post('/bookings/', bookingData);
     },
     onSuccess: () => {
+      setIsSubmitted(false);
       setIsSuccess(true);
       onSuccess?.();
       reset();
       setValidatedPartner(null);
       setPartnerValidationMessage(null);
+      setSubmissionError(null);
       setStep('details');
     },
   });
 
   const onSubmit = async (data: BookingFormData) => {
+    setSubmissionError(null);
+
     if (step === 'details') {
-      const isValid = await trigger(['contact_name', 'contact_email', 'contact_phone', 'country_of_origin', 'number_of_adults', 'number_of_children', 'source', 'partner_code']);
-      if (isValid) {
-        setStep('travelers');
-      }
-    } else if (step === 'travelers') {
-      const isValid = await trigger('travelers');
-      if (isValid) {
-        setStep('confirmation');
-      }
-    } else {
-      const result = bookingSchema.safeParse(data);
-      if (result.success) {
-        setIsSubmitted(true);
-        try {
-          await bookingMutation.mutateAsync(data);
-        } catch (error) {
-          console.error('booking submission failed', error);
-          setIsSubmitted(false);
-          setError('root', { message: 'Failed to submit booking. Please try again.' });
-        }
-      } else {
+      const result = step1Schema.safeParse(data);
+      if (!result.success) {
         result.error.issues.forEach((err) => {
           const path = err.path.join('.');
           setError(path as any, { message: err.message });
         });
+        return;
+      }
+      clearErrors(['contact_name', 'contact_email', 'contact_phone', 'country_of_origin', 'number_of_adults', 'number_of_children', 'source']);
+      setStep('travelers');
+    } else if (step === 'travelers') {
+      const result = step2Schema.safeParse(data);
+      if (!result.success) {
+        result.error.issues.forEach((err) => {
+          const path = err.path.join('.');
+          setError(path as any, { message: err.message });
+        });
+        return;
+      }
+      clearErrors(['travelers']);
+      setStep('confirmation');
+    } else {
+      const result = bookingSchema.safeParse(data);
+      if (!result.success) {
+        let hasStep1Error = false;
+        let hasStep2Error = false;
+        const messages: string[] = [];
+
+        result.error.issues.forEach((err) => {
+          const path = err.path.join('.');
+          setError(path as any, { message: err.message });
+          messages.push(err.message);
+          if (path.startsWith('travelers')) {
+            hasStep2Error = true;
+          } else {
+            hasStep1Error = true;
+          }
+        });
+
+        if (hasStep1Error) {
+          setStep('details');
+        } else if (hasStep2Error) {
+          setStep('travelers');
+        } else {
+          setSubmissionError(messages.join('. '));
+        }
+        return;
+      }
+
+      setIsSubmitted(true);
+      try {
+        await bookingMutation.mutateAsync(data);
+      } catch (error: any) {
+        console.error('Booking submission failed:', error);
+        setIsSubmitted(false);
+        const errMsg = error?.message || 'Failed to submit booking. Please check your connection and try again.';
+        setSubmissionError(errMsg);
+        setError('root', { message: errMsg });
       }
     }
   };
 
   const goBack = () => {
+    setSubmissionError(null);
     if (step === 'travelers') setStep('details');
     else if (step === 'confirmation') setStep('travelers');
   };
@@ -904,6 +986,16 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
                 </div>
               </div>
 
+              {submissionError && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-xs text-red-800 flex items-start gap-2.5 animate-fade-in">
+                  <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold block">Submission Problem:</span>
+                    <p className="mt-0.5">{submissionError}</p>
+                  </div>
+                </div>
+              )}
+
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-xs text-blue-800 space-y-1">
                 <span className="font-bold block">Next Steps:</span>
                 <p>Upon submitting, our tour specialist will review your chosen hotel options and send your confirmed itinerary invoice and payment link within 24 hours.</p>
@@ -919,6 +1011,7 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
                   type="button"
                   variant="outline"
                   onClick={goBack}
+                  disabled={bookingMutation.isPending}
                 >
                   Back
                 </Button>
@@ -930,6 +1023,7 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
                 type="button"
                 variant="outline"
                 onClick={onClose}
+                disabled={bookingMutation.isPending}
               >
                 Cancel
               </Button>
@@ -939,9 +1033,13 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
                 variant="primary"
                 disabled={isSubmitting || bookingMutation.isPending}
               >
-                {step === 'confirmation'
-                  ? (bookingMutation.isPending ? 'Submitting...' : 'Confirm Reservation')
-                  : 'Continue to Travelers'
+                {bookingMutation.isPending
+                  ? 'Submitting...'
+                  : step === 'details'
+                  ? 'Continue to Travelers'
+                  : step === 'travelers'
+                  ? 'Review Booking'
+                  : 'Confirm Reservation'
                 }
               </Button>
             </div>

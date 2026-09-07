@@ -61,7 +61,7 @@ def get_bookings_by_type(
     """
     Retrieve bookings by type (package or group_trip).
     """
-    if booking_type not in ["package", "group_trip"]:
+    if booking_type not in ["package", "group_trip", "hotel"]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid booking type")
     bookings = booking_service.get_bookings_by_type(db, booking_type, skip=skip, limit=limit)
     return bookings
@@ -77,7 +77,7 @@ def create_booking(
     Create new booking.
     """
     # Validate booking type
-    if booking_in.booking_type not in ["package", "group_trip"]:
+    if booking_in.booking_type not in ["package", "group_trip", "hotel"]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid booking type")
 
     # Validate travelers count

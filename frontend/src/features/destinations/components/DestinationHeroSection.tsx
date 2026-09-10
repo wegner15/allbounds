@@ -190,13 +190,13 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
           <div className="flex flex-wrap items-center gap-4">
             <Link
               to={bookingLink}
-              className="group inline-flex items-center gap-3 px-6 sm:px-7 py-3.5 sm:py-4 bg-butter hover:bg-[#e4cb73] text-charcoal font-bold text-xs sm:text-sm tracking-wider uppercase rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              className="group inline-flex items-center gap-3 px-6 sm:px-7 py-3.5 sm:py-4 bg-primary hover:bg-primary-dark text-white font-bold text-xs sm:text-sm tracking-wider uppercase rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
-              <span className="p-1 rounded-md bg-charcoal/10 group-hover:bg-charcoal/15 transition-colors">
-                <Calendar className="w-4 h-4 text-charcoal" />
+              <span className="p-1 rounded-md bg-white/20 group-hover:bg-white/30 transition-colors">
+                <Calendar className="w-4 h-4 text-white" />
               </span>
               <span className="tracking-wider">{ctaText}</span>
-              <ArrowRight className="w-4 h-4 text-charcoal transition-transform duration-300 group-hover:translate-x-1" />
+              <ArrowRight className="w-4 h-4 text-white transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </div>
         </div>

@@ -60,13 +60,17 @@ const getDefaultHighlights = (countryName: string, regionName?: string): string[
 const cleanSummaryText = (text: string): string => {
   return text
     .replace(/<[^>]*>?/gm, '')
-    .replace(/&mdash;/g, '—')
-    .replace(/&ndash;/g, '–')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&amp;/g, '&')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&hellip;/g, '...')
+    .replace(/&rsquo;/gi, "'")
+    .replace(/&lsquo;/gi, "'")
+    .replace(/&rdquo;/gi, '"')
+    .replace(/&ldquo;/gi, '"')
+    .replace(/&mdash;/gi, '—')
+    .replace(/&ndash;/gi, '–')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&amp;/gi, '&')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&hellip;/gi, '...')
     .replace(/There is no question too small\.?\s*/gi, '')
     .trim();
 };
@@ -151,16 +155,12 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-teal to-primary-dark z-0" />
       )}
 
-      {/* Cinematic Diagonal Gradient Scrim — Left-focused for maximum text clarity, right side clear */}
-      {/* Primary horizontal left-to-right fade out before the right half */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 md:via-black/40 to-transparent w-full md:w-[75%] lg:w-[62%] z-[1]" />
-      
-      {/* Diagonal bottom-left enhancer for CTA & paragraph contrast */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-black/80 via-black/35 to-transparent w-full md:w-[65%] lg:w-[50%] z-[1]" />
+      {/* Subtle gentle overall backdrop tone (no harsh split line) */}
+      <div className="absolute inset-0 bg-black/15 z-[1]" />
 
-      {/* Hero Content Area */}
-      <div className="fluid-container relative z-10 py-16 sm:py-20 md:py-24">
-        <div className="max-w-3xl text-left">
+      {/* Hero Content Area - Blur and shading traces the writing */}
+      <div className="fluid-container relative z-10 py-10 sm:py-14 md:py-16">
+        <div className="max-w-2xl text-left bg-black/40 backdrop-blur-md p-6 sm:p-8 md:p-10 rounded-2xl md:rounded-3xl border border-white/15 shadow-2xl">
           
           {/* Top Location Badge */}
           <div className="inline-flex items-center gap-2 text-white/90 text-xs sm:text-sm font-semibold tracking-[0.25em] uppercase drop-shadow-md mb-2 sm:mb-3">
@@ -176,7 +176,7 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
           </div>
 
           {/* Main Headline */}
-          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-playfair font-bold text-white tracking-tight leading-[1.05] drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] mb-3 sm:mb-4">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-playfair font-bold text-white tracking-tight leading-[1.05] drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] mb-3 sm:mb-4">
             {targetTitle}
           </h1>
 
@@ -197,7 +197,7 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
           )}
 
           {/* Summary / Descriptive Narrative */}
-          <p className="text-sm sm:text-base md:text-lg text-white/90 leading-relaxed font-light max-w-xl md:max-w-2xl drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] mb-7 sm:mb-9 line-clamp-4 md:line-clamp-none">
+          <p className="text-sm sm:text-base md:text-lg text-white/90 leading-relaxed font-light drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] mb-6 sm:mb-8 line-clamp-4 md:line-clamp-none">
             {displaySummary}
           </p>
 

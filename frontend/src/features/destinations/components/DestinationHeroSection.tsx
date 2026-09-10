@@ -54,6 +54,23 @@ const getDefaultHighlights = (countryName: string, regionName?: string): string[
   return ['Extraordinary Journeys', 'Breathtaking Landscapes', 'Unforgettable Moments'];
 };
 
+/**
+ * Helper to clean HTML tags and entities from raw summary text
+ */
+const cleanSummaryText = (text: string): string => {
+  return text
+    .replace(/<[^>]*>?/gm, '')
+    .replace(/&mdash;/g, '—')
+    .replace(/&ndash;/g, '–')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&hellip;/g, '...')
+    .replace(/There is no question too small\.?\s*/gi, '')
+    .trim();
+};
+
 const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo(({
   country,
   category,
@@ -66,11 +83,12 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
   // Extract and clean summary
   const displaySummary = useMemo(() => {
     if (country.summary) {
-      return country.summary.replace(/There is no question too small\.?\s*/gi, '').trim();
+      const cleaned = cleanSummaryText(country.summary);
+      if (cleaned) return cleaned;
     }
     if (country.description) {
-      const plainText = country.description.replace(/<[^>]*>?/gm, '').trim();
-      return plainText.length > 220 ? `${plainText.slice(0, 220).trim()}...` : plainText;
+      const cleaned = cleanSummaryText(country.description);
+      return cleaned.length > 220 ? `${cleaned.slice(0, 220).trim()}...` : cleaned;
     }
     return `Escape to an extraordinary paradise where nature and culture paint the perfect picture. Discover world-class experiences, stunning landscapes, and unforgettable memories in ${country.name}.`;
   }, [country.summary, country.description, country.name]);
@@ -133,15 +151,12 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-teal to-primary-dark z-0" />
       )}
 
-      {/* Multi-layered Cinematic Gradient Overlays for Peak Readability & Mood */}
-      {/* Left dark scrim overlay to ensure left-aligned text stands out on any photo */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 md:via-black/45 to-transparent z-[1]" />
+      {/* Cinematic Diagonal Gradient Scrim — Left-focused for maximum text clarity, right side clear */}
+      {/* Primary horizontal left-to-right fade out before the right half */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 md:via-black/40 to-transparent w-full md:w-[75%] lg:w-[62%] z-[1]" />
       
-      {/* Bottom subtle shadow overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent z-[1]" />
-      
-      {/* Top subtle vignette overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent z-[1]" />
+      {/* Diagonal bottom-left enhancer for CTA & paragraph contrast */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-black/80 via-black/35 to-transparent w-full md:w-[65%] lg:w-[50%] z-[1]" />
 
       {/* Hero Content Area */}
       <div className="fluid-container relative z-10 py-16 sm:py-20 md:py-24">

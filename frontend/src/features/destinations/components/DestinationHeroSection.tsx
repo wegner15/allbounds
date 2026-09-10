@@ -158,62 +158,59 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
       {/* Subtle gentle overall backdrop tone (no harsh split line) */}
       <div className="absolute inset-0 bg-black/15 z-[1]" />
 
-      {/* Hero Content Area - Blur and shading traces the writing */}
+      {/* Hero Content Area - Compact Glass Card with Standalone CTA Button */}
       <div className="fluid-container relative z-10 py-10 sm:py-14 md:py-16">
-        <div className="max-w-2xl text-left bg-black/40 backdrop-blur-md p-6 sm:p-8 md:p-10 rounded-2xl md:rounded-3xl border border-white/15 shadow-2xl">
+        <div className="max-w-xl text-left flex flex-col items-start gap-4 sm:gap-5">
           
-          {/* Top Location Badge */}
-          <div className="inline-flex items-center gap-2 text-white/90 text-xs sm:text-sm font-semibold tracking-[0.25em] uppercase drop-shadow-md mb-2 sm:mb-3">
-            <MapPin className="w-4 h-4 text-white/90 shrink-0" />
-            <span>{country.name}</span>
-          </div>
-
-          {/* Cursive / Script Pre-heading */}
-          <div className="relative z-10 -mb-1 sm:-mb-2">
-            <span className="font-script text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-butter drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)] tracking-wide select-none inline-block transform -rotate-1">
-              {scriptPrefix}
-            </span>
-          </div>
-
-          {/* Main Headline */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-playfair font-bold text-white tracking-tight leading-[1.05] drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] mb-3 sm:mb-4">
-            {targetTitle}
-          </h1>
-
-          {/* Key Highlights / Tagline with Bullets */}
-          {activeHighlights.length > 0 && (
-            <div className="flex flex-wrap items-center gap-x-2.5 sm:gap-x-3 gap-y-1.5 text-white/95 text-sm sm:text-base md:text-lg font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] mb-4 sm:mb-5">
-              {activeHighlights.map((highlight, index) => (
-                <React.Fragment key={index}>
-                  {index > 0 && (
-                    <span className="text-butter text-xs sm:text-sm font-bold select-none" aria-hidden="true">
-                      •
-                    </span>
-                  )}
-                  <span className="tracking-wide">{highlight}</span>
-                </React.Fragment>
-              ))}
+          {/* Compact Glass Card for Location, Title & Highlights */}
+          <div className="bg-black/40 backdrop-blur-md px-6 py-5 sm:px-8 sm:py-6 md:px-9 md:py-7 rounded-2xl md:rounded-3xl border border-white/15 shadow-2xl">
+            
+            {/* Top Location Badge */}
+            <div className="inline-flex items-center gap-2 text-white/90 text-xs sm:text-sm font-semibold tracking-[0.25em] uppercase drop-shadow-md mb-1.5 sm:mb-2">
+              <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90 shrink-0" />
+              <span>{country.name}</span>
             </div>
-          )}
 
-          {/* Summary / Descriptive Narrative */}
-          <p className="text-sm sm:text-base md:text-lg text-white/90 leading-relaxed font-light drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] mb-6 sm:mb-8 line-clamp-4 md:line-clamp-none">
-            {displaySummary}
-          </p>
-
-          {/* Call to Action Button */}
-          <div className="flex flex-wrap items-center gap-4">
-            <Link
-              to={bookingLink}
-              className="group inline-flex items-center gap-3 px-6 sm:px-7 py-3.5 sm:py-4 bg-primary hover:bg-primary-dark text-white font-bold text-xs sm:text-sm tracking-wider uppercase rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-            >
-              <span className="p-1 rounded-md bg-white/20 group-hover:bg-white/30 transition-colors">
-                <Calendar className="w-4 h-4 text-white" />
+            {/* Cursive / Script Pre-heading */}
+            <div className="relative z-10 -mb-1 sm:-mb-2">
+              <span className="font-script text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-butter drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)] tracking-wide select-none inline-block transform -rotate-1">
+                {scriptPrefix}
               </span>
-              <span className="tracking-wider">{ctaText}</span>
-              <ArrowRight className="w-4 h-4 text-white transition-transform duration-300 group-hover:translate-x-1" />
-            </Link>
+            </div>
+
+            {/* Main Headline */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-playfair font-bold text-white tracking-tight leading-[1.05] drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
+              {targetTitle}
+            </h1>
+
+            {/* Key Highlights / Tagline with Bullets */}
+            {activeHighlights.length > 0 && (
+              <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-2.5 gap-y-1 text-white/95 text-xs sm:text-sm md:text-base font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] mt-3 sm:mt-4">
+                {activeHighlights.map((highlight, index) => (
+                  <React.Fragment key={index}>
+                    {index > 0 && (
+                      <span className="text-butter text-xs font-bold select-none" aria-hidden="true">
+                        •
+                      </span>
+                    )}
+                    <span className="tracking-wide">{highlight}</span>
+                  </React.Fragment>
+                ))}
+              </div>
+            )}
           </div>
+
+          {/* Standalone Call to Action Button */}
+          <Link
+            to={bookingLink}
+            className="group inline-flex items-center gap-3 px-6 sm:px-7 py-3.5 sm:py-4 bg-primary hover:bg-primary-dark text-white font-bold text-xs sm:text-sm tracking-wider uppercase rounded-xl sm:rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+          >
+            <span className="p-1 rounded-md bg-white/20 group-hover:bg-white/30 transition-colors">
+              <Calendar className="w-4 h-4 text-white" />
+            </span>
+            <span className="tracking-wider">{ctaText}</span>
+            <ArrowRight className="w-4 h-4 text-white transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
         </div>
       </div>
     </section>

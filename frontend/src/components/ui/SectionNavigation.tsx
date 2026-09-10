@@ -90,7 +90,7 @@ const SectionNavigation: React.FC<SectionNavigationProps> = ({
 
     return (
         <nav
-            className={`sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm ${className}`}
+            className={`sticky top-0 z-40 bg-butter border-b border-butter/30 shadow-sm ${className}`}
             role="navigation"
             aria-label="Section navigation"
         >
@@ -105,10 +105,10 @@ const SectionNavigation: React.FC<SectionNavigationProps> = ({
                                 onClick={(e) => handleSectionClick(e, section.id)}
                                 className={`
                                   whitespace-nowrap px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200
-                                  flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-butter focus:ring-offset-2
+                                  flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-charcoal focus:ring-offset-2
                                   ${isActive
-                                        ? 'bg-butter text-charcoal font-bold shadow-sm'
-                                        : 'text-gray-600 hover:text-charcoal hover:bg-gray-100'
+                                        ? 'bg-white text-charcoal font-bold shadow-sm'
+                                        : 'text-charcoal/85 hover:text-charcoal hover:bg-white/30'
                                     }
                                 `}
                                 aria-current={isActive ? 'location' : undefined}

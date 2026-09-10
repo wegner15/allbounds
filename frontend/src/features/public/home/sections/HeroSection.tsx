@@ -273,16 +273,16 @@ const HeroSection: React.FC = () => {
 
           {/* Tabs */}
           <div className="flex justify-center mb-6 overflow-x-auto">
-            <div className="inline-flex bg-black/30 backdrop-blur-md p-1 rounded-full border border-white/10 whitespace-nowrap">
+            <div className="inline-flex bg-butter p-1.5 rounded-full shadow-lg border border-butter/40 whitespace-nowrap">
               {tabs.map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`
-                    flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium transition-all duration-300
+                    flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300
                     ${activeTab === tab.id
-                      ? 'bg-white text-charcoal shadow-lg scale-105'
-                      : 'text-white hover:bg-white/10'
+                      ? 'bg-white text-charcoal shadow-md scale-105'
+                      : 'text-charcoal/85 hover:text-charcoal hover:bg-white/30'
                     }
                   `}
                 >

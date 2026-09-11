@@ -163,43 +163,41 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
 
       {/* ── BOTTOM ROW: text-block left + CTA centred ── */}
       <div className="absolute bottom-0 left-0 right-0 z-10 pb-6 sm:pb-8 md:pb-10">
-        {/* Text block — bottom-left */}
+        {/* Text block — bottom-left, no background, text shadows only */}
         <div className="fluid-container">
-          <div className="inline-block max-w-sm sm:max-w-md mb-4 sm:mb-5">
-            <div className="bg-black/30 backdrop-blur-sm px-5 py-4 sm:px-7 sm:py-5 rounded-xl sm:rounded-2xl border border-white/10 shadow-xl">
+          <div className="inline-block max-w-sm sm:max-w-md mb-4 sm:mb-5 px-1">
 
-              {/* Location Badge */}
-              <div className="inline-flex items-center gap-1.5 text-white/85 text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase mb-1.5">
-                <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
-                <span>{country.name}</span>
-              </div>
-
-              {/* Script prefix */}
-              <div className="-mb-1 sm:-mb-1.5">
-                <span className="font-script text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-butter drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)] tracking-wide select-none inline-block -rotate-1">
-                  {scriptPrefix}
-                </span>
-              </div>
-
-              {/* Headline */}
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-playfair font-bold text-white tracking-tight leading-[1.05] drop-shadow-[0_3px_10px_rgba(0,0,0,0.85)]">
-                {targetTitle}
-              </h1>
-
-              {/* Highlights */}
-              {activeHighlights.length > 0 && (
-                <div className="flex flex-wrap items-center gap-x-1.5 sm:gap-x-2 gap-y-1 text-white/90 text-xs sm:text-sm font-medium mt-2 sm:mt-2.5">
-                  {activeHighlights.map((highlight, index) => (
-                    <React.Fragment key={index}>
-                      {index > 0 && (
-                        <span className="text-butter text-xs font-bold select-none" aria-hidden="true">•</span>
-                      )}
-                      <span>{highlight}</span>
-                    </React.Fragment>
-                  ))}
-                </div>
-              )}
+            {/* Location Badge */}
+            <div className="inline-flex items-center gap-1.5 text-white/90 text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase mb-1.5 [text-shadow:0_1px_6px_rgba(0,0,0,0.9)]">
+              <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]" />
+              <span>{country.name}</span>
             </div>
+
+            {/* Script prefix */}
+            <div className="-mb-1 sm:-mb-1.5">
+              <span className="font-script text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-butter tracking-wide select-none inline-block -rotate-1 [text-shadow:0_2px_12px_rgba(0,0,0,0.95),0_1px_4px_rgba(0,0,0,0.9)]">
+                {scriptPrefix}
+              </span>
+            </div>
+
+            {/* Headline */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-playfair font-bold text-white tracking-tight leading-[1.05] [text-shadow:0_3px_16px_rgba(0,0,0,1),0_1px_6px_rgba(0,0,0,0.95)]">
+              {targetTitle}
+            </h1>
+
+            {/* Highlights */}
+            {activeHighlights.length > 0 && (
+              <div className="flex flex-wrap items-center gap-x-1.5 sm:gap-x-2 gap-y-1 text-white/95 text-xs sm:text-sm font-semibold mt-2 sm:mt-2.5 [text-shadow:0_1px_8px_rgba(0,0,0,0.95)]">
+                {activeHighlights.map((highlight, index) => (
+                  <React.Fragment key={index}>
+                    {index > 0 && (
+                      <span className="text-butter font-bold select-none" aria-hidden="true">•</span>
+                    )}
+                    <span>{highlight}</span>
+                  </React.Fragment>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

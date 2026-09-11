@@ -173,15 +173,15 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
               <span>{country.name}</span>
             </div>
 
-            {/* Script prefix */}
-            <div className="-mb-1 sm:-mb-1.5">
-              <span className="font-script text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-butter tracking-wide select-none inline-block -rotate-1 [text-shadow:0_2px_12px_rgba(0,0,0,0.95),0_1px_4px_rgba(0,0,0,0.9)]">
+            {/* Script prefix — Pacifico brush font */}
+            <div className="-mb-2 sm:-mb-3">
+              <span className="font-pacifico text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-butter select-none inline-block [text-shadow:0_2px_14px_rgba(0,0,0,0.95),0_1px_4px_rgba(0,0,0,0.9)]">
                 {scriptPrefix}
               </span>
             </div>
 
             {/* Headline */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-playfair font-bold text-white tracking-tight leading-[1.05] [text-shadow:0_3px_16px_rgba(0,0,0,1),0_1px_6px_rgba(0,0,0,0.95)]">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-playfair font-bold text-white tracking-tight leading-[1.0] [text-shadow:0_3px_20px_rgba(0,0,0,1),0_1px_8px_rgba(0,0,0,0.95)]">
               {targetTitle}
             </h1>
 

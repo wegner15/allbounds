@@ -116,7 +116,7 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
 
   return (
     <section
-      className="relative w-full min-h-[520px] sm:min-h-[580px] md:min-h-[640px] lg:min-h-[700px] flex items-center overflow-hidden"
+      className="relative w-full h-[calc(100vh-64px)] max-h-[800px] min-h-[480px] overflow-hidden flex flex-col"
       aria-label={`${country.name} destination hero`}
     >
       {/* Background Image with Fallback */}
@@ -128,7 +128,7 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
               imageId={country.image_id}
               alt={`Scenic view of ${country.name}`}
               variant="large"
-              className="w-full h-full scale-105 transition-transform duration-1000 ease-out"
+              className="w-full h-full"
               objectFit="cover"
               loading="eager"
               priority={true}
@@ -142,7 +142,7 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
               imageId={country.image_id}
               alt={`Scenic view of ${country.name}`}
               variant="medium"
-              className="w-full h-full scale-105 transition-transform duration-1000 ease-out"
+              className="w-full h-full"
               objectFit="cover"
               loading="eager"
               priority={true}
@@ -155,61 +155,65 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-teal to-primary-dark z-0" />
       )}
 
-      {/* Subtle gentle overall backdrop tone (no harsh split line) */}
-      <div className="absolute inset-0 bg-black/15 z-[1]" />
+      {/* Very subtle overall tone — keeps image crisp */}
+      <div className="absolute inset-0 bg-black/10 z-[1]" />
 
-      {/* Hero Content Area - Compact Glass Card with Standalone CTA Button */}
-      <div className="fluid-container relative z-10 py-10 sm:py-14 md:py-16">
-        <div className="max-w-xl text-left flex flex-col items-start gap-4 sm:gap-5">
-          
-          {/* Compact Glass Card for Location, Title & Highlights */}
-          <div className="bg-black/40 backdrop-blur-md px-6 py-5 sm:px-8 sm:py-6 md:px-9 md:py-7 rounded-2xl md:rounded-3xl border border-white/15 shadow-2xl">
-            
-            {/* Top Location Badge */}
-            <div className="inline-flex items-center gap-2 text-white/90 text-xs sm:text-sm font-semibold tracking-[0.25em] uppercase drop-shadow-md mb-1.5 sm:mb-2">
-              <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90 shrink-0" />
-              <span>{country.name}</span>
-            </div>
+      {/* Bottom gradient to anchor text readability */}
+      <div className="absolute bottom-0 left-0 right-0 h-2/5 bg-gradient-to-t from-black/55 via-black/20 to-transparent z-[1]" />
 
-            {/* Cursive / Script Pre-heading */}
-            <div className="relative z-10 -mb-1 sm:-mb-2">
-              <span className="font-script text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-butter drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)] tracking-wide select-none inline-block transform -rotate-1">
-                {scriptPrefix}
-              </span>
-            </div>
+      {/* ── BOTTOM ROW: text-block left + CTA centred ── */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 pb-6 sm:pb-8 md:pb-10">
+        {/* Text block — bottom-left */}
+        <div className="fluid-container">
+          <div className="inline-block max-w-sm sm:max-w-md mb-4 sm:mb-5">
+            <div className="bg-black/30 backdrop-blur-sm px-5 py-4 sm:px-7 sm:py-5 rounded-xl sm:rounded-2xl border border-white/10 shadow-xl">
 
-            {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-playfair font-bold text-white tracking-tight leading-[1.05] drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
-              {targetTitle}
-            </h1>
-
-            {/* Key Highlights / Tagline with Bullets */}
-            {activeHighlights.length > 0 && (
-              <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-2.5 gap-y-1 text-white/95 text-xs sm:text-sm md:text-base font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] mt-3 sm:mt-4">
-                {activeHighlights.map((highlight, index) => (
-                  <React.Fragment key={index}>
-                    {index > 0 && (
-                      <span className="text-butter text-xs font-bold select-none" aria-hidden="true">
-                        •
-                      </span>
-                    )}
-                    <span className="tracking-wide">{highlight}</span>
-                  </React.Fragment>
-                ))}
+              {/* Location Badge */}
+              <div className="inline-flex items-center gap-1.5 text-white/85 text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase mb-1.5">
+                <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+                <span>{country.name}</span>
               </div>
-            )}
-          </div>
 
-          {/* Standalone Call to Action Button */}
+              {/* Script prefix */}
+              <div className="-mb-1 sm:-mb-1.5">
+                <span className="font-script text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-butter drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)] tracking-wide select-none inline-block -rotate-1">
+                  {scriptPrefix}
+                </span>
+              </div>
+
+              {/* Headline */}
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-playfair font-bold text-white tracking-tight leading-[1.05] drop-shadow-[0_3px_10px_rgba(0,0,0,0.85)]">
+                {targetTitle}
+              </h1>
+
+              {/* Highlights */}
+              {activeHighlights.length > 0 && (
+                <div className="flex flex-wrap items-center gap-x-1.5 sm:gap-x-2 gap-y-1 text-white/90 text-xs sm:text-sm font-medium mt-2 sm:mt-2.5">
+                  {activeHighlights.map((highlight, index) => (
+                    <React.Fragment key={index}>
+                      {index > 0 && (
+                        <span className="text-butter text-xs font-bold select-none" aria-hidden="true">•</span>
+                      )}
+                      <span>{highlight}</span>
+                    </React.Fragment>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* CTA Button — centred at bottom */}
+        <div className="flex justify-center px-4">
           <Link
             to={bookingLink}
-            className="group inline-flex items-center gap-3 px-6 sm:px-7 py-3.5 sm:py-4 bg-primary hover:bg-primary-dark text-white font-bold text-xs sm:text-sm tracking-wider uppercase rounded-xl sm:rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            className="group inline-flex items-center gap-3 px-7 sm:px-8 py-3.5 sm:py-4 bg-primary hover:bg-primary-dark text-white font-bold text-xs sm:text-sm tracking-wider uppercase rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.03] active:scale-[0.98]"
           >
             <span className="p-1 rounded-md bg-white/20 group-hover:bg-white/30 transition-colors">
               <Calendar className="w-4 h-4 text-white" />
             </span>
-            <span className="tracking-wider">{ctaText}</span>
-            <ArrowRight className="w-4 h-4 text-white transition-transform duration-300 group-hover:translate-x-1" />
+            <span>{ctaText}</span>
+            <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
         </div>
       </div>

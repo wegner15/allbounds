@@ -39,6 +39,14 @@ from app.models.partner import Partner
 
 from app.models.group_trip_price_chart import GroupTripPriceChart, GroupTripPriceChartHotel
 from app.models.hotel_price_chart import HotelPriceChart, HotelPriceChartNightRate
+from app.models.finance import (
+    Currency,
+    CompanyFinanceSettings,
+    Invoice,
+    InvoiceLineItem,
+    PaymentReceipt,
+    TravelVoucher
+)
 
 # This ensures all models are imported in the correct order
 __all__ = [
@@ -54,6 +62,7 @@ __all__ = [
     'Booking', 'BookingTraveler', 'Inquiry',
     'CountryVisitInfo', 'NewsletterSubscription', 'VisaApplication',
     'FlightBooking', 'FlightPassenger', 'EmailLog', 'Partner',
+    'Currency', 'CompanyFinanceSettings', 'Invoice', 'InvoiceLineItem', 'PaymentReceipt', 'TravelVoucher',
 ]
 
 

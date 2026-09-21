@@ -154,6 +154,23 @@ import TagsListPage from './features/admin/tags/TagsListPage';
 import CreateTagPage from './features/admin/tags/CreateTagPage';
 import EditTagPage from './features/admin/tags/EditTagPage';
 
+// Import Admin Finance pages
+import { FinanceOverviewPage } from './features/admin/finance/FinanceOverviewPage';
+import { InvoicesListPage } from './features/admin/finance/invoices/InvoicesListPage';
+import { InvoiceEditorPage } from './features/admin/finance/invoices/InvoiceEditorPage';
+import { InvoiceDetailPage } from './features/admin/finance/invoices/InvoiceDetailPage';
+import { ReceiptsListPage } from './features/admin/finance/receipts/ReceiptsListPage';
+import { ReceiptDetailPage } from './features/admin/finance/receipts/ReceiptDetailPage';
+import { VouchersListPage } from './features/admin/finance/vouchers/VouchersListPage';
+import { VoucherEditorPage } from './features/admin/finance/vouchers/VoucherEditorPage';
+import { VoucherDetailPage } from './features/admin/finance/vouchers/VoucherDetailPage';
+import { FinanceSettingsPage } from './features/admin/finance/settings/FinanceSettingsPage';
+
+// Import Public Verification pages
+import { PublicVoucherVerificationPage } from './features/public/verification/PublicVoucherVerificationPage';
+import { PublicReceiptVerificationPage } from './features/public/verification/PublicReceiptVerificationPage';
+import { PublicInvoiceViewPage } from './features/public/verification/PublicInvoiceViewPage';
+
 // Placeholder pages for routes we haven't fully implemented yet
 
 
@@ -385,6 +402,9 @@ const router = createBrowserRouter([
       { path: 'unauthorized', element: <UnauthorizedPage /> },
       { path: 'form-showcase', element: <FormShowcasePage /> },
       { path: 'contact', element: <ContactFormPage /> },
+      { path: 'verify/voucher/:code', element: <PublicVoucherVerificationPage /> },
+      { path: 'verify/receipt/:code', element: <PublicReceiptVerificationPage /> },
+      { path: 'verify/invoice/:token', element: <PublicInvoiceViewPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },
@@ -483,6 +503,19 @@ const router = createBrowserRouter([
       { path: 'tags', element: <TagsListPage /> },
       { path: 'tags/new', element: <CreateTagPage /> },
       { path: 'tags/:id/edit', element: <EditTagPage /> },
+      // Finance management routes
+      { path: 'finance', element: <FinanceOverviewPage /> },
+      { path: 'finance/invoices', element: <InvoicesListPage /> },
+      { path: 'finance/invoices/new', element: <InvoiceEditorPage /> },
+      { path: 'finance/invoices/:id', element: <InvoiceDetailPage /> },
+      { path: 'finance/invoices/:id/edit', element: <InvoiceEditorPage /> },
+      { path: 'finance/receipts', element: <ReceiptsListPage /> },
+      { path: 'finance/receipts/:id', element: <ReceiptDetailPage /> },
+      { path: 'finance/vouchers', element: <VouchersListPage /> },
+      { path: 'finance/vouchers/new', element: <VoucherEditorPage /> },
+      { path: 'finance/vouchers/:id', element: <VoucherDetailPage /> },
+      { path: 'finance/vouchers/:id/edit', element: <VoucherEditorPage /> },
+      { path: 'finance/settings', element: <FinanceSettingsPage /> },
     ],
   },
 ]);

@@ -4765,11 +4765,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/countries</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
     <loc>https://allboundvacations.com/destinations</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -5226,7 +5221,7 @@
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/dubai/hotels/pullman-deira-city-centre</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-09-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -6156,7 +6151,7 @@
   </url>
   <url>
     <loc>https://allboundvacations.com/destinations/kenya/hotels/swahili-beach-resort</loc>
-    <lastmod>2026-09-02</lastmod>
+    <lastmod>2026-09-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -9230,7 +9225,7 @@
   </url>
   <url>
     <loc>https://allboundvacations.com/hotels/dubai/pullman-deira-city-centre</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-09-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -9668,7 +9663,7 @@
   </url>
   <url>
     <loc>https://allboundvacations.com/hotels/kenya/swahili-beach-resort</loc>
-    <lastmod>2026-09-02</lastmod>
+    <lastmod>2026-09-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -10100,7 +10095,7 @@
   </url>
   <url>
     <loc>https://allboundvacations.com/hotels/pullman-deira-city-centre</loc>
-    <lastmod>2026-08-11</lastmod>
+    <lastmod>2026-09-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -10274,7 +10269,7 @@
   </url>
   <url>
     <loc>https://allboundvacations.com/hotels/swahili-beach-resort</loc>
-    <lastmod>2026-09-02</lastmod>
+    <lastmod>2026-09-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

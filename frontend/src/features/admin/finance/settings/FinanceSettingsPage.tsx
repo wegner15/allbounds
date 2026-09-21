@@ -3,6 +3,9 @@ import {
   Save,
   Plus,
   Trash2,
+  Pencil,
+  X,
+  Check,
   Building,
   CreditCard,
   DollarSign,
@@ -62,6 +65,16 @@ export const FinanceSettingsPage: React.FC = () => {
   const [newCurrName, setNewCurrName] = useState<string>('');
   const [newCurrSymbol, setNewCurrSymbol] = useState<string>('');
   const [newCurrRate, setNewCurrRate] = useState<number>(1.0);
+
+  // Edit currency inline state
+  const [editingCurrId, setEditingCurrId] = useState<number | null>(null);
+  const [editCurrName, setEditCurrName] = useState<string>('');
+  const [editCurrSymbol, setEditCurrSymbol] = useState<string>('');
+  const [editCurrRate, setEditCurrRate] = useState<number>(1.0);
+  const [editCurrIsBase, setEditCurrIsBase] = useState<boolean>(false);
+  const [editCurrIsActive, setEditCurrIsActive] = useState<boolean>(true);
+  const [savingCurrId, setSavingCurrId] = useState<number | null>(null);
+  const [deletingCurrId, setDeletingCurrId] = useState<number | null>(null);
 
   const loadAll = async () => {
     try {
@@ -209,6 +222,62 @@ export const FinanceSettingsPage: React.FC = () => {
     }
   };
 
+  const startEditCurrency = (curr: Currency) => {
+    setEditingCurrId(curr.id);
+    setEditCurrName(curr.name);
+    setEditCurrSymbol(curr.symbol);
+    setEditCurrRate(curr.exchange_rate_to_usd);
+    setEditCurrIsBase(curr.is_base_currency);
+    setEditCurrIsActive(curr.is_active);
+  };
+
+  const cancelEditCurrency = () => setEditingCurrId(null);
+
+  const handleSaveCurrencyEdit = async (currId: number) => {
+    setSavingCurrId(currId);
+    try {
+      await financeApi.updateCurrency(currId, {
+        name: editCurrName,
+        symbol: editCurrSymbol,
+        exchange_rate_to_usd: editCurrRate,
+        is_base_currency: editCurrIsBase,
+        is_active: editCurrIsActive
+      });
+      const cList = await financeApi.getCurrencies(false);
+      setCurrencies(cList);
+      setEditingCurrId(null);
+      setMessage({ type: 'success', text: 'Currency updated successfully!' });
+      setTimeout(() => setMessage(null), 3000);
+    } catch (err: any) {
+      alert(err?.response?.data?.detail || 'Failed to update currency');
+    } finally {
+      setSavingCurrId(null);
+    }
+  };
+
+  const handleDeleteCurrency = async (curr: Currency) => {
+    if (curr.is_base_currency) {
+      alert('Cannot delete the base currency. Set another currency as base first.');
+      return;
+    }
+    const confirmed = window.confirm(
+      `Delete ${curr.code} (${curr.name})? This cannot be undone.`
+    );
+    if (!confirmed) return;
+    setDeletingCurrId(curr.id);
+    try {
+      await financeApi.deleteCurrency(curr.id);
+      const cList = await financeApi.getCurrencies(false);
+      setCurrencies(cList);
+      setMessage({ type: 'success', text: `${curr.code} removed.` });
+      setTimeout(() => setMessage(null), 3000);
+    } catch (err: any) {
+      alert(err?.response?.data?.detail || 'Failed to delete currency');
+    } finally {
+      setDeletingCurrId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
@@ -286,59 +355,142 @@ export const FinanceSettingsPage: React.FC = () => {
                 <th className="px-4 py-3 text-left">Code</th>
                 <th className="px-4 py-3 text-left">Currency Name</th>
                 <th className="px-4 py-3 text-center">Symbol</th>
-                <th className="px-4 py-3 text-left">Units per 1 USD (Exchange Rate)</th>
-                <th className="px-4 py-3 text-center">Base Currency</th>
+                <th className="px-4 py-3 text-left">Units per 1 USD</th>
+                <th className="px-4 py-3 text-center">Base</th>
                 <th className="px-4 py-3 text-center">Status</th>
+                <th className="px-4 py-3 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white">
               {currencies.map((curr) => (
-                <tr key={curr.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-mono font-bold text-teal-900 text-sm">{curr.code}</td>
-                  <td className="px-4 py-3 font-medium text-gray-900">{curr.name}</td>
-                  <td className="px-4 py-3 text-center font-bold text-gray-700">{curr.symbol}</td>
-                  <td className="px-4 py-3">
-                    {curr.is_base_currency ? (
-                      <span className="font-mono text-gray-500 font-bold">1.0000 (Base)</span>
-                    ) : (
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="number"
-                          step="0.0001"
-                          defaultValue={curr.exchange_rate_to_usd}
-                          onBlur={(e) => {
-                            const val = parseFloat(e.target.value);
-                            if (val > 0 && val !== curr.exchange_rate_to_usd) {
-                              handleUpdateCurrencyRate(curr, val);
-                            }
-                          }}
-                          className="w-32 p-1 border border-gray-300 rounded font-mono text-xs focus:ring-1 focus:ring-teal-500"
-                        />
-                        <span className="text-[11px] text-gray-400">
-                          (1 USD = {curr.exchange_rate_to_usd} {curr.code})
-                        </span>
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    {curr.is_base_currency ? (
-                      <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-teal-100 text-teal-800">
-                        Base USD
-                      </span>
-                    ) : (
-                      <span className="text-gray-400">-</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <span
-                      className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold ${
+                <React.Fragment key={curr.id}>
+                  <tr className={`hover:bg-gray-50 ${editingCurrId === curr.id ? 'bg-teal-50/40' : ''}`}>
+                    <td className="px-4 py-3 font-mono font-bold text-teal-900 text-sm">{curr.code}</td>
+                    <td className="px-4 py-3 font-medium text-gray-900">{curr.name}</td>
+                    <td className="px-4 py-3 text-center font-bold text-gray-700">{curr.symbol}</td>
+                    <td className="px-4 py-3 font-mono text-gray-700">
+                      {curr.is_base_currency
+                        ? <span className="text-gray-400">1.0000 (Base)</span>
+                        : `${curr.exchange_rate_to_usd.toFixed(4)}`
+                      }
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {curr.is_base_currency
+                        ? <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-teal-100 text-teal-800">Base</span>
+                        : <span className="text-gray-300">—</span>
+                      }
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold ${
                         curr.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'
-                      }`}
-                    >
-                      {curr.is_active ? 'Active' : 'Disabled'}
-                    </span>
-                  </td>
-                </tr>
+                      }`}>
+                        {curr.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          type="button"
+                          title="Edit currency"
+                          onClick={() => editingCurrId === curr.id ? cancelEditCurrency() : startEditCurrency(curr)}
+                          className="p-1.5 rounded-lg text-teal-700 hover:bg-teal-100 transition cursor-pointer"
+                        >
+                          {editingCurrId === curr.id ? <X className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
+                        </button>
+                        <button
+                          type="button"
+                          title={curr.is_base_currency ? 'Cannot delete base currency' : 'Delete currency'}
+                          onClick={() => handleDeleteCurrency(curr)}
+                          disabled={deletingCurrId === curr.id || curr.is_base_currency}
+                          className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+
+                  {/* Inline Edit Row */}
+                  {editingCurrId === curr.id && (
+                    <tr className="bg-teal-50/60 border-t border-teal-200">
+                      <td colSpan={7} className="px-5 py-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-6 gap-4 text-xs items-end">
+                          <div className="sm:col-span-2">
+                            <label className="block text-gray-600 font-semibold mb-1">Currency Name *</label>
+                            <input
+                              type="text"
+                              value={editCurrName}
+                              onChange={(e) => setEditCurrName(e.target.value)}
+                              className="w-full p-2 border border-gray-300 rounded-lg text-xs"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-gray-600 font-semibold mb-1">Symbol *</label>
+                            <input
+                              type="text"
+                              value={editCurrSymbol}
+                              onChange={(e) => setEditCurrSymbol(e.target.value)}
+                              className="w-full p-2 border border-gray-300 rounded-lg text-xs font-bold"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-gray-600 font-semibold mb-1">Rate to 1 USD</label>
+                            <input
+                              type="number"
+                              step="0.0001"
+                              min="0.0001"
+                              value={editCurrRate}
+                              disabled={editCurrIsBase}
+                              onChange={(e) => setEditCurrRate(parseFloat(e.target.value) || 1.0)}
+                              className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono disabled:bg-gray-100 disabled:text-gray-400"
+                            />
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={editCurrIsBase}
+                                onChange={(e) => {
+                                  setEditCurrIsBase(e.target.checked);
+                                  if (e.target.checked) setEditCurrRate(1.0);
+                                }}
+                                className="w-4 h-4 accent-teal-700"
+                              />
+                              <span className="text-gray-700 font-semibold">Set as Base</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={editCurrIsActive}
+                                onChange={(e) => setEditCurrIsActive(e.target.checked)}
+                                className="w-4 h-4 accent-teal-700"
+                              />
+                              <span className="text-gray-700 font-semibold">Active</span>
+                            </label>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleSaveCurrencyEdit(curr.id)}
+                              disabled={savingCurrId === curr.id}
+                              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-teal-800 hover:bg-teal-900 text-white rounded-lg text-xs font-semibold transition disabled:opacity-50 cursor-pointer"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                              {savingCurrId === curr.id ? 'Saving...' : 'Save'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={cancelEditCurrency}
+                              className="px-3 py-2 border border-gray-300 rounded-lg text-xs hover:bg-gray-50 cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               ))}
             </tbody>
           </table>

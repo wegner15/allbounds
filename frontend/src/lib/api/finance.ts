@@ -46,6 +46,10 @@ export const financeApi = {
     return apiClient.put<Currency>(`/finance/currencies/${id}`, data);
   },
 
+  async deleteCurrency(id: number): Promise<{ message: string }> {
+    return apiClient.delete<{ message: string }>(`/finance/currencies/${id}`);
+  },
+
   // ==========================================
   // INVOICES
   // ==========================================

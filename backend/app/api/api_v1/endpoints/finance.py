@@ -72,6 +72,20 @@ def update_currency(
     return currency
 
 
+@router.delete("/currencies/{currency_id}")
+def delete_currency(
+    currency_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+) -> Any:
+    """Delete a currency. Base currencies cannot be deleted."""
+    try:
+        finance_service.delete_currency(db, currency_id)
+        return {"message": "Currency deleted successfully"}
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
 # ==========================================
 # COMPANY FINANCE SETTINGS
 # ==========================================

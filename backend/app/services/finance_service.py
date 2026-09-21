@@ -233,6 +233,15 @@ class FinanceService:
         db.refresh(currency)
         return currency
 
+    def delete_currency(self, db: Session, currency_id: int) -> None:
+        currency = db.query(Currency).filter(Currency.id == currency_id).first()
+        if not currency:
+            raise ValueError("Currency not found")
+        if currency.is_base_currency:
+            raise ValueError("Cannot delete the base currency. Set another currency as base first.")
+        db.delete(currency)
+        db.commit()
+
     # ==========================================
     # COMPANY FINANCE SETTINGS
     # ==========================================

@@ -131,9 +131,9 @@ export const InvoicesListPage: React.FC = () => {
         </div>
         <Link
           to="/admin/finance/invoices/new"
-          className="inline-flex items-center px-4 py-2 bg-teal-800 hover:bg-teal-900 text-white rounded-xl text-sm font-semibold shadow-sm transition"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-teal-800 hover:bg-teal-900 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer"
         >
-          <Plus className="w-4 h-4 mr-1.5" /> Create Invoice
+          <Plus className="w-4 h-4" /> Create Invoice
         </Link>
       </div>
 
@@ -223,7 +223,13 @@ export const InvoicesListPage: React.FC = () => {
           <div className="text-center p-12 text-gray-500">
             <FileText className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <p className="font-semibold text-gray-700">No invoices found.</p>
-            <p className="text-xs text-gray-400 mt-1">Try adjusting your filters or create a new invoice.</p>
+            <p className="text-xs text-gray-400 mt-1 mb-4">Try adjusting your filters or create a new invoice.</p>
+            <Link
+              to="/admin/finance/invoices/new"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-teal-800 hover:bg-teal-900 text-white rounded-xl text-xs font-semibold shadow-md transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" /> Create Invoice
+            </Link>
           </div>
         ) : (
           <div className="overflow-x-auto">

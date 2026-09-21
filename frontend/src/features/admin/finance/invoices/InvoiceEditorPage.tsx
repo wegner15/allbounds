@@ -46,8 +46,9 @@ export const InvoiceEditorPage: React.FC = () => {
   const [dueDate, setDueDate] = useState<string>(
     new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0]
   );
-  const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('');
   const [exchangeRate, setExchangeRate] = useState<number>(1.0);
+  const [loadingInvoiceNumber, setLoadingInvoiceNumber] = useState<boolean>(false);
   const [consultantName, setConsultantName] = useState<string>('');
   const [paymentTerms, setPaymentTerms] = useState<string>('');
 
@@ -121,6 +122,31 @@ export const InvoiceEditorPage: React.FC = () => {
         setCurrencies(currList);
         setSettings(compSettings);
         setAvailableBookings(bookingsRes || []);
+
+        if (!isEditing) {
+          // Default to base currency from settings
+          const baseCurr = currList.find((c) => c.is_base_currency);
+          if (baseCurr) {
+            setSelectedCurrency(baseCurr.code);
+            setExchangeRate(baseCurr.exchange_rate_to_usd);
+          } else if (currList.length > 0) {
+            setSelectedCurrency(currList[0].code);
+            setExchangeRate(currList[0].exchange_rate_to_usd);
+          } else {
+            setSelectedCurrency('USD');
+          }
+
+          // Fetch auto-generated invoice number
+          setLoadingInvoiceNumber(true);
+          try {
+            const numRes = await financeApi.getNextInvoiceNumber();
+            setInvoiceNumber(numRes.invoice_number);
+          } catch {
+            // fallback: leave blank so backend generates on save
+          } finally {
+            setLoadingInvoiceNumber(false);
+          }
+        }
 
         if (compSettings && !isEditing) {
           setNotes(compSettings.default_invoice_notes || '');
@@ -330,7 +356,8 @@ export const InvoiceEditorPage: React.FC = () => {
     };
 
     const payload = {
-      invoice_number: invoiceNumber || undefined,
+      // Leave invoice_number undefined for new invoices so backend generates it
+      invoice_number: isEditing ? invoiceNumber : undefined,
       booking_id: bookingId,
       quote_number: quoteNumber || undefined,
       invoice_status: statusOverride || invoiceStatus,
@@ -409,7 +436,7 @@ export const InvoiceEditorPage: React.FC = () => {
             type="button"
             onClick={() => handleSave('draft')}
             disabled={saving}
-            className="px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium transition"
+            className="px-4 py-2.5 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-xl text-sm font-semibold shadow-2xs transition-all cursor-pointer"
           >
             Save as Draft
           </button>
@@ -417,10 +444,10 @@ export const InvoiceEditorPage: React.FC = () => {
             type="button"
             onClick={() => handleSave('issued')}
             disabled={saving}
-            className="px-5 py-2 bg-teal-800 hover:bg-teal-900 text-white rounded-lg text-sm font-semibold shadow-sm transition flex items-center"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-teal-800 hover:bg-teal-900 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-150 disabled:opacity-50 cursor-pointer"
           >
-            <Save className="w-4 h-4 mr-1.5" />
-            {saving ? 'Saving...' : 'Issue Invoice'}
+            <Save className="w-4 h-4" />
+            {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Issue Invoice'}
           </button>
         </div>
       </div>
@@ -467,13 +494,25 @@ export const InvoiceEditorPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
             <div>
               <label className="block text-gray-700 font-semibold mb-1">Invoice Number</label>
-              <input
-                type="text"
-                value={invoiceNumber}
-                onChange={(e) => setInvoiceNumber(e.target.value)}
-                placeholder="Auto-generated (e.g. INV-2026-00001)"
-                className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono"
-              />
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={invoiceNumber}
+                  readOnly
+                  className="w-full p-2 border border-gray-200 bg-gray-50 rounded-lg text-xs font-mono text-gray-600 cursor-not-allowed"
+                />
+              ) : (
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 p-2 border border-teal-200 bg-teal-50 rounded-lg text-xs font-mono font-bold text-teal-800 tracking-wider">
+                    {loadingInvoiceNumber ? (
+                      <span className="text-gray-400 animate-pulse">Generating...</span>
+                    ) : (
+                      invoiceNumber || 'Auto-generated on save'
+                    )}
+                  </div>
+                  <span className="text-xs text-gray-400 whitespace-nowrap">Auto-generated</span>
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-gray-700 font-semibold mb-1">Quote Number</label>
@@ -808,9 +847,9 @@ export const InvoiceEditorPage: React.FC = () => {
             <button
               type="button"
               onClick={addItem}
-              className="inline-flex items-center px-3 py-1.5 bg-teal-50 text-teal-800 hover:bg-teal-100 rounded-lg text-xs font-semibold transition"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-teal-50 hover:bg-teal-100 text-teal-900 border border-teal-200 rounded-lg text-xs font-semibold shadow-2xs transition-all cursor-pointer"
             >
-              <Plus className="w-3.5 h-3.5 mr-1" /> Add Service Item
+              <Plus className="w-3.5 h-3.5" /> Add Service Item
             </button>
           </div>
 
@@ -1065,6 +1104,27 @@ export const InvoiceEditorPage: React.FC = () => {
               className="w-full p-2 border border-gray-300 rounded-lg text-xs"
             />
           </div>
+        </div>
+
+        {/* Bottom Save Action Bar */}
+        <div className="flex justify-end items-center gap-3 pt-4 pb-12">
+          <button
+            type="button"
+            onClick={() => handleSave('draft')}
+            disabled={saving}
+            className="px-5 py-2.5 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-xl text-sm font-semibold shadow-2xs transition-all cursor-pointer"
+          >
+            Save as Draft
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSave('issued')}
+            disabled={saving}
+            className="inline-flex items-center gap-2 px-7 py-2.5 bg-teal-800 hover:bg-teal-900 text-white rounded-xl text-sm font-bold shadow-lg hover:shadow-xl transition-all duration-150 disabled:opacity-50 cursor-pointer"
+          >
+            <Save className="w-4 h-4" />
+            {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Issue Invoice'}
+          </button>
         </div>
       </div>
     </div>

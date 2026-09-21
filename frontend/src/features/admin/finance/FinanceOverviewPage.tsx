@@ -61,19 +61,19 @@ export const FinanceOverviewPage: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2">
           <Link
             to="/admin/finance/invoices/new"
-            className="inline-flex items-center px-4 py-2 bg-teal-800 hover:bg-teal-900 text-white rounded-xl text-sm font-semibold shadow-sm transition"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-teal-800 hover:bg-teal-900 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer"
           >
-            <Plus className="w-4 h-4 mr-1.5" /> Create Invoice
+            <Plus className="w-4 h-4" /> Create Invoice
           </Link>
           <Link
             to="/admin/finance/vouchers/new"
-            className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-semibold shadow-sm transition"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-semibold shadow-2xs transition cursor-pointer"
           >
-            <Compass className="w-4 h-4 mr-1.5 text-teal-700" /> Issue Voucher
+            <Compass className="w-4 h-4 text-teal-700" /> Issue Voucher
           </Link>
           <Link
             to="/admin/finance/settings"
-            className="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-medium transition"
+            className="inline-flex items-center px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-medium transition cursor-pointer"
           >
             Settings & Currencies
           </Link>

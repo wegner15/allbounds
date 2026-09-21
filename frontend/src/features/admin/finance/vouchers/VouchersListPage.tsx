@@ -118,9 +118,9 @@ export const VouchersListPage: React.FC = () => {
         </div>
         <Link
           to="/admin/finance/vouchers/new"
-          className="inline-flex items-center px-4 py-2 bg-teal-800 hover:bg-teal-900 text-white rounded-xl text-sm font-semibold shadow-sm transition"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-teal-800 hover:bg-teal-900 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer"
         >
-          <Plus className="w-4 h-4 mr-1.5" /> Issue Travel Voucher
+          <Plus className="w-4 h-4" /> Issue Travel Voucher
         </Link>
       </div>
 
@@ -182,9 +182,15 @@ export const VouchersListPage: React.FC = () => {
           <div className="text-center p-12 text-gray-500">
             <Compass className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <p className="font-semibold text-gray-700">No travel vouchers found.</p>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-gray-400 mt-1 mb-4">
               Issue a new service voucher or adjust your search filters.
             </p>
+            <Link
+              to="/admin/finance/vouchers/new"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-teal-800 hover:bg-teal-900 text-white rounded-xl text-xs font-semibold shadow-md transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" /> Issue Travel Voucher
+            </Link>
           </div>
         ) : (
           <div className="overflow-x-auto">

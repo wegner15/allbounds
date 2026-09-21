@@ -72,6 +72,10 @@ export const financeApi = {
     return apiClient.get<Invoice>(`/finance/invoices/${id}`);
   },
 
+  async getNextInvoiceNumber(): Promise<{ invoice_number: string }> {
+    return apiClient.get<{ invoice_number: string }>('/finance/invoices/next-number');
+  },
+
   async getInvoiceByToken(token: string): Promise<Invoice> {
     return apiClient.get<Invoice>(`/finance/invoices/by-token/${token}`);
   },

@@ -36,7 +36,22 @@ export default {
         // Legacy colors (keeping for backward compatibility)
         butter: '#eeca80',
         sand: '#edd785',
-        teal: '#8fbac0', // Aligned with updated primary
+        teal: {
+          DEFAULT: '#8fbac0', // Aligned with updated primary
+          dark: '#6fa4ab',
+          light: '#b8d8dc',
+          50: '#f0fdfa',
+          100: '#ccfbf1',
+          200: '#99f6e4',
+          300: '#5eead4',
+          400: '#2dd4bf',
+          500: '#14b8a6',
+          600: '#0d9488',
+          700: '#0f766e',
+          800: '#115e59',
+          900: '#134e4a',
+          950: '#042f2e',
+        },
         mint: '#58e5b1',
         footer: '#bab7ac',
         'primary-link': '#2D3748',

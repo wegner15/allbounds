@@ -234,9 +234,9 @@ export const FinanceSettingsPage: React.FC = () => {
           type="button"
           onClick={handleSaveSettings}
           disabled={saving}
-          className="px-5 py-2 bg-teal-800 hover:bg-teal-900 text-white rounded-xl text-sm font-semibold shadow-sm transition flex items-center"
+          className="inline-flex items-center gap-2 px-6 py-2.5 bg-teal-800 hover:bg-teal-900 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-150 disabled:opacity-50 cursor-pointer"
         >
-          <Save className="w-4 h-4 mr-1.5" />
+          <Save className="w-4 h-4" />
           {saving ? 'Saving...' : 'Save Settings'}
         </button>
       </div>
@@ -272,9 +272,9 @@ export const FinanceSettingsPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowAddCurrency(true)}
-            className="inline-flex items-center px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-900 text-xs font-semibold rounded-lg transition"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-teal-50 hover:bg-teal-100 text-teal-900 border border-teal-200 text-xs font-semibold rounded-lg shadow-2xs transition-all cursor-pointer"
           >
-            <Plus className="w-3.5 h-3.5 mr-1" /> Add New Currency
+            <Plus className="w-3.5 h-3.5" /> Add New Currency
           </button>
         </div>
 
@@ -539,9 +539,9 @@ export const FinanceSettingsPage: React.FC = () => {
           <button
             type="button"
             onClick={addBankAccount}
-            className="inline-flex items-center px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-900 text-xs font-semibold rounded-lg transition"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-teal-50 hover:bg-teal-100 text-teal-900 border border-teal-200 text-xs font-semibold rounded-lg shadow-2xs transition-all cursor-pointer"
           >
-            <Plus className="w-3.5 h-3.5 mr-1" /> Add Bank Account
+            <Plus className="w-3.5 h-3.5" /> Add Bank Account
           </button>
         </div>
 
@@ -558,7 +558,7 @@ export const FinanceSettingsPage: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 <div>
-                  <label className="block text-gray-600 font-medium mb-1">Bank Name *</label>
+                  <label className="block font-medium text-gray-700 mb-1">Bank Name *</label>
                   <input
                     type="text"
                     value={b.bank_name}
@@ -567,12 +567,13 @@ export const FinanceSettingsPage: React.FC = () => {
                       updated[idx].bank_name = e.target.value;
                       setBankAccounts(updated);
                     }}
-                    placeholder="e.g. Stanbic Bank Uganda"
-                    className="w-full p-2 border border-gray-300 rounded-lg text-xs font-bold"
+                    placeholder="e.g. Standard Chartered Bank"
+                    className="w-full p-2 border border-gray-300 rounded-lg text-xs"
+                    required
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-600 font-medium mb-1">Account Name *</label>
+                  <label className="block font-medium text-gray-700 mb-1">Account Name *</label>
                   <input
                     type="text"
                     value={b.account_name}
@@ -581,11 +582,12 @@ export const FinanceSettingsPage: React.FC = () => {
                       updated[idx].account_name = e.target.value;
                       setBankAccounts(updated);
                     }}
-                    className="w-full p-2 border border-gray-300 rounded-lg text-xs font-semibold"
+                    className="w-full p-2 border border-gray-300 rounded-lg text-xs"
+                    required
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-600 font-medium mb-1">Account Number *</label>
+                  <label className="block font-medium text-gray-700 mb-1">Account Number / IBAN *</label>
                   <input
                     type="text"
                     value={b.account_number}
@@ -594,11 +596,12 @@ export const FinanceSettingsPage: React.FC = () => {
                       updated[idx].account_number = e.target.value;
                       setBankAccounts(updated);
                     }}
-                    className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono font-bold"
+                    className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono"
+                    required
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-600 font-medium mb-1">Branch</label>
+                  <label className="block font-medium text-gray-700 mb-1">Branch</label>
                   <input
                     type="text"
                     value={b.branch || ''}
@@ -607,12 +610,12 @@ export const FinanceSettingsPage: React.FC = () => {
                       updated[idx].branch = e.target.value;
                       setBankAccounts(updated);
                     }}
-                    placeholder="Corporate Branch, Kampala"
+                    placeholder="e.g. Speke Road Branch, Kampala"
                     className="w-full p-2 border border-gray-300 rounded-lg text-xs"
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-600 font-medium mb-1">SWIFT / BIC Code</label>
+                  <label className="block font-medium text-gray-700 mb-1">SWIFT / BIC Code</label>
                   <input
                     type="text"
                     value={b.swift_bic || ''}
@@ -621,12 +624,12 @@ export const FinanceSettingsPage: React.FC = () => {
                       updated[idx].swift_bic = e.target.value;
                       setBankAccounts(updated);
                     }}
-                    placeholder="SBICUGKX"
-                    className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono font-bold"
+                    placeholder="e.g. SCBLUGKX"
+                    className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-600 font-medium mb-1">Account Currency</label>
+                  <label className="block font-medium text-gray-700 mb-1">Account Currency</label>
                   <select
                     value={b.currency}
                     onChange={(e) => {
@@ -634,11 +637,11 @@ export const FinanceSettingsPage: React.FC = () => {
                       updated[idx].currency = e.target.value;
                       setBankAccounts(updated);
                     }}
-                    className="w-full p-2 border border-gray-300 rounded-lg text-xs bg-white font-bold"
+                    className="w-full p-2 border border-gray-300 rounded-lg text-xs bg-white"
                   >
                     {currencies.map((c) => (
                       <option key={c.id} value={c.code}>
-                        {c.code}
+                        {c.code} ({c.name})
                       </option>
                     ))}
                   </select>
@@ -646,6 +649,9 @@ export const FinanceSettingsPage: React.FC = () => {
               </div>
             </div>
           ))}
+          {bankAccounts.length === 0 && (
+            <p className="text-xs text-gray-400 italic py-2">No bank accounts configured yet.</p>
+          )}
         </div>
       </div>
 
@@ -663,9 +669,9 @@ export const FinanceSettingsPage: React.FC = () => {
           <button
             type="button"
             onClick={addMomoAccount}
-            className="inline-flex items-center px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-900 text-xs font-semibold rounded-lg transition"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-teal-50 hover:bg-teal-100 text-teal-900 border border-teal-200 text-xs font-semibold rounded-lg shadow-2xs transition-all cursor-pointer"
           >
-            <Plus className="w-3.5 h-3.5 mr-1" /> Add Mobile Money
+            <Plus className="w-3.5 h-3.5" /> Add Mobile Money
           </button>
         </div>
 
@@ -781,6 +787,19 @@ export const FinanceSettingsPage: React.FC = () => {
             />
           </div>
         </div>
+      </div>
+
+      {/* Bottom Save Action Bar */}
+      <div className="flex justify-end items-center pt-2 pb-12">
+        <button
+          type="button"
+          onClick={handleSaveSettings}
+          disabled={saving}
+          className="inline-flex items-center gap-2 px-7 py-3 bg-teal-800 hover:bg-teal-900 text-white rounded-xl text-sm font-bold shadow-lg hover:shadow-xl transition-all duration-150 disabled:opacity-50 cursor-pointer"
+        >
+          <Save className="w-4 h-4" />
+          {saving ? 'Saving...' : 'Save Settings'}
+        </button>
       </div>
     </div>
   );

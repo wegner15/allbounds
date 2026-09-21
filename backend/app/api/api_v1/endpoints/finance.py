@@ -111,6 +111,15 @@ def get_finance_stats(
 # INVOICE ENDPOINTS
 # ==========================================
 
+@router.get("/invoices/next-number")
+def get_next_invoice_number(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+) -> Any:
+    """Preview the next auto-generated invoice number without creating an invoice."""
+    return {"invoice_number": finance_service.get_next_invoice_number(db)}
+
+
 @router.get("/invoices")
 def get_invoices(
     skip: int = 0,

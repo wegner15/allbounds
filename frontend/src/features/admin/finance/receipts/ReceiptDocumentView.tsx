@@ -50,7 +50,7 @@ export const ReceiptDocumentView: React.FC<ReceiptDocumentViewProps> = ({
               <button
                 type="button"
                 onClick={onSendEmail}
-                className="inline-flex items-center px-3 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium shadow-sm transition"
+                className="inline-flex items-center px-3 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium shadow-2xs transition cursor-pointer"
               >
                 <Mail className="w-4 h-4 mr-1.5 text-gray-500" /> Send Email
               </button>
@@ -58,7 +58,7 @@ export const ReceiptDocumentView: React.FC<ReceiptDocumentViewProps> = ({
             <button
               type="button"
               onClick={() => window.print()}
-              className="inline-flex items-center px-3.5 py-2 rounded-lg bg-teal-800 hover:bg-teal-900 text-white text-sm font-medium shadow-sm transition"
+              className="inline-flex items-center px-3.5 py-2 rounded-lg bg-teal-800 hover:bg-teal-900 text-white text-sm font-semibold shadow-sm transition cursor-pointer"
             >
               <Printer className="w-4 h-4 mr-1.5" /> Print / PDF
             </button>

@@ -368,9 +368,9 @@ export const VoucherEditorPage: React.FC = () => {
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="px-5 py-2 bg-teal-800 hover:bg-teal-900 text-white rounded-xl text-sm font-semibold shadow-sm transition flex items-center"
+          className="inline-flex items-center gap-2 px-6 py-2.5 bg-teal-800 hover:bg-teal-900 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-150 disabled:opacity-50 cursor-pointer"
         >
-          <Save className="w-4 h-4 mr-1.5" />
+          <Save className="w-4 h-4" />
           {saving ? 'Saving...' : 'Save & Issue Voucher'}
         </button>
       </div>
@@ -939,6 +939,19 @@ export const VoucherEditorPage: React.FC = () => {
               className="w-full p-2 border border-gray-300 rounded-lg text-xs"
             />
           </div>
+        </div>
+
+        {/* Bottom Save Action Bar */}
+        <div className="flex justify-end items-center pt-4 pb-12">
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="inline-flex items-center gap-2 px-7 py-3 bg-teal-800 hover:bg-teal-900 text-white rounded-xl text-sm font-bold shadow-lg hover:shadow-xl transition-all duration-150 disabled:opacity-50 cursor-pointer"
+          >
+            <Save className="w-4 h-4" />
+            {saving ? 'Saving...' : 'Save & Issue Voucher'}
+          </button>
         </div>
       </div>
     </div>

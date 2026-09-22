@@ -12,10 +12,6 @@ import {
   Briefcase,
   Users,
   MapPin,
-  Calendar,
-  Navigation,
-  ShieldCheck,
-  Headphones,
 } from 'lucide-react';
 import DateRangePicker from '../../../../components/ui/DateRangePicker';
 import GuestsInput, { type GuestConfig } from '../../../../components/ui/GuestsInput';
@@ -30,39 +26,6 @@ interface TabConfig {
   fields: ('location' | 'dates' | 'guests' | 'activiy_types')[];
 }
 
-const popularDestinations = [
-  { label: 'Uganda', slug: 'uganda' },
-  { label: 'Kenya', slug: 'kenya' },
-  { label: 'Tanzania', slug: 'tanzania' },
-  { label: 'Rwanda', slug: 'rwanda' },
-  { label: 'Mauritius', slug: 'mauritius' },
-  { label: 'Dubai', slug: 'dubai' },
-  { label: 'Greece', slug: 'greece' },
-  { label: 'Maldives', slug: 'maldives' },
-];
-
-const trustItems = [
-  {
-    icon: <Navigation className="w-6 h-6" />,
-    title: 'Curated journeys',
-    subtitle: 'UNIQUE EXPERIENCES',
-  },
-  {
-    icon: <Users className="w-6 h-6" />,
-    title: 'Local experts',
-    subtitle: 'REAL INSIGHTS',
-  },
-  {
-    icon: <ShieldCheck className="w-6 h-6" />,
-    title: 'Flexible planning',
-    subtitle: 'YOUR TRIP, YOUR WAY',
-  },
-  {
-    icon: <Headphones className="w-6 h-6" />,
-    title: '24/7 support',
-    subtitle: 'ALWAYS HERE',
-  },
-];
 
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();
@@ -320,7 +283,7 @@ const HeroSection: React.FC = () => {
       {/* ── Content ── */}
       <div
         className="relative z-20 max-w-[1400px] mx-auto px-4 md:px-8 flex flex-col justify-between"
-        style={{ minHeight: '720px', paddingTop: '100px', paddingBottom: '0' }}
+        style={{ minHeight: '660px', paddingTop: '100px', paddingBottom: '3.5rem' }}
       >
         {/* ── Headline — top-left, two-line ── */}
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -333,9 +296,6 @@ const HeroSection: React.FC = () => {
               Designed. Booked. Perfected.
             </span>
           </h1>
-          <p className="mt-3 text-gray-200 font-lato font-light leading-relaxed text-base md:text-lg max-w-xl">
-            Luxury Safaris, Family Holidays, Beach Escapes &amp; Group Trips – All in One Place.
-          </p>
         </div>
 
         {/* ── Search Card ── */}
@@ -373,10 +333,10 @@ const HeroSection: React.FC = () => {
             </div>
 
             {/* ── Search fields row ── */}
-            <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-stretch">
+            <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-stretch rounded-b-2xl">
 
               {/* Where */}
-              <div className="flex-1 min-w-0 relative px-3 py-3.5 border-b md:border-b-0 md:border-r border-gray-100 hover:bg-gray-50/60 transition-colors group">
+              <div className="flex-1 min-w-0 relative px-3 py-3.5 border-b md:border-b-0 md:border-r border-gray-100 hover:bg-gray-50/60 transition-colors group md:rounded-bl-2xl">
                 <label className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">
                   <MapPin className="w-3.5 h-3.5" />
                   Where are you going?
@@ -418,7 +378,7 @@ const HeroSection: React.FC = () => {
               </div>
 
               {/* Search Button */}
-              <div className="flex items-center justify-center px-4 py-3.5 shrink-0">
+              <div className="flex items-center justify-center px-4 py-3.5 shrink-0 rounded-b-2xl md:rounded-b-none md:rounded-br-2xl">
                 <button
                   type="submit"
                   className="bg-teal hover:bg-teal-dark text-white rounded-xl px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 font-bold text-base flex items-center gap-2 whitespace-nowrap w-full md:w-auto justify-center"
@@ -429,49 +389,6 @@ const HeroSection: React.FC = () => {
                 </button>
               </div>
             </form>
-
-            {/* ── Popular Destinations chips ── */}
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl">
-              <span className="flex items-center gap-1 text-xs text-gray-400 font-medium mr-1 shrink-0">
-                <MapPin className="w-3.5 h-3.5" />
-                Explore popular destinations
-              </span>
-              {popularDestinations.map((dest) => (
-                <button
-                  key={dest.slug}
-                  onClick={() => navigate(`/destinations/${dest.slug}`)}
-                  className="flex items-center gap-1 text-xs font-semibold text-charcoal hover:text-teal transition-colors duration-200 group"
-                >
-                  <MapPin className="w-3 h-3 text-teal group-hover:text-teal-dark transition-colors" />
-                  {dest.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* ── Trust Bar ── */}
-        <div
-          className="w-full animate-in fade-in duration-700 delay-200"
-          style={{ marginTop: '1.75rem', paddingBottom: '2rem' }}
-        >
-          <div className="flex flex-wrap justify-start gap-y-4">
-            {trustItems.map((item, i) => (
-              <React.Fragment key={item.title}>
-                <div className="flex items-center gap-3 pr-8">
-                  <div className="text-butter/90 shrink-0">{item.icon}</div>
-                  <div>
-                    <p className="text-white font-semibold text-sm leading-tight">{item.title}</p>
-                    <p className="text-white/50 text-[10px] font-bold uppercase tracking-widest mt-0.5">
-                      {item.subtitle}
-                    </p>
-                  </div>
-                </div>
-                {i < trustItems.length - 1 && (
-                  <div className="hidden sm:block w-px bg-white/20 self-stretch mr-8" />
-                )}
-              </React.Fragment>
-            ))}
           </div>
         </div>
       </div>

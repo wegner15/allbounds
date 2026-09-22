@@ -283,7 +283,7 @@ const HeroSection: React.FC = () => {
       {/* ── Content ── */}
       <div
         className="relative z-20 max-w-[1400px] mx-auto px-4 md:px-8 flex flex-col justify-between"
-        style={{ minHeight: '660px', paddingTop: '100px', paddingBottom: '3.5rem' }}
+        style={{ minHeight: '680px', paddingTop: '140px', paddingBottom: '3.5rem' }}
       >
         {/* ── Headline — top-left, two-line ── */}
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -300,7 +300,7 @@ const HeroSection: React.FC = () => {
 
         {/* ── Search Card ── */}
         <div
-          className="w-full animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100"
+          className="w-full max-w-[980px] animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100"
           style={{ marginTop: '2.5rem' }}
         >
           <div className="bg-white rounded-2xl shadow-2xl overflow-visible">

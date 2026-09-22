@@ -113,11 +113,11 @@ export default {
       borderRadius: {
         'none': '0',
         'sm': '4px',
-        'DEFAULT': '8px',
-        'md': '8px',
-        'lg': '12px',
-        'xl': '16px',
-        '2xl': '24px',
+        'DEFAULT': '6px',
+        'md': '6px',
+        'lg': '8px',
+        'xl': '10px',
+        '2xl': '14px',
         'full': '9999px',
       },
       boxShadow: {

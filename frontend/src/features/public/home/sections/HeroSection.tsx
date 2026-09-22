@@ -319,7 +319,7 @@ const HeroSection: React.FC = () => {
 
       {/* ── Content ── */}
       <div
-        className="relative z-20 max-w-[1400px] mx-auto px-6 md:px-10 flex flex-col justify-between"
+        className="relative z-20 max-w-[1400px] mx-auto px-4 md:px-8 flex flex-col justify-between"
         style={{ minHeight: '720px', paddingTop: '100px', paddingBottom: '0' }}
       >
         {/* ── Headline — top-left, two-line ── */}
@@ -352,7 +352,7 @@ const HeroSection: React.FC = () => {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`
-                    flex items-center gap-2 px-5 py-4 text-sm font-semibold whitespace-nowrap transition-all duration-200 border-b-2 -mb-px
+                    flex items-center gap-2 px-4 py-3.5 text-sm font-semibold whitespace-nowrap transition-all duration-200 border-b-2 -mb-px
                     ${
                       activeTab === tab.id
                         ? 'border-teal text-teal bg-teal/5'
@@ -376,7 +376,7 @@ const HeroSection: React.FC = () => {
             <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-stretch">
 
               {/* Where */}
-              <div className="flex-1 relative px-5 py-4 border-b md:border-b-0 md:border-r border-gray-100 hover:bg-gray-50/60 transition-colors group">
+              <div className="flex-1 min-w-0 relative px-3 py-3.5 border-b md:border-b-0 md:border-r border-gray-100 hover:bg-gray-50/60 transition-colors group">
                 <label className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">
                   <MapPin className="w-3.5 h-3.5" />
                   Where are you going?
@@ -390,7 +390,7 @@ const HeroSection: React.FC = () => {
               </div>
 
               {/* Dates */}
-              <div className="flex-1 relative px-5 py-4 border-b md:border-b-0 md:border-r border-gray-100 hover:bg-gray-50/60 transition-colors cursor-pointer">
+              <div className="flex-1 min-w-0 relative px-3 py-3.5 border-b md:border-b-0 md:border-r border-gray-100 hover:bg-gray-50/60 transition-colors cursor-pointer">
                 <DateRangePicker
                   range={dateRange}
                   setRange={handleDateRangeSelect}
@@ -401,7 +401,7 @@ const HeroSection: React.FC = () => {
               </div>
 
               {/* Guests / Activity Type */}
-              <div className="flex-1 relative px-5 py-4 border-b md:border-b-0 md:border-r border-gray-100 hover:bg-gray-50/60 transition-colors">
+              <div className="flex-1 min-w-0 relative px-3 py-3.5 border-b md:border-b-0 md:border-r border-gray-100 hover:bg-gray-50/60 transition-colors">
                 <label className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">
                   <Users className="w-3.5 h-3.5" />
                   {activeTabConfig.fields.includes('guests') ? 'Guests' : 'Type'}
@@ -418,11 +418,11 @@ const HeroSection: React.FC = () => {
               </div>
 
               {/* Search Button */}
-              <div className="flex items-center justify-center px-5 py-4">
+              <div className="flex items-center justify-center px-4 py-3.5 shrink-0">
                 <button
                   type="submit"
-                  className="bg-teal hover:bg-teal-dark text-white rounded-xl px-7 py-3.5 shadow-lg hover:shadow-xl transition-all duration-300 font-bold text-base flex items-center gap-2 whitespace-nowrap w-full md:w-auto justify-center"
-                  style={{ minWidth: '130px' }}
+                  className="bg-teal hover:bg-teal-dark text-white rounded-xl px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 font-bold text-base flex items-center gap-2 whitespace-nowrap w-full md:w-auto justify-center"
+                  style={{ minWidth: '120px' }}
                 >
                   <Search className="w-5 h-5" />
                   Search
@@ -431,7 +431,7 @@ const HeroSection: React.FC = () => {
             </form>
 
             {/* ── Popular Destinations chips ── */}
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-5 py-3 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl">
               <span className="flex items-center gap-1 text-xs text-gray-400 font-medium mr-1 shrink-0">
                 <MapPin className="w-3.5 h-3.5" />
                 Explore popular destinations

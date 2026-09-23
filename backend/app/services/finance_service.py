@@ -306,6 +306,7 @@ class FinanceService:
         db_invoice = Invoice(
             invoice_number=invoice_number,
             booking_id=invoice_in.booking_id,
+            client_id=invoice_in.client_id,
             quote_number=invoice_in.quote_number,
             invoice_status=invoice_in.invoice_status,
             invoice_date=invoice_in.invoice_date,
@@ -352,6 +353,8 @@ class FinanceService:
                 tax_rate=item_data.tax_rate,
                 tax_amount=item_data.tax_amount,
                 total_amount=item_data.total_amount,
+                cost_price=getattr(item_data, "cost_price", 0.0),
+                supplier_id=getattr(item_data, "supplier_id", None),
                 metadata_json=item_data.metadata_json or {},
                 sort_order=idx
             )
@@ -628,6 +631,7 @@ class FinanceService:
             receipt_number=receipt_number,
             invoice_id=invoice.id,
             booking_id=invoice.booking_id,
+            client_id=getattr(receipt_in, "client_id", None) or invoice.client_id,
             payment_reference=receipt_in.payment_reference,
             receipt_date=receipt_in.receipt_date,
             payment_date=receipt_in.payment_date,

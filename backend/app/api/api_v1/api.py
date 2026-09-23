@@ -36,6 +36,9 @@ from app.api.api_v1.endpoints import (
     content_tags,
     travel_guides,
     finance,
+    clients,
+    suppliers,
+    reports,
 )
 
 api_router = APIRouter()
@@ -81,3 +84,6 @@ api_router.include_router(visa_applications.router, prefix="/visa-applications",
 api_router.include_router(flight_bookings.router, prefix="/flight-bookings", tags=["Flight Bookings"])
 api_router.include_router(email_logs.router, prefix="/email-logs", tags=["Logs"])
 api_router.include_router(finance.router, prefix="/finance", tags=["Finance"])
+api_router.include_router(clients.router, prefix="/clients", tags=["Clients"])
+api_router.include_router(suppliers.router, prefix="/suppliers", tags=["Suppliers"])
+api_router.include_router(reports.router, prefix="/reports", tags=["Reports"])

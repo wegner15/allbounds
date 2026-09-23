@@ -165,6 +165,12 @@ import { VouchersListPage } from './features/admin/finance/vouchers/VouchersList
 import { VoucherEditorPage } from './features/admin/finance/vouchers/VoucherEditorPage';
 import { VoucherDetailPage } from './features/admin/finance/vouchers/VoucherDetailPage';
 import { FinanceSettingsPage } from './features/admin/finance/settings/FinanceSettingsPage';
+import { ClientsListPage } from './features/admin/finance/clients/ClientsListPage';
+import { ClientDetailPage } from './features/admin/finance/clients/ClientDetailPage';
+import { SuppliersListPage } from './features/admin/finance/suppliers/SuppliersListPage';
+import { SupplierDetailPage } from './features/admin/finance/suppliers/SupplierDetailPage';
+import { SupplierBillsPage } from './features/admin/finance/suppliers/SupplierBillsPage';
+import { ReportsOverviewPage } from './features/admin/finance/reports/ReportsOverviewPage';
 
 // Import Public Verification pages
 import { PublicVoucherVerificationPage } from './features/public/verification/PublicVoucherVerificationPage';
@@ -515,6 +521,12 @@ const router = createBrowserRouter([
       { path: 'finance/vouchers/new', element: <VoucherEditorPage /> },
       { path: 'finance/vouchers/:id', element: <VoucherDetailPage /> },
       { path: 'finance/vouchers/:id/edit', element: <VoucherEditorPage /> },
+      { path: 'finance/clients', element: <ClientsListPage /> },
+      { path: 'finance/clients/:id', element: <ClientDetailPage /> },
+      { path: 'finance/suppliers', element: <SuppliersListPage /> },
+      { path: 'finance/suppliers/:id', element: <SupplierDetailPage /> },
+      { path: 'finance/bills', element: <SupplierBillsPage /> },
+      { path: 'finance/reports', element: <ReportsOverviewPage /> },
       { path: 'finance/settings', element: <FinanceSettingsPage /> },
     ],
   },

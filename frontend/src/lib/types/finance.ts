@@ -352,3 +352,278 @@ export interface PublicReceiptVerificationResponse {
   payer_name: string;
   verification_timestamp: string;
 }
+
+// ==========================================
+// CLIENT CRM TYPES
+// ==========================================
+
+export interface Client {
+  id: number;
+  client_type: 'individual' | 'corporate';
+  first_name?: string;
+  last_name?: string;
+  company_name?: string;
+  contact_person?: string;
+  email: string;
+  phone?: string;
+  alt_phone?: string;
+  country_of_origin?: string;
+  address?: string;
+  city?: string;
+  postal_code?: string;
+  tin_number?: string;
+  vat_number?: string;
+  passport_number?: string;
+  nationality?: string;
+  dietary_requirements?: string;
+  special_notes?: string;
+  is_active: boolean;
+  display_name: string;
+  total_invoiced_usd: number;
+  total_paid_usd: number;
+  outstanding_balance_usd: number;
+  invoices_count: number;
+  bookings_count: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface StatementTransaction {
+  date: string;
+  type: 'INVOICE' | 'PAYMENT';
+  reference_number: string;
+  description: string;
+  currency: string;
+  debit: number;
+  credit: number;
+  running_balance: number;
+}
+
+export interface ClientStatement {
+  client: Client;
+  statement_date: string;
+  start_date?: string;
+  end_date?: string;
+  opening_balance: number;
+  total_billed: number;
+  total_paid: number;
+  closing_balance: number;
+  transactions: StatementTransaction[];
+}
+
+// ==========================================
+// SUPPLIERS & PAYABLES TYPES
+// ==========================================
+
+export interface Supplier {
+  id: number;
+  name: string;
+  supplier_code: string;
+  category: 'lodge_hotel' | 'safari_operator' | 'transporter' | 'airline' | 'park_authority' | 'guide' | 'other' | string;
+  contact_person?: string;
+  email?: string;
+  phone?: string;
+  whatsapp?: string;
+  physical_address?: string;
+  country?: string;
+  currency: string;
+  tax_pin_number?: string;
+  bank_details?: Record<string, any>;
+  mobile_money_details?: Record<string, any>;
+  payment_terms?: string;
+  rating?: number;
+  notes?: string;
+  is_active: boolean;
+  total_billed_usd: number;
+  total_paid_usd: number;
+  balance_payable_usd: number;
+  pending_bills_count: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface SupplierPayment {
+  id: number;
+  payment_number: string;
+  supplier_bill_id: number;
+  supplier_id: number;
+  payment_date: string;
+  amount_paid: number;
+  currency: string;
+  exchange_rate_to_usd: number;
+  payment_method: string;
+  reference_code: string;
+  disbursed_from_account?: string;
+  notes?: string;
+  created_at?: string;
+}
+
+export interface SupplierBill {
+  id: number;
+  bill_number: string;
+  supplier_reference?: string;
+  supplier_id: number;
+  supplier_name?: string;
+  booking_id?: number;
+  invoice_id?: number;
+  bill_date: string;
+  due_date: string;
+  service_date?: string;
+  currency: string;
+  exchange_rate_to_usd: number;
+  amount_billed: number;
+  amount_paid: number;
+  balance_payable: number;
+  status: 'pending' | 'partially_paid' | 'paid' | 'overdue' | 'cancelled';
+  category: string;
+  description?: string;
+  notes?: string;
+  attachment_url?: string;
+  created_at?: string;
+  updated_at?: string;
+  payments: SupplierPayment[];
+}
+
+export interface SupplierLedgerTransaction {
+  date: string;
+  type: 'BILL' | 'PAYMENT';
+  reference_number: string;
+  supplier_reference?: string;
+  description: string;
+  currency: string;
+  bill_amount: number;
+  paid_amount: number;
+  running_payable: number;
+}
+
+export interface SupplierLedger {
+  supplier: Supplier;
+  statement_date: string;
+  start_date?: string;
+  end_date?: string;
+  total_billed: number;
+  total_paid: number;
+  closing_payable: number;
+  transactions: SupplierLedgerTransaction[];
+}
+
+// ==========================================
+// FINANCIAL REPORTS TYPES
+// ==========================================
+
+export interface SalesReport {
+  start_date?: string;
+  end_date?: string;
+  total_invoiced_usd: number;
+  total_collected_usd: number;
+  total_outstanding_usd: number;
+  invoices_count: number;
+  average_order_value_usd: number;
+  period_breakdown: {
+    period: string;
+    invoices_count: number;
+    gross_revenue_usd: number;
+    discount_usd: number;
+    net_revenue_usd: number;
+    collected_usd: number;
+    outstanding_usd: number;
+  }[];
+  destination_breakdown: {
+    destination: string;
+    bookings_count: number;
+    total_sales_usd: number;
+    percentage_of_total: number;
+  }[];
+  consultant_breakdown: {
+    consultant_name: string;
+    invoices_count: number;
+    total_sales_usd: number;
+  }[];
+}
+
+export interface AgingBucket {
+  bucket_label: string;
+  count: number;
+  total_amount_usd: number;
+  percentage: number;
+}
+
+export interface ReceivablesAgingReport {
+  as_of_date: string;
+  total_receivable_usd: number;
+  buckets: AgingBucket[];
+  overdue_invoices: {
+    invoice_id: number;
+    invoice_number: string;
+    client_name: string;
+    invoice_date: string;
+    due_date: string;
+    days_overdue: number;
+    currency: string;
+    total_amount: number;
+    amount_paid: number;
+    balance_due: number;
+    balance_due_usd: number;
+    status: string;
+  }[];
+}
+
+export interface PayablesAgingReport {
+  as_of_date: string;
+  total_payable_usd: number;
+  buckets: AgingBucket[];
+  pending_bills: {
+    bill_id: number;
+    bill_number: string;
+    supplier_name: string;
+    bill_date: string;
+    due_date: string;
+    days_overdue: number;
+    currency: string;
+    amount_billed: number;
+    amount_paid: number;
+    balance_payable: number;
+    balance_payable_usd: number;
+    status: string;
+  }[];
+}
+
+export interface ProfitabilityItem {
+  booking_id?: number;
+  invoice_id: number;
+  invoice_number: string;
+  client_name: string;
+  service_description: string;
+  destination?: string;
+  revenue_usd: number;
+  cost_usd: number;
+  gross_profit_usd: number;
+  gross_margin_percent: number;
+}
+
+export interface ProfitabilityReport {
+  start_date?: string;
+  end_date?: string;
+  total_revenue_usd: number;
+  total_cost_usd: number;
+  total_gross_profit_usd: number;
+  average_margin_percent: number;
+  items: ProfitabilityItem[];
+}
+
+export interface CashFlowReport {
+  start_date?: string;
+  end_date?: string;
+  total_inflow_usd: number;
+  total_outflow_usd: number;
+  net_cash_flow_usd: number;
+  inflows_by_method: Record<string, number>;
+  outflows_by_method: Record<string, number>;
+  daily_timeline: {
+    date: string;
+    inflow_usd: number;
+    outflow_usd: number;
+    net_usd: number;
+  }[];
+}
+

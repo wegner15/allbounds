@@ -27,6 +27,8 @@ from app.models.media import MediaAsset
 from app.models.audit import AuditLog
 from app.models.seo import SeoMeta
 from app.models.itinerary import ItineraryItem, ItineraryActivity
+from app.models.client import Client
+from app.models.supplier import Supplier
 from app.models.booking import Booking, BookingTraveler
 from app.models.inquiry import Inquiry
 from app.models.country_visit_info import CountryVisitInfo
@@ -47,6 +49,8 @@ from app.models.finance import (
     PaymentReceipt,
     TravelVoucher
 )
+from app.models.supplier_bill import SupplierBill
+from app.models.supplier_payment import SupplierPayment
 
 # This ensures all models are imported in the correct order
 __all__ = [
@@ -59,10 +63,12 @@ __all__ = [
     'Review', 'BlogPost', 'Tag', 'ContentPage',
     'MediaAsset', 'AuditLog', 'SeoMeta',
     'ItineraryItem', 'ItineraryActivity',
+    'Client', 'Supplier',
     'Booking', 'BookingTraveler', 'Inquiry',
     'CountryVisitInfo', 'NewsletterSubscription', 'VisaApplication',
     'FlightBooking', 'FlightPassenger', 'EmailLog', 'Partner',
     'Currency', 'CompanyFinanceSettings', 'Invoice', 'InvoiceLineItem', 'PaymentReceipt', 'TravelVoucher',
+    'SupplierBill', 'SupplierPayment',
 ]
 
 

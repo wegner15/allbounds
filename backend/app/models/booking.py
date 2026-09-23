@@ -48,9 +48,13 @@ class Booking(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
+    # Client link
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete="SET NULL"), nullable=True, index=True)
+
     # Relationships
     travelers = relationship("BookingTraveler", backref="booking", cascade="all, delete-orphan")
     partner = relationship("Partner", backref="bookings")
+    client = relationship("Client", back_populates="bookings")
 
 
 class BookingTraveler(Base):

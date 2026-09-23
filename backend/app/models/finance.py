@@ -64,6 +64,7 @@ class Invoice(Base):
     id = Column(Integer, primary_key=True, index=True)
     invoice_number = Column(String(100), unique=True, index=True, nullable=False)
     booking_id = Column(Integer, ForeignKey("bookings.id", ondelete="SET NULL"), nullable=True, index=True)
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete="SET NULL"), nullable=True, index=True)
     quote_number = Column(String(100), nullable=True)
     
     # draft, issued, partially_paid, paid, overdue, cancelled
@@ -126,6 +127,8 @@ class Invoice(Base):
     )
     booking = relationship("Booking", foreign_keys=[booking_id])
     consultant = relationship("User", foreign_keys=[consultant_id])
+    client = relationship("Client", foreign_keys=[client_id], back_populates="invoices")
+    supplier_bills = relationship("SupplierBill", back_populates="invoice")
 
 
 class InvoiceLineItem(Base):
@@ -146,12 +149,17 @@ class InvoiceLineItem(Base):
     tax_amount = Column(Float, nullable=False, default=0.0)
     total_amount = Column(Float, nullable=False, default=0.0)
 
+    # Cost & Supplier tracking
+    cost_price = Column(Float, nullable=False, default=0.0)
+    supplier_id = Column(Integer, ForeignKey("suppliers.id", ondelete="SET NULL"), nullable=True, index=True)
+
     # Category-specific structured data
     metadata_json = Column(JSON, nullable=True, default=dict)
     sort_order = Column(Integer, default=0)
 
     # Relationship
     invoice = relationship("Invoice", back_populates="line_items")
+    supplier = relationship("Supplier")
 
 
 class PaymentReceipt(Base):
@@ -161,6 +169,7 @@ class PaymentReceipt(Base):
     receipt_number = Column(String(100), unique=True, index=True, nullable=False)
     invoice_id = Column(Integer, ForeignKey("invoices.id", ondelete="CASCADE"), nullable=False, index=True)
     booking_id = Column(Integer, ForeignKey("bookings.id", ondelete="SET NULL"), nullable=True, index=True)
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete="SET NULL"), nullable=True, index=True)
 
     payment_reference = Column(String(150), nullable=False)  # Bank txn id, momo txn id, etc.
     receipt_date = Column(Date, nullable=False)
@@ -187,6 +196,7 @@ class PaymentReceipt(Base):
     # Relationships
     invoice = relationship("Invoice", back_populates="receipts")
     booking = relationship("Booking", foreign_keys=[booking_id])
+    client = relationship("Client", foreign_keys=[client_id], back_populates="receipts")
 
 
 class TravelVoucher(Base):
@@ -196,6 +206,7 @@ class TravelVoucher(Base):
     voucher_number = Column(String(100), unique=True, index=True, nullable=False)
     booking_id = Column(Integer, ForeignKey("bookings.id", ondelete="SET NULL"), nullable=True, index=True)
     invoice_id = Column(Integer, ForeignKey("invoices.id", ondelete="SET NULL"), nullable=True, index=True)
+    supplier_id = Column(Integer, ForeignKey("suppliers.id", ondelete="SET NULL"), nullable=True, index=True)
     confirmation_number = Column(String(100), nullable=True)
 
     version = Column(Integer, nullable=False, default=1)
@@ -230,3 +241,4 @@ class TravelVoucher(Base):
     booking = relationship("Booking", foreign_keys=[booking_id])
     invoice = relationship("Invoice", foreign_keys=[invoice_id])
     issued_by = relationship("User", foreign_keys=[issued_by_id])
+    supplier = relationship("Supplier", foreign_keys=[supplier_id], back_populates="vouchers")

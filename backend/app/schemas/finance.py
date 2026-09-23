@@ -111,6 +111,8 @@ class InvoiceLineItemBase(BaseModel):
     tax_rate: float = 0.0
     tax_amount: float = 0.0
     total_amount: float = 0.0
+    cost_price: float = 0.0
+    supplier_id: Optional[int] = None
     metadata_json: Optional[Dict[str, Any]] = Field(default_factory=dict)
     sort_order: int = 0
 
@@ -143,6 +145,7 @@ class InvoiceBase(BaseModel):
     consultant_id: Optional[int] = None
     consultant_name: Optional[str] = None
     payment_terms: Optional[str] = None
+    client_id: Optional[int] = None
     client_type: str = Field(default="individual", description="individual or corporate")
     client_details: Dict[str, Any] = Field(default_factory=dict)
     trip_summary: Dict[str, Any] = Field(default_factory=dict)
@@ -186,6 +189,7 @@ class InvoiceUpdate(BaseModel):
     consultant_id: Optional[int] = None
     consultant_name: Optional[str] = None
     payment_terms: Optional[str] = None
+    client_id: Optional[int] = None
     client_type: Optional[str] = None
     client_details: Optional[Dict[str, Any]] = None
     trip_summary: Optional[Dict[str, Any]] = None
@@ -213,6 +217,7 @@ class InvoiceUpdate(BaseModel):
 class PaymentReceiptBase(BaseModel):
     invoice_id: int
     booking_id: Optional[int] = None
+    client_id: Optional[int] = None
     payment_reference: str
     receipt_date: date
     payment_date: datetime
@@ -266,6 +271,7 @@ class InvoiceResponse(InvoiceBase):
 class TravelVoucherBase(BaseModel):
     booking_id: Optional[int] = None
     invoice_id: Optional[int] = None
+    supplier_id: Optional[int] = None
     confirmation_number: Optional[str] = None
     version: int = 1
     voucher_status: str = Field(default="confirmed", description="confirmed, pending, amended, cancelled")

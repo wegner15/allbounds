@@ -4,6 +4,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global Print and PDF Styles */
+@import './features/admin/finance/components/PrintStyles.css';
+
 /* Image loading shimmer animation */
 @keyframes shimmer {
   0% {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import {
   Printer,
@@ -9,11 +9,14 @@ import {
   Building,
   User,
   ShieldCheck,
-  CreditCard
+  CreditCard,
+  Download,
+  Loader2,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { PaymentReceipt, CompanyFinanceSettings } from '../../../../lib/types/finance';
 import { DocumentHeader } from '../components/DocumentHeader';
+import { usePdfDownload } from '../../../../lib/utils/pdfGenerator';
 import '../components/PrintStyles.css';
 
 interface ReceiptDocumentViewProps {
@@ -29,45 +32,75 @@ export const ReceiptDocumentView: React.FC<ReceiptDocumentViewProps> = ({
   onSendEmail,
   isPublicView = false
 }) => {
+  const documentRef = useRef<HTMLDivElement>(null);
+  const { isGenerating, downloadPdf } = usePdfDownload();
+
   const client = receipt.received_from || {};
   const alloc = receipt.payment_allocation || {};
   const verificationUrl = `${window.location.origin}/verify/receipt/${receipt.verification_code}`;
 
+  const handleDownloadPdf = () => {
+    const filename = `Payment-Receipt-${receipt.receipt_number || 'AVR'}.pdf`;
+    downloadPdf(documentRef.current, filename);
+  };
+
   return (
-    <div className="max-w-4xl mx-auto my-6">
+    <div className="max-w-4xl mx-auto my-6 print:m-0 print:max-w-none">
       {/* Action Bar (Hidden during print) */}
-      {!isPublicView && (
-        <div className="no-print mb-6 flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+      <div className="no-print print:hidden mb-6 flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+        {!isPublicView ? (
           <Link
             to="/admin/finance/receipts"
             className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-teal-700"
           >
             <ArrowLeft className="w-4 h-4 mr-1" /> Back to Receipts
           </Link>
+        ) : (
+          <span className="text-xs font-bold uppercase tracking-wider text-teal-800">
+            Official Electronic Payment Receipt
+          </span>
+        )}
 
-          <div className="flex items-center space-x-2">
-            {onSendEmail && (
-              <button
-                type="button"
-                onClick={onSendEmail}
-                className="inline-flex items-center px-3 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium shadow-2xs transition cursor-pointer"
-              >
-                <Mail className="w-4 h-4 mr-1.5 text-gray-500" /> Send Email
-              </button>
-            )}
+        <div className="flex items-center space-x-2">
+          {onSendEmail && !isPublicView && (
             <button
               type="button"
-              onClick={() => window.print()}
-              className="inline-flex items-center px-3.5 py-2 rounded-lg bg-teal-800 hover:bg-teal-900 text-white text-sm font-semibold shadow-sm transition cursor-pointer"
+              onClick={onSendEmail}
+              className="inline-flex items-center px-3 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium shadow-sm transition cursor-pointer"
             >
-              <Printer className="w-4 h-4 mr-1.5" /> Print / PDF
+              <Mail className="w-4 h-4 mr-1.5 text-gray-500" /> Send Email
             </button>
-          </div>
+          )}
+
+          <button
+            type="button"
+            disabled={isGenerating}
+            onClick={handleDownloadPdf}
+            className="inline-flex items-center px-3.5 py-2 rounded-lg bg-teal-700 hover:bg-teal-800 disabled:opacity-50 text-white text-sm font-semibold shadow-sm transition cursor-pointer"
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Generating PDF...
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4 mr-1.5" /> Download PDF
+              </>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="inline-flex items-center px-3 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium shadow-sm transition cursor-pointer"
+          >
+            <Printer className="w-4 h-4 mr-1.5 text-gray-500" /> Print
+          </button>
         </div>
-      )}
+      </div>
 
       {/* Main Document Card */}
-      <div className="print-container bg-white rounded-2xl shadow-xl p-8 sm:p-12 border border-gray-200">
+      <div ref={documentRef} className="print-container bg-white rounded-2xl shadow-xl p-8 sm:p-12 border border-gray-200 print:shadow-none print:border-none print:p-0">
         {/* A. Header */}
         <DocumentHeader
           title="PAYMENT RECEIPT"

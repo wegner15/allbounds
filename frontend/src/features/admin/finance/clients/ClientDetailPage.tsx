@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -16,11 +16,14 @@ import {
   Clock,
   CheckCircle,
   CreditCard,
-  Edit2
+  Edit2,
+  Download,
+  Loader2,
 } from 'lucide-react';
 import { clientsApi } from '../../../../lib/api/clients';
 import type { Client, ClientStatement } from '../../../../lib/types/finance';
 import { ClientEditorModal } from './ClientEditorModal';
+import { usePdfDownload } from '../../../../lib/utils/pdfGenerator';
 
 export const ClientDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -37,6 +40,20 @@ export const ClientDetailPage: React.FC = () => {
 
   // Modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // PDF Download
+  const statementRef = useRef<HTMLDivElement>(null);
+  const { isGenerating, downloadPdf } = usePdfDownload();
+
+  const handleDownloadPdf = () => {
+    if (!client) return;
+    const cleanName = (client.display_name || 'Client').replace(/[^a-zA-Z0-9]/g, '-');
+    downloadPdf(statementRef.current, `Statement-of-Account-${cleanName}.pdf`);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   const fetchClientData = async () => {
     if (!clientId) return;
@@ -59,10 +76,6 @@ export const ClientDetailPage: React.FC = () => {
   useEffect(() => {
     fetchClientData();
   }, [clientId, startDate, endDate]);
-
-  const handlePrint = () => {
-    window.print();
-  };
 
   if (loading) {
     return (
@@ -101,27 +114,43 @@ export const ClientDetailPage: React.FC = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsEditModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl font-semibold text-sm transition-colors"
+            className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl font-semibold text-sm transition-colors cursor-pointer"
           >
             <Edit2 className="w-4 h-4" /> Edit Profile
           </button>
           <button
-            onClick={handlePrint}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-900 hover:bg-black text-white rounded-xl font-semibold text-sm shadow-sm transition-colors"
+            type="button"
+            disabled={isGenerating}
+            onClick={handleDownloadPdf}
+            className="flex items-center gap-2 px-4 py-2 bg-teal-700 hover:bg-teal-800 disabled:opacity-50 text-white rounded-xl font-semibold text-sm shadow-sm transition-colors cursor-pointer"
           >
-            <Printer className="w-4 h-4" /> Print Statement
+            {isGenerating ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Generating PDF...
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4" /> Download PDF
+              </>
+            )}
+          </button>
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-xl font-semibold text-sm shadow-sm transition-colors cursor-pointer"
+          >
+            <Printer className="w-4 h-4 text-gray-500" /> Print
           </button>
           <Link
             to={`/admin/finance/invoices/new?client_id=${client.id}`}
-            className="flex items-center gap-2 px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-semibold text-sm shadow-sm transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-semibold text-sm shadow-sm transition-colors"
           >
             <Plus className="w-4 h-4" /> New Invoice
           </Link>
         </div>
       </div>
 
-      {/* Client Profile Header Card */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8 space-y-6">
+      {/* Client Profile Header Card (Hidden during print) */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8 space-y-6 no-print print:hidden">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100 pb-6">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-2xl bg-teal-100 text-teal-800 flex items-center justify-center font-bold text-2xl">
@@ -230,15 +259,65 @@ export const ClientDetailPage: React.FC = () => {
       </div>
 
       {/* Statement of Account Section */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8 space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100 pb-5">
+      <div
+        ref={statementRef}
+        className="print-container bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8 space-y-6 print:p-0 print:border-none print:shadow-none"
+      >
+        {/* Printable Letterhead Header */}
+        <div className="border-b border-gray-200 pb-6 flex justify-between items-start">
           <div>
-            <h2 className="text-xl font-bold font-playfair text-gray-900">Statement of Account</h2>
+            <h2 className="text-xl font-black uppercase tracking-wider text-teal-800">
+              ALLBOUND VACATIONS LTD
+            </h2>
+            <p className="text-xs text-gray-500 mt-0.5">Plot 12 Kampala Road, Uganda</p>
+            <p className="text-xs text-gray-500">finance@allboundvacations.com | +256 700 000 000</p>
+          </div>
+          <div className="text-right">
+            <h3 className="text-xl font-bold font-playfair text-gray-900">STATEMENT OF ACCOUNT</h3>
+            <p className="text-xs text-gray-400 font-mono mt-0.5">
+              Date: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </p>
+          </div>
+        </div>
+
+        {/* Client & Summary Banner */}
+        <div className="grid grid-cols-2 gap-6 text-sm">
+          <div className="space-y-1">
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Account / Client:</p>
+            <p className="font-bold text-gray-900 text-base">{client.display_name}</p>
+            {client.company_name && (
+              <p className="text-xs text-gray-600 font-medium">{client.company_name}</p>
+            )}
+            <p className="text-xs text-gray-500">{client.email}</p>
+            {client.phone && <p className="text-xs text-gray-500">{client.phone}</p>}
+            {client.country_of_origin && (
+              <p className="text-xs text-gray-500">{client.country_of_origin}</p>
+            )}
+          </div>
+          <div className="p-4 bg-gray-50 rounded-xl space-y-1 text-right print:bg-gray-50">
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Closing Balance Due</p>
+            <p className={`text-2xl font-black ${
+              client.outstanding_balance_usd > 0 ? 'text-amber-800' : 'text-emerald-700'
+            }`}>
+              ${(statement?.closing_balance ?? client.outstanding_balance_usd).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </p>
+            <p className="text-xs text-gray-500">
+              Total Billed: ${(statement?.total_billed ?? client.total_invoiced_usd).toLocaleString(undefined, { minimumFractionDigits: 2 })} | Total Paid: ${(statement?.total_paid ?? client.total_paid_usd).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100 pb-4 no-print print:hidden">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Transaction History</h2>
             <p className="text-xs text-gray-500 mt-0.5">Chronological record of invoices issued and receipts collected</p>
           </div>
 
           {/* Date Range Controls */}
-          <div className="flex items-center gap-3 print:hidden">
+          <div className="flex items-center gap-3">
             <div>
               <label className="block text-[10px] font-bold text-gray-400 uppercase">From</label>
               <input

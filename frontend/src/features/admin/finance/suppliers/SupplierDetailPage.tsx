@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -19,12 +19,15 @@ import {
   Smartphone,
   Check,
   Compass,
+  Download,
+  Loader2,
 } from 'lucide-react';
 import { suppliersApi } from '../../../../lib/api/suppliers';
 import type { Supplier, SupplierLedger, SupplierBill } from '../../../../lib/types/finance';
 import { SupplierEditorModal } from './SupplierEditorModal';
 import { SupplierBillModal } from './SupplierBillModal';
 import { SupplierPaymentModal } from './SupplierPaymentModal';
+import { usePdfDownload } from '../../../../lib/utils/pdfGenerator';
 
 export const SupplierDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -47,6 +50,16 @@ export const SupplierDetailPage: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isBillModalOpen, setIsBillModalOpen] = useState(false);
   const [selectedBillForPayment, setSelectedBillForPayment] = useState<SupplierBill | null>(null);
+
+  // PDF Download
+  const ledgerRef = useRef<HTMLDivElement>(null);
+  const { isGenerating, downloadPdf } = usePdfDownload();
+
+  const handleDownloadPdf = () => {
+    if (!supplier) return;
+    const cleanName = (supplier.name || 'Supplier').replace(/[^a-zA-Z0-9]/g, '-');
+    downloadPdf(ledgerRef.current, `Supplier-Statement-${cleanName}.pdf`);
+  };
 
   const fetchSupplierData = async () => {
     if (!supplierId) return;
@@ -143,30 +156,48 @@ export const SupplierDetailPage: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsEditModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-medium shadow-sm transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-medium shadow-sm transition-all cursor-pointer"
           >
             <Edit2 className="w-4 h-4 text-gray-500" />
             Edit Supplier
           </button>
           <button
             onClick={() => setIsBillModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-all"
+            className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             Record Inbound Bill
           </button>
           <button
-            onClick={handlePrint}
-            className="flex items-center gap-1.5 px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl text-sm font-semibold shadow-sm transition-all"
+            type="button"
+            disabled={isGenerating}
+            onClick={handleDownloadPdf}
+            className="flex items-center gap-1.5 px-4 py-2 bg-teal-700 hover:bg-teal-800 disabled:opacity-50 text-white rounded-xl text-sm font-semibold shadow-sm transition-all cursor-pointer"
           >
-            <Printer className="w-4 h-4" />
+            {isGenerating ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Generating PDF...
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4" />
+                Download PDF
+              </>
+            )}
+          </button>
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-1.5 px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-medium shadow-sm transition-all cursor-pointer"
+          >
+            <Printer className="w-4 h-4 text-gray-500" />
             Print Ledger
           </button>
         </div>
       </div>
 
-      {/* Supplier Profile Card */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+      {/* Supplier Profile Card (Hidden during print) */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 no-print print:hidden">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="flex items-start gap-4">
             <div className="w-16 h-16 rounded-2xl bg-purple-50 text-purple-700 flex items-center justify-center font-bold text-2xl shrink-0 border border-purple-100">
@@ -279,8 +310,8 @@ export const SupplierDetailPage: React.FC = () => {
         )}
       </div>
 
-      {/* Financial Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* Financial Summary Cards (Hidden during print) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 no-print print:hidden">
         <div className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-700">
             <FileText className="w-6 h-6" />
@@ -319,7 +350,7 @@ export const SupplierDetailPage: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 print:hidden">
+      <div className="flex border-b border-gray-200 no-print print:hidden">
         <button
           onClick={() => setActiveTab('ledger')}
           className={`pb-3 px-4 font-semibold text-sm transition-colors border-b-2 ${
@@ -382,7 +413,10 @@ export const SupplierDetailPage: React.FC = () => {
           </div>
 
           {/* Printable Statement Document */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 print:p-0 print:border-none print:shadow-none space-y-6">
+          <div
+            ref={ledgerRef}
+            className="print-container bg-white rounded-2xl border border-gray-100 shadow-sm p-8 print:p-0 print:border-none print:shadow-none space-y-6"
+          >
             <div className="flex justify-between items-start border-b border-gray-100 pb-6">
               <div>
                 <h2 className="text-xl font-black uppercase tracking-wider text-teal-800">

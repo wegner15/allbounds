@@ -1,5 +1,11 @@
+/* ========================================================
+   GLOBAL PRINT & PDF DOCUMENT STYLES
+   Ensures clean, isolated, professional A4 documents
+   without any sidebar, header, or website chrome.
+   ======================================================== */
+
 @media print {
-  /* Hide non-printable elements */
+  /* 1. Hide ALL navigation, headers, sidebars, buttons, and site chrome */
   nav,
   header,
   aside,
@@ -7,36 +13,79 @@
   .no-print,
   button,
   .admin-sidebar,
-  .action-bar {
+  .action-bar,
+  [role="navigation"],
+  [role="banner"],
+  .Toastify,
+  .toast,
+  .modal-backdrop {
     display: none !important;
   }
 
-  body {
+  /* Do not append URL destinations after links in print */
+  a[href]:after {
+    content: none !important;
+  }
+
+  /* 2. Reset html, body, and root containers */
+  html,
+  body,
+  #root {
     background-color: #ffffff !important;
     color: #111827 !important;
     margin: 0 !important;
     padding: 0 !important;
-    font-size: 11pt !important;
+    height: auto !important;
+    min-height: 100% !important;
+    overflow: visible !important;
+    font-size: 10.5pt !important;
   }
 
+  /* Prevent container overflow clipping */
+  div,
+  main,
+  section {
+    overflow: visible !important;
+  }
+
+  /* 3. Document Print Container */
   .print-container {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 10mm 15mm !important;
+    padding: 0 !important;
     box-shadow: none !important;
     border: none !important;
-    background: transparent !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
   }
 
+  /* 4. Page Break Controls */
   .page-break {
-    page-break-before: always;
+    page-break-before: always !important;
+    break-before: page !important;
   }
 
-  /* Ensure colors and backgrounds render in print */
+  .avoid-break,
+  tr,
+  .print-avoid-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  thead {
+    display: table-header-group !important;
+  }
+
+  tfoot {
+    display: table-footer-group !important;
+  }
+
+  /* 5. Force exact background colors and text colors */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    box-shadow: none !important;
   }
 
   table {
@@ -44,12 +93,14 @@
     width: 100% !important;
   }
 
-  th, td {
-    padding: 6px 10px !important;
+  th,
+  td {
+    padding: 5px 8px !important;
   }
 
+  /* 6. A4 Page Specification */
   @page {
     size: A4 portrait;
-    margin: 10mm;
+    margin: 10mm 12mm;
   }
 }

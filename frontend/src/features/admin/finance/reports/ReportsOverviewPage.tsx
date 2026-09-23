@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   BarChart3,
   TrendingUp,
@@ -16,8 +16,10 @@ import {
   Layers,
   Building2,
   Users,
+  Loader2,
 } from 'lucide-react';
 import { reportsApi } from '../../../../lib/api/reports';
+import { usePdfDownload } from '../../../../lib/utils/pdfGenerator';
 import type {
   SalesReport,
   ReceivablesAgingReport,
@@ -42,6 +44,18 @@ export const ReportsOverviewPage: React.FC = () => {
 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // PDF Export
+  const reportRef = useRef<HTMLDivElement>(null);
+  const { isGenerating, downloadPdf } = usePdfDownload();
+
+  const handleDownloadPdf = () => {
+    downloadPdf(
+      reportRef.current,
+      `Financial-Report-${activeTab}-${new Date().toISOString().split('T')[0]}.pdf`,
+      { orientation: activeTab === 'profitability' || activeTab === 'sales' ? 'landscape' : 'portrait', marginMm: 8 }
+    );
+  };
 
   const fetchReport = async () => {
     setLoading(true);
@@ -133,16 +147,34 @@ export const ReportsOverviewPage: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-semibold shadow-sm transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-semibold shadow-sm transition-all cursor-pointer"
           >
             <Download className="w-4 h-4 text-gray-500" />
             Export CSV
           </button>
           <button
-            onClick={handlePrint}
-            className="flex items-center gap-1.5 px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl text-sm font-semibold shadow-sm transition-all"
+            type="button"
+            disabled={isGenerating}
+            onClick={handleDownloadPdf}
+            className="flex items-center gap-1.5 px-4 py-2 bg-teal-700 hover:bg-teal-800 disabled:opacity-50 text-white rounded-xl text-sm font-semibold shadow-sm transition-all cursor-pointer"
           >
-            <Printer className="w-4 h-4" />
+            {isGenerating ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Generating PDF...
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4" />
+                Download PDF
+              </>
+            )}
+          </button>
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-medium shadow-sm transition-all cursor-pointer"
+          >
+            <Printer className="w-4 h-4 text-gray-500" />
             Print Report
           </button>
         </div>
@@ -248,7 +280,25 @@ export const ReportsOverviewPage: React.FC = () => {
           <p>{error}</p>
         </div>
       ) : (
-        <>
+        <div ref={reportRef} className="print-container space-y-6 print:p-0 print:border-none print:shadow-none">
+          {/* Printable Letterhead Header */}
+          <div className="border-b border-gray-200 pb-5 hidden print:flex justify-between items-start">
+            <div>
+              <h2 className="text-xl font-black uppercase tracking-wider text-teal-800">
+                ALLBOUND VACATIONS LTD
+              </h2>
+              <p className="text-xs text-gray-500 mt-0.5">Plot 12 Kampala Road, Kampala, Uganda</p>
+              <p className="text-xs text-gray-500">finance@allboundvacations.com | Executive Financial Intelligence</p>
+            </div>
+            <div className="text-right">
+              <h3 className="text-lg font-bold uppercase tracking-wider text-gray-900">
+                {activeTab.replace('_', ' ')} Report
+              </h3>
+              <p className="text-xs text-gray-400 font-mono mt-0.5">
+                Generated: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              </p>
+            </div>
+          </div>
           {/* ======================================================== */}
           {/* TAB 1: SALES REPORT */}
           {/* ======================================================== */}
@@ -830,7 +880,7 @@ export const ReportsOverviewPage: React.FC = () => {
               </div>
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

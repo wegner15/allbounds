@@ -239,14 +239,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
   };
 
   return (
-    <div className="h-screen flex overflow-hidden bg-gray-100">
+    <div className="h-screen flex overflow-hidden bg-gray-100 print:h-auto print:overflow-visible print:bg-white">
       <Helmet>
         <title>{title} | AllBounds Admin</title>
       </Helmet>
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
+        <div className="fixed inset-0 z-40 md:hidden no-print print:hidden">
           <div
             className="fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity"
             onClick={() => setSidebarOpen(false)}
@@ -363,7 +363,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
       )}
 
       {/* Desktop sidebar */}
-      <div className="hidden md:flex md:flex-shrink-0">
+      <div className="hidden md:flex md:flex-shrink-0 no-print print:hidden">
         <div className="flex flex-col w-56">
           <div className="flex flex-col h-0 flex-1 bg-charcoal">
             <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
@@ -458,9 +458,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
       </div>
 
       {/* Main content */}
-      <div className="flex flex-col w-0 flex-1 overflow-hidden">
+      <div className="flex flex-col w-0 flex-1 overflow-hidden print:w-full print:overflow-visible">
         {/* Top header */}
-        <div className="relative z-10 flex-shrink-0 flex h-16 bg-white shadow">
+        <div className="relative z-10 flex-shrink-0 flex h-16 bg-white shadow no-print print:hidden">
           <button
             type="button"
             className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal md:hidden"
@@ -493,9 +493,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
         </div>
 
         {/* Page content */}
-        <main ref={mainRef} className="flex-1 relative overflow-y-auto focus:outline-none">
-          <div className="py-4">
-            <div className="max-w-none px-4 sm:px-6 lg:px-8">
+        <main ref={mainRef} className="flex-1 relative overflow-y-auto focus:outline-none print:overflow-visible print:p-0">
+          <div className="py-4 print:py-0">
+            <div className="max-w-none px-4 sm:px-6 lg:px-8 print:p-0 print:m-0">
               {children}
             </div>
           </div>

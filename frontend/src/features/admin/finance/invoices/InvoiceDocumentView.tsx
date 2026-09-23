@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import {
   Printer,
@@ -12,11 +12,14 @@ import {
   FileText,
   User,
   Building,
-  ArrowLeft
+  ArrowLeft,
+  Download,
+  Loader2,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Invoice, CompanyFinanceSettings } from '../../../../lib/types/finance';
 import { DocumentHeader } from '../components/DocumentHeader';
+import { usePdfDownload } from '../../../../lib/utils/pdfGenerator';
 import '../components/PrintStyles.css';
 
 interface InvoiceDocumentViewProps {
@@ -35,6 +38,19 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
   isPublicView = false
 }) => {
   const [activeTab, setActiveTab] = useState<'document' | 'receipts'>('document');
+  const documentRef = useRef<HTMLDivElement>(null);
+  const { isGenerating, downloadPdf } = usePdfDownload();
+
+  const handleDownloadPdf = () => {
+    if (activeTab !== 'document') {
+      setActiveTab('document');
+      setTimeout(() => {
+        downloadPdf(documentRef.current, `Invoice-${invoice.invoice_number || 'INV'}.pdf`);
+      }, 100);
+    } else {
+      downloadPdf(documentRef.current, `Invoice-${invoice.invoice_number || 'INV'}.pdf`);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -88,10 +104,10 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
   const verificationUrl = `${window.location.origin}/verify/invoice/${invoice.verification_token}`;
 
   return (
-    <div className="max-w-4xl mx-auto my-6">
+    <div className="max-w-4xl mx-auto my-6 print:m-0 print:max-w-none">
       {/* Top Action Bar (Hidden during print) */}
-      {!isPublicView && (
-        <div className="no-print mb-6 flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+      <div className="no-print print:hidden mb-6 flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+        {!isPublicView ? (
           <div className="flex items-center space-x-3">
             <Link
               to="/admin/finance/invoices"
@@ -104,7 +120,7 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveTab('document')}
-                className={`px-3 py-1 text-sm font-medium rounded-md transition ${
+                className={`px-3 py-1 text-sm font-medium rounded-md transition cursor-pointer ${
                   activeTab === 'document'
                     ? 'bg-teal-700 text-white shadow-sm'
                     : 'text-gray-600 hover:bg-gray-100'
@@ -115,7 +131,7 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveTab('receipts')}
-                className={`px-3 py-1 text-sm font-medium rounded-md transition ${
+                className={`px-3 py-1 text-sm font-medium rounded-md transition cursor-pointer ${
                   activeTab === 'receipts'
                     ? 'bg-teal-700 text-white shadow-sm'
                     : 'text-gray-600 hover:bg-gray-100'
@@ -125,42 +141,64 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
               </button>
             </div>
           </div>
+        ) : (
+          <span className="text-xs font-bold uppercase tracking-wider text-teal-800">
+            Official Allbound Vacations Invoice
+          </span>
+        )}
 
-          <div className="flex items-center space-x-2">
-            {invoice.invoice_status !== 'paid' && invoice.invoice_status !== 'cancelled' && onRecordPayment && (
-              <button
-                type="button"
-                onClick={onRecordPayment}
-                className="inline-flex items-center px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium shadow-sm transition"
-              >
-                <DollarSign className="w-4 h-4 mr-1.5" /> Record Payment
-              </button>
-            )}
-            {onSendEmail && (
-              <button
-                type="button"
-                onClick={onSendEmail}
-                className="inline-flex items-center px-3 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium shadow-sm transition"
-              >
-                <Mail className="w-4 h-4 mr-1.5 text-gray-500" /> Send Email
-              </button>
-            )}
+        <div className="flex items-center space-x-2">
+          {invoice.invoice_status !== 'paid' && invoice.invoice_status !== 'cancelled' && onRecordPayment && !isPublicView && (
+            <button
+              type="button"
+              onClick={onRecordPayment}
+              className="inline-flex items-center px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium shadow-sm transition cursor-pointer"
+            >
+              <DollarSign className="w-4 h-4 mr-1.5" /> Record Payment
+            </button>
+          )}
+          {onSendEmail && !isPublicView && (
+            <button
+              type="button"
+              onClick={onSendEmail}
+              className="inline-flex items-center px-3 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium shadow-sm transition cursor-pointer"
+            >
+              <Mail className="w-4 h-4 mr-1.5 text-gray-500" /> Send Email
+            </button>
+          )}
+          {!isPublicView && (
             <Link
               to={`/admin/finance/invoices/${invoice.id}/edit`}
               className="inline-flex items-center px-3 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium shadow-sm transition"
             >
               <Edit className="w-4 h-4 mr-1.5 text-gray-500" /> Edit
             </Link>
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className="inline-flex items-center px-3.5 py-2 rounded-lg bg-teal-800 hover:bg-teal-900 text-white text-sm font-medium shadow-sm transition"
-            >
-              <Printer className="w-4 h-4 mr-1.5" /> Print / PDF
-            </button>
-          </div>
+          )}
+          <button
+            type="button"
+            disabled={isGenerating}
+            onClick={handleDownloadPdf}
+            className="inline-flex items-center px-3.5 py-2 rounded-lg bg-teal-700 hover:bg-teal-800 disabled:opacity-50 text-white text-sm font-semibold shadow-sm transition cursor-pointer"
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Generating PDF...
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4 mr-1.5" /> Download PDF
+              </>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="inline-flex items-center px-3 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium shadow-sm transition cursor-pointer"
+          >
+            <Printer className="w-4 h-4 mr-1.5 text-gray-500" /> Print
+          </button>
         </div>
-      )}
+      </div>
 
       {/* Tab: Receipts List */}
       {activeTab === 'receipts' && !isPublicView ? (
@@ -220,7 +258,7 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
         </div>
       ) : (
         /* Document Card */
-        <div className="print-container bg-white rounded-2xl shadow-xl p-8 sm:p-12 border border-gray-200">
+        <div ref={documentRef} className="print-container bg-white rounded-2xl shadow-xl p-8 sm:p-12 border border-gray-200 print:shadow-none print:border-none print:p-0">
           {/* A. Header */}
           <DocumentHeader
             title="INVOICE"

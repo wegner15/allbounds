@@ -53,7 +53,7 @@ export const ReportsOverviewPage: React.FC = () => {
     downloadPdf(
       reportRef.current,
       `Financial-Report-${activeTab}-${new Date().toISOString().split('T')[0]}.pdf`,
-      { orientation: activeTab === 'profitability' || activeTab === 'sales' ? 'landscape' : 'portrait', marginMm: 8 }
+      { orientation: 'portrait', marginMm: 0 }
     );
   };
 
@@ -280,94 +280,109 @@ export const ReportsOverviewPage: React.FC = () => {
           <p>{error}</p>
         </div>
       ) : (
-        <div ref={reportRef} className="print-container space-y-6 print:p-0 print:border-none print:shadow-none">
-          {/* Printable Letterhead Header */}
-          <div className="border-b border-gray-200 pb-5 hidden print:flex justify-between items-start">
+        <div ref={reportRef} className="print-container bg-white rounded-2xl shadow-sm p-6 sm:p-8 border border-gray-200 print:shadow-none print:border-none print:p-0 space-y-6">
+          {/* Internal Management Report Header */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-5 border-b border-gray-200 gap-3">
             <div>
-              <h2 className="text-xl font-black uppercase tracking-wider text-teal-800">
-                ALLBOUND VACATIONS LTD
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-teal-50 text-teal-800 border border-teal-200">
+                  Internal Management Report
+                </span>
+                <span className="text-xs text-gray-300">•</span>
+                <span className="text-xs text-gray-500 font-medium">
+                  Generated {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </span>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mt-1 capitalize font-playfair">
+                {activeTab.replace('_', ' ')} Statement
               </h2>
-              <p className="text-xs text-gray-500 mt-0.5">Plot 335 , Block 13 Najjanankumbi , Entebbe Road, Kampala Uganda</p>
-              <p className="text-xs text-gray-500">finance@allboundvacations.com | Executive Financial Intelligence</p>
             </div>
-            <div className="text-right">
-              <h3 className="text-lg font-bold uppercase tracking-wider text-gray-900">
-                {activeTab.replace('_', ' ')} Report
-              </h3>
-              <p className="text-xs text-gray-400 font-mono mt-0.5">
-                Generated: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-              </p>
+            
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-50 border border-gray-200 text-gray-700">
+                Period: <span className="font-bold text-gray-900">{startDate && endDate ? `${startDate} to ${endDate}` : 'All Time'}</span>
+              </span>
             </div>
           </div>
+
           {/* ======================================================== */}
           {/* TAB 1: SALES REPORT */}
           {/* ======================================================== */}
           {activeTab === 'sales' && salesReport && (
             <div className="space-y-6">
-              {/* Sales KPIs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Total Invoiced</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
+              {/* Sales KPIs - Executive Metric Tiles */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+                <div className="p-4 bg-gradient-to-b from-white to-teal-50/20 rounded-xl border border-teal-100/80 border-l-4 border-l-teal-700 shadow-xs flex flex-col justify-between">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-teal-900/70">Total Invoiced</p>
+                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-gray-900 mt-1.5 tabular-nums truncate">
                     ${salesReport.total_invoiced_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">{salesReport.invoices_count} total invoices</p>
+                  <p className="text-[11px] text-gray-500 mt-1 font-medium">{salesReport.invoices_count} total invoices</p>
                 </div>
 
-                <div className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Total Collected</p>
-                  <p className="text-2xl font-bold text-emerald-700 mt-1">
+                <div className="p-4 bg-gradient-to-b from-white to-emerald-50/20 rounded-xl border border-emerald-100/80 border-l-4 border-l-emerald-600 shadow-xs flex flex-col justify-between">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-900/70">Total Collected</p>
+                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-emerald-700 mt-1.5 tabular-nums truncate">
                     ${salesReport.total_collected_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
-                  <p className="text-xs text-emerald-600 mt-1">
+                  <p className="text-[11px] text-emerald-700 mt-1 font-medium">
                     {salesReport.total_invoiced_usd > 0
                       ? `${Math.round((salesReport.total_collected_usd / salesReport.total_invoiced_usd) * 100)}% collection rate`
                       : '—'}
                   </p>
                 </div>
 
-                <div className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Outstanding Due</p>
-                  <p className="text-2xl font-bold text-amber-700 mt-1">
+                <div className="p-4 bg-gradient-to-b from-white to-amber-50/20 rounded-xl border border-amber-100/80 border-l-4 border-l-amber-600 shadow-xs flex flex-col justify-between">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-amber-900/70">Outstanding Due</p>
+                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-amber-700 mt-1.5 tabular-nums truncate">
                     ${salesReport.total_outstanding_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">Accounts receivable</p>
+                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Accounts receivable</p>
                 </div>
 
-                <div className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Avg Booking Value</p>
-                  <p className="text-2xl font-bold text-teal-800 mt-1">
+                <div className="p-4 bg-gradient-to-b from-white to-teal-50/20 rounded-xl border border-teal-100/80 border-l-4 border-l-teal-600 shadow-xs flex flex-col justify-between">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-teal-900/70">Avg Booking Value</p>
+                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-teal-800 mt-1.5 tabular-nums truncate">
                     ${salesReport.average_order_value_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">Per safari invoice</p>
+                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Per safari invoice</p>
                 </div>
 
-                <div className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Invoices Count</p>
-                  <p className="text-2xl font-bold text-purple-700 mt-1">{salesReport.invoices_count}</p>
-                  <p className="text-xs text-gray-400 mt-1">Processed</p>
+                <div className="p-4 bg-gradient-to-b from-white to-purple-50/20 rounded-xl border border-purple-100/80 border-l-4 border-l-purple-600 shadow-xs flex flex-col justify-between">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-purple-900/70">Invoices Count</p>
+                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-purple-700 mt-1.5 tabular-nums truncate">
+                    {salesReport.invoices_count}
+                  </p>
+                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Processed</p>
                 </div>
               </div>
 
               {/* Destination Breakdown & Consultant Performance */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Destination breakdown */}
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
-                  <h3 className="text-base font-bold text-gray-900">Revenue by Safari Destination</h3>
-                  <div className="space-y-3">
+                <div className="bg-white p-5 rounded-xl border border-teal-100/80 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+                      Revenue by Safari Destination
+                    </h3>
+                    <span className="text-[11px] text-gray-500">
+                      {salesReport.destination_breakdown.length} destinations
+                    </span>
+                  </div>
+                  <div className="space-y-4 pt-1">
                     {salesReport.destination_breakdown.length > 0 ? (
                       salesReport.destination_breakdown.map((dest, idx) => (
-                        <div key={idx} className="space-y-1">
-                          <div className="flex justify-between text-xs font-semibold text-gray-700">
-                            <span>{dest.destination}</span>
-                            <span>
+                        <div key={idx} className="space-y-2">
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="font-semibold text-gray-800">{dest.destination}</span>
+                            <span className="px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 font-bold border border-teal-200/60 tabular-nums">
                               ${dest.total_sales_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })} ({dest.percentage_of_total}%)
                             </span>
                           </div>
-                          <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                          <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
                             <div
-                              className="bg-teal-600 h-2 rounded-full"
-                              style={{ width: `${Math.min(100, dest.percentage_of_total)}%` }}
+                              className="bg-gradient-to-r from-teal-700 to-teal-500 h-2.5 rounded-full"
+                              style={{ width: `${Math.min(100, Math.max(2, dest.percentage_of_total))}%` }}
                             />
                           </div>
                         </div>
@@ -379,11 +394,18 @@ export const ReportsOverviewPage: React.FC = () => {
                 </div>
 
                 {/* Consultant Performance */}
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
-                  <h3 className="text-base font-bold text-gray-900">Sales by Travel Consultant</h3>
+                <div className="bg-white p-5 rounded-xl border border-teal-100/80 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+                      Sales by Travel Consultant
+                    </h3>
+                    <span className="text-[11px] text-gray-500">
+                      {salesReport.consultant_breakdown.length} consultants
+                    </span>
+                  </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-gray-50 border-b border-gray-100 text-gray-500 uppercase font-bold">
+                      <thead className="bg-teal-50/60 border-b border-teal-100 text-teal-900 uppercase font-bold text-[10.5px]">
                         <tr>
                           <th className="py-2.5 px-3">Consultant</th>
                           <th className="py-2.5 px-3 text-center">Invoices</th>
@@ -393,10 +415,14 @@ export const ReportsOverviewPage: React.FC = () => {
                       <tbody className="divide-y divide-gray-100">
                         {salesReport.consultant_breakdown.length > 0 ? (
                           salesReport.consultant_breakdown.map((c, idx) => (
-                            <tr key={idx} className="hover:bg-gray-50/70">
+                            <tr key={idx} className="hover:bg-teal-50/20">
                               <td className="py-2.5 px-3 font-semibold text-gray-900">{c.consultant_name}</td>
-                              <td className="py-2.5 px-3 text-center font-mono">{c.invoices_count}</td>
-                              <td className="py-2.5 px-3 text-right font-bold text-teal-800">
+                              <td className="py-2.5 px-3 text-center font-mono">
+                                <span className="inline-block px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[11px]">
+                                  {c.invoices_count}
+                                </span>
+                              </td>
+                              <td className="py-2.5 px-3 text-right font-bold text-teal-800 tabular-nums">
                                 ${c.total_sales_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                               </td>
                             </tr>
@@ -415,13 +441,16 @@ export const ReportsOverviewPage: React.FC = () => {
               </div>
 
               {/* Periodic Breakdown Table */}
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-gray-100">
-                  <h3 className="text-base font-bold text-gray-900">Period Revenue Breakdown</h3>
+              <div className="bg-white rounded-xl border border-teal-100/80 shadow-xs overflow-hidden">
+                <div className="p-4 border-b border-teal-100 bg-teal-50/40 flex justify-between items-center">
+                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+                    Period Revenue Breakdown
+                  </h3>
+                  <span className="text-xs text-gray-500">{salesReport.period_breakdown.length} periods</span>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-teal-50/70 border-b border-teal-100 text-[11px] font-bold text-teal-900 uppercase tracking-wider">
                       <tr>
                         <th className="py-3 px-4">Period</th>
                         <th className="py-3 px-4 text-center">Invoices</th>
@@ -434,22 +463,26 @@ export const ReportsOverviewPage: React.FC = () => {
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {salesReport.period_breakdown.map((p, idx) => (
-                        <tr key={idx} className="hover:bg-gray-50/60">
-                          <td className="py-3 px-4 font-semibold text-gray-900">{p.period}</td>
-                          <td className="py-3 px-4 text-center font-mono text-xs">{p.invoices_count}</td>
-                          <td className="py-3 px-4 text-right font-medium text-gray-700">
+                        <tr key={idx} className="hover:bg-teal-50/30 odd:bg-white even:bg-teal-50/15">
+                          <td className="py-2.5 px-4 font-semibold text-gray-900">{p.period}</td>
+                          <td className="py-2.5 px-4 text-center font-mono">
+                            <span className="inline-block px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[11px]">
+                              {p.invoices_count}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-4 text-right font-medium text-gray-700 tabular-nums">
                             ${p.gross_revenue_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                           </td>
-                          <td className="py-3 px-4 text-right text-gray-500">
+                          <td className="py-2.5 px-4 text-right text-gray-500 tabular-nums">
                             ${p.discount_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                           </td>
-                          <td className="py-3 px-4 text-right font-bold text-teal-800">
+                          <td className="py-2.5 px-4 text-right font-bold text-teal-800 tabular-nums">
                             ${p.net_revenue_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                           </td>
-                          <td className="py-3 px-4 text-right font-semibold text-emerald-600">
+                          <td className="py-2.5 px-4 text-right font-semibold text-emerald-600 tabular-nums">
                             ${p.collected_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                           </td>
-                          <td className="py-3 px-4 text-right font-semibold text-amber-700">
+                          <td className="py-2.5 px-4 text-right font-semibold text-amber-700 tabular-nums">
                             ${p.outstanding_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                           </td>
                         </tr>
@@ -467,49 +500,49 @@ export const ReportsOverviewPage: React.FC = () => {
           {activeTab === 'profitability' && profitabilityReport && (
             <div className="space-y-6">
               {/* Profitability KPIs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Client Revenue (USD)</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+                <div className="p-4 bg-gradient-to-b from-white to-teal-50/20 rounded-xl border border-teal-100/80 border-l-4 border-l-teal-700 shadow-xs flex flex-col justify-between">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-teal-900/70">Client Revenue</p>
+                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-gray-900 mt-1.5 tabular-nums truncate">
                     ${profitabilityReport.total_revenue_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">Total invoiced receivables</p>
+                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Total invoiced receivables</p>
                 </div>
 
-                <div className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Supplier Costs (USD)</p>
-                  <p className="text-2xl font-bold text-rose-700 mt-1">
+                <div className="p-4 bg-gradient-to-b from-white to-rose-50/20 rounded-xl border border-rose-100/80 border-l-4 border-l-rose-600 shadow-xs flex flex-col justify-between">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-rose-900/70">Supplier Costs</p>
+                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-rose-700 mt-1.5 tabular-nums truncate">
                     ${profitabilityReport.total_cost_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">Total vendor payables</p>
+                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Total vendor payables</p>
                 </div>
 
-                <div className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Gross Profit (USD)</p>
-                  <p className="text-2xl font-bold text-emerald-700 mt-1">
+                <div className="p-4 bg-gradient-to-b from-white to-emerald-50/20 rounded-xl border border-emerald-100/80 border-l-4 border-l-emerald-600 shadow-xs flex flex-col justify-between">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-900/70">Gross Profit</p>
+                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-emerald-700 mt-1.5 tabular-nums truncate">
                     ${profitabilityReport.total_gross_profit_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
-                  <p className="text-xs text-emerald-600 mt-1">Revenue minus supplier costs</p>
+                  <p className="text-[11px] text-emerald-700 mt-1 font-medium">Revenue minus supplier costs</p>
                 </div>
 
-                <div className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Average Profit Margin</p>
-                  <p className="text-2xl font-bold text-teal-800 mt-1">
+                <div className="p-4 bg-gradient-to-b from-white to-teal-50/20 rounded-xl border border-teal-100/80 border-l-4 border-l-teal-600 shadow-xs flex flex-col justify-between">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-teal-900/70">Average Profit Margin</p>
+                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-teal-800 mt-1.5 tabular-nums truncate">
                     {profitabilityReport.average_margin_percent}%
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">Overall margin across trips</p>
+                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Overall margin across trips</p>
                 </div>
               </div>
 
               {/* Profitability Items Table */}
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-                  <h3 className="text-base font-bold text-gray-900">Trip & Invoice Profitability Analysis</h3>
+              <div className="bg-white rounded-xl border border-teal-100/80 shadow-xs overflow-hidden">
+                <div className="p-4 border-b border-teal-100 bg-teal-50/40 flex justify-between items-center">
+                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Trip & Invoice Profitability Analysis</h3>
                   <span className="text-xs text-gray-500">{profitabilityReport.items.length} trips analyzed</span>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-teal-50/70 border-b border-teal-100 text-[11px] font-bold text-teal-900 uppercase tracking-wider">
                       <tr>
                         <th className="py-3 px-4">Invoice #</th>
                         <th className="py-3 px-4">Client</th>
@@ -524,31 +557,31 @@ export const ReportsOverviewPage: React.FC = () => {
                     <tbody className="divide-y divide-gray-100">
                       {profitabilityReport.items.length > 0 ? (
                         profitabilityReport.items.map((item, idx) => (
-                          <tr key={idx} className="hover:bg-gray-50/60">
-                            <td className="py-3 px-4 font-mono font-bold text-teal-800 text-xs">
+                          <tr key={idx} className="hover:bg-teal-50/30 odd:bg-white even:bg-teal-50/15">
+                            <td className="py-2.5 px-4 font-mono font-bold text-teal-800">
                               {item.invoice_number}
                             </td>
-                            <td className="py-3 px-4 font-semibold text-gray-900 text-xs">
+                            <td className="py-2.5 px-4 font-semibold text-gray-900">
                               {item.client_name}
                             </td>
-                            <td className="py-3 px-4 text-xs text-gray-600">
+                            <td className="py-2.5 px-4 text-gray-600">
                               {item.destination || '—'}
                             </td>
-                            <td className="py-3 px-4 text-xs text-gray-500 max-w-xs truncate">
+                            <td className="py-2.5 px-4 text-gray-500 max-w-xs truncate">
                               {item.service_description}
                             </td>
-                            <td className="py-3 px-4 text-right font-medium text-gray-800">
+                            <td className="py-2.5 px-4 text-right font-medium text-gray-800 tabular-nums">
                               ${item.revenue_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </td>
-                            <td className="py-3 px-4 text-right font-medium text-rose-600">
+                            <td className="py-2.5 px-4 text-right font-medium text-rose-600 tabular-nums">
                               ${item.cost_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </td>
-                            <td className="py-3 px-4 text-right font-bold text-emerald-700">
+                            <td className="py-2.5 px-4 text-right font-bold text-emerald-700 tabular-nums">
                               ${item.gross_profit_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </td>
-                            <td className="py-3 px-4 text-right">
+                            <td className="py-2.5 px-4 text-right">
                               <span
-                                className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                                className={`px-2 py-0.5 rounded-full text-xs font-bold tabular-nums ${
                                   item.gross_margin_percent >= 25
                                     ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                                     : item.gross_margin_percent >= 10
@@ -581,32 +614,32 @@ export const ReportsOverviewPage: React.FC = () => {
           {activeTab === 'receivables' && receivablesReport && (
             <div className="space-y-6">
               {/* Buckets Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
                 {receivablesReport.buckets.map((b, idx) => (
-                  <div key={idx} className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm space-y-1">
-                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400">{b.bucket_label}</p>
-                    <p className="text-2xl font-bold text-gray-900">
+                  <div key={idx} className="p-4 bg-gradient-to-b from-white to-teal-50/20 rounded-xl border border-teal-100/80 border-l-4 border-l-teal-700 shadow-xs flex flex-col justify-between">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-teal-900/70">{b.bucket_label}</p>
+                    <p className="text-xl sm:text-[22px] font-black tracking-tight text-gray-900 mt-1.5 tabular-nums truncate">
                       ${b.total_amount_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
-                    <div className="flex justify-between text-xs text-gray-500 pt-1">
+                    <div className="flex justify-between text-[11px] text-gray-500 pt-1 font-medium">
                       <span>{b.count} invoices</span>
-                      <span>{b.percentage}% of total</span>
+                      <span>{b.percentage}%</span>
                     </div>
                   </div>
                 ))}
               </div>
 
               {/* Overdue Invoices Table */}
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-                  <h3 className="text-base font-bold text-gray-900">Unpaid & Overdue Invoices</h3>
-                  <span className="text-xs text-rose-600 font-semibold">
+              <div className="bg-white rounded-xl border border-teal-100/80 shadow-xs overflow-hidden">
+                <div className="p-4 border-b border-teal-100 bg-teal-50/40 flex justify-between items-center">
+                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Unpaid & Overdue Invoices</h3>
+                  <span className="text-xs text-rose-700 font-bold tabular-nums">
                     Total Outstanding: ${receivablesReport.total_receivable_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </span>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-teal-50/70 border-b border-teal-100 text-[11px] font-bold text-teal-900 uppercase tracking-wider">
                       <tr>
                         <th className="py-3 px-4">Invoice #</th>
                         <th className="py-3 px-4">Client Name</th>
@@ -621,14 +654,14 @@ export const ReportsOverviewPage: React.FC = () => {
                     <tbody className="divide-y divide-gray-100">
                       {receivablesReport.overdue_invoices.length > 0 ? (
                         receivablesReport.overdue_invoices.map((inv) => (
-                          <tr key={inv.invoice_id} className="hover:bg-gray-50/60">
-                            <td className="py-3 px-4 font-mono font-bold text-teal-800 text-xs">
+                          <tr key={inv.invoice_id} className="hover:bg-teal-50/30 odd:bg-white even:bg-teal-50/15">
+                            <td className="py-2.5 px-4 font-mono font-bold text-teal-800">
                               {inv.invoice_number}
                             </td>
-                            <td className="py-3 px-4 font-semibold text-gray-900 text-xs">{inv.client_name}</td>
-                            <td className="py-3 px-4 text-xs text-gray-500">{inv.invoice_date}</td>
-                            <td className="py-3 px-4 text-xs text-gray-500">{inv.due_date}</td>
-                            <td className="py-3 px-4">
+                            <td className="py-2.5 px-4 font-semibold text-gray-900">{inv.client_name}</td>
+                            <td className="py-2.5 px-4 text-gray-500">{inv.invoice_date}</td>
+                            <td className="py-2.5 px-4 text-gray-500">{inv.due_date}</td>
+                            <td className="py-2.5 px-4">
                               {inv.days_overdue > 0 ? (
                                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-100">
                                   <Clock className="w-3 h-3" /> {inv.days_overdue} days overdue
@@ -639,13 +672,13 @@ export const ReportsOverviewPage: React.FC = () => {
                                 </span>
                               )}
                             </td>
-                            <td className="py-3 px-4 text-right font-medium text-gray-700">
+                            <td className="py-2.5 px-4 text-right font-medium text-gray-700 tabular-nums">
                               {inv.currency} {inv.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </td>
-                            <td className="py-3 px-4 text-right text-emerald-600 font-medium">
+                            <td className="py-2.5 px-4 text-right text-emerald-600 font-medium tabular-nums">
                               {inv.currency} {inv.amount_paid.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </td>
-                            <td className="py-3 px-4 text-right font-black text-rose-700">
+                            <td className="py-2.5 px-4 text-right font-black text-rose-700 tabular-nums">
                               ${inv.balance_due_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </td>
                           </tr>
@@ -670,32 +703,32 @@ export const ReportsOverviewPage: React.FC = () => {
           {activeTab === 'payables' && payablesReport && (
             <div className="space-y-6">
               {/* Buckets Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
                 {payablesReport.buckets.map((b, idx) => (
-                  <div key={idx} className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm space-y-1">
-                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400">{b.bucket_label}</p>
-                    <p className="text-2xl font-bold text-gray-900">
+                  <div key={idx} className="p-4 bg-gradient-to-b from-white to-rose-50/20 rounded-xl border border-rose-100/80 border-l-4 border-l-rose-600 shadow-xs flex flex-col justify-between">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-rose-900/70">{b.bucket_label}</p>
+                    <p className="text-xl sm:text-[22px] font-black tracking-tight text-gray-900 mt-1.5 tabular-nums truncate">
                       ${b.total_amount_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
-                    <div className="flex justify-between text-xs text-gray-500 pt-1">
+                    <div className="flex justify-between text-[11px] text-gray-500 pt-1 font-medium">
                       <span>{b.count} vendor bills</span>
-                      <span>{b.percentage}% of total</span>
+                      <span>{b.percentage}%</span>
                     </div>
                   </div>
                 ))}
               </div>
 
               {/* Pending Bills Table */}
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-                  <h3 className="text-base font-bold text-gray-900">Pending & Overdue Vendor Liabilities</h3>
-                  <span className="text-xs text-rose-600 font-semibold">
+              <div className="bg-white rounded-xl border border-teal-100/80 shadow-xs overflow-hidden">
+                <div className="p-4 border-b border-teal-100 bg-teal-50/40 flex justify-between items-center">
+                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Pending & Overdue Vendor Liabilities</h3>
+                  <span className="text-xs text-rose-700 font-bold tabular-nums">
                     Total Balance Payable: ${payablesReport.total_payable_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </span>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-teal-50/70 border-b border-teal-100 text-[11px] font-bold text-teal-900 uppercase tracking-wider">
                       <tr>
                         <th className="py-3 px-4">Bill #</th>
                         <th className="py-3 px-4">Supplier</th>
@@ -710,14 +743,14 @@ export const ReportsOverviewPage: React.FC = () => {
                     <tbody className="divide-y divide-gray-100">
                       {payablesReport.pending_bills.length > 0 ? (
                         payablesReport.pending_bills.map((bill) => (
-                          <tr key={bill.bill_id} className="hover:bg-gray-50/60">
-                            <td className="py-3 px-4 font-mono font-bold text-teal-800 text-xs">
+                          <tr key={bill.bill_id} className="hover:bg-teal-50/30 odd:bg-white even:bg-teal-50/15">
+                            <td className="py-2.5 px-4 font-mono font-bold text-teal-800">
                               {bill.bill_number}
                             </td>
-                            <td className="py-3 px-4 font-semibold text-gray-900 text-xs">{bill.supplier_name}</td>
-                            <td className="py-3 px-4 text-xs text-gray-500">{bill.bill_date}</td>
-                            <td className="py-3 px-4 text-xs text-gray-500">{bill.due_date}</td>
-                            <td className="py-3 px-4">
+                            <td className="py-2.5 px-4 font-semibold text-gray-900">{bill.supplier_name}</td>
+                            <td className="py-2.5 px-4 text-gray-500">{bill.bill_date}</td>
+                            <td className="py-2.5 px-4 text-gray-500">{bill.due_date}</td>
+                            <td className="py-2.5 px-4">
                               {bill.days_overdue > 0 ? (
                                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-100">
                                   <Clock className="w-3 h-3" /> {bill.days_overdue} days overdue
@@ -728,13 +761,13 @@ export const ReportsOverviewPage: React.FC = () => {
                                 </span>
                               )}
                             </td>
-                            <td className="py-3 px-4 text-right font-medium text-gray-700">
+                            <td className="py-2.5 px-4 text-right font-medium text-gray-700 tabular-nums">
                               {bill.currency} {bill.amount_billed.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </td>
-                            <td className="py-3 px-4 text-right text-emerald-600 font-medium">
+                            <td className="py-2.5 px-4 text-right text-emerald-600 font-medium tabular-nums">
                               {bill.currency} {bill.amount_paid.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </td>
-                            <td className="py-3 px-4 text-right font-black text-rose-700">
+                            <td className="py-2.5 px-4 text-right font-black text-rose-700 tabular-nums">
                               ${bill.balance_payable_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </td>
                           </tr>
@@ -759,52 +792,54 @@ export const ReportsOverviewPage: React.FC = () => {
           {activeTab === 'cash_flow' && cashFlowReport && (
             <div className="space-y-6">
               {/* Cash-Flow KPIs */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                <div className="p-4 bg-gradient-to-b from-white to-emerald-50/20 rounded-xl border border-emerald-100/80 border-l-4 border-l-emerald-600 shadow-xs flex flex-col justify-between">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Total Inflow</p>
-                    <ArrowDownRight className="w-5 h-5 text-emerald-600" />
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-900/70">Total Inflow</p>
+                    <ArrowDownRight className="w-4 h-4 text-emerald-600" />
                   </div>
-                  <p className="text-2xl font-bold text-emerald-700 mt-2">
+                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-emerald-700 mt-1.5 tabular-nums truncate">
                     ${cashFlowReport.total_inflow_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">Receipts from clients</p>
+                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Receipts from clients</p>
                 </div>
 
-                <div className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                <div className="p-4 bg-gradient-to-b from-white to-rose-50/20 rounded-xl border border-rose-100/80 border-l-4 border-l-rose-600 shadow-xs flex flex-col justify-between">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Total Outflow</p>
-                    <ArrowUpRight className="w-5 h-5 text-rose-600" />
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-rose-900/70">Total Outflow</p>
+                    <ArrowUpRight className="w-4 h-4 text-rose-600" />
                   </div>
-                  <p className="text-2xl font-bold text-rose-700 mt-2">
+                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-rose-700 mt-1.5 tabular-nums truncate">
                     ${cashFlowReport.total_outflow_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">Disbursements to suppliers</p>
+                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Disbursements to suppliers</p>
                 </div>
 
-                <div className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Net Cash Flow</p>
+                <div className="p-4 bg-gradient-to-b from-white to-teal-50/20 rounded-xl border border-teal-100/80 border-l-4 border-l-teal-600 shadow-xs flex flex-col justify-between">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-teal-900/70">Net Cash Flow</p>
                   <p
-                    className={`text-2xl font-bold mt-2 ${
+                    className={`text-xl sm:text-[22px] font-black tracking-tight mt-1.5 tabular-nums truncate ${
                       cashFlowReport.net_cash_flow_usd >= 0 ? 'text-teal-800' : 'text-rose-700'
                     }`}
                   >
                     ${cashFlowReport.net_cash_flow_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">Inflow minus outflow</p>
+                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Inflow minus outflow</p>
                 </div>
               </div>
 
               {/* Inflows & Outflows by Method */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-3">
-                  <h4 className="text-sm font-bold text-gray-900">Inflows by Payment Channel</h4>
-                  <div className="space-y-2">
+                <div className="bg-white p-5 rounded-xl border border-teal-100/80 shadow-xs space-y-3">
+                  <div className="border-b border-gray-100 pb-2.5">
+                    <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Inflows by Payment Channel</h4>
+                  </div>
+                  <div className="space-y-2 pt-1">
                     {Object.entries(cashFlowReport.inflows_by_method).length > 0 ? (
                       Object.entries(cashFlowReport.inflows_by_method).map(([method, amt]) => (
                         <div key={method} className="flex justify-between items-center text-xs py-1.5 border-b border-gray-50">
                           <span className="capitalize font-medium text-gray-700">{method.replace(/_/g, ' ')}</span>
-                          <span className="font-bold text-emerald-700">
+                          <span className="font-bold text-emerald-700 tabular-nums">
                             ${amt.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                           </span>
                         </div>
@@ -815,14 +850,16 @@ export const ReportsOverviewPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-3">
-                  <h4 className="text-sm font-bold text-gray-900">Outflows by Payment Channel</h4>
-                  <div className="space-y-2">
+                <div className="bg-white p-5 rounded-xl border border-teal-100/80 shadow-xs space-y-3">
+                  <div className="border-b border-gray-100 pb-2.5">
+                    <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Outflows by Payment Channel</h4>
+                  </div>
+                  <div className="space-y-2 pt-1">
                     {Object.entries(cashFlowReport.outflows_by_method).length > 0 ? (
                       Object.entries(cashFlowReport.outflows_by_method).map(([method, amt]) => (
                         <div key={method} className="flex justify-between items-center text-xs py-1.5 border-b border-gray-50">
                           <span className="capitalize font-medium text-gray-700">{method.replace(/_/g, ' ')}</span>
-                          <span className="font-bold text-rose-700">
+                          <span className="font-bold text-rose-700 tabular-nums">
                             ${amt.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                           </span>
                         </div>
@@ -835,13 +872,13 @@ export const ReportsOverviewPage: React.FC = () => {
               </div>
 
               {/* Timeline Table */}
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-gray-100">
-                  <h3 className="text-base font-bold text-gray-900">Daily Cash Movement</h3>
+              <div className="bg-white rounded-xl border border-teal-100/80 shadow-xs overflow-hidden">
+                <div className="p-4 border-b border-teal-100 bg-teal-50/40">
+                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Daily Cash Movement</h3>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-teal-50/70 border-b border-teal-100 text-[11px] font-bold text-teal-900 uppercase tracking-wider">
                       <tr>
                         <th className="py-3 px-4">Date</th>
                         <th className="py-3 px-4 text-right">Inflow (USD)</th>
@@ -852,15 +889,15 @@ export const ReportsOverviewPage: React.FC = () => {
                     <tbody className="divide-y divide-gray-100">
                       {cashFlowReport.daily_timeline.length > 0 ? (
                         cashFlowReport.daily_timeline.map((d, idx) => (
-                          <tr key={idx} className="hover:bg-gray-50/60">
-                            <td className="py-3 px-4 font-medium text-gray-900 text-xs">{d.date}</td>
-                            <td className="py-3 px-4 text-right font-medium text-emerald-600">
+                          <tr key={idx} className="hover:bg-teal-50/30 odd:bg-white even:bg-teal-50/15">
+                            <td className="py-2.5 px-4 font-medium text-gray-900">{d.date}</td>
+                            <td className="py-2.5 px-4 text-right font-medium text-emerald-600 tabular-nums">
                               {d.inflow_usd > 0 ? `+$${d.inflow_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '—'}
                             </td>
-                            <td className="py-3 px-4 text-right font-medium text-rose-600">
+                            <td className="py-2.5 px-4 text-right font-medium text-rose-600 tabular-nums">
                               {d.outflow_usd > 0 ? `-$${d.outflow_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '—'}
                             </td>
-                            <td className="py-3 px-4 text-right font-bold">
+                            <td className="py-2.5 px-4 text-right font-bold tabular-nums">
                               <span className={d.net_usd >= 0 ? 'text-teal-800' : 'text-rose-700'}>
                                 {d.net_usd >= 0 ? '+' : ''}${d.net_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                               </span>

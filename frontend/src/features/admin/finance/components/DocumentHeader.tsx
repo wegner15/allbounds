@@ -35,49 +35,39 @@ export const DocumentHeader: React.FC<DocumentHeaderProps> = ({
         {/* ======================================================== */}
         {/* COLUMN 1: BRAND IDENTITY & LEGAL DETAILS                 */}
         {/* ======================================================== */}
-        <div className="flex-1 sm:pr-6 flex flex-col justify-between">
+        <div className="w-full sm:w-[44%] flex-shrink-0 flex flex-col justify-between sm:pr-6">
           <div>
-            {/* Logo Mark + Brand Typography */}
-            <div className="flex items-center space-x-3.5">
-              <div className="h-16 w-16 sm:h-[68px] sm:w-[68px] flex-shrink-0">
-                <img
-                  src="/favicon.svg"
-                  alt="Allbound Vacations"
-                  className="h-full w-full object-contain"
-                  onError={(e) => {
-                    const target = e.currentTarget as HTMLImageElement;
-                    if (!target.src.includes('android-chrome')) {
-                      target.src = '/logo/android-chrome-512x512.png';
-                    }
-                  }}
-                />
-              </div>
-              <div className="flex flex-col justify-center">
-                <h1 className="text-3xl sm:text-[34px] font-black tracking-tight text-teal-900 leading-none font-sans">
-                  Allbound
-                </h1>
-                <p className="text-[11px] sm:text-xs uppercase tracking-[0.32em] font-semibold text-teal-700 mt-1.5 pl-0.5">
-                  vacations
-                </p>
-              </div>
+            {/* Logo Lockup: Perfect Vector / High-Res Brand Mark */}
+            <div className="flex items-center">
+              <img
+                src="/logo/allbound_logo_header_2x.png"
+                alt="Allbound Vacations"
+                className="h-14 sm:h-[62px] w-auto max-w-full object-contain object-left block"
+                onError={(e) => {
+                  const target = e.currentTarget as HTMLImageElement;
+                  if (!target.src.includes('brand_mark')) {
+                    target.src = '/logo/brand_mark_2x.png';
+                  }
+                }}
+              />
             </div>
 
             {/* Legal Company Name & Trading Name */}
-            <div className="mt-3.5 pl-0.5">
-              <p className="text-xs sm:text-[12.5px] font-bold text-gray-900 uppercase tracking-wider leading-snug">
+            <div className="mt-3.5">
+              <p className="text-[12px] sm:text-[13px] font-bold text-[#0c4a52] uppercase tracking-[0.05em] leading-snug whitespace-nowrap">
                 {legalName}
               </p>
-              <p className="text-xs italic text-teal-800 mt-0.5">
+              <p className="text-xs sm:text-[12.5px] italic text-teal-800 mt-0.5 font-normal">
                 Trading as: {companyName.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())}
               </p>
             </div>
           </div>
 
-          {/* Brand Divider & Tagline */}
+          {/* Short Gold Accent Bar & Tagline (Matching Image 1) */}
           <div className="mt-3">
-            <div className="border-t border-teal-700/30 my-2 w-full" />
-            <p className="text-xs italic font-serif text-teal-800">
-              "{tagline}"
+            <div className="w-12 h-[2.5px] bg-[#c59b27] rounded-full my-2" />
+            <p className="text-xs sm:text-[12.5px] italic font-serif text-[#b88628] leading-tight">
+              {tagline.replace(/^["']|["']$/g, '')}
             </p>
           </div>
         </div>
@@ -85,12 +75,12 @@ export const DocumentHeader: React.FC<DocumentHeaderProps> = ({
         {/* ======================================================== */}
         {/* VERTICAL DIVIDER 1                                       */}
         {/* ======================================================== */}
-        <div className="hidden sm:block w-[1.5px] bg-teal-700/50 self-stretch my-0.5" />
+        <div className="hidden sm:block w-[1.5px] bg-[#c59b27]/60 self-stretch my-0.5 flex-shrink-0" />
 
         {/* ======================================================== */}
         {/* COLUMN 2: LOCATION, CONTACT & TAX / REGISTRATION DETAILS */}
         {/* ======================================================== */}
-        <div className="flex-1 sm:px-6 flex flex-col justify-between">
+        <div className="w-full sm:w-[33%] flex-shrink-0 flex flex-col justify-between sm:px-6">
           {/* Contact Details with Brand Teal Icons */}
           <div className="space-y-2 text-[11.5px] text-gray-700">
             <div className="flex items-start space-x-2.5">
@@ -117,7 +107,7 @@ export const DocumentHeader: React.FC<DocumentHeaderProps> = ({
 
           {/* Brand Divider & Tax / Registration Grid */}
           <div className="mt-3">
-            <div className="border-t border-teal-700/30 my-2 w-full" />
+            <div className="border-t border-teal-700/25 my-2 w-full" />
             <div className="grid grid-cols-[auto_1fr] gap-x-5 gap-y-0.5 text-[11px]">
               <span className="text-gray-500 font-medium">TIN:</span>
               <span className="text-gray-800 font-semibold">{tin}</span>
@@ -132,12 +122,12 @@ export const DocumentHeader: React.FC<DocumentHeaderProps> = ({
         {/* ======================================================== */}
         {/* VERTICAL DIVIDER 2                                       */}
         {/* ======================================================== */}
-        <div className="hidden sm:block w-[1.5px] bg-teal-700/50 self-stretch my-0.5" />
+        <div className="hidden sm:block w-[1.5px] bg-[#c59b27]/60 self-stretch my-0.5 flex-shrink-0" />
 
         {/* ======================================================== */}
         {/* COLUMN 3: DOCUMENT TITLE & STATUS BADGE                  */}
         {/* ======================================================== */}
-        <div className="w-full sm:w-[220px] sm:pl-6 flex flex-col justify-between items-start sm:items-center text-left sm:text-center">
+        <div className="w-full sm:w-[23%] flex-shrink-0 flex flex-col justify-between items-start sm:items-center text-left sm:text-center sm:pl-6">
           <div className="pt-1">
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-teal-900 font-playfair uppercase">
               {title}

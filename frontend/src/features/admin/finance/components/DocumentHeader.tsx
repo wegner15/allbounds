@@ -17,7 +17,7 @@ export const DocumentHeader: React.FC<DocumentHeaderProps> = ({
   const companyName = settings?.company_name || 'ALLBOUND VACATIONS';
   const legalName = settings?.legal_company_name || 'Allbound Travel Services Limited';
   const tagline = settings?.tagline || 'Your Dream Holiday. Designed. Booked. Perfected.';
-  const address = settings?.physical_address || 'Plot 12, Kampala Road, Kampala, Uganda';
+  const address = settings?.physical_address || 'Plot 335, Block 13 Najjanankumbi, Entebbe Road\nKampala Uganda';
   const phone = settings?.phone || '+(256) 782 594 008';
   const email = settings?.email || 'bookings@allboundvacations.com';
   const website = settings?.website || 'allboundvacations.com';
@@ -30,14 +30,16 @@ export const DocumentHeader: React.FC<DocumentHeaderProps> = ({
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
         {/* Company Identity */}
         <div className="flex items-start space-x-4">
-          <div className="h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 bg-teal-900 rounded-lg flex items-center justify-center p-2 shadow-sm">
+          <div className="h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 rounded-xl overflow-hidden shadow-sm flex items-center justify-center bg-teal-950">
             <img
-              src="/logo/main_logo.png"
-              alt="Allbound Vacations"
+              src="/favicon.svg"
+              alt={companyName}
               className="h-full w-full object-contain"
               onError={(e) => {
-                // Fallback to text if image not loadable in print
-                (e.target as HTMLElement).style.display = 'none';
+                const target = e.currentTarget as HTMLImageElement;
+                if (!target.src.includes('android-chrome')) {
+                  target.src = '/logo/android-chrome-512x512.png';
+                }
               }}
             />
           </div>
@@ -52,7 +54,7 @@ export const DocumentHeader: React.FC<DocumentHeaderProps> = ({
               "{tagline}"
             </p>
             <div className="text-xs text-gray-600 mt-2 space-y-0.5">
-              <p>{address}</p>
+              <p className="whitespace-pre-line">{address}</p>
               <p>
                 <span className="font-medium">Tel:</span> {phone} &bull;{' '}
                 <span className="font-medium">Email:</span> {email}

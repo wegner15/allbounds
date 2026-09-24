@@ -31,7 +31,7 @@ class CompanyFinanceSettings(Base):
     company_name = Column(String(255), nullable=False, default="ALLBOUND VACATIONS")
     legal_company_name = Column(String(255), nullable=False, default="Allbound Travel Services Limited")
     tagline = Column(String(255), nullable=False, default="Your Dream Holiday. Designed. Booked. Perfected.")
-    physical_address = Column(Text, nullable=True, default="Plot 12, Kampala Road, Kampala, Uganda")
+    physical_address = Column(Text, nullable=True, default="Plot 335, Block 13 Najjanankumbi, Entebbe Road, Kampala Uganda")
     phone = Column(String(100), nullable=True, default="+(256) 782 594 008")
     whatsapp = Column(String(100), nullable=True, default="+(256) 782 594 008")
     email = Column(String(255), nullable=True, default="bookings@allboundvacations.com")

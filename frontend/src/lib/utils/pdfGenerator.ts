@@ -26,26 +26,36 @@ export async function exportElementToPdf(
   } = options;
 
   try {
-    // 1. Temporarily prepare element for high-fidelity capture
+    // 1. Wait for document fonts to be ready to avoid font-swap metrics shifts
+    if (document.fonts && document.fonts.ready) {
+      await document.fonts.ready;
+    }
+
+    // 2. Temporarily prepare element for high-fidelity capture (remove card artifacts)
     const originalShadow = element.style.boxShadow;
     const originalBorder = element.style.border;
+    const originalBorderRadius = element.style.borderRadius;
     element.style.boxShadow = 'none';
+    element.style.border = 'none';
+    element.style.borderRadius = '0';
 
-    // 2. Render DOM to high-res Canvas via html2canvas
+    // 3. Render DOM to high-res Canvas via html2canvas with lossless settings
+    const captureWidth = Math.max(element.scrollWidth, 794);
     const canvas = await html2canvas(element, {
-      scale,
+      scale: Math.max(scale, 2.5),
       useCORS: true,
       logging: false,
       backgroundColor: '#ffffff',
-      windowWidth: element.scrollWidth,
+      windowWidth: captureWidth,
       windowHeight: element.scrollHeight,
     });
 
     // Restore styling
     element.style.boxShadow = originalShadow;
     element.style.border = originalBorder;
+    element.style.borderRadius = originalBorderRadius;
 
-    // 3. Setup jsPDF Document
+    // 4. Setup jsPDF Document (A4 format)
     const pdf = new jsPDF({
       orientation,
       unit: 'mm',
@@ -64,22 +74,25 @@ export async function exportElementToPdf(
 
     // How many pixels on the canvas correspond to one printable page height
     const pageHeightInCanvasPx = (canvas.width * printableHeight) / printableWidth;
-    const totalPages = Math.ceil(canvas.height / pageHeightInCanvasPx);
+    const overflowRatio = canvas.height / pageHeightInCanvasPx;
 
-    // 4. Multi-page slicing or single-page placement
-    if (totalPages <= 1) {
-      const imgData = canvas.toDataURL('image/jpeg', quality);
+    // 5. High-fidelity placement (use lossless PNG to avoid JPEG ringing distortion)
+    // If within 8% of single-page height, fit onto single page cleanly
+    if (overflowRatio <= 1.08) {
+      const imgData = canvas.toDataURL('image/png');
+      const renderHeightMm = Math.min(totalImgHeightMm, printableHeight);
       pdf.addImage(
         imgData,
-        'JPEG',
+        'PNG',
         marginMm,
         marginMm,
         printableWidth,
-        totalImgHeightMm,
+        renderHeightMm,
         undefined,
-        'FAST'
+        'SLOW'
       );
     } else {
+      const totalPages = Math.ceil(canvas.height / pageHeightInCanvasPx);
       for (let i = 0; i < totalPages; i++) {
         if (i > 0) {
           pdf.addPage('a4', orientation);
@@ -109,24 +122,24 @@ export async function exportElementToPdf(
             sliceHeightPx
           );
 
-          const pageImgData = pageCanvas.toDataURL('image/jpeg', quality);
+          const pageImgData = pageCanvas.toDataURL('image/png');
           const sliceHeightMm = (sliceHeightPx * printableWidth) / canvas.width;
 
           pdf.addImage(
             pageImgData,
-            'JPEG',
+            'PNG',
             marginMm,
             marginMm,
             printableWidth,
             sliceHeightMm,
             undefined,
-            'FAST'
+            'SLOW'
           );
         }
       }
     }
 
-    // 5. Trigger download
+    // 6. Trigger download
     const cleanFilename = filename.endsWith('.pdf') ? filename : `${filename}.pdf`;
     pdf.save(cleanFilename);
     return true;

@@ -45,7 +45,7 @@ export const ReceiptDocumentView: React.FC<ReceiptDocumentViewProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto my-6 print:m-0 print:max-w-none">
+    <div className="max-w-5xl mx-auto my-6 print:m-0 print:max-w-none">
       {/* Action Bar (Hidden during print) */}
       <div className="no-print print:hidden mb-6 flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
         {!isPublicView ? (
@@ -100,7 +100,7 @@ export const ReceiptDocumentView: React.FC<ReceiptDocumentViewProps> = ({
       </div>
 
       {/* Main Document Card */}
-      <div ref={documentRef} className="print-container bg-white rounded-2xl shadow-xl p-8 sm:p-12 border border-gray-200 print:shadow-none print:border-none print:p-0">
+      <div ref={documentRef} className="print-container bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-200 print:shadow-none print:border-none print:p-0">
         {/* A. Header */}
         <DocumentHeader
           title="PAYMENT RECEIPT"

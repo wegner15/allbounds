@@ -20,10 +20,15 @@ export async function exportElementToPdf(
 ): Promise<boolean> {
   const {
     orientation = 'portrait',
-    marginMm = 10,
-    scale = 2,
-    quality = 0.95,
+    marginMm = 0,
+    scale = 2.5,
   } = options;
+
+  // Track original styling to restore cleanly in finally block
+  const originalShadow = element.style.boxShadow;
+  const originalBorder = element.style.border;
+  const originalBorderRadius = element.style.borderRadius;
+  const originalPadding = element.style.padding;
 
   try {
     // 1. Wait for document fonts to be ready to avoid font-swap metrics shifts
@@ -31,13 +36,13 @@ export async function exportElementToPdf(
       await document.fonts.ready;
     }
 
-    // 2. Temporarily prepare element for high-fidelity capture (remove card artifacts)
-    const originalShadow = element.style.boxShadow;
-    const originalBorder = element.style.border;
-    const originalBorderRadius = element.style.borderRadius;
+    // 2. Temporarily prepare element for high-fidelity capture:
+    // Strip outer card decorations and set compact printable edge padding (~6-7mm)
+    // to prevent excessive left/right whitespace that squeezes content
     element.style.boxShadow = 'none';
     element.style.border = 'none';
     element.style.borderRadius = '0';
+    element.style.padding = '20px 24px';
 
     // 3. Render DOM to high-res Canvas via html2canvas with lossless settings
     const captureWidth = Math.max(element.scrollWidth, 794);
@@ -49,11 +54,6 @@ export async function exportElementToPdf(
       windowWidth: captureWidth,
       windowHeight: element.scrollHeight,
     });
-
-    // Restore styling
-    element.style.boxShadow = originalShadow;
-    element.style.border = originalBorder;
-    element.style.borderRadius = originalBorderRadius;
 
     // 4. Setup jsPDF Document (A4 format)
     const pdf = new jsPDF({
@@ -146,6 +146,12 @@ export async function exportElementToPdf(
   } catch (error) {
     console.error('Failed to generate PDF document:', error);
     throw error;
+  } finally {
+    // Restore styling
+    element.style.boxShadow = originalShadow;
+    element.style.border = originalBorder;
+    element.style.borderRadius = originalBorderRadius;
+    element.style.padding = originalPadding;
   }
 }
 

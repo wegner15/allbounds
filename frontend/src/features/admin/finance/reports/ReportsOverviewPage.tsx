@@ -287,7 +287,7 @@ export const ReportsOverviewPage: React.FC = () => {
               <h2 className="text-xl font-black uppercase tracking-wider text-teal-800">
                 ALLBOUND VACATIONS LTD
               </h2>
-              <p className="text-xs text-gray-500 mt-0.5">Plot 335, Block 13 Najjanankumbi, Entebbe Road, Kampala Uganda</p>
+              <p className="text-xs text-gray-500 mt-0.5">Plot 335 , Block 13 Najjanankumbi , Entebbe Road, Kampala Uganda</p>
               <p className="text-xs text-gray-500">finance@allboundvacations.com | Executive Financial Intelligence</p>
             </div>
             <div className="text-right">

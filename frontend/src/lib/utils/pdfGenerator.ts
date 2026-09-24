@@ -7,11 +7,13 @@ export interface PdfExportOptions {
   marginMm?: number;
   scale?: number;
   quality?: number;
+  continuous?: boolean;
 }
 
 /**
- * Capture an HTML DOM element and export it cleanly to an A4 PDF document.
- * Automatically slices long documents into multiple pages without clipping margins.
+ * Capture an HTML DOM element and export it cleanly to a PDF document.
+ * By default generates a continuous seamless PDF matching the exact content height,
+ * completely eliminating awkward page cuts and box splitting.
  */
 export async function exportElementToPdf(
   element: HTMLElement,
@@ -22,6 +24,7 @@ export async function exportElementToPdf(
     orientation = 'portrait',
     marginMm = 0,
     scale = 2.5,
+    continuous = true,
   } = options;
 
   // Track original styling to restore cleanly in finally block
@@ -55,7 +58,39 @@ export async function exportElementToPdf(
       windowHeight: element.scrollHeight,
     });
 
-    // 4. Setup jsPDF Document (A4 format)
+    const pageWidth = orientation === 'portrait' ? 210 : 297;
+    const printableWidth = pageWidth - marginMm * 2;
+    const totalImgHeightMm = (canvas.height * printableWidth) / canvas.width;
+
+    // 4. CONTINUOUS SINGLE-PAGE PDF (Default)
+    // Generates a seamless document matching exact content height without arbitrary page cuts
+    if (continuous) {
+      const pdfHeight = totalImgHeightMm + marginMm * 2;
+      const pdf = new jsPDF({
+        orientation,
+        unit: 'mm',
+        format: [pageWidth, pdfHeight],
+        compress: true,
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(
+        imgData,
+        'PNG',
+        marginMm,
+        marginMm,
+        printableWidth,
+        totalImgHeightMm,
+        undefined,
+        'SLOW'
+      );
+
+      const cleanFilename = filename.endsWith('.pdf') ? filename : `${filename}.pdf`;
+      pdf.save(cleanFilename);
+      return true;
+    }
+
+    // 5. FIXED A4 MULTI-PAGE FALLBACK (Only if continuous is explicitly set to false)
     const pdf = new jsPDF({
       orientation,
       unit: 'mm',
@@ -63,21 +98,11 @@ export async function exportElementToPdf(
       compress: true,
     });
 
-    const pageWidth = orientation === 'portrait' ? 210 : 297;
     const pageHeight = orientation === 'portrait' ? 297 : 210;
-
-    const printableWidth = pageWidth - marginMm * 2;
     const printableHeight = pageHeight - marginMm * 2;
-
-    // Calculate how tall the canvas would be in mm at printable width
-    const totalImgHeightMm = (canvas.height * printableWidth) / canvas.width;
-
-    // How many pixels on the canvas correspond to one printable page height
     const pageHeightInCanvasPx = (canvas.width * printableHeight) / printableWidth;
     const overflowRatio = canvas.height / pageHeightInCanvasPx;
 
-    // 5. High-fidelity placement (use lossless PNG to avoid JPEG ringing distortion)
-    // If within 8% of single-page height, fit onto single page cleanly
     if (overflowRatio <= 1.08) {
       const imgData = canvas.toDataURL('image/png');
       const renderHeightMm = Math.min(totalImgHeightMm, printableHeight);
@@ -101,7 +126,6 @@ export async function exportElementToPdf(
         const sourceY = i * pageHeightInCanvasPx;
         const sliceHeightPx = Math.min(pageHeightInCanvasPx, canvas.height - sourceY);
 
-        // Create temporary canvas for this page slice
         const pageCanvas = document.createElement('canvas');
         pageCanvas.width = canvas.width;
         pageCanvas.height = sliceHeightPx;

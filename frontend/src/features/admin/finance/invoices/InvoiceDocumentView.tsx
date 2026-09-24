@@ -272,16 +272,16 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-6 py-4 border-b border-gray-200 text-sm">
             {/* Bill To */}
             <div>
-              <h3 className="text-xs font-bold text-[#0c3b44] uppercase tracking-wider mb-2.5 flex items-center space-x-2">
+              <h3 className="text-xs font-bold text-teal-900 uppercase tracking-wider mb-2.5 flex items-center space-x-2">
                 {invoice.client_type === 'corporate' ? (
-                  <Building className="w-4 h-4 text-[#c59b27]" />
+                  <Building className="w-4 h-4 text-teal-700" />
                 ) : (
-                  <User className="w-4 h-4 text-[#c59b27]" />
+                  <User className="w-4 h-4 text-teal-700" />
                 )}
-                <span className="text-[#c59b27] font-light">|</span>
+                <span className="text-teal-700 font-light">|</span>
                 <span>Bill To: {invoice.client_type === 'corporate' ? 'Corporate Client' : 'Individual Traveller'}</span>
               </h3>
-              <div className="bg-[#f4f9fa] p-4 rounded-xl border border-[#e2eff2] space-y-1">
+              <div className="bg-teal-50/40 p-4 rounded-xl border border-teal-100 space-y-1">
                 {invoice.client_type === 'corporate' ? (
                   <>
                     <p className="font-bold text-gray-900 text-base">
@@ -311,12 +311,12 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
 
             {/* Invoice Meta */}
             <div>
-              <h3 className="text-xs font-bold text-[#0c3b44] uppercase tracking-wider mb-2.5 flex items-center space-x-2">
-                <FileText className="w-4 h-4 text-[#c59b27]" />
-                <span className="text-[#c59b27] font-light">|</span>
+              <h3 className="text-xs font-bold text-teal-900 uppercase tracking-wider mb-2.5 flex items-center space-x-2">
+                <FileText className="w-4 h-4 text-teal-700" />
+                <span className="text-teal-700 font-light">|</span>
                 <span>Invoice Details</span>
               </h3>
-              <div className="bg-[#f4f9fa] p-4 rounded-xl border border-[#e2eff2] space-y-1.5">
+              <div className="bg-teal-50/40 p-4 rounded-xl border border-teal-100 space-y-1.5">
                 <div className="flex justify-between">
                   <span className="text-gray-500">Invoice Number:</span>
                   <span className="font-mono font-bold text-gray-900">{invoice.invoice_number}</span>
@@ -339,7 +339,7 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Payment Due Date:</span>
-                  <span className="text-[#c59b27] font-bold">{invoice.due_date}</span>
+                  <span className="text-teal-900 font-bold">{invoice.due_date}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Currency:</span>

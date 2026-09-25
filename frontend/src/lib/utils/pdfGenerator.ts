@@ -47,15 +47,38 @@ export async function exportElementToPdf(
     element.style.borderRadius = '0';
     element.style.padding = '20px 24px';
 
-    // 3. Render DOM to high-res Canvas via html2canvas with lossless settings
-    const captureWidth = Math.max(element.scrollWidth, 794);
+    // 3. Measure element absolute position and dimensions to ensure zero clipping
+    const scrollX = window.pageXOffset || document.documentElement.scrollLeft || 0;
+    const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+    const rect = element.getBoundingClientRect();
+
+    // Virtual window in html2canvas must cover the entire viewport + scroll area
+    // so centered or right-aligned elements are never clipped by a narrow virtual window
+    const virtualWindowWidth = Math.max(
+      document.documentElement.scrollWidth,
+      document.documentElement.clientWidth,
+      window.innerWidth,
+      rect.left + rect.width + scrollX + 300
+    );
+    const virtualWindowHeight = Math.max(
+      document.documentElement.scrollHeight,
+      document.documentElement.clientHeight,
+      window.innerHeight,
+      rect.top + rect.height + scrollY + 300
+    );
+
+    // Render DOM to high-res Canvas via html2canvas with lossless settings
     const canvas = await html2canvas(element, {
       scale: Math.max(scale, 2.5),
       useCORS: true,
       logging: false,
       backgroundColor: '#ffffff',
-      windowWidth: captureWidth,
-      windowHeight: element.scrollHeight,
+      x: rect.left + scrollX,
+      y: rect.top + scrollY,
+      width: rect.width,
+      height: rect.height,
+      windowWidth: virtualWindowWidth,
+      windowHeight: virtualWindowHeight,
     });
 
     const pageWidth = orientation === 'portrait' ? 210 : 297;

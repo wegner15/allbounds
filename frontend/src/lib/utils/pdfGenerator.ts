@@ -8,6 +8,7 @@ export interface PdfExportOptions {
   scale?: number;
   quality?: number;
   continuous?: boolean;
+  contentWidth?: number;
 }
 
 /**
@@ -25,66 +26,85 @@ export async function exportElementToPdf(
     marginMm = 0,
     scale = 2.5,
     continuous = true,
+    contentWidth = 1120,
   } = options;
 
-  // Track original styling to restore cleanly in finally block
-  const originalShadow = element.style.boxShadow;
-  const originalBorder = element.style.border;
-  const originalBorderRadius = element.style.borderRadius;
-  const originalPadding = element.style.padding;
+  // 1. Wait for document fonts to be ready
+  if (document.fonts && document.fonts.ready) {
+    await document.fonts.ready;
+  }
+
+  // 2. Create an isolated off-screen staging container with a fixed desktop print width (1120px).
+  // This completely eliminates clipping from parent sidebar layouts, responsive downscaling on small
+  // viewports, overflow-y scrollbars on <main>, and window scroll offsets.
+  const stagingContainer = document.createElement('div');
+  stagingContainer.style.position = 'fixed';
+  stagingContainer.style.left = '-10000px';
+  stagingContainer.style.top = '0';
+  stagingContainer.style.width = `${contentWidth}px`;
+  stagingContainer.style.background = '#ffffff';
+  stagingContainer.style.zIndex = '-9999';
+  stagingContainer.style.overflow = 'visible';
+
+  // Deep clone the element to capture
+  const clone = element.cloneNode(true) as HTMLElement;
+  clone.style.width = `${contentWidth}px`;
+  clone.style.maxWidth = `${contentWidth}px`;
+  clone.style.margin = '0';
+  clone.style.boxShadow = 'none';
+  clone.style.border = 'none';
+  clone.style.borderRadius = '0';
+  clone.style.padding = '24px 32px';
+  clone.style.boxSizing = 'border-box';
+
+  // Synchronize form inputs / textareas / selects if any
+  const origInputs = element.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('input, textarea, select');
+  const clonedInputs = clone.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('input, textarea, select');
+  origInputs.forEach((orig, idx) => {
+    const target = clonedInputs[idx];
+    if (target) {
+      target.value = orig.value;
+      if ('checked' in orig && 'checked' in target) {
+        (target as HTMLInputElement).checked = (orig as HTMLInputElement).checked;
+      }
+    }
+  });
+
+  // Synchronize canvas elements if any (e.g. dynamic charts or barcodes)
+  const origCanvases = element.querySelectorAll<HTMLCanvasElement>('canvas');
+  const clonedCanvases = clone.querySelectorAll<HTMLCanvasElement>('canvas');
+  origCanvases.forEach((orig, idx) => {
+    const target = clonedCanvases[idx];
+    if (target) {
+      const ctx = target.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(orig, 0, 0);
+      }
+    }
+  });
+
+  // Ensure any table/overflow containers inside the clone render in full without clipping
+  const overflowContainers = clone.querySelectorAll<HTMLElement>('.overflow-x-auto, .overflow-hidden');
+  overflowContainers.forEach((el) => {
+    el.style.overflow = 'visible';
+  });
+
+  stagingContainer.appendChild(clone);
+  document.body.appendChild(stagingContainer);
 
   try {
-    // 1. Wait for document fonts to be ready to avoid font-swap metrics shifts
-    if (document.fonts && document.fonts.ready) {
-      await document.fonts.ready;
-    }
+    // Brief layout settle tick to allow browser to calculate full DOM layout
+    await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 50)));
 
-    // 2. Temporarily prepare element for high-fidelity capture:
-    // Strip outer card decorations and set compact printable edge padding (~6-7mm)
-    // to prevent excessive left/right whitespace that squeezes content
-    element.style.boxShadow = 'none';
-    element.style.border = 'none';
-    element.style.borderRadius = '0';
-    element.style.padding = '20px 24px';
-
-    // 3. Render DOM to high-res Canvas via html2canvas with lossless settings.
-    // NOTE:
-    // - Do NOT pass `x` or `y` offsets manually: html2canvas already calculates the element's
-    //   exact bounding box coordinates (left, top) within the cloned iframe. Passing manual x/y
-    //   adds to these coordinates, shifting the canvas and clipping off the top and left portions!
-    // - Setting `scrollX: 0` and `scrollY: 0` ensures window scroll position does not shift the capture.
-    // - Providing an adequate desktop window width (>= 1280px) ensures full responsive layouts.
-    const captureWidth = Math.max(
-      document.documentElement.scrollWidth,
-      document.documentElement.clientWidth,
-      window.innerWidth,
-      element.scrollWidth,
-      1280
-    );
-    const captureHeight = Math.max(
-      document.documentElement.scrollHeight,
-      document.documentElement.clientHeight,
-      window.innerHeight,
-      element.scrollHeight,
-      1280
-    );
-
-    const canvas = await html2canvas(element, {
+    const canvas = await html2canvas(clone, {
       scale: Math.max(scale, 2.5),
       useCORS: true,
       logging: false,
       backgroundColor: '#ffffff',
       scrollX: 0,
       scrollY: 0,
-      windowWidth: captureWidth,
-      windowHeight: captureHeight,
-      onclone: (_clonedDoc, clonedElement) => {
-        // Ensure any overflow containers inside the target element render in full without clipping
-        const overflowEls = clonedElement.querySelectorAll('.overflow-x-auto, .overflow-hidden');
-        overflowEls.forEach((el) => {
-          (el as HTMLElement).style.overflow = 'visible';
-        });
-      },
+      windowWidth: contentWidth + 100,
+      windowHeight: Math.max(1280, clone.scrollHeight + 200),
     });
 
     const pageWidth = orientation === 'portrait' ? 210 : 297;
@@ -200,11 +220,10 @@ export async function exportElementToPdf(
     console.error('Failed to generate PDF document:', error);
     throw error;
   } finally {
-    // Restore styling
-    element.style.boxShadow = originalShadow;
-    element.style.border = originalBorder;
-    element.style.borderRadius = originalBorderRadius;
-    element.style.padding = originalPadding;
+    // Clean up staging container from DOM
+    if (stagingContainer.parentNode) {
+      stagingContainer.parentNode.removeChild(stagingContainer);
+    }
   }
 }
 

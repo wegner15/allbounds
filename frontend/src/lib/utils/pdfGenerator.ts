@@ -47,38 +47,44 @@ export async function exportElementToPdf(
     element.style.borderRadius = '0';
     element.style.padding = '20px 24px';
 
-    // 3. Measure element absolute position and dimensions to ensure zero clipping
-    const scrollX = window.pageXOffset || document.documentElement.scrollLeft || 0;
-    const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
-    const rect = element.getBoundingClientRect();
-
-    // Virtual window in html2canvas must cover the entire viewport + scroll area
-    // so centered or right-aligned elements are never clipped by a narrow virtual window
-    const virtualWindowWidth = Math.max(
+    // 3. Render DOM to high-res Canvas via html2canvas with lossless settings.
+    // NOTE:
+    // - Do NOT pass `x` or `y` offsets manually: html2canvas already calculates the element's
+    //   exact bounding box coordinates (left, top) within the cloned iframe. Passing manual x/y
+    //   adds to these coordinates, shifting the canvas and clipping off the top and left portions!
+    // - Setting `scrollX: 0` and `scrollY: 0` ensures window scroll position does not shift the capture.
+    // - Providing an adequate desktop window width (>= 1280px) ensures full responsive layouts.
+    const captureWidth = Math.max(
       document.documentElement.scrollWidth,
       document.documentElement.clientWidth,
       window.innerWidth,
-      rect.left + rect.width + scrollX + 300
+      element.scrollWidth,
+      1280
     );
-    const virtualWindowHeight = Math.max(
+    const captureHeight = Math.max(
       document.documentElement.scrollHeight,
       document.documentElement.clientHeight,
       window.innerHeight,
-      rect.top + rect.height + scrollY + 300
+      element.scrollHeight,
+      1280
     );
 
-    // Render DOM to high-res Canvas via html2canvas with lossless settings
     const canvas = await html2canvas(element, {
       scale: Math.max(scale, 2.5),
       useCORS: true,
       logging: false,
       backgroundColor: '#ffffff',
-      x: rect.left + scrollX,
-      y: rect.top + scrollY,
-      width: rect.width,
-      height: rect.height,
-      windowWidth: virtualWindowWidth,
-      windowHeight: virtualWindowHeight,
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: captureWidth,
+      windowHeight: captureHeight,
+      onclone: (_clonedDoc, clonedElement) => {
+        // Ensure any overflow containers inside the target element render in full without clipping
+        const overflowEls = clonedElement.querySelectorAll('.overflow-x-auto, .overflow-hidden');
+        overflowEls.forEach((el) => {
+          (el as HTMLElement).style.overflow = 'visible';
+        });
+      },
     });
 
     const pageWidth = orientation === 'portrait' ? 210 : 297;

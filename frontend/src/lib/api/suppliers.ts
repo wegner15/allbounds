@@ -57,6 +57,7 @@ export const suppliersApi = {
     skip?: number;
     limit?: number;
     supplier_id?: number;
+    invoice_id?: number;
     status?: string;
     search?: string;
   } = {}): Promise<{ items: SupplierBill[]; total: number; skip: number; limit: number }> {
@@ -64,6 +65,7 @@ export const suppliersApi = {
     if (params.skip !== undefined) query.set('skip', params.skip.toString());
     if (params.limit !== undefined) query.set('limit', params.limit.toString());
     if (params.supplier_id) query.set('supplier_id', params.supplier_id.toString());
+    if (params.invoice_id) query.set('invoice_id', params.invoice_id.toString());
     if (params.status && params.status !== 'all') query.set('status', params.status);
     if (params.search) query.set('search', params.search);
 

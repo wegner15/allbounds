@@ -55,6 +55,7 @@ def get_bills(
     skip: int = 0,
     limit: int = 50,
     supplier_id: Optional[int] = None,
+    invoice_id: Optional[int] = None,
     status: Optional[str] = None,
     search: Optional[str] = None,
     db: Session = Depends(get_db),
@@ -62,7 +63,13 @@ def get_bills(
 ) -> Any:
     """List supplier bills (payables) with filters."""
     items, total = supplier_service.get_bills(
-        db, skip=skip, limit=limit, supplier_id=supplier_id, status=status, search=search
+        db,
+        skip=skip,
+        limit=limit,
+        supplier_id=supplier_id,
+        invoice_id=invoice_id,
+        status=status,
+        search=search,
     )
     return {
         "items": items,

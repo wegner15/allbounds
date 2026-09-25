@@ -12,6 +12,7 @@ from app.models.finance import (
     PaymentReceipt,
     TravelVoucher
 )
+from app.models.supplier_bill import SupplierBill
 from app.models.booking import Booking
 from app.schemas.finance import (
     CurrencyCreate,
@@ -19,12 +20,14 @@ from app.schemas.finance import (
     CompanyFinanceSettingsUpdate,
     InvoiceCreate,
     InvoiceUpdate,
+    InvoiceProfitabilityResponse,
     PaymentReceiptCreate,
     TravelVoucherCreate,
     TravelVoucherUpdate,
     FinanceDashboardStats
 )
 from app.services.email import email_service
+from app.services.supplier_service import supplier_service
 
 
 # ==========================================
@@ -544,6 +547,8 @@ class FinanceService:
                     tax_rate=item.get("tax_rate", 0.0),
                     tax_amount=item.get("tax_amount", 0.0),
                     total_amount=total_amt,
+                    cost_price=item.get("cost_price", 0.0) or 0.0,
+                    supplier_id=item.get("supplier_id"),
                     metadata_json=item.get("metadata_json") or {},
                     sort_order=idx
                 )
@@ -584,6 +589,61 @@ class FinanceService:
         db.delete(invoice)
         db.commit()
         return True
+
+    def get_invoice_profitability(self, db: Session, invoice_id: int) -> Optional[InvoiceProfitabilityResponse]:
+        invoice = self.get_invoice(db, invoice_id)
+        if not invoice:
+            return None
+
+        inv_rate = invoice.exchange_rate_to_usd if invoice.exchange_rate_to_usd and invoice.exchange_rate_to_usd > 0 else 1.0
+        revenue = invoice.total_amount
+        revenue_usd = revenue / inv_rate
+
+        # Get linked supplier bills
+        bills = (
+            db.query(SupplierBill)
+            .filter(
+                SupplierBill.invoice_id == invoice.id,
+                SupplierBill.status != "cancelled"
+            )
+            .order_by(SupplierBill.bill_date.desc())
+            .all()
+        )
+
+        total_expenses_usd = 0.0
+        if bills:
+            for b in bills:
+                b_rate = b.exchange_rate_to_usd if b.exchange_rate_to_usd and b.exchange_rate_to_usd > 0 else 1.0
+                total_expenses_usd += (b.amount_billed / b_rate)
+        else:
+            # Fallback to line item cost prices if no bills yet
+            for li in invoice.line_items:
+                cost = getattr(li, "cost_price", 0.0) or 0.0
+                qty = getattr(li, "quantity", 1.0) or 1.0
+                total_expenses_usd += (cost * qty) / inv_rate
+
+        total_expenses = total_expenses_usd * inv_rate
+        gross_profit_usd = revenue_usd - total_expenses_usd
+        gross_profit = revenue - total_expenses
+        margin_percent = (gross_profit_usd / revenue_usd * 100) if revenue_usd > 0 else 0.0
+
+        bill_responses = [supplier_service._build_bill_response(b) for b in bills]
+
+        return InvoiceProfitabilityResponse(
+            invoice_id=invoice.id,
+            invoice_number=invoice.invoice_number,
+            currency=invoice.currency,
+            exchange_rate_to_usd=inv_rate,
+            total_revenue=round(revenue, 2),
+            total_revenue_usd=round(revenue_usd, 2),
+            total_expenses=round(total_expenses, 2),
+            total_expenses_usd=round(total_expenses_usd, 2),
+            gross_profit=round(gross_profit, 2),
+            gross_profit_usd=round(gross_profit_usd, 2),
+            gross_margin_percent=round(margin_percent, 1),
+            bills_count=len(bills),
+            supplier_bills=bill_responses,
+        )
 
     # ==========================================
     # PAYMENT RECEIPTS MANAGEMENT

@@ -17,6 +17,7 @@ from app.schemas.finance import (
     InvoiceCreate,
     InvoiceFromBookingCreate,
     InvoiceUpdate,
+    InvoiceProfitabilityResponse,
     PaymentReceiptResponse,
     PaymentReceiptCreate,
     TravelVoucherResponse,
@@ -200,6 +201,19 @@ def get_invoice(
     if not invoice:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invoice not found")
     return invoice
+
+
+@router.get("/invoices/{invoice_id}/profitability", response_model=InvoiceProfitabilityResponse)
+def get_invoice_profitability(
+    invoice_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+) -> Any:
+    """Get internal profitability and linked supplier expenses for an invoice (Staff only)."""
+    profitability = finance_service.get_invoice_profitability(db, invoice_id)
+    if not profitability:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invoice not found")
+    return profitability
 
 
 @router.get("/invoices/by-token/{token}", response_model=InvoiceResponse)

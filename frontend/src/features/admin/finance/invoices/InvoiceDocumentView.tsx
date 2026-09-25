@@ -16,9 +16,16 @@ import {
   ArrowLeft,
   Download,
   Loader2,
+  TrendingUp,
+  TrendingDown,
+  Receipt,
+  ShoppingCart,
+  Plus,
+  ShieldCheck,
+  ExternalLink,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import type { Invoice, CompanyFinanceSettings } from '../../../../lib/types/finance';
+import type { Invoice, CompanyFinanceSettings, InvoiceProfitability } from '../../../../lib/types/finance';
 import { DocumentHeader } from '../components/DocumentHeader';
 import { usePdfDownload } from '../../../../lib/utils/pdfGenerator';
 import '../components/PrintStyles.css';
@@ -26,7 +33,9 @@ import '../components/PrintStyles.css';
 interface InvoiceDocumentViewProps {
   invoice: Invoice;
   settings?: CompanyFinanceSettings | null;
+  profitability?: InvoiceProfitability | null;
   onRecordPayment?: () => void;
+  onRecordExpense?: () => void;
   onSendEmail?: () => void;
   isPublicView?: boolean;
 }
@@ -34,11 +43,13 @@ interface InvoiceDocumentViewProps {
 export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
   invoice,
   settings,
+  profitability,
   onRecordPayment,
+  onRecordExpense,
   onSendEmail,
   isPublicView = false
 }) => {
-  const [activeTab, setActiveTab] = useState<'document' | 'receipts'>('document');
+  const [activeTab, setActiveTab] = useState<'document' | 'receipts' | 'expenses'>('document');
   const documentRef = useRef<HTMLDivElement>(null);
   const { isGenerating, downloadPdf } = usePdfDownload();
 
@@ -140,6 +151,32 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
               >
                 Payments & Receipts ({invoice.receipts?.length || 0})
               </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('expenses')}
+                className={`px-3 py-1 text-sm font-medium rounded-md transition cursor-pointer flex items-center space-x-1.5 ${
+                  activeTab === 'expenses'
+                    ? 'bg-teal-700 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <span>Expenses & Profit</span>
+                {profitability && (
+                  <span
+                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                      profitability.gross_profit >= 0
+                        ? activeTab === 'expenses'
+                          ? 'bg-teal-900 text-emerald-300'
+                          : 'bg-emerald-100 text-emerald-800'
+                        : activeTab === 'expenses'
+                        ? 'bg-red-950 text-red-300'
+                        : 'bg-red-100 text-red-800'
+                    }`}
+                  >
+                    {profitability.gross_margin_percent}%
+                  </span>
+                )}
+              </button>
             </div>
           </div>
         ) : (
@@ -149,6 +186,16 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
         )}
 
         <div className="flex items-center space-x-2">
+          {onRecordExpense && !isPublicView && (
+            <button
+              type="button"
+              onClick={onRecordExpense}
+              className="inline-flex items-center px-3 py-2 rounded-lg bg-teal-800 hover:bg-teal-900 text-white text-sm font-medium shadow-sm transition cursor-pointer"
+              title="Record supplier bill or cost incurred for this invoice"
+            >
+              <Plus className="w-4 h-4 mr-1.5 text-teal-200" /> Record Expense
+            </button>
+          )}
           {invoice.invoice_status !== 'paid' && invoice.invoice_status !== 'cancelled' && onRecordPayment && !isPublicView && (
             <button
               type="button"
@@ -255,6 +302,309 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
             <p className="text-gray-500 text-sm py-4">
               No payments have been recorded for this invoice yet.
             </p>
+          )}
+        </div>
+      ) : activeTab === 'expenses' && !isPublicView ? (
+        /* Tab: Expenses & Profitability (Internal Staff Only - Never printed or sent to client) */
+        <div className="space-y-6">
+          {/* Internal Confidentiality Notice Banner */}
+          <div className="bg-gradient-to-r from-teal-900 to-slate-900 text-white p-5 rounded-2xl shadow-md border border-teal-800 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-start space-x-3 max-w-2xl">
+              <div className="p-2.5 bg-teal-800/80 rounded-xl text-emerald-300 shrink-0">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <h3 className="font-bold text-base text-white">Invoice Profitability & Supplier Expenses</h3>
+                  <span className="bg-emerald-500/20 text-emerald-300 text-[11px] font-semibold px-2 py-0.5 rounded-full border border-emerald-500/30 uppercase tracking-wider">
+                    Staff Confidential
+                  </span>
+                </div>
+                <p className="text-xs text-teal-200 mt-1 leading-relaxed">
+                  These cost metrics, supplier details, and margins are strictly internal. They are never rendered on downloaded client PDFs, print previews, or public verification pages.
+                </p>
+              </div>
+            </div>
+            {onRecordExpense && (
+              <button
+                type="button"
+                onClick={onRecordExpense}
+                className="inline-flex items-center px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold shadow-md transition cursor-pointer"
+              >
+                <Plus className="w-4 h-4 mr-1.5" /> Record Supplier Expense
+              </button>
+            )}
+          </div>
+
+          {/* 4 Scorecard KPI Tiles */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* 1. Revenue */}
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-200/80 hover:shadow-md transition">
+              <div className="flex items-center justify-between text-gray-500 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider">Total Revenue</span>
+                <div className="p-2 bg-blue-50 text-blue-700 rounded-lg">
+                  <DollarSign className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="text-xl font-extrabold text-gray-900 font-mono">
+                {invoice.currency} {(profitability?.total_revenue ?? invoice.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+              <div className="text-xs text-gray-500 mt-1 flex items-center justify-between">
+                <span>Approx USD</span>
+                <span className="font-mono font-medium">
+                  ${(profitability?.total_revenue_usd ?? (invoice.total_amount / (invoice.exchange_rate_to_usd || 1))).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              </div>
+            </div>
+
+            {/* 2. Total Incurred Expenses */}
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-200/80 hover:shadow-md transition">
+              <div className="flex items-center justify-between text-gray-500 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider">Total Expenses</span>
+                <div className="p-2 bg-amber-50 text-amber-700 rounded-lg">
+                  <Receipt className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="text-xl font-extrabold text-gray-900 font-mono">
+                {invoice.currency} {(profitability?.total_expenses ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+              <div className="text-xs text-gray-500 mt-1 flex items-center justify-between">
+                <span>{profitability?.bills_count || 0} linked bill(s)</span>
+                <span className="font-mono font-medium">
+                  ${(profitability?.total_expenses_usd ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
+                </span>
+              </div>
+            </div>
+
+            {/* 3. Gross Profit */}
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-200/80 hover:shadow-md transition">
+              <div className="flex items-center justify-between text-gray-500 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider">Gross Profit</span>
+                <div className={`p-2 rounded-lg ${
+                  (profitability?.gross_profit ?? 0) >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+                }`}>
+                  {(profitability?.gross_profit ?? 0) >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                </div>
+              </div>
+              <div className={`text-xl font-extrabold font-mono ${
+                (profitability?.gross_profit ?? 0) >= 0 ? 'text-emerald-700' : 'text-rose-700'
+              }`}>
+                {invoice.currency} {(profitability?.gross_profit ?? invoice.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+              <div className="text-xs text-gray-500 mt-1 flex items-center justify-between">
+                <span>Net Earnings</span>
+                <span className="font-mono font-medium">
+                  ${(profitability?.gross_profit_usd ?? (invoice.total_amount / (invoice.exchange_rate_to_usd || 1))).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
+                </span>
+              </div>
+            </div>
+
+            {/* 4. Gross Margin % */}
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-200/80 hover:shadow-md transition">
+              <div className="flex items-center justify-between text-gray-500 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider">Profit Margin</span>
+                <div className="p-2 bg-teal-50 text-teal-700 rounded-lg">
+                  <ShoppingCart className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="text-xl font-extrabold text-teal-800 font-mono">
+                {(profitability?.gross_margin_percent ?? 100).toFixed(1)}%
+              </div>
+              <div className="mt-1">
+                {(profitability?.gross_margin_percent ?? 100) >= 30 ? (
+                  <span className="inline-block text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full">
+                    Strong Margin (≥30%)
+                  </span>
+                ) : (profitability?.gross_margin_percent ?? 100) >= 15 ? (
+                  <span className="inline-block text-[11px] font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-full">
+                    Standard Margin (15-30%)
+                  </span>
+                ) : (profitability?.gross_margin_percent ?? 100) >= 0 ? (
+                  <span className="inline-block text-[11px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full">
+                    Low Margin (&lt;15%)
+                  </span>
+                ) : (
+                  <span className="inline-block text-[11px] font-bold text-rose-800 bg-rose-50 px-2 py-0.5 rounded-full">
+                    Operating Loss
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Supplier Bills Table */}
+          <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-base font-bold text-gray-900 flex items-center">
+                  <Receipt className="w-5 h-5 mr-2 text-teal-700" /> Linked Supplier Expenses & Bills
+                </h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Actual bills and payables committed to lodges, transportation providers, and local operators
+                </p>
+              </div>
+              {onRecordExpense && (
+                <button
+                  type="button"
+                  onClick={onRecordExpense}
+                  className="inline-flex items-center px-3.5 py-1.5 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-semibold border border-teal-200 transition cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5 mr-1" /> Add Bill
+                </button>
+              )}
+            </div>
+
+            {profitability?.supplier_bills && profitability.supplier_bills.length > 0 ? (
+              <div className="overflow-x-auto border border-gray-200 rounded-xl">
+                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                  <thead className="bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
+                    <tr>
+                      <th className="px-4 py-3 text-left">Bill Number</th>
+                      <th className="px-4 py-3 text-left">Supplier</th>
+                      <th className="px-4 py-3 text-left">Category</th>
+                      <th className="px-4 py-3 text-left">Bill Date</th>
+                      <th className="px-4 py-3 text-left">Due Date</th>
+                      <th className="px-4 py-3 text-right">Amount</th>
+                      <th className="px-4 py-3 text-right">Paid</th>
+                      <th className="px-4 py-3 text-right">Balance</th>
+                      <th className="px-4 py-3 text-center">Status</th>
+                      <th className="px-4 py-3 text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 bg-white">
+                    {profitability.supplier_bills.map((bill) => (
+                      <tr key={bill.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 font-semibold text-teal-900 font-mono text-xs">
+                          {bill.bill_number}
+                          {bill.supplier_reference && (
+                            <span className="block text-[11px] text-gray-400 font-normal">
+                              Ref: {bill.supplier_reference}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-gray-900 font-medium">
+                          {bill.supplier_name || `Supplier #${bill.supplier_id}`}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="inline-block px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 text-gray-700 capitalize">
+                            {bill.category}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-gray-600 text-xs">
+                          {bill.bill_date ? new Date(bill.bill_date).toLocaleDateString() : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-gray-600 text-xs">
+                          {bill.due_date ? new Date(bill.due_date).toLocaleDateString() : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-right font-bold text-gray-900 font-mono">
+                          {bill.currency} {bill.amount_billed.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono text-xs text-emerald-700">
+                          {bill.currency} {bill.amount_paid.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono text-xs font-semibold text-amber-700">
+                          {bill.currency} {bill.balance_payable.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                            bill.status === 'paid'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : bill.status === 'partially_paid'
+                              ? 'bg-amber-100 text-amber-800'
+                              : bill.status === 'overdue'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {bill.status.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Link
+                            to={`/admin/finance/suppliers/bills`}
+                            className="inline-flex items-center text-xs font-medium text-teal-700 hover:text-teal-900"
+                          >
+                            View <ExternalLink className="w-3 h-3 ml-0.5" />
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                <Receipt className="w-10 h-10 mx-auto text-gray-300 mb-2" />
+                <h4 className="text-sm font-bold text-gray-700">No Supplier Bills Attached Yet</h4>
+                <p className="text-xs text-gray-500 max-w-md mx-auto mt-1 mb-4">
+                  Add expenses incurred from lodges, safari transport, or permits to accurately calculate the net profit for this invoice.
+                </p>
+                {onRecordExpense && (
+                  <button
+                    type="button"
+                    onClick={onRecordExpense}
+                    className="inline-flex items-center px-4 py-2 rounded-lg bg-teal-700 hover:bg-teal-800 text-white text-xs font-medium shadow-sm transition cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4 mr-1.5" /> Record Supplier Expense
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Line Item Unit Costs Breakdown (Optional summary) */}
+          {invoice.line_items && invoice.line_items.some((item) => (item.cost_price || 0) > 0) && (
+            <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-2">
+                Line Items Unit Cost Price Breakdown
+              </h3>
+              <p className="text-xs text-gray-500 mb-3">
+                Estimated internal unit costs recorded at the line item level
+              </p>
+              <div className="overflow-x-auto border border-gray-200 rounded-xl">
+                <table className="min-w-full divide-y divide-gray-200 text-xs">
+                  <thead className="bg-gray-50 text-gray-500 uppercase">
+                    <tr>
+                      <th className="px-3 py-2 text-left">Item</th>
+                      <th className="px-3 py-2 text-center">Qty</th>
+                      <th className="px-3 py-2 text-right">Selling Price</th>
+                      <th className="px-3 py-2 text-right">Cost Price</th>
+                      <th className="px-3 py-2 text-right">Total Cost</th>
+                      <th className="px-3 py-2 text-right">Unit Profit</th>
+                      <th className="px-3 py-2 text-right">Estimated Margin</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {invoice.line_items.map((item, i) => {
+                      const cost = item.cost_price || 0;
+                      const totalCost = cost * item.quantity;
+                      const profit = item.total_amount - totalCost;
+                      const margin = item.total_amount > 0 ? (profit / item.total_amount) * 100 : 0;
+                      return (
+                        <tr key={i} className="hover:bg-gray-50">
+                          <td className="px-3 py-2 font-medium text-gray-900">{item.title}</td>
+                          <td className="px-3 py-2 text-center">{item.quantity}</td>
+                          <td className="px-3 py-2 text-right font-mono">
+                            {invoice.currency} {item.unit_price.toFixed(2)}
+                          </td>
+                          <td className="px-3 py-2 text-right font-mono text-amber-700">
+                            {invoice.currency} {cost.toFixed(2)}
+                          </td>
+                          <td className="px-3 py-2 text-right font-mono font-medium text-amber-800">
+                            {invoice.currency} {totalCost.toFixed(2)}
+                          </td>
+                          <td className={`px-3 py-2 text-right font-mono font-medium ${profit >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
+                            {invoice.currency} {profit.toFixed(2)}
+                          </td>
+                          <td className="px-3 py-2 text-right font-mono">
+                            {margin.toFixed(1)}%
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           )}
         </div>
       ) : (

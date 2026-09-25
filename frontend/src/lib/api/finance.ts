@@ -11,6 +11,7 @@ import type {
   TravelVoucherCreateRequest,
   TravelVoucherUpdateRequest,
   FinanceDashboardStats,
+  InvoiceProfitability,
   PublicVoucherVerificationResponse,
   PublicReceiptVerificationResponse
 } from '../types/finance';
@@ -74,6 +75,10 @@ export const financeApi = {
 
   async getInvoice(id: number): Promise<Invoice> {
     return apiClient.get<Invoice>(`/finance/invoices/${id}`);
+  },
+
+  async getInvoiceProfitability(id: number): Promise<InvoiceProfitability> {
+    return apiClient.get<InvoiceProfitability>(`/finance/invoices/${id}/profitability`);
   },
 
   async getNextInvoiceNumber(): Promise<{ invoice_number: string }> {

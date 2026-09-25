@@ -11,15 +11,18 @@ import {
   DollarSign,
   FileCheck,
   AlertCircle,
-  Sparkles
+  Sparkles,
+  ShieldCheck
 } from 'lucide-react';
 import { financeApi } from '../../../../lib/api/finance';
+import { suppliersApi } from '../../../../lib/api/suppliers';
 import { apiClient } from '../../../../lib/api';
 import type {
   Invoice,
   InvoiceLineItem,
   Currency,
-  CompanyFinanceSettings
+  CompanyFinanceSettings,
+  Supplier
 } from '../../../../lib/types/finance';
 
 export const InvoiceEditorPage: React.FC = () => {
@@ -35,6 +38,7 @@ export const InvoiceEditorPage: React.FC = () => {
   const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [settings, setSettings] = useState<CompanyFinanceSettings | null>(null);
   const [availableBookings, setAvailableBookings] = useState<any[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
   // Form state
   const [invoiceNumber, setInvoiceNumber] = useState<string>('');
@@ -113,15 +117,17 @@ export const InvoiceEditorPage: React.FC = () => {
     async function loadData() {
       try {
         setLoading(true);
-        const [currList, compSettings, bookingsRes] = await Promise.all([
+        const [currList, compSettings, bookingsRes, suppliersRes] = await Promise.all([
           financeApi.getCurrencies(),
           financeApi.getSettings(),
-          apiClient.get<any[]>('/bookings/type/package').catch(() => [])
+          apiClient.get<any[]>('/bookings/type/package').catch(() => []),
+          suppliersApi.getSuppliers({ is_active: true, limit: 200 }).catch(() => ({ items: [] }))
         ]);
 
         setCurrencies(currList);
         setSettings(compSettings);
         setAvailableBookings(bookingsRes || []);
+        setSuppliers(suppliersRes?.items || []);
 
         if (!isEditing) {
           // Default to base currency from settings
@@ -969,6 +975,49 @@ export const InvoiceEditorPage: React.FC = () => {
                     <label className="block text-gray-500 font-medium mb-1">Line Total</label>
                     <div className="p-2 bg-gray-100 rounded-lg font-mono font-bold text-gray-900 text-xs">
                       {selectedCurrency} {item.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Internal Cost & Supplier (Staff Only - Hidden from Client) */}
+                <div className="pt-2.5 border-t border-gray-200 mt-2 bg-teal-50/50 p-3 rounded-lg border border-teal-200/60">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-bold text-teal-900 uppercase tracking-wider flex items-center">
+                      <ShieldCheck className="w-3.5 h-3.5 mr-1 text-teal-700" /> Internal Cost & Supplier (Staff Only - Invisible to Client)
+                    </span>
+                    {item.unit_price > 0 && (item.cost_price || 0) > 0 && (
+                      <span className="text-[11px] font-mono font-semibold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
+                        Line Margin: {selectedCurrency} {((item.unit_price - (item.cost_price || 0)) * item.quantity).toFixed(2)} ({(((item.unit_price - (item.cost_price || 0)) / item.unit_price) * 100).toFixed(0)}%)
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <label className="block text-gray-600 font-medium mb-1 text-[11px]">Linked Supplier</label>
+                      <select
+                        value={item.supplier_id || ''}
+                        onChange={(e) => handleItemChange(idx, 'supplier_id', e.target.value ? Number(e.target.value) : null)}
+                        className="w-full p-2 border border-gray-300 rounded-lg text-xs bg-white"
+                      >
+                        <option value="">-- No Supplier Linked --</option>
+                        {suppliers.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.name} ({s.category.replace('_', ' ').toUpperCase()})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-gray-600 font-medium mb-1 text-[11px]">Unit Cost Price ({selectedCurrency})</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={item.cost_price || ''}
+                        onChange={(e) => handleItemChange(idx, 'cost_price', parseFloat(e.target.value) || 0)}
+                        placeholder="0.00"
+                        className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono"
+                      />
                     </div>
                   </div>
                 </div>

@@ -191,6 +191,7 @@ class SupplierService:
         skip: int = 0,
         limit: int = 50,
         supplier_id: Optional[int] = None,
+        invoice_id: Optional[int] = None,
         status: Optional[str] = None,
         search: Optional[str] = None,
     ) -> Tuple[List[SupplierBillResponse], int]:
@@ -198,6 +199,9 @@ class SupplierService:
 
         if supplier_id:
             query = query.filter(SupplierBill.supplier_id == supplier_id)
+
+        if invoice_id:
+            query = query.filter(SupplierBill.invoice_id == invoice_id)
 
         if status:
             query = query.filter(SupplierBill.status == status)

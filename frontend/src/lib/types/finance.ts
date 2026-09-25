@@ -99,6 +99,8 @@ export interface InvoiceLineItem {
   tax_rate: number;
   tax_amount: number;
   total_amount: number;
+  cost_price?: number;
+  supplier_id?: number | null;
   metadata_json?: Record<string, any>;
   sort_order?: number;
 }
@@ -625,5 +627,21 @@ export interface CashFlowReport {
     outflow_usd: number;
     net_usd: number;
   }[];
+}
+
+export interface InvoiceProfitability {
+  invoice_id: number;
+  invoice_number: string;
+  currency: string;
+  exchange_rate_to_usd: number;
+  total_revenue: number;
+  total_revenue_usd: number;
+  total_expenses: number;
+  total_expenses_usd: number;
+  gross_profit: number;
+  gross_profit_usd: number;
+  gross_margin_percent: number;
+  bills_count: number;
+  supplier_bills: SupplierBill[];
 }
 

@@ -8,6 +8,9 @@ interface SupplierBillModalProps {
   onClose: () => void;
   onSaved: (bill: SupplierBill) => void;
   defaultSupplierId?: number;
+  defaultInvoiceId?: number;
+  invoiceNumber?: string;
+  bookingId?: number;
   suppliers: Supplier[];
 }
 
@@ -16,6 +19,9 @@ export const SupplierBillModal: React.FC<SupplierBillModalProps> = ({
   onClose,
   onSaved,
   defaultSupplierId,
+  defaultInvoiceId,
+  invoiceNumber,
+  bookingId,
   suppliers
 }) => {
   const [supplierId, setSupplierId] = useState<number>(defaultSupplierId || (suppliers[0]?.id || 0));
@@ -63,6 +69,8 @@ export const SupplierBillModal: React.FC<SupplierBillModalProps> = ({
 
       const bill = await suppliersApi.createBill({
         supplier_id: supplierId,
+        invoice_id: defaultInvoiceId,
+        booking_id: bookingId,
         supplier_reference: supplierReference,
         bill_date: billDate,
         due_date: dueDate,
@@ -90,12 +98,18 @@ export const SupplierBillModal: React.FC<SupplierBillModalProps> = ({
         {/* Header */}
         <div className="px-6 py-5 bg-gradient-to-r from-teal-800 to-teal-950 text-white flex justify-between items-center">
           <div>
-            <h2 className="text-xl font-bold font-playfair">Enter Supplier Bill (Payable)</h2>
-            <p className="text-xs text-teal-200 mt-0.5">Record an invoice or commitment due to a supplier/lodge</p>
+            <h2 className="text-xl font-bold font-playfair">
+              {defaultInvoiceId ? 'Record Invoice Expense' : 'Enter Supplier Bill (Payable)'}
+            </h2>
+            <p className="text-xs text-teal-200 mt-0.5">
+              {invoiceNumber
+                ? `Recording supplier cost linked to Invoice #${invoiceNumber}`
+                : 'Record an invoice or commitment due to a supplier/lodge'}
+            </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -103,6 +117,14 @@ export const SupplierBillModal: React.FC<SupplierBillModalProps> = ({
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+          {defaultInvoiceId && (
+            <div className="p-3 bg-teal-50 border border-teal-200 rounded-xl flex items-center justify-between text-xs text-teal-900">
+              <span className="font-semibold">Linked Invoice:</span>
+              <span className="font-mono bg-white px-2 py-0.5 rounded border border-teal-200 font-bold">
+                {invoiceNumber || `#${defaultInvoiceId}`}
+              </span>
+            </div>
+          )}
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl">
               {error}

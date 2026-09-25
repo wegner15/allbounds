@@ -387,3 +387,26 @@ class SendEmailRequest(BaseModel):
     subject: Optional[str] = None
     message: Optional[str] = None
     copy_me: bool = True
+
+
+# ==========================================
+# INVOICE PROFITABILITY SCHEMAS
+# ==========================================
+
+from app.schemas.supplier_bill import SupplierBillResponse
+
+class InvoiceProfitabilityResponse(BaseModel):
+    invoice_id: int
+    invoice_number: str
+    currency: str
+    exchange_rate_to_usd: float
+    total_revenue: float
+    total_revenue_usd: float
+    total_expenses: float
+    total_expenses_usd: float
+    gross_profit: float
+    gross_profit_usd: float
+    gross_margin_percent: float
+    bills_count: int
+    supplier_bills: List[SupplierBillResponse] = []
+

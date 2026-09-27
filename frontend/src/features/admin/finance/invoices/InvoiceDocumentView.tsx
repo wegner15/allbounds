@@ -322,9 +322,6 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
                     Staff Confidential
                   </span>
                 </div>
-                <p className="text-xs text-teal-200 mt-1 leading-relaxed">
-                  These cost metrics, supplier details, and margins are strictly internal. They are never rendered on downloaded client PDFs, print previews, or public verification pages.
-                </p>
               </div>
             </div>
             {onRecordExpense && (

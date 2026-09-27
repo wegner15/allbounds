@@ -344,6 +344,23 @@ class FinanceService:
         db.flush()
 
         for idx, item_data in enumerate(line_items_data):
+            supp_expenses = getattr(item_data, "supplier_expenses", None)
+            meta = dict(item_data.metadata_json or {})
+            if supp_expenses:
+                meta["supplier_expenses"] = supp_expenses
+
+            cost_p = getattr(item_data, "cost_price", 0.0) or 0.0
+            supp_id = getattr(item_data, "supplier_id", None)
+            cost_narr = getattr(item_data, "cost_narration", None)
+
+            if supp_expenses and isinstance(supp_expenses, list):
+                if cost_p <= 0:
+                    cost_p = sum(float(se.get("net_price") or se.get("amount") or 0.0) * float(se.get("quantity") or se.get("qty") or 1.0) for se in supp_expenses)
+                if not supp_id:
+                    supp_id = next((se.get("supplier_id") for se in supp_expenses if se.get("supplier_id")), None)
+                if not cost_narr:
+                    cost_narr = "; ".join(filter(None, [se.get("narration") for se in supp_expenses]))
+
             db_item = InvoiceLineItem(
                 invoice_id=db_invoice.id,
                 category=item_data.category,
@@ -356,9 +373,10 @@ class FinanceService:
                 tax_rate=item_data.tax_rate,
                 tax_amount=item_data.tax_amount,
                 total_amount=item_data.total_amount,
-                cost_price=getattr(item_data, "cost_price", 0.0),
-                supplier_id=getattr(item_data, "supplier_id", None),
-                metadata_json=item_data.metadata_json or {},
+                cost_price=cost_p,
+                supplier_id=supp_id,
+                cost_narration=cost_narr,
+                metadata_json=meta,
                 sort_order=idx
             )
             db.add(db_item)
@@ -533,8 +551,29 @@ class FinanceService:
             db.query(InvoiceLineItem).filter(InvoiceLineItem.invoice_id == invoice.id).delete()
             computed_subtotal = 0.0
             for idx, item in enumerate(new_items):
-                item_total = (item["quantity"] * item["unit_price"]) - item["discount"] + item["tax_amount"]
-                total_amt = max(0.0, item_total)
+                supp_expenses = item.get("supplier_expenses") or (item.get("metadata_json") or {}).get("supplier_expenses")
+                meta = dict(item.get("metadata_json") or {})
+                if supp_expenses:
+                    meta["supplier_expenses"] = supp_expenses
+
+                cost_p = item.get("cost_price", 0.0) or 0.0
+                supp_id = item.get("supplier_id")
+                cost_narr = item.get("cost_narration")
+
+                if supp_expenses and isinstance(supp_expenses, list):
+                    if cost_p <= 0:
+                        cost_p = sum(float(se.get("net_price") or se.get("amount") or 0.0) * float(se.get("quantity") or se.get("qty") or 1.0) for se in supp_expenses)
+                    if not supp_id:
+                        supp_id = next((se.get("supplier_id") for se in supp_expenses if se.get("supplier_id")), None)
+                    if not cost_narr:
+                        cost_narr = "; ".join(filter(None, [se.get("narration") for se in supp_expenses]))
+
+                if "total_amount" in item and item["total_amount"] is not None and float(item["total_amount"]) > 0:
+                    total_amt = float(item["total_amount"])
+                else:
+                    item_total = (item["quantity"] * item["unit_price"]) - item.get("discount", 0.0) + item.get("tax_amount", 0.0)
+                    total_amt = max(0.0, item_total)
+
                 db_item = InvoiceLineItem(
                     invoice_id=invoice.id,
                     category=item.get("category", "other"),
@@ -547,13 +586,14 @@ class FinanceService:
                     tax_rate=item.get("tax_rate", 0.0),
                     tax_amount=item.get("tax_amount", 0.0),
                     total_amount=total_amt,
-                    cost_price=item.get("cost_price", 0.0) or 0.0,
-                    supplier_id=item.get("supplier_id"),
-                    metadata_json=item.get("metadata_json") or {},
+                    cost_price=cost_p,
+                    supplier_id=supp_id,
+                    cost_narration=cost_narr,
+                    metadata_json=meta,
                     sort_order=idx
                 )
                 db.add(db_item)
-                computed_subtotal += (item["quantity"] * item["unit_price"])
+                computed_subtotal += total_amt
 
             if "subtotal" not in update_data:
                 update_data["subtotal"] = computed_subtotal
@@ -616,11 +656,18 @@ class FinanceService:
                 b_rate = b.exchange_rate_to_usd if b.exchange_rate_to_usd and b.exchange_rate_to_usd > 0 else 1.0
                 total_expenses_usd += (b.amount_billed / b_rate)
         else:
-            # Fallback to line item cost prices if no bills yet
+            # Fallback to line item cost prices or multiple supplier expenses breakdown if no bills yet
             for li in invoice.line_items:
-                cost = getattr(li, "cost_price", 0.0) or 0.0
-                qty = getattr(li, "quantity", 1.0) or 1.0
-                total_expenses_usd += (cost * qty) / inv_rate
+                supp_expenses = (li.metadata_json or {}).get("supplier_expenses", [])
+                if supp_expenses:
+                    for se in supp_expenses:
+                        net_p = float(se.get("net_price") if se.get("net_price") is not None else (se.get("amount") or 0.0))
+                        q = float(se.get("quantity") if se.get("quantity") is not None else (se.get("qty") or 1.0))
+                        total_expenses_usd += (net_p * q) / inv_rate
+                else:
+                    cost = getattr(li, "cost_price", 0.0) or 0.0
+                    qty = getattr(li, "quantity", 1.0) or 1.0
+                    total_expenses_usd += (cost * qty) / inv_rate
 
         total_expenses = total_expenses_usd * inv_rate
         gross_profit_usd = revenue_usd - total_expenses_usd

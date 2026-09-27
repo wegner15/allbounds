@@ -113,6 +113,8 @@ class InvoiceLineItemBase(BaseModel):
     total_amount: float = 0.0
     cost_price: float = 0.0
     supplier_id: Optional[int] = None
+    cost_narration: Optional[str] = None
+    supplier_expenses: Optional[List[Dict[str, Any]]] = None
     metadata_json: Optional[Dict[str, Any]] = Field(default_factory=dict)
     sort_order: int = 0
 

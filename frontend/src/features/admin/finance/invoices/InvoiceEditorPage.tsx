@@ -20,6 +20,7 @@ import { apiClient } from '../../../../lib/api';
 import type {
   Invoice,
   InvoiceLineItem,
+  SupplierExpenseItem,
   Currency,
   CompanyFinanceSettings,
   Supplier
@@ -84,7 +85,6 @@ export const InvoiceEditorPage: React.FC = () => {
   const [transportationType, setTransportationType] = useState<string>('Private 4x4 Safari Land Cruiser');
   const [tourPackageName, setTourPackageName] = useState<string>('');
 
-  // Line Items
   const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([
     {
       category: 'accommodation',
@@ -96,6 +96,21 @@ export const InvoiceEditorPage: React.FC = () => {
       tax_rate: 0,
       tax_amount: 0,
       total_amount: 0,
+      cost_price: 0,
+      supplier_id: null,
+      cost_narration: '',
+      supplier_expenses: [
+        {
+          category: 'accommodation',
+          supplier_id: null,
+          narration: '',
+          quantity: 1,
+          net_price: 0,
+          markup: 0,
+          tax: 0,
+          total: 0
+        }
+      ],
       sort_order: 0
     }
   ]);
@@ -210,7 +225,60 @@ export const InvoiceEditorPage: React.FC = () => {
 
           setNotes(inv.notes || '');
           setTerms(inv.terms_and_conditions || '');
-          setLineItems(inv.line_items || []);
+          const mappedItems = (inv.line_items || []).map((li: any) => {
+            const rawExpenses =
+              li.supplier_expenses && li.supplier_expenses.length > 0
+                ? li.supplier_expenses
+                : (li.metadata_json?.supplier_expenses && li.metadata_json.supplier_expenses.length > 0
+                    ? li.metadata_json.supplier_expenses
+                    : null);
+
+            let expenses: SupplierExpenseItem[] = [];
+            if (rawExpenses) {
+              expenses = rawExpenses.map((exp: any) => {
+                const q = exp.quantity !== undefined ? exp.quantity : (exp.qty !== undefined ? exp.qty : 1);
+                const net = exp.net_price !== undefined ? exp.net_price : (exp.amount || 0);
+                const tax = exp.tax !== undefined ? exp.tax : 0;
+                const tot = exp.total !== undefined ? exp.total : ((net + (exp.markup || 0)) * q + tax);
+                const mu = exp.markup !== undefined ? exp.markup : Math.max(0, (tot - tax) / (q || 1) - net);
+                return {
+                  category: exp.category || li.category || 'other',
+                  supplier_id: exp.supplier_id || null,
+                  supplier_name: exp.supplier_name || '',
+                  narration: exp.narration || '',
+                  quantity: q,
+                  net_price: net,
+                  markup: mu,
+                  tax: tax,
+                  total: tot
+                };
+              });
+            } else {
+              const q = li.quantity || 1;
+              const net = li.cost_price || 0;
+              const tax = li.tax_amount || 0;
+              const tot = li.total_amount || (li.unit_price * q) || 0;
+              const mu = Math.max(0, (tot - tax) / (q || 1) - net);
+              expenses = [
+                {
+                  category: li.category || 'other',
+                  supplier_id: li.supplier_id || null,
+                  narration: li.cost_narration || '',
+                  quantity: q,
+                  net_price: net,
+                  markup: mu,
+                  tax: tax,
+                  total: tot
+                }
+              ];
+            }
+
+            return {
+              ...li,
+              supplier_expenses: expenses
+            };
+          });
+          setLineItems(mappedItems);
         }
       } catch (err: any) {
         setError(err?.message || 'Failed to load initial invoice data');
@@ -235,13 +303,137 @@ export const InvoiceEditorPage: React.FC = () => {
     const updated = [...lineItems];
     const item = { ...updated[index], [field]: value };
 
-    const qty = field === 'quantity' ? parseFloat(value) || 0 : item.quantity;
-    const price = field === 'unit_price' ? parseFloat(value) || 0 : item.unit_price;
-    const disc = field === 'discount' ? parseFloat(value) || 0 : item.discount;
-    const tax = field === 'tax_amount' ? parseFloat(value) || 0 : item.tax_amount;
-
-    item.total_amount = Math.max(0, qty * price - disc + tax);
+    if (field === 'quantity') {
+      const qty = Math.max(0.1, parseFloat(value) || 1);
+      item.quantity = qty;
+      const totalAmt = item.total_amount || 0;
+      item.unit_price = totalAmt / qty;
+    }
     updated[index] = item;
+    setLineItems(updated);
+  };
+
+  // Recreatable Service Category & Supplier Expense handlers
+  const handleExpenseRowChange = (
+    itemIdx: number,
+    expIdx: number,
+    field: keyof SupplierExpenseItem,
+    value: any
+  ) => {
+    const updated = [...lineItems];
+    const item = { ...updated[itemIdx] };
+    const rows = [...(item.supplier_expenses || [])];
+    const row = { ...rows[expIdx] };
+
+    if (field === 'net_price') {
+      const net = Math.max(0, parseFloat(value) || 0);
+      row.net_price = net;
+      row.total = Math.max(0, (net + row.markup) * (row.quantity || 1) + row.tax);
+    } else if (field === 'markup') {
+      const mu = Math.max(0, parseFloat(value) || 0);
+      row.markup = mu;
+      row.total = Math.max(0, (row.net_price + mu) * (row.quantity || 1) + row.tax);
+    } else if (field === 'tax') {
+      const tx = Math.max(0, parseFloat(value) || 0);
+      row.tax = tx;
+      row.total = Math.max(0, (row.net_price + row.markup) * (row.quantity || 1) + tx);
+    } else if (field === 'quantity') {
+      const q = Math.max(0, parseFloat(value) || 0);
+      row.quantity = q;
+      row.total = Math.max(0, (row.net_price + row.markup) * q + row.tax);
+    } else if (field === 'total') {
+      const tot = Math.max(0, parseFloat(value) || 0);
+      row.total = tot;
+      const q = row.quantity > 0 ? row.quantity : 1;
+      row.markup = Math.max(0, (tot - row.tax) / q - row.net_price);
+    } else if (field === 'supplier_id') {
+      const suppId = value ? Number(value) : null;
+      row.supplier_id = suppId;
+      const found = suppliers.find((s) => s.id === suppId);
+      row.supplier_name = found?.name || '';
+    } else if (field === 'category') {
+      row.category = value;
+    } else if (field === 'narration') {
+      row.narration = value;
+    }
+
+    rows[expIdx] = row;
+
+    // Recalculate parent item
+    const totalCost = rows.reduce((sum, r) => sum + ((r.net_price || 0) * (r.quantity || 1)), 0);
+    const totalTax = rows.reduce((sum, r) => sum + (r.tax || 0), 0);
+    const totalLineAmount = rows.reduce((sum, r) => sum + (r.total || 0), 0);
+    const itemQty = item.quantity > 0 ? item.quantity : 1;
+    const primarySupplier = rows.find((r) => r.supplier_id)?.supplier_id || null;
+    const narrations = rows.map((r) => r.narration).filter(Boolean).join('; ');
+
+    item.supplier_expenses = rows;
+    item.cost_price = totalCost;
+    item.tax_amount = totalTax;
+    item.total_amount = totalLineAmount;
+    item.unit_price = totalLineAmount / itemQty;
+    item.discount = 0;
+    item.supplier_id = primarySupplier;
+    item.cost_narration = narrations;
+    item.metadata_json = {
+      ...(item.metadata_json || {}),
+      supplier_expenses: rows
+    };
+
+    updated[itemIdx] = item;
+    setLineItems(updated);
+  };
+
+  const addExpenseRow = (itemIdx: number) => {
+    const updated = [...lineItems];
+    const item = { ...updated[itemIdx] };
+    const rows = [...(item.supplier_expenses || [])];
+    rows.push({
+      category: item.category || 'other',
+      supplier_id: null,
+      narration: '',
+      quantity: 1,
+      net_price: 0,
+      markup: 0,
+      tax: 0,
+      total: 0
+    });
+    item.supplier_expenses = rows;
+    item.metadata_json = {
+      ...(item.metadata_json || {}),
+      supplier_expenses: rows
+    };
+    updated[itemIdx] = item;
+    setLineItems(updated);
+  };
+
+  const removeExpenseRow = (itemIdx: number, expIdx: number) => {
+    const updated = [...lineItems];
+    const item = { ...updated[itemIdx] };
+    let rows = [...(item.supplier_expenses || [])];
+    if (rows.length <= 1) return;
+    rows = rows.filter((_, i) => i !== expIdx);
+
+    const totalCost = rows.reduce((sum, r) => sum + ((r.net_price || 0) * (r.quantity || 1)), 0);
+    const totalTax = rows.reduce((sum, r) => sum + (r.tax || 0), 0);
+    const totalLineAmount = rows.reduce((sum, r) => sum + (r.total || 0), 0);
+    const itemQty = item.quantity > 0 ? item.quantity : 1;
+    const primarySupplier = rows.find((r) => r.supplier_id)?.supplier_id || null;
+    const narrations = rows.map((r) => r.narration).filter(Boolean).join('; ');
+
+    item.supplier_expenses = rows;
+    item.cost_price = totalCost;
+    item.tax_amount = totalTax;
+    item.total_amount = totalLineAmount;
+    item.unit_price = totalLineAmount / itemQty;
+    item.supplier_id = primarySupplier;
+    item.cost_narration = narrations;
+    item.metadata_json = {
+      ...(item.metadata_json || {}),
+      supplier_expenses: rows
+    };
+
+    updated[itemIdx] = item;
     setLineItems(updated);
   };
 
@@ -258,6 +450,21 @@ export const InvoiceEditorPage: React.FC = () => {
         tax_rate: 0,
         tax_amount: 0,
         total_amount: 0,
+        cost_price: 0,
+        supplier_id: null,
+        cost_narration: '',
+        supplier_expenses: [
+          {
+            category: 'other',
+            supplier_id: null,
+            narration: '',
+            quantity: 1,
+            net_price: 0,
+            markup: 0,
+            tax: 0,
+            total: 0
+          }
+        ],
         sort_order: lineItems.length
       }
     ]);
@@ -301,13 +508,28 @@ export const InvoiceEditorPage: React.FC = () => {
         tax_rate: 0,
         tax_amount: 0,
         total_amount: price,
+        cost_price: 0,
+        supplier_id: null,
+        cost_narration: b.selected_hotel_name ? `Hotel: ${b.selected_hotel_name}` : '',
+        supplier_expenses: [
+          {
+            category: 'accommodation',
+            supplier_id: null,
+            narration: b.selected_hotel_name ? `Hotel: ${b.selected_hotel_name}` : '',
+            quantity: 1,
+            net_price: 0,
+            markup: price,
+            tax: 0,
+            total: price
+          }
+        ],
         sort_order: 0
       }
     ]);
   };
 
   // Calculate totals
-  const subtotal = lineItems.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
+  const subtotal = lineItems.reduce((sum, item) => sum + (item.total_amount || (item.quantity * item.unit_price) || 0), 0);
   const itemsDiscount = lineItems.reduce((sum, item) => sum + (item.discount || 0), 0);
   const totalDiscount = itemsDiscount + (promotionalDiscount || 0);
   const taxableAmount = Math.max(0, subtotal - totalDiscount);
@@ -925,99 +1147,213 @@ export const InvoiceEditorPage: React.FC = () => {
                   />
                 </div>
 
-                {/* Pricing row */}
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs pt-1">
-                  <div>
-                    <label className="block text-gray-500 font-medium mb-1">Qty</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      value={item.quantity}
-                      onChange={(e) => handleItemChange(idx, 'quantity', e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-500 font-medium mb-1">Unit Price ({selectedCurrency})</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={item.unit_price}
-                      onChange={(e) => handleItemChange(idx, 'unit_price', e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono font-semibold"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-500 font-medium mb-1">Discount ({selectedCurrency})</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={item.discount}
-                      onChange={(e) => handleItemChange(idx, 'discount', e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono text-red-600"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-500 font-medium mb-1">Tax Amount ({selectedCurrency})</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={item.tax_amount}
-                      onChange={(e) => handleItemChange(idx, 'tax_amount', e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-500 font-medium mb-1">Line Total</label>
-                    <div className="p-2 bg-gray-100 rounded-lg font-mono font-bold text-gray-900 text-xs">
-                      {selectedCurrency} {item.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Internal Cost & Supplier (Staff Only - Hidden from Client) */}
-                <div className="pt-2.5 border-t border-gray-200 mt-2 bg-teal-50/50 p-3 rounded-lg border border-teal-200/60">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-bold text-teal-900 uppercase tracking-wider flex items-center">
-                      <ShieldCheck className="w-3.5 h-3.5 mr-1 text-teal-700" /> Internal Cost & Supplier (Staff Only - Invisible to Client)
-                    </span>
-                    {item.unit_price > 0 && (item.cost_price || 0) > 0 && (
-                      <span className="text-[11px] font-mono font-semibold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
-                        Line Margin: {selectedCurrency} {((item.unit_price - (item.cost_price || 0)) * item.quantity).toFixed(2)} ({(((item.unit_price - (item.cost_price || 0)) / item.unit_price) * 100).toFixed(0)}%)
+                {/* Costing, Service Categories & Multiple Suppliers Breakdown (Staff Only) */}
+                <div className="pt-3 border-t border-gray-200 mt-2 bg-teal-50/40 p-3.5 sm:p-4 rounded-xl border border-teal-200/70">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-2.5 border-b border-teal-200/50">
+                    <div>
+                      <span className="text-xs font-bold text-teal-950 uppercase tracking-wider flex items-center gap-1.5">
+                        <ShieldCheck className="w-4 h-4 text-teal-700" /> Costing, Service Categories & Suppliers
                       </span>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    <div>
-                      <label className="block text-gray-600 font-medium mb-1 text-[11px]">Linked Supplier</label>
-                      <select
-                        value={item.supplier_id || ''}
-                        onChange={(e) => handleItemChange(idx, 'supplier_id', e.target.value ? Number(e.target.value) : null)}
-                        className="w-full p-2 border border-gray-300 rounded-lg text-xs bg-white"
-                      >
-                        <option value="">-- No Supplier Linked --</option>
-                        {suppliers.map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {s.name} ({s.category.replace('_', ' ').toUpperCase()})
-                          </option>
-                        ))}
-                      </select>
+                      <p className="text-[11px] text-teal-700 mt-0.5">
+                        Staff only • Hidden from client PDF • Add multiple service categories & linked suppliers
+                      </p>
                     </div>
-                    <div>
-                      <label className="block text-gray-600 font-medium mb-1 text-[11px]">Unit Cost Price ({selectedCurrency})</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={item.cost_price || ''}
-                        onChange={(e) => handleItemChange(idx, 'cost_price', parseFloat(e.target.value) || 0)}
-                        placeholder="0.00"
-                        className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono"
-                      />
+                    <button
+                      type="button"
+                      onClick={() => addExpenseRow(idx)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-teal-700 hover:bg-teal-800 text-white rounded-lg text-xs font-semibold shadow-2xs transition cursor-pointer self-start sm:self-auto"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Add Service Category / Supplier
+                    </button>
+                  </div>
+
+                  {/* Recreatable Service Category / Supplier Rows */}
+                  <div className="space-y-3">
+                    {(item.supplier_expenses || []).map((exp, expIdx) => {
+                      const markupPercent = exp.net_price > 0 ? ((exp.markup / exp.net_price) * 100).toFixed(0) : '0';
+                      return (
+                        <div
+                          key={expIdx}
+                          className="p-3 bg-white rounded-lg border border-teal-100 shadow-2xs space-y-2.5"
+                        >
+                          {/* Row Top: Service Category, Linked Supplier, Narration, Delete */}
+                          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 text-xs">
+                            <div className="sm:col-span-3">
+                              <label className="block text-gray-600 font-medium mb-1 text-[11px]">Service Category</label>
+                              <select
+                                value={exp.category || 'other'}
+                                onChange={(e) => handleExpenseRowChange(idx, expIdx, 'category', e.target.value)}
+                                className="w-full p-2 border border-gray-300 rounded-lg text-xs bg-white focus:ring-1 focus:ring-teal-500"
+                              >
+                                <option value="accommodation">Accommodation</option>
+                                <option value="transportation">Transportation & Fuel</option>
+                                <option value="activities">Activities & Park Fees</option>
+                                <option value="flights">Flights & Charters</option>
+                                <option value="meals">Meals & Catering</option>
+                                <option value="guide">Guide / Tour Leader</option>
+                                <option value="other">Other Service</option>
+                              </select>
+                            </div>
+
+                            <div className="sm:col-span-4">
+                              <label className="block text-gray-600 font-medium mb-1 text-[11px]">Linked Supplier</label>
+                              <select
+                                value={exp.supplier_id || ''}
+                                onChange={(e) => handleExpenseRowChange(idx, expIdx, 'supplier_id', e.target.value)}
+                                className="w-full p-2 border border-gray-300 rounded-lg text-xs bg-white focus:ring-1 focus:ring-teal-500 font-medium"
+                              >
+                                <option value="">-- No Supplier Linked / Direct --</option>
+                                {suppliers.map((s) => (
+                                  <option key={s.id} value={s.id}>
+                                    {s.name} ({s.category.replace(/_/g, ' ').toUpperCase()})
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div className="sm:col-span-5 flex items-start gap-1.5">
+                              <div className="flex-1">
+                                <label className="block text-gray-600 font-medium mb-1 text-[11px]">
+                                  Narration / Description (Internal)
+                                </label>
+                                <input
+                                  type="text"
+                                  value={exp.narration || ''}
+                                  onChange={(e) => handleExpenseRowChange(idx, expIdx, 'narration', e.target.value)}
+                                  placeholder="e.g. 2 Deluxe Rooms @ $150/night, Mara Serena Lodge"
+                                  className="w-full p-2 border border-gray-300 rounded-lg text-xs bg-white focus:ring-1 focus:ring-teal-500"
+                                />
+                              </div>
+                              {(item.supplier_expenses || []).length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeExpenseRow(idx, expIdx)}
+                                  title="Remove this category row"
+                                  className="mt-6 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Row Bottom: Qty, Net Price, Mark up, Tax, Total */}
+                          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs pt-2 border-t border-gray-100">
+                            <div>
+                              <label className="block text-gray-600 font-medium mb-1 text-[11px]">Qty / Units</label>
+                              <input
+                                type="number"
+                                step="0.1"
+                                min="0"
+                                value={exp.quantity}
+                                onChange={(e) => handleExpenseRowChange(idx, expIdx, 'quantity', e.target.value)}
+                                className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-gray-600 font-medium mb-1 text-[11px]">
+                                Net Price ({selectedCurrency})
+                              </label>
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={exp.net_price}
+                                onChange={(e) => handleExpenseRowChange(idx, expIdx, 'net_price', e.target.value)}
+                                placeholder="0.00"
+                                className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono text-amber-900 bg-amber-50/30 font-medium"
+                              />
+                            </div>
+
+                            <div>
+                              <div className="flex items-center justify-between mb-1">
+                                <label className="block text-gray-600 font-medium text-[11px]">
+                                  Mark up ({selectedCurrency})
+                                </label>
+                                {exp.net_price > 0 && exp.markup > 0 && (
+                                  <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-1 rounded">
+                                    +{markupPercent}%
+                                  </span>
+                                )}
+                              </div>
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={exp.markup}
+                                onChange={(e) => handleExpenseRowChange(idx, expIdx, 'markup', e.target.value)}
+                                placeholder="0.00"
+                                className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono text-emerald-800 bg-emerald-50/30 font-medium"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-gray-600 font-medium mb-1 text-[11px]">
+                                Tax ({selectedCurrency})
+                              </label>
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={exp.tax}
+                                onChange={(e) => handleExpenseRowChange(idx, expIdx, 'tax', e.target.value)}
+                                placeholder="0.00"
+                                className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-gray-800 font-bold mb-1 text-[11px]">
+                                Total ({selectedCurrency})
+                              </label>
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={exp.total}
+                                onChange={(e) => handleExpenseRowChange(idx, expIdx, 'total', e.target.value)}
+                                placeholder="0.00"
+                                className="w-full p-2 border border-teal-400 rounded-lg text-xs font-mono font-bold text-gray-900 bg-teal-50/50"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Financial Rollup Summary for this Service Item */}
+                  <div className="mt-3 pt-3 border-t border-teal-200/70 flex flex-wrap items-center justify-between gap-3 text-xs">
+                    <div className="flex flex-wrap items-center gap-4 text-[11px]">
+                      <div>
+                        <span className="text-gray-500">Net Cost (Expenses):</span>{' '}
+                        <span className="font-mono font-semibold text-amber-800">
+                          {selectedCurrency} {(item.cost_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Total Markup (Margin):</span>{' '}
+                        <span className="font-mono font-semibold text-emerald-800">
+                          {selectedCurrency}{' '}
+                          {Math.max(0, item.total_amount - (item.cost_price || 0) - (item.tax_amount || 0)).toLocaleString(undefined, {
+                            minimumFractionDigits: 2
+                          })}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Line Tax:</span>{' '}
+                        <span className="font-mono font-semibold text-gray-700">
+                          {selectedCurrency} {(item.tax_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-600 font-medium">Item Client Price:</span>
+                      <span className="px-2.5 py-1 bg-teal-900 text-white rounded-lg font-mono font-bold text-xs shadow-2xs">
+                        {selectedCurrency} {item.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </span>
                     </div>
                   </div>
                 </div>

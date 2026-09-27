@@ -25,7 +25,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import type { Invoice, CompanyFinanceSettings, InvoiceProfitability } from '../../../../lib/types/finance';
+import type { Invoice, CompanyFinanceSettings, InvoiceProfitability, Supplier } from '../../../../lib/types/finance';
 import { DocumentHeader } from '../components/DocumentHeader';
 import { usePdfDownload } from '../../../../lib/utils/pdfGenerator';
 import '../components/PrintStyles.css';
@@ -34,6 +34,7 @@ interface InvoiceDocumentViewProps {
   invoice: Invoice;
   settings?: CompanyFinanceSettings | null;
   profitability?: InvoiceProfitability | null;
+  suppliers?: Supplier[];
   onRecordPayment?: () => void;
   onRecordExpense?: () => void;
   onSendEmail?: () => void;
@@ -44,6 +45,7 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
   invoice,
   settings,
   profitability,
+  suppliers = [],
   onRecordPayment,
   onRecordExpense,
   onSendEmail,
@@ -551,51 +553,121 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
             )}
           </div>
 
-          {/* Line Item Unit Costs Breakdown (Optional summary) */}
-          {invoice.line_items && invoice.line_items.some((item) => (item.cost_price || 0) > 0) && (
+          {/* Service Categories & Multiple Suppliers Costing Breakdown */}
+          {invoice.line_items && invoice.line_items.some((item) => {
+            const exps = item.supplier_expenses || (item.metadata_json?.supplier_expenses);
+            return (exps && exps.length > 0) || (item.cost_price || 0) > 0;
+          }) && (
             <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
-              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-2">
-                Line Items Unit Cost Price Breakdown
-              </h3>
-              <p className="text-xs text-gray-500 mb-3">
-                Estimated internal unit costs recorded at the line item level
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+                  Service Categories & Suppliers Costing Breakdown
+                </h3>
+                <span className="text-[11px] font-semibold text-teal-800 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-full">
+                  Internal Staff Only • Confidential
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 mb-4">
+                Detailed breakdown of services, linked suppliers, net costs, company markups, and client selling prices.
               </p>
               <div className="overflow-x-auto border border-gray-200 rounded-xl">
                 <table className="min-w-full divide-y divide-gray-200 text-xs">
-                  <thead className="bg-gray-50 text-gray-500 uppercase">
+                  <thead className="bg-gray-50 text-gray-600 uppercase font-semibold text-[10px]">
                     <tr>
-                      <th className="px-3 py-2 text-left">Item</th>
-                      <th className="px-3 py-2 text-center">Qty</th>
-                      <th className="px-3 py-2 text-right">Selling Price</th>
-                      <th className="px-3 py-2 text-right">Cost Price</th>
-                      <th className="px-3 py-2 text-right">Total Cost</th>
-                      <th className="px-3 py-2 text-right">Unit Profit</th>
-                      <th className="px-3 py-2 text-right">Estimated Margin</th>
+                      <th className="px-3 py-2.5 text-left">Service Item & Category</th>
+                      <th className="px-3 py-2.5 text-left">Linked Supplier</th>
+                      <th className="px-3 py-2.5 text-left">Narration</th>
+                      <th className="px-3 py-2.5 text-center">Qty</th>
+                      <th className="px-3 py-2.5 text-right">Net Price</th>
+                      <th className="px-3 py-2.5 text-right">Mark up</th>
+                      <th className="px-3 py-2.5 text-right">Tax</th>
+                      <th className="px-3 py-2.5 text-right">Client Total</th>
+                      <th className="px-3 py-2.5 text-right">Margin %</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {invoice.line_items.map((item, i) => {
+                      const exps = item.supplier_expenses || (item.metadata_json?.supplier_expenses);
+                      if (exps && exps.length > 0) {
+                        return exps.map((exp: any, expIdx: number) => {
+                          const suppName = exp.supplier_name || suppliers.find((s) => s.id === exp.supplier_id)?.name || '-- Direct / Internal --';
+                          const q = exp.quantity !== undefined ? exp.quantity : (exp.qty !== undefined ? exp.qty : 1);
+                          const net = exp.net_price !== undefined ? exp.net_price : (exp.amount || 0);
+                          const mu = exp.markup !== undefined ? exp.markup : 0;
+                          const tx = exp.tax !== undefined ? exp.tax : 0;
+                          const tot = exp.total !== undefined ? exp.total : ((net + mu) * q + tx);
+                          const margin = tot > 0 ? (((tot - (net * q) - tx) / tot) * 100) : 0;
+
+                          return (
+                            <tr key={`${i}-${expIdx}`} className="hover:bg-gray-50/70">
+                              <td className="px-3 py-2.5">
+                                <div className="font-semibold text-gray-900">{item.title}</div>
+                                <span className="inline-block mt-0.5 text-[10px] font-medium text-teal-800 bg-teal-50 px-1.5 py-0.5 rounded capitalize">
+                                  {(exp.category || item.category || 'other').replace(/_/g, ' ')}
+                                </span>
+                              </td>
+                              <td className="px-3 py-2.5 font-medium text-gray-800">
+                                {suppName}
+                              </td>
+                              <td className="px-3 py-2.5 text-gray-600 max-w-xs truncate">
+                                {exp.narration || '—'}
+                              </td>
+                              <td className="px-3 py-2.5 text-center font-mono">{q}</td>
+                              <td className="px-3 py-2.5 text-right font-mono text-amber-800 font-medium">
+                                {invoice.currency} {net.toFixed(2)}
+                              </td>
+                              <td className="px-3 py-2.5 text-right font-mono text-emerald-700 font-medium">
+                                {invoice.currency} {mu.toFixed(2)}
+                              </td>
+                              <td className="px-3 py-2.5 text-right font-mono text-gray-600">
+                                {invoice.currency} {tx.toFixed(2)}
+                              </td>
+                              <td className="px-3 py-2.5 text-right font-mono font-bold text-gray-900">
+                                {invoice.currency} {tot.toFixed(2)}
+                              </td>
+                              <td className="px-3 py-2.5 text-right font-mono text-emerald-800 font-semibold">
+                                {margin.toFixed(1)}%
+                              </td>
+                            </tr>
+                          );
+                        });
+                      }
+
+                      // Fallback for line items without breakdown rows
                       const cost = item.cost_price || 0;
                       const totalCost = cost * item.quantity;
                       const profit = item.total_amount - totalCost;
                       const margin = item.total_amount > 0 ? (profit / item.total_amount) * 100 : 0;
+                      const supp = suppliers.find((s) => s.id === item.supplier_id)?.name || '-- Direct / Internal --';
+
                       return (
-                        <tr key={i} className="hover:bg-gray-50">
-                          <td className="px-3 py-2 font-medium text-gray-900">{item.title}</td>
-                          <td className="px-3 py-2 text-center">{item.quantity}</td>
-                          <td className="px-3 py-2 text-right font-mono">
-                            {invoice.currency} {item.unit_price.toFixed(2)}
+                        <tr key={i} className="hover:bg-gray-50/70">
+                          <td className="px-3 py-2.5">
+                            <div className="font-semibold text-gray-900">{item.title}</div>
+                            <span className="inline-block mt-0.5 text-[10px] font-medium text-teal-800 bg-teal-50 px-1.5 py-0.5 rounded capitalize">
+                              {(item.category || 'other').replace(/_/g, ' ')}
+                            </span>
                           </td>
-                          <td className="px-3 py-2 text-right font-mono text-amber-700">
+                          <td className="px-3 py-2.5 font-medium text-gray-800">
+                            {supp}
+                          </td>
+                          <td className="px-3 py-2.5 text-gray-600 max-w-xs truncate">
+                            {item.cost_narration || '—'}
+                          </td>
+                          <td className="px-3 py-2.5 text-center font-mono">{item.quantity}</td>
+                          <td className="px-3 py-2.5 text-right font-mono text-amber-800 font-medium">
                             {invoice.currency} {cost.toFixed(2)}
                           </td>
-                          <td className="px-3 py-2 text-right font-mono font-medium text-amber-800">
-                            {invoice.currency} {totalCost.toFixed(2)}
+                          <td className="px-3 py-2.5 text-right font-mono text-emerald-700 font-medium">
+                            {invoice.currency} {(profit / (item.quantity || 1)).toFixed(2)}
                           </td>
-                          <td className={`px-3 py-2 text-right font-mono font-medium ${profit >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
-                            {invoice.currency} {profit.toFixed(2)}
+                          <td className="px-3 py-2.5 text-right font-mono text-gray-600">
+                            {invoice.currency} {(item.tax_amount || 0).toFixed(2)}
                           </td>
-                          <td className="px-3 py-2 text-right font-mono">
+                          <td className="px-3 py-2.5 text-right font-mono font-bold text-gray-900">
+                            {invoice.currency} {item.total_amount.toFixed(2)}
+                          </td>
+                          <td className="px-3 py-2.5 text-right font-mono text-emerald-800 font-semibold">
                             {margin.toFixed(1)}%
                           </td>
                         </tr>

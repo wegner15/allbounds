@@ -81,6 +81,7 @@ export const InvoiceDetailPage: React.FC = () => {
         invoice={invoice}
         settings={settings}
         profitability={profitability}
+        suppliers={suppliers}
         onRecordPayment={() => setIsReceiptModalOpen(true)}
         onRecordExpense={() => setIsExpenseModalOpen(true)}
         onSendEmail={() => setIsEmailModalOpen(true)}

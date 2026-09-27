@@ -86,6 +86,20 @@ export interface TripSummary {
   tour_package_name?: string;
 }
 
+export interface SupplierExpenseItem {
+  id?: string;
+  category?: string;
+  supplier_id?: number | null;
+  supplier_name?: string;
+  narration?: string;
+  quantity: number;
+  net_price: number;
+  markup: number;
+  tax: number;
+  total: number;
+  amount?: number;
+}
+
 export interface InvoiceLineItem {
   id?: number;
   invoice_id?: number;
@@ -101,6 +115,8 @@ export interface InvoiceLineItem {
   total_amount: number;
   cost_price?: number;
   supplier_id?: number | null;
+  cost_narration?: string;
+  supplier_expenses?: SupplierExpenseItem[];
   metadata_json?: Record<string, any>;
   sort_order?: number;
 }

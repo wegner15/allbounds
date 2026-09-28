@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import ConfirmationModal from '../../../components/ui/ConfirmationModal';
 import { usePaginatedBlogs, useDeleteBlog, usePublishBlog, useUnpublishBlog, useFeatureBlog, useUnfeatureBlog } from '../../../lib/hooks/useBlogs';
 import type { BlogPost } from '../../../lib/hooks/useBlogs';
 
@@ -35,45 +37,77 @@ const BlogsListPage: React.FC = () => {
   const featureBlogMutation = useFeatureBlog();
   const unfeatureBlogMutation = useUnfeatureBlog();
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this blog post?')) {
-      try {
-        await deleteBlogMutation.mutateAsync(id);
-      } catch (error) {
-        console.error('Error deleting blog post:', error);
-      }
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    blogId: number | null;
+    blogTitle: string;
+  }>({
+    isOpen: false,
+    blogId: null,
+    blogTitle: '',
+  });
+
+  const openDeleteModal = (blog: BlogPost) => {
+    setDeleteModal({
+      isOpen: true,
+      blogId: blog.id,
+      blogTitle: blog.title,
+    });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteModal.blogId) return;
+    try {
+      await deleteBlogMutation.mutateAsync(deleteModal.blogId);
+      toast.success('Blog post deleted successfully');
+      setDeleteModal({ isOpen: false, blogId: null, blogTitle: '' });
+    } catch (err: any) {
+      console.error('Error deleting blog post:', err);
+      const errorMessage =
+        err?.response?.data?.detail ||
+        err?.message ||
+        'Failed to delete blog post. Please try again.';
+      toast.error(errorMessage);
     }
   };
 
   const handlePublish = async (id: number) => {
     try {
       await publishBlogMutation.mutateAsync(id);
-    } catch (error) {
-      console.error('Error publishing blog post:', error);
+      toast.success('Blog post published');
+    } catch (err: any) {
+      console.error('Error publishing blog post:', err);
+      toast.error(err?.response?.data?.detail || err?.message || 'Failed to publish blog post');
     }
   };
 
   const handleUnpublish = async (id: number) => {
     try {
       await unpublishBlogMutation.mutateAsync(id);
-    } catch (error) {
-      console.error('Error unpublishing blog post:', error);
+      toast.success('Blog post unpublished');
+    } catch (err: any) {
+      console.error('Error unpublishing blog post:', err);
+      toast.error(err?.response?.data?.detail || err?.message || 'Failed to unpublish blog post');
     }
   };
 
   const handleFeature = async (id: number) => {
     try {
       await featureBlogMutation.mutateAsync(id);
-    } catch (error) {
-      console.error('Error featuring blog post:', error);
+      toast.success('Blog post featured');
+    } catch (err: any) {
+      console.error('Error featuring blog post:', err);
+      toast.error(err?.response?.data?.detail || err?.message || 'Failed to feature blog post');
     }
   };
 
   const handleUnfeature = async (id: number) => {
     try {
       await unfeatureBlogMutation.mutateAsync(id);
-    } catch (error) {
-      console.error('Error unfeaturing blog post:', error);
+      toast.success('Blog post unfeatured');
+    } catch (err: any) {
+      console.error('Error unfeaturing blog post:', err);
+      toast.error(err?.response?.data?.detail || err?.message || 'Failed to unfeature blog post');
     }
   };
 
@@ -226,7 +260,7 @@ const BlogsListPage: React.FC = () => {
                         </button>
                       )}
                       <button
-                        onClick={() => handleDelete(blog.id)}
+                        onClick={() => openDeleteModal(blog)}
                         disabled={deleteBlogMutation.isPending}
                         className="text-red-600 hover:text-red-900 disabled:opacity-50"
                       >
@@ -348,6 +382,23 @@ const BlogsListPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, blogId: null, blogTitle: '' })}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Blog Post"
+        message={
+          deleteModal.blogTitle
+            ? `Are you sure you want to delete "${deleteModal.blogTitle}"? This action cannot be undone.`
+            : 'Are you sure you want to delete this blog post? This action cannot be undone.'
+        }
+        confirmText="Delete Post"
+        cancelText="Cancel"
+        isLoading={deleteBlogMutation.isPending}
+        variant="danger"
+      />
     </div>
   );
 };

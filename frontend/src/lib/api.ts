@@ -361,6 +361,7 @@ export const endpoints = {
     list: () => '/users/',
     detail: (id: number) => `/users/${id}`,
     me: () => '/users/me',
+    roles: () => '/users/roles',
   },
 
   // Travel Guides

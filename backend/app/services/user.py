@@ -1,6 +1,6 @@
 from typing import List, Optional, Dict, Any
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.user import User, Role, Permission
 from app.schemas.user import UserCreate, UserUpdate
@@ -11,19 +11,19 @@ class UserService:
         """
         Retrieve all users with pagination.
         """
-        return db.query(User).offset(skip).limit(limit).all()
+        return db.query(User).options(joinedload(User.roles)).offset(skip).limit(limit).all()
     
     def get_user(self, db: Session, user_id: int) -> Optional[User]:
         """
         Retrieve a specific user by ID.
         """
-        return db.query(User).filter(User.id == user_id).first()
+        return db.query(User).options(joinedload(User.roles)).filter(User.id == user_id).first()
     
     def get_user_by_email(self, db: Session, email: str) -> Optional[User]:
         """
         Retrieve a specific user by email.
         """
-        return db.query(User).filter(User.email == email).first()
+        return db.query(User).options(joinedload(User.roles)).filter(User.email == email).first()
     
     def create_user(self, db: Session, user_in: UserCreate) -> User:
         """
@@ -37,6 +37,10 @@ class UserService:
             is_active=user_in.is_active,
             is_superuser=user_in.is_superuser,
         )
+        if user_in.role_ids:
+            roles = db.query(Role).filter(Role.id.in_(user_in.role_ids)).all()
+            db_user.roles = roles
+
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
@@ -51,6 +55,13 @@ class UserService:
             return None
         
         update_data = user_in.model_dump(exclude_unset=True)
+        
+        # Handle role_ids if provided
+        if "role_ids" in update_data:
+            role_ids = update_data.pop("role_ids")
+            if role_ids is not None:
+                roles = db.query(Role).filter(Role.id.in_(role_ids)).all()
+                db_user.roles = roles
         
         # Hash the password if it's being updated
         if "password" in update_data:

@@ -5,11 +5,13 @@ import { useAuth } from '../../lib/contexts/AuthContext';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireSuperuser?: boolean;
+  requireRole?: string | string[];
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  requireSuperuser = false 
+  requireSuperuser = false,
+  requireRole
 }) => {
   const { user, isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
@@ -30,7 +32,21 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // If superuser is required but user is not a superuser
   if (requireSuperuser && !user?.is_superuser) {
+    // If user has the finance role, redirect smoothly to finance section
+    if (user?.roles?.some(r => r.name === 'finance')) {
+      return <Navigate to="/admin/finance" replace />;
+    }
     return <Navigate to="/unauthorized" replace />;
+  }
+
+  // If a specific role is required (superusers always bypass)
+  if (requireRole && !user?.is_superuser) {
+    const roles = Array.isArray(requireRole) ? requireRole : [requireRole];
+    const userRoleNames = user?.roles?.map(r => r.name) || [];
+    const hasRequiredRole = roles.some(role => userRoleNames.includes(role));
+    if (!hasRequiredRole) {
+      return <Navigate to="/unauthorized" replace />;
+    }
   }
 
   // User is authenticated and has proper permissions

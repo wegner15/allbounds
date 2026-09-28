@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.models.user import User
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import get_current_user, get_current_finance_or_admin
 from app.services.finance_service import finance_service
 from app.schemas.finance import (
     CurrencyResponse,
@@ -50,7 +50,7 @@ def get_currencies(
 def create_currency(
     currency_in: CurrencyCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Add a new currency and its exchange rate to USD."""
     try:
@@ -64,7 +64,7 @@ def update_currency(
     currency_id: int,
     currency_update: CurrencyUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Update currency rate or status."""
     currency = finance_service.update_currency(db, currency_id, currency_update)
@@ -77,7 +77,7 @@ def update_currency(
 def delete_currency(
     currency_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Delete a currency. Base currencies cannot be deleted."""
     try:
@@ -103,7 +103,7 @@ def get_company_finance_settings(
 def update_company_finance_settings(
     settings_in: CompanyFinanceSettingsUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Update company finance settings."""
     return finance_service.update_company_settings(db, settings_in)
@@ -116,7 +116,7 @@ def update_company_finance_settings(
 @router.get("/stats", response_model=FinanceDashboardStats)
 def get_finance_stats(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Get aggregate financial metrics, recent invoices, and receipts."""
     return finance_service.get_finance_dashboard_stats(db)
@@ -129,7 +129,7 @@ def get_finance_stats(
 @router.get("/invoices/next-number")
 def get_next_invoice_number(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Preview the next auto-generated invoice number without creating an invoice."""
     return {"invoice_number": finance_service.get_next_invoice_number(db)}
@@ -143,7 +143,7 @@ def get_invoices(
     client_search: Optional[str] = None,
     currency: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """List invoices with pagination and search filters."""
     invoices, total = finance_service.get_invoices(
@@ -161,7 +161,7 @@ def get_invoices(
 def create_invoice(
     invoice_in: InvoiceCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Create a new manual invoice."""
     if not invoice_in.consultant_id:
@@ -174,7 +174,7 @@ def create_invoice(
 def create_invoice_from_booking(
     request_in: InvoiceFromBookingCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """1-Click generate invoice from an existing booking."""
     try:
@@ -194,7 +194,7 @@ def create_invoice_from_booking(
 def get_invoice(
     invoice_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Get full details of a specific invoice."""
     invoice = finance_service.get_invoice(db, invoice_id)
@@ -207,7 +207,7 @@ def get_invoice(
 def get_invoice_profitability(
     invoice_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Get internal profitability and linked supplier expenses for an invoice (Staff only)."""
     profitability = finance_service.get_invoice_profitability(db, invoice_id)
@@ -233,7 +233,7 @@ def update_invoice(
     invoice_id: int,
     invoice_update: InvoiceUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Update invoice line items, terms, or status."""
     invoice = finance_service.update_invoice(db, invoice_id, invoice_update)
@@ -246,7 +246,7 @@ def update_invoice(
 def delete_invoice(
     invoice_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Delete an invoice."""
     success = finance_service.delete_invoice(db, invoice_id)
@@ -260,7 +260,7 @@ def send_invoice_email(
     invoice_id: int,
     email_req: SendEmailRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Send invoice link and summary via email."""
     success = finance_service.send_invoice_email(
@@ -286,7 +286,7 @@ def get_receipts(
     limit: int = 50,
     invoice_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """List payment receipts with pagination."""
     receipts, total = finance_service.get_receipts(db, skip=skip, limit=limit, invoice_id=invoice_id)
@@ -302,7 +302,7 @@ def get_receipts(
 def create_receipt(
     receipt_in: PaymentReceiptCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Record payment and automatically allocate against invoice."""
     try:
@@ -315,7 +315,7 @@ def create_receipt(
 def get_receipt(
     receipt_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Get payment receipt details."""
     receipt = finance_service.get_receipt(db, receipt_id)
@@ -329,7 +329,7 @@ def send_receipt_email(
     receipt_id: int,
     email_req: SendEmailRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Send payment receipt via email."""
     success = finance_service.send_receipt_email(
@@ -356,7 +356,7 @@ def get_vouchers(
     status: Optional[str] = None,
     supplier_search: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """List travel vouchers."""
     vouchers, total = finance_service.get_vouchers(
@@ -374,7 +374,7 @@ def get_vouchers(
 def create_voucher(
     voucher_in: TravelVoucherCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Create a travel voucher."""
     if not voucher_in.issued_by_id:
@@ -387,7 +387,7 @@ def create_voucher(
 def create_voucher_from_booking(
     req_in: TravelVoucherFromBookingCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """1-Click generate travel voucher from booking."""
     try:
@@ -406,7 +406,7 @@ def create_voucher_from_booking(
 def get_voucher(
     voucher_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Get full details of a specific travel voucher."""
     voucher = finance_service.get_voucher(db, voucher_id)
@@ -420,7 +420,7 @@ def update_voucher(
     voucher_id: int,
     voucher_update: TravelVoucherUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Update voucher or bump version."""
     voucher = finance_service.update_voucher(db, voucher_id, voucher_update)
@@ -434,7 +434,7 @@ def send_voucher_email(
     voucher_id: int,
     email_req: SendEmailRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Send travel voucher to supplier or client via email."""
     success = finance_service.send_voucher_email(

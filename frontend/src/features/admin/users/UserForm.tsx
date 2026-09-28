@@ -3,8 +3,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
-import { useCreateUser, useUpdateUser } from '../../../lib/hooks/useUsers';
-import type { User } from '../../../lib/types/api';
+import { useCreateUser, useUpdateUser, useRoles } from '../../../lib/hooks/useUsers';
+import type { User, Role } from '../../../lib/types/api';
 import FormInput from '../../../components/ui/FormInput';
 import FormCheckbox from '../../../components/ui/FormCheckbox';
 import Button from '../../../components/ui/Button';
@@ -49,9 +49,19 @@ const UserForm: React.FC<UserFormProps> = ({ userData, isEdit = false }) => {
   
   const createUserMutation = useCreateUser();
   const updateUserMutation = useUpdateUser(userData?.id);
+  const { data: availableRoles = [] } = useRoles();
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>(() => 
+    userData?.roles?.map((r) => r.id) || []
+  );
+
+  const handleToggleRole = (roleId: number) => {
+    setSelectedRoleIds((prev) =>
+      prev.includes(roleId) ? prev.filter((id) => id !== roleId) : [...prev, roleId]
+    );
+  };
   
   // Initialize form with default values or existing user data
   const {
@@ -93,11 +103,17 @@ const UserForm: React.FC<UserFormProps> = ({ userData, isEdit = false }) => {
         if (!updateData.password) {
           delete updateData.password;
         }
-        await updateUserMutation.mutateAsync(updateData);
+        await updateUserMutation.mutateAsync({
+          ...updateData,
+          role_ids: selectedRoleIds,
+        });
       } else {
         // Remove confirm_password before sending to API
         const { confirm_password, ...createData } = data;
-        await createUserMutation.mutateAsync(createData as CreateUserFormData);
+        await createUserMutation.mutateAsync({
+          ...(createData as CreateUserFormData),
+          role_ids: selectedRoleIds,
+        });
       }
       
       navigate('/admin/users');
@@ -198,13 +214,48 @@ const UserForm: React.FC<UserFormProps> = ({ userData, isEdit = false }) => {
           {/* User Role */}
           <div className="sm:col-span-6">
             <fieldset>
-              <legend className="text-sm font-medium text-gray-700">User Role</legend>
-              <div className="mt-2 space-y-4">
+              <legend className="text-sm font-medium text-gray-700">User Role & Permissions</legend>
+              <div className="mt-3 space-y-4">
                 <FormCheckbox
                   id="is_superuser"
-                  label="Admin (can access admin panel and manage all content)"
+                  label="Super Admin (unrestricted access to all admin panel sections and settings)"
                   {...register('is_superuser')}
                 />
+
+                {availableRoles.length > 0 && (
+                  <div className="mt-3 pl-4 border-l-2 border-teal/40 space-y-3">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      Module Access Roles
+                    </p>
+                    {availableRoles.map((role) => (
+                      <div key={role.id} className="flex items-start">
+                        <input
+                          id={`role-${role.id}`}
+                          type="checkbox"
+                          checked={selectedRoleIds.includes(role.id)}
+                          onChange={() => handleToggleRole(role.id)}
+                          className="h-4 w-4 mt-0.5 rounded border-gray-300 text-teal focus:ring-teal cursor-pointer"
+                        />
+                        <label
+                          htmlFor={`role-${role.id}`}
+                          className="ml-2 text-sm text-gray-700 cursor-pointer select-none"
+                        >
+                          <span className="font-medium text-gray-900 capitalize">{role.name}</span>
+                          {role.name.toLowerCase() === 'finance' && (
+                            <span className="ml-1 text-xs text-gray-500">
+                              — Access restricted strictly to Finance, Invoices, Receipts, Clients, Suppliers, Bills, and Reports
+                            </span>
+                          )}
+                          {role.description && role.name.toLowerCase() !== 'finance' && (
+                            <span className="ml-1 text-xs text-gray-500">
+                              — {role.description}
+                            </span>
+                          )}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </fieldset>
           </div>

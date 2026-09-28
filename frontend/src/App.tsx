@@ -3,7 +3,7 @@ import { createBrowserRouter, RouterProvider, Outlet, useSearchParams, ScrollRes
 import { HelmetProvider } from 'react-helmet-async';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/api';
-import { AuthProvider } from './lib/contexts/AuthContext';
+import { AuthProvider, useAuth } from './lib/contexts/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import ErrorBoundary, { RouteErrorFallback } from './components/ErrorBoundary';
 import SeoHead from './components/seo/SeoHead';
@@ -351,6 +351,15 @@ const ContactFormPage = () => (
   </>
 );
 
+// Intelligent redirect for admin index based on user roles
+const AdminIndexRedirect: React.FC = () => {
+  const { user } = useAuth();
+  if (!user?.is_superuser && user?.roles?.some((r) => r.name === 'finance')) {
+    return <Navigate to="/admin/finance" replace />;
+  }
+  return <Navigate to="/admin/dashboard" replace />;
+};
+
 // Router configuration
 const router = createBrowserRouter([
   {
@@ -417,117 +426,135 @@ const router = createBrowserRouter([
   {
     path: '/admin',
     element: (
-      <ProtectedRoute requireSuperuser={true}>
+      <ProtectedRoute>
         <AdminLayout>
           <Outlet />
         </AdminLayout>
       </ProtectedRoute>
     ),
     children: [
-      { path: 'dashboard', element: <AdminDashboardPage /> },
-      // Destination management routes
-      { path: 'destinations', element: <DestinationsListPage /> },
-      { path: 'destinations/regions/new', element: <CreateRegionPage /> },
-      { path: 'destinations/regions/:id/edit', element: <EditRegionPage /> },
-      { path: 'destinations/countries', element: <CountriesListPage /> },
-      { path: 'destinations/countries/new', element: <CreateCountryPage /> },
-      { path: 'destinations/countries/:id/edit', element: <EditCountryPage /> },
-      { path: 'countries/:id/visit-info', element: <ManageCountryVisitInfoPage /> },
-      { path: 'travel-guides/categories', element: <TravelGuideCategoriesPage /> },
-      // Holiday types management routes
-      { path: 'holiday-types', element: <HolidayTypesListPage /> },
-      { path: 'holiday-types/new', element: <CreateHolidayTypePage /> },
-      { path: 'holiday-types/:id/edit', element: <EditHolidayTypePage /> },
-      // Content tags management route
-      { path: 'tags', element: <TagsListPage /> },
-      // Hotel management routes
-      { path: 'hotels', element: <HotelsListPage /> },
-      { path: 'hotels/new', element: <CreateHotelPage /> },
-      { path: 'hotels/:id/edit', element: <EditHotelPage /> },
-      { path: 'hotels/:id/relationships', element: <HotelRelationshipsPage /> },
-      // Hotel types management routes
-      { path: 'hotel-types', element: <HotelTypesListPage /> },
-      { path: 'hotel-types/new', element: <CreateHotelTypePage /> },
-      { path: 'hotel-types/:id/edit', element: <EditHotelTypePage /> },
-      // Partner management routes
-      { path: 'partners', element: <PartnersListPage /> },
-      { path: 'partners/new', element: <CreatePartnerPage /> },
-      { path: 'partners/:id/edit', element: <EditPartnerPage /> },
-      // Amenities management routes
-      { path: 'amenities', element: <AmenitiesListPage /> },
-      { path: 'amenities/new', element: <CreateAmenityPage /> },
-      { path: 'amenities/:id/edit', element: <EditAmenityPage /> },
-      // Inclusion management routes
-      { path: 'inclusions', element: <InclusionsListPage /> },
-      { path: 'inclusions/new', element: <CreateInclusionPage /> },
-      { path: 'inclusions/:id/edit', element: <EditInclusionPage /> },
-      // Exclusion management routes
-      { path: 'exclusions', element: <ExclusionsListPage /> },
-      { path: 'exclusions/new', element: <CreateExclusionPage /> },
-      { path: 'exclusions/:id/edit', element: <EditExclusionPage /> },
-      // Attraction management routes
-      { path: 'attractions', element: <AttractionsListPage /> },
-      { path: 'attractions/new', element: <CreateAttractionPage /> },
-      { path: 'attractions/:id/edit', element: <EditAttractionPage /> },
-      { path: 'attractions/:id/relationships', element: <AttractionRelationshipsPage /> },
-      { path: 'blog', element: <BlogsListPage /> },
-      { path: 'blog/create', element: <CreateBlogPage /> },
-      { path: 'blog/edit/:id', element: <EditBlogPage /> },
-      // Activity management routes
-      { path: 'activities', element: <ActivityListPage /> },
-      { path: 'activities/create', element: <ActivityCreatePage /> },
-      { path: 'activities/:id/edit', element: <ActivityEditPage /> },
-      // User management routes
-      { path: 'users', element: <UsersListPage /> },
-      { path: 'users/new', element: <CreateUserPage /> },
-      { path: 'users/:id/edit', element: <EditUserPage /> },
-      // Package management routes
-      { path: 'packages', element: <PackagesListPage /> },
-      { path: 'packages/new', element: <CreatePackagePage /> },
-      { path: 'packages/:id/edit', element: <EditPackagePage /> },
-      // Group trip management routes
-      { path: 'group-trips', element: <GroupTripsListPage /> },
-      { path: 'group-trips/new', element: <CreateGroupTripPage /> },
-      { path: 'group-trips/:id/edit', element: <EditGroupTripPage /> },
-      // Newsletter subscribers
-      { path: 'newsletter', element: <SubscriberList /> },
-      // Booking management routes
-      { path: 'bookings/packages', element: <PackageBookingsPage /> },
-      { path: 'bookings/group-trips', element: <GroupTripBookingsPage /> },
-      { path: 'bookings/inquiries', element: <GeneralInquiriesPage /> },
-      { path: 'bookings/visa-applications', element: <VisaApplicationsPage /> },
-      { path: 'bookings/flights', element: <FlightBookingsPage /> },
-      // Content management routes
-      { path: 'content', element: <ContentListPage /> },
-      { path: 'content/create', element: <ContentForm /> },
-      { path: 'content/edit/:id', element: <ContentForm /> },
-      // Other admin routes
-      { path: 'settings', element: <AdminSettingsPage /> },
-      { path: 'logs/email', element: <EmailLogsPage /> },
-      { path: 'preview/:type/:id', element: <AdminPreviewPage /> },
-      // Content Tags management routes
-      { path: 'tags', element: <TagsListPage /> },
-      { path: 'tags/new', element: <CreateTagPage /> },
-      { path: 'tags/:id/edit', element: <EditTagPage /> },
-      // Finance management routes
-      { path: 'finance', element: <FinanceOverviewPage /> },
-      { path: 'finance/invoices', element: <InvoicesListPage /> },
-      { path: 'finance/invoices/new', element: <InvoiceEditorPage /> },
-      { path: 'finance/invoices/:id', element: <InvoiceDetailPage /> },
-      { path: 'finance/invoices/:id/edit', element: <InvoiceEditorPage /> },
-      { path: 'finance/receipts', element: <ReceiptsListPage /> },
-      { path: 'finance/receipts/:id', element: <ReceiptDetailPage /> },
-      { path: 'finance/vouchers', element: <VouchersListPage /> },
-      { path: 'finance/vouchers/new', element: <VoucherEditorPage /> },
-      { path: 'finance/vouchers/:id', element: <VoucherDetailPage /> },
-      { path: 'finance/vouchers/:id/edit', element: <VoucherEditorPage /> },
-      { path: 'finance/clients', element: <ClientsListPage /> },
-      { path: 'finance/clients/:id', element: <ClientDetailPage /> },
-      { path: 'finance/suppliers', element: <SuppliersListPage /> },
-      { path: 'finance/suppliers/:id', element: <SupplierDetailPage /> },
-      { path: 'finance/bills', element: <SupplierBillsPage /> },
-      { path: 'finance/reports', element: <ReportsOverviewPage /> },
-      { path: 'finance/settings', element: <FinanceSettingsPage /> },
+      { index: true, element: <AdminIndexRedirect /> },
+      // Finance management routes (Accessible by users with 'finance' role or superusers)
+      {
+        element: (
+          <ProtectedRoute requireRole="finance">
+            <Outlet />
+          </ProtectedRoute>
+        ),
+        children: [
+          { path: 'finance', element: <FinanceOverviewPage /> },
+          { path: 'finance/invoices', element: <InvoicesListPage /> },
+          { path: 'finance/invoices/new', element: <InvoiceEditorPage /> },
+          { path: 'finance/invoices/:id', element: <InvoiceDetailPage /> },
+          { path: 'finance/invoices/:id/edit', element: <InvoiceEditorPage /> },
+          { path: 'finance/receipts', element: <ReceiptsListPage /> },
+          { path: 'finance/receipts/:id', element: <ReceiptDetailPage /> },
+          { path: 'finance/vouchers', element: <VouchersListPage /> },
+          { path: 'finance/vouchers/new', element: <VoucherEditorPage /> },
+          { path: 'finance/vouchers/:id', element: <VoucherDetailPage /> },
+          { path: 'finance/vouchers/:id/edit', element: <VoucherEditorPage /> },
+          { path: 'finance/clients', element: <ClientsListPage /> },
+          { path: 'finance/clients/:id', element: <ClientDetailPage /> },
+          { path: 'finance/suppliers', element: <SuppliersListPage /> },
+          { path: 'finance/suppliers/:id', element: <SupplierDetailPage /> },
+          { path: 'finance/bills', element: <SupplierBillsPage /> },
+          { path: 'finance/reports', element: <ReportsOverviewPage /> },
+          { path: 'finance/settings', element: <FinanceSettingsPage /> },
+        ],
+      },
+      // Admin / Superuser-only management routes
+      {
+        element: (
+          <ProtectedRoute requireSuperuser={true}>
+            <Outlet />
+          </ProtectedRoute>
+        ),
+        children: [
+          { path: 'dashboard', element: <AdminDashboardPage /> },
+          // Destination management routes
+          { path: 'destinations', element: <DestinationsListPage /> },
+          { path: 'destinations/regions/new', element: <CreateRegionPage /> },
+          { path: 'destinations/regions/:id/edit', element: <EditRegionPage /> },
+          { path: 'destinations/countries', element: <CountriesListPage /> },
+          { path: 'destinations/countries/new', element: <CreateCountryPage /> },
+          { path: 'destinations/countries/:id/edit', element: <EditCountryPage /> },
+          { path: 'countries/:id/visit-info', element: <ManageCountryVisitInfoPage /> },
+          { path: 'travel-guides/categories', element: <TravelGuideCategoriesPage /> },
+          // Holiday types management routes
+          { path: 'holiday-types', element: <HolidayTypesListPage /> },
+          { path: 'holiday-types/new', element: <CreateHolidayTypePage /> },
+          { path: 'holiday-types/:id/edit', element: <EditHolidayTypePage /> },
+          // Hotel management routes
+          { path: 'hotels', element: <HotelsListPage /> },
+          { path: 'hotels/new', element: <CreateHotelPage /> },
+          { path: 'hotels/:id/edit', element: <EditHotelPage /> },
+          { path: 'hotels/:id/relationships', element: <HotelRelationshipsPage /> },
+          // Hotel types management routes
+          { path: 'hotel-types', element: <HotelTypesListPage /> },
+          { path: 'hotel-types/new', element: <CreateHotelTypePage /> },
+          { path: 'hotel-types/:id/edit', element: <EditHotelTypePage /> },
+          // Partner management routes
+          { path: 'partners', element: <PartnersListPage /> },
+          { path: 'partners/new', element: <CreatePartnerPage /> },
+          { path: 'partners/:id/edit', element: <EditPartnerPage /> },
+          // Amenities management routes
+          { path: 'amenities', element: <AmenitiesListPage /> },
+          { path: 'amenities/new', element: <CreateAmenityPage /> },
+          { path: 'amenities/:id/edit', element: <EditAmenityPage /> },
+          // Inclusion management routes
+          { path: 'inclusions', element: <InclusionsListPage /> },
+          { path: 'inclusions/new', element: <CreateInclusionPage /> },
+          { path: 'inclusions/:id/edit', element: <EditInclusionPage /> },
+          // Exclusion management routes
+          { path: 'exclusions', element: <ExclusionsListPage /> },
+          { path: 'exclusions/new', element: <CreateExclusionPage /> },
+          { path: 'exclusions/:id/edit', element: <EditExclusionPage /> },
+          // Attraction management routes
+          { path: 'attractions', element: <AttractionsListPage /> },
+          { path: 'attractions/new', element: <CreateAttractionPage /> },
+          { path: 'attractions/:id/edit', element: <EditAttractionPage /> },
+          { path: 'attractions/:id/relationships', element: <AttractionRelationshipsPage /> },
+          { path: 'blog', element: <BlogsListPage /> },
+          { path: 'blog/create', element: <CreateBlogPage /> },
+          { path: 'blog/edit/:id', element: <EditBlogPage /> },
+          // Activity management routes
+          { path: 'activities', element: <ActivityListPage /> },
+          { path: 'activities/create', element: <ActivityCreatePage /> },
+          { path: 'activities/:id/edit', element: <ActivityEditPage /> },
+          // User management routes
+          { path: 'users', element: <UsersListPage /> },
+          { path: 'users/new', element: <CreateUserPage /> },
+          { path: 'users/:id/edit', element: <EditUserPage /> },
+          // Package management routes
+          { path: 'packages', element: <PackagesListPage /> },
+          { path: 'packages/new', element: <CreatePackagePage /> },
+          { path: 'packages/:id/edit', element: <EditPackagePage /> },
+          // Group trip management routes
+          { path: 'group-trips', element: <GroupTripsListPage /> },
+          { path: 'group-trips/new', element: <CreateGroupTripPage /> },
+          { path: 'group-trips/:id/edit', element: <EditGroupTripPage /> },
+          // Newsletter subscribers
+          { path: 'newsletter', element: <SubscriberList /> },
+          // Booking management routes
+          { path: 'bookings/packages', element: <PackageBookingsPage /> },
+          { path: 'bookings/group-trips', element: <GroupTripBookingsPage /> },
+          { path: 'bookings/inquiries', element: <GeneralInquiriesPage /> },
+          { path: 'bookings/visa-applications', element: <VisaApplicationsPage /> },
+          { path: 'bookings/flights', element: <FlightBookingsPage /> },
+          // Content management routes
+          { path: 'content', element: <ContentListPage /> },
+          { path: 'content/create', element: <ContentForm /> },
+          { path: 'content/edit/:id', element: <ContentForm /> },
+          // Other admin routes
+          { path: 'settings', element: <AdminSettingsPage /> },
+          { path: 'logs/email', element: <EmailLogsPage /> },
+          { path: 'preview/:type/:id', element: <AdminPreviewPage /> },
+          // Content Tags management routes
+          { path: 'tags', element: <TagsListPage /> },
+          { path: 'tags/new', element: <CreateTagPage /> },
+          { path: 'tags/:id/edit', element: <EditTagPage /> },
+        ],
+      },
     ],
   },
 ]);

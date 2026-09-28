@@ -136,10 +136,10 @@ def get_roles(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: User = Depends(has_permission("roles:read")),
+    current_user: User = Depends(get_current_active_superuser),
 ) -> Any:
     """
-    Retrieve all roles.
+    Retrieve all roles (Admin only).
     """
     roles = role_service.get_roles(db, skip=skip, limit=limit)
     return roles

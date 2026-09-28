@@ -2,6 +2,12 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { TokenResponse } from '../api';
 
+interface UserRole {
+  id: number;
+  name: string;
+  description?: string;
+}
+
 interface User {
   id: number;
   email: string;
@@ -9,6 +15,7 @@ interface User {
   last_name: string;
   is_active: boolean;
   is_superuser: boolean;
+  roles?: UserRole[];
 }
 
 interface AuthContextType {
@@ -16,7 +23,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   logout: () => void;
   refreshToken: () => Promise<boolean>;
 }
@@ -129,7 +136,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       
       // Fetch user info
-      await fetchUserInfo();
+      const userInfo = await fetchUserInfo();
+      return userInfo;
     } catch (error) {
       console.error('Login error:', error);
       setError(error instanceof Error ? error.message : 'Login failed');

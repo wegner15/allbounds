@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient, endpoints } from '../api';
-import type { User } from '../types/api';
+import type { User, Role } from '../types/api';
 
 // Hook for fetching all users (admin only)
 export const useUsers = () => {
@@ -8,6 +8,16 @@ export const useUsers = () => {
     queryKey: ['users'],
     queryFn: async () => {
       return apiClient.get<User[]>(endpoints.users.list());
+    },
+  });
+};
+
+// Hook for fetching all roles (admin only)
+export const useRoles = () => {
+  return useQuery({
+    queryKey: ['roles'],
+    queryFn: async () => {
+      return apiClient.get<Role[]>(endpoints.users.roles());
     },
   });
 };
@@ -31,6 +41,7 @@ export interface CreateUserData {
   last_name?: string;
   is_active: boolean;
   is_superuser: boolean;
+  role_ids?: number[];
 }
 
 export const useCreateUser = () => {
@@ -54,6 +65,7 @@ export interface UpdateUserData {
   last_name?: string;
   is_active?: boolean;
   is_superuser?: boolean;
+  role_ids?: number[];
 }
 
 export const useUpdateUser = (id?: number) => {

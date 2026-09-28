@@ -768,6 +768,12 @@ export interface MediaAsset extends BaseModel {
 }
 
 // User types
+export interface Role {
+  id: number;
+  name: string;
+  description?: string;
+}
+
 export interface User extends BaseModel {
   email: string;
   first_name?: string;
@@ -775,6 +781,7 @@ export interface User extends BaseModel {
   is_active: boolean;
   is_superuser: boolean;
   last_login?: string;
+  roles?: Role[];
 }
 
 // Review types

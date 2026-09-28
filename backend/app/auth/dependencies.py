@@ -3,7 +3,7 @@ from typing import Optional, List
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.config import settings
 from app.db.database import get_db
@@ -47,7 +47,12 @@ async def get_current_user(
     except JWTError:
         raise credentials_exception
 
-    user = db.query(User).filter(User.id == int(token_data.sub)).first()
+    user = (
+        db.query(User)
+        .options(joinedload(User.roles))
+        .filter(User.id == int(token_data.sub))
+        .first()
+    )
     if not user:
         raise credentials_exception
 
@@ -131,6 +136,11 @@ def has_permission(required_permission: str):
         if current_user.is_superuser:
             return current_user
         
+        # Allow finance users to read bookings (needed for invoicing & vouchers)
+        user_roles = {role.name for role in current_user.roles}
+        if required_permission == "booking:read" and "finance" in user_roles:
+            return current_user
+
         # Check if the user has the required permission through their roles
         user_permissions = set()
         for role in current_user.roles:
@@ -176,3 +186,20 @@ def has_role(required_role: str):
         return current_user
     
     return check_role
+
+async def get_current_finance_or_admin(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    """
+    Allow superusers and users with the 'finance' role.
+    """
+    if current_user.is_superuser:
+        return current_user
+    
+    user_roles = {role.name for role in current_user.roles}
+    if "finance" not in user_roles:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Finance role or superuser privilege required",
+        )
+    return current_user

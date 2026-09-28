@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.models.user import User
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import get_current_user, get_current_finance_or_admin
 from app.services.client_service import client_service
 from app.schemas.client import (
     ClientResponse,
@@ -25,7 +25,7 @@ def get_clients(
     client_type: Optional[str] = None,
     is_active: Optional[bool] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_finance_or_admin),
 ) -> Any:
     """List clients with pagination, spend/balance calculations, and search."""
     items, total = client_service.get_clients(
@@ -43,7 +43,7 @@ def get_clients(
 def create_client(
     client_in: ClientCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_finance_or_admin),
 ) -> Any:
     """Create a new client (individual or corporate)."""
     try:
@@ -56,7 +56,7 @@ def create_client(
 def get_client(
     client_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_finance_or_admin),
 ) -> Any:
     """Get full client profile with financial summary."""
     client = client_service.get_client(db, client_id)
@@ -70,7 +70,7 @@ def update_client(
     client_id: int,
     client_update: ClientUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_finance_or_admin),
 ) -> Any:
     """Update client details."""
     try:
@@ -86,7 +86,7 @@ def update_client(
 def delete_client(
     client_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_finance_or_admin),
 ) -> Any:
     """Delete or deactivate a client."""
     success = client_service.delete_client(db, client_id)
@@ -101,7 +101,7 @@ def get_client_statement(
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_finance_or_admin),
 ) -> Any:
     """Generate chronological Statement of Account for a client."""
     statement = client_service.get_client_statement(

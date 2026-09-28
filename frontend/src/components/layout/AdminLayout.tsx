@@ -8,6 +8,7 @@ interface NavItem {
   name: string;
   href: string;
   icon: string;
+  roles?: string[];
   subItems?: { name: string; href: string; }[];
 }
 
@@ -30,6 +31,17 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
   }, [location.pathname]);
 
+  // Auto-expand 'Finance' if current path is under finance
+  React.useEffect(() => {
+    if (location.pathname.includes('/finance')) {
+      setExpandedItems((prev) => {
+        const next = new Set(prev);
+        next.add('Finance');
+        return next;
+      });
+    }
+  }, [location.pathname]);
+
   const navigation: NavItem[] = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: 'chart-bar' },
     {
@@ -48,6 +60,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
       name: 'Finance',
       href: '#',
       icon: 'banknotes',
+      roles: ['admin', 'finance'],
       subItems: [
         { name: 'Finance Overview', href: '/admin/finance' },
         { name: 'Invoices', href: '/admin/finance/invoices' },
@@ -96,6 +109,20 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
     { name: 'Email Logs', href: '/admin/logs/email', icon: 'document-text' },
     { name: 'Settings', href: '/admin/settings', icon: 'cog' },
   ];
+
+  const isSuperuser = !!user?.is_superuser;
+  const userRoleNames = user?.roles?.map((r) => r.name) || [];
+
+  const visibleNavigation = navigation.filter((item) => {
+    if (isSuperuser) return true;
+    if (item.roles && item.roles.length > 0) {
+      return item.roles.some((r) => userRoleNames.includes(r));
+    }
+    return false;
+  });
+
+  const homePath = isSuperuser ? '/admin/dashboard' : '/admin/finance';
+  const roleTitle = isSuperuser ? 'Admin' : userRoleNames.includes('finance') ? 'Finance' : 'Portal';
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
@@ -270,12 +297,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
               {/* Mobile sidebar content */}
               <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
                 <div className="flex-shrink-0 flex items-center px-4">
-                  <Link to="/admin/dashboard" className="text-white text-xl font-bold">
-                    AllBounds Admin
+                  <Link to={homePath} className="text-white text-xl font-bold">
+                    AllBounds {roleTitle}
                   </Link>
                 </div>
                 <nav className="mt-5 px-2 space-y-1">
-                  {navigation.map((item) => (
+                  {visibleNavigation.map((item) => (
                     <div key={item.name}>
                       {item.subItems ? (
                         <button
@@ -368,12 +395,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
           <div className="flex flex-col h-0 flex-1 bg-charcoal">
             <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
               <div className="flex items-center flex-shrink-0 px-4">
-                <Link to="/admin/dashboard" className="text-white text-xl font-bold">
-                  AllBounds Admin
+                <Link to={homePath} className="text-white text-xl font-bold">
+                  AllBounds {roleTitle}
                 </Link>
               </div>
               <nav className="mt-5 flex-1 px-2 space-y-1">
-                {navigation.map((item) => (
+                {visibleNavigation.map((item) => (
                   <div key={item.name}>
                     {item.subItems ? (
                       <button

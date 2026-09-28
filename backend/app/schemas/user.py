@@ -10,34 +10,6 @@ class UserBase(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
 
-# Schema for creating a new User
-class UserCreate(UserBase):
-    password: str = Field(..., min_length=8)
-
-# Schema for updating a User
-class UserUpdate(BaseModel):
-    email: Optional[EmailStr] = None
-    password: Optional[str] = Field(None, min_length=8)
-    is_active: Optional[bool] = None
-    is_superuser: Optional[bool] = None
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-
-# Schema for User response
-class UserResponse(UserBase):
-    id: int
-    created_at: datetime
-    updated_at: datetime
-    last_login: Optional[datetime] = None
-    
-    class Config:
-        from_attributes = True
-
-# Schema for User login
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
-
 # Schema for Role
 class RoleBase(BaseModel):
     name: str
@@ -57,6 +29,37 @@ class RoleResponse(RoleBase):
     
     class Config:
         from_attributes = True
+
+# Schema for creating a new User
+class UserCreate(UserBase):
+    password: str = Field(..., min_length=8)
+    role_ids: Optional[List[int]] = None
+
+# Schema for updating a User
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    password: Optional[str] = Field(None, min_length=8)
+    is_active: Optional[bool] = None
+    is_superuser: Optional[bool] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    role_ids: Optional[List[int]] = None
+
+# Schema for User response
+class UserResponse(UserBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    last_login: Optional[datetime] = None
+    roles: List[RoleResponse] = []
+    
+    class Config:
+        from_attributes = True
+
+# Schema for User login
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
 
 # Schema for Permission
 class PermissionBase(BaseModel):

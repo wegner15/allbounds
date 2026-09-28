@@ -12,11 +12,14 @@ export const useAuthHook = () => {
   const handleLogin = async (email: string, password: string, redirectPath?: string) => {
     setIsSubmitting(true);
     try {
-      await auth.login(email, password);
+      const loggedInUser = await auth.login(email, password);
 
-      // After successful login, redirect to admin dashboard
-      const targetPath = '/admin/dashboard';
-      console.log('Login successful, redirecting to dashboard');
+      // Determine appropriate target based on user roles
+      const isFinanceOnly = !loggedInUser?.is_superuser && loggedInUser?.roles?.some(r => r.name === 'finance');
+      const defaultPath = isFinanceOnly ? '/admin/finance' : '/admin/dashboard';
+      const targetPath = redirectPath || defaultPath;
+
+      console.log(`Login successful, redirecting to ${targetPath}`);
 
       // Navigate to the target path
       navigate(targetPath, { replace: true });
@@ -35,27 +38,29 @@ export const useAuthHook = () => {
     navigate('/login', { replace: true });
   };
   
-  // Check if user has required role
-  const hasRole = (): boolean => {
+  // Check if user is an administrator
+  const isAdmin = (): boolean => !!auth.user?.is_superuser;
+
+  // Check if user has finance access (either superuser or finance role)
+  const isFinanceUser = (): boolean => {
     if (!auth.user) return false;
-    
-    // For superusers, grant access to everything
     if (auth.user.is_superuser) return true;
-    
-    // For regular users, check roles (would need to be expanded based on your role structure)
-    // This is a placeholder implementation
-    return false;
+    return auth.user.roles?.some(r => r.name === 'finance') ?? false;
+  };
+
+  // Check if user has required role
+  const hasRole = (roleName?: string): boolean => {
+    if (!auth.user) return false;
+    if (auth.user.is_superuser) return true;
+    if (!roleName) return false;
+    return auth.user.roles?.some(r => r.name === roleName) ?? false;
   };
   
   // Check if user has required permission
-  const hasPermission = (): boolean => {
+  const hasPermission = (permissionName?: string): boolean => {
     if (!auth.user) return false;
-    
-    // For superusers, grant access to everything
     if (auth.user.is_superuser) return true;
-    
-    // For regular users, check permissions (would need to be expanded based on your permission structure)
-    // This is a placeholder implementation
+    // Superusers have all permissions
     return false;
   };
   
@@ -64,6 +69,8 @@ export const useAuthHook = () => {
     handleLogin,
     handleLogout,
     isSubmitting,
+    isAdmin,
+    isFinanceUser,
     hasRole,
     hasPermission,
   };

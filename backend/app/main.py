@@ -156,6 +156,25 @@ async def startup_event():
             logger.warning("Redis client not initialized. Caching disabled.")
     except Exception as e:
         logger.warning(f"Redis connection failed: {e}. Caching disabled.")
+
+    # Ensure default roles exist in the database
+    try:
+        from app.db.database import SessionLocal
+        from app.models.user import Role
+        with SessionLocal() as db:
+            default_roles = [
+                ("admin", "System Administrator with full access"),
+                ("finance", "Finance staff — access to finance, invoicing, billing, and reports"),
+            ]
+            for role_name, role_desc in default_roles:
+                existing_role = db.query(Role).filter(Role.name == role_name).first()
+                if not existing_role:
+                    new_role = Role(name=role_name, description=role_desc)
+                    db.add(new_role)
+            db.commit()
+            logger.info("Default roles ensured (admin, finance)")
+    except Exception as e:
+        logger.warning(f"Failed to ensure default roles on startup: {e}")
     
     logger.info("Application startup complete")
 

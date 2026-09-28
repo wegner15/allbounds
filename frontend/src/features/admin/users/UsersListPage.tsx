@@ -132,11 +132,27 @@ const UsersListPage: React.FC = () => {
                        <div className="text-sm text-gray-900">{user.email}</div>
                      </td>
                      <td className="px-6 py-4 whitespace-nowrap">
-                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                         user.is_superuser ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
-                       }`}>
-                         {user.is_superuser ? 'Admin' : 'User'}
-                       </span>
+                       <div className="flex flex-wrap gap-1">
+                         {user.is_superuser && (
+                           <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                             Admin
+                           </span>
+                         )}
+                         {user.roles && user.roles.length > 0 ? (
+                           user.roles.map((r) => (
+                             <span
+                               key={r.id}
+                               className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-100 text-emerald-800 capitalize"
+                             >
+                               {r.name}
+                             </span>
+                           ))
+                         ) : !user.is_superuser ? (
+                           <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                             User
+                           </span>
+                         ) : null}
+                       </div>
                      </td>
                      <td className="px-6 py-4 whitespace-nowrap">
                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${

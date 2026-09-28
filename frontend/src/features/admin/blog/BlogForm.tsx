@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AlertCircle, X } from 'lucide-react';
+import { toast } from 'react-toastify';
 import BlogInlineEditor from '../../../components/ui/BlogInlineEditor';
 import ImageSelector from '../../../components/ui/ImageSelector';
 import type { BlogPost, BlogPostCreateInput, BlogPostUpdateInput } from '../../../lib/hooks/useBlogs';
@@ -9,11 +11,14 @@ interface BlogFormProps {
   initialData?: BlogPost;
   onSubmit: (data: BlogPostCreateInput | BlogPostUpdateInput) => void;
   isLoading: boolean;
+  error?: string | null;
+  onClearError?: () => void;
 }
 
-const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading }) => {
+const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading, error, onClearError }) => {
   const navigate = useNavigate();
   const { data: packages, isLoading: isLoadingPackages } = usePackages();
+  const [localError, setLocalError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -80,15 +85,79 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading })
 
 
 
+  const displayError = error || localError;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    setLocalError(null);
+    onClearError?.();
+
+    if (!formData.title.trim()) {
+      const msg = 'Please enter a title for your blog post.';
+      setLocalError(msg);
+      toast.error(msg);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    const strippedContent = formData.content.replace(/<[^>]*>/g, '').trim();
+    if (!strippedContent && !formData.content.includes('<img')) {
+      const msg = 'Please write some content for your blog post before publishing.';
+      setLocalError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    if (formData.summary && formData.summary.length > 1000) {
+      const msg = `Post summary is too long (${formData.summary.length}/1000 characters). Please shorten it to under 1000 characters before saving.`;
+      setLocalError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    const cleanedData: BlogPostCreateInput | BlogPostUpdateInput = {
+      ...formData,
+      title: formData.title.trim(),
+      summary: formData.summary.trim() || undefined,
+      slug: formData.slug.trim() || undefined,
+      cover_image_id: formData.cover_image_id.trim() || undefined,
+    };
+
+    onSubmit(cleanedData);
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Error Alert Banner */}
+          {displayError && (
+            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl shadow-sm">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
+                </div>
+                <div className="ml-3 flex-1">
+                  <h3 className="text-sm font-semibold text-red-800">
+                    {initialData ? 'Failed to update blog post' : 'Failed to publish blog post'}
+                  </h3>
+                  <div className="mt-1 text-sm text-red-700 whitespace-pre-line leading-relaxed">
+                    {displayError}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocalError(null);
+                    onClearError?.();
+                  }}
+                  className="ml-auto pl-3 text-red-400 hover:text-red-600 transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          )}
           {/* Header Section */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
             <div className="mb-6">
@@ -123,9 +192,18 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading })
 
             {/* Summary */}
             <div>
-              <label htmlFor="summary" className="block text-sm font-semibold text-gray-900 mb-3">
-                Post Summary
-              </label>
+              <div className="flex items-center justify-between mb-3">
+                <label htmlFor="summary" className="block text-sm font-semibold text-gray-900">
+                  Post Summary
+                </label>
+                <span
+                  className={`text-xs font-semibold ${
+                    formData.summary.length > 1000 ? 'text-red-600 font-bold' : 'text-gray-500'
+                  }`}
+                >
+                  {formData.summary.length} / 1000 characters
+                </span>
+              </div>
               <textarea
                 id="summary"
                 name="summary"
@@ -133,11 +211,22 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading })
                 onChange={handleChange}
                 placeholder="Write a compelling summary that will appear in previews and search results..."
                 rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical transition-colors placeholder-gray-400"
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 resize-vertical transition-colors placeholder-gray-400 ${
+                  formData.summary.length > 1000
+                    ? 'border-red-400 focus:ring-red-500 focus:border-red-500 bg-red-50/30'
+                    : 'border-gray-300 focus:ring-blue-500 focus:border-transparent'
+                }`}
               />
-              <p className="mt-2 text-sm text-gray-500">
-                A good summary helps readers understand what your post is about and improves SEO.
-              </p>
+              {formData.summary.length > 1000 ? (
+                <p className="mt-2 text-sm text-red-600 font-medium flex items-center gap-1.5">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  Summary exceeds the 1000-character limit by {formData.summary.length - 1000} characters. Please shorten it so the post can be saved.
+                </p>
+              ) : (
+                <p className="mt-2 text-sm text-gray-500">
+                  A good summary helps readers understand what your post is about and improves SEO (up to 1,000 characters).
+                </p>
+              )}
             </div>
 
             {/* Cover Image */}
@@ -305,6 +394,15 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading })
 
           {/* Form Actions */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+            {displayError && (
+              <div className="mb-4 p-3.5 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2.5 text-sm text-red-700">
+                <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                <div className="flex-1 whitespace-pre-line leading-snug">
+                  <span className="font-semibold">Unable to save: </span>
+                  {displayError}
+                </div>
+              </div>
+            )}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="text-sm text-gray-600">
                 {initialData ? 'Update your changes to save the blog post.' : 'Ready to publish your blog post?'}

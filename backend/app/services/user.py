@@ -40,6 +40,9 @@ class UserService:
         if user_in.role_ids:
             roles = db.query(Role).filter(Role.id.in_(user_in.role_ids)).all()
             db_user.roles = roles
+        elif getattr(user_in, "role_names", None):
+            roles = db.query(Role).filter(Role.name.in_(user_in.role_names)).all()
+            db_user.roles = roles
 
         db.add(db_user)
         db.commit()
@@ -56,11 +59,16 @@ class UserService:
         
         update_data = user_in.model_dump(exclude_unset=True)
         
-        # Handle role_ids if provided
+        # Handle role_ids or role_names if provided
         if "role_ids" in update_data:
             role_ids = update_data.pop("role_ids")
             if role_ids is not None:
                 roles = db.query(Role).filter(Role.id.in_(role_ids)).all()
+                db_user.roles = roles
+        elif "role_names" in update_data:
+            role_names = update_data.pop("role_names")
+            if role_names is not None:
+                roles = db.query(Role).filter(Role.name.in_(role_names)).all()
                 db_user.roles = roles
         
         # Hash the password if it's being updated

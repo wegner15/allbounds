@@ -34,6 +34,7 @@ class RoleResponse(RoleBase):
 class UserCreate(UserBase):
     password: str = Field(..., min_length=8)
     role_ids: Optional[List[int]] = None
+    role_names: Optional[List[str]] = None
 
 # Schema for updating a User
 class UserUpdate(BaseModel):
@@ -44,6 +45,7 @@ class UserUpdate(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     role_ids: Optional[List[int]] = None
+    role_names: Optional[List[str]] = None
 
 # Schema for User response
 class UserResponse(UserBase):

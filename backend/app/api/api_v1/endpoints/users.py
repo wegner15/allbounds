@@ -66,6 +66,34 @@ def update_current_user(
     user = user_service.update_user(db, current_user.id, user_in)
     return user
 
+# Role management endpoints
+@router.get("/roles", response_model=List[RoleResponse])
+def get_roles(
+    db: Session = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+    current_user: User = Depends(get_current_active_superuser),
+) -> Any:
+    """
+    Retrieve all roles (Admin only).
+    """
+    roles = role_service.get_roles(db, skip=skip, limit=limit)
+    return roles
+
+# Permission management endpoints
+@router.get("/permissions", response_model=List[PermissionResponse])
+def get_permissions(
+    db: Session = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+    current_user: User = Depends(has_permission("permissions:read")),
+) -> Any:
+    """
+    Retrieve all permissions.
+    """
+    permissions = permission_service.get_permissions(db, skip=skip, limit=limit)
+    return permissions
+
 @router.get("/{user_id}", response_model=UserResponse)
 def get_user_by_id(
     user_id: int,
@@ -129,31 +157,3 @@ def delete_user(
     
     user_service.delete_user(db, user_id=user_id)
     return user
-
-# Role management endpoints
-@router.get("/roles", response_model=List[RoleResponse])
-def get_roles(
-    db: Session = Depends(get_db),
-    skip: int = 0,
-    limit: int = 100,
-    current_user: User = Depends(get_current_active_superuser),
-) -> Any:
-    """
-    Retrieve all roles (Admin only).
-    """
-    roles = role_service.get_roles(db, skip=skip, limit=limit)
-    return roles
-
-# Permission management endpoints
-@router.get("/permissions", response_model=List[PermissionResponse])
-def get_permissions(
-    db: Session = Depends(get_db),
-    skip: int = 0,
-    limit: int = 100,
-    current_user: User = Depends(has_permission("permissions:read")),
-) -> Any:
-    """
-    Retrieve all permissions.
-    """
-    permissions = permission_service.get_permissions(db, skip=skip, limit=limit)
-    return permissions

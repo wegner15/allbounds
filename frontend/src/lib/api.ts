@@ -111,15 +111,15 @@ export const apiClient = {
     return this.request(endpoint, 'GET') as Promise<T>;
   },
 
-  async post<T>(endpoint: string, data: unknown): Promise<T> {
+  async post<T>(endpoint: string, data?: unknown): Promise<T> {
     return this.request(endpoint, 'POST', data) as Promise<T>;
   },
 
-  async put<T>(endpoint: string, data: unknown): Promise<T> {
+  async put<T>(endpoint: string, data?: unknown): Promise<T> {
     return this.request(endpoint, 'PUT', data) as Promise<T>;
   },
 
-  async patch<T>(endpoint: string, data: unknown): Promise<T> {
+  async patch<T>(endpoint: string, data?: unknown): Promise<T> {
     return this.request(endpoint, 'PATCH', data) as Promise<T>;
   },
 

@@ -528,17 +528,47 @@ export interface SupplierLedger {
 // ==========================================
 // FINANCIAL REPORTS TYPES
 // ==========================================
+// FINANCIAL REPORTS TYPES
+// ==========================================
+
+export type ReportGranularity = 'day' | 'week' | 'month' | 'quarter';
+
+export interface AmountByLabel {
+  label: string;
+  count: number;
+  amount_usd: number;
+  percentage: number;
+}
+
+export interface SalesComparison {
+  previous_start_date: string;
+  previous_end_date: string;
+  previous_invoiced_usd: number;
+  previous_collected_usd: number;
+  previous_invoices_count: number;
+  invoiced_change_percent?: number | null;
+  collected_change_percent?: number | null;
+  invoices_count_change_percent?: number | null;
+}
 
 export interface SalesReport {
   start_date?: string;
   end_date?: string;
+  granularity?: ReportGranularity;
+  include_drafts?: boolean;
+  total_gross_usd?: number;
+  total_discount_usd?: number;
   total_invoiced_usd: number;
   total_collected_usd: number;
   total_outstanding_usd: number;
+  collection_rate_percent?: number;
   invoices_count: number;
   average_order_value_usd: number;
+  comparison?: SalesComparison | null;
   period_breakdown: {
     period: string;
+    period_label?: string;
+    period_start?: string;
     invoices_count: number;
     gross_revenue_usd: number;
     discount_usd: number;
@@ -556,27 +586,52 @@ export interface SalesReport {
     consultant_name: string;
     invoices_count: number;
     total_sales_usd: number;
+    collected_usd?: number;
+    outstanding_usd?: number;
+    percentage_of_total?: number;
   }[];
+  status_breakdown?: AmountByLabel[];
 }
 
 export interface AgingBucket {
+  key?: string;
   bucket_label: string;
   count: number;
   total_amount_usd: number;
   percentage: number;
 }
 
+export interface AgingPartyRow {
+  party_id?: number | null;
+  party_name: string;
+  documents_count: number;
+  current_usd: number;
+  d1_30_usd: number;
+  d31_60_usd: number;
+  d61_90_usd: number;
+  d90_plus_usd: number;
+  total_usd: number;
+  oldest_days_overdue: number;
+}
+
 export interface ReceivablesAgingReport {
   as_of_date: string;
   total_receivable_usd: number;
+  total_overdue_usd?: number;
+  overdue_percent?: number;
+  documents_count?: number;
+  weighted_avg_days_overdue?: number;
   buckets: AgingBucket[];
+  by_party?: AgingPartyRow[];
   overdue_invoices: {
     invoice_id: number;
     invoice_number: string;
+    client_id?: number | null;
     client_name: string;
     invoice_date: string;
     due_date: string;
     days_overdue: number;
+    bucket?: string;
     currency: string;
     total_amount: number;
     amount_paid: number;
@@ -589,14 +644,23 @@ export interface ReceivablesAgingReport {
 export interface PayablesAgingReport {
   as_of_date: string;
   total_payable_usd: number;
+  total_overdue_usd?: number;
+  overdue_percent?: number;
+  documents_count?: number;
+  weighted_avg_days_overdue?: number;
+  due_next_7_days_usd?: number;
+  due_next_30_days_usd?: number;
   buckets: AgingBucket[];
+  by_party?: AgingPartyRow[];
   pending_bills: {
     bill_id: number;
     bill_number: string;
+    supplier_id?: number | null;
     supplier_name: string;
     bill_date: string;
     due_date: string;
     days_overdue: number;
+    bucket?: string;
     currency: string;
     amount_billed: number;
     amount_paid: number;
@@ -610,9 +674,21 @@ export interface ProfitabilityItem {
   booking_id?: number;
   invoice_id: number;
   invoice_number: string;
+  invoice_date?: string;
   client_name: string;
+  consultant_name?: string;
   service_description: string;
   destination?: string;
+  cost_source?: string;
+  revenue_usd: number;
+  cost_usd: number;
+  gross_profit_usd: number;
+  gross_margin_percent: number;
+}
+
+export interface ProfitabilityGroupItem {
+  label: string;
+  invoices_count: number;
   revenue_usd: number;
   cost_usd: number;
   gross_profit_usd: number;
@@ -622,27 +698,92 @@ export interface ProfitabilityItem {
 export interface ProfitabilityReport {
   start_date?: string;
   end_date?: string;
+  include_drafts?: boolean;
   total_revenue_usd: number;
   total_cost_usd: number;
   total_gross_profit_usd: number;
   average_margin_percent: number;
+  invoices_count?: number;
+  loss_making_count?: number;
+  missing_cost_count?: number;
+  by_destination?: ProfitabilityGroupItem[];
+  by_consultant?: ProfitabilityGroupItem[];
   items: ProfitabilityItem[];
+}
+
+export interface CashFlowDailyItem {
+  date: string;
+  period?: string;
+  period_label?: string;
+  inflow_usd: number;
+  outflow_usd: number;
+  net_usd: number;
+  cumulative_net_usd?: number;
+  receipts_count?: number;
+  payments_count?: number;
 }
 
 export interface CashFlowReport {
   start_date?: string;
   end_date?: string;
+  granularity?: ReportGranularity;
   total_inflow_usd: number;
   total_outflow_usd: number;
   net_cash_flow_usd: number;
+  receipts_count?: number;
+  payments_count?: number;
   inflows_by_method: Record<string, number>;
   outflows_by_method: Record<string, number>;
-  daily_timeline: {
-    date: string;
-    inflow_usd: number;
-    outflow_usd: number;
-    net_usd: number;
+  inflows_by_client?: AmountByLabel[];
+  outflows_by_supplier?: AmountByLabel[];
+  daily_timeline: CashFlowDailyItem[];
+}
+
+export interface ExecutiveSummaryReport {
+  start_date: string;
+  end_date: string;
+  as_of_date: string;
+  granularity: ReportGranularity;
+  invoiced_usd: number;
+  invoices_count: number;
+  average_order_value_usd: number;
+  invoiced_change_percent?: number | null;
+  gross_profit_usd: number;
+  gross_margin_percent: number;
+  cash_in_usd: number;
+  cash_out_usd: number;
+  net_cash_usd: number;
+  receivables_usd: number;
+  receivables_overdue_usd: number;
+  payables_usd: number;
+  payables_overdue_usd: number;
+  net_working_position_usd: number;
+  trend: {
+    period: string;
+    period_label?: string;
+    period_start?: string;
+    invoices_count: number;
+    gross_revenue_usd: number;
+    discount_usd: number;
+    net_revenue_usd: number;
+    collected_usd: number;
+    outstanding_usd: number;
   }[];
+  cash_trend: CashFlowDailyItem[];
+  top_destinations: {
+    destination: string;
+    bookings_count: number;
+    total_sales_usd: number;
+    percentage_of_total: number;
+  }[];
+  top_consultants: {
+    consultant_name: string;
+    invoices_count: number;
+    total_sales_usd: number;
+  }[];
+  top_debtors: AgingPartyRow[];
+  receivable_buckets: AgingBucket[];
+  payable_buckets: AgingBucket[];
 }
 
 export interface InvoiceProfitability {

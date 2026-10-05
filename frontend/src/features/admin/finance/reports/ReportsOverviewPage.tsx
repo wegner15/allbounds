@@ -1,80 +1,119 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  BarChart3,
-  TrendingUp,
-  DollarSign,
-  ArrowDownRight,
-  ArrowUpRight,
-  Clock,
-  Calendar,
   Download,
   Printer,
   AlertCircle,
-  FileSpreadsheet,
-  CheckCircle,
-  Percent,
-  Layers,
-  Building2,
-  Users,
   Loader2,
+  FileSpreadsheet,
+  PieChart,
+  DollarSign,
+  TrendingUp,
+  Clock,
+  Building2,
+  Wallet,
 } from 'lucide-react';
+import { pdf } from '@react-pdf/renderer';
 import { reportsApi } from '../../../../lib/api/reports';
-import { usePdfDownload } from '../../../../lib/utils/pdfGenerator';
+import { financeApi } from '../../../../lib/api/finance';
+import { ReportFilterBar } from './components/ReportFilterBar';
+import { ExecutiveSummaryView } from './views/ExecutiveSummaryView';
+import { SalesView } from './views/SalesView';
+import { ProfitabilityView } from './views/ProfitabilityView';
+import { ReceivablesView } from './views/ReceivablesView';
+import { PayablesView } from './views/PayablesView';
+import { CashFlowView } from './views/CashFlowView';
+import { ReportPdfDocument, type ReportTabKey } from './pdf/ReportPdfDocument';
+import { downloadCsv } from './utils/csvExport';
+import { getDatePresets, type DatePresetKey } from './utils/datePresets';
 import type {
   SalesReport,
   ReceivablesAgingReport,
   PayablesAgingReport,
   ProfitabilityReport,
   CashFlowReport,
+  ExecutiveSummaryReport,
+  CompanyFinanceSettings,
+  ReportGranularity,
 } from '../../../../lib/types/finance';
 
 export const ReportsOverviewPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'sales' | 'receivables' | 'payables' | 'profitability' | 'cash_flow'>('sales');
+  const [activeTab, setActiveTab] = useState<ReportTabKey>('executive');
 
-  // Date Filters
-  const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
+  // Filter States
+  const presets = getDatePresets();
+  const [selectedPreset, setSelectedPreset] = useState<DatePresetKey>('ytd');
+  const [startDate, setStartDate] = useState<string>(presets.ytd.startDate);
+  const [endDate, setEndDate] = useState<string>(presets.ytd.endDate);
+  const [granularity, setGranularity] = useState<ReportGranularity>('month');
+  const [includeDrafts, setIncludeDrafts] = useState<boolean>(false);
+  const [asOfDate, setAsOfDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
-  // Report States
+  // Report Data States
+  const [executiveReport, setExecutiveReport] = useState<ExecutiveSummaryReport | null>(null);
   const [salesReport, setSalesReport] = useState<SalesReport | null>(null);
+  const [profitabilityReport, setProfitabilityReport] = useState<ProfitabilityReport | null>(null);
   const [receivablesReport, setReceivablesReport] = useState<ReceivablesAgingReport | null>(null);
   const [payablesReport, setPayablesReport] = useState<PayablesAgingReport | null>(null);
-  const [profitabilityReport, setProfitabilityReport] = useState<ProfitabilityReport | null>(null);
   const [cashFlowReport, setCashFlowReport] = useState<CashFlowReport | null>(null);
+  const [settings, setSettings] = useState<CompanyFinanceSettings | null>(null);
 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState<boolean>(false);
 
-  // PDF Export
-  const reportRef = useRef<HTMLDivElement>(null);
-  const { isGenerating, downloadPdf } = usePdfDownload();
+  // Load Company Finance Settings once for header/branding
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const s = await financeApi.getSettings();
+        setSettings(s);
+      } catch (err) {
+        console.warn('Could not load company settings for reports branding', err);
+      }
+    }
+    loadSettings();
+  }, []);
 
-  const handleDownloadPdf = () => {
-    downloadPdf(
-      reportRef.current,
-      `Financial-Report-${activeTab}-${new Date().toISOString().split('T')[0]}.pdf`,
-      { orientation: 'portrait', marginMm: 0 }
-    );
-  };
-
-  const fetchReport = async () => {
+  // Fetch Report Data based on active tab & filters
+  const fetchReport = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      if (activeTab === 'sales') {
-        const data = await reportsApi.getSalesReport(startDate || undefined, endDate || undefined);
+      if (activeTab === 'executive') {
+        const data = await reportsApi.getExecutiveSummary({
+          startDate: startDate || undefined,
+          endDate: endDate || undefined,
+          granularity,
+          includeDrafts,
+        });
+        setExecutiveReport(data);
+      } else if (activeTab === 'sales') {
+        const data = await reportsApi.getSalesReport(
+          startDate || undefined,
+          endDate || undefined,
+          granularity,
+          includeDrafts
+        );
         setSalesReport(data);
+      } else if (activeTab === 'profitability') {
+        const data = await reportsApi.getProfitability(
+          startDate || undefined,
+          endDate || undefined,
+          includeDrafts
+        );
+        setProfitabilityReport(data);
       } else if (activeTab === 'receivables') {
-        const data = await reportsApi.getReceivablesAging();
+        const data = await reportsApi.getReceivablesAging(asOfDate || undefined);
         setReceivablesReport(data);
       } else if (activeTab === 'payables') {
-        const data = await reportsApi.getPayablesAging();
+        const data = await reportsApi.getPayablesAging(asOfDate || undefined);
         setPayablesReport(data);
-      } else if (activeTab === 'profitability') {
-        const data = await reportsApi.getProfitability(startDate || undefined, endDate || undefined);
-        setProfitabilityReport(data);
       } else if (activeTab === 'cash_flow') {
-        const data = await reportsApi.getCashFlow(startDate || undefined, endDate || undefined);
+        const data = await reportsApi.getCashFlow(
+          startDate || undefined,
+          endDate || undefined,
+          granularity
+        );
         setCashFlowReport(data);
       }
     } catch (err: any) {
@@ -82,86 +121,231 @@ export const ReportsOverviewPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab, startDate, endDate, granularity, includeDrafts, asOfDate]);
 
   useEffect(() => {
     fetchReport();
-  }, [activeTab, startDate, endDate]);
+  }, [fetchReport]);
 
-  const handlePrint = () => {
-    window.print();
+  // Handle Preset selection
+  const handleSelectPreset = (presetKey: DatePresetKey) => {
+    setSelectedPreset(presetKey);
+    const p = presets[presetKey];
+    setStartDate(p.startDate);
+    setEndDate(p.endDate);
+    setGranularity(p.suggestedGranularity);
   };
 
-  // CSV export generator for currently active tab
-  const handleExportCSV = () => {
-    let csvContent = 'data:text/csv;charset=utf-8,';
+  const handleResetFilters = () => {
+    handleSelectPreset('ytd');
+    setIncludeDrafts(false);
+    setAsOfDate(new Date().toISOString().split('T')[0]);
+  };
 
-    if (activeTab === 'sales' && salesReport) {
-      csvContent += 'Period,Invoices Count,Gross Revenue USD,Discount USD,Net Revenue USD,Collected USD,Outstanding USD\r\n';
-      salesReport.period_breakdown.forEach((row) => {
-        csvContent += `"${row.period}",${row.invoices_count},${row.gross_revenue_usd},${row.discount_usd},${row.net_revenue_usd},${row.collected_usd},${row.outstanding_usd}\r\n`;
-      });
-    } else if (activeTab === 'profitability' && profitabilityReport) {
-      csvContent += 'Invoice #,Client Name,Destination,Description,Revenue USD,Cost USD,Gross Profit USD,Gross Margin %\r\n';
-      profitabilityReport.items.forEach((item) => {
-        csvContent += `"${item.invoice_number}","${item.client_name}","${item.destination || ''}","${item.service_description.replace(/"/g, '""')}",${item.revenue_usd},${item.cost_usd},${item.gross_profit_usd},${item.gross_margin_percent}\r\n`;
-      });
-    } else if (activeTab === 'receivables' && receivablesReport) {
-      csvContent += 'Invoice #,Client Name,Invoice Date,Due Date,Days Overdue,Currency,Total Amount,Balance Due USD\r\n';
-      receivablesReport.overdue_invoices.forEach((inv) => {
-        csvContent += `"${inv.invoice_number}","${inv.client_name}","${inv.invoice_date}","${inv.due_date}",${inv.days_overdue},"${inv.currency}",${inv.total_amount},${inv.balance_due_usd}\r\n`;
-      });
-    } else if (activeTab === 'payables' && payablesReport) {
-      csvContent += 'Bill #,Supplier Name,Bill Date,Due Date,Days Overdue,Currency,Amount Billed,Balance Payable USD\r\n';
-      payablesReport.pending_bills.forEach((bill) => {
-        csvContent += `"${bill.bill_number}","${bill.supplier_name}","${bill.bill_date}","${bill.due_date}",${bill.days_overdue},"${bill.currency}",${bill.amount_billed},${bill.balance_payable_usd}\r\n`;
-      });
-    } else if (activeTab === 'cash_flow' && cashFlowReport) {
-      csvContent += 'Date,Inflow USD,Outflow USD,Net USD\r\n';
-      cashFlowReport.daily_timeline.forEach((d) => {
-        csvContent += `"${d.date}",${d.inflow_usd},${d.outflow_usd},${d.net_usd}\r\n`;
-      });
+  // High-Fidelity Vector PDF Export using @react-pdf/renderer
+  const handleDownloadPdf = async () => {
+    const currentData =
+      activeTab === 'executive'
+        ? executiveReport
+        : activeTab === 'sales'
+        ? salesReport
+        : activeTab === 'profitability'
+        ? profitabilityReport
+        : activeTab === 'receivables'
+        ? receivablesReport
+        : activeTab === 'payables'
+        ? payablesReport
+        : cashFlowReport;
+
+    if (!currentData) return;
+
+    try {
+      setIsGeneratingPdf(true);
+
+      const periodText =
+        activeTab === 'receivables' || activeTab === 'payables'
+          ? undefined
+          : startDate && endDate
+          ? `${startDate} to ${endDate}`
+          : 'All Time';
+
+      const asOfText =
+        activeTab === 'receivables' || activeTab === 'payables'
+          ? asOfDate || new Date().toISOString().split('T')[0]
+          : undefined;
+
+      const granularityText =
+        activeTab === 'receivables' || activeTab === 'payables' || activeTab === 'profitability'
+          ? undefined
+          : granularity;
+
+      const doc = (
+        <ReportPdfDocument
+          reportType={activeTab}
+          data={currentData as any}
+          settings={settings}
+          periodText={periodText}
+          asOfText={asOfText}
+          granularityText={granularityText}
+          generatedBy="Allbound Finance Platform"
+        />
+      );
+
+      const blob = await pdf(doc).toBlob();
+      const url = URL.createObjectURL(blob);
+      const filename = `Allbound-${activeTab.replace('_', '-')}-Report-${new Date().toISOString().split('T')[0]}.pdf`;
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      console.error('Failed to generate high-fidelity report PDF:', err);
+      alert('Failed to generate report PDF: ' + (err?.message || 'Unknown error'));
+    } finally {
+      setIsGeneratingPdf(false);
     }
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `${activeTab}_report_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
+
+  // Robust CSV Export
+  const handleExportCSV = () => {
+    const timestamp = new Date().toISOString().split('T')[0];
+
+    if (activeTab === 'executive' && executiveReport) {
+      const headers = ['Period', 'Invoices Count', 'Gross Revenue USD', 'Discount USD', 'Net Revenue USD', 'Collected USD', 'Outstanding USD'];
+      const rows = executiveReport.trend.map((r) => [
+        r.period_label || r.period,
+        r.invoices_count,
+        r.gross_revenue_usd,
+        r.discount_usd,
+        r.net_revenue_usd,
+        r.collected_usd,
+        r.outstanding_usd,
+      ]);
+      downloadCsv(`Allbound_Executive_Summary_${timestamp}.csv`, headers, rows);
+    } else if (activeTab === 'sales' && salesReport) {
+      const headers = ['Period', 'Invoices Count', 'Gross Revenue USD', 'Discount USD', 'Net Revenue USD', 'Collected USD', 'Outstanding USD'];
+      const rows = salesReport.period_breakdown.map((row) => [
+        row.period_label || row.period,
+        row.invoices_count,
+        row.gross_revenue_usd,
+        row.discount_usd,
+        row.net_revenue_usd,
+        row.collected_usd,
+        row.outstanding_usd,
+      ]);
+      downloadCsv(`Allbound_Sales_Report_${timestamp}.csv`, headers, rows);
+    } else if (activeTab === 'profitability' && profitabilityReport) {
+      const headers = ['Invoice #', 'Invoice Date', 'Client Name', 'Destination', 'Trip Description', 'Revenue USD', 'Cost USD', 'Gross Profit USD', 'Margin %', 'Cost Source'];
+      const rows = profitabilityReport.items.map((item) => [
+        item.invoice_number,
+        item.invoice_date || '',
+        item.client_name,
+        item.destination || '',
+        item.service_description,
+        item.revenue_usd,
+        item.cost_usd,
+        item.gross_profit_usd,
+        item.gross_margin_percent,
+        item.cost_source || '',
+      ]);
+      downloadCsv(`Allbound_Trip_Profitability_${timestamp}.csv`, headers, rows);
+    } else if (activeTab === 'receivables' && receivablesReport) {
+      const headers = ['Invoice #', 'Client Name', 'Invoice Date', 'Due Date', 'Days Overdue', 'Aging Bucket', 'Currency', 'Total Amount', 'Amount Paid', 'Balance Due USD'];
+      const rows = receivablesReport.overdue_invoices.map((inv) => [
+        inv.invoice_number,
+        inv.client_name,
+        inv.invoice_date,
+        inv.due_date,
+        inv.days_overdue,
+        inv.bucket || '',
+        inv.currency,
+        inv.total_amount,
+        inv.amount_paid,
+        inv.balance_due_usd,
+      ]);
+      downloadCsv(`Allbound_Aged_Debtors_${timestamp}.csv`, headers, rows);
+    } else if (activeTab === 'payables' && payablesReport) {
+      const headers = ['Bill #', 'Supplier Name', 'Bill Date', 'Due Date', 'Days Overdue', 'Aging Bucket', 'Currency', 'Amount Billed', 'Amount Paid', 'Balance Payable USD'];
+      const rows = payablesReport.pending_bills.map((bill) => [
+        bill.bill_number,
+        bill.supplier_name,
+        bill.bill_date,
+        bill.due_date,
+        bill.days_overdue,
+        bill.bucket || '',
+        bill.currency,
+        bill.amount_billed,
+        bill.amount_paid,
+        bill.balance_payable_usd,
+      ]);
+      downloadCsv(`Allbound_Aged_Creditors_${timestamp}.csv`, headers, rows);
+    } else if (activeTab === 'cash_flow' && cashFlowReport) {
+      const headers = ['Date / Period', 'Cash Inflow USD', 'Cash Outflow USD', 'Net Cash USD', 'Cumulative Net USD', 'Receipts Count', 'Payments Count'];
+      const rows = cashFlowReport.daily_timeline.map((d) => [
+        d.period_label || d.date,
+        d.inflow_usd,
+        d.outflow_usd,
+        d.net_usd,
+        d.cumulative_net_usd ?? '',
+        d.receipts_count || 0,
+        d.payments_count || 0,
+      ]);
+      downloadCsv(`Allbound_Cash_Flow_${timestamp}.csv`, headers, rows);
+    }
+  };
+
+  const tabs: { key: ReportTabKey; label: string; icon: React.ReactNode }[] = [
+    { key: 'executive', label: 'Executive Summary', icon: <PieChart className="w-4 h-4" /> },
+    { key: 'sales', label: 'Sales & Revenue', icon: <DollarSign className="w-4 h-4" /> },
+    { key: 'profitability', label: 'Trip Profitability', icon: <TrendingUp className="w-4 h-4" /> },
+    { key: 'receivables', label: 'Receivables (Debtors)', icon: <Clock className="w-4 h-4" /> },
+    { key: 'payables', label: 'Payables (Suppliers)', icon: <Building2 className="w-4 h-4" /> },
+    { key: 'cash_flow', label: 'Cash-Flow Statement', icon: <Wallet className="w-4 h-4" /> },
+  ];
 
   return (
     <div className="max-w-7xl mx-auto my-6 px-4 space-y-6">
-      {/* Header */}
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold font-playfair text-gray-900">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-teal-50 text-teal-800 border border-teal-200">
+              Corporate Financial Analytics
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold font-playfair text-gray-900 mt-1">
             Financial & Profitability Reports
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
             Executive performance analytics: sales revenue, debtor aging, vendor payables, cost tracking, and cash-flow
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleExportCSV}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-semibold shadow-sm transition-all cursor-pointer"
-          >
-            <Download className="w-4 h-4 text-gray-500" />
-            Export CSV
-          </button>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 flex-wrap">
           <button
             type="button"
-            disabled={isGenerating}
-            onClick={handleDownloadPdf}
-            className="flex items-center gap-1.5 px-4 py-2 bg-teal-700 hover:bg-teal-800 disabled:opacity-50 text-white rounded-xl text-sm font-semibold shadow-sm transition-all cursor-pointer"
+            onClick={handleExportCSV}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl text-xs sm:text-sm font-semibold shadow-2xs transition-all cursor-pointer"
           >
-            {isGenerating ? (
+            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            Export CSV
+          </button>
+
+          <button
+            type="button"
+            disabled={isGeneratingPdf || loading}
+            onClick={handleDownloadPdf}
+            className="flex items-center gap-1.5 px-4 py-2 bg-teal-800 hover:bg-teal-900 disabled:opacity-50 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-xs hover:shadow-sm transition-all cursor-pointer"
+          >
+            {isGeneratingPdf ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Generating PDF...
+                Rendering PDF...
               </>
             ) : (
               <>
@@ -170,752 +354,98 @@ export const ReportsOverviewPage: React.FC = () => {
               </>
             )}
           </button>
+
           <button
-            onClick={handlePrint}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-medium shadow-sm transition-all cursor-pointer"
+            type="button"
+            onClick={() => window.print()}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl text-xs sm:text-sm font-medium shadow-2xs transition-all cursor-pointer"
           >
             <Printer className="w-4 h-4 text-gray-500" />
-            Print Report
+            Print
           </button>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-gray-200 overflow-x-auto print:hidden">
-        <button
-          onClick={() => setActiveTab('sales')}
-          className={`pb-3 px-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-2 ${
-            activeTab === 'sales'
-              ? 'border-teal-700 text-teal-800'
-              : 'border-transparent text-gray-500 hover:text-gray-900'
-          }`}
-        >
-          Sales & Invoiced Revenue
-        </button>
-        <button
-          onClick={() => setActiveTab('profitability')}
-          className={`pb-3 px-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-2 ${
-            activeTab === 'profitability'
-              ? 'border-teal-700 text-teal-800'
-              : 'border-transparent text-gray-500 hover:text-gray-900'
-          }`}
-        >
-          Trip & Booking Profitability
-        </button>
-        <button
-          onClick={() => setActiveTab('receivables')}
-          className={`pb-3 px-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-2 ${
-            activeTab === 'receivables'
-              ? 'border-teal-700 text-teal-800'
-              : 'border-transparent text-gray-500 hover:text-gray-900'
-          }`}
-        >
-          Receivables Aging (Debtors)
-        </button>
-        <button
-          onClick={() => setActiveTab('payables')}
-          className={`pb-3 px-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-2 ${
-            activeTab === 'payables'
-              ? 'border-teal-700 text-teal-800'
-              : 'border-transparent text-gray-500 hover:text-gray-900'
-          }`}
-        >
-          Payables Aging (Suppliers)
-        </button>
-        <button
-          onClick={() => setActiveTab('cash_flow')}
-          className={`pb-3 px-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-2 ${
-            activeTab === 'cash_flow'
-              ? 'border-teal-700 text-teal-800'
-              : 'border-transparent text-gray-500 hover:text-gray-900'
-          }`}
-        >
-          Cash-Flow Statement
-        </button>
+      {/* Tabs Navigation */}
+      <div className="flex border-b border-gray-200 overflow-x-auto print:hidden gap-1">
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex items-center gap-2 pb-3 px-4 font-semibold text-xs sm:text-sm whitespace-nowrap transition-colors border-b-2 cursor-pointer ${
+                isActive
+                  ? 'border-teal-800 text-teal-900'
+                  : 'border-transparent text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Date Filter Bar (for applicable reports) */}
-      {['sales', 'profitability', 'cash_flow'].includes(activeTab) && (
-        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-wrap items-center justify-between gap-3 print:hidden">
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Date Range:</span>
-            <div className="flex items-center gap-2">
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 focus:ring-2 focus:ring-teal-500"
-              />
-              <span className="text-xs text-gray-400">to</span>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 focus:ring-2 focus:ring-teal-500"
-              />
-            </div>
-            {(startDate || endDate) && (
-              <button
-                onClick={() => {
-                  setStartDate('');
-                  setEndDate('');
-                }}
-                className="text-xs text-teal-700 hover:underline font-medium"
-              >
-                Reset Dates
-              </button>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Filter Bar */}
+      <ReportFilterBar
+        activeTab={activeTab}
+        selectedPreset={selectedPreset}
+        onSelectPreset={handleSelectPreset}
+        startDate={startDate}
+        endDate={endDate}
+        onStartDateChange={setStartDate}
+        onEndDateChange={setEndDate}
+        granularity={granularity}
+        onGranularityChange={setGranularity}
+        includeDrafts={includeDrafts}
+        onIncludeDraftsChange={setIncludeDrafts}
+        asOfDate={asOfDate}
+        onAsOfDateChange={setAsOfDate}
+        onReset={handleResetFilters}
+      />
 
-      {/* Loading & Error States */}
+      {/* Content Area */}
       {loading ? (
-        <div className="flex items-center justify-center p-16">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-teal-600"></div>
+        <div className="flex items-center justify-center p-20 bg-white rounded-2xl border border-gray-200/80">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-9 w-9 border-b-2 border-teal-700"></div>
+            <p className="text-xs text-gray-500 font-medium">Computing financial metrics...</p>
+          </div>
         </div>
       ) : error ? (
-        <div className="p-8 bg-white rounded-2xl border border-red-100 text-center text-red-600 space-y-2">
+        <div className="p-8 bg-white rounded-2xl border border-rose-200 text-center text-rose-600 space-y-2">
           <AlertCircle className="w-8 h-8 mx-auto" />
-          <p>{error}</p>
+          <p className="font-semibold text-sm">{error}</p>
         </div>
       ) : (
-        <div ref={reportRef} className="print-container bg-white rounded-2xl shadow-sm p-6 sm:p-8 border border-gray-200 print:shadow-none print:border-none print:p-0 space-y-6">
-          {/* Internal Management Report Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-5 border-b border-gray-200 gap-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-teal-50 text-teal-800 border border-teal-200">
-                  Internal Management Report
-                </span>
-                <span className="text-xs text-gray-300">•</span>
-                <span className="text-xs text-gray-500 font-medium">
-                  Generated {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                </span>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mt-1 capitalize font-playfair">
-                {activeTab.replace('_', ' ')} Statement
-              </h2>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-50 border border-gray-200 text-gray-700">
-                Period: <span className="font-bold text-gray-900">{startDate && endDate ? `${startDate} to ${endDate}` : 'All Time'}</span>
-              </span>
-            </div>
-          </div>
+        <div className="space-y-6">
+          {activeTab === 'executive' && executiveReport && (
+            <ExecutiveSummaryView
+              data={executiveReport}
+              onNavigateTab={(tab) => setActiveTab(tab as ReportTabKey)}
+            />
+          )}
 
-          {/* ======================================================== */}
-          {/* TAB 1: SALES REPORT */}
-          {/* ======================================================== */}
           {activeTab === 'sales' && salesReport && (
-            <div className="space-y-6">
-              {/* Sales KPIs - Executive Metric Tiles */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
-                <div className="p-4 bg-gradient-to-b from-white to-teal-50/20 rounded-xl border border-teal-100/80 border-l-4 border-l-teal-700 shadow-xs flex flex-col justify-between">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-teal-900/70">Total Invoiced</p>
-                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-gray-900 mt-1.5 tabular-nums truncate">
-                    ${salesReport.total_invoiced_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-[11px] text-gray-500 mt-1 font-medium">{salesReport.invoices_count} total invoices</p>
-                </div>
-
-                <div className="p-4 bg-gradient-to-b from-white to-emerald-50/20 rounded-xl border border-emerald-100/80 border-l-4 border-l-emerald-600 shadow-xs flex flex-col justify-between">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-900/70">Total Collected</p>
-                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-emerald-700 mt-1.5 tabular-nums truncate">
-                    ${salesReport.total_collected_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-[11px] text-emerald-700 mt-1 font-medium">
-                    {salesReport.total_invoiced_usd > 0
-                      ? `${Math.round((salesReport.total_collected_usd / salesReport.total_invoiced_usd) * 100)}% collection rate`
-                      : '—'}
-                  </p>
-                </div>
-
-                <div className="p-4 bg-gradient-to-b from-white to-amber-50/20 rounded-xl border border-amber-100/80 border-l-4 border-l-amber-600 shadow-xs flex flex-col justify-between">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-amber-900/70">Outstanding Due</p>
-                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-amber-700 mt-1.5 tabular-nums truncate">
-                    ${salesReport.total_outstanding_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Accounts receivable</p>
-                </div>
-
-                <div className="p-4 bg-gradient-to-b from-white to-teal-50/20 rounded-xl border border-teal-100/80 border-l-4 border-l-teal-600 shadow-xs flex flex-col justify-between">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-teal-900/70">Avg Booking Value</p>
-                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-teal-800 mt-1.5 tabular-nums truncate">
-                    ${salesReport.average_order_value_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Per safari invoice</p>
-                </div>
-
-                <div className="p-4 bg-gradient-to-b from-white to-purple-50/20 rounded-xl border border-purple-100/80 border-l-4 border-l-purple-600 shadow-xs flex flex-col justify-between">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-purple-900/70">Invoices Count</p>
-                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-purple-700 mt-1.5 tabular-nums truncate">
-                    {salesReport.invoices_count}
-                  </p>
-                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Processed</p>
-                </div>
-              </div>
-
-              {/* Destination Breakdown & Consultant Performance */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Destination breakdown */}
-                <div className="bg-white p-5 rounded-xl border border-teal-100/80 shadow-xs space-y-4">
-                  <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
-                      Revenue by Safari Destination
-                    </h3>
-                    <span className="text-[11px] text-gray-500">
-                      {salesReport.destination_breakdown.length} destinations
-                    </span>
-                  </div>
-                  <div className="space-y-4 pt-1">
-                    {salesReport.destination_breakdown.length > 0 ? (
-                      salesReport.destination_breakdown.map((dest, idx) => (
-                        <div key={idx} className="space-y-2">
-                          <div className="flex justify-between items-center text-xs">
-                            <span className="font-semibold text-gray-800">{dest.destination}</span>
-                            <span className="px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 font-bold border border-teal-200/60 tabular-nums">
-                              ${dest.total_sales_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })} ({dest.percentage_of_total}%)
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
-                            <div
-                              className="bg-gradient-to-r from-teal-700 to-teal-500 h-2.5 rounded-full"
-                              style={{ width: `${Math.min(100, Math.max(2, dest.percentage_of_total))}%` }}
-                            />
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-xs text-gray-400 text-center py-4">No destination sales data available.</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Consultant Performance */}
-                <div className="bg-white p-5 rounded-xl border border-teal-100/80 shadow-xs space-y-4">
-                  <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
-                      Sales by Travel Consultant
-                    </h3>
-                    <span className="text-[11px] text-gray-500">
-                      {salesReport.consultant_breakdown.length} consultants
-                    </span>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-teal-50/60 border-b border-teal-100 text-teal-900 uppercase font-bold text-[10.5px]">
-                        <tr>
-                          <th className="py-2.5 px-3">Consultant</th>
-                          <th className="py-2.5 px-3 text-center">Invoices</th>
-                          <th className="py-2.5 px-3 text-right">Total Revenue</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100">
-                        {salesReport.consultant_breakdown.length > 0 ? (
-                          salesReport.consultant_breakdown.map((c, idx) => (
-                            <tr key={idx} className="hover:bg-teal-50/20">
-                              <td className="py-2.5 px-3 font-semibold text-gray-900">{c.consultant_name}</td>
-                              <td className="py-2.5 px-3 text-center font-mono">
-                                <span className="inline-block px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[11px]">
-                                  {c.invoices_count}
-                                </span>
-                              </td>
-                              <td className="py-2.5 px-3 text-right font-bold text-teal-800 tabular-nums">
-                                ${c.total_sales_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                              </td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan={3} className="py-4 text-center text-gray-400">
-                              No consultant breakdown data.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-
-              {/* Periodic Breakdown Table */}
-              <div className="bg-white rounded-xl border border-teal-100/80 shadow-xs overflow-hidden">
-                <div className="p-4 border-b border-teal-100 bg-teal-50/40 flex justify-between items-center">
-                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
-                    Period Revenue Breakdown
-                  </h3>
-                  <span className="text-xs text-gray-500">{salesReport.period_breakdown.length} periods</span>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-teal-50/70 border-b border-teal-100 text-[11px] font-bold text-teal-900 uppercase tracking-wider">
-                      <tr>
-                        <th className="py-3 px-4">Period</th>
-                        <th className="py-3 px-4 text-center">Invoices</th>
-                        <th className="py-3 px-4 text-right">Gross Sales</th>
-                        <th className="py-3 px-4 text-right">Discounts</th>
-                        <th className="py-3 px-4 text-right">Net Revenue</th>
-                        <th className="py-3 px-4 text-right">Collected</th>
-                        <th className="py-3 px-4 text-right">Outstanding</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {salesReport.period_breakdown.map((p, idx) => (
-                        <tr key={idx} className="hover:bg-teal-50/30 odd:bg-white even:bg-teal-50/15">
-                          <td className="py-2.5 px-4 font-semibold text-gray-900">{p.period}</td>
-                          <td className="py-2.5 px-4 text-center font-mono">
-                            <span className="inline-block px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[11px]">
-                              {p.invoices_count}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-4 text-right font-medium text-gray-700 tabular-nums">
-                            ${p.gross_revenue_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                          </td>
-                          <td className="py-2.5 px-4 text-right text-gray-500 tabular-nums">
-                            ${p.discount_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                          </td>
-                          <td className="py-2.5 px-4 text-right font-bold text-teal-800 tabular-nums">
-                            ${p.net_revenue_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                          </td>
-                          <td className="py-2.5 px-4 text-right font-semibold text-emerald-600 tabular-nums">
-                            ${p.collected_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                          </td>
-                          <td className="py-2.5 px-4 text-right font-semibold text-amber-700 tabular-nums">
-                            ${p.outstanding_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+            <SalesView data={salesReport} />
           )}
 
-          {/* ======================================================== */}
-          {/* TAB 2: TRIP & BOOKING PROFITABILITY */}
-          {/* ======================================================== */}
           {activeTab === 'profitability' && profitabilityReport && (
-            <div className="space-y-6">
-              {/* Profitability KPIs */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-                <div className="p-4 bg-gradient-to-b from-white to-teal-50/20 rounded-xl border border-teal-100/80 border-l-4 border-l-teal-700 shadow-xs flex flex-col justify-between">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-teal-900/70">Client Revenue</p>
-                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-gray-900 mt-1.5 tabular-nums truncate">
-                    ${profitabilityReport.total_revenue_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Total invoiced receivables</p>
-                </div>
-
-                <div className="p-4 bg-gradient-to-b from-white to-rose-50/20 rounded-xl border border-rose-100/80 border-l-4 border-l-rose-600 shadow-xs flex flex-col justify-between">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-rose-900/70">Supplier Costs</p>
-                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-rose-700 mt-1.5 tabular-nums truncate">
-                    ${profitabilityReport.total_cost_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Total vendor payables</p>
-                </div>
-
-                <div className="p-4 bg-gradient-to-b from-white to-emerald-50/20 rounded-xl border border-emerald-100/80 border-l-4 border-l-emerald-600 shadow-xs flex flex-col justify-between">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-900/70">Gross Profit</p>
-                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-emerald-700 mt-1.5 tabular-nums truncate">
-                    ${profitabilityReport.total_gross_profit_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-[11px] text-emerald-700 mt-1 font-medium">Revenue minus supplier costs</p>
-                </div>
-
-                <div className="p-4 bg-gradient-to-b from-white to-teal-50/20 rounded-xl border border-teal-100/80 border-l-4 border-l-teal-600 shadow-xs flex flex-col justify-between">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-teal-900/70">Average Profit Margin</p>
-                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-teal-800 mt-1.5 tabular-nums truncate">
-                    {profitabilityReport.average_margin_percent}%
-                  </p>
-                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Overall margin across trips</p>
-                </div>
-              </div>
-
-              {/* Profitability Items Table */}
-              <div className="bg-white rounded-xl border border-teal-100/80 shadow-xs overflow-hidden">
-                <div className="p-4 border-b border-teal-100 bg-teal-50/40 flex justify-between items-center">
-                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Trip & Invoice Profitability Analysis</h3>
-                  <span className="text-xs text-gray-500">{profitabilityReport.items.length} trips analyzed</span>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-teal-50/70 border-b border-teal-100 text-[11px] font-bold text-teal-900 uppercase tracking-wider">
-                      <tr>
-                        <th className="py-3 px-4">Invoice #</th>
-                        <th className="py-3 px-4">Client</th>
-                        <th className="py-3 px-4">Destination</th>
-                        <th className="py-3 px-4">Trip Details</th>
-                        <th className="py-3 px-4 text-right">Revenue (USD)</th>
-                        <th className="py-3 px-4 text-right">Cost (USD)</th>
-                        <th className="py-3 px-4 text-right">Gross Profit</th>
-                        <th className="py-3 px-4 text-right">Margin %</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {profitabilityReport.items.length > 0 ? (
-                        profitabilityReport.items.map((item, idx) => (
-                          <tr key={idx} className="hover:bg-teal-50/30 odd:bg-white even:bg-teal-50/15">
-                            <td className="py-2.5 px-4 font-mono font-bold text-teal-800">
-                              {item.invoice_number}
-                            </td>
-                            <td className="py-2.5 px-4 font-semibold text-gray-900">
-                              {item.client_name}
-                            </td>
-                            <td className="py-2.5 px-4 text-gray-600">
-                              {item.destination || '—'}
-                            </td>
-                            <td className="py-2.5 px-4 text-gray-500 max-w-xs truncate">
-                              {item.service_description}
-                            </td>
-                            <td className="py-2.5 px-4 text-right font-medium text-gray-800 tabular-nums">
-                              ${item.revenue_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </td>
-                            <td className="py-2.5 px-4 text-right font-medium text-rose-600 tabular-nums">
-                              ${item.cost_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </td>
-                            <td className="py-2.5 px-4 text-right font-bold text-emerald-700 tabular-nums">
-                              ${item.gross_profit_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </td>
-                            <td className="py-2.5 px-4 text-right">
-                              <span
-                                className={`px-2 py-0.5 rounded-full text-xs font-bold tabular-nums ${
-                                  item.gross_margin_percent >= 25
-                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                                    : item.gross_margin_percent >= 10
-                                    ? 'bg-amber-50 text-amber-700 border border-amber-100'
-                                    : 'bg-rose-50 text-rose-700 border border-rose-100'
-                                }`}
-                              >
-                                {item.gross_margin_percent}%
-                              </span>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={8} className="py-8 text-center text-gray-400 text-sm">
-                            No trip profitability records found for this period.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+            <ProfitabilityView data={profitabilityReport} />
           )}
 
-          {/* ======================================================== */}
-          {/* TAB 3: RECEIVABLES AGING (DEBTORS) */}
-          {/* ======================================================== */}
           {activeTab === 'receivables' && receivablesReport && (
-            <div className="space-y-6">
-              {/* Buckets Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
-                {receivablesReport.buckets.map((b, idx) => (
-                  <div key={idx} className="p-4 bg-gradient-to-b from-white to-teal-50/20 rounded-xl border border-teal-100/80 border-l-4 border-l-teal-700 shadow-xs flex flex-col justify-between">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-teal-900/70">{b.bucket_label}</p>
-                    <p className="text-xl sm:text-[22px] font-black tracking-tight text-gray-900 mt-1.5 tabular-nums truncate">
-                      ${b.total_amount_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
-                    <div className="flex justify-between text-[11px] text-gray-500 pt-1 font-medium">
-                      <span>{b.count} invoices</span>
-                      <span>{b.percentage}%</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Overdue Invoices Table */}
-              <div className="bg-white rounded-xl border border-teal-100/80 shadow-xs overflow-hidden">
-                <div className="p-4 border-b border-teal-100 bg-teal-50/40 flex justify-between items-center">
-                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Unpaid & Overdue Invoices</h3>
-                  <span className="text-xs text-rose-700 font-bold tabular-nums">
-                    Total Outstanding: ${receivablesReport.total_receivable_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-teal-50/70 border-b border-teal-100 text-[11px] font-bold text-teal-900 uppercase tracking-wider">
-                      <tr>
-                        <th className="py-3 px-4">Invoice #</th>
-                        <th className="py-3 px-4">Client Name</th>
-                        <th className="py-3 px-4">Invoice Date</th>
-                        <th className="py-3 px-4">Due Date</th>
-                        <th className="py-3 px-4">Aging Status</th>
-                        <th className="py-3 px-4 text-right">Invoiced Amount</th>
-                        <th className="py-3 px-4 text-right">Amount Paid</th>
-                        <th className="py-3 px-4 text-right">Balance Due (USD)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {receivablesReport.overdue_invoices.length > 0 ? (
-                        receivablesReport.overdue_invoices.map((inv) => (
-                          <tr key={inv.invoice_id} className="hover:bg-teal-50/30 odd:bg-white even:bg-teal-50/15">
-                            <td className="py-2.5 px-4 font-mono font-bold text-teal-800">
-                              {inv.invoice_number}
-                            </td>
-                            <td className="py-2.5 px-4 font-semibold text-gray-900">{inv.client_name}</td>
-                            <td className="py-2.5 px-4 text-gray-500">{inv.invoice_date}</td>
-                            <td className="py-2.5 px-4 text-gray-500">{inv.due_date}</td>
-                            <td className="py-2.5 px-4">
-                              {inv.days_overdue > 0 ? (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-100">
-                                  <Clock className="w-3 h-3" /> {inv.days_overdue} days overdue
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                  Current
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-2.5 px-4 text-right font-medium text-gray-700 tabular-nums">
-                              {inv.currency} {inv.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                            </td>
-                            <td className="py-2.5 px-4 text-right text-emerald-600 font-medium tabular-nums">
-                              {inv.currency} {inv.amount_paid.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                            </td>
-                            <td className="py-2.5 px-4 text-right font-black text-rose-700 tabular-nums">
-                              ${inv.balance_due_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={8} className="py-8 text-center text-gray-400 text-sm">
-                            No overdue or unpaid receivables at this time.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+            <ReceivablesView data={receivablesReport} />
           )}
 
-          {/* ======================================================== */}
-          {/* TAB 4: PAYABLES AGING (SUPPLIERS) */}
-          {/* ======================================================== */}
           {activeTab === 'payables' && payablesReport && (
-            <div className="space-y-6">
-              {/* Buckets Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
-                {payablesReport.buckets.map((b, idx) => (
-                  <div key={idx} className="p-4 bg-gradient-to-b from-white to-rose-50/20 rounded-xl border border-rose-100/80 border-l-4 border-l-rose-600 shadow-xs flex flex-col justify-between">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-rose-900/70">{b.bucket_label}</p>
-                    <p className="text-xl sm:text-[22px] font-black tracking-tight text-gray-900 mt-1.5 tabular-nums truncate">
-                      ${b.total_amount_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
-                    <div className="flex justify-between text-[11px] text-gray-500 pt-1 font-medium">
-                      <span>{b.count} vendor bills</span>
-                      <span>{b.percentage}%</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Pending Bills Table */}
-              <div className="bg-white rounded-xl border border-teal-100/80 shadow-xs overflow-hidden">
-                <div className="p-4 border-b border-teal-100 bg-teal-50/40 flex justify-between items-center">
-                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Pending & Overdue Vendor Liabilities</h3>
-                  <span className="text-xs text-rose-700 font-bold tabular-nums">
-                    Total Balance Payable: ${payablesReport.total_payable_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-teal-50/70 border-b border-teal-100 text-[11px] font-bold text-teal-900 uppercase tracking-wider">
-                      <tr>
-                        <th className="py-3 px-4">Bill #</th>
-                        <th className="py-3 px-4">Supplier</th>
-                        <th className="py-3 px-4">Bill Date</th>
-                        <th className="py-3 px-4">Due Date</th>
-                        <th className="py-3 px-4">Aging Status</th>
-                        <th className="py-3 px-4 text-right">Amount Billed</th>
-                        <th className="py-3 px-4 text-right">Paid</th>
-                        <th className="py-3 px-4 text-right">Balance Payable (USD)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {payablesReport.pending_bills.length > 0 ? (
-                        payablesReport.pending_bills.map((bill) => (
-                          <tr key={bill.bill_id} className="hover:bg-teal-50/30 odd:bg-white even:bg-teal-50/15">
-                            <td className="py-2.5 px-4 font-mono font-bold text-teal-800">
-                              {bill.bill_number}
-                            </td>
-                            <td className="py-2.5 px-4 font-semibold text-gray-900">{bill.supplier_name}</td>
-                            <td className="py-2.5 px-4 text-gray-500">{bill.bill_date}</td>
-                            <td className="py-2.5 px-4 text-gray-500">{bill.due_date}</td>
-                            <td className="py-2.5 px-4">
-                              {bill.days_overdue > 0 ? (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-100">
-                                  <Clock className="w-3 h-3" /> {bill.days_overdue} days overdue
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
-                                  Due Soon
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-2.5 px-4 text-right font-medium text-gray-700 tabular-nums">
-                              {bill.currency} {bill.amount_billed.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                            </td>
-                            <td className="py-2.5 px-4 text-right text-emerald-600 font-medium tabular-nums">
-                              {bill.currency} {bill.amount_paid.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                            </td>
-                            <td className="py-2.5 px-4 text-right font-black text-rose-700 tabular-nums">
-                              ${bill.balance_payable_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={8} className="py-8 text-center text-gray-400 text-sm">
-                            No pending vendor liabilities at this time.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+            <PayablesView data={payablesReport} />
           )}
 
-          {/* ======================================================== */}
-          {/* TAB 5: CASH-FLOW STATEMENT */}
-          {/* ======================================================== */}
           {activeTab === 'cash_flow' && cashFlowReport && (
-            <div className="space-y-6">
-              {/* Cash-Flow KPIs */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                <div className="p-4 bg-gradient-to-b from-white to-emerald-50/20 rounded-xl border border-emerald-100/80 border-l-4 border-l-emerald-600 shadow-xs flex flex-col justify-between">
-                  <div className="flex items-center justify-between">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-900/70">Total Inflow</p>
-                    <ArrowDownRight className="w-4 h-4 text-emerald-600" />
-                  </div>
-                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-emerald-700 mt-1.5 tabular-nums truncate">
-                    ${cashFlowReport.total_inflow_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Receipts from clients</p>
-                </div>
-
-                <div className="p-4 bg-gradient-to-b from-white to-rose-50/20 rounded-xl border border-rose-100/80 border-l-4 border-l-rose-600 shadow-xs flex flex-col justify-between">
-                  <div className="flex items-center justify-between">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-rose-900/70">Total Outflow</p>
-                    <ArrowUpRight className="w-4 h-4 text-rose-600" />
-                  </div>
-                  <p className="text-xl sm:text-[22px] font-black tracking-tight text-rose-700 mt-1.5 tabular-nums truncate">
-                    ${cashFlowReport.total_outflow_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Disbursements to suppliers</p>
-                </div>
-
-                <div className="p-4 bg-gradient-to-b from-white to-teal-50/20 rounded-xl border border-teal-100/80 border-l-4 border-l-teal-600 shadow-xs flex flex-col justify-between">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-teal-900/70">Net Cash Flow</p>
-                  <p
-                    className={`text-xl sm:text-[22px] font-black tracking-tight mt-1.5 tabular-nums truncate ${
-                      cashFlowReport.net_cash_flow_usd >= 0 ? 'text-teal-800' : 'text-rose-700'
-                    }`}
-                  >
-                    ${cashFlowReport.net_cash_flow_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Inflow minus outflow</p>
-                </div>
-              </div>
-
-              {/* Inflows & Outflows by Method */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white p-5 rounded-xl border border-teal-100/80 shadow-xs space-y-3">
-                  <div className="border-b border-gray-100 pb-2.5">
-                    <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Inflows by Payment Channel</h4>
-                  </div>
-                  <div className="space-y-2 pt-1">
-                    {Object.entries(cashFlowReport.inflows_by_method).length > 0 ? (
-                      Object.entries(cashFlowReport.inflows_by_method).map(([method, amt]) => (
-                        <div key={method} className="flex justify-between items-center text-xs py-1.5 border-b border-gray-50">
-                          <span className="capitalize font-medium text-gray-700">{method.replace(/_/g, ' ')}</span>
-                          <span className="font-bold text-emerald-700 tabular-nums">
-                            ${amt.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                          </span>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-xs text-gray-400">No inflow channel data.</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="bg-white p-5 rounded-xl border border-teal-100/80 shadow-xs space-y-3">
-                  <div className="border-b border-gray-100 pb-2.5">
-                    <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Outflows by Payment Channel</h4>
-                  </div>
-                  <div className="space-y-2 pt-1">
-                    {Object.entries(cashFlowReport.outflows_by_method).length > 0 ? (
-                      Object.entries(cashFlowReport.outflows_by_method).map(([method, amt]) => (
-                        <div key={method} className="flex justify-between items-center text-xs py-1.5 border-b border-gray-50">
-                          <span className="capitalize font-medium text-gray-700">{method.replace(/_/g, ' ')}</span>
-                          <span className="font-bold text-rose-700 tabular-nums">
-                            ${amt.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                          </span>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-xs text-gray-400">No outflow channel data.</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Timeline Table */}
-              <div className="bg-white rounded-xl border border-teal-100/80 shadow-xs overflow-hidden">
-                <div className="p-4 border-b border-teal-100 bg-teal-50/40">
-                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Daily Cash Movement</h3>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-teal-50/70 border-b border-teal-100 text-[11px] font-bold text-teal-900 uppercase tracking-wider">
-                      <tr>
-                        <th className="py-3 px-4">Date</th>
-                        <th className="py-3 px-4 text-right">Inflow (USD)</th>
-                        <th className="py-3 px-4 text-right">Outflow (USD)</th>
-                        <th className="py-3 px-4 text-right">Net Flow (USD)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {cashFlowReport.daily_timeline.length > 0 ? (
-                        cashFlowReport.daily_timeline.map((d, idx) => (
-                          <tr key={idx} className="hover:bg-teal-50/30 odd:bg-white even:bg-teal-50/15">
-                            <td className="py-2.5 px-4 font-medium text-gray-900">{d.date}</td>
-                            <td className="py-2.5 px-4 text-right font-medium text-emerald-600 tabular-nums">
-                              {d.inflow_usd > 0 ? `+$${d.inflow_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '—'}
-                            </td>
-                            <td className="py-2.5 px-4 text-right font-medium text-rose-600 tabular-nums">
-                              {d.outflow_usd > 0 ? `-$${d.outflow_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '—'}
-                            </td>
-                            <td className="py-2.5 px-4 text-right font-bold tabular-nums">
-                              <span className={d.net_usd >= 0 ? 'text-teal-800' : 'text-rose-700'}>
-                                {d.net_usd >= 0 ? '+' : ''}${d.net_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                              </span>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={4} className="py-8 text-center text-gray-400 text-sm">
-                            No cash movements recorded during this period.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+            <CashFlowView data={cashFlowReport} />
           )}
         </div>
       )}

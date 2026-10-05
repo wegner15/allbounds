@@ -23,6 +23,7 @@ import {
   Plus,
   ShieldCheck,
   ExternalLink,
+  Ban,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Invoice, CompanyFinanceSettings, InvoiceProfitability, Supplier } from '../../../../lib/types/finance';
@@ -38,6 +39,7 @@ interface InvoiceDocumentViewProps {
   onRecordPayment?: () => void;
   onRecordExpense?: () => void;
   onSendEmail?: () => void;
+  onCancelInvoice?: () => void;
   isPublicView?: boolean;
 }
 
@@ -49,6 +51,7 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
   onRecordPayment,
   onRecordExpense,
   onSendEmail,
+  onCancelInvoice,
   isPublicView = false
 }) => {
   const [activeTab, setActiveTab] = useState<'document' | 'receipts' | 'expenses'>('document');
@@ -214,6 +217,16 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
               className="inline-flex items-center px-3 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium shadow-sm transition cursor-pointer"
             >
               <Mail className="w-4 h-4 mr-1.5 text-gray-500" /> Send Email
+            </button>
+          )}
+          {onCancelInvoice && !isPublicView && invoice.invoice_status !== 'cancelled' && (
+            <button
+              type="button"
+              onClick={onCancelInvoice}
+              className="inline-flex items-center px-3 py-2 rounded-lg bg-white border border-amber-300 hover:bg-amber-50 text-amber-700 text-sm font-medium shadow-sm transition cursor-pointer"
+              title="Cancel this invoice"
+            >
+              <Ban className="w-4 h-4 mr-1.5 text-amber-600" /> Cancel
             </button>
           )}
           {!isPublicView && (

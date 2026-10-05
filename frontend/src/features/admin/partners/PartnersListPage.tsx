@@ -5,8 +5,10 @@ import Button from '../../../components/ui/Button';
 import { usePartners, useDeletePartner } from '../../../lib/hooks/usePartners';
 import CloudflareImage from '../../../components/ui/CloudflareImage';
 import { PARTNER_CATEGORIES } from './PartnerForm';
+import { useConfirm } from '../../../components/ui/ConfirmProvider';
 
 const PartnersListPage: React.FC = () => {
+  const confirm = useConfirm();
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -14,7 +16,7 @@ const PartnersListPage: React.FC = () => {
   const deletePartnerMutation = useDeletePartner();
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this partner?')) {
+    if (await confirm({ title: 'Delete Partner', message: 'Are you sure you want to delete this partner?', confirmText: 'Delete', variant: 'danger' })) {
       try {
         await deletePartnerMutation.mutateAsync(id);
         toast.success('Partner deleted successfully');

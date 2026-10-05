@@ -9,10 +9,12 @@ import {
   useDeleteTravelGuideCategory,
 } from '../../../lib/hooks/useTravelGuides';
 import type { TravelGuideCategory } from '../../../lib/types/travel-guide';
+import { useConfirm } from '../../../components/ui/ConfirmProvider';
 
 const COMMON_EMOJIS = ['ℹ️', '🎯', '🌃', '🛍️', '🏖️', '🍽️', '🚴', '🎉', '🎫', '💵', '🗣️', '📅', '🦁', '🌊', '🍷', '🏃', '🏄', '✈️', '⛵', '🗺️', '☕', '🍖', '🍹', '🌴'];
 
 export const TravelGuideCategoriesPage: React.FC = () => {
+  const confirm = useConfirm();
   const { data: categories = [], isLoading, error } = useTravelGuideCategories(true);
   const createMutation = useCreateTravelGuideCategory();
   const updateMutation = useUpdateTravelGuideCategory();
@@ -87,7 +89,7 @@ export const TravelGuideCategoriesPage: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Deleting a category will also delete all associated guide items. Continue?')) {
+    if (await confirm({ title: 'Delete Category', message: 'Deleting a category will also delete all associated guide items. Continue?', confirmText: 'Delete', variant: 'danger' })) {
       await deleteMutation.mutateAsync(id);
     }
   };

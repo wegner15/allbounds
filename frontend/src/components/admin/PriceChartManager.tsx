@@ -14,6 +14,7 @@ import {
 } from '../../lib/hooks/usePackagePriceCharts';
 import { useHotels } from '../../lib/hooks/useHotels';
 import type { PriceChartHotelOption, HotelPriceChartNightRate } from '../../lib/types/api';
+import { useConfirm } from '../ui/ConfirmProvider';
 
 const priceChartSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
@@ -46,6 +47,7 @@ interface EditingChart {
 }
 
 const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entityType = 'package', entityId }) => {
+  const confirm = useConfirm();
   const targetId = entityId || packageId || 0;
   const { data: priceCharts, isLoading, refetch } = useEntityPriceCharts(entityType, targetId);
   const { data: hotelsList = [] } = useHotels();
@@ -351,7 +353,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({ packageId, entity
   };
 
   const handleDelete = async (chartId: number) => {
-    if (window.confirm('Are you sure you want to delete this price chart? This action cannot be undone.')) {
+    if (await confirm({ title: 'Delete Price Chart', message: 'Are you sure you want to delete this price chart? This action cannot be undone.', confirmText: 'Delete', variant: 'danger' })) {
       try {
         await deletePriceChart.mutateAsync({ priceChartId: chartId, entityId: targetId });
         await refetch();

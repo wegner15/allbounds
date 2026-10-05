@@ -19,8 +19,10 @@ import {
 import { clientsApi } from '../../../../lib/api/clients';
 import type { Client } from '../../../../lib/types/finance';
 import { ClientEditorModal } from './ClientEditorModal';
+import { useConfirm } from '../../../../components/ui/ConfirmProvider';
 
 export const ClientsListPage: React.FC = () => {
+  const confirm = useConfirm();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +72,13 @@ export const ClientsListPage: React.FC = () => {
   };
 
   const handleDeleteClient = async (client: Client) => {
-    if (!window.confirm(`Are you sure you want to deactivate or remove ${client.display_name}?`)) return;
+    const confirmed = await confirm({
+      title: 'Remove Client',
+      message: `Are you sure you want to deactivate or remove ${client.display_name}?`,
+      confirmText: 'Remove',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
     try {
       await clientsApi.deleteClient(client.id);
       fetchClients();

@@ -9,6 +9,7 @@ import {
   useDeleteDestinationGuideItem,
 } from '../../../lib/hooks/useTravelGuides';
 import type { DestinationGuideItem, TravelGuideCategory } from '../../../lib/types/travel-guide';
+import { useConfirm } from '../../../components/ui/ConfirmProvider';
 
 interface CountryTravelGuideEditorProps {
   countryId: number;
@@ -17,6 +18,7 @@ interface CountryTravelGuideEditorProps {
 const COMMON_EMOJIS = ['ℹ️', '🎯', '🌃', '🛍️', '🏖️', '🍽️', '🚴', '🎉', '🎫', '💵', '🗣️', '📅', '🦁', '🌊', '🍷', '🏃', '🏄', '✈️', '⛵', '🗺️', '☕', '🍖', '🍹', '🌴'];
 
 export const CountryTravelGuideEditor: React.FC<CountryTravelGuideEditorProps> = ({ countryId }) => {
+  const confirm = useConfirm();
   const { data: categories = [], isLoading: categoriesLoading } = useTravelGuideCategories(true);
   const { data: items = [], isLoading: itemsLoading } = useDestinationGuideItems({
     countryId,
@@ -110,7 +112,7 @@ export const CountryTravelGuideEditor: React.FC<CountryTravelGuideEditorProps> =
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this travel guide item?')) {
+    if (await confirm({ title: 'Delete Travel Guide Item', message: 'Are you sure you want to delete this travel guide item?', confirmText: 'Delete', variant: 'danger' })) {
       await deleteMutation.mutateAsync(id);
     }
   };

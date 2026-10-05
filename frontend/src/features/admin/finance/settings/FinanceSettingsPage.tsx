@@ -22,8 +22,10 @@ import type {
   BankAccount,
   MobileMoneyAccount
 } from '../../../../lib/types/finance';
+import { useConfirm } from '../../../../components/ui/ConfirmProvider';
 
 export const FinanceSettingsPage: React.FC = () => {
+  const confirm = useConfirm();
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -260,9 +262,12 @@ export const FinanceSettingsPage: React.FC = () => {
       alert('Cannot delete the base currency. Set another currency as base first.');
       return;
     }
-    const confirmed = window.confirm(
-      `Delete ${curr.code} (${curr.name})? This cannot be undone.`
-    );
+    const confirmed = await confirm({
+      title: 'Delete Currency',
+      message: `Delete ${curr.code} (${curr.name})? This cannot be undone.`,
+      confirmText: 'Delete',
+      variant: 'danger',
+    });
     if (!confirmed) return;
     setDeletingCurrId(curr.id);
     try {

@@ -6,6 +6,7 @@ import { queryClient } from './lib/api';
 import { AuthProvider, useAuth } from './lib/contexts/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import ErrorBoundary, { RouteErrorFallback } from './components/ErrorBoundary';
+import { ConfirmProvider } from './components/ui/ConfirmProvider';
 import SeoHead from './components/seo/SeoHead';
 
 // Import layout components
@@ -564,9 +565,11 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>
         <AuthProvider>
-          <ErrorBoundary>
-            <RouterProvider router={router} />
-          </ErrorBoundary>
+          <ConfirmProvider>
+            <ErrorBoundary>
+              <RouterProvider router={router} />
+            </ErrorBoundary>
+          </ConfirmProvider>
         </AuthProvider>
       </HelmetProvider>
     </QueryClientProvider>

@@ -242,6 +242,19 @@ def update_invoice(
     return invoice
 
 
+@router.post("/invoices/{invoice_id}/cancel", response_model=InvoiceResponse)
+def cancel_invoice(
+    invoice_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_finance_or_admin)
+) -> Any:
+    """Cancel an invoice."""
+    invoice = finance_service.cancel_invoice(db, invoice_id)
+    if not invoice:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invoice not found")
+    return invoice
+
+
 @router.delete("/invoices/{invoice_id}")
 def delete_invoice(
     invoice_id: int,

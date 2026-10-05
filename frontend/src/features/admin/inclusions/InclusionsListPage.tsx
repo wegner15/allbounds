@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Button from '../../../components/ui/Button';
 import { apiClient } from '../../../lib/api';
+import { useConfirm } from '../../../components/ui/ConfirmProvider';
 
 interface Inclusion {
   id: number;
@@ -14,6 +15,7 @@ interface Inclusion {
 }
 
 const InclusionsListPage: React.FC = () => {
+  const confirm = useConfirm();
   const [inclusions, setInclusions] = useState<Inclusion[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +38,7 @@ const InclusionsListPage: React.FC = () => {
   }, []);
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this inclusion?')) {
+    if (await confirm({ title: 'Delete Inclusion', message: 'Are you sure you want to delete this inclusion?', confirmText: 'Delete', variant: 'danger' })) {
       try {
         await apiClient.delete(`/inclusions/${id}`);
         setInclusions(inclusions.filter(inclusion => inclusion.id !== id));

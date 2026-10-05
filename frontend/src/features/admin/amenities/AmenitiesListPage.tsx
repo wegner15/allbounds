@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Button from '../../../components/ui/Button';
 import { useAmenities, useDeleteAmenity } from '../../../lib/hooks/useAmenities';
+import { useConfirm } from '../../../components/ui/ConfirmProvider';
 
 const AmenitiesListPage: React.FC = () => {
+  const confirm = useConfirm();
   const [includeInactive, setIncludeInactive] = useState(false);
   const [page, setPage] = useState(1);
   const limit = 10;
@@ -16,7 +18,7 @@ const AmenitiesListPage: React.FC = () => {
   const totalPages = data?.pages || 0;
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this amenity?')) {
+    if (await confirm({ title: 'Delete Amenity', message: 'Are you sure you want to delete this amenity?', confirmText: 'Delete', variant: 'danger' })) {
       try {
         await deleteAmenity.mutateAsync(id);
         toast.success('Amenity deleted successfully');

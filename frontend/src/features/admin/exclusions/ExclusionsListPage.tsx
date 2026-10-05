@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Button from '../../../components/ui/Button';
 import { apiClient } from '../../../lib/api';
+import { useConfirm } from '../../../components/ui/ConfirmProvider';
 
 interface Exclusion {
   id: number;
@@ -14,6 +15,7 @@ interface Exclusion {
 }
 
 const ExclusionsListPage: React.FC = () => {
+  const confirm = useConfirm();
   const [exclusions, setExclusions] = useState<Exclusion[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +38,7 @@ const ExclusionsListPage: React.FC = () => {
   }, []);
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this exclusion?')) {
+    if (await confirm({ title: 'Delete Exclusion', message: 'Are you sure you want to delete this exclusion?', confirmText: 'Delete', variant: 'danger' })) {
       try {
         await apiClient.delete(`/exclusions/${id}`);
         setExclusions(exclusions.filter(exclusion => exclusion.id !== id));

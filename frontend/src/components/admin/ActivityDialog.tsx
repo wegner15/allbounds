@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useCreateActivity, useUpdateActivity, useDeleteActivity } from '../../lib/hooks/useItinerary';
 import { useAttractions } from '../../lib/hooks/useAttractions';
 import type { ItineraryActivity } from '../../lib/types/itinerary';
+import { useConfirm } from '../ui/ConfirmProvider';
 
 const activitySchema = z.object({
   time: z.string().optional(),
@@ -49,6 +50,7 @@ export const ActivityDialog: React.FC<ActivityDialogProps> = ({
   itemId,
   onClose,
 }) => {
+  const confirm = useConfirm();
   const { data: attractions } = useAttractions();
   const createActivity = useCreateActivity();
   const updateActivity = useUpdateActivity();
@@ -122,7 +124,7 @@ export const ActivityDialog: React.FC<ActivityDialogProps> = ({
   const handleDelete = async () => {
     if (!activity) return;
     
-    if (confirm('Are you sure you want to delete this activity?')) {
+    if (await confirm({ title: 'Delete Activity', message: 'Are you sure you want to delete this activity?', confirmText: 'Delete', variant: 'danger' })) {
       try {
         await deleteActivity.mutateAsync(activity.id);
         onClose();

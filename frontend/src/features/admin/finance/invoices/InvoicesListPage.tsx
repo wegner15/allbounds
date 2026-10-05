@@ -10,13 +10,16 @@ import {
   AlertCircle,
   Trash2,
   ExternalLink,
-  Filter
+  Filter,
+  Ban
 } from 'lucide-react';
 import { financeApi } from '../../../../lib/api/finance';
 import type { Invoice, FinanceDashboardStats } from '../../../../lib/types/finance';
 import { ReceiptEditorModal } from '../receipts/ReceiptEditorModal';
+import { useConfirm } from '../../../../components/ui/ConfirmProvider';
 
 export const InvoicesListPage: React.FC = () => {
+  const confirm = useConfirm();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [stats, setStats] = useState<FinanceDashboardStats | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -66,8 +69,33 @@ export const InvoicesListPage: React.FC = () => {
     fetchInvoices();
   };
 
+  const handleCancel = async (invoiceId: number) => {
+    const confirmed = await confirm({
+      title: 'Cancel Invoice',
+      message: 'Are you sure you want to cancel this invoice? The status will be updated to Cancelled.',
+      confirmText: 'Cancel Invoice',
+      cancelText: 'Keep Invoice',
+      variant: 'warning',
+    });
+    if (!confirmed) {
+      return;
+    }
+    try {
+      await financeApi.cancelInvoice(invoiceId);
+      fetchInvoices();
+    } catch (err: any) {
+      alert(err?.response?.data?.detail || 'Failed to cancel invoice');
+    }
+  };
+
   const handleDelete = async (invoiceId: number) => {
-    if (!window.confirm('Are you sure you want to delete this invoice? This action cannot be undone.')) {
+    const confirmed = await confirm({
+      title: 'Delete Invoice',
+      message: 'Are you sure you want to delete this invoice? This action cannot be undone.',
+      confirmText: 'Delete',
+      variant: 'danger',
+    });
+    if (!confirmed) {
       return;
     }
     try {
@@ -303,10 +331,20 @@ export const InvoicesListPage: React.FC = () => {
                         >
                           <ExternalLink className="w-4 h-4 inline" />
                         </Link>
+                        {inv.invoice_status !== 'cancelled' && (
+                          <button
+                            type="button"
+                            onClick={() => handleCancel(inv.id)}
+                            className="p-1 hover:bg-amber-50 text-amber-600 rounded transition cursor-pointer"
+                            title="Cancel Invoice"
+                          >
+                            <Ban className="w-4 h-4 inline" />
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => handleDelete(inv.id)}
-                          className="p-1 hover:bg-red-50 text-red-600 rounded transition"
+                          className="p-1 hover:bg-red-50 text-red-600 rounded transition cursor-pointer"
                           title="Delete"
                         >
                           <Trash2 className="w-4 h-4 inline" />

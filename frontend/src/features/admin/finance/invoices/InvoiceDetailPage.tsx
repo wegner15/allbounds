@@ -7,8 +7,10 @@ import { InvoiceDocumentView } from './InvoiceDocumentView';
 import { ReceiptEditorModal } from '../receipts/ReceiptEditorModal';
 import { SendEmailModal } from '../components/SendEmailModal';
 import { SupplierBillModal } from '../suppliers/SupplierBillModal';
+import { useConfirm } from '../../../../components/ui/ConfirmProvider';
 
 export const InvoiceDetailPage: React.FC = () => {
+  const confirm = useConfirm();
   const { id } = useParams<{ id: string }>();
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [settings, setSettings] = useState<CompanyFinanceSettings | null>(null);
@@ -58,6 +60,24 @@ export const InvoiceDetailPage: React.FC = () => {
     fetchInvoiceData();
   };
 
+  const handleCancelInvoice = async () => {
+    if (!invoice) return;
+    const confirmed = await confirm({
+      title: 'Cancel Invoice',
+      message: 'Are you sure you want to cancel this invoice? The status will be updated to Cancelled.',
+      confirmText: 'Cancel Invoice',
+      cancelText: 'Keep Invoice',
+      variant: 'warning',
+    });
+    if (!confirmed) return;
+    try {
+      await financeApi.cancelInvoice(invoice.id);
+      fetchInvoiceData();
+    } catch (err: any) {
+      alert(err?.response?.data?.detail || 'Failed to cancel invoice');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
@@ -85,6 +105,7 @@ export const InvoiceDetailPage: React.FC = () => {
         onRecordPayment={() => setIsReceiptModalOpen(true)}
         onRecordExpense={() => setIsExpenseModalOpen(true)}
         onSendEmail={() => setIsEmailModalOpen(true)}
+        onCancelInvoice={handleCancelInvoice}
       />
 
       {/* Record Payment Modal */}

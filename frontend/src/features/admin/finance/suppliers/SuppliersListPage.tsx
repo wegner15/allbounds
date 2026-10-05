@@ -24,8 +24,10 @@ import { suppliersApi } from '../../../../lib/api/suppliers';
 import type { Supplier } from '../../../../lib/types/finance';
 import { SupplierEditorModal } from './SupplierEditorModal';
 import { SupplierBillModal } from './SupplierBillModal';
+import { useConfirm } from '../../../../components/ui/ConfirmProvider';
 
 export const SuppliersListPage: React.FC = () => {
+  const confirm = useConfirm();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +75,13 @@ export const SuppliersListPage: React.FC = () => {
   };
 
   const handleDeleteSupplier = async (supplier: Supplier) => {
-    if (!window.confirm(`Are you sure you want to deactivate ${supplier.name}?`)) return;
+    const confirmed = await confirm({
+      title: 'Deactivate Supplier',
+      message: `Are you sure you want to deactivate ${supplier.name}?`,
+      confirmText: 'Deactivate',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
     try {
       await suppliersApi.deleteSupplier(supplier.id);
       fetchSuppliers();

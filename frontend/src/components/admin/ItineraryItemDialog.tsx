@@ -12,6 +12,7 @@ import Button from '../ui/Button';
 import { useCreateItineraryItem, useUpdateItineraryItem, useDeleteItineraryItem } from '../../lib/hooks/useItinerary';
 import { useHotels } from '../../lib/hooks/useHotels';
 import type { ItineraryItem } from '../../lib/types/itinerary';
+import { useConfirm } from '../ui/ConfirmProvider';
 
 const itineraryItemSchema = z.object({
   day_number: z.number().min(1),
@@ -44,6 +45,7 @@ export const ItineraryItemDialog: React.FC<ItineraryItemDialogProps> = ({
   dayNumber,
   onClose,
 }) => {
+  const confirm = useConfirm();
   const { data: hotels } = useHotels();
   const createItem = useCreateItineraryItem();
   const updateItem = useUpdateItineraryItem();
@@ -111,7 +113,7 @@ export const ItineraryItemDialog: React.FC<ItineraryItemDialogProps> = ({
   const handleDelete = async () => {
     if (!item) return;
     
-    if (confirm('Are you sure you want to delete this itinerary item? This will also delete all associated activities.')) {
+    if (await confirm({ title: 'Delete Itinerary Item', message: 'Are you sure you want to delete this itinerary item? This will also delete all associated activities.', confirmText: 'Delete', variant: 'danger' })) {
       try {
         await deleteItem.mutateAsync(item.id);
         onClose();

@@ -622,6 +622,15 @@ class FinanceService:
         db.refresh(invoice)
         return invoice
 
+    def cancel_invoice(self, db: Session, invoice_id: int) -> Optional[Invoice]:
+        invoice = self.get_invoice(db, invoice_id)
+        if not invoice:
+            return None
+        invoice.invoice_status = "cancelled"
+        db.commit()
+        db.refresh(invoice)
+        return invoice
+
     def delete_invoice(self, db: Session, invoice_id: int) -> bool:
         invoice = self.get_invoice(db, invoice_id)
         if not invoice:

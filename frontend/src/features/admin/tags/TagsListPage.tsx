@@ -9,6 +9,7 @@ import {
   useDeleteContentTag,
 } from '../../../lib/hooks/useContentTags';
 import type { ContentTag, ContentTagCreate, ContentTagUpdate } from '../../../lib/types/content-tag';
+import { useConfirm } from '../../../components/ui/ConfirmProvider';
 
 // Preset color options for tags
 const COLOR_PRESETS = [
@@ -56,6 +57,7 @@ const DEFAULT_CATEGORIES = [
 ];
 
 const TagsListPage: React.FC = () => {
+  const confirm = useConfirm();
   const [includeInactive, setIncludeInactive] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -287,7 +289,13 @@ const TagsListPage: React.FC = () => {
 
   // Delete Tag
   const handleDeleteTag = async (id: number, name: string) => {
-    if (window.confirm(`Are you sure you want to delete the tag "${name}"?`)) {
+    const confirmed = await confirm({
+      title: 'Delete Tag',
+      message: `Are you sure you want to delete the tag "${name}"?`,
+      confirmText: 'Delete',
+      variant: 'danger',
+    });
+    if (confirmed) {
       try {
         await deleteTagMutation.mutateAsync(id);
         toast.success('Tag deleted successfully');
@@ -378,11 +386,13 @@ const TagsListPage: React.FC = () => {
     const affectedTags = allTags.filter((t) => t.category === cat);
 
     if (affectedTags.length > 0) {
-      if (
-        !window.confirm(
-          `Category "${cat.replace(/_/g, ' ')}" has ${affectedTags.length} tag(s). Are you sure you want to delete this category? The affected tags will be reassigned to "general".`
-        )
-      ) {
+      const confirmed = await confirm({
+        title: 'Delete Category',
+        message: `Category "${cat.replace(/_/g, ' ')}" has ${affectedTags.length} tag(s). Are you sure you want to delete this category? The affected tags will be reassigned to "general".`,
+        confirmText: 'Delete',
+        variant: 'danger',
+      });
+      if (!confirmed) {
         return;
       }
       try {

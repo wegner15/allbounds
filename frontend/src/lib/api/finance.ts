@@ -107,6 +107,14 @@ export const financeApi = {
     return apiClient.put<Invoice>(`/finance/invoices/${id}`, data);
   },
 
+  async cancelInvoice(id: number): Promise<Invoice> {
+    try {
+      return await apiClient.post<Invoice>(`/finance/invoices/${id}/cancel`);
+    } catch {
+      return await apiClient.put<Invoice>(`/finance/invoices/${id}`, { invoice_status: 'cancelled' });
+    }
+  },
+
   async deleteInvoice(id: number): Promise<{ message: string }> {
     return apiClient.delete<{ message: string }>(`/finance/invoices/${id}`);
   },

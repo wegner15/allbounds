@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Button from '../../../components/ui/Button';
 import { apiClient } from '../../../lib/api';
+import { useConfirm } from '../../../components/ui/ConfirmProvider';
 
 interface HotelType {
   id: number;
@@ -13,6 +14,7 @@ interface HotelType {
 }
 
 const HotelTypesListPage: React.FC = () => {
+  const confirm = useConfirm();
   const [hotelTypes, setHotelTypes] = useState<HotelType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +37,7 @@ const HotelTypesListPage: React.FC = () => {
   }, []);
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this hotel type?')) {
+    if (await confirm({ title: 'Delete Hotel Type', message: 'Are you sure you want to delete this hotel type?', confirmText: 'Delete', variant: 'danger' })) {
       try {
         await apiClient.delete(`/hotel-types/${id}`);
         setHotelTypes(hotelTypes.filter(hotelType => hotelType.id !== id));

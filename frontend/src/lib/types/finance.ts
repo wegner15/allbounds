@@ -125,6 +125,7 @@ export interface Invoice {
   id: number;
   invoice_number: string;
   booking_id?: number | null;
+  client_id?: number | null;
   quote_number?: string;
   invoice_status: 'draft' | 'issued' | 'partially_paid' | 'paid' | 'overdue' | 'cancelled';
   invoice_date: string;
@@ -168,6 +169,7 @@ export interface Invoice {
 export interface InvoiceCreateRequest {
   invoice_number?: string;
   booking_id?: number | null;
+  client_id?: number | null;
   quote_number?: string;
   invoice_status?: string;
   invoice_date: string;

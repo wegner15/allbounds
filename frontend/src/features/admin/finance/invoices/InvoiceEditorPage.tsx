@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams, Link, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft,
   Save,
@@ -12,10 +12,17 @@ import {
   FileCheck,
   AlertCircle,
   Sparkles,
-  ShieldCheck
+  ShieldCheck,
+  Users,
+  Search,
+  CheckCircle2,
+  X,
+  ChevronDown,
+  Check
 } from 'lucide-react';
 import { financeApi } from '../../../../lib/api/finance';
 import { suppliersApi } from '../../../../lib/api/suppliers';
+import { clientsApi } from '../../../../lib/api/clients';
 import { apiClient } from '../../../../lib/api';
 import type {
   Invoice,
@@ -23,13 +30,15 @@ import type {
   SupplierExpenseItem,
   Currency,
   CompanyFinanceSettings,
-  Supplier
+  Supplier,
+  Client
 } from '../../../../lib/types/finance';
 
 export const InvoiceEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const isEditing = Boolean(id);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
@@ -40,6 +49,13 @@ export const InvoiceEditorPage: React.FC = () => {
   const [settings, setSettings] = useState<CompanyFinanceSettings | null>(null);
   const [availableBookings, setAvailableBookings] = useState<any[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [availableClients, setAvailableClients] = useState<Client[]>([]);
+
+  // Client Directory selection state
+  const [clientId, setClientId] = useState<number | null>(null);
+  const [clientSearchQuery, setClientSearchQuery] = useState<string>('');
+  const [isClientDropdownOpen, setIsClientDropdownOpen] = useState<boolean>(false);
+  const clientDropdownRef = useRef<HTMLDivElement>(null);
 
   // Form state
   const [invoiceNumber, setInvoiceNumber] = useState<string>('');
@@ -127,24 +143,86 @@ export const InvoiceEditorPage: React.FC = () => {
   const [notes, setNotes] = useState<string>('');
   const [terms, setTerms] = useState<string>('');
 
+  // Client Selection Handlers
+  const applyClientData = (c: Client) => {
+    setClientId(c.id);
+    setClientSearchQuery(c.display_name || c.company_name || '');
+    setIsClientDropdownOpen(false);
+    setClientType(c.client_type);
+
+    if (c.client_type === 'corporate') {
+      setCompanyName(c.company_name || c.display_name || '');
+      setContactPerson(c.contact_person || '');
+      setTinVat(c.tin_number || c.vat_number || '');
+    } else {
+      const name = c.display_name || [c.first_name, c.last_name].filter(Boolean).join(' ');
+      setFullName(name);
+      setLeadTraveller((prev) => prev || name);
+    }
+
+    setEmail(c.email || '');
+    setTelephone(c.phone || c.alt_phone || '');
+    setCountry(c.country_of_origin || '');
+
+    const addrParts = [c.address, c.city, c.postal_code].filter(Boolean);
+    setAddress(addrParts.join(', '));
+  };
+
+  const handleClearClient = () => {
+    setClientId(null);
+    setClientSearchQuery('');
+  };
+
+  // Close client dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (clientDropdownRef.current && !clientDropdownRef.current.contains(event.target as Node)) {
+        setIsClientDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   // Load initial currencies, settings, and invoice if editing
   useEffect(() => {
     async function loadData() {
       try {
         setLoading(true);
-        const [currList, compSettings, bookingsRes, suppliersRes] = await Promise.all([
+        const [currList, compSettings, bookingsRes, suppliersRes, clientsRes] = await Promise.all([
           financeApi.getCurrencies(),
           financeApi.getSettings(),
           apiClient.get<any[]>('/bookings/type/package').catch(() => []),
-          suppliersApi.getSuppliers({ is_active: true, limit: 200 }).catch(() => ({ items: [] }))
+          suppliersApi.getSuppliers({ is_active: true, limit: 200 }).catch(() => ({ items: [] })),
+          clientsApi.getClients({ limit: 300, is_active: true }).catch(() => ({ items: [], total: 0 }))
         ]);
 
         setCurrencies(currList);
         setSettings(compSettings);
         setAvailableBookings(bookingsRes || []);
         setSuppliers(suppliersRes?.items || []);
+        const loadedClients = clientsRes?.items || [];
+        setAvailableClients(loadedClients);
 
         if (!isEditing) {
+          // Check URL query param ?client_id=
+          const urlClientId = searchParams.get('client_id');
+          if (urlClientId) {
+            const cid = parseInt(urlClientId, 10);
+            if (!isNaN(cid)) {
+              const matched = loadedClients.find((cl: Client) => cl.id === cid);
+              if (matched) {
+                applyClientData(matched);
+              } else {
+                clientsApi.getClient(cid).then((cl) => {
+                  if (cl) applyClientData(cl);
+                }).catch(() => {});
+              }
+            }
+          }
+
           // Default to base currency from settings
           const baseCurr = currList.find((c) => c.is_base_currency);
           if (baseCurr) {
@@ -178,6 +256,13 @@ export const InvoiceEditorPage: React.FC = () => {
           const inv = await financeApi.getInvoice(parseInt(id, 10));
           setInvoiceNumber(inv.invoice_number);
           setBookingId(inv.booking_id || null);
+          setClientId(inv.client_id || null);
+          if (inv.client_id) {
+            const matched = loadedClients.find((cl: Client) => cl.id === inv.client_id);
+            if (matched) {
+              setClientSearchQuery(matched.display_name || matched.company_name || '');
+            }
+          }
           setQuoteNumber(inv.quote_number || '');
           setInvoiceStatus(inv.invoice_status);
           setInvoiceDate(inv.invoice_date);
@@ -587,6 +672,7 @@ export const InvoiceEditorPage: React.FC = () => {
       // Leave invoice_number undefined for new invoices so backend generates it
       invoice_number: isEditing ? invoiceNumber : undefined,
       booking_id: bookingId,
+      client_id: clientId || undefined,
       quote_number: quoteNumber || undefined,
       invoice_status: statusOverride || invoiceStatus,
       invoice_date: invoiceDate,
@@ -637,6 +723,17 @@ export const InvoiceEditorPage: React.FC = () => {
       </div>
     );
   }
+
+  const filteredClients = availableClients.filter((c) => {
+    if (!clientSearchQuery.trim()) return true;
+    const q = clientSearchQuery.toLowerCase();
+    const name = (c.display_name || `${c.first_name || ''} ${c.last_name || ''}`).toLowerCase();
+    const comp = (c.company_name || '').toLowerCase();
+    const em = (c.email || '').toLowerCase();
+    const ph = (c.phone || c.alt_phone || '').toLowerCase();
+    const cp = (c.contact_person || '').toLowerCase();
+    return name.includes(q) || comp.includes(q) || em.includes(q) || ph.includes(q) || cp.includes(q);
+  });
 
   return (
     <div className="max-w-5xl mx-auto my-6 px-4">
@@ -821,16 +918,21 @@ export const InvoiceEditorPage: React.FC = () => {
 
         {/* Section 2: Bill To Client Info */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-bold text-teal-900 uppercase tracking-wider">
-              2. Bill To — Client Information
-            </h2>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 className="text-sm font-bold text-teal-900 uppercase tracking-wider">
+                2. Bill To — Client Information
+              </h2>
+              <p className="text-[11px] text-gray-500 mt-0.5">
+                Select an existing client from your directory or fill in the billing details manually
+              </p>
+            </div>
             {/* Toggle Individual vs Corporate */}
-            <div className="flex bg-gray-100 p-1 rounded-lg">
+            <div className="flex bg-gray-100 p-1 rounded-lg self-start sm:self-auto">
               <button
                 type="button"
                 onClick={() => setClientType('individual')}
-                className={`px-3 py-1 rounded text-xs font-semibold transition ${
+                className={`px-3 py-1 rounded text-xs font-semibold transition cursor-pointer ${
                   clientType === 'individual' ? 'bg-white shadow-sm text-teal-900' : 'text-gray-600'
                 }`}
               >
@@ -839,12 +941,168 @@ export const InvoiceEditorPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setClientType('corporate')}
-                className={`px-3 py-1 rounded text-xs font-semibold transition ${
+                className={`px-3 py-1 rounded text-xs font-semibold transition cursor-pointer ${
                   clientType === 'corporate' ? 'bg-white shadow-sm text-teal-900' : 'text-gray-600'
                 }`}
               >
                 Corporate Client
               </button>
+            </div>
+          </div>
+
+          {/* Client Directory Selection */}
+          <div className="mb-5 p-3.5 bg-gradient-to-r from-teal-50/80 via-teal-50/40 to-slate-50 border border-teal-200/80 rounded-xl space-y-2.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-teal-700 flex-shrink-0" />
+                <span className="text-xs font-bold text-teal-950 uppercase tracking-wider">
+                  Select from Client Directory
+                </span>
+                {clientId ? (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    Linked Client #{clientId}
+                  </span>
+                ) : (
+                  <span className="text-[11px] text-teal-800 font-medium hidden sm:inline">
+                    (Auto-fills details below)
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                {clientId && (
+                  <button
+                    type="button"
+                    onClick={handleClearClient}
+                    className="text-xs text-red-600 hover:text-red-700 font-medium hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" /> Unlink / Custom Client
+                  </button>
+                )}
+                <Link
+                  to="/admin/finance/clients"
+                  target="_blank"
+                  className="text-[11px] text-teal-700 hover:text-teal-900 hover:underline font-medium"
+                >
+                  Manage Directory ↗
+                </Link>
+              </div>
+            </div>
+
+            {/* Searchable Combobox */}
+            <div className="relative" ref={clientDropdownRef}>
+              <div className="relative flex items-center">
+                <Search className="w-4 h-4 text-gray-400 absolute left-3 pointer-events-none" />
+                <input
+                  type="text"
+                  value={clientSearchQuery}
+                  onChange={(e) => {
+                    setClientSearchQuery(e.target.value);
+                    if (!isClientDropdownOpen) setIsClientDropdownOpen(true);
+                  }}
+                  onFocus={() => setIsClientDropdownOpen(true)}
+                  placeholder={
+                    availableClients.length > 0
+                      ? 'Search client directory by name, company, email, or phone...'
+                      : 'Loading client directory...'
+                  }
+                  className="w-full pl-9 pr-16 py-2 border border-gray-300 rounded-lg text-xs bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium shadow-2xs"
+                />
+                <div className="absolute right-2 flex items-center space-x-1">
+                  {clientSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setClientSearchQuery('');
+                        setIsClientDropdownOpen(true);
+                      }}
+                      className="p-1 text-gray-400 hover:text-gray-600 rounded-full cursor-pointer"
+                      title="Clear search"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setIsClientDropdownOpen(!isClientDropdownOpen)}
+                    className="p-1 text-gray-400 hover:text-gray-600 rounded cursor-pointer"
+                    title="Toggle client list"
+                  >
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${isClientDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Floating Dropdown List */}
+              {isClientDropdownOpen && (
+                <div className="absolute z-30 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-64 overflow-y-auto divide-y divide-gray-100">
+                  <div className="p-2 bg-gray-50 text-[11px] text-gray-500 font-semibold flex justify-between items-center sticky top-0 border-b border-gray-200">
+                    <span>Available Clients ({filteredClients.length})</span>
+                    <span className="text-[10px] text-gray-400">Click to select & auto-fill</span>
+                  </div>
+
+                  {filteredClients.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-gray-500">
+                      <p className="font-semibold text-gray-700">No matching clients found</p>
+                      <p className="text-[11px] text-gray-400 mt-0.5">
+                        You can fill out the client details manually below.
+                      </p>
+                    </div>
+                  ) : (
+                    filteredClients.map((c) => {
+                      const isSelected = c.id === clientId;
+                      const isCorp = c.client_type === 'corporate';
+                      return (
+                        <div
+                          key={c.id}
+                          onClick={() => applyClientData(c)}
+                          className={`p-2.5 hover:bg-teal-50/80 cursor-pointer transition flex items-center justify-between text-xs ${
+                            isSelected ? 'bg-teal-50 text-teal-900 font-semibold' : 'text-gray-800'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-2.5 min-w-0">
+                            <div className={`p-1.5 rounded-lg flex-shrink-0 ${
+                              isCorp ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                            }`}>
+                              {isCorp ? <Building className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-bold truncate text-gray-900">
+                                  {c.display_name || c.company_name || 'Unnamed Client'}
+                                </span>
+                                <span className={`text-[10px] font-semibold px-1.5 py-0.2 rounded ${
+                                  isCorp ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-blue-50 text-blue-700 border border-blue-200'
+                                }`}>
+                                  {isCorp ? 'Corporate' : 'Individual'}
+                                </span>
+                              </div>
+                              <div className="text-[11px] text-gray-500 flex flex-wrap items-center gap-x-2 gap-y-0.5 truncate">
+                                {c.email && <span>{c.email}</span>}
+                                {c.phone && <span>• {c.phone}</span>}
+                                {c.country_of_origin && <span>• {c.country_of_origin}</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
+                            {c.outstanding_balance_usd > 0 && (
+                              <span className="text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                                Bal: ${c.outstanding_balance_usd.toLocaleString()}
+                              </span>
+                            )}
+                            {isSelected && (
+                              <span className="text-emerald-600 font-bold flex items-center text-[11px]">
+                                <Check className="w-3.5 h-3.5 mr-0.5" /> Selected
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

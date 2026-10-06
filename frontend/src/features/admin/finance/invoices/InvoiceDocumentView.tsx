@@ -738,6 +738,16 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
                 {client.telephone && <p className="text-gray-600">{client.telephone}</p>}
                 {client.address && <p className="text-gray-600">{client.address}</p>}
                 {client.country && <p className="text-gray-600 font-medium">{client.country}</p>}
+                {invoice.client_id && !isPublicView && (
+                  <div className="pt-1.5 no-print print:hidden">
+                    <Link
+                      to={`/admin/finance/clients/${invoice.client_id}`}
+                      className="inline-flex items-center text-xs font-semibold text-teal-700 hover:text-teal-900 hover:underline gap-1"
+                    >
+                      <ExternalLink className="w-3 h-3" /> View Client Profile & Statement
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
 

@@ -31,8 +31,15 @@ import type {
   Currency,
   CompanyFinanceSettings,
   Supplier,
-  Client
+  Client,
+  FinanceCategoryOption
 } from '../../../../lib/types/finance';
+import { CategoryManagerModal } from '../components/CategoryManagerModal';
+import {
+  DEFAULT_INVOICE_CATEGORIES,
+  normalizeCategories,
+  ensureCategoryIncluded
+} from '../utils/categoryUtils';
 
 export const InvoiceEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -43,6 +50,11 @@ export const InvoiceEditorPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Dynamic invoice categories state
+  const [invoiceCategories, setInvoiceCategories] = useState<FinanceCategoryOption[]>(DEFAULT_INVOICE_CATEGORIES);
+  const [showCategoryModal, setShowCategoryModal] = useState<boolean>(false);
+  const [targetItemIdxForCategory, setTargetItemIdxForCategory] = useState<number | null>(null);
 
   // Settings & Currencies
   const [currencies, setCurrencies] = useState<Currency[]>([]);
@@ -201,6 +213,9 @@ export const InvoiceEditorPage: React.FC = () => {
 
         setCurrencies(currList);
         setSettings(compSettings);
+        if (compSettings?.invoice_categories) {
+          setInvoiceCategories(normalizeCategories(compSettings.invoice_categories, DEFAULT_INVOICE_CATEGORIES));
+        }
         setAvailableBookings(bookingsRes || []);
         setSuppliers(suppliersRes?.items || []);
         const loadedClients = clientsRes?.items || [];
@@ -1356,17 +1371,40 @@ export const InvoiceEditorPage: React.FC = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-6 gap-3 text-xs">
                   <div className="sm:col-span-1">
-                    <label className="block text-gray-500 font-medium mb-1">Category</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-gray-500 font-medium">Category</label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTargetItemIdxForCategory(idx);
+                          setShowCategoryModal(true);
+                        }}
+                        className="text-[10px] text-teal-700 hover:text-teal-900 font-semibold hover:underline cursor-pointer"
+                        title="Add or edit invoice categories"
+                      >
+                        + Manage
+                      </button>
+                    </div>
                     <select
                       value={item.category}
-                      onChange={(e) => handleItemChange(idx, 'category', e.target.value)}
+                      onChange={(e) => {
+                        if (e.target.value === '__manage__') {
+                          setTargetItemIdxForCategory(idx);
+                          setShowCategoryModal(true);
+                        } else {
+                          handleItemChange(idx, 'category', e.target.value);
+                        }
+                      }}
                       className="w-full p-2 border border-gray-300 rounded-lg text-xs bg-white"
                     >
-                      <option value="accommodation">Accommodation</option>
-                      <option value="transportation">Transportation</option>
-                      <option value="activities">Activities & Permits</option>
-                      <option value="flights">Flights</option>
-                      <option value="other">Other Services</option>
+                      {ensureCategoryIncluded(invoiceCategories, item.category).map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.label}
+                        </option>
+                      ))}
+                      <option value="__manage__" className="text-teal-700 font-semibold">
+                        ➕ + Add / Manage...
+                      </option>
                     </select>
                   </div>
 
@@ -1437,19 +1475,40 @@ export const InvoiceEditorPage: React.FC = () => {
                           {/* Row Top: Service Category, Linked Supplier, Narration, Delete */}
                           <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 text-xs">
                             <div className="sm:col-span-3">
-                              <label className="block text-gray-600 font-medium mb-1 text-[11px]">Service Category</label>
+                              <div className="flex items-center justify-between mb-1">
+                                <label className="block text-gray-600 font-medium text-[11px]">Service Category</label>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setTargetItemIdxForCategory(idx);
+                                    setShowCategoryModal(true);
+                                  }}
+                                  className="text-[10px] text-teal-700 hover:text-teal-900 font-semibold hover:underline cursor-pointer"
+                                  title="Add or edit categories"
+                                >
+                                  + Manage
+                                </button>
+                              </div>
                               <select
                                 value={exp.category || 'other'}
-                                onChange={(e) => handleExpenseRowChange(idx, expIdx, 'category', e.target.value)}
+                                onChange={(e) => {
+                                  if (e.target.value === '__manage__') {
+                                    setTargetItemIdxForCategory(idx);
+                                    setShowCategoryModal(true);
+                                  } else {
+                                    handleExpenseRowChange(idx, expIdx, 'category', e.target.value);
+                                  }
+                                }}
                                 className="w-full p-2 border border-gray-300 rounded-lg text-xs bg-white focus:ring-1 focus:ring-teal-500"
                               >
-                                <option value="accommodation">Accommodation</option>
-                                <option value="transportation">Transportation & Fuel</option>
-                                <option value="activities">Activities & Park Fees</option>
-                                <option value="flights">Flights & Charters</option>
-                                <option value="meals">Meals & Catering</option>
-                                <option value="guide">Guide / Tour Leader</option>
-                                <option value="other">Other Service</option>
+                                {ensureCategoryIncluded(invoiceCategories, exp.category).map((cat) => (
+                                  <option key={cat.id} value={cat.id}>
+                                    {cat.label}
+                                  </option>
+                                ))}
+                                <option value="__manage__" className="text-teal-700 font-semibold">
+                                  ➕ + Add / Manage...
+                                </option>
                               </select>
                             </div>
 
@@ -1770,6 +1829,22 @@ export const InvoiceEditorPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      <CategoryManagerModal
+        isOpen={showCategoryModal}
+        onClose={() => {
+          setShowCategoryModal(false);
+          setTargetItemIdxForCategory(null);
+        }}
+        type="invoice"
+        initialCategories={invoiceCategories}
+        onCategoriesSaved={(updated, newId) => {
+          setInvoiceCategories(updated);
+          if (newId && targetItemIdxForCategory !== null) {
+            handleItemChange(targetItemIdxForCategory, 'category', newId);
+          }
+        }}
+      />
     </div>
   );
 };

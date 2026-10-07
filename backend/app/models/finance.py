@@ -46,6 +46,10 @@ class CompanyFinanceSettings(Base):
     mobile_money_accounts = Column(JSON, nullable=True, default=list)
     card_payment_info = Column(Text, nullable=True)
 
+    # Dynamic line item and supplier category configurations
+    invoice_categories = Column(JSON, nullable=True, default=list)
+    supplier_categories = Column(JSON, nullable=True, default=list)
+
     # Standard Notes & Terms templates
     default_invoice_notes = Column(Text, nullable=True)
     default_invoice_terms = Column(Text, nullable=True)

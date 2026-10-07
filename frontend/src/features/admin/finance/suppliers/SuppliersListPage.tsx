@@ -21,14 +21,17 @@ import {
   UserCheck,
 } from 'lucide-react';
 import { suppliersApi } from '../../../../lib/api/suppliers';
-import type { Supplier } from '../../../../lib/types/finance';
+import { financeApi } from '../../../../lib/api/finance';
+import type { Supplier, FinanceCategoryOption } from '../../../../lib/types/finance';
 import { SupplierEditorModal } from './SupplierEditorModal';
 import { SupplierBillModal } from './SupplierBillModal';
+import { DEFAULT_SUPPLIER_CATEGORIES, normalizeCategories } from '../utils/categoryUtils';
 import { useConfirm } from '../../../../components/ui/ConfirmProvider';
 
 export const SuppliersListPage: React.FC = () => {
   const confirm = useConfirm();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [supplierCategories, setSupplierCategories] = useState<FinanceCategoryOption[]>(DEFAULT_SUPPLIER_CATEGORIES);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,6 +41,15 @@ export const SuppliersListPage: React.FC = () => {
   const [totalCount, setTotalCount] = useState<number>(0);
   const [skip, setSkip] = useState<number>(0);
   const limit = 25;
+
+  // Load categories
+  useEffect(() => {
+    financeApi.getSettings().then((s) => {
+      if (s?.supplier_categories) {
+        setSupplierCategories(normalizeCategories(s.supplier_categories, DEFAULT_SUPPLIER_CATEGORIES));
+      }
+    }).catch(() => {});
+  }, []);
 
   // Modals state
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -91,41 +103,50 @@ export const SuppliersListPage: React.FC = () => {
   };
 
   const getCategoryBadge = (category: string) => {
+    const matched = supplierCategories.find((c) => c.id === category);
+    const label = matched ? matched.label : category.replace(/_/g, ' ');
+
     switch (category) {
       case 'lodge_hotel':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-100">
-            <Building2 className="w-3 h-3" /> Lodge / Hotel
+            <Building2 className="w-3 h-3" /> {label}
+          </span>
+        );
+      case 'safari_operator':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-teal-50 text-teal-700 border border-teal-100">
+            <Compass className="w-3 h-3" /> {label}
           </span>
         );
       case 'transporter':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
-            <Car className="w-3 h-3" /> Transporter
+            <Car className="w-3 h-3" /> {label}
           </span>
         );
       case 'airline':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-sky-50 text-sky-700 border border-sky-100">
-            <Plane className="w-3 h-3" /> Airline / Flight
+            <Plane className="w-3 h-3" /> {label}
           </span>
         );
       case 'park_authority':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
-            <TreePine className="w-3 h-3" /> Park Authority
+            <TreePine className="w-3 h-3" /> {label}
           </span>
         );
       case 'guide':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">
-            <UserCheck className="w-3 h-3" /> Safari Guide
+            <UserCheck className="w-3 h-3" /> {label}
           </span>
         );
       default:
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-700 border border-gray-100">
-            <Compass className="w-3 h-3" /> {category.replace(/_/g, ' ')}
+            <Compass className="w-3 h-3" /> {label}
           </span>
         );
     }
@@ -246,13 +267,11 @@ export const SuppliersListPage: React.FC = () => {
             className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
             <option value="all">All Categories</option>
-            <option value="lodge_hotel">Lodges & Hotels</option>
-            <option value="safari_operator">Safari Operators</option>
-            <option value="transporter">Transporters / 4x4 Fleets</option>
-            <option value="airline">Airlines & Flights</option>
-            <option value="park_authority">Park Authorities (UWA/KWS)</option>
-            <option value="guide">Safari Guides</option>
-            <option value="other">Other Service Partners</option>
+            {supplierCategories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.label}
+              </option>
+            ))}
           </select>
         </div>
       </div>

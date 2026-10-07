@@ -2,7 +2,7 @@ import math
 from datetime import datetime, date
 from typing import Optional, List, Dict, Any, Tuple
 from sqlalchemy.orm import Session
-from sqlalchemy import func, desc, or_
+from sqlalchemy import func, desc, or_, text
 
 from app.models.finance import (
     Currency,
@@ -128,6 +128,27 @@ def number_to_words(amount: float, currency_code: str = "USD") -> str:
     return " ".join(words_parts).strip()
 
 
+DEFAULT_INVOICE_CATEGORIES = [
+    {"id": "accommodation", "label": "Accommodation"},
+    {"id": "transportation", "label": "Transportation"},
+    {"id": "activities", "label": "Activities & Permits"},
+    {"id": "flights", "label": "Flights"},
+    {"id": "meals", "label": "Meals & Catering"},
+    {"id": "guide", "label": "Guide / Tour Leader"},
+    {"id": "other", "label": "Other Services"}
+]
+
+DEFAULT_SUPPLIER_CATEGORIES = [
+    {"id": "lodge_hotel", "label": "Safari Lodge / Hotel"},
+    {"id": "safari_operator", "label": "DMC / Safari Operator"},
+    {"id": "transporter", "label": "Transport & 4×4 Hire"},
+    {"id": "airline", "label": "Airline / Flight Charter"},
+    {"id": "park_authority", "label": "Wildlife / Park Permits"},
+    {"id": "guide", "label": "Tour Guide"},
+    {"id": "other", "label": "Other Service"}
+]
+
+
 class FinanceService:
     # ==========================================
     # NUMBER GENERATORS
@@ -249,13 +270,41 @@ class FinanceService:
     # COMPANY FINANCE SETTINGS
     # ==========================================
 
+    def _ensure_category_columns(self, db: Session) -> None:
+        try:
+            db.execute(text("ALTER TABLE company_finance_settings ADD COLUMN IF NOT EXISTS invoice_categories JSON;"))
+            db.execute(text("ALTER TABLE company_finance_settings ADD COLUMN IF NOT EXISTS supplier_categories JSON;"))
+            db.commit()
+        except Exception:
+            db.rollback()
+
     def get_company_settings(self, db: Session) -> CompanyFinanceSettings:
+        self._ensure_category_columns(db)
         settings = db.query(CompanyFinanceSettings).first()
         if not settings:
-            settings = CompanyFinanceSettings()
+            settings = CompanyFinanceSettings(
+                invoice_categories=DEFAULT_INVOICE_CATEGORIES,
+                supplier_categories=DEFAULT_SUPPLIER_CATEGORIES
+            )
             db.add(settings)
             db.commit()
             db.refresh(settings)
+            return settings
+
+        changed = False
+        if not settings.invoice_categories or len(settings.invoice_categories) == 0:
+            settings.invoice_categories = DEFAULT_INVOICE_CATEGORIES
+            changed = True
+        if not settings.supplier_categories or len(settings.supplier_categories) == 0:
+            settings.supplier_categories = DEFAULT_SUPPLIER_CATEGORIES
+            changed = True
+        if changed:
+            try:
+                db.commit()
+                db.refresh(settings)
+            except Exception:
+                db.rollback()
+
         return settings
 
     def update_company_settings(

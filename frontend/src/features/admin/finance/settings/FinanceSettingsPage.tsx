@@ -13,15 +13,25 @@ import {
   Globe,
   FileText,
   AlertCircle,
-  CheckCircle2
+  CheckCircle2,
+  Tag,
+  RotateCcw,
+  FolderPlus
 } from 'lucide-react';
 import { financeApi } from '../../../../lib/api/finance';
 import type {
   CompanyFinanceSettings,
   Currency,
   BankAccount,
-  MobileMoneyAccount
+  MobileMoneyAccount,
+  FinanceCategoryOption
 } from '../../../../lib/types/finance';
+import {
+  DEFAULT_SUPPLIER_CATEGORIES,
+  DEFAULT_INVOICE_CATEGORIES,
+  normalizeCategories,
+  slugifyCategory
+} from '../utils/categoryUtils';
 import { useConfirm } from '../../../../components/ui/ConfirmProvider';
 
 export const FinanceSettingsPage: React.FC = () => {
@@ -52,6 +62,16 @@ export const FinanceSettingsPage: React.FC = () => {
 
   // Mobile Money Accounts
   const [momoAccounts, setMomoAccounts] = useState<MobileMoneyAccount[]>([]);
+
+  // Categories state
+  const [invoiceCategories, setInvoiceCategories] = useState<FinanceCategoryOption[]>(DEFAULT_INVOICE_CATEGORIES);
+  const [supplierCategories, setSupplierCategories] = useState<FinanceCategoryOption[]>(DEFAULT_SUPPLIER_CATEGORIES);
+  const [newInvoiceCategoryLabel, setNewInvoiceCategoryLabel] = useState<string>('');
+  const [newSupplierCategoryLabel, setNewSupplierCategoryLabel] = useState<string>('');
+  const [editingInvoiceCatId, setEditingInvoiceCatId] = useState<string | null>(null);
+  const [editingInvoiceCatLabel, setEditingInvoiceCatLabel] = useState<string>('');
+  const [editingSupplierCatId, setEditingSupplierCatId] = useState<string | null>(null);
+  const [editingSupplierCatLabel, setEditingSupplierCatLabel] = useState<string>('');
 
   // Default Templates
   const [invoiceNotes, setInvoiceNotes] = useState<string>('');
@@ -104,6 +124,9 @@ export const FinanceSettingsPage: React.FC = () => {
       setBankAccounts(s.bank_accounts || []);
       setMomoAccounts(s.mobile_money_accounts || []);
 
+      setInvoiceCategories(normalizeCategories(s.invoice_categories, DEFAULT_INVOICE_CATEGORIES));
+      setSupplierCategories(normalizeCategories(s.supplier_categories, DEFAULT_SUPPLIER_CATEGORIES));
+
       setInvoiceNotes(s.default_invoice_notes || '');
       setInvoiceTerms(s.default_invoice_terms || '');
       setReceiptNotice(s.default_receipt_notice || '');
@@ -141,6 +164,8 @@ export const FinanceSettingsPage: React.FC = () => {
         vat_number: vat,
         bank_accounts: bankAccounts,
         mobile_money_accounts: momoAccounts,
+        invoice_categories: invoiceCategories,
+        supplier_categories: supplierCategories,
         default_invoice_notes: invoiceNotes,
         default_invoice_terms: invoiceTerms,
         default_receipt_notice: receiptNotice,
@@ -280,6 +305,111 @@ export const FinanceSettingsPage: React.FC = () => {
       alert(err?.response?.data?.detail || 'Failed to delete currency');
     } finally {
       setDeletingCurrId(null);
+    }
+  };
+
+  // Category management handlers
+  const handleAddInvoiceCategory = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = newInvoiceCategoryLabel.trim();
+    if (!trimmed) return;
+    const newId = slugifyCategory(trimmed);
+    if (invoiceCategories.some((c) => c.id === newId || c.label.toLowerCase() === trimmed.toLowerCase())) {
+      setMessage({ type: 'error', text: `Invoice category "${trimmed}" already exists.` });
+      return;
+    }
+    setInvoiceCategories([...invoiceCategories, { id: newId, label: trimmed, is_default: false }]);
+    setNewInvoiceCategoryLabel('');
+    setMessage({ type: 'success', text: `Added "${trimmed}" to invoice categories. Remember to click "Save Settings".` });
+  };
+
+  const handleAddSupplierCategory = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = newSupplierCategoryLabel.trim();
+    if (!trimmed) return;
+    const newId = slugifyCategory(trimmed);
+    if (supplierCategories.some((c) => c.id === newId || c.label.toLowerCase() === trimmed.toLowerCase())) {
+      setMessage({ type: 'error', text: `Supplier category "${trimmed}" already exists.` });
+      return;
+    }
+    setSupplierCategories([...supplierCategories, { id: newId, label: trimmed, is_default: false }]);
+    setNewSupplierCategoryLabel('');
+    setMessage({ type: 'success', text: `Added "${trimmed}" to supplier categories. Remember to click "Save Settings".` });
+  };
+
+  const handleSaveEditInvoiceCategory = (id: string) => {
+    const trimmed = editingInvoiceCatLabel.trim();
+    if (!trimmed) return;
+    setInvoiceCategories((prev) => prev.map((c) => (c.id === id ? { ...c, label: trimmed } : c)));
+    setEditingInvoiceCatId(null);
+    setEditingInvoiceCatLabel('');
+  };
+
+  const handleSaveEditSupplierCategory = (id: string) => {
+    const trimmed = editingSupplierCatLabel.trim();
+    if (!trimmed) return;
+    setSupplierCategories((prev) => prev.map((c) => (c.id === id ? { ...c, label: trimmed } : c)));
+    setEditingSupplierCatId(null);
+    setEditingSupplierCatLabel('');
+  };
+
+  const handleDeleteInvoiceCategory = async (id: string) => {
+    if (invoiceCategories.length <= 1) {
+      setMessage({ type: 'error', text: 'At least one invoice category must be kept.' });
+      return;
+    }
+    const confirmed = await confirm({
+      title: 'Delete Category',
+      message: 'Are you sure you want to remove this invoice category?',
+      confirmText: 'Delete',
+      variant: 'danger',
+    });
+    if (confirmed) {
+      setInvoiceCategories((prev) => prev.filter((c) => c.id !== id));
+      setMessage({ type: 'success', text: 'Category removed from list. Remember to click "Save Settings".' });
+    }
+  };
+
+  const handleDeleteSupplierCategory = async (id: string) => {
+    if (supplierCategories.length <= 1) {
+      setMessage({ type: 'error', text: 'At least one supplier category must be kept.' });
+      return;
+    }
+    const confirmed = await confirm({
+      title: 'Delete Category',
+      message: 'Are you sure you want to remove this supplier category?',
+      confirmText: 'Delete',
+      variant: 'danger',
+    });
+    if (confirmed) {
+      setSupplierCategories((prev) => prev.filter((c) => c.id !== id));
+      setMessage({ type: 'success', text: 'Category removed from list. Remember to click "Save Settings".' });
+    }
+  };
+
+  const handleResetInvoiceCategories = async () => {
+    const confirmed = await confirm({
+      title: 'Reset Invoice Categories',
+      message: 'Reset invoice categories back to system defaults?',
+      confirmText: 'Reset',
+      variant: 'danger',
+    });
+    if (confirmed) {
+      setInvoiceCategories([...DEFAULT_INVOICE_CATEGORIES]);
+      setMessage({ type: 'success', text: 'Invoice categories reset to defaults.' });
+    }
+  };
+
+  const handleResetSupplierCategories = async () => {
+    const confirmed = await confirm({
+      title: 'Reset Supplier Categories',
+      message: 'Reset supplier categories back to system defaults?',
+      confirmText: 'Reset',
+      variant: 'danger',
+    });
+    if (confirmed) {
+      setSupplierCategories([...DEFAULT_SUPPLIER_CATEGORIES]);
+      setMessage({ type: 'success', text: 'Supplier categories reset to defaults.' });
     }
   };
 
@@ -942,6 +1072,238 @@ export const FinanceSettingsPage: React.FC = () => {
               onChange={(e) => setVoucherClientInst(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-lg text-xs"
             />
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION 6: INVOICE & SUPPLIER CATEGORIES */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-6">
+        <div>
+          <h2 className="text-base font-bold text-teal-900 flex items-center">
+            <Tag className="w-5 h-5 mr-2 text-teal-700" /> Invoice Line Item & Supplier Categories
+          </h2>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Configure line item categories for invoicing clients and business categories for registering suppliers and partners.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Column 1: Invoice Line Item Categories */}
+          <div className="bg-gray-50/60 rounded-xl p-4.5 border border-gray-200/80 space-y-3.5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-gray-900">Invoice Line Item Categories</h3>
+                <p className="text-[11px] text-gray-500">Used when adding services to invoices & costing</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleResetInvoiceCategories}
+                className="text-[11px] text-gray-500 hover:text-teal-700 flex items-center gap-1 font-medium transition cursor-pointer"
+              >
+                <RotateCcw className="w-3 h-3" /> Reset Defaults
+              </button>
+            </div>
+
+            {/* Quick Add Form */}
+            <form onSubmit={handleAddInvoiceCategory} className="flex gap-2">
+              <input
+                type="text"
+                value={newInvoiceCategoryLabel}
+                onChange={(e) => setNewInvoiceCategoryLabel(e.target.value)}
+                placeholder="e.g. Visa Fees, Boat Safaris, Insurance..."
+                className="flex-1 px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="inline-flex items-center gap-1 px-3 py-1.5 bg-teal-800 hover:bg-teal-900 text-white rounded-lg text-xs font-semibold shadow-2xs transition cursor-pointer shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" /> Add
+              </button>
+            </form>
+
+            {/* List */}
+            <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+              {invoiceCategories.map((cat) => {
+                const isEditing = editingInvoiceCatId === cat.id;
+                return (
+                  <div
+                    key={cat.id}
+                    className="flex items-center justify-between p-2 rounded-lg bg-white border border-gray-200 text-xs shadow-2xs"
+                  >
+                    {isEditing ? (
+                      <div className="flex items-center gap-2 flex-1 mr-2">
+                        <input
+                          type="text"
+                          value={editingInvoiceCatLabel}
+                          onChange={(e) => setEditingInvoiceCatLabel(e.target.value)}
+                          className="flex-1 px-2 py-0.5 text-xs border border-teal-500 rounded focus:outline-none bg-white font-medium"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSaveEditInvoiceCategory(cat.id);
+                            if (e.key === 'Escape') setEditingInvoiceCatId(null);
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleSaveEditInvoiceCategory(cat.id)}
+                          className="p-1 text-teal-700 hover:bg-teal-50 rounded"
+                          title="Save"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingInvoiceCatId(null)}
+                          className="p-1 text-gray-400 hover:bg-gray-100 rounded"
+                          title="Cancel"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
+                          <span className="font-semibold text-gray-900 truncate">{cat.label}</span>
+                          <span className="font-mono text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded shrink-0">
+                            {cat.id}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingInvoiceCatId(cat.id);
+                              setEditingInvoiceCatLabel(cat.label);
+                            }}
+                            className="p-1 text-gray-400 hover:text-teal-700 hover:bg-gray-50 rounded transition"
+                            title="Edit name"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteInvoiceCategory(cat.id)}
+                            className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Column 2: Supplier / Partner Categories */}
+          <div className="bg-gray-50/60 rounded-xl p-4.5 border border-gray-200/80 space-y-3.5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-gray-900">Supplier / Partner Categories</h3>
+                <p className="text-[11px] text-gray-500">Used when adding safari lodges, operators & vendors</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleResetSupplierCategories}
+                className="text-[11px] text-gray-500 hover:text-teal-700 flex items-center gap-1 font-medium transition cursor-pointer"
+              >
+                <RotateCcw className="w-3 h-3" /> Reset Defaults
+              </button>
+            </div>
+
+            {/* Quick Add Form */}
+            <form onSubmit={handleAddSupplierCategory} className="flex gap-2">
+              <input
+                type="text"
+                value={newSupplierCategoryLabel}
+                onChange={(e) => setNewSupplierCategoryLabel(e.target.value)}
+                placeholder="e.g. Balloon Safari, Boat Operator, Cultural..."
+                className="flex-1 px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="inline-flex items-center gap-1 px-3 py-1.5 bg-teal-800 hover:bg-teal-900 text-white rounded-lg text-xs font-semibold shadow-2xs transition cursor-pointer shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" /> Add
+              </button>
+            </form>
+
+            {/* List */}
+            <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+              {supplierCategories.map((cat) => {
+                const isEditing = editingSupplierCatId === cat.id;
+                return (
+                  <div
+                    key={cat.id}
+                    className="flex items-center justify-between p-2 rounded-lg bg-white border border-gray-200 text-xs shadow-2xs"
+                  >
+                    {isEditing ? (
+                      <div className="flex items-center gap-2 flex-1 mr-2">
+                        <input
+                          type="text"
+                          value={editingSupplierCatLabel}
+                          onChange={(e) => setEditingSupplierCatLabel(e.target.value)}
+                          className="flex-1 px-2 py-0.5 text-xs border border-teal-500 rounded focus:outline-none bg-white font-medium"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSaveEditSupplierCategory(cat.id);
+                            if (e.key === 'Escape') setEditingSupplierCatId(null);
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleSaveEditSupplierCategory(cat.id)}
+                          className="p-1 text-teal-700 hover:bg-teal-50 rounded"
+                          title="Save"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingSupplierCatId(null)}
+                          className="p-1 text-gray-400 hover:bg-gray-100 rounded"
+                          title="Cancel"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
+                          <span className="font-semibold text-gray-900 truncate">{cat.label}</span>
+                          <span className="font-mono text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded shrink-0">
+                            {cat.id}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingSupplierCatId(cat.id);
+                              setEditingSupplierCatLabel(cat.label);
+                            }}
+                            className="p-1 text-gray-400 hover:text-teal-700 hover:bg-gray-50 rounded transition"
+                            title="Edit name"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteSupplierCategory(cat.id)}
+                            className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

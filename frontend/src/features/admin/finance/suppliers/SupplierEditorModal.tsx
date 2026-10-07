@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { X, Building, Mail, Phone, MapPin, Globe, CreditCard, Star } from 'lucide-react';
+import { X, Building, Mail, Phone, MapPin, Globe, CreditCard, Star, Plus } from 'lucide-react';
 import { suppliersApi } from '../../../../lib/api/suppliers';
-import type { Supplier } from '../../../../lib/types/finance';
+import { financeApi } from '../../../../lib/api/finance';
+import type { Supplier, FinanceCategoryOption } from '../../../../lib/types/finance';
+import { CategoryManagerModal } from '../components/CategoryManagerModal';
+import {
+  DEFAULT_SUPPLIER_CATEGORIES,
+  normalizeCategories,
+  ensureCategoryIncluded
+} from '../utils/categoryUtils';
 
 interface SupplierEditorModalProps {
   isOpen: boolean;
@@ -18,6 +25,8 @@ export const SupplierEditorModal: React.FC<SupplierEditorModalProps> = ({
 }) => {
   const [name, setName] = useState('');
   const [category, setCategory] = useState('lodge_hotel');
+  const [categories, setCategories] = useState<FinanceCategoryOption[]>(DEFAULT_SUPPLIER_CATEGORIES);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [contactPerson, setContactPerson] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -35,6 +44,23 @@ export const SupplierEditorModal: React.FC<SupplierEditorModalProps> = ({
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Load custom categories from finance settings
+    const loadCategories = async () => {
+      try {
+        const settings = await financeApi.getSettings();
+        if (settings?.supplier_categories) {
+          setCategories(normalizeCategories(settings.supplier_categories, DEFAULT_SUPPLIER_CATEGORIES));
+        }
+      } catch (err) {
+        console.error('Error fetching supplier categories:', err);
+      }
+    };
+    loadCategories();
+  }, [isOpen]);
 
   useEffect(() => {
     if (supplierToEdit) {
@@ -169,19 +195,36 @@ export const SupplierEditorModal: React.FC<SupplierEditorModalProps> = ({
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Category</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-medium text-gray-700">Category</label>
+                <button
+                  type="button"
+                  onClick={() => setShowCategoryModal(true)}
+                  className="text-[11px] text-teal-700 hover:text-teal-900 font-semibold flex items-center gap-0.5 hover:underline cursor-pointer"
+                  title="Add or edit supplier categories"
+                >
+                  <Plus className="w-3 h-3" /> Add / Edit
+                </button>
+              </div>
               <select
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                onChange={(e) => {
+                  if (e.target.value === '__manage__') {
+                    setShowCategoryModal(true);
+                  } else {
+                    setCategory(e.target.value);
+                  }
+                }}
                 className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 text-sm bg-white"
               >
-                <option value="lodge_hotel">Safari Lodge / Hotel</option>
-                <option value="safari_operator">DMC / Safari Operator</option>
-                <option value="transporter">Transport & 4x4 Hire</option>
-                <option value="airline">Airline / Flight Charters</option>
-                <option value="park_authority">Wildlife / Park Permits</option>
-                <option value="guide">Tour Guide</option>
-                <option value="other">Other Service</option>
+                {ensureCategoryIncluded(categories, category).map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.label}
+                  </option>
+                ))}
+                <option value="__manage__" className="text-teal-700 font-semibold">
+                  ➕ + Add / Manage Categories...
+                </option>
               </select>
             </div>
           </div>
@@ -332,6 +375,18 @@ export const SupplierEditorModal: React.FC<SupplierEditorModalProps> = ({
           </div>
         </form>
 
+        <CategoryManagerModal
+          isOpen={showCategoryModal}
+          onClose={() => setShowCategoryModal(false)}
+          type="supplier"
+          initialCategories={categories}
+          onCategoriesSaved={(updated, newId) => {
+            setCategories(updated);
+            if (newId) {
+              setCategory(newId);
+            }
+          }}
+        />
       </div>
     </div>
   );

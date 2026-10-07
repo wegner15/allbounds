@@ -29,6 +29,13 @@ export interface MobileMoneyAccount {
   is_primary?: boolean;
 }
 
+export interface FinanceCategoryOption {
+  id: string;
+  label: string;
+  description?: string;
+  is_default?: boolean;
+}
+
 export interface CompanyFinanceSettings {
   id: number;
   company_name: string;
@@ -45,6 +52,8 @@ export interface CompanyFinanceSettings {
   bank_accounts: BankAccount[];
   mobile_money_accounts: MobileMoneyAccount[];
   card_payment_info?: string;
+  invoice_categories?: FinanceCategoryOption[];
+  supplier_categories?: FinanceCategoryOption[];
   default_invoice_notes?: string;
   default_invoice_terms?: string;
   default_receipt_notice?: string;

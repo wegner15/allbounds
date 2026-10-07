@@ -56,6 +56,8 @@ class CompanyFinanceSettingsBase(BaseModel):
     bank_accounts: List[Dict[str, Any]] = Field(default_factory=list)
     mobile_money_accounts: List[Dict[str, Any]] = Field(default_factory=list)
     card_payment_info: Optional[str] = None
+    invoice_categories: List[Dict[str, Any]] = Field(default_factory=list)
+    supplier_categories: List[Dict[str, Any]] = Field(default_factory=list)
     default_invoice_notes: Optional[str] = None
     default_invoice_terms: Optional[str] = None
     default_receipt_notice: Optional[str] = None
@@ -79,6 +81,8 @@ class CompanyFinanceSettingsUpdate(BaseModel):
     bank_accounts: Optional[List[Dict[str, Any]]] = None
     mobile_money_accounts: Optional[List[Dict[str, Any]]] = None
     card_payment_info: Optional[str] = None
+    invoice_categories: Optional[List[Dict[str, Any]]] = None
+    supplier_categories: Optional[List[Dict[str, Any]]] = None
     default_invoice_notes: Optional[str] = None
     default_invoice_terms: Optional[str] = None
     default_receipt_notice: Optional[str] = None

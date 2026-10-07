@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { X, FileText, Calendar, DollarSign, Building } from 'lucide-react';
 import { suppliersApi } from '../../../../lib/api/suppliers';
-import type { Supplier, SupplierBill } from '../../../../lib/types/finance';
+import { financeApi } from '../../../../lib/api/finance';
+import type { Supplier, SupplierBill, FinanceCategoryOption } from '../../../../lib/types/finance';
+import { DEFAULT_INVOICE_CATEGORIES, normalizeCategories, ensureCategoryIncluded } from '../utils/categoryUtils';
 
 interface SupplierBillModalProps {
   isOpen: boolean;
@@ -32,10 +34,20 @@ export const SupplierBillModal: React.FC<SupplierBillModalProps> = ({
   const [amountBilled, setAmountBilled] = useState<number | ''>('');
   const [currency, setCurrency] = useState('USD');
   const [category, setCategory] = useState('accommodation');
+  const [categories, setCategories] = useState<FinanceCategoryOption[]>(DEFAULT_INVOICE_CATEGORIES);
   const [description, setDescription] = useState('');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    financeApi.getSettings().then((s) => {
+      if (s?.invoice_categories) {
+        setCategories(normalizeCategories(s.invoice_categories, DEFAULT_INVOICE_CATEGORIES));
+      }
+    }).catch(() => {});
+  }, [isOpen]);
 
   useEffect(() => {
     if (defaultSupplierId) {
@@ -171,13 +183,11 @@ export const SupplierBillModal: React.FC<SupplierBillModalProps> = ({
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 text-sm bg-white"
               >
-                <option value="accommodation">Accommodation / Lodge</option>
-                <option value="transport">Transport / Vehicle Hire</option>
-                <option value="permits">Park Permits / Gorilla Tracking</option>
-                <option value="flight">Domestic / Charter Flight</option>
-                <option value="guide">Guide / Driver Fees</option>
-                <option value="activity">Boat Cruise / Tour Activity</option>
-                <option value="other">Other Cost</option>
+                {ensureCategoryIncluded(categories, category).map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.label}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

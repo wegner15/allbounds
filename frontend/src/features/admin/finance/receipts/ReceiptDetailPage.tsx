@@ -22,6 +22,34 @@ export const ReceiptDetailPage: React.FC = () => {
           financeApi.getReceipt(parseInt(id, 10)),
           financeApi.getSettings()
         ]);
+
+        const client = rec.received_from || {};
+        const hasIdentity = client.company_name || client.company || client.full_name || client.name;
+        if (!hasIdentity && rec.invoice_id) {
+          try {
+            const inv = await financeApi.getInvoice(rec.invoice_id);
+            if (inv?.client_details) {
+              const c = inv.client_details;
+              rec.received_from = {
+                ...c,
+                ...client,
+                name: c.full_name || c.contact_person || (c as any).name || client.name || '',
+                full_name: c.full_name || client.full_name || '',
+                company: c.company_name || (c as any).company || client.company || '',
+                company_name: c.company_name || client.company_name || '',
+                contact_person: c.contact_person || client.contact_person || '',
+                email: client.email || c.email || '',
+                phone: client.phone || client.telephone || c.telephone || (c as any).phone || '',
+                telephone: client.telephone || client.phone || c.telephone || '',
+                country: client.country || c.country || '',
+                address: client.address || c.address || '',
+              };
+            }
+          } catch {
+            // fallback gracefully
+          }
+        }
+
         setReceipt(rec);
         setSettings(compSettings);
       } catch (err: any) {
@@ -50,6 +78,13 @@ export const ReceiptDetailPage: React.FC = () => {
     );
   }
 
+  const payerDisplayName =
+    receipt.received_from?.company_name ||
+    receipt.received_from?.company ||
+    receipt.received_from?.full_name ||
+    receipt.received_from?.name ||
+    '';
+
   return (
     <>
       <ReceiptDocumentView
@@ -64,7 +99,7 @@ export const ReceiptDetailPage: React.FC = () => {
           onClose={() => setIsEmailModalOpen(false)}
           title={`Send Receipt #${receipt.receipt_number}`}
           defaultEmail={receipt.received_from?.email || ''}
-          defaultName={receipt.received_from?.name || ''}
+          defaultName={payerDisplayName}
           onSend={async (data) => {
             await financeApi.sendReceiptEmail(receipt.id, data);
           }}

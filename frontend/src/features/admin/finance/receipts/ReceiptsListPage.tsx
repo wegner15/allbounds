@@ -96,7 +96,7 @@ export const ReceiptsListPage: React.FC = () => {
                       </td>
                       <td className="px-4 py-3.5">
                         <p className="font-semibold text-gray-900">
-                          {client.company || client.name || 'Client'}
+                          {client.company_name || client.company || client.full_name || client.name || 'Client'}
                         </p>
                         {client.email && <p className="text-[11px] text-gray-500">{client.email}</p>}
                       </td>

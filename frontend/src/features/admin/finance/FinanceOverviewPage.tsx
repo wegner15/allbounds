@@ -265,7 +265,7 @@ export const FinanceOverviewPage: React.FC = () => {
                       {rec.receipt_number}
                     </Link>
                     <p className="text-gray-600 mt-0.5 font-medium">
-                      {rec.received_from?.company || rec.received_from?.name || 'Payer'}
+                      {rec.received_from?.company_name || rec.received_from?.company || rec.received_from?.full_name || rec.received_from?.name || 'Payer'}
                     </p>
                     <span className="text-[11px] text-gray-400">
                       {new Date(rec.payment_date).toLocaleDateString()} &bull; {rec.payment_method.replace('_', ' ')}

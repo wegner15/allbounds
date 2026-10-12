@@ -36,6 +36,15 @@ export const ReceiptDocumentView: React.FC<ReceiptDocumentViewProps> = ({
   const { isGenerating, downloadPdf } = usePdfDownload();
 
   const client = receipt.received_from || {};
+  const companyName = client.company_name || client.company || '';
+  const clientName = client.full_name || client.name || '';
+  const contactPerson = client.contact_person || (companyName && clientName && clientName !== companyName ? clientName : '');
+  const displayName = companyName || clientName || 'Valued Client';
+  const phone = client.phone || client.telephone || '';
+  const email = client.email || '';
+  const address = client.address || '';
+  const country = client.country || '';
+
   const alloc = receipt.payment_allocation || {};
   const verificationUrl = `${window.location.origin}/verify/receipt/${receipt.verification_code}`;
 
@@ -118,7 +127,7 @@ export const ReceiptDocumentView: React.FC<ReceiptDocumentViewProps> = ({
           {/* Received From */}
           <div>
             <h3 className="text-xs font-bold text-teal-900 uppercase tracking-wider mb-2 flex items-center">
-              {client.company ? (
+              {companyName ? (
                 <Building className="w-3.5 h-3.5 mr-1" />
               ) : (
                 <User className="w-3.5 h-3.5 mr-1" />
@@ -127,14 +136,15 @@ export const ReceiptDocumentView: React.FC<ReceiptDocumentViewProps> = ({
             </h3>
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 space-y-1">
               <p className="font-bold text-gray-900 text-base">
-                {client.company || client.name || 'Valued Client'}
+                {displayName}
               </p>
-              {client.company && client.name && (
-                <p className="text-gray-700"><span className="text-gray-500">Contact:</span> {client.name}</p>
+              {contactPerson && contactPerson !== displayName && (
+                <p className="text-gray-700"><span className="text-gray-500">Contact:</span> {contactPerson}</p>
               )}
-              {client.email && <p className="text-gray-600">{client.email}</p>}
-              {client.phone && <p className="text-gray-600">{client.phone}</p>}
-              {client.country && <p className="text-gray-600 font-medium">{client.country}</p>}
+              {email && <p className="text-gray-600">{email}</p>}
+              {phone && <p className="text-gray-600">{phone}</p>}
+              {address && <p className="text-gray-600">{address}</p>}
+              {country && <p className="text-gray-600 font-medium">{country}</p>}
             </div>
           </div>
 

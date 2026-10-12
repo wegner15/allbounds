@@ -780,17 +780,67 @@ class FinanceService:
             "total_paid": new_paid
         }
 
-        # Auto-fill received_from if empty
-        received_from = receipt_in.received_from
-        if not received_from:
-            client = invoice.client_details
-            received_from = {
-                "name": client.get("full_name") or client.get("contact_person", ""),
-                "company": client.get("company_name", ""),
-                "email": client.get("email", ""),
-                "phone": client.get("telephone", ""),
-                "country": client.get("country", "")
-            }
+        # Auto-fill and normalize received_from with all standard keys
+        raw_rf = dict(receipt_in.received_from or {})
+        inv_client = dict(invoice.client_details or {})
+
+        client_name = (
+            raw_rf.get("name")
+            or raw_rf.get("full_name")
+            or inv_client.get("full_name")
+            or inv_client.get("contact_person")
+            or inv_client.get("name")
+            or ""
+        )
+        company_name = (
+            raw_rf.get("company")
+            or raw_rf.get("company_name")
+            or inv_client.get("company_name")
+            or inv_client.get("company")
+            or ""
+        )
+        contact_person = (
+            raw_rf.get("contact_person")
+            or inv_client.get("contact_person")
+            or ""
+        )
+        email = (
+            raw_rf.get("email")
+            or inv_client.get("email")
+            or ""
+        )
+        phone = (
+            raw_rf.get("phone")
+            or raw_rf.get("telephone")
+            or inv_client.get("telephone")
+            or inv_client.get("phone")
+            or ""
+        )
+        country = (
+            raw_rf.get("country")
+            or inv_client.get("country")
+            or ""
+        )
+        address = (
+            raw_rf.get("address")
+            or inv_client.get("address")
+            or ""
+        )
+
+        received_from = {
+            **inv_client,
+            **raw_rf,
+            "name": client_name or contact_person or company_name,
+            "full_name": client_name,
+            "company": company_name,
+            "company_name": company_name,
+            "contact_person": contact_person,
+            "email": email,
+            "phone": phone,
+            "telephone": phone,
+            "country": country,
+            "address": address,
+        }
 
         db_receipt = PaymentReceipt(
             receipt_number=receipt_number,
@@ -825,6 +875,86 @@ class FinanceService:
         db.refresh(db_receipt)
         return db_receipt
 
+    def _ensure_receipt_received_from(self, db: Session, receipt: PaymentReceipt) -> PaymentReceipt:
+        if not receipt:
+            return receipt
+
+        rf = dict(receipt.received_from or {})
+        inv = receipt.invoice
+        inv_client = dict(inv.client_details or {}) if inv and inv.client_details else {}
+
+        name = (
+            rf.get("name")
+            or rf.get("full_name")
+            or inv_client.get("full_name")
+            or inv_client.get("contact_person")
+            or inv_client.get("name")
+            or ""
+        )
+        company = (
+            rf.get("company")
+            or rf.get("company_name")
+            or inv_client.get("company_name")
+            or inv_client.get("company")
+            or ""
+        )
+        contact = (
+            rf.get("contact_person")
+            or inv_client.get("contact_person")
+            or ""
+        )
+        email = (
+            rf.get("email")
+            or inv_client.get("email")
+            or ""
+        )
+        phone = (
+            rf.get("phone")
+            or rf.get("telephone")
+            or inv_client.get("telephone")
+            or inv_client.get("phone")
+            or ""
+        )
+        country = (
+            rf.get("country")
+            or inv_client.get("country")
+            or ""
+        )
+        address = (
+            rf.get("address")
+            or inv_client.get("address")
+            or ""
+        )
+
+        has_missing = (
+            not rf.get("name")
+            or not rf.get("phone")
+            or (not rf.get("company") and bool(company))
+            or not rf.get("email")
+        )
+        if has_missing and (name or company or email or phone):
+            enriched = {
+                **inv_client,
+                **rf,
+                "name": name or contact or company,
+                "full_name": name,
+                "company": company,
+                "company_name": company,
+                "contact_person": contact,
+                "email": email,
+                "phone": phone,
+                "telephone": phone,
+                "country": country,
+                "address": address,
+            }
+            receipt.received_from = enriched
+            try:
+                db.commit()
+            except Exception:
+                db.rollback()
+
+        return receipt
+
     def get_receipts(
         self,
         db: Session,
@@ -838,18 +968,26 @@ class FinanceService:
 
         total = query.count()
         receipts = query.order_by(PaymentReceipt.created_at.desc()).offset(skip).limit(limit).all()
+        for r in receipts:
+            self._ensure_receipt_received_from(db, r)
         return receipts, total
 
     def get_receipt(self, db: Session, receipt_id: int) -> Optional[PaymentReceipt]:
-        return db.query(PaymentReceipt).filter(PaymentReceipt.id == receipt_id).first()
+        receipt = db.query(PaymentReceipt).filter(PaymentReceipt.id == receipt_id).first()
+        if receipt:
+            self._ensure_receipt_received_from(db, receipt)
+        return receipt
 
     def get_receipt_by_code(self, db: Session, code: str) -> Optional[PaymentReceipt]:
-        return db.query(PaymentReceipt).filter(
+        receipt = db.query(PaymentReceipt).filter(
             or_(
                 PaymentReceipt.verification_code == code,
                 PaymentReceipt.receipt_number == code
             )
         ).first()
+        if receipt:
+            self._ensure_receipt_received_from(db, receipt)
+        return receipt
 
     # ==========================================
     # TRAVEL VOUCHERS MANAGEMENT
@@ -1178,7 +1316,13 @@ class FinanceService:
         if not receipt:
             return False
 
-        name = recipient_name or receipt.received_from.get("name", "Valued Client")
+        name = (
+            recipient_name
+            or receipt.received_from.get("company_name")
+            or receipt.received_from.get("company")
+            or receipt.received_from.get("full_name")
+            or receipt.received_from.get("name", "Valued Client")
+        )
         email_subject = subject or f"Payment Receipt {receipt.receipt_number} — Allbound Vacations"
 
         html_body = f"""

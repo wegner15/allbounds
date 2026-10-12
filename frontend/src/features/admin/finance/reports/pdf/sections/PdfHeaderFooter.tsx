@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from '@react-pdf/renderer';
+import { View, Text, Image, StyleSheet } from '@react-pdf/renderer';
 import { pdfStyles, C } from '../pdfStyles';
 import type { CompanyFinanceSettings } from '../../../../../../lib/types/finance';
 
@@ -30,6 +30,11 @@ export const PdfHeader: React.FC<PdfHeaderProps> = ({
   const email = settings?.email || 'bookings@allboundvacations.com';
   const tin = settings?.tin_number || '1054173942';
 
+  const logoUrl =
+    typeof window !== 'undefined' && window.location?.origin
+      ? `${window.location.origin}/logo/brand_mark.png`
+      : '/logo/brand_mark.png';
+
   const todayStr = new Date().toLocaleDateString('en-GB', {
     day: '2-digit',
     month: 'short',
@@ -41,9 +46,7 @@ export const PdfHeader: React.FC<PdfHeaderProps> = ({
       {/* Brand & Legal Info */}
       <View style={pdfStyles.headerLeft}>
         <View style={headerBrandStyles.brandRow}>
-          <View style={headerBrandStyles.logoBadge}>
-            <Text style={headerBrandStyles.logoText}>AB</Text>
-          </View>
+          <Image src={logoUrl} style={headerBrandStyles.logoImage} />
           <View style={{ marginLeft: 8 }}>
             <Text style={pdfStyles.legalName}>{legalName}</Text>
             <Text style={pdfStyles.tradingName}>Trading as: {companyName}</Text>
@@ -97,19 +100,10 @@ const headerBrandStyles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 3,
   },
-  logoBadge: {
-    width: 24,
-    height: 24,
-    borderRadius: 4,
-    backgroundColor: C.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoText: {
-    color: C.white,
-    fontFamily: 'Helvetica-Bold',
-    fontSize: 10,
-    letterSpacing: 0.5,
+  logoImage: {
+    width: 26,
+    height: 26,
+    objectFit: 'contain',
   },
 });
 

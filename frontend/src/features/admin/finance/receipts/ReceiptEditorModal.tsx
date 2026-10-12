@@ -46,21 +46,42 @@ export const ReceiptEditorModal: React.FC<ReceiptEditorModalProps> = ({
     setError(null);
 
     try {
-      const created = await financeApi.createReceipt({
-        invoice_id: invoice.id,
-        booking_id: invoice.booking_id,
-        payment_reference: paymentReference.trim(),
-        receipt_date: receiptDate,
-        payment_date: new Date().toISOString(),
-        amount_received: Number(amountReceived),
-        currency: invoice.currency,
-        exchange_rate_to_usd: invoice.exchange_rate_to_usd,
-        payment_method: paymentMethod,
-        payment_provider: paymentProvider.trim() || undefined,
-        payment_status: 'completed',
-        received_from: invoice.client_details,
-        notes: notes.trim() || undefined
-      });
+        const c = invoice.client_details || {};
+        const fullName = c.full_name || (c as any).name || '';
+        const companyName = c.company_name || (c as any).company || '';
+        const contactPerson = c.contact_person || '';
+        const displayName = fullName || contactPerson || companyName || '';
+        const phone = c.telephone || (c as any).phone || '';
+
+        const normalizedReceivedFrom = {
+          ...c,
+          name: displayName,
+          full_name: fullName || displayName,
+          company: companyName,
+          company_name: companyName,
+          contact_person: contactPerson,
+          email: c.email || '',
+          phone,
+          telephone: phone,
+          country: c.country || '',
+          address: c.address || '',
+        };
+
+        const created = await financeApi.createReceipt({
+          invoice_id: invoice.id,
+          booking_id: invoice.booking_id,
+          payment_reference: paymentReference.trim(),
+          receipt_date: receiptDate,
+          payment_date: new Date().toISOString(),
+          amount_received: Number(amountReceived),
+          currency: invoice.currency,
+          exchange_rate_to_usd: invoice.exchange_rate_to_usd,
+          payment_method: paymentMethod,
+          payment_provider: paymentProvider.trim() || undefined,
+          payment_status: 'completed',
+          received_from: normalizedReceivedFrom,
+          notes: notes.trim() || undefined
+        });
       onSuccess(created);
       onClose();
     } catch (err: any) {

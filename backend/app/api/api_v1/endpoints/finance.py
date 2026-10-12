@@ -512,7 +512,13 @@ def verify_receipt_code(
     if not receipt:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid receipt verification code")
 
-    payer_name = receipt.received_from.get("name") or receipt.received_from.get("company", "Client")
+    payer_name = (
+        receipt.received_from.get("company_name")
+        or receipt.received_from.get("company")
+        or receipt.received_from.get("full_name")
+        or receipt.received_from.get("name")
+        or "Client"
+    )
     inv_num = receipt.invoice.invoice_number if receipt.invoice else None
 
     return PublicReceiptVerificationResponse(

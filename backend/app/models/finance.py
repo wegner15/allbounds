@@ -247,3 +247,83 @@ class TravelVoucher(Base):
     invoice = relationship("Invoice", foreign_keys=[invoice_id])
     issued_by = relationship("User", foreign_keys=[issued_by_id])
     supplier = relationship("Supplier", foreign_keys=[supplier_id], back_populates="vouchers")
+
+
+def generate_signing_token():
+    return f"sgn_{uuid.uuid4().hex}"
+
+
+class PaymentVoucher(Base):
+    __tablename__ = "payment_vouchers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    voucher_number = Column(String(100), unique=True, index=True, nullable=False)  # e.g. "PV-2026-00001"
+
+    # pending_signature, signed, disbursed, reconciled, cancelled
+    voucher_status = Column(String(50), nullable=False, default="pending_signature")
+
+    # safari_field_advance, fuel_maintenance, park_permits, per_diem_allowance, petty_cash, emergency_expense, operational_expense, other
+    category = Column(String(100), nullable=False, default="safari_field_advance")
+
+    issue_date = Column(Date, nullable=False)
+    due_date = Column(Date, nullable=True)
+
+    # Optional linkage to tour/safari booking
+    booking_id = Column(Integer, ForeignKey("bookings.id", ondelete="SET NULL"), nullable=True, index=True)
+
+    # Employee / Beneficiary
+    employee_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    employee_details = Column(JSON, nullable=False, default=dict)
+    # e.g. {"name": "Moses Okello", "role": "Lead Safari Guide", "phone": "+256 78...", "email": "...", "id_number": "...", "payment_account": "MTN MoMo: 078..."}
+
+    # Financial details
+    amount = Column(Float, nullable=False, default=0.0)
+    currency = Column(String(10), nullable=False, default="USD")
+    exchange_rate_to_usd = Column(Float, nullable=False, default=1.0)
+    amount_in_words = Column(String(500), nullable=True)
+
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+
+    # Line items breakdown: list of {"item": "...", "quantity": 1, "unit_price": 100, "total": 100, "notes": "..."}
+    line_items = Column(JSON, nullable=False, default=list)
+
+    # Management Authorization
+    authorized_by_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    authorized_by_name = Column(String(255), nullable=True)
+    authorized_at = Column(DateTime(timezone=True), nullable=True)
+    authorized_signature_url = Column(Text, nullable=True)
+
+    # Employee Digital Signature & Audit Trail
+    signing_token = Column(String(100), unique=True, index=True, default=generate_signing_token)
+    is_signed = Column(Boolean, nullable=False, default=False)
+    signed_at = Column(DateTime(timezone=True), nullable=True)
+    signed_by_name = Column(String(255), nullable=True)
+    signature_data = Column(Text, nullable=True)  # Base64 data URL
+    signed_ip_address = Column(String(50), nullable=True)
+    signed_user_agent = Column(String(255), nullable=True)
+    signer_declaration = Column(Text, nullable=True)
+
+    # Disbursement & Settlement Details
+    # cash, mobile_money, bank_transfer, company_card, cheque
+    disbursement_method = Column(String(50), nullable=False, default="cash")
+    disbursed_from_account = Column(String(150), nullable=True)
+    disbursement_reference = Column(String(150), nullable=True)
+    disbursed_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Reconciliation / Retirement
+    reconciliation_notes = Column(Text, nullable=True)
+    actual_amount_spent = Column(Float, nullable=True)
+    refund_amount = Column(Float, nullable=True)
+
+    notes = Column(Text, nullable=True)
+    terms_and_conditions = Column(Text, nullable=True)
+    verification_code = Column(String(100), unique=True, index=True, default=generate_verification_token)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    booking = relationship("Booking", foreign_keys=[booking_id])
+    employee = relationship("User", foreign_keys=[employee_id])
+    authorized_by = relationship("User", foreign_keys=[authorized_by_id])

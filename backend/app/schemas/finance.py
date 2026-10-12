@@ -416,3 +416,145 @@ class InvoiceProfitabilityResponse(BaseModel):
     bills_count: int
     supplier_bills: List[SupplierBillResponse] = []
 
+
+# ==========================================
+# PAYMENT / EXPENSE AUTHORIZATION VOUCHERS
+# ==========================================
+
+class PaymentVoucherLineItem(BaseModel):
+    item: str
+    quantity: float = 1.0
+    unit_price: float = 0.0
+    total: float = 0.0
+    notes: Optional[str] = None
+
+
+class PaymentVoucherBase(BaseModel):
+    category: str = "safari_field_advance"
+    issue_date: date
+    due_date: Optional[date] = None
+    booking_id: Optional[int] = None
+    employee_id: Optional[int] = None
+    employee_details: Dict[str, Any] = Field(default_factory=dict)
+    amount: float = 0.0
+    currency: str = "USD"
+    exchange_rate_to_usd: float = 1.0
+    amount_in_words: Optional[str] = None
+    title: str
+    description: Optional[str] = None
+    line_items: List[Dict[str, Any]] = Field(default_factory=list)
+    disbursement_method: str = "cash"
+    disbursed_from_account: Optional[str] = None
+    disbursement_reference: Optional[str] = None
+    notes: Optional[str] = None
+    terms_and_conditions: Optional[str] = None
+
+
+class PaymentVoucherCreate(PaymentVoucherBase):
+    voucher_number: Optional[str] = None
+    voucher_status: Optional[str] = "pending_signature"
+    authorized_by_name: Optional[str] = None
+
+
+class PaymentVoucherUpdate(BaseModel):
+    voucher_status: Optional[str] = None
+    category: Optional[str] = None
+    issue_date: Optional[date] = None
+    due_date: Optional[date] = None
+    booking_id: Optional[int] = None
+    employee_id: Optional[int] = None
+    employee_details: Optional[Dict[str, Any]] = None
+    amount: Optional[float] = None
+    currency: Optional[str] = None
+    exchange_rate_to_usd: Optional[float] = None
+    amount_in_words: Optional[str] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    line_items: Optional[List[Dict[str, Any]]] = None
+    authorized_by_name: Optional[str] = None
+    disbursement_method: Optional[str] = None
+    disbursed_from_account: Optional[str] = None
+    disbursement_reference: Optional[str] = None
+    disbursed_at: Optional[datetime] = None
+    reconciliation_notes: Optional[str] = None
+    actual_amount_spent: Optional[float] = None
+    refund_amount: Optional[float] = None
+    notes: Optional[str] = None
+    terms_and_conditions: Optional[str] = None
+
+
+class PaymentVoucherSignRequest(BaseModel):
+    signed_by_name: str
+    signature_data: str
+    signer_declaration: Optional[str] = None
+
+
+class PaymentVoucherResponse(PaymentVoucherBase):
+    id: int
+    voucher_number: str
+    voucher_status: str
+    authorized_by_id: Optional[int] = None
+    authorized_by_name: Optional[str] = None
+    authorized_at: Optional[datetime] = None
+    authorized_signature_url: Optional[str] = None
+    signing_token: str
+    is_signed: bool
+    signed_at: Optional[datetime] = None
+    signed_by_name: Optional[str] = None
+    signature_data: Optional[str] = None
+    signed_ip_address: Optional[str] = None
+    signed_user_agent: Optional[str] = None
+    signer_declaration: Optional[str] = None
+    disbursed_at: Optional[datetime] = None
+    reconciliation_notes: Optional[str] = None
+    actual_amount_spent: Optional[float] = None
+    refund_amount: Optional[float] = None
+    verification_code: str
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class PublicPaymentVoucherSignView(BaseModel):
+    voucher_number: str
+    voucher_status: str
+    category: str
+    issue_date: date
+    due_date: Optional[date] = None
+    employee_name: str
+    employee_role: Optional[str] = None
+    employee_phone: Optional[str] = None
+    employee_email: Optional[str] = None
+    amount: float
+    currency: str
+    amount_in_words: Optional[str] = None
+    title: str
+    description: Optional[str] = None
+    line_items: List[Dict[str, Any]] = []
+    authorized_by_name: Optional[str] = None
+    is_signed: bool
+    signed_at: Optional[datetime] = None
+    signed_by_name: Optional[str] = None
+    signature_data: Optional[str] = None
+    verification_code: str
+    terms_and_conditions: Optional[str] = None
+
+
+class PublicPaymentVoucherVerificationResponse(BaseModel):
+    is_valid: bool
+    voucher_number: str
+    voucher_status: str
+    category: str
+    issue_date: date
+    amount: float
+    currency: str
+    employee_name: str
+    authorized_by_name: Optional[str] = None
+    is_signed: bool
+    signed_by_name: Optional[str] = None
+    signed_at: Optional[datetime] = None
+    verification_timestamp: datetime
+
+

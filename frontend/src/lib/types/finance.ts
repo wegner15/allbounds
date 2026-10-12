@@ -813,3 +813,149 @@ export interface InvoiceProfitability {
   supplier_bills: SupplierBill[];
 }
 
+export interface PaymentVoucherLineItem {
+  id?: string;
+  item_code?: string;
+  description: string;
+  category?: string;
+  quantity: number;
+  unit_price: number;
+  amount: number;
+  notes?: string;
+}
+
+export interface EmployeeVoucherDetails {
+  name?: string;
+  full_name?: string;
+  role?: string;
+  department?: string;
+  phone?: string;
+  email?: string;
+  id_number?: string;
+  [key: string]: any;
+}
+
+export interface PaymentVoucher {
+  id: number;
+  voucher_number: string;
+  voucher_status: "draft" | "authorized" | "disbursed" | "signed" | "reconciled" | "cancelled" | "rejected";
+  category: "per_diem" | "safari_advance" | "fuel_transport" | "field_allowance" | "staff_salary" | "commission" | "reimbursement" | "medical_emergency" | "contingency" | "other" | string;
+  issue_date: string;
+  due_date?: string | null;
+  booking_id?: number | null;
+  employee_id?: number | null;
+  employee_details: EmployeeVoucherDetails;
+  amount: number;
+  currency: string;
+  exchange_rate_to_usd: number;
+  amount_in_words?: string | null;
+  title: string;
+  description?: string | null;
+  line_items: PaymentVoucherLineItem[];
+  authorized_by_id?: number | null;
+  authorized_by_name?: string | null;
+  authorized_at?: string | null;
+  authorized_signature_url?: string | null;
+  signing_token: string;
+  is_signed: boolean;
+  signed_at?: string | null;
+  signed_by_name?: string | null;
+  signature_data?: string | null;
+  signed_ip_address?: string | null;
+  signed_user_agent?: string | null;
+  signer_declaration?: string | null;
+  disbursement_method: "cash" | "bank_transfer" | "mobile_money" | "cheque" | "corporate_card" | string;
+  disbursed_from_account?: string | null;
+  disbursement_reference?: string | null;
+  disbursed_at?: string | null;
+  reconciliation_notes?: string | null;
+  actual_amount_spent?: number | null;
+  refund_amount?: number | null;
+  notes?: string | null;
+  terms_and_conditions?: string | null;
+  verification_code: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface PaymentVoucherCreateRequest {
+  voucher_number?: string;
+  category: string;
+  issue_date: string;
+  due_date?: string | null;
+  booking_id?: number | null;
+  employee_id?: number | null;
+  employee_details: EmployeeVoucherDetails;
+  amount: number;
+  currency: string;
+  exchange_rate_to_usd?: number;
+  amount_in_words?: string | null;
+  title: string;
+  description?: string | null;
+  line_items: PaymentVoucherLineItem[];
+  authorized_by_name?: string | null;
+  authorized_signature_url?: string | null;
+  disbursement_method: string;
+  disbursed_from_account?: string | null;
+  disbursement_reference?: string | null;
+  notes?: string | null;
+  terms_and_conditions?: string | null;
+}
+
+export interface PaymentVoucherUpdateRequest {
+  voucher_status?: string;
+  category?: string;
+  issue_date?: string;
+  due_date?: string | null;
+  employee_details?: EmployeeVoucherDetails;
+  amount?: number;
+  currency?: string;
+  exchange_rate_to_usd?: number;
+  amount_in_words?: string | null;
+  title?: string;
+  description?: string | null;
+  line_items?: PaymentVoucherLineItem[];
+  authorized_by_name?: string | null;
+  disbursement_method?: string;
+  disbursed_from_account?: string | null;
+  disbursement_reference?: string | null;
+  disbursed_at?: string | null;
+  reconciliation_notes?: string | null;
+  actual_amount_spent?: number | null;
+  refund_amount?: number | null;
+  notes?: string | null;
+  terms_and_conditions?: string | null;
+}
+
+export interface PaymentVoucherSignRequest {
+  signed_by_name: string;
+  signature_data: string;
+  signer_declaration?: string;
+}
+
+export interface PublicPaymentVoucherSignView {
+  voucher_number: string;
+  voucher_status: string;
+  category: string;
+  issue_date: string;
+  due_date?: string | null;
+  employee_name: string;
+  employee_role?: string | null;
+  employee_phone?: string | null;
+  employee_email?: string | null;
+  amount: number;
+  currency: string;
+  amount_in_words?: string | null;
+  title: string;
+  description?: string | null;
+  line_items: PaymentVoucherLineItem[];
+  authorized_by_name?: string | null;
+  is_signed: boolean;
+  signed_at?: string | null;
+  signed_by_name?: string | null;
+  signature_data?: string | null;
+  verification_code: string;
+  terms_and_conditions?: string | null;
+}
+
+

@@ -10,7 +10,8 @@ from app.models.finance import (
     Invoice,
     InvoiceLineItem,
     PaymentReceipt,
-    TravelVoucher
+    TravelVoucher,
+    PaymentVoucher
 )
 from app.models.supplier_bill import SupplierBill
 from app.models.booking import Booking
@@ -24,6 +25,9 @@ from app.schemas.finance import (
     PaymentReceiptCreate,
     TravelVoucherCreate,
     TravelVoucherUpdate,
+    PaymentVoucherCreate,
+    PaymentVoucherUpdate,
+    PaymentVoucherSignRequest,
     FinanceDashboardStats
 )
 from app.services.email import email_service
@@ -200,6 +204,24 @@ class FinanceService:
         if last_vch and last_vch.voucher_number:
             try:
                 last_num_str = last_vch.voucher_number.replace(prefix, "")
+                next_num = int(last_num_str) + 1
+            except ValueError:
+                next_num = 1
+        else:
+            next_num = 1
+
+        return f"{prefix}{next_num:05d}"
+
+    def get_next_payment_voucher_number(self, db: Session) -> str:
+        current_year = datetime.utcnow().year
+        prefix = f"PV-{current_year}-"
+        last_pv = db.query(PaymentVoucher).filter(
+            PaymentVoucher.voucher_number.like(f"{prefix}%")
+        ).order_by(PaymentVoucher.id.desc()).first()
+
+        if last_pv and last_pv.voucher_number:
+            try:
+                last_num_str = last_pv.voucher_number.replace(prefix, "")
                 next_num = int(last_num_str) + 1
             except ValueError:
                 next_num = 1
@@ -1196,6 +1218,156 @@ class FinanceService:
             or_(
                 TravelVoucher.verification_code == code,
                 TravelVoucher.voucher_number == code
+            )
+        ).first()
+
+    # ==========================================
+    # PAYMENT / EXPENSE AUTHORIZATION VOUCHERS
+    # ==========================================
+
+    def create_payment_voucher(
+        self,
+        db: Session,
+        voucher_in: PaymentVoucherCreate,
+        current_user_name: Optional[str] = None,
+        current_user_id: Optional[int] = None
+    ) -> PaymentVoucher:
+        voucher_number = voucher_in.voucher_number or self.get_next_payment_voucher_number(db)
+        amount_words = voucher_in.amount_in_words or number_to_words(voucher_in.amount, voucher_in.currency)
+        auth_name = voucher_in.authorized_by_name or current_user_name or "Finance Administrator"
+
+        db_pv = PaymentVoucher(
+            voucher_number=voucher_number,
+            voucher_status=voucher_in.voucher_status or "pending_signature",
+            category=voucher_in.category,
+            issue_date=voucher_in.issue_date,
+            due_date=voucher_in.due_date,
+            booking_id=voucher_in.booking_id,
+            employee_id=voucher_in.employee_id,
+            employee_details=voucher_in.employee_details,
+            amount=voucher_in.amount,
+            currency=voucher_in.currency,
+            exchange_rate_to_usd=voucher_in.exchange_rate_to_usd,
+            amount_in_words=amount_words,
+            title=voucher_in.title,
+            description=voucher_in.description,
+            line_items=voucher_in.line_items,
+            authorized_by_id=current_user_id,
+            authorized_by_name=auth_name,
+            authorized_at=datetime.utcnow(),
+            disbursement_method=voucher_in.disbursement_method,
+            disbursed_from_account=voucher_in.disbursed_from_account,
+            disbursement_reference=voucher_in.disbursement_reference,
+            notes=voucher_in.notes,
+            terms_and_conditions=voucher_in.terms_and_conditions,
+        )
+        db.add(db_pv)
+        db.commit()
+        db.refresh(db_pv)
+        return db_pv
+
+    def update_payment_voucher(
+        self,
+        db: Session,
+        voucher_id: int,
+        voucher_update: PaymentVoucherUpdate
+    ) -> Optional[PaymentVoucher]:
+        pv = db.query(PaymentVoucher).filter(PaymentVoucher.id == voucher_id).first()
+        if not pv:
+            return None
+
+        update_data = voucher_update.dict(exclude_unset=True)
+        if "amount" in update_data and update_data["amount"] is not None and not update_data.get("amount_in_words"):
+            curr = update_data.get("currency") or pv.currency
+            update_data["amount_in_words"] = number_to_words(update_data["amount"], curr)
+
+        if update_data.get("voucher_status") == "disbursed" and not pv.disbursed_at:
+            update_data["disbursed_at"] = datetime.utcnow()
+
+        for field, value in update_data.items():
+            setattr(pv, field, value)
+
+        db.commit()
+        db.refresh(pv)
+        return pv
+
+    def get_payment_vouchers(
+        self,
+        db: Session,
+        skip: int = 0,
+        limit: int = 50,
+        status: Optional[str] = None,
+        category: Optional[str] = None,
+        employee_id: Optional[int] = None,
+        booking_id: Optional[int] = None,
+        search: Optional[str] = None
+    ) -> Tuple[List[PaymentVoucher], int]:
+        query = db.query(PaymentVoucher)
+        if status:
+            query = query.filter(PaymentVoucher.voucher_status == status)
+        if category:
+            query = query.filter(PaymentVoucher.category == category)
+        if employee_id:
+            query = query.filter(PaymentVoucher.employee_id == employee_id)
+        if booking_id:
+            query = query.filter(PaymentVoucher.booking_id == booking_id)
+        if search:
+            pattern = f"%{search}%"
+            query = query.filter(
+                or_(
+                    PaymentVoucher.voucher_number.ilike(pattern),
+                    PaymentVoucher.title.ilike(pattern),
+                    PaymentVoucher.employee_details["name"].astext.ilike(pattern),
+                    PaymentVoucher.notes.ilike(pattern)
+                )
+            )
+
+        total = query.count()
+        vouchers = query.order_by(PaymentVoucher.created_at.desc()).offset(skip).limit(limit).all()
+        return vouchers, total
+
+    def get_payment_voucher(self, db: Session, voucher_id: int) -> Optional[PaymentVoucher]:
+        return db.query(PaymentVoucher).filter(PaymentVoucher.id == voucher_id).first()
+
+    def get_payment_voucher_by_signing_token(self, db: Session, token: str) -> Optional[PaymentVoucher]:
+        return db.query(PaymentVoucher).filter(PaymentVoucher.signing_token == token).first()
+
+    def sign_payment_voucher(
+        self,
+        db: Session,
+        token: str,
+        sign_in: PaymentVoucherSignRequest,
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None
+    ) -> Optional[PaymentVoucher]:
+        pv = self.get_payment_voucher_by_signing_token(db, token)
+        if not pv:
+            return None
+        if pv.voucher_status == "cancelled":
+            raise ValueError("This voucher has been cancelled and cannot be signed.")
+
+        pv.is_signed = True
+        pv.signed_at = datetime.utcnow()
+        pv.signed_by_name = sign_in.signed_by_name
+        pv.signature_data = sign_in.signature_data
+        pv.signer_declaration = sign_in.signer_declaration or (
+            f"I, {sign_in.signed_by_name}, hereby acknowledge receipt/authorization of {pv.currency} {pv.amount:,.2f} "
+            f"for '{pv.title}' and agree to submit receipts and account for these company funds accordingly."
+        )
+        pv.signed_ip_address = ip_address
+        pv.signed_user_agent = user_agent
+        if pv.voucher_status == "pending_signature":
+            pv.voucher_status = "signed"
+
+        db.commit()
+        db.refresh(pv)
+        return pv
+
+    def get_payment_voucher_by_verification_code(self, db: Session, code: str) -> Optional[PaymentVoucher]:
+        return db.query(PaymentVoucher).filter(
+            or_(
+                PaymentVoucher.verification_code == code,
+                PaymentVoucher.voucher_number == code
             )
         ).first()
 

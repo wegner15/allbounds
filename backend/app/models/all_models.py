@@ -47,7 +47,8 @@ from app.models.finance import (
     Invoice,
     InvoiceLineItem,
     PaymentReceipt,
-    TravelVoucher
+    TravelVoucher,
+    PaymentVoucher
 )
 from app.models.supplier_bill import SupplierBill
 from app.models.supplier_payment import SupplierPayment
@@ -68,6 +69,7 @@ __all__ = [
     'CountryVisitInfo', 'NewsletterSubscription', 'VisaApplication',
     'FlightBooking', 'FlightPassenger', 'EmailLog', 'Partner',
     'Currency', 'CompanyFinanceSettings', 'Invoice', 'InvoiceLineItem', 'PaymentReceipt', 'TravelVoucher',
+    'PaymentVoucher',
     'SupplierBill', 'SupplierPayment',
 ]
 

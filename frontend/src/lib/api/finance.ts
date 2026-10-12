@@ -10,6 +10,11 @@ import type {
   TravelVoucher,
   TravelVoucherCreateRequest,
   TravelVoucherUpdateRequest,
+  PaymentVoucher,
+  PaymentVoucherCreateRequest,
+  PaymentVoucherUpdateRequest,
+  PaymentVoucherSignRequest,
+  PublicPaymentVoucherSignView,
   FinanceDashboardStats,
   InvoiceProfitability,
   PublicVoucherVerificationResponse,
@@ -214,6 +219,51 @@ export const financeApi = {
   },
 
   // ==========================================
+  // PAYMENT / EXPENSE AUTHORIZATION VOUCHERS
+  // ==========================================
+  async getPaymentVouchers(params?: {
+    skip?: number;
+    limit?: number;
+    status?: string;
+    category?: string;
+    employee_id?: number;
+    booking_id?: number;
+    search?: string;
+  }): Promise<{ items: PaymentVoucher[]; total: number; skip: number; limit: number }> {
+    const q = new URLSearchParams();
+    if (params?.skip !== undefined) q.append('skip', String(params.skip));
+    if (params?.limit !== undefined) q.append('limit', String(params.limit));
+    if (params?.status) q.append('status', params.status);
+    if (params?.category) q.append('category', params.category);
+    if (params?.employee_id) q.append('employee_id', String(params.employee_id));
+    if (params?.booking_id) q.append('booking_id', String(params.booking_id));
+    if (params?.search) q.append('search', params.search);
+    return apiClient.get<{ items: PaymentVoucher[]; total: number; skip: number; limit: number }>(
+      `/finance/payment-vouchers?${q.toString()}`
+    );
+  },
+
+  async createPaymentVoucher(data: PaymentVoucherCreateRequest): Promise<PaymentVoucher> {
+    return apiClient.post<PaymentVoucher>('/finance/payment-vouchers', data);
+  },
+
+  async getPaymentVoucher(id: number): Promise<PaymentVoucher> {
+    return apiClient.get<PaymentVoucher>(`/finance/payment-vouchers/${id}`);
+  },
+
+  async updatePaymentVoucher(id: number, data: PaymentVoucherUpdateRequest): Promise<PaymentVoucher> {
+    return apiClient.put<PaymentVoucher>(`/finance/payment-vouchers/${id}`, data);
+  },
+
+  async getPaymentVoucherForSigning(token: string): Promise<PublicPaymentVoucherSignView> {
+    return apiClient.get<PublicPaymentVoucherSignView>(`/finance/payment-vouchers/sign/${token}`);
+  },
+
+  async signPaymentVoucher(token: string, data: PaymentVoucherSignRequest): Promise<PublicPaymentVoucherSignView> {
+    return apiClient.post<PublicPaymentVoucherSignView>(`/finance/payment-vouchers/sign/${token}`, data);
+  },
+
+  // ==========================================
   // PUBLIC VERIFICATION
   // ==========================================
   async verifyVoucher(code: string): Promise<PublicVoucherVerificationResponse> {
@@ -223,4 +273,9 @@ export const financeApi = {
   async verifyReceipt(code: string): Promise<PublicReceiptVerificationResponse> {
     return apiClient.get<PublicReceiptVerificationResponse>(`/finance/verify/receipt/${code}`);
   },
+
+  async verifyPaymentVoucher(code: string): Promise<any> {
+    return apiClient.get<any>(`/finance/verify/payment-voucher/${code}`);
+  },
 };
+

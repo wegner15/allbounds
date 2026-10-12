@@ -10939,11 +10939,6 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/packages/beach-honeymoon-dubai</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>https://allboundvacations.com/packages/bucket-list-adventure-gorilla-encounters-in-bwindi</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -10960,11 +10955,6 @@
   </url>
   <url>
     <loc>https://allboundvacations.com/packages/coin-de-mire-attitude-hotel-4-nights-package</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://allboundvacations.com/packages/desert-romance-package</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -10999,11 +10989,6 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/packages/dubai-elite-lifestyle</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>https://allboundvacations.com/packages/dubai-express-escape-4-days-3-nights</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -11014,22 +10999,7 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/packages/dubai-luxury-adventure</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>https://allboundvacations.com/packages/dubai-luxury-city-beach-combo</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://allboundvacations.com/packages/dubai-millionaire-experience</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://allboundvacations.com/packages/dubai-royal-experience</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -11099,16 +11069,6 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/packages/dubai/beach-honeymoon-dubai</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://allboundvacations.com/packages/dubai/desert-romance-package</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>https://allboundvacations.com/packages/dubai/dubai-abu-dhabi-family</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -11139,11 +11099,6 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/packages/dubai/dubai-elite-lifestyle</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>https://allboundvacations.com/packages/dubai/dubai-express-escape-4-days-3-nights</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -11154,22 +11109,7 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://allboundvacations.com/packages/dubai/dubai-luxury-adventure</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>https://allboundvacations.com/packages/dubai/dubai-luxury-city-beach-combo</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://allboundvacations.com/packages/dubai/dubai-millionaire-experience</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://allboundvacations.com/packages/dubai/dubai-royal-experience</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -11215,11 +11155,6 @@
   </url>
   <url>
     <loc>https://allboundvacations.com/packages/dubai/ultra-luxury-dubai</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://allboundvacations.com/packages/dubai/vip-dubai-experience</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -11585,11 +11520,6 @@
   </url>
   <url>
     <loc>https://allboundvacations.com/packages/veranda-tamarin-4-nights-package</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://allboundvacations.com/packages/vip-dubai-experience</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>

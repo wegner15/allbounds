@@ -1,6 +1,6 @@
 from typing import Any, List, Optional
 from datetime import datetime, date
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
@@ -24,6 +24,12 @@ from app.schemas.finance import (
     TravelVoucherCreate,
     TravelVoucherFromBookingCreate,
     TravelVoucherUpdate,
+    PaymentVoucherResponse,
+    PaymentVoucherCreate,
+    PaymentVoucherUpdate,
+    PaymentVoucherSignRequest,
+    PublicPaymentVoucherSignView,
+    PublicPaymentVoucherVerificationResponse,
     PublicVoucherVerificationResponse,
     PublicReceiptVerificationResponse,
     FinanceDashboardStats,
@@ -463,6 +469,177 @@ def send_voucher_email(
 
 
 # ==========================================
+# PAYMENT / EXPENSE AUTHORIZATION VOUCHERS
+# ==========================================
+
+@router.get("/payment-vouchers")
+def get_payment_vouchers(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=100),
+    status: Optional[str] = None,
+    category: Optional[str] = None,
+    employee_id: Optional[int] = None,
+    booking_id: Optional[int] = None,
+    search: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_finance_or_admin)
+) -> Any:
+    """List employee payment / expense authorization vouchers."""
+    vouchers, total = finance_service.get_payment_vouchers(
+        db,
+        skip=skip,
+        limit=limit,
+        status=status,
+        category=category,
+        employee_id=employee_id,
+        booking_id=booking_id,
+        search=search
+    )
+    return {
+        "items": [PaymentVoucherResponse.from_orm(v) for v in vouchers],
+        "total": total,
+        "skip": skip,
+        "limit": limit
+    }
+
+
+@router.post("/payment-vouchers", response_model=PaymentVoucherResponse)
+def create_payment_voucher(
+    voucher_in: PaymentVoucherCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_finance_or_admin)
+) -> Any:
+    """Create a new payment / expense authorization voucher."""
+    auth_name = voucher_in.authorized_by_name or f"{current_user.first_name or ''} {current_user.last_name or ''}".strip() or current_user.email
+    return finance_service.create_payment_voucher(
+        db,
+        voucher_in,
+        current_user_name=auth_name,
+        current_user_id=current_user.id
+    )
+
+
+@router.get("/payment-vouchers/{voucher_id}", response_model=PaymentVoucherResponse)
+def get_payment_voucher(
+    voucher_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_finance_or_admin)
+) -> Any:
+    """Get single payment voucher by ID."""
+    pv = finance_service.get_payment_voucher(db, voucher_id)
+    if not pv:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment voucher not found")
+    return pv
+
+
+@router.put("/payment-vouchers/{voucher_id}", response_model=PaymentVoucherResponse)
+def update_payment_voucher(
+    voucher_id: int,
+    voucher_update: PaymentVoucherUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_finance_or_admin)
+) -> Any:
+    """Update payment voucher details, status, or retirement."""
+    pv = finance_service.update_payment_voucher(db, voucher_id, voucher_update)
+    if not pv:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment voucher not found")
+    return pv
+
+
+# ==========================================
+# PUBLIC EMPLOYEE SIGNING PORTAL ENDPOINTS
+# ==========================================
+
+@router.get("/payment-vouchers/sign/{token}", response_model=PublicPaymentVoucherSignView)
+def get_payment_voucher_for_signing(
+    token: str,
+    db: Session = Depends(get_db)
+) -> Any:
+    """Public endpoint: Allows an employee to view the voucher before signing via secure token."""
+    pv = finance_service.get_payment_voucher_by_signing_token(db, token)
+    if not pv:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Signing link is invalid or expired.")
+
+    emp_details = dict(pv.employee_details or {})
+    return PublicPaymentVoucherSignView(
+        voucher_number=pv.voucher_number,
+        voucher_status=pv.voucher_status,
+        category=pv.category,
+        issue_date=pv.issue_date,
+        due_date=pv.due_date,
+        employee_name=emp_details.get("name") or emp_details.get("full_name") or "Authorized Employee",
+        employee_role=emp_details.get("role") or emp_details.get("department") or "",
+        employee_phone=emp_details.get("phone") or "",
+        employee_email=emp_details.get("email") or "",
+        amount=pv.amount,
+        currency=pv.currency,
+        amount_in_words=pv.amount_in_words,
+        title=pv.title,
+        description=pv.description,
+        line_items=pv.line_items or [],
+        authorized_by_name=pv.authorized_by_name,
+        is_signed=pv.is_signed,
+        signed_at=pv.signed_at,
+        signed_by_name=pv.signed_by_name,
+        signature_data=pv.signature_data,
+        verification_code=pv.verification_code,
+        terms_and_conditions=pv.terms_and_conditions
+    )
+
+
+@router.post("/payment-vouchers/sign/{token}", response_model=PublicPaymentVoucherSignView)
+def sign_payment_voucher(
+    token: str,
+    sign_in: PaymentVoucherSignRequest,
+    request: Request,
+    db: Session = Depends(get_db)
+) -> Any:
+    """Public endpoint: Captures employee digital signature, IP address, timestamp, and audit trail."""
+    client_ip = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")[:250]
+
+    try:
+        pv = finance_service.sign_payment_voucher(
+            db,
+            token=token,
+            sign_in=sign_in,
+            ip_address=client_ip,
+            user_agent=user_agent
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+    if not pv:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Signing link is invalid or expired.")
+
+    emp_details = dict(pv.employee_details or {})
+    return PublicPaymentVoucherSignView(
+        voucher_number=pv.voucher_number,
+        voucher_status=pv.voucher_status,
+        category=pv.category,
+        issue_date=pv.issue_date,
+        due_date=pv.due_date,
+        employee_name=emp_details.get("name") or emp_details.get("full_name") or "Authorized Employee",
+        employee_role=emp_details.get("role") or emp_details.get("department") or "",
+        employee_phone=emp_details.get("phone") or "",
+        employee_email=emp_details.get("email") or "",
+        amount=pv.amount,
+        currency=pv.currency,
+        amount_in_words=pv.amount_in_words,
+        title=pv.title,
+        description=pv.description,
+        line_items=pv.line_items or [],
+        authorized_by_name=pv.authorized_by_name,
+        is_signed=pv.is_signed,
+        signed_at=pv.signed_at,
+        signed_by_name=pv.signed_by_name,
+        signature_data=pv.signature_data,
+        verification_code=pv.verification_code,
+        terms_and_conditions=pv.terms_and_conditions
+    )
+
+
+# ==========================================
 # PUBLIC VERIFICATION ENDPOINTS
 # ==========================================
 
@@ -534,3 +711,34 @@ def verify_receipt_code(
         payer_name=payer_name,
         verification_timestamp=datetime.utcnow()
     )
+
+
+@router.get("/verify/payment-voucher/{code}", response_model=PublicPaymentVoucherVerificationResponse)
+def verify_payment_voucher_code(
+    code: str,
+    db: Session = Depends(get_db)
+) -> Any:
+    """Public verification endpoint for QR code scans on employee payment / expense authorization vouchers."""
+    pv = finance_service.get_payment_voucher_by_verification_code(db, code)
+    if not pv:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid payment voucher verification code")
+
+    emp_details = dict(pv.employee_details or {})
+    employee_name = emp_details.get("name") or emp_details.get("full_name") or "Authorized Employee"
+
+    return PublicPaymentVoucherVerificationResponse(
+        is_valid=pv.voucher_status not in ("cancelled", "rejected"),
+        voucher_number=pv.voucher_number,
+        voucher_status=pv.voucher_status,
+        category=pv.category,
+        issue_date=pv.issue_date,
+        amount=pv.amount,
+        currency=pv.currency,
+        employee_name=employee_name,
+        authorized_by_name=pv.authorized_by_name,
+        is_signed=pv.is_signed,
+        signed_by_name=pv.signed_by_name,
+        signed_at=pv.signed_at,
+        verification_timestamp=datetime.utcnow()
+    )
+

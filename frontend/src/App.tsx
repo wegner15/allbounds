@@ -165,6 +165,7 @@ import { ReceiptDetailPage } from './features/admin/finance/receipts/ReceiptDeta
 import { VouchersListPage } from './features/admin/finance/vouchers/VouchersListPage';
 import { VoucherEditorPage } from './features/admin/finance/vouchers/VoucherEditorPage';
 import { VoucherDetailPage } from './features/admin/finance/vouchers/VoucherDetailPage';
+import { PaymentVoucherDetailPage } from './features/admin/finance/vouchers/PaymentVoucherDetailPage';
 import { FinanceSettingsPage } from './features/admin/finance/settings/FinanceSettingsPage';
 import { ClientsListPage } from './features/admin/finance/clients/ClientsListPage';
 import { ClientDetailPage } from './features/admin/finance/clients/ClientDetailPage';
@@ -175,6 +176,8 @@ import { ReportsOverviewPage } from './features/admin/finance/reports/ReportsOve
 
 // Import Public Verification pages
 import { PublicVoucherVerificationPage } from './features/public/verification/PublicVoucherVerificationPage';
+import { PublicPaymentVoucherVerificationPage } from './features/public/verification/PublicPaymentVoucherVerificationPage';
+import { PublicPaymentVoucherSignPage } from './features/public/verification/PublicPaymentVoucherSignPage';
 import { PublicReceiptVerificationPage } from './features/public/verification/PublicReceiptVerificationPage';
 import { PublicInvoiceViewPage } from './features/public/verification/PublicInvoiceViewPage';
 
@@ -418,6 +421,8 @@ const router = createBrowserRouter([
       { path: 'unauthorized', element: <UnauthorizedPage /> },
       { path: 'form-showcase', element: <FormShowcasePage /> },
       { path: 'contact', element: <ContactFormPage /> },
+      { path: 'sign/voucher/:token', element: <PublicPaymentVoucherSignPage /> },
+      { path: 'verify/payment-voucher/:code', element: <PublicPaymentVoucherVerificationPage /> },
       { path: 'verify/voucher/:code', element: <PublicVoucherVerificationPage /> },
       { path: 'verify/receipt/:code', element: <PublicReceiptVerificationPage /> },
       { path: 'verify/invoice/:token', element: <PublicInvoiceViewPage /> },
@@ -454,6 +459,7 @@ const router = createBrowserRouter([
           { path: 'finance/vouchers/new', element: <VoucherEditorPage /> },
           { path: 'finance/vouchers/:id', element: <VoucherDetailPage /> },
           { path: 'finance/vouchers/:id/edit', element: <VoucherEditorPage /> },
+          { path: 'finance/payment-vouchers/:id', element: <PaymentVoucherDetailPage /> },
           { path: 'finance/clients', element: <ClientsListPage /> },
           { path: 'finance/clients/:id', element: <ClientDetailPage /> },
           { path: 'finance/suppliers', element: <SuppliersListPage /> },

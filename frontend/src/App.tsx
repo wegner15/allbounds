@@ -166,6 +166,7 @@ import { VouchersListPage } from './features/admin/finance/vouchers/VouchersList
 import { VoucherEditorPage } from './features/admin/finance/vouchers/VoucherEditorPage';
 import { VoucherDetailPage } from './features/admin/finance/vouchers/VoucherDetailPage';
 import { PaymentVoucherDetailPage } from './features/admin/finance/vouchers/PaymentVoucherDetailPage';
+import { StaffRegistryPage } from './features/admin/finance/staff/StaffRegistryPage';
 import { FinanceSettingsPage } from './features/admin/finance/settings/FinanceSettingsPage';
 import { ClientsListPage } from './features/admin/finance/clients/ClientsListPage';
 import { ClientDetailPage } from './features/admin/finance/clients/ClientDetailPage';
@@ -460,6 +461,7 @@ const router = createBrowserRouter([
           { path: 'finance/vouchers/:id', element: <VoucherDetailPage /> },
           { path: 'finance/vouchers/:id/edit', element: <VoucherEditorPage /> },
           { path: 'finance/payment-vouchers/:id', element: <PaymentVoucherDetailPage /> },
+          { path: 'finance/staff', element: <StaffRegistryPage /> },
           { path: 'finance/clients', element: <ClientsListPage /> },
           { path: 'finance/clients/:id', element: <ClientDetailPage /> },
           { path: 'finance/suppliers', element: <SuppliersListPage /> },

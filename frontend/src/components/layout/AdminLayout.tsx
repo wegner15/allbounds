@@ -69,6 +69,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
         { name: 'Suppliers Directory', href: '/admin/finance/suppliers' },
         { name: 'Supplier Bills (Payables)', href: '/admin/finance/bills' },
         { name: 'Travel Vouchers', href: '/admin/finance/vouchers' },
+        { name: 'Staff Registry', href: '/admin/finance/staff' },
         { name: 'Financial Reports', href: '/admin/finance/reports' },
         { name: 'Finance Settings', href: '/admin/finance/settings' }
       ]

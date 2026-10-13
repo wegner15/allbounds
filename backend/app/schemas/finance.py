@@ -38,6 +38,21 @@ class CurrencyResponse(CurrencyBase):
 
 
 # ==========================================
+# STAFF / EMPLOYEE REGISTRY SCHEMAS
+# ==========================================
+
+class StaffMemberInput(BaseModel):
+    id: Optional[str] = Field(None, max_length=50, description="Registry ID, e.g. ABV-EMP-001. Generated when omitted.")
+    name: str = Field(..., min_length=1, max_length=150)
+    role: Optional[str] = Field(None, max_length=150)
+    department: Optional[str] = Field(None, max_length=150)
+    phone: Optional[str] = Field(None, max_length=50)
+    email: Optional[EmailStr] = None
+    id_number: Optional[str] = Field(None, max_length=50, description="Staff / National ID")
+    is_active: bool = True
+
+
+# ==========================================
 # COMPANY FINANCE SETTINGS SCHEMAS
 # ==========================================
 

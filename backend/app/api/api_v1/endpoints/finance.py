@@ -33,7 +33,8 @@ from app.schemas.finance import (
     PublicVoucherVerificationResponse,
     PublicReceiptVerificationResponse,
     FinanceDashboardStats,
-    SendEmailRequest
+    SendEmailRequest,
+    StaffMemberInput
 )
 
 router = APIRouter()
@@ -481,6 +482,7 @@ def get_payment_vouchers(
     status: Optional[str] = None,
     category: Optional[str] = None,
     employee_id: Optional[int] = None,
+    staff_id: Optional[str] = None,
     booking_id: Optional[int] = None,
     search: Optional[str] = None,
     db: Session = Depends(get_db),
@@ -494,6 +496,7 @@ def get_payment_vouchers(
         status=status,
         category=category,
         employee_id=employee_id,
+        staff_id=staff_id,
         booking_id=booking_id,
         search=search
     )
@@ -579,21 +582,25 @@ def send_payment_voucher_email(
 
 @router.get("/staff")
 def get_staff_members(
+    active_only: bool = False,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
     """Retrieve list of employees / staff members for voucher assignments."""
-    return finance_service.get_staff_members(db)
+    return finance_service.get_staff_members(db, active_only=active_only)
 
 
 @router.post("/staff")
 def save_staff_member(
-    member_data: Dict[str, Any],
+    member_in: StaffMemberInput,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
-    """Save or update a staff member in the directory."""
-    return finance_service.save_staff_member(db, member_data)
+    """Create or update a staff member in the registry (matched by id)."""
+    try:
+        return finance_service.save_staff_member(db, member_in.model_dump(exclude_unset=True))
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.delete("/staff/{member_id}")
@@ -602,8 +609,11 @@ def delete_staff_member(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_finance_or_admin)
 ) -> Any:
-    """Delete a staff member from the directory."""
-    return finance_service.delete_staff_member(db, member_id)
+    """Delete a staff member from the registry. Issued vouchers keep their employee snapshot."""
+    result = finance_service.delete_staff_member(db, member_id)
+    if result is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Staff member not found")
+    return result
 
 
 # ==========================================

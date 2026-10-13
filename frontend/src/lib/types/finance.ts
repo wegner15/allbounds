@@ -825,6 +825,8 @@ export interface PaymentVoucherLineItem {
 }
 
 export interface EmployeeVoucherDetails {
+  /** Registry ID (e.g. ABV-EMP-001) when the payee was picked from the staff registry */
+  staff_id?: string;
   name?: string;
   full_name?: string;
   role?: string;
@@ -833,6 +835,17 @@ export interface EmployeeVoucherDetails {
   email?: string;
   id_number?: string;
   [key: string]: any;
+}
+
+export interface StaffMember {
+  id?: string;
+  name: string;
+  role?: string | null;
+  department?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  id_number?: string | null;
+  is_active?: boolean;
 }
 
 export interface PaymentVoucher {

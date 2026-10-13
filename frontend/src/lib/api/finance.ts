@@ -18,7 +18,8 @@ import type {
   FinanceDashboardStats,
   InvoiceProfitability,
   PublicVoucherVerificationResponse,
-  PublicReceiptVerificationResponse
+  PublicReceiptVerificationResponse,
+  StaffMember
 } from '../types/finance';
 
 export const financeApi = {
@@ -219,6 +220,21 @@ export const financeApi = {
   },
 
   // ==========================================
+  // STAFF / EMPLOYEE REGISTRY
+  // ==========================================
+  async getStaff(activeOnly = false): Promise<StaffMember[]> {
+    return apiClient.get<StaffMember[]>(`/finance/staff?active_only=${activeOnly}`);
+  },
+
+  async saveStaff(member: StaffMember): Promise<StaffMember[]> {
+    return apiClient.post<StaffMember[]>('/finance/staff', member);
+  },
+
+  async deleteStaff(id: string): Promise<StaffMember[]> {
+    return apiClient.delete<StaffMember[]>(`/finance/staff/${encodeURIComponent(id)}`);
+  },
+
+  // ==========================================
   // PAYMENT / EXPENSE AUTHORIZATION VOUCHERS
   // ==========================================
   async getPaymentVouchers(params?: {
@@ -227,6 +243,7 @@ export const financeApi = {
     status?: string;
     category?: string;
     employee_id?: number;
+    staff_id?: string;
     booking_id?: number;
     search?: string;
   }): Promise<{ items: PaymentVoucher[]; total: number; skip: number; limit: number }> {
@@ -236,6 +253,7 @@ export const financeApi = {
     if (params?.status) q.append('status', params.status);
     if (params?.category) q.append('category', params.category);
     if (params?.employee_id) q.append('employee_id', String(params.employee_id));
+    if (params?.staff_id) q.append('staff_id', params.staff_id);
     if (params?.booking_id) q.append('booking_id', String(params.booking_id));
     if (params?.search) q.append('search', params.search);
     return apiClient.get<{ items: PaymentVoucher[]; total: number; skip: number; limit: number }>(

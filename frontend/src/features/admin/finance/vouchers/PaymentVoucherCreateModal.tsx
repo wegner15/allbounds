@@ -17,7 +17,8 @@ import type {
   PaymentVoucher,
   PaymentVoucherCreateRequest,
   PaymentVoucherLineItem,
-  Currency
+  Currency,
+  StaffMember
 } from '../../../../lib/types/finance';
 
 interface PaymentVoucherCreateModalProps {
@@ -42,6 +43,8 @@ export const PaymentVoucherCreateModal: React.FC<PaymentVoucherCreateModalProps>
   const [bookingId, setBookingId] = useState<string>('');
   
   // Employee
+  const [staffList, setStaffList] = useState<StaffMember[]>([]);
+  const [staffId, setStaffId] = useState<string>('');
   const [employeeName, setEmployeeName] = useState<string>('');
   const [employeeRole, setEmployeeRole] = useState<string>('Senior Safari Guide');
   const [employeePhone, setEmployeePhone] = useState<string>('');
@@ -81,10 +84,29 @@ export const PaymentVoucherCreateModal: React.FC<PaymentVoucherCreateModalProps>
         console.error('Failed to load currencies', err);
       }
     }
+    async function loadStaff() {
+      try {
+        setStaffList(await financeApi.getStaff(true));
+      } catch (err) {
+        console.error('Failed to load staff registry', err);
+      }
+    }
     if (isOpen) {
       loadCurrencies();
+      loadStaff();
     }
   }, [isOpen]);
+
+  const handleSelectStaff = (id: string) => {
+    setStaffId(id);
+    const m = staffList.find((s) => s.id === id);
+    if (!m) return;
+    setEmployeeName(m.name || '');
+    setEmployeeRole(m.role || '');
+    setEmployeePhone(m.phone || '');
+    setEmployeeEmail(m.email || '');
+    setEmployeeIdNumber(m.id_number || m.id || '');
+  };
 
   if (!isOpen) return null;
 
@@ -146,6 +168,7 @@ export const PaymentVoucherCreateModal: React.FC<PaymentVoucherCreateModalProps>
         due_date: dueDate || null,
         booking_id: bookingId ? parseInt(bookingId, 10) : null,
         employee_details: {
+          ...(staffId ? { staff_id: staffId } : {}),
           name: employeeName.trim(),
           role: employeeRole.trim(),
           phone: employeePhone.trim(),
@@ -290,7 +313,29 @@ export const PaymentVoucherCreateModal: React.FC<PaymentVoucherCreateModalProps>
             <h3 className="text-xs font-bold uppercase tracking-wider text-teal-900 mb-2 flex items-center gap-1.5">
               <User className="w-3.5 h-3.5" /> Employee / Payee Details
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200">
+              <label className="block text-gray-600 font-bold mb-1 text-[10px] uppercase">
+                Select from Staff Registry
+              </label>
+              <select
+                value={staffId}
+                onChange={(e) => handleSelectStaff(e.target.value)}
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-xl font-medium focus:ring-2 focus:ring-teal-600 outline-none"
+              >
+                <option value="">— Enter payee manually —</option>
+                {staffList.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}{s.role ? ` — ${s.role}` : ''} ({s.id})
+                  </option>
+                ))}
+              </select>
+              {staffList.length === 0 && (
+                <p className="mt-1 text-[10px] text-gray-500">
+                  No staff in the registry yet. Add staff under Finance → Staff Registry.
+                </p>
+              )}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 mt-2 bg-gray-50 rounded-2xl border border-gray-200">
               <div>
                 <label className="block text-gray-600 font-bold mb-1 text-[10px] uppercase">
                   Staff / Payee Name *

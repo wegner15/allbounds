@@ -153,63 +153,6 @@ DEFAULT_SUPPLIER_CATEGORIES = [
     {"id": "other", "label": "Other Service"}
 ]
 
-DEFAULT_STAFF_MEMBERS = [
-    {
-        "id": "ABV-EMP-001",
-        "name": "Moses Okello",
-        "role": "Lead Safari Guide",
-        "phone": "+256 782 112 233",
-        "email": "m.okello@allboundvacations.com",
-        "id_number": "ABV-EMP-001",
-        "department": "Safari Guiding & Field Operations"
-    },
-    {
-        "id": "ABV-EMP-002",
-        "name": "David Opolot",
-        "role": "Senior Safari Guide",
-        "phone": "+256 782 445 566",
-        "email": "d.opolot@allboundvacations.com",
-        "id_number": "ABV-EMP-002",
-        "department": "Safari Guiding & Field Operations"
-    },
-    {
-        "id": "ABV-EMP-003",
-        "name": "Alex Mukasa",
-        "role": "Lead Tour Driver & Chauffeur",
-        "phone": "+256 772 334 455",
-        "email": "a.mukasa@allboundvacations.com",
-        "id_number": "ABV-EMP-003",
-        "department": "Transport & Fleet Operations"
-    },
-    {
-        "id": "ABV-EMP-004",
-        "name": "Sarah Namubiru",
-        "role": "Operations & Reservations Coordinator",
-        "phone": "+256 701 889 900",
-        "email": "s.namubiru@allboundvacations.com",
-        "id_number": "ABV-EMP-004",
-        "department": "Operations Management"
-    },
-    {
-        "id": "ABV-EMP-005",
-        "name": "Brian Kato",
-        "role": "Field Logistics & Transport Officer",
-        "phone": "+256 784 556 677",
-        "email": "b.kato@allboundvacations.com",
-        "id_number": "ABV-EMP-005",
-        "department": "Logistics & Fleet"
-    },
-    {
-        "id": "ABV-EMP-006",
-        "name": "Grace Achieng",
-        "role": "Guest Relations & Tour Escort",
-        "phone": "+256 752 990 011",
-        "email": "g.achieng@allboundvacations.com",
-        "id_number": "ABV-EMP-006",
-        "department": "Customer Relations"
-    }
-]
-
 
 class FinanceService:
     # ==========================================
@@ -1357,6 +1300,7 @@ class FinanceService:
         status: Optional[str] = None,
         category: Optional[str] = None,
         employee_id: Optional[int] = None,
+        staff_id: Optional[str] = None,
         booking_id: Optional[int] = None,
         search: Optional[str] = None
     ) -> Tuple[List[PaymentVoucher], int]:
@@ -1367,6 +1311,8 @@ class FinanceService:
             query = query.filter(PaymentVoucher.category == category)
         if employee_id:
             query = query.filter(PaymentVoucher.employee_id == employee_id)
+        if staff_id:
+            query = query.filter(PaymentVoucher.employee_details["staff_id"].as_string() == staff_id)
         if booking_id:
             query = query.filter(PaymentVoucher.booking_id == booking_id)
         if search:
@@ -1375,7 +1321,7 @@ class FinanceService:
                 or_(
                     PaymentVoucher.voucher_number.ilike(pattern),
                     PaymentVoucher.title.ilike(pattern),
-                    PaymentVoucher.employee_details["name"].astext.ilike(pattern),
+                    PaymentVoucher.employee_details["name"].as_string().ilike(pattern),
                     PaymentVoucher.notes.ilike(pattern)
                 )
             )
@@ -1593,31 +1539,61 @@ class FinanceService:
         return True
 
 
-    def get_staff_members(self, db: Session) -> List[Dict[str, Any]]:
+    # ==========================================
+    # STAFF / EMPLOYEE REGISTRY
+    # ==========================================
+
+    @staticmethod
+    def _next_staff_id(current: List[Dict[str, Any]]) -> str:
+        highest = 0
+        for m in current:
+            suffix = str(m.get("id", "")).rsplit("-", 1)[-1]
+            if suffix.isdigit():
+                highest = max(highest, int(suffix))
+        return f"ABV-EMP-{highest + 1:03d}"
+
+    def get_staff_members(self, db: Session, active_only: bool = False) -> List[Dict[str, Any]]:
         settings = self.get_settings(db)
-        if not settings.staff_members or len(settings.staff_members) == 0:
-            settings.staff_members = DEFAULT_STAFF_MEMBERS
-            db.commit()
-            db.refresh(settings)
-        return settings.staff_members or []
+        members = list(settings.staff_members or [])
+        if active_only:
+            members = [m for m in members if m.get("is_active", True)]
+        return members
 
     def save_staff_member(self, db: Session, member_data: Dict[str, Any]) -> List[Dict[str, Any]]:
-        settings = self.get_settings(db)
-        current = list(settings.staff_members or [])
-        if not current:
-            current = list(DEFAULT_STAFF_MEMBERS)
-        
-        member_id = member_data.get("id")
-        if not member_id:
-            import uuid
-            member_id = f"ABV-EMP-{uuid.uuid4().hex[:6].upper()}"
-            member_data["id"] = member_id
+        """
+        Create or update a registry entry. Entries are matched by `id` only, so two different
+        people with the same name stay separate. Raises ValueError on invalid/duplicate data.
+        """
+        name = (member_data.get("name") or "").strip()
+        if not name:
+            raise ValueError("Staff member name is required.")
+        member_data = {**member_data, "name": name}
+        email = (member_data.get("email") or "").strip().lower() or None
+        member_data["email"] = email
 
-        # Update if exists, or append
-        found = False
+        settings = self.get_settings(db)
+        current = [dict(m) for m in (settings.staff_members or [])]
+
+        member_id = member_data.get("id")
+        if email:
+            clash = next(
+                (m for m in current if (m.get("email") or "").lower() == email and m.get("id") != member_id),
+                None,
+            )
+            if clash:
+                raise ValueError(f"Email {email} already belongs to {clash.get('name')} ({clash.get('id')}).")
+
+        if not member_id:
+            member_id = self._next_staff_id(current)
+            member_data["id"] = member_id
+        member_data.setdefault("id_number", member_id)
+        member_data["id_number"] = member_data["id_number"] or member_id
+        member_data.setdefault("is_active", True)
+
         updated = []
+        found = False
         for m in current:
-            if m.get("id") == member_id or (member_data.get("name") and m.get("name", "").strip().lower() == member_data["name"].strip().lower()):
+            if m.get("id") == member_id:
                 updated.append({**m, **member_data})
                 found = True
             else:
@@ -1628,16 +1604,20 @@ class FinanceService:
         settings.staff_members = updated
         db.commit()
         db.refresh(settings)
-        return settings.staff_members
+        return list(settings.staff_members or [])
 
-    def delete_staff_member(self, db: Session, member_id: str) -> List[Dict[str, Any]]:
+    def delete_staff_member(self, db: Session, member_id: str) -> Optional[List[Dict[str, Any]]]:
+        """Remove an entry. Returns None if it does not exist. Existing vouchers keep their snapshot."""
         settings = self.get_settings(db)
         current = list(settings.staff_members or [])
         updated = [m for m in current if m.get("id") != member_id]
+        if len(updated) == len(current):
+            return None
         settings.staff_members = updated
         db.commit()
         db.refresh(settings)
-        return settings.staff_members
+        return list(settings.staff_members or [])
+
 
     def send_voucher_email(
         self,

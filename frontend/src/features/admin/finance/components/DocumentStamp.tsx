@@ -1,6 +1,14 @@
 import React from 'react';
 
-export type StampStatus = 'invoice' | 'receipt' | 'paid' | 'received' | 'void';
+export type StampStatus =
+  | 'invoice'
+  | 'receipt'
+  | 'paid'
+  | 'received'
+  | 'void'
+  | 'authorized'
+  | 'approved'
+  | 'voucher';
 
 interface DocumentStampProps {
   status: StampStatus | string;
@@ -20,10 +28,24 @@ const LABELS: Record<string, string> = {
   paid: 'PAID',
   received: 'RECEIVED',
   void: 'VOID',
+  authorized: 'AUTHORIZED',
+  approved: 'APPROVED',
+  voucher: 'VOUCHER',
 };
 
 const formatStampDate = (value?: string | Date | null): string => {
-  const d = value ? new Date(value) : new Date();
+  if (!value) {
+    const d = new Date();
+    const day = String(d.getDate());
+    const month = d.toLocaleString('en-GB', { month: 'short' }).toUpperCase();
+    return `${day} ${month} ${d.getFullYear()}`;
+  }
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, monthNum, dayNum] = value.split('-').map(Number);
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    return `${dayNum} ${months[monthNum - 1] || 'OCT'} ${year}`;
+  }
+  const d = new Date(value);
   const safe = isNaN(d.getTime()) ? new Date() : d;
   const day = String(safe.getDate());
   const month = safe.toLocaleString('en-GB', { month: 'short' }).toUpperCase();
@@ -31,7 +53,7 @@ const formatStampDate = (value?: string | Date | null): string => {
 };
 
 /**
- * Rubber-stamp styled company stamp used on invoices and receipts.
+ * Rubber-stamp styled company stamp used on invoices, receipts, and vouchers.
  * Rendered as inline SVG so it prints, scales and is captured correctly by the PDF exporter.
  */
 export const DocumentStamp: React.FC<DocumentStampProps> = ({
@@ -72,7 +94,16 @@ export const DocumentStamp: React.FC<DocumentStampProps> = ({
       <line x1="46" y1="134" x2="514" y2="134" stroke={BLUE} strokeWidth="2" />
 
       {/* Dynamic status */}
-      <text x="280" y="184" textAnchor="middle" fontSize="38" fill={BLUE} letterSpacing="6">{label}</text>
+      <text
+        x="280"
+        y="184"
+        textAnchor="middle"
+        fontSize={label.length > 8 ? 32 : 38}
+        fill={BLUE}
+        letterSpacing={label.length > 8 ? 4 : 6}
+      >
+        {label}
+      </text>
 
       {/* Document number */}
       {documentNumber && (

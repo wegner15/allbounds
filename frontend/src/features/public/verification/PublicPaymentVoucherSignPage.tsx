@@ -1,25 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { QRCodeSVG } from 'qrcode.react';
 import {
   ShieldCheck,
   AlertTriangle,
-  FileCheck2,
-  CheckCircle,
+  CheckCircle2,
   PenTool,
   RotateCcw,
   Calendar,
-  CreditCard,
   Building2,
   Phone,
   Mail,
-  Receipt,
   Download,
   Printer,
   ExternalLink,
-  ChevronRight
+  User,
+  Loader2,
+  Clock,
+  Check
 } from 'lucide-react';
 import { financeApi } from '../../../lib/api/finance';
 import type { PublicPaymentVoucherSignView } from '../../../lib/types/finance';
+import { DocumentHeader } from '../../admin/finance/components/DocumentHeader';
+import { DocumentStamp } from '../../admin/finance/components/DocumentStamp';
+import { usePdfDownload } from '../../../lib/utils/pdfGenerator';
+import '../../admin/finance/components/PrintStyles.css';
 
 export const PublicPaymentVoucherSignPage: React.FC = () => {
   const { token } = useParams<{ token: string }>();
@@ -28,6 +33,10 @@ export const PublicPaymentVoucherSignPage: React.FC = () => {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // PDF Export and Print Ref
+  const documentRef = useRef<HTMLDivElement | null>(null);
+  const { isGenerating, downloadPdf } = usePdfDownload();
 
   // Signature Form State
   const [signerName, setSignerName] = useState<string>('');
@@ -55,10 +64,10 @@ export const PublicPaymentVoucherSignPage: React.FC = () => {
     fetchVoucher();
   }, [token]);
 
-  // Canvas setup
+  // Canvas setup for unsigned voucher
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || voucher?.is_signed) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -134,6 +143,14 @@ export const PublicPaymentVoucherSignPage: React.FC = () => {
     setIsCanvasDrawn(false);
   };
 
+  const handleDownloadPdf = () => {
+    if (!voucher || !documentRef.current) return;
+    downloadPdf(
+      documentRef.current,
+      `Payment-Voucher-${voucher.voucher_number || 'PV'}.pdf`
+    );
+  };
+
   const handleSubmitSignature = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) return;
@@ -168,7 +185,8 @@ export const PublicPaymentVoucherSignPage: React.FC = () => {
           'I confirm that I have received / been authorized for the stated funds and agree to account for all expenses per Allbound Vacations policies.'
       });
       setVoucher(updated);
-      setSuccessMessage('Signature submitted successfully! Thank you.');
+      setSuccessMessage('Signature submitted successfully! You can now download or print your official signed voucher below.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
       setError(err?.response?.data?.detail || 'Failed to submit signature. Please try again.');
     } finally {
@@ -176,11 +194,15 @@ export const PublicPaymentVoucherSignPage: React.FC = () => {
     }
   };
 
+  const verificationUrl = voucher
+    ? `${window.location.origin}/verify/payment-voucher/${voucher.verification_code}`
+    : '';
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-gray-950 py-10 px-4 sm:px-6 lg:px-8 text-gray-800">
-      <div className="max-w-2xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-teal-950 via-gray-900 to-gray-950 py-10 px-4 sm:px-6 lg:px-8 text-gray-800">
+      <div className={`${voucher?.is_signed ? 'max-w-4xl' : 'max-w-2xl'} mx-auto space-y-6 transition-all duration-300`}>
         {/* Brand Header */}
-        <div className="text-center">
+        <div className="text-center no-print">
           <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md px-5 py-2 rounded-full border border-white/15 text-white shadow-lg mb-3">
             <img
               src="/logo/brand_mark.png"
@@ -225,8 +247,357 @@ export const PublicPaymentVoucherSignPage: React.FC = () => {
           </div>
         )}
 
-        {/* Success / Voucher Card */}
-        {voucher && (
+        {/* ======================================================== */}
+        {/* SIGNED VOUCHER VIEW (DOWNLOADABLE & PRINTABLE)           */}
+        {/* ======================================================== */}
+        {voucher && voucher.is_signed && (
+          <div className="space-y-6">
+            {/* Top Action & Congratulations Banner */}
+            <div className="no-print bg-white/95 backdrop-blur-md rounded-2xl p-5 sm:p-6 border border-emerald-200/80 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-start gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-700 flex-shrink-0 mt-0.5 shadow-sm">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-bold text-gray-900 font-playfair">
+                      Payment Voucher Signed & Accepted
+                    </h3>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      <Check className="w-3 h-3" /> Official Copy
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                    Signed by <strong className="text-gray-900">{voucher.signed_by_name}</strong>
+                    {voucher.signed_at ? ` on ${new Date(voucher.signed_at).toLocaleString()}` : ''}.
+                    You can now download the official signed PDF or print it below for your personal records and expense retirement.
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+                <button
+                  type="button"
+                  onClick={handleDownloadPdf}
+                  disabled={isGenerating}
+                  className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-teal-800 hover:bg-teal-900 active:scale-[0.98] text-white rounded-xl text-xs font-bold shadow-md hover:shadow-lg transition cursor-pointer disabled:opacity-50"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Generating PDF...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4" />
+                      <span>Download Voucher PDF</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gray-900 hover:bg-black active:scale-[0.98] text-white rounded-xl text-xs font-semibold shadow transition cursor-pointer"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Print</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Success Toast / Notification */}
+            {successMessage && (
+              <div className="no-print p-4 bg-emerald-500/20 border border-emerald-400/40 text-emerald-100 rounded-2xl text-xs font-semibold flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-300 flex-shrink-0" />
+                <span>{successMessage}</span>
+              </div>
+            )}
+
+            {/* DOCUMENT PRINT & DOWNLOAD CONTAINER */}
+            <div className="bg-gray-200/90 p-3 sm:p-6 lg:p-8 rounded-3xl flex justify-center overflow-x-auto shadow-2xl">
+              <div
+                ref={documentRef}
+                className="print-document bg-white w-full max-w-[850px] min-h-[1050px] p-6 sm:p-12 shadow-2xl rounded-2xl text-gray-900 border border-gray-200 flex flex-col justify-between space-y-6 mx-auto"
+                style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+              >
+                <div className="space-y-6">
+                  {/* Header with official logo & legal info */}
+                  <DocumentHeader
+                    title="PAYMENT & EXPENSE VOUCHER"
+                    subtitle="EMPLOYEE DISBURSEMENT & AUTHORIZATION"
+                    statusBadge={
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 uppercase tracking-wider">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Digitally Signed
+                      </span>
+                    }
+                  />
+
+                  {/* Top Meta Bar */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-teal-50/70 rounded-xl border border-teal-100 text-xs">
+                    <div>
+                      <span className="text-gray-500 uppercase font-bold text-[10px] block">Voucher No.</span>
+                      <span className="font-mono font-extrabold text-teal-950 text-sm mt-0.5 block">
+                        {voucher.voucher_number}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 uppercase font-bold text-[10px] block">Issue Date</span>
+                      <span className="font-semibold text-gray-900 text-sm mt-0.5 block">
+                        {voucher.issue_date}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 uppercase font-bold text-[10px] block">Accountability Due</span>
+                      <span className="font-semibold text-gray-900 text-sm mt-0.5 block">
+                        {voucher.due_date || 'Within 3 Days'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 uppercase font-bold text-[10px] block">Expense Category</span>
+                      <span className="font-bold text-teal-900 text-sm capitalize mt-0.5 block">
+                        {voucher.category.replace(/_/g, ' ')}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Recipient Details & Authorized Amount */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 p-4 rounded-xl border border-gray-200 bg-white">
+                    <div>
+                      <span className="text-xs font-bold uppercase text-teal-800 tracking-wider flex items-center gap-1.5 mb-2">
+                        <User className="w-3.5 h-3.5" /> Authorized Payee / Staff Member
+                      </span>
+                      <div className="text-xs space-y-1">
+                        <p className="text-sm font-bold text-gray-900">{voucher.employee_name}</p>
+                        {voucher.employee_role && (
+                          <p className="text-gray-600 font-medium">Role: {voucher.employee_role}</p>
+                        )}
+                        {voucher.employee_phone && (
+                          <p className="text-gray-500">Tel: {voucher.employee_phone}</p>
+                        )}
+                        {voucher.employee_email && (
+                          <p className="text-gray-500">Email: {voucher.employee_email}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="sm:text-right bg-amber-50/50 p-3.5 rounded-xl border border-amber-200/80 flex flex-col justify-center">
+                      <span className="text-xs uppercase font-bold text-amber-900 tracking-wider">
+                        Total Authorized Amount
+                      </span>
+                      <div className="text-2xl sm:text-3xl font-extrabold text-teal-950 font-mono mt-0.5">
+                        {voucher.currency} {voucher.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </div>
+                      {voucher.amount_in_words && (
+                        <p className="text-[11px] text-gray-600 italic mt-0.5 capitalize">
+                          {voucher.amount_in_words}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Purpose / Description */}
+                  <div className="p-4 rounded-xl border border-gray-200 bg-gray-50/70 text-xs space-y-1">
+                    <span className="font-bold text-gray-900 uppercase tracking-wider block text-[11px]">
+                      Authorized Purpose & Description
+                    </span>
+                    <p className="text-sm font-semibold text-gray-900">{voucher.title}</p>
+                    {voucher.description && (
+                      <p className="text-gray-600 leading-relaxed text-xs">{voucher.description}</p>
+                    )}
+                  </div>
+
+                  {/* Itemized Line Items Table */}
+                  {voucher.line_items && voucher.line_items.length > 0 && (
+                    <div className="overflow-hidden rounded-xl border border-gray-200">
+                      <table className="w-full text-xs">
+                        <thead className="bg-teal-900 text-white uppercase font-semibold text-[10px]">
+                          <tr>
+                            <th className="px-3 py-2.5 text-left w-12">#</th>
+                            <th className="px-3 py-2.5 text-left">Description / Particulars</th>
+                            <th className="px-3 py-2.5 text-center w-16">Qty</th>
+                            <th className="px-3 py-2.5 text-right w-28">Unit Rate</th>
+                            <th className="px-3 py-2.5 text-right w-32">Total ({voucher.currency})</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {voucher.line_items.map((item, idx) => (
+                            <tr key={idx} className="hover:bg-gray-50">
+                              <td className="px-3 py-2 text-gray-400 font-mono">{idx + 1}</td>
+                              <td className="px-3 py-2 font-medium text-gray-900">
+                                {item.description}
+                                {item.notes && (
+                                  <span className="block text-[11px] text-gray-400 font-normal">
+                                    {item.notes}
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-3 py-2 text-center text-gray-600">{item.quantity || 1}</td>
+                              <td className="px-3 py-2 text-right text-gray-600 font-mono">
+                                {(item.unit_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              </td>
+                              <td className="px-3 py-2 text-right font-bold text-gray-900 font-mono">
+                                {(item.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot className="bg-teal-50/70 border-t-2 border-teal-800 text-xs font-bold text-gray-900">
+                          <tr>
+                            <td colSpan={4} className="px-3 py-3 text-right uppercase tracking-wider text-teal-900">
+                              Total Authorized Amount:
+                            </td>
+                            <td className="px-3 py-3 text-right text-sm text-teal-950 font-mono">
+                              {voucher.currency} {voucher.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* Accountability / Policy Notice */}
+                  <div className="p-3 bg-gray-50 rounded-xl border border-gray-200 text-[10px] text-gray-500 leading-relaxed space-y-1">
+                    <span className="font-bold text-gray-700 uppercase tracking-wider block">
+                      Accountability & Retirement Notice:
+                    </span>
+                    <p>
+                      {voucher.terms_and_conditions ||
+                        '1. All disbursements must be strictly accounted for with valid fiscal receipts, invoices, or signed acknowledgments within 3 working days of activity completion. 2. Any unspent balance must be surrendered back to Finance immediately. 3. Unauthorized excess expenditures will not be reimbursed without prior written management approval.'}
+                    </p>
+                  </div>
+
+                  {/* Dual Signature Boxes */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-gray-200">
+                    {/* Management Authorization */}
+                    <div className="p-4 rounded-xl border border-gray-200 bg-gray-50/60 flex flex-col justify-between min-h-[220px]">
+                      <div>
+                        <span className="text-[11px] font-bold text-gray-700 uppercase tracking-wider block">
+                          1. Authorized & Approved By
+                        </span>
+                        <p className="text-xs font-semibold text-gray-900 mt-1">
+                          {voucher.authorized_by_name || 'Finance Director'}
+                        </p>
+                        <p className="text-[11px] text-gray-500">Allbound Vacations Management</p>
+                      </div>
+
+                      {/* Official Rubber Stamp */}
+                      <div className="my-2 flex justify-center">
+                        <DocumentStamp
+                          status="authorized"
+                          documentNumber={voucher.voucher_number}
+                          date={voucher.issue_date}
+                          width={185}
+                        />
+                      </div>
+
+                      <div className="border-t border-dashed border-gray-300 pt-2 flex items-center justify-between text-[10px] text-gray-400">
+                        <span>Date: {voucher.issue_date}</span>
+                        <span className="font-semibold text-teal-800">AUTHORIZED</span>
+                      </div>
+                    </div>
+
+                    {/* Employee Acceptance */}
+                    <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/40 flex flex-col justify-between min-h-[220px]">
+                      <div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-[11px] font-bold text-gray-700 uppercase tracking-wider block">
+                            2. Employee Acceptance & Signature
+                          </span>
+                          <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" /> Signed
+                          </span>
+                        </div>
+
+                        {voucher.signature_data && (
+                          <div className="my-2 flex flex-col items-center justify-center">
+                            <img
+                              src={voucher.signature_data}
+                              alt="Employee Digital Signature"
+                              className="h-20 max-w-full object-contain"
+                            />
+                            <p className="text-xs font-bold text-gray-900 mt-1">
+                              {voucher.signed_by_name}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="border-t border-dashed border-gray-300 pt-2 flex items-center justify-between text-[10px] text-gray-400">
+                        <span>
+                          Signed:{' '}
+                          {voucher.signed_at
+                            ? new Date(voucher.signed_at).toLocaleString()
+                            : 'Registered'}
+                        </span>
+                        <span className="font-semibold text-emerald-800">ACCEPTED</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer QR & Verification */}
+                <div className="mt-8 pt-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+                  <div className="flex items-center gap-3">
+                    <QRCodeSVG
+                      value={verificationUrl}
+                      size={54}
+                      bgColor="#ffffff"
+                      fgColor="#0f2922"
+                      level="M"
+                    />
+                    <div>
+                      <p className="text-[10px] uppercase font-bold text-teal-900">
+                        Scan to Verify Authentic Document
+                      </p>
+                      <p className="text-[9px] font-mono text-gray-400 break-all">{verificationUrl}</p>
+                      <p className="text-[9px] text-gray-500">
+                        Verification Code: <strong className="text-gray-800 font-mono">{voucher.verification_code}</strong>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right text-[10px] text-gray-400">
+                    <p>Allbound Vacations Ltd • Official Financial Document</p>
+                    <p>Cryptographically verified disbursement voucher</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Download & Print Bar */}
+            <div className="no-print bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-white">
+              <p className="text-xs text-teal-200">
+                Official disbursement document for Allbound Vacations Limited. Keep this copy for expense retirement.
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleDownloadPdf}
+                  disabled={isGenerating}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-teal-700 hover:bg-teal-600 active:scale-[0.98] text-white rounded-xl text-xs font-bold transition cursor-pointer disabled:opacity-50"
+                >
+                  <Download className="w-4 h-4" />
+                  {isGenerating ? 'Generating PDF...' : 'Download PDF'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs font-semibold transition cursor-pointer"
+                >
+                  <Printer className="w-4 h-4" />
+                  Print
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* UNSIGNED VOUCHER VIEW (INTERACTIVE SIGNING PAD)          */}
+        {/* ======================================================== */}
+        {voucher && !voucher.is_signed && (
           <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden divide-y divide-gray-100">
             {/* Voucher Header Ribbon */}
             <div className="bg-gradient-to-r from-teal-950 via-teal-900 to-gray-900 text-white p-6 sm:p-8">
@@ -241,15 +612,9 @@ export const PublicPaymentVoucherSignPage: React.FC = () => {
                 </div>
 
                 <div>
-                  {voucher.is_signed ? (
-                    <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                      <CheckCircle className="w-4 h-4 text-emerald-400" /> Digitally Signed
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30">
-                      <PenTool className="w-4 h-4 text-amber-400" /> Awaiting Signature
-                    </span>
-                  )}
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                    <PenTool className="w-4 h-4 text-amber-400" /> Awaiting Signature
+                  </span>
                 </div>
               </div>
 
@@ -393,158 +758,120 @@ export const PublicPaymentVoucherSignPage: React.FC = () => {
               </div>
             </div>
 
-            {/* SIGNATURE SECTION */}
+            {/* Interactive Signing Pad Form */}
             <div className="p-6 sm:p-8">
-              {voucher.is_signed ? (
-                /* Already Signed View */
-                <div className="bg-emerald-50 rounded-2xl p-6 border border-emerald-200 text-center space-y-4">
-                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-emerald-600">
-                    <CheckCircle className="w-7 h-7" />
+              <form onSubmit={handleSubmitSignature} className="space-y-6">
+                {successMessage && (
+                  <div className="p-3 bg-emerald-100 border border-emerald-300 text-emerald-900 rounded-xl text-xs font-semibold">
+                    {successMessage}
                   </div>
-                  <div>
-                    <h4 className="text-lg font-bold text-emerald-950 font-playfair">
-                      Voucher Fully Signed & Accepted
-                    </h4>
-                    <p className="text-xs text-emerald-800 mt-1">
-                      Signed by{' '}
-                      <strong className="text-emerald-950">{voucher.signed_by_name}</strong> on{' '}
-                      {voucher.signed_at ? new Date(voucher.signed_at).toLocaleString() : 'Record'}
-                    </p>
+                )}
+
+                {error && (
+                  <div className="p-3 bg-red-100 border border-red-300 text-red-900 rounded-xl text-xs font-semibold">
+                    {error}
                   </div>
+                )}
 
-                  {voucher.signature_data && (
-                    <div className="bg-white rounded-xl p-3 inline-block border border-emerald-200 shadow-sm max-w-xs mx-auto">
-                      <img
-                        src={voucher.signature_data}
-                        alt="Digital Signature"
-                        className="h-16 max-w-full object-contain mx-auto"
-                      />
-                      <span className="text-[10px] text-gray-400 block border-t border-gray-100 mt-1 pt-1 font-mono">
-                        Secured Digital Signature
-                      </span>
-                    </div>
-                  )}
-
-                  <p className="text-[11px] text-emerald-700 max-w-md mx-auto">
-                    A permanent audit record has been stored. You may keep this webpage for your
-                    records.
+                <div>
+                  <h4 className="text-base font-bold text-gray-900 font-playfair">
+                    Employee Acceptance & Digital Signature
+                  </h4>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Please write your signature on the pad below using your fingertip (on mobile/tablet) or mouse cursor.
                   </p>
                 </div>
-              ) : (
-                /* Interactive Signing Pad Form */
-                <form onSubmit={handleSubmitSignature} className="space-y-6">
-                  {successMessage && (
-                    <div className="p-3 bg-emerald-100 border border-emerald-300 text-emerald-900 rounded-xl text-xs font-semibold">
-                      {successMessage}
-                    </div>
-                  )}
 
-                  {error && (
-                    <div className="p-3 bg-red-100 border border-red-300 text-red-900 rounded-xl text-xs font-semibold">
-                      {error}
-                    </div>
-                  )}
+                {/* Signer Full Name */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                    Full Name of Recipient / Employee *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={signerName}
+                    onChange={(e) => setSignerName(e.target.value)}
+                    placeholder="e.g. John Doe"
+                    className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-600 focus:border-teal-600 outline-none"
+                  />
+                </div>
 
-                  <div>
-                    <h4 className="text-base font-bold text-gray-900 font-playfair">
-                      Employee Acceptance & Digital Signature
-                    </h4>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      Please write your signature on the pad below using your fingertip (on mobile) or mouse cursor.
-                    </p>
+                {/* Signature Pad Canvas */}
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <PenTool className="w-3.5 h-3.5 text-teal-800" /> Draw Signature Below *
+                    </label>
+                    <button
+                      type="button"
+                      onClick={clearCanvas}
+                      className="text-xs text-gray-500 hover:text-red-600 flex items-center gap-1 transition font-medium cursor-pointer"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" /> Clear Pad
+                    </button>
                   </div>
 
-                  {/* Signer Full Name */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                      Full Name of Recipient / Employee *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={signerName}
-                      onChange={(e) => setSignerName(e.target.value)}
-                      placeholder="e.g. John Doe"
-                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-600 focus:border-teal-600 outline-none"
+                  <div className="relative border-2 border-dashed border-teal-800/40 hover:border-teal-700 rounded-2xl bg-teal-50/20 p-1 touch-none">
+                    <canvas
+                      ref={canvasRef}
+                      onMouseDown={startDrawing}
+                      onMouseMove={draw}
+                      onMouseUp={stopDrawing}
+                      onMouseLeave={stopDrawing}
+                      onTouchStart={startDrawing}
+                      onTouchMove={draw}
+                      onTouchEnd={stopDrawing}
+                      className="w-full h-40 bg-white rounded-xl shadow-inner cursor-crosshair block"
                     />
-                  </div>
-
-                  {/* Signature Pad Canvas */}
-                  <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <label className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-                        <PenTool className="w-3.5 h-3.5 text-teal-800" /> Draw Signature Below *
-                      </label>
-                      <button
-                        type="button"
-                        onClick={clearCanvas}
-                        className="text-xs text-gray-500 hover:text-red-600 flex items-center gap-1 transition font-medium"
-                      >
-                        <RotateCcw className="w-3.5 h-3.5" /> Clear Pad
-                      </button>
-                    </div>
-
-                    <div className="relative border-2 border-dashed border-teal-800/40 hover:border-teal-700 rounded-2xl bg-teal-50/20 p-1 touch-none">
-                      <canvas
-                        ref={canvasRef}
-                        onMouseDown={startDrawing}
-                        onMouseMove={draw}
-                        onMouseUp={stopDrawing}
-                        onMouseLeave={stopDrawing}
-                        onTouchStart={startDrawing}
-                        onTouchMove={draw}
-                        onTouchEnd={stopDrawing}
-                        className="w-full h-40 bg-white rounded-xl shadow-inner cursor-crosshair block"
-                      />
-                      {!isCanvasDrawn && (
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-gray-300 text-xs italic">
-                          ✍️ Sign here with touch or mouse
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Declaration Checkbox */}
-                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                    <label className="flex items-start gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={hasAgreed}
-                        onChange={(e) => setHasAgreed(e.target.checked)}
-                        className="mt-0.5 w-4 h-4 text-teal-700 border-gray-300 rounded focus:ring-teal-500 cursor-pointer"
-                      />
-                      <span className="text-xs text-gray-600 leading-relaxed select-none">
-                        I hereby acknowledge receipt and authorization of the total sum of{' '}
-                        <strong className="text-gray-900 font-mono">
-                          {voucher.currency} {voucher.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                        </strong>{' '}
-                        for the designated official duties. I undertake to submit valid receipts,
-                        proper accounts, and refund any unspent balance in accordance with
-                        Allbound Vacations financial procedures.
-                      </span>
-                    </label>
-                  </div>
-
-                  {/* Submit Button */}
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full py-3.5 px-6 rounded-2xl bg-teal-800 hover:bg-teal-900 text-white font-bold text-sm shadow-xl hover:shadow-2xl transition duration-150 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                  >
-                    {submitting ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        <span>Submitting Digital Signature...</span>
-                      </>
-                    ) : (
-                      <>
-                        <ShieldCheck className="w-5 h-5 text-amber-300" />
-                        <span>Sign & Accept Payment Voucher</span>
-                      </>
+                    {!isCanvasDrawn && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-gray-400 text-xs italic select-none">
+                        ✍️ Sign here with fingertip or mouse
+                      </div>
                     )}
-                  </button>
-                </form>
-              )}
+                  </div>
+                </div>
+
+                {/* Declaration Checkbox */}
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={hasAgreed}
+                      onChange={(e) => setHasAgreed(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 text-teal-700 border-gray-300 rounded focus:ring-teal-500 cursor-pointer"
+                    />
+                    <span className="text-xs text-gray-600 leading-relaxed select-none">
+                      I hereby acknowledge receipt and authorization of the total sum of{' '}
+                      <strong className="text-gray-900 font-mono">
+                        {voucher.currency} {voucher.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </strong>{' '}
+                      for the designated official duties. I undertake to submit valid receipts,
+                      proper accounts, and refund any unspent balance in accordance with
+                      Allbound Vacations financial procedures.
+                    </span>
+                  </label>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full py-3.5 px-6 rounded-2xl bg-teal-800 hover:bg-teal-900 text-white font-bold text-sm shadow-xl hover:shadow-2xl transition duration-150 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="animate-spin h-5 w-5 text-white" />
+                      <span>Submitting Digital Signature...</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck className="w-5 h-5 text-amber-300" />
+                      <span>Sign & Accept Payment Voucher</span>
+                    </>
+                  )}
+                </button>
+              </form>
             </div>
 
             {/* Footer Notice */}

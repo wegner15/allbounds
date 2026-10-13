@@ -25,6 +25,7 @@ import { Link } from 'react-router-dom';
 import type { PaymentVoucher, CompanyFinanceSettings } from '../../../../lib/types/finance';
 import { financeApi } from '../../../../lib/api/finance';
 import { DocumentHeader } from '../components/DocumentHeader';
+import { DocumentStamp } from '../components/DocumentStamp';
 import { SendEmailModal } from '../components/SendEmailModal';
 import { usePdfDownload } from '../../../../lib/utils/pdfGenerator';
 import '../components/PrintStyles.css';
@@ -390,7 +391,7 @@ export const PaymentVoucherDocumentView: React.FC<PaymentVoucherDocumentViewProp
             {/* DUAL SIGNATURE BOXES */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-gray-200">
               {/* Management Authorization */}
-              <div className="p-4 rounded-xl border border-gray-200 bg-gray-50/60 flex flex-col justify-between h-44">
+              <div className="p-4 rounded-xl border border-gray-200 bg-gray-50/60 flex flex-col justify-between min-h-[220px]">
                 <div>
                   <span className="text-[11px] font-bold text-gray-700 uppercase tracking-wider block">
                     1. Authorized & Approved By
@@ -399,6 +400,16 @@ export const PaymentVoucherDocumentView: React.FC<PaymentVoucherDocumentViewProp
                     {voucher.authorized_by_name || 'Finance Director'}
                   </p>
                   <p className="text-[11px] text-gray-500">Allbound Vacations Management</p>
+                </div>
+
+                {/* Official Rubber Stamp */}
+                <div className="my-2 flex justify-center">
+                  <DocumentStamp
+                    status="authorized"
+                    documentNumber={voucher.voucher_number}
+                    date={voucher.authorized_at || voucher.issue_date}
+                    width={185}
+                  />
                 </div>
 
                 <div className="border-t border-dashed border-gray-300 pt-2 flex items-center justify-between text-[10px] text-gray-400">
@@ -411,7 +422,7 @@ export const PaymentVoucherDocumentView: React.FC<PaymentVoucherDocumentViewProp
 
               {/* Employee Acceptance Signature */}
               <div
-                className={`p-4 rounded-xl border flex flex-col justify-between h-44 ${
+                className={`p-4 rounded-xl border flex flex-col justify-between min-h-[220px] ${
                   voucher.is_signed
                     ? 'border-emerald-200 bg-emerald-50/40'
                     : 'border-amber-200 bg-amber-50/40'
@@ -434,13 +445,13 @@ export const PaymentVoucherDocumentView: React.FC<PaymentVoucherDocumentViewProp
                   </div>
 
                   {voucher.is_signed && voucher.signature_data ? (
-                    <div className="mt-1">
+                    <div className="my-2 flex flex-col items-center justify-center">
                       <img
                         src={voucher.signature_data}
                         alt="Employee Digital Signature"
-                        className="h-14 max-w-full object-contain"
+                        className="h-20 max-w-full object-contain"
                       />
-                      <p className="text-[11px] font-semibold text-gray-900">
+                      <p className="text-xs font-bold text-gray-900 mt-1">
                         {voucher.signed_by_name}
                       </p>
                     </div>
@@ -452,13 +463,13 @@ export const PaymentVoucherDocumentView: React.FC<PaymentVoucherDocumentViewProp
                       <div className="no-print mt-2 flex items-center justify-center gap-2">
                         <button
                           onClick={handleCopySigningLink}
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-teal-800 hover:text-teal-900 bg-white px-2 py-1 rounded-lg border border-teal-200"
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-teal-800 hover:text-teal-900 bg-white px-2 py-1 rounded-lg border border-teal-200 cursor-pointer"
                         >
                           <Copy className="w-3 h-3" /> Copy Link
                         </button>
                         <button
                           onClick={() => setIsEmailModalOpen(true)}
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-teal-800 hover:text-teal-900 bg-white px-2 py-1 rounded-lg border border-teal-200"
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-teal-800 hover:text-teal-900 bg-white px-2 py-1 rounded-lg border border-teal-200 cursor-pointer"
                         >
                           <Mail className="w-3 h-3" /> Email Link
                         </button>

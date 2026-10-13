@@ -42,6 +42,9 @@ STATUS_LABELS = {
     "paid": "PAID",
     "received": "RECEIVED",
     "void": "VOID",
+    "authorized": "AUTHORIZED",
+    "approved": "APPROVED",
+    "voucher": "VOUCHER",
 }
 
 SCALE = 2  # render at 2x, downsample for smooth edges
@@ -69,8 +72,17 @@ def _text_centered(draw, cx, y, text, font, fill, tracking=0):
     return bbox[3] - bbox[1]
 
 
-def _format_date(value: Optional[Union[date, datetime]]) -> str:
-    value = value or datetime.now()
+def _format_date(value: Optional[Union[date, datetime, str]]) -> str:
+    if not value:
+        value = datetime.now()
+    elif isinstance(value, str):
+        try:
+            value = datetime.fromisoformat(value)
+        except ValueError:
+            try:
+                value = datetime.strptime(value.split("T")[0], "%Y-%m-%d")
+            except Exception:
+                value = datetime.now()
     return value.strftime("%d %b %Y").upper().lstrip("0")
 
 
@@ -122,7 +134,9 @@ def render_stamp_png(
     d.line((46 * SCALE, 134 * SCALE, W - 46 * SCALE, 134 * SCALE), fill=BLUE_INK, width=2 * SCALE)
 
     # Status band (blue)
-    _text_centered(d, cx, 146 * SCALE, label, _font(38), BLUE_INK, tracking=6)
+    status_font_size = 32 if len(label) > 8 else 38
+    status_tracking = 4 if len(label) > 8 else 6
+    _text_centered(d, cx, 146 * SCALE, label, _font(status_font_size), BLUE_INK, tracking=status_tracking)
 
     # Document number
     y = 200

@@ -8,6 +8,9 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     curl \
     libjemalloc2 \
+    fonts-dejavu-core \
+    fontconfig \
+    && fc-cache -f \
     && rm -rf /var/lib/apt/lists/*
 
 # Use jemalloc instead of Python's default allocator

@@ -16,6 +16,7 @@ import {
 import { Link } from 'react-router-dom';
 import type { PaymentReceipt, CompanyFinanceSettings } from '../../../../lib/types/finance';
 import { DocumentHeader } from '../components/DocumentHeader';
+import { DocumentStamp } from '../components/DocumentStamp';
 import { usePdfDownload } from '../../../../lib/utils/pdfGenerator';
 import '../components/PrintStyles.css';
 
@@ -299,6 +300,14 @@ export const ReceiptDocumentView: React.FC<ReceiptDocumentViewProps> = ({
               Verification Code: {receipt.verification_code} &bull; Generated: {new Date().toLocaleString()}
             </p>
           </div>
+
+          {/* Company stamp */}
+          <DocumentStamp
+            status="receipt"
+            documentNumber={receipt.receipt_number}
+            date={receipt.receipt_date || receipt.payment_date}
+            width={220}
+          />
 
           <div className="flex items-center space-x-3 bg-gray-50 p-2 rounded-lg border border-gray-200">
             <QRCodeSVG value={verificationUrl} size={60} level="M" />

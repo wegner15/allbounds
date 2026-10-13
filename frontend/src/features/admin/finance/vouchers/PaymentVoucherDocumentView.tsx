@@ -23,7 +23,9 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { PaymentVoucher, CompanyFinanceSettings } from '../../../../lib/types/finance';
+import { financeApi } from '../../../../lib/api/finance';
 import { DocumentHeader } from '../components/DocumentHeader';
+import { SendEmailModal } from '../components/SendEmailModal';
 import { usePdfDownload } from '../../../../lib/utils/pdfGenerator';
 import '../components/PrintStyles.css';
 
@@ -43,6 +45,7 @@ export const PaymentVoucherDocumentView: React.FC<PaymentVoucherDocumentViewProp
   const documentRef = useRef<HTMLDivElement>(null);
   const { isGenerating, downloadPdf } = usePdfDownload();
   const [copiedLink, setCopiedLink] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
 
   const handleDownloadPdf = () => {
     downloadPdf(
@@ -141,6 +144,14 @@ export const PaymentVoucherDocumentView: React.FC<PaymentVoucherDocumentViewProp
           >
             {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
             {copiedLink ? 'Signing Link Copied!' : 'Copy Signing Link'}
+          </button>
+
+          {/* Email Signing Link */}
+          <button
+            onClick={() => setIsEmailModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 transition"
+          >
+            <Mail className="w-4 h-4" /> Email Signing Link
           </button>
 
           {/* Share on WhatsApp */}
@@ -438,12 +449,20 @@ export const PaymentVoucherDocumentView: React.FC<PaymentVoucherDocumentViewProp
                       <p className="text-xs text-gray-500 italic">
                         Awaiting employee signature via digital link.
                       </p>
-                      <button
-                        onClick={handleCopySigningLink}
-                        className="no-print mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-teal-800 hover:text-teal-900 bg-white px-2 py-1 rounded-lg border border-teal-200"
-                      >
-                        <Copy className="w-3 h-3" /> Copy Mobile Signing Link
-                      </button>
+                      <div className="no-print mt-2 flex items-center justify-center gap-2">
+                        <button
+                          onClick={handleCopySigningLink}
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-teal-800 hover:text-teal-900 bg-white px-2 py-1 rounded-lg border border-teal-200"
+                        >
+                          <Copy className="w-3 h-3" /> Copy Link
+                        </button>
+                        <button
+                          onClick={() => setIsEmailModalOpen(true)}
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-teal-800 hover:text-teal-900 bg-white px-2 py-1 rounded-lg border border-teal-200"
+                        >
+                          <Mail className="w-3 h-3" /> Email Link
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -491,6 +510,18 @@ export const PaymentVoucherDocumentView: React.FC<PaymentVoucherDocumentViewProp
           </div>
         </div>
       </div>
+
+      {/* Send Email Modal */}
+      <SendEmailModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        title={`Email Voucher ${voucher.voucher_number}`}
+        defaultEmail={employee.email || ''}
+        defaultName={employee.name || employee.full_name || ''}
+        onSend={async (data) => {
+          await financeApi.sendPaymentVoucherEmail(voucher.id, data);
+        }}
+      />
     </div>
   );
 };

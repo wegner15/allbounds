@@ -46,6 +46,7 @@ export const PaymentVoucherCreateModal: React.FC<PaymentVoucherCreateModalProps>
   const [employeeRole, setEmployeeRole] = useState<string>('Senior Safari Guide');
   const [employeePhone, setEmployeePhone] = useState<string>('');
   const [employeeEmail, setEmployeeEmail] = useState<string>('');
+  const [sendEmailImmediately, setSendEmailImmediately] = useState<boolean>(true);
   const [employeeIdNumber, setEmployeeIdNumber] = useState<string>('');
 
   // Voucher details
@@ -164,6 +165,19 @@ export const PaymentVoucherCreateModal: React.FC<PaymentVoucherCreateModalProps>
       };
 
       const res = await financeApi.createPaymentVoucher(payload);
+
+      if (employeeEmail.trim() && sendEmailImmediately) {
+        try {
+          await financeApi.sendPaymentVoucherEmail(res.id, {
+            recipient_email: employeeEmail.trim(),
+            recipient_name: employeeName.trim(),
+            subject: `Action Required: Payment Voucher ${res.voucher_number} — Review & Sign Digitally`
+          });
+        } catch (mailErr) {
+          console.warn('Could not dispatch automatic email on creation:', mailErr);
+        }
+      }
+
       onCreated(res);
       onClose();
     } catch (err: any) {
@@ -356,6 +370,20 @@ export const PaymentVoucherCreateModal: React.FC<PaymentVoucherCreateModalProps>
                 />
               </div>
             </div>
+
+            {employeeEmail.trim() && (
+              <label className="mt-2.5 flex items-center gap-2.5 cursor-pointer p-2.5 bg-teal-50/70 rounded-xl border border-teal-200">
+                <input
+                  type="checkbox"
+                  checked={sendEmailImmediately}
+                  onChange={(e) => setSendEmailImmediately(e.target.checked)}
+                  className="w-4 h-4 text-teal-700 rounded border-gray-300 focus:ring-teal-500 cursor-pointer"
+                />
+                <span className="text-[11px] font-semibold text-teal-900">
+                  Send digital signing link email to <strong className="text-teal-950 underline">{employeeEmail}</strong> immediately upon creation
+                </span>
+              </label>
+            )}
           </div>
 
           {/* SECTION 3: Purpose & Description */}

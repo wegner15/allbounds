@@ -263,6 +263,15 @@ export const financeApi = {
     return apiClient.post<PublicPaymentVoucherSignView>(`/finance/payment-vouchers/sign/${token}`, data);
   },
 
+  async sendPaymentVoucherEmail(id: number, data: {
+    recipient_email: string;
+    recipient_name?: string;
+    subject?: string;
+    message?: string;
+  }): Promise<{ message: string }> {
+    return apiClient.post<{ message: string }>(`/finance/payment-vouchers/${id}/send-email`, data);
+  },
+
   // ==========================================
   // PUBLIC VERIFICATION
   // ==========================================

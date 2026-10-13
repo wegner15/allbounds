@@ -58,6 +58,7 @@ class CompanyFinanceSettingsBase(BaseModel):
     card_payment_info: Optional[str] = None
     invoice_categories: List[Dict[str, Any]] = Field(default_factory=list)
     supplier_categories: List[Dict[str, Any]] = Field(default_factory=list)
+    staff_members: List[Dict[str, Any]] = Field(default_factory=list)
     default_invoice_notes: Optional[str] = None
     default_invoice_terms: Optional[str] = None
     default_receipt_notice: Optional[str] = None
@@ -83,6 +84,7 @@ class CompanyFinanceSettingsUpdate(BaseModel):
     card_payment_info: Optional[str] = None
     invoice_categories: Optional[List[Dict[str, Any]]] = None
     supplier_categories: Optional[List[Dict[str, Any]]] = None
+    staff_members: Optional[List[Dict[str, Any]]] = None
     default_invoice_notes: Optional[str] = None
     default_invoice_terms: Optional[str] = None
     default_receipt_notice: Optional[str] = None
@@ -393,6 +395,7 @@ class SendEmailRequest(BaseModel):
     subject: Optional[str] = None
     message: Optional[str] = None
     copy_me: bool = True
+    base_url: Optional[str] = None
 
 
 # ==========================================

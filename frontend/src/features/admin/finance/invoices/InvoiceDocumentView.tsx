@@ -28,6 +28,7 @@ import {
 import { Link } from 'react-router-dom';
 import type { Invoice, CompanyFinanceSettings, InvoiceProfitability, Supplier } from '../../../../lib/types/finance';
 import { DocumentHeader } from '../components/DocumentHeader';
+import { DocumentStamp } from '../components/DocumentStamp';
 import { usePdfDownload } from '../../../../lib/utils/pdfGenerator';
 import '../components/PrintStyles.css';
 
@@ -119,6 +120,16 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
   };
 
   const verificationUrl = `${window.location.origin}/verify/invoice/${invoice.verification_token}`;
+
+  // Stamp: PAID (dated at last payment), CANCELLED -> VOID, otherwise INVOICE (dated at invoice date)
+  const lastPaymentDate = (invoice.receipts || [])
+    .map((r) => r.payment_date)
+    .filter(Boolean)
+    .sort()
+    .pop();
+  const stampStatus =
+    invoice.invoice_status === 'paid' ? 'paid' : invoice.invoice_status === 'cancelled' ? 'void' : 'invoice';
+  const stampDate = stampStatus === 'paid' ? lastPaymentDate || invoice.invoice_date : invoice.invoice_date;
 
   return (
     <div className="max-w-5xl mx-auto my-6 print:m-0 print:max-w-none">
@@ -1099,6 +1110,14 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
                   Generated on {new Date().toLocaleString()} &bull; Verification Ref: {invoice.verification_token}
                 </p>
               </div>
+
+              {/* Company stamp */}
+              <DocumentStamp
+                status={stampStatus}
+                documentNumber={invoice.invoice_number}
+                date={stampDate}
+                width={220}
+              />
 
               {/* QR Code */}
               <div className="flex items-center space-x-3 bg-gray-50 p-2 rounded-lg border border-gray-200">

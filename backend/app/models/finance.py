@@ -49,6 +49,7 @@ class CompanyFinanceSettings(Base):
     # Dynamic line item and supplier category configurations
     invoice_categories = Column(JSON, nullable=True, default=list)
     supplier_categories = Column(JSON, nullable=True, default=list)
+    staff_members = Column(JSON, nullable=True, default=list)
 
     # Standard Notes & Terms templates
     default_invoice_notes = Column(Text, nullable=True)

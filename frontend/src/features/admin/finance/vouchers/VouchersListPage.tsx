@@ -19,11 +19,13 @@ import {
   Briefcase,
   Users,
   ShieldCheck,
-  ArrowRight
+  ArrowRight,
+  Mail
 } from 'lucide-react';
 import { financeApi } from '../../../../lib/api/finance';
 import type { TravelVoucher, PaymentVoucher } from '../../../../lib/types/finance';
 import { PaymentVoucherCreateModal } from './PaymentVoucherCreateModal';
+import { SendEmailModal } from '../components/SendEmailModal';
 
 export const VouchersListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -51,6 +53,7 @@ export const VouchersListPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState<boolean>(false);
+  const [emailVoucher, setEmailVoucher] = useState<PaymentVoucher | null>(null);
   const limit = 20;
 
   // Fetch Travel Vouchers
@@ -590,6 +593,13 @@ export const VouchersListPage: React.FC = () => {
                             <Copy className="w-4 h-4 inline" />
                           </button>
                           <button
+                            onClick={() => setEmailVoucher(pv)}
+                            className="p-1.5 text-teal-700 hover:text-teal-900 hover:bg-teal-50 rounded-lg transition"
+                            title="Email Signing Link to Employee"
+                          >
+                            <Mail className="w-4 h-4 inline" />
+                          </button>
+                          <button
                             onClick={() => handleWhatsAppShare(pv)}
                             className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition"
                             title="Share on WhatsApp"
@@ -649,6 +659,20 @@ export const VouchersListPage: React.FC = () => {
           navigate(`/admin/finance/payment-vouchers/${newVoucher.id}`);
         }}
       />
+
+      {/* Send Email Modal */}
+      {emailVoucher && (
+        <SendEmailModal
+          isOpen={!!emailVoucher}
+          onClose={() => setEmailVoucher(null)}
+          title={`Email Voucher ${emailVoucher.voucher_number}`}
+          defaultEmail={emailVoucher.employee_details?.email || ''}
+          defaultName={emailVoucher.employee_details?.name || emailVoucher.employee_details?.full_name || ''}
+          onSend={async (data) => {
+            await financeApi.sendPaymentVoucherEmail(emailVoucher.id, data);
+          }}
+        />
+      )}
     </div>
   );
 };

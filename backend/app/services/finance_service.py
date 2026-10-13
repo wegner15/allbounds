@@ -31,6 +31,7 @@ from app.schemas.finance import (
     FinanceDashboardStats
 )
 from app.services.email import email_service
+from app.services.stamp import stamp_img_html, stamp_inline_image
 from app.services.supplier_service import supplier_service
 
 
@@ -150,6 +151,63 @@ DEFAULT_SUPPLIER_CATEGORIES = [
     {"id": "park_authority", "label": "Wildlife / Park Permits"},
     {"id": "guide", "label": "Tour Guide"},
     {"id": "other", "label": "Other Service"}
+]
+
+DEFAULT_STAFF_MEMBERS = [
+    {
+        "id": "ABV-EMP-001",
+        "name": "Moses Okello",
+        "role": "Lead Safari Guide",
+        "phone": "+256 782 112 233",
+        "email": "m.okello@allboundvacations.com",
+        "id_number": "ABV-EMP-001",
+        "department": "Safari Guiding & Field Operations"
+    },
+    {
+        "id": "ABV-EMP-002",
+        "name": "David Opolot",
+        "role": "Senior Safari Guide",
+        "phone": "+256 782 445 566",
+        "email": "d.opolot@allboundvacations.com",
+        "id_number": "ABV-EMP-002",
+        "department": "Safari Guiding & Field Operations"
+    },
+    {
+        "id": "ABV-EMP-003",
+        "name": "Alex Mukasa",
+        "role": "Lead Tour Driver & Chauffeur",
+        "phone": "+256 772 334 455",
+        "email": "a.mukasa@allboundvacations.com",
+        "id_number": "ABV-EMP-003",
+        "department": "Transport & Fleet Operations"
+    },
+    {
+        "id": "ABV-EMP-004",
+        "name": "Sarah Namubiru",
+        "role": "Operations & Reservations Coordinator",
+        "phone": "+256 701 889 900",
+        "email": "s.namubiru@allboundvacations.com",
+        "id_number": "ABV-EMP-004",
+        "department": "Operations Management"
+    },
+    {
+        "id": "ABV-EMP-005",
+        "name": "Brian Kato",
+        "role": "Field Logistics & Transport Officer",
+        "phone": "+256 784 556 677",
+        "email": "b.kato@allboundvacations.com",
+        "id_number": "ABV-EMP-005",
+        "department": "Logistics & Fleet"
+    },
+    {
+        "id": "ABV-EMP-006",
+        "name": "Grace Achieng",
+        "role": "Guest Relations & Tour Escort",
+        "phone": "+256 752 990 011",
+        "email": "g.achieng@allboundvacations.com",
+        "id_number": "ABV-EMP-006",
+        "department": "Customer Relations"
+    }
 ]
 
 
@@ -1451,6 +1509,9 @@ class FinanceService:
         name = recipient_name or invoice.client_details.get("full_name", "Valued Client")
         email_subject = subject or f"Invoice {invoice.invoice_number} from Allbound Vacations"
 
+        stamp_date = getattr(invoice, "issue_date", None) or datetime.now()
+        stamp_status = "paid" if (invoice.balance_due or 0) <= 0 else "invoice"
+
         html_body = f"""
         <p>Dear {name},</p>
         <p>{custom_message or 'Please find below the summary of your invoice for your upcoming travel with Allbound Vacations.'}</p>
@@ -1462,6 +1523,7 @@ class FinanceService:
             <p style="font-size: 18px; color: #008080;"><strong>Balance Due: {invoice.currency} {invoice.balance_due:,.2f}</strong></p>
         </div>
         <p>Thank you for choosing Allbound Vacations.</p>
+        {stamp_img_html(invoice.invoice_number, stamp_status)}
         """
 
         cta = {
@@ -1473,7 +1535,10 @@ class FinanceService:
             content_html=html_body,
             call_to_action=cta
         )
-        email_service.send_email(recipient_email, email_subject, content)
+        email_service.send_email(
+            recipient_email, email_subject, content,
+            inline_images=[stamp_inline_image(stamp_status, invoice.invoice_number, stamp_date)]
+        )
         return True
 
     def send_receipt_email(
@@ -1509,6 +1574,7 @@ class FinanceService:
             <p><em>({receipt.amount_in_words})</em></p>
         </div>
         <p>Payment received with thanks. Allocated to referenced booking/invoice.</p>
+        {stamp_img_html(receipt.receipt_number, "receipt")}
         """
 
         cta = {
@@ -1520,8 +1586,58 @@ class FinanceService:
             content_html=html_body,
             call_to_action=cta
         )
-        email_service.send_email(recipient_email, email_subject, content)
+        email_service.send_email(
+            recipient_email, email_subject, content,
+            inline_images=[stamp_inline_image("receipt", receipt.receipt_number, receipt.payment_date)]
+        )
         return True
+
+
+    def get_staff_members(self, db: Session) -> List[Dict[str, Any]]:
+        settings = self.get_settings(db)
+        if not settings.staff_members or len(settings.staff_members) == 0:
+            settings.staff_members = DEFAULT_STAFF_MEMBERS
+            db.commit()
+            db.refresh(settings)
+        return settings.staff_members or []
+
+    def save_staff_member(self, db: Session, member_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        settings = self.get_settings(db)
+        current = list(settings.staff_members or [])
+        if not current:
+            current = list(DEFAULT_STAFF_MEMBERS)
+        
+        member_id = member_data.get("id")
+        if not member_id:
+            import uuid
+            member_id = f"ABV-EMP-{uuid.uuid4().hex[:6].upper()}"
+            member_data["id"] = member_id
+
+        # Update if exists, or append
+        found = False
+        updated = []
+        for m in current:
+            if m.get("id") == member_id or (member_data.get("name") and m.get("name", "").strip().lower() == member_data["name"].strip().lower()):
+                updated.append({**m, **member_data})
+                found = True
+            else:
+                updated.append(m)
+        if not found:
+            updated.append(member_data)
+
+        settings.staff_members = updated
+        db.commit()
+        db.refresh(settings)
+        return settings.staff_members
+
+    def delete_staff_member(self, db: Session, member_id: str) -> List[Dict[str, Any]]:
+        settings = self.get_settings(db)
+        current = list(settings.staff_members or [])
+        updated = [m for m in current if m.get("id") != member_id]
+        settings.staff_members = updated
+        db.commit()
+        db.refresh(settings)
+        return settings.staff_members
 
     def send_voucher_email(
         self,
@@ -1529,7 +1645,9 @@ class FinanceService:
         voucher_id: int,
         recipient_email: str,
         recipient_name: Optional[str] = None,
-        subject: Optional[str] = None
+        subject: Optional[str] = None,
+        custom_message: Optional[str] = None,
+        base_url: Optional[str] = None
     ) -> bool:
         voucher = self.get_voucher(db, voucher_id)
         if not voucher:
@@ -1540,10 +1658,12 @@ class FinanceService:
 
         lead_pax = voucher.traveller_details.get("lead_traveller", "Guests")
         pax_count = voucher.traveller_details.get("adults", 1) + voucher.traveller_details.get("children", 0)
+        custom_note_html = f"<p style='background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px 16px; margin: 16px 0; color: #92400e;'><strong>Message from Allbound Vacations:</strong><br>{custom_message}</p>" if custom_message else ""
 
         html_body = f"""
         <p>Dear {name},</p>
         <p>Please find the official service voucher for the following reservation:</p>
+        {custom_note_html}
         <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0;">
             <p><strong>Voucher Number:</strong> {voucher.voucher_number} (Version {voucher.version:02d})</p>
             <p><strong>Status:</strong> {voucher.voucher_status.upper()}</p>
@@ -1554,8 +1674,9 @@ class FinanceService:
         <p>Please render the requested services to the named guests as agreed.</p>
         """
 
+        origin = base_url.rstrip("/") if base_url else "https://allboundvacations.com"
         cta = {
-            "url": f"https://allboundvacations.com/verify/voucher/{voucher.verification_code}",
+            "url": f"{origin}/verify/voucher/{voucher.verification_code}",
             "text": "Verify Travel Voucher Online"
         }
         content = email_service.generate_html_email(
@@ -1563,8 +1684,62 @@ class FinanceService:
             content_html=html_body,
             call_to_action=cta
         )
-        email_service.send_email(recipient_email, email_subject, content)
-        return True
+        return email_service.send_email(recipient_email, email_subject, content)
+
+    def send_payment_voucher_email(
+        self,
+        db: Session,
+        voucher_id: int,
+        recipient_email: str,
+        recipient_name: Optional[str] = None,
+        subject: Optional[str] = None,
+        custom_message: Optional[str] = None,
+        base_url: Optional[str] = None
+    ) -> bool:
+        voucher = self.get_payment_voucher(db, voucher_id)
+        if not voucher:
+            return False
+
+        emp_details = dict(voucher.employee_details or {})
+        name = recipient_name or emp_details.get("name") or emp_details.get("full_name") or "Team Member"
+        email_subject = subject or f"Action Required: Payment Voucher {voucher.voucher_number} — Sign Digitally"
+
+        custom_note_html = f"<p style='background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px 16px; margin: 16px 0; color: #92400e;'><strong>Message from Finance:</strong><br>{custom_message}</p>" if custom_message else ""
+
+        due_date_str = f"<p><strong>Accountability Due Date:</strong> {voucher.due_date.strftime('%d %b %Y')}</p>" if voucher.due_date else ""
+        amount_words_str = f"<p><em>({voucher.amount_in_words})</em></p>" if voucher.amount_in_words else ""
+
+        html_body = f"""
+        <p>Dear {name},</p>
+        <p>An official <strong>Payment & Expense Authorization Voucher</strong> has been issued for you by Allbound Vacations.</p>
+        {custom_note_html}
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0;">
+            <p><strong>Voucher Number:</strong> {voucher.voucher_number}</p>
+            <p><strong>Purpose / Title:</strong> {voucher.title}</p>
+            <p><strong>Category:</strong> {voucher.category.replace('_', ' ').title()}</p>
+            <p><strong>Issue Date:</strong> {voucher.issue_date.strftime('%d %b %Y')}</p>
+            {due_date_str}
+            <p><strong>Disbursement Method:</strong> {voucher.disbursement_method.replace('_', ' ').title()}</p>
+            <p style="font-size: 18px; color: #008080;"><strong>Authorized Amount: {voucher.currency} {voucher.amount:,.2f}</strong></p>
+            {amount_words_str}
+        </div>
+        <p><strong>How to sign:</strong> Click the button below to open your secure signing portal on your smartphone, tablet, or computer. You can sign directly on the screen with your finger or mouse.</p>
+        <p style="font-size: 12px; color: #64748b; margin-top: 20px;">Please account for all expenditures with valid fiscal receipts and return any unspent balance per company financial guidelines.</p>
+        """
+
+        origin = base_url.rstrip("/") if base_url else "https://allboundvacations.com"
+        signing_url = f"{origin}/sign/voucher/{voucher.signing_token}"
+        cta = {
+            "url": signing_url,
+            "text": "Review & Sign Voucher Digitally"
+        }
+        content = email_service.generate_html_email(
+            title=f"Payment Voucher #{voucher.voucher_number}",
+            content_html=html_body,
+            call_to_action=cta
+        )
+        return email_service.send_email(recipient_email, email_subject, content)
 
 
 finance_service = FinanceService()
+

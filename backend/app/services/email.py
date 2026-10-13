@@ -5,13 +5,14 @@ from app.db.database import SessionLocal
 from app.models.email_log import EmailLog
 
 class EmailService:
-    def send_email(self, to_email: str, subject: str, html_content: str) -> None:
+    def send_email(self, to_email: str, subject: str, html_content: str, inline_images: list = None) -> bool:
         """
         Sends an email using Zoho ZeptoMail and logs the outcome to the DB.
+        Returns True if the email request was accepted (HTTP 200/201), False otherwise.
         """
         if not settings.ZEPTO_API_KEY:
             print(f"Warning: ZEPTO_API_KEY is missing. Would have sent email to {to_email}")
-            return
+            return False
 
         url = "https://api.zeptomail.com/v1.1/email"
         
@@ -27,6 +28,9 @@ class EmailService:
             "subject": subject,
             "htmlbody": html_content
         }
+        if inline_images:
+            # Each: {"mime_type": "image/png", "content": <base64>, "cid": "..."}
+            payload["inline_images"] = inline_images
         
         response_status = None
         response_data = None
@@ -48,7 +52,10 @@ class EmailService:
             log_entry = EmailLog(
                 recipient=to_email,
                 subject=subject,
-                payload=payload,
+                payload={
+                    **payload,
+                    **({"inline_images": [{**i, "content": "<omitted>"} for i in inline_images]} if inline_images else {}),
+                },
                 response_status=response_status,
                 response_data=response_data
             )
@@ -59,6 +66,8 @@ class EmailService:
             print(f"Failed to save email log: {e}")
         finally:
             db.close()
+
+        return response_status in [200, 201]
 
     def generate_html_email(self, title: str, content_html: str, call_to_action: dict = None) -> str:
         """

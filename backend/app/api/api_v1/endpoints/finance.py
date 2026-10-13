@@ -461,10 +461,12 @@ def send_voucher_email(
         voucher_id=voucher_id,
         recipient_email=email_req.recipient_email,
         recipient_name=email_req.recipient_name,
-        subject=email_req.subject
+        subject=email_req.subject,
+        custom_message=email_req.message,
+        base_url=email_req.base_url
     )
     if not success:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Voucher not found")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to dispatch travel voucher email. Please verify recipient email.")
     return {"message": "Voucher email dispatched successfully"}
 
 
@@ -544,6 +546,64 @@ def update_payment_voucher(
     if not pv:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment voucher not found")
     return pv
+
+
+@router.post("/payment-vouchers/{voucher_id}/send-email")
+def send_payment_voucher_email(
+    voucher_id: int,
+    email_req: SendEmailRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_finance_or_admin)
+) -> Any:
+    """Send payment voucher notification and digital signing link to employee via email."""
+    success = finance_service.send_payment_voucher_email(
+        db,
+        voucher_id=voucher_id,
+        recipient_email=email_req.recipient_email,
+        recipient_name=email_req.recipient_name,
+        subject=email_req.subject,
+        custom_message=email_req.message,
+        base_url=email_req.base_url
+    )
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to dispatch payment voucher email. Please verify recipient email or email provider configuration."
+        )
+    return {"message": "Payment voucher signing email dispatched successfully"}
+
+
+# ==========================================
+# STAFF & EMPLOYEE DIRECTORY
+# ==========================================
+
+@router.get("/staff")
+def get_staff_members(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_finance_or_admin)
+) -> Any:
+    """Retrieve list of employees / staff members for voucher assignments."""
+    return finance_service.get_staff_members(db)
+
+
+@router.post("/staff")
+def save_staff_member(
+    member_data: Dict[str, Any],
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_finance_or_admin)
+) -> Any:
+    """Save or update a staff member in the directory."""
+    return finance_service.save_staff_member(db, member_data)
+
+
+@router.delete("/staff/{member_id}")
+def delete_staff_member(
+    member_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_finance_or_admin)
+) -> Any:
+    """Delete a staff member from the directory."""
+    return finance_service.delete_staff_member(db, member_id)
 
 
 # ==========================================

@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Optional, Any, List
 from datetime import datetime
 from pydantic import BaseModel, Field
 
@@ -20,3 +20,11 @@ class EmailLogResponse(EmailLogBase):
 
     class Config:
         orm_mode = True
+        from_attributes = True
+
+class PaginatedEmailLogsResponse(BaseModel):
+    items: List[EmailLogResponse]
+    total: int
+    page: int
+    size: int
+    pages: int

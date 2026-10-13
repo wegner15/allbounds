@@ -321,6 +321,9 @@ class FinanceService:
         if not settings.supplier_categories or len(settings.supplier_categories) == 0:
             settings.supplier_categories = DEFAULT_SUPPLIER_CATEGORIES
             changed = True
+        if settings.staff_members is None:
+            settings.staff_members = []
+            changed = True
         if changed:
             try:
                 db.commit()
@@ -329,6 +332,8 @@ class FinanceService:
                 db.rollback()
 
         return settings
+
+    get_settings = get_company_settings
 
     def update_company_settings(
         self, db: Session, settings_update: CompanyFinanceSettingsUpdate

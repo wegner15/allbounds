@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, field_validator
 from typing import Optional, List, Dict, Any
 from datetime import date, datetime
 
@@ -80,6 +80,18 @@ class CompanyFinanceSettingsBase(BaseModel):
     default_voucher_supplier_instructions: Optional[str] = None
     default_voucher_client_instructions: Optional[str] = None
     default_voucher_terms: Optional[str] = None
+
+    @field_validator(
+        'bank_accounts',
+        'mobile_money_accounts',
+        'invoice_categories',
+        'supplier_categories',
+        'staff_members',
+        mode='before'
+    )
+    @classmethod
+    def ensure_list(cls, v):
+        return v if v is not None else []
 
 
 class CompanyFinanceSettingsUpdate(BaseModel):

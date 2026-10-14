@@ -494,14 +494,14 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
 
   if (isSuccess) {
     return (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-start justify-center z-50 p-4 pt-20 sm:pt-24 pb-8 animate-fade-in overflow-y-auto">
         <div className="bg-white rounded-2xl max-w-md w-full p-6 text-center shadow-2xl border border-gray-100">
           <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <Check className="w-8 h-8 stroke-[3]" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2 font-serif">Booking Received!</h2>
           <p className="text-gray-600 text-sm mb-6 leading-relaxed">
-            Thank you for booking with All Bounds Vacations. Our safari concierge has received your request and will contact you within 24 hours to confirm your itinerary and hotel options.
+            Thank you for booking with Allbound Vacations. Our safari concierge has received your request and will contact you within 24 hours to confirm your itinerary and hotel options.
           </p>
           <Button onClick={onClose} variant="primary" className="w-full">
             Continue Browsing
@@ -513,7 +513,7 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
 
   if (isSubmitted) {
     return (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-start justify-center z-50 p-4 pt-20 sm:pt-24 pb-8 overflow-y-auto">
         <div className="bg-white rounded-2xl max-w-md w-full p-8 text-center shadow-2xl">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal mx-auto mb-4"></div>
           <h3 className="text-lg font-bold text-gray-900 mb-1">Confirming Your Booking...</h3>
@@ -524,8 +524,13 @@ const PackageBookingForm: React.FC<PackageBookingFormProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100 my-8 animate-fade-in">
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-start justify-center z-50 p-4 pt-20 sm:pt-24 pb-8 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[calc(100vh-6rem)] sm:max-h-[calc(100vh-7.5rem)] overflow-y-auto shadow-2xl border border-gray-100 animate-fade-in">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10">
           <div>

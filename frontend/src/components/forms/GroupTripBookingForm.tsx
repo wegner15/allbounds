@@ -328,7 +328,7 @@ const GroupTripBookingForm: React.FC<GroupTripBookingFormProps> = ({
 
   if (isSuccess) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-start justify-center z-50 p-4 pt-20 sm:pt-24 pb-8 overflow-y-auto">
         <div className="bg-white rounded-lg max-w-md w-full p-6 text-center">
           <div className="mb-4">
             <svg className="mx-auto h-16 w-16 text-green-500 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -347,7 +347,7 @@ const GroupTripBookingForm: React.FC<GroupTripBookingFormProps> = ({
 
   if (isSubmitted) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-start justify-center z-50 p-4 pt-20 sm:pt-24 pb-8 overflow-y-auto">
         <div className="bg-white rounded-lg max-w-md w-full p-6 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-gray-600">Submitting your booking...</p>
@@ -357,8 +357,13 @@ const GroupTripBookingForm: React.FC<GroupTripBookingFormProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-start justify-center z-50 p-4 pt-20 sm:pt-24 pb-8 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[calc(100vh-6rem)] sm:max-h-[calc(100vh-7.5rem)] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div>

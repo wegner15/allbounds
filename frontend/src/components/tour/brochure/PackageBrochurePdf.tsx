@@ -85,6 +85,8 @@ const S = StyleSheet.create({
   coverBg:      { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.5 },
   coverBody:    { flex: 1, padding: 38, justifyContent: 'space-between' },
   coverHead:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  logoContainer:{ backgroundColor: C.white, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, flexDirection: 'row', alignItems: 'center' },
+  logoImage:    { height: 26, width: 115, objectFit: 'contain' },
   brandName:    { fontSize: 17, fontFamily: 'Helvetica-Bold', color: C.white, letterSpacing: 2 },
   brandSub:     { fontSize: 7, color: C.amber, letterSpacing: 3, marginTop: 2 },
   badge:        { borderWidth: 1, borderColor: 'rgba(255,255,255,0.25)', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, fontSize: 7, color: '#fef3c7', letterSpacing: 1.5 },
@@ -104,7 +106,7 @@ const S = StyleSheet.create({
   coverQrImg:   { width: 52, height: 52 },
   coverFtLabel: { fontSize: 9, color: C.amber, fontFamily: 'Helvetica-Bold', marginBottom: 2 },
   coverFtSub:   { fontSize: 7, color: '#9ca3af', marginBottom: 1 },
-  coverTagline: { fontSize: 9, color: C.amber, fontStyle: 'italic' },
+  coverTagline: { fontSize: 8, color: C.amber, fontStyle: 'italic', textAlign: 'right', lineHeight: 1.3 },
 
   /* Page chrome */
   page:        { backgroundColor: C.white },
@@ -112,6 +114,7 @@ const S = StyleSheet.create({
   pageHead:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 36, paddingTop: 26, paddingBottom: 10, borderBottomWidth: 1.5, borderBottomColor: '#ccfbf1', marginBottom: 14 },
   darkPageHead:{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 36, paddingTop: 26, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.1)', marginBottom: 14 },
   phLeft:      { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  phLogo:      { width: 12, height: 12, objectFit: 'contain' },
   phDot:       { width: 7, height: 7, borderRadius: 3.5, backgroundColor: C.teal },
   phDotAmber:  { width: 7, height: 7, borderRadius: 3.5, backgroundColor: C.amber },
   phTitle:     { fontSize: 9, fontFamily: 'Helvetica-Bold', color: C.teal, letterSpacing: 1.5 },
@@ -121,7 +124,7 @@ const S = StyleSheet.create({
   pageFoot:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 36, paddingBottom: 20, paddingTop: 8, borderTopWidth: 1, borderTopColor: C.gray200, marginTop: 'auto' },
   darkPageFoot:{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 36, paddingBottom: 20, paddingTop: 8, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)', marginTop: 'auto' },
   pfText:      { fontSize: 7, color: C.gray400 },
-  pfTextA:     { fontSize: 7, color: C.amber, fontStyle: 'italic' },
+  pfTextA:     { fontSize: 7, color: C.amber, fontStyle: 'italic', textAlign: 'right', lineHeight: 1.3 },
   body:        { paddingHorizontal: 36, flex: 1 },
 
   /* Typography */
@@ -224,6 +227,17 @@ interface Props {
   qrCodeDataUrl?: string;
 }
 
+// ─── Logo URLs (matching invoice design) ──────────────────────────────────────
+const logoHeaderUrl =
+  typeof window !== 'undefined' && window.location?.origin
+    ? `${window.location.origin}/logo/allbound_logo_header_2x.png`
+    : '/logo/allbound_logo_header_2x.png';
+
+const brandMarkUrl =
+  typeof window !== 'undefined' && window.location?.origin
+    ? `${window.location.origin}/logo/brand_mark.png`
+    : '/logo/brand_mark.png';
+
 // ─── Component ────────────────────────────────────────────────────────────────
 export const PackageBrochurePdf: React.FC<Props> = ({
   packageData,
@@ -244,10 +258,10 @@ export const PackageBrochurePdf: React.FC<Props> = ({
 
   return (
     <Document
-      title={`${packageData.name} - AllBounds Vacations Brochure`}
-      author="AllBounds Vacations"
+      title={`${packageData.name} - Allbound Vacations Brochure`}
+      author="Allbound Vacations"
       subject="Luxury Tour Package Brochure"
-      keywords="safari, tour, itinerary, allbounds"
+      keywords="safari, tour, itinerary, allbound vacations"
     >
       {/* ── PAGE 1: COVER ─────────────────────────────────────────────── */}
       <Page size="A4" style={S.coverPage}>
@@ -255,9 +269,8 @@ export const PackageBrochurePdf: React.FC<Props> = ({
         <View style={S.coverBody}>
           {/* Header */}
           <View style={S.coverHead}>
-            <View>
-              <Text style={S.brandName}>ALLBOUNDS VACATIONS</Text>
-              <Text style={S.brandSub}>EXPEDITIONS & SAFARIS</Text>
+            <View style={S.logoContainer}>
+              <Image src={logoHeaderUrl} style={S.logoImage} />
             </View>
             <Text style={S.badge}>OFFICIAL TOUR DOSSIER</Text>
           </View>
@@ -312,7 +325,10 @@ export const PackageBrochurePdf: React.FC<Props> = ({
                 <Text style={S.coverFtSub}>bookings@allboundvacations.com</Text>
               </View>
             </View>
-            <Text style={S.coverTagline}>Bespoke African Journeys</Text>
+            <View style={{ alignItems: 'flex-end' }}>
+              <Text style={S.coverTagline}>Your Dream Holiday.</Text>
+              <Text style={S.coverTagline}>Designed. Booked. Perfected.</Text>
+            </View>
           </View>
         </View>
       </Page>
@@ -321,8 +337,8 @@ export const PackageBrochurePdf: React.FC<Props> = ({
       <Page size="A4" style={S.page}>
         <View style={S.pageHead}>
           <View style={S.phLeft}>
-            <View style={S.phDot} />
-            <Text style={S.phTitle}>ALLBOUNDS VACATIONS</Text>
+            <Image src={brandMarkUrl} style={S.phLogo} />
+            <Text style={S.phTitle}>ALLBOUND VACATIONS</Text>
           </View>
           <Text style={S.phRight}>TOUR OVERVIEW & FACTS  •  PAGE 02</Text>
         </View>
@@ -395,7 +411,7 @@ export const PackageBrochurePdf: React.FC<Props> = ({
         <Page key={pi} size="A4" style={S.page}>
           <View style={S.pageHead}>
             <View style={S.phLeft}>
-              <View style={S.phDot} />
+              <Image src={brandMarkUrl} style={S.phLogo} />
               <Text style={S.phTitle}>{packageData.name.toUpperCase()}</Text>
             </View>
             <Text style={S.phRight}>DAILY ITINERARY  •  PAGE {String(pi + 3).padStart(2, '0')}</Text>
@@ -458,7 +474,7 @@ export const PackageBrochurePdf: React.FC<Props> = ({
             })}
           </View>
           <View style={S.pageFoot}>
-            <Text style={S.pfText}>AllBounds Vacations  •  Detailed Daily Itinerary</Text>
+            <Text style={S.pfText}>Allbound Vacations  •  Detailed Daily Itinerary</Text>
             <Text style={S.pfText}>Page {String(pi + 3).padStart(2, '0')}</Text>
           </View>
         </Page>
@@ -468,7 +484,7 @@ export const PackageBrochurePdf: React.FC<Props> = ({
       <Page size="A4" style={S.page}>
         <View style={S.pageHead}>
           <View style={S.phLeft}>
-            <View style={S.phDot} />
+            <Image src={brandMarkUrl} style={S.phLogo} />
             <Text style={S.phTitle}>LODGING & TERMS</Text>
           </View>
           <Text style={S.phRight}>ACCOMMODATIONS & INCLUSIONS</Text>
@@ -539,7 +555,7 @@ export const PackageBrochurePdf: React.FC<Props> = ({
           </View>
         </View>
         <View style={S.pageFoot}>
-          <Text style={S.pfText}>AllBounds Vacations  •  Accommodations & Terms</Text>
+          <Text style={S.pfText}>Allbound Vacations  •  Accommodations & Terms</Text>
           <Text style={S.pfText}>Official Brochure</Text>
         </View>
       </Page>
@@ -548,8 +564,8 @@ export const PackageBrochurePdf: React.FC<Props> = ({
       <Page size="A4" style={[S.page, S.darkPage]}>
         <View style={S.darkPageHead}>
           <View style={S.phLeft}>
-            <View style={S.phDotAmber} />
-            <Text style={S.phTitleW}>ALLBOUNDS VACATIONS</Text>
+            <Image src={brandMarkUrl} style={S.phLogo} />
+            <Text style={S.phTitleW}>ALLBOUND VACATIONS</Text>
           </View>
           <Text style={S.phRightA}>PRICING & BOOKING DOSSIER</Text>
         </View>
@@ -619,7 +635,7 @@ export const PackageBrochurePdf: React.FC<Props> = ({
 
           {/* Contact */}
           <View style={S.contactBox}>
-            <Text style={S.contactT}>Speak With An AllBounds Safari Specialist</Text>
+            <Text style={S.contactT}>Speak With An Allbound Safari Specialist</Text>
             <Text style={S.contactSub}>
               Have questions or ready to book? Our destination experts are available 7 days a week to assist you.
             </Text>
@@ -635,8 +651,11 @@ export const PackageBrochurePdf: React.FC<Props> = ({
         </View>
 
         <View style={S.darkPageFoot}>
-          <Text style={S.pfText}>© {currentYear} AllBounds Vacations. All rights reserved.</Text>
-          <Text style={S.pfTextA}>Crafting Unforgettable African Journeys</Text>
+          <Text style={S.pfText}>© {currentYear} Allbound Vacations. All rights reserved.</Text>
+          <View style={{ alignItems: 'flex-end' }}>
+            <Text style={S.pfTextA}>Your Dream Holiday.</Text>
+            <Text style={S.pfTextA}>Designed. Booked. Perfected.</Text>
+          </View>
         </View>
       </Page>
     </Document>

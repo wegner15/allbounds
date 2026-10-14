@@ -4,7 +4,6 @@ import {
   CheckCircle2,
   XCircle,
   Star,
-  Compass,
   ShieldCheck,
   Phone,
   Mail,
@@ -51,22 +50,36 @@ const Page: React.FC<{ children: React.ReactNode; dark?: boolean }> = ({ childre
   </div>
 );
 
-// Standard light page header
-const PageHeader: React.FC<{ left: string; right: string }> = ({ left, right }) => (
+// Standard light page header with official brand mark
+const PageHeader: React.FC<{ left?: string; right: string }> = ({ left = 'Allbound Vacations', right }) => (
   <div className="flex items-center justify-between pb-3 border-b-2 border-teal/20 px-10 pt-8">
-    <div className="flex items-center gap-2 text-teal">
-      <Compass className="w-5 h-5" />
+    <div className="flex items-center gap-2.5 text-teal">
+      <img
+        src="/logo/brand_mark_2x.png"
+        alt="Allbound Vacations"
+        className="w-5 h-5 object-contain"
+        onError={(e) => {
+          (e.target as HTMLElement).style.display = 'none';
+        }}
+      />
       <span className="text-sm font-bold uppercase tracking-wider font-playfair">{left}</span>
     </div>
     <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">{right}</span>
   </div>
 );
 
-// Standard dark page header
-const DarkPageHeader: React.FC<{ left: string; right: string }> = ({ left, right }) => (
+// Standard dark page header with official brand mark
+const DarkPageHeader: React.FC<{ left?: string; right: string }> = ({ left = 'Allbound Vacations', right }) => (
   <div className="flex items-center justify-between pb-3 border-b border-white/15 px-10 pt-8">
-    <div className="flex items-center gap-2">
-      <Compass className="w-5 h-5 text-amber-400" />
+    <div className="flex items-center gap-2.5">
+      <img
+        src="/logo/brand_mark_2x.png"
+        alt="Allbound Vacations"
+        className="w-5 h-5 object-contain"
+        onError={(e) => {
+          (e.target as HTMLElement).style.display = 'none';
+        }}
+      />
       <span className="text-sm font-bold uppercase tracking-wider font-playfair text-white">{left}</span>
     </div>
     <span className="text-[11px] font-semibold text-amber-300/80 uppercase tracking-widest">{right}</span>
@@ -74,14 +87,14 @@ const DarkPageHeader: React.FC<{ left: string; right: string }> = ({ left, right
 );
 
 // Standard page footer
-const PageFooter: React.FC<{ left: string; right: string; dark?: boolean }> = ({ left, right, dark }) => (
+const PageFooter: React.FC<{ left: string; right: React.ReactNode; dark?: boolean }> = ({ left, right, dark }) => (
   <div
     className={`flex items-center justify-between px-10 pb-8 pt-3 mt-auto border-t text-[10px] ${
       dark ? 'border-white/15 text-gray-400' : 'border-gray-200 text-gray-400'
     }`}
   >
     <span>{left}</span>
-    <span className={dark ? 'text-amber-400/90 font-serif italic' : ''}>{right}</span>
+    <span className={dark ? 'text-amber-400/90 font-serif italic text-right' : 'text-right'}>{right}</span>
   </div>
 );
 
@@ -152,13 +165,20 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
         <div className="absolute inset-5 border border-amber-400/30 rounded-2xl pointer-events-none z-10" />
 
         <header className="relative z-20 pt-10 px-10 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-teal/90 border border-amber-400/40 flex items-center justify-center shadow-lg">
-              <Compass className="w-6 h-6 text-amber-300" />
-            </div>
-            <div>
-              <span className="text-xl font-bold tracking-widest uppercase font-playfair text-white block">AllBounds</span>
-              <span className="text-[9px] tracking-[0.25em] uppercase text-amber-300 font-medium block">Expeditions &amp; Safaris</span>
+          {/* Official Brand Lockup - Matches Invoice Design */}
+          <div className="flex items-center">
+            <div className="bg-white/95 backdrop-blur-md px-4 py-2 rounded-xl border border-white/30 shadow-xl flex items-center">
+              <img
+                src="/logo/allbound_logo_header_2x.png"
+                alt="Allbound Vacations"
+                className="h-10 sm:h-11 w-auto max-w-full object-contain block"
+                onError={(e) => {
+                  const target = e.currentTarget as HTMLImageElement;
+                  if (!target.src.includes('brand_mark')) {
+                    target.src = '/logo/brand_mark_2x.png';
+                  }
+                }}
+              />
             </div>
           </div>
           <div className="bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 text-xs font-semibold tracking-wider uppercase text-amber-200">
@@ -217,13 +237,17 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
               <span className="font-medium text-gray-300 tracking-wide text-[10px] block">bookings@allboundvacations.com</span>
             </div>
           </div>
-          <span className="text-amber-300/80 font-serif italic text-sm">Bespoke African Journeys</span>
+          <div className="text-right text-amber-300/80 font-serif italic text-xs sm:text-sm leading-tight">
+            <span>Your Dream Holiday.</span>
+            <br />
+            <span>Designed. Booked. Perfected.</span>
+          </div>
         </footer>
       </div>
 
       {/* PAGE 2: TOUR OVERVIEW & TRIP FACTS */}
       <Page>
-        <PageHeader left="AllBounds Expeditions" right="Tour Overview & Facts • Page 02" />
+        <PageHeader left="Allbound Vacations" right="Tour Overview & Facts • Page 02" />
         <div className="px-10 pt-6 pb-2 space-y-5 flex-1">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-widest text-teal block mb-0.5">Executive Itinerary Overview</span>
@@ -278,7 +302,7 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
             </div>
           )}
         </div>
-        <PageFooter left={`AllBounds Vacations • Tour Dossier: ${packageData.name}`} right="Page 02" />
+        <PageFooter left={`Allbound Vacations • Tour Dossier: ${packageData.name}`} right="Page 02" />
       </Page>
 
       {/* PAGES 3+: DAY-BY-DAY ITINERARY */}
@@ -480,7 +504,7 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
 
             })}
           </div>
-          <PageFooter left="AllBounds Vacations • Detailed Daily Itinerary" right={`Page ${String(pageIndex + 3).padStart(2, '0')}`} />
+          <PageFooter left="Allbound Vacations • Detailed Daily Itinerary" right={`Page ${String(pageIndex + 3).padStart(2, '0')}`} />
         </Page>
       ))}
 
@@ -553,12 +577,12 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
             </div>
           </div>
         </div>
-        <PageFooter left="AllBounds Vacations • Accommodations & Terms" right="Official Brochure" />
+        <PageFooter left="Allbound Vacations • Accommodations & Terms" right="Official Brochure" />
       </Page>
 
       {/* FINAL PAGE: PRICING & BOOKING (BACK COVER) */}
       <Page dark>
-        <DarkPageHeader left="AllBounds Expeditions" right="Pricing & Booking Dossier" />
+        <DarkPageHeader left="Allbound Vacations" right="Pricing & Booking Dossier" />
         <div className="px-10 pt-6 pb-2 space-y-5 flex-1">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400 block mb-0.5">Guaranteed Departures &amp; Rates</span>
@@ -636,7 +660,7 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
           </div>
 
           <div className="bg-gradient-to-r from-teal/90 to-teal-950/90 border border-amber-400/40 rounded-xl p-4 shadow-xl">
-            <h3 className="text-sm font-bold font-playfair text-white mb-1">Speak With An AllBounds Safari Specialist</h3>
+            <h3 className="text-sm font-bold font-playfair text-white mb-1">Speak With An Allbound Safari Specialist</h3>
             <p className="text-[11px] text-gray-200 mb-3 leading-relaxed">Have questions or ready to book? Our destination experts are available 7 days a week to assist you.</p>
             <div className="grid grid-cols-3 gap-2 text-xs">
               <div className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-amber-300" /><span className="font-semibold text-white text-[11px]">+256 782 594 008</span></div>
@@ -645,7 +669,17 @@ export const PackageBrochureDocument: React.FC<PackageBrochureDocumentProps> = (
             </div>
           </div>
         </div>
-        <PageFooter dark left={`© ${currentYear} AllBounds Vacations. All rights reserved.`} right="Crafting Unforgettable African Journeys" />
+        <PageFooter
+          dark
+          left={`© ${currentYear} Allbound Vacations. All rights reserved.`}
+          right={
+            <span className="text-right block leading-tight font-serif italic">
+              Your Dream Holiday.
+              <br />
+              Designed. Booked. Perfected.
+            </span>
+          }
+        />
       </Page>
     </div>
   );

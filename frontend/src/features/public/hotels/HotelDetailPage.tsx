@@ -282,10 +282,7 @@ const HotelDetailPage: React.FC = () => {
     );
   }
 
-  const destinationSlug = destination || hotel.country?.slug;
-  const canonicalHotelPath = location.pathname.startsWith('/destinations')
-    ? `/destinations/${destinationSlug}/hotels/${hotel.slug}`
-    : (destinationSlug ? `/hotels/${destinationSlug}/${hotel.slug}` : `/hotels/${hotel.slug}`);
+  const canonicalHotelPath = `/hotels/${hotel.slug}`;
 
   const rawHotelDescription = hotel.summary ||
     hotel.description?.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() ||

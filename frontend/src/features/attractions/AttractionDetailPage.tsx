@@ -113,9 +113,7 @@ const AttractionDetailPage: React.FC = () => {
   }
 
   const destinationSlug = destination || attraction?.country?.slug;
-  const canonicalAttractionPath = location.pathname.startsWith('/destinations')
-    ? `/destinations/${destinationSlug}/attractions/${slug}`
-    : (destinationSlug ? `/attractions/${destinationSlug}/${slug}` : `/attractions/${slug}`);
+  const canonicalAttractionPath = `/attractions/${slug}`;
 
   const rawAttractionDesc = attraction?.summary ||
     attraction?.description?.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() ||

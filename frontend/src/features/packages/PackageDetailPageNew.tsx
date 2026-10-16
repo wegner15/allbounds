@@ -151,7 +151,7 @@ const PackageDetailPageNew: React.FC = () => {
     );
   }
 
-  const destinationSlug = destination || packageDetail.country?.slug;
+  const destinationSlug = packageDetail.country?.slug || destination;
   const canonicalPackagePath = destinationSlug
     ? `/packages/${destinationSlug}/${packageDetail.slug}`
     : `/packages/${packageDetail.slug}`;

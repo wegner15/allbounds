@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page Not Found | Allbound Vacations</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#2D3748" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --charcoal: #3c4852;
+        --teal: #008080;
+        --teal-dark: #006666;
+        --sand: #edd785;
+        --paper: #f8f7f2;
+        --gray-text: #6b7280;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: var(--paper);
+        color: var(--charcoal);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1.5rem;
+        text-align: center;
+      }
+      .logo-container {
+        margin-bottom: 2rem;
+      }
+      .logo-container img {
+        height: 60px;
+        width: auto;
+      }
+      .badge {
+        display: inline-block;
+        background-color: rgba(0, 128, 128, 0.1);
+        color: var(--teal);
+        font-size: 0.875rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        padding: 0.35rem 0.85rem;
+        border-radius: 9999px;
+        margin-bottom: 1.25rem;
+      }
+      h1 {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: clamp(2.5rem, 6vw, 4.5rem);
+        font-weight: 700;
+        line-height: 1.1;
+        color: var(--charcoal);
+        margin-bottom: 1rem;
+      }
+      p {
+        font-size: 1.125rem;
+        color: var(--gray-text);
+        max-width: 520px;
+        margin: 0 auto 2rem;
+        line-height: 1.6;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        margin-bottom: 2.5rem;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.85rem 1.75rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        text-decoration: none;
+        transition: all 0.2s ease-in-out;
+      }
+      .btn-primary {
+        background-color: var(--teal);
+        color: #ffffff;
+      }
+      .btn-primary:hover {
+        background-color: var(--teal-dark);
+      }
+      .btn-secondary {
+        background-color: #ffffff;
+        color: var(--charcoal);
+        border: 1px solid #d1d5db;
+      }
+      .btn-secondary:hover {
+        background-color: #f3f4f6;
+      }
+      .quick-links {
+        display: flex;
+        gap: 1.5rem;
+        font-size: 0.95rem;
+      }
+      .quick-links a {
+        color: var(--teal);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .quick-links a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="logo-container">
+      <a href="/">
+        <img src="/logo/main_logo.png" alt="Allbound Vacations" onerror="this.src='/favicon.svg'" />
+      </a>
+    </div>
+
+    <span class="badge">Error 404</span>
+    <h1>Destination Not Found</h1>
+    <p>
+      The safari itinerary or page you are looking for may have been moved, renamed, or is temporarily unavailable.
+    </p>
+
+    <div class="actions">
+      <a href="/" class="btn btn-primary">Return Home</a>
+      <a href="/packages/" class="btn btn-secondary">Explore Safari Packages</a>
+      <a href="/destinations/" class="btn btn-secondary">View Destinations</a>
+    </div>
+
+    <div class="quick-links">
+      <a href="/blog/">Travel Blog</a>
+      <span>&bull;</span>
+      <a href="/about-us/">About Us</a>
+      <span>&bull;</span>
+      <a href="/contact-us/">Contact Us</a>
+    </div>
+  </body>
+</html>

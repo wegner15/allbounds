@@ -63,6 +63,31 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+function normalizeTrailingSlash(urlOrPath) {
+  if (!urlOrPath) return '/';
+  const [baseAndQuery, hash] = urlOrPath.split('#');
+  const [base, query] = baseAndQuery.split('?');
+  const lastSegment = base.split('/').pop() || '';
+  const hasFileExtension = /\.[a-z0-9]+$/i.test(lastSegment);
+
+  let normalizedBase = base;
+  if (!hasFileExtension && !normalizedBase.endsWith('/')) {
+    normalizedBase = `${normalizedBase}/`;
+  }
+
+  let result = normalizedBase;
+  if (query !== undefined) result += `?${query}`;
+  if (hash !== undefined) result += `#${hash}`;
+  return result;
+}
+
+function buildAbsoluteUrl(path) {
+  const normalized = normalizeTrailingSlash(path);
+  if (/^https?:\/\//i.test(normalized)) return normalized;
+  const cleanPath = normalized.startsWith('/') ? normalized : `/${normalized}`;
+  return `${SITE_URL}${cleanPath}`;
+}
+
 function makeBreadcrumbs(items) {
   return {
     '@context': 'https://schema.org',
@@ -71,7 +96,7 @@ function makeBreadcrumbs(items) {
       '@type': 'ListItem',
       position: idx + 1,
       name: item.name,
-      item: item.url.startsWith('http') ? item.url : `${SITE_URL}${item.url}`,
+      item: buildAbsoluteUrl(item.url),
     })),
   };
 }
@@ -334,8 +359,7 @@ async function fetchList(path) {
 function renderHtml(template, { title, heading, description, canonicalUrl, image, type = 'website', jsonLd }) {
   const safeTitle = escapeHtml(title);
   const safeDesc = escapeHtml(description);
-  const safeImg = escapeHtml(image || DEFAULT_OG_IMAGE);
-  const safeUrl = escapeHtml(canonicalUrl);
+  const safeUrl = escapeHtml(buildAbsoluteUrl(canonicalUrl));
   const h1Text = escapeHtml(heading || title.replace(/\s*\|\s*Allbound Vacations.*$/i, '').trim() || title);
 
   let html = template;
@@ -574,7 +598,6 @@ async function main() {
 
     if (countrySlug) {
       // 2. Nested /hotels/:country/:slug
-      const nestedCanonical = `${SITE_URL}${nestedHotelPath}`;
       const nestedJsonLd = [
         {
           '@context': 'https://schema.org',
@@ -582,7 +605,7 @@ async function main() {
           name: hotel.name.trim(),
           description,
           image,
-          url: nestedCanonical,
+          url: rootCanonical,
           starRating: hotel.stars ? { '@type': 'Rating', ratingValue: hotel.stars } : undefined,
           address: hotel.country ? {
             '@type': 'PostalAddress',
@@ -596,11 +619,10 @@ async function main() {
           { name: hotel.name.trim(), url: nestedHotelPath },
         ]),
       ];
-      await writePage(nestedHotelPath, renderHtml(template, { title, heading: hotel.name.trim(), description, canonicalUrl: nestedCanonical, image, type: 'article', jsonLd: nestedJsonLd }));
+      await writePage(nestedHotelPath, renderHtml(template, { title, heading: hotel.name.trim(), description, canonicalUrl: rootCanonical, image, type: 'article', jsonLd: nestedJsonLd }));
       count++;
 
       // 3. /destinations/:country/hotels/:slug
-      const destCanonical = `${SITE_URL}${destPath}`;
       const destJsonLd = [
         {
           '@context': 'https://schema.org',
@@ -608,7 +630,7 @@ async function main() {
           name: hotel.name.trim(),
           description,
           image,
-          url: destCanonical,
+          url: rootCanonical,
           starRating: hotel.stars ? { '@type': 'Rating', ratingValue: hotel.stars } : undefined,
           address: hotel.country ? {
             '@type': 'PostalAddress',
@@ -623,7 +645,7 @@ async function main() {
           { name: hotel.name.trim(), url: destPath },
         ]),
       ];
-      await writePage(destPath, renderHtml(template, { title, heading: hotel.name.trim(), description, canonicalUrl: destCanonical, image, type: 'article', jsonLd: destJsonLd }));
+      await writePage(destPath, renderHtml(template, { title, heading: hotel.name.trim(), description, canonicalUrl: rootCanonical, image, type: 'article', jsonLd: destJsonLd }));
       count++;
     }
   }
@@ -662,7 +684,6 @@ async function main() {
 
     if (countrySlug) {
       // 2. Nested /activities/:country/:slug
-      const nestedCanonical = `${SITE_URL}${nestedActPath}`;
       const nestedJsonLd = [
         {
           '@context': 'https://schema.org',
@@ -670,7 +691,7 @@ async function main() {
           name: act.name.trim(),
           description,
           image,
-          url: nestedCanonical,
+          url: rootCanonical,
           provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
         },
         makeBreadcrumbs([
@@ -680,11 +701,10 @@ async function main() {
           { name: act.name.trim(), url: nestedActPath },
         ]),
       ];
-      await writePage(nestedActPath, renderHtml(template, { title, heading: act.name.trim(), description, canonicalUrl: nestedCanonical, image, type: 'article', jsonLd: nestedJsonLd }));
+      await writePage(nestedActPath, renderHtml(template, { title, heading: act.name.trim(), description, canonicalUrl: rootCanonical, image, type: 'article', jsonLd: nestedJsonLd }));
       count++;
 
       // 3. /destinations/:country/activities/:slug
-      const destCanonical = `${SITE_URL}${destPath}`;
       const destJsonLd = [
         {
           '@context': 'https://schema.org',
@@ -692,7 +712,7 @@ async function main() {
           name: act.name.trim(),
           description,
           image,
-          url: destCanonical,
+          url: rootCanonical,
           provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
         },
         makeBreadcrumbs([
@@ -703,7 +723,7 @@ async function main() {
           { name: act.name.trim(), url: destPath },
         ]),
       ];
-      await writePage(destPath, renderHtml(template, { title, heading: act.name.trim(), description, canonicalUrl: destCanonical, image, type: 'article', jsonLd: destJsonLd }));
+      await writePage(destPath, renderHtml(template, { title, heading: act.name.trim(), description, canonicalUrl: rootCanonical, image, type: 'article', jsonLd: destJsonLd }));
       count++;
     }
   }
@@ -743,7 +763,6 @@ async function main() {
 
     if (countrySlug) {
       // 2. Nested /attractions/:country/:slug
-      const nestedCanonical = `${SITE_URL}${nestedAttPath}`;
       const nestedJsonLd = [
         {
           '@context': 'https://schema.org',
@@ -751,7 +770,7 @@ async function main() {
           name: att.name.trim(),
           description,
           image,
-          url: nestedCanonical,
+          url: rootCanonical,
           provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
           containedInPlace: att.country ? { '@type': 'Country', name: att.country.name || att.country } : undefined,
         },
@@ -762,11 +781,10 @@ async function main() {
           { name: att.name.trim(), url: nestedAttPath },
         ]),
       ];
-      await writePage(nestedAttPath, renderHtml(template, { title, heading: att.name.trim(), description, canonicalUrl: nestedCanonical, image, type: 'article', jsonLd: nestedJsonLd }));
+      await writePage(nestedAttPath, renderHtml(template, { title, heading: att.name.trim(), description, canonicalUrl: rootCanonical, image, type: 'article', jsonLd: nestedJsonLd }));
       count++;
 
       // 3. /destinations/:country/attractions/:slug
-      const destCanonical = `${SITE_URL}${destPath}`;
       const destJsonLd = [
         {
           '@context': 'https://schema.org',
@@ -774,7 +792,7 @@ async function main() {
           name: att.name.trim(),
           description,
           image,
-          url: destCanonical,
+          url: rootCanonical,
           provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
           containedInPlace: att.country ? { '@type': 'Country', name: att.country.name || att.country } : undefined,
         },
@@ -786,7 +804,7 @@ async function main() {
           { name: att.name.trim(), url: destPath },
         ]),
       ];
-      await writePage(destPath, renderHtml(template, { title, heading: att.name.trim(), description, canonicalUrl: destCanonical, image, type: 'article', jsonLd: destJsonLd }));
+      await writePage(destPath, renderHtml(template, { title, heading: att.name.trim(), description, canonicalUrl: rootCanonical, image, type: 'article', jsonLd: destJsonLd }));
       count++;
     }
   }

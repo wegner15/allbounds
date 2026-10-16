@@ -74,12 +74,13 @@ const SeoHead: React.FC<SeoHeadProps> = ({
     ? `${rawDescription.substring(0, 155).trim()}...`
     : rawDescription;
 
-  // Always produce an absolute canonical URL
-  const canonical = canonicalUrl
+  // Always produce an absolute canonical URL with trailing slash compliance
+  const rawCanonical = canonicalUrl
     ? canonicalUrl
     : canonicalPath
       ? buildAbsoluteUrl(canonicalPath)
       : (typeof window !== 'undefined' ? window.location.href : SITE_URL);
+  const canonical = buildAbsoluteUrl(rawCanonical);
 
   const ogImage = image || DEFAULT_OG_IMAGE;
   const ogImageWidth = imageWidth ?? (image ? undefined : DEFAULT_OG_IMAGE_WIDTH);

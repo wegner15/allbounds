@@ -23,21 +23,21 @@ const API_BASE_URL = normalizeBaseUrl(
 
 const staticRoutes = [
   { path: '/', changefreq: 'daily', priority: '1.0' },
-  { path: '/destinations', changefreq: 'weekly', priority: '0.9' },
-  { path: '/packages', changefreq: 'weekly', priority: '0.9' },
-  { path: '/hotels', changefreq: 'weekly', priority: '0.8' },
-  { path: '/activities', changefreq: 'weekly', priority: '0.8' },
-  { path: '/attractions', changefreq: 'weekly', priority: '0.8' },
-  { path: '/holiday-types', changefreq: 'weekly', priority: '0.8' },
-  { path: '/group-trips', changefreq: 'weekly', priority: '0.8' },
-  { path: '/blog', changefreq: 'daily', priority: '0.8' },
-  { path: '/about-us', changefreq: 'monthly', priority: '0.6' },
-  { path: '/contact-us', changefreq: 'monthly', priority: '0.6' },
-  { path: '/payment-plans', changefreq: 'monthly', priority: '0.5' },
-  { path: '/visa-application', changefreq: 'monthly', priority: '0.5' },
-  { path: '/flights', changefreq: 'monthly', priority: '0.5' },
-  { path: '/regions', changefreq: 'monthly', priority: '0.4' },
-  { path: '/stays', changefreq: 'monthly', priority: '0.4' },
+  { path: '/destinations/', changefreq: 'weekly', priority: '0.9' },
+  { path: '/packages/', changefreq: 'weekly', priority: '0.9' },
+  { path: '/hotels/', changefreq: 'weekly', priority: '0.8' },
+  { path: '/activities/', changefreq: 'weekly', priority: '0.8' },
+  { path: '/attractions/', changefreq: 'weekly', priority: '0.8' },
+  { path: '/holiday-types/', changefreq: 'weekly', priority: '0.8' },
+  { path: '/group-trips/', changefreq: 'weekly', priority: '0.8' },
+  { path: '/blog/', changefreq: 'daily', priority: '0.8' },
+  { path: '/about-us/', changefreq: 'monthly', priority: '0.6' },
+  { path: '/contact-us/', changefreq: 'monthly', priority: '0.6' },
+  { path: '/payment-plans/', changefreq: 'monthly', priority: '0.5' },
+  { path: '/visa-application/', changefreq: 'monthly', priority: '0.5' },
+  { path: '/flights/', changefreq: 'monthly', priority: '0.5' },
+  { path: '/regions/', changefreq: 'monthly', priority: '0.4' },
+  { path: '/stays/', changefreq: 'monthly', priority: '0.4' },
 ];
 
 const contentRouteSlugs = new Set(['careers', 'terms', 'privacy']);
@@ -62,11 +62,7 @@ async function main() {
 
   const urls = [];
 
-  urls.push(...staticRoutes.map((route) => ({
-    loc: new URL(route.path, SITE_URL).toString(),
-    changefreq: route.changefreq,
-    priority: route.priority,
-  })));
+  urls.push(...staticRoutes.map((route) => makeUrl(route.path, undefined, route.changefreq, route.priority)));
 
   for (const region of regions) {
     if (!region?.slug) continue;
@@ -80,45 +76,34 @@ async function main() {
     }
   }
 
+  // Canonical package URLs only (no duplicates)
   for (const item of packages) {
     if (item?.slug) {
-      urls.push(makeUrl(`/packages/${item.slug}`, item.updated_at, 'weekly', '0.9'));
-      if (item.country?.slug) {
-        urls.push(makeUrl(`/packages/${item.country.slug}/${item.slug}`, item.updated_at, 'weekly', '0.9'));
-      }
+      const canonicalPath = item.country?.slug
+        ? `/packages/${item.country.slug}/${item.slug}`
+        : `/packages/${item.slug}`;
+      urls.push(makeUrl(canonicalPath, item.updated_at, 'weekly', '0.9'));
     }
   }
 
+  // Canonical hotel URLs only (no duplicates)
   for (const item of hotels) {
     if (item?.slug) {
       urls.push(makeUrl(`/hotels/${item.slug}`, item.updated_at, 'weekly', '0.7'));
-      const countrySlug = item.country?.slug || (typeof item.country === 'string' ? item.country.toLowerCase() : undefined);
-      if (countrySlug) {
-        urls.push(makeUrl(`/hotels/${countrySlug}/${item.slug}`, item.updated_at, 'weekly', '0.7'));
-        urls.push(makeUrl(`/destinations/${countrySlug}/hotels/${item.slug}`, item.updated_at, 'weekly', '0.7'));
-      }
     }
   }
 
+  // Canonical attraction URLs only (no duplicates)
   for (const item of attractions) {
     if (item?.slug) {
       urls.push(makeUrl(`/attractions/${item.slug}`, item.updated_at, 'weekly', '0.7'));
-      const countrySlug = item.country?.slug || (typeof item.country === 'string' ? item.country.toLowerCase() : undefined);
-      if (countrySlug) {
-        urls.push(makeUrl(`/attractions/${countrySlug}/${item.slug}`, item.updated_at, 'weekly', '0.7'));
-        urls.push(makeUrl(`/destinations/${countrySlug}/attractions/${item.slug}`, item.updated_at, 'weekly', '0.7'));
-      }
     }
   }
 
+  // Canonical activity URLs only (no duplicates)
   for (const item of activities) {
     if (item?.slug) {
       urls.push(makeUrl(`/activities/${item.slug}`, item.updated_at, 'weekly', '0.7'));
-      const countrySlug = item.country?.slug || item.countries?.[0]?.slug || (typeof item.country === 'string' ? item.country.toLowerCase() : undefined);
-      if (countrySlug) {
-        urls.push(makeUrl(`/activities/${countrySlug}/${item.slug}`, item.updated_at, 'weekly', '0.7'));
-        urls.push(makeUrl(`/destinations/${countrySlug}/activities/${item.slug}`, item.updated_at, 'weekly', '0.7'));
-      }
     }
   }
 
@@ -203,9 +188,16 @@ function normalizeList(data) {
   return [];
 }
 
+function normalizeTrailingSlash(pathname) {
+  if (!pathname || pathname === '/') return '/';
+  const clean = pathname.startsWith('/') ? pathname : `/${pathname}`;
+  return clean.endsWith('/') ? clean : `${clean}/`;
+}
+
 function makeUrl(path, lastmod, changefreq, priority) {
+  const normalizedPath = normalizeTrailingSlash(path);
   return {
-    loc: new URL(path, SITE_URL).toString(),
+    loc: new URL(normalizedPath, SITE_URL).toString(),
     lastmod: lastmod ? toIsoDate(lastmod) : undefined,
     changefreq,
     priority,

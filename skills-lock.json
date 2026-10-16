@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "seo": {
+      "source": "iannuttall/seo",
+      "sourceType": "github",
+      "skillPath": "skills/seo/SKILL.md",
+      "computedHash": "d3402f94a8460a7637d19bef5470270396a02b4ee87beaf7ef5ee0c5b7a34a07"
+    }
+  }
+}

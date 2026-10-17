@@ -339,6 +339,41 @@ const staticPages = [
     description: 'Flexible payment plans and transparent booking options for your dream holiday with Allbound Vacations.',
     type: 'website',
   },
+  {
+    path: '/terms',
+    title: `Terms & Conditions | ${SITE_NAME}`,
+    heading: 'Booking Terms & Conditions',
+    description: 'Review our booking conditions, payment policies, and cancellation terms at Allbound Vacations.',
+    type: 'website',
+  },
+  {
+    path: '/privacy',
+    title: `Privacy Policy | ${SITE_NAME}`,
+    heading: 'Privacy Policy',
+    description: 'Learn how Allbound Vacations protects and handles your personal information and travel data.',
+    type: 'website',
+  },
+  {
+    path: '/careers',
+    title: `Careers | ${SITE_NAME}`,
+    heading: 'Join Our Team',
+    description: 'Explore career opportunities and join the passionate travel specialists team at Allbound Vacations.',
+    type: 'website',
+  },
+  {
+    path: '/start-planning',
+    title: `Plan Your Custom Safari | ${SITE_NAME}`,
+    heading: 'Custom Safari & Vacation Planner',
+    description: 'Design your tailored holiday experience in Africa with guidance from our safari destination specialists.',
+    type: 'website',
+  },
+  {
+    path: '/book-destination',
+    title: `Book Destination Experience | ${SITE_NAME}`,
+    heading: 'Book Your Destination Experience',
+    description: 'Reserve your next African destination vacation and travel itinerary with Allbound Vacations.',
+    type: 'website',
+  },
 ];
 
 async function fetchList(path) {
@@ -356,13 +391,23 @@ async function fetchList(path) {
   }
 }
 
-function renderHtml(template, { title, heading, description, canonicalUrl, image, type = 'website', jsonLd }) {
+function renderHtml(template, { title, heading, description, canonicalUrl, image, type = 'website', jsonLd, noIndex = false }) {
   const safeTitle = escapeHtml(title);
   const safeDesc = escapeHtml(description);
   const safeUrl = escapeHtml(buildAbsoluteUrl(canonicalUrl));
+  const safeImg = escapeHtml(image || DEFAULT_OG_IMAGE);
   const h1Text = escapeHtml(heading || title.replace(/\s*\|\s*Allbound Vacations.*$/i, '').trim() || title);
 
   let html = template;
+
+  // Handle robots meta tag
+  if (noIndex) {
+    if (html.includes('name="robots"')) {
+      html = html.replace(/<meta name="robots" content=".*?" \/>/, '<meta name="robots" content="noindex, nofollow" />');
+    } else {
+      html = html.replace('</head>', '    <meta name="robots" content="noindex, nofollow" />\n  </head>');
+    }
+  }
 
   // Replace <title>
   html = html.replace(/<title>.*?<\/title>/s, `<title>${safeTitle}</title>`);
@@ -448,6 +493,53 @@ async function main() {
       image: DEFAULT_OG_IMAGE,
       type: page.type,
       jsonLd: page.jsonLd,
+    });
+    await writePage(page.path, html);
+    count++;
+  }
+
+  // 1b. App shell pages (auth/admin routes with noIndex)
+  const appShellPages = [
+    {
+      path: '/login',
+      title: `Sign In | ${SITE_NAME}`,
+      heading: 'Sign In to Your Account',
+      description: 'Access the Allbound Vacations portal.',
+      noIndex: true,
+    },
+    {
+      path: '/admin',
+      title: `Admin Portal | ${SITE_NAME}`,
+      heading: 'Allbound Vacations Administration',
+      description: 'Internal administrative dashboard for Allbound Vacations.',
+      noIndex: true,
+    },
+    {
+      path: '/unauthorized',
+      title: `Access Denied | ${SITE_NAME}`,
+      heading: 'Access Restricted',
+      description: 'You do not have permission to view this resource.',
+      noIndex: true,
+    },
+    {
+      path: '/search',
+      title: `Search Safaris & Destinations | ${SITE_NAME}`,
+      heading: 'Search Safaris, Stays & Destinations',
+      description: 'Search packages, hotels, activities, and destinations with Allbound Vacations.',
+      noIndex: true,
+    },
+  ];
+
+  for (const page of appShellPages) {
+    const canonicalUrl = `${SITE_URL}${page.path}`;
+    const html = renderHtml(template, {
+      title: page.title,
+      heading: page.heading,
+      description: page.description,
+      canonicalUrl,
+      image: DEFAULT_OG_IMAGE,
+      type: 'website',
+      noIndex: page.noIndex,
     });
     await writePage(page.path, html);
     count++;
@@ -846,5 +938,5 @@ async function main() {
 
 main().catch((err) => {
   console.error('[prerender-seo] Error during prerendering:', err);
-  process.exit(0);
+  process.exit(1);
 });

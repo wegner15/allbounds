@@ -1,44 +1,40 @@
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    const path = url.pathname;
+    // Normalize path by stripping trailing slashes for consistent route matching
+    const rawPath = url.pathname;
+    const path = rawPath.length > 1 ? rawPath.replace(/\/+$/, '') : rawPath;
 
-    // 1. Fetch static asset from Cloudflare Pages asset store
-    let response = await env.ASSETS.fetch(request);
-
-    // 2. If the static asset exists and is not 404, serve it directly
-    if (response.status !== 404) {
-      return response;
-    }
-
-    // 3. If asset not found, check if this is an SPA route handled by React Router
-    const isSpaRoute =
-      path === '/admin' ||
-      path.startsWith('/admin/') ||
-      path === '/login' ||
-      path.startsWith('/login/') ||
+    // Check if this is an SPA / application route handled by React Router
+    const isAdmin = path === '/admin' || path.startsWith('/admin/');
+    const isLogin = path === '/login';
+    const isOtherSpa =
       path.startsWith('/sign/') ||
       path.startsWith('/verify/') ||
-      path.startsWith('/start-planning') ||
-      path.startsWith('/book-destination') ||
-      path.startsWith('/unauthorized') ||
-      path.startsWith('/form-showcase') ||
-      path.startsWith('/search') ||
-      path === '/terms' ||
-      path === '/privacy' ||
-      path === '/careers';
+      path === '/start-planning' ||
+      path === '/book-destination' ||
+      path === '/unauthorized' ||
+      path === '/form-showcase' ||
+      path === '/search';
 
-    if (isSpaRoute) {
-      // Return root index.html with 200 OK for React Router client navigation
-      const indexRequest = new Request(new URL('/', request.url), request);
-      const indexResponse = await env.ASSETS.fetch(indexRequest);
-      return new Response(indexResponse.body, {
+    if (isAdmin || isLogin || isOtherSpa) {
+      // Determine the best pre-rendered shell: /admin/, /login/, or root /
+      const targetPath = isAdmin ? '/admin/' : (isLogin ? '/login/' : '/');
+      const shellRequest = new Request(new URL(targetPath, request.url), request);
+      let shellResponse = await env.ASSETS.fetch(shellRequest);
+
+      // If the specific shell wasn't found, fallback to root /
+      if (shellResponse.status === 404 && targetPath !== '/') {
+        shellResponse = await env.ASSETS.fetch(new Request(new URL('/', request.url), request));
+      }
+
+      return new Response(shellResponse.body, {
         status: 200,
-        headers: indexResponse.headers,
+        headers: shellResponse.headers,
       });
     }
 
-    // 4. For any genuinely non-existent path, return the 404 response
-    return response;
+    // For all other routes (prerendered SEO pages, assets, images), fetch directly
+    return env.ASSETS.fetch(request);
   },
 };

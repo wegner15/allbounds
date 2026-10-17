@@ -1,17 +1,4 @@
-# Cloudflare Pages Redirects & SPA Rewrites
-
-# Clean directory trailing-slash redirects for SPA shells
-/login                  /login/       308
-/admin                  /admin/       308
-
-# Admin SPA client-side routes rewrite to admin shell
-/admin/*                /admin/       200
-
-# Verification & document signing SPA routes
-/sign/*                 /             200
-/verify/*               /             200
-
-# Legacy & booking sub-routes
+# Cloudflare Pages Legacy Redirects
 /destinations/*/book    /book-destination/  308
 /destinations-old/*     /destinations/      308
 /packages-old/*         /packages/          308

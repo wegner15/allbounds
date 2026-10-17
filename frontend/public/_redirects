@@ -1,38 +1,17 @@
-# Cloudflare Pages / Netlify SPA Redirects
-/admin/*                /index.html   200
-/admin                  /index.html   200
-/login                  /index.html   200
-/login/                 /index.html   200
-/start-planning         /index.html   200
-/start-planning/*       /index.html   200
-/book-destination       /index.html   200
-/book-destination/*     /index.html   200
-/destinations/*/book    /index.html   200
-/destinations-old/*     /index.html   200
-/packages-old/*         /index.html   200
-/unauthorized           /index.html   200
-/unauthorized/          /index.html   200
-/form-showcase          /index.html   200
-/form-showcase/         /index.html   200
-/contact                /index.html   200
-/contact/               /index.html   200
-/careers                /index.html   200
-/careers/               /index.html   200
-/terms                  /index.html   200
-/terms/                 /index.html   200
-/privacy                /index.html   200
-/privacy/               /index.html   200
-/payment-plans          /index.html   200
-/payment-plans/         /index.html   200
-/visa-application       /index.html   200
-/visa-application/      /index.html   200
-/flights                /index.html   200
-/flights/               /index.html   200
-/search                 /index.html   200
-/search/*               /index.html   200
-/stays                  /index.html   200
-/stays/*                /index.html   200
-/regions                /index.html   200
-/regions/*              /index.html   200
-/sign/*                 /index.html   200
-/verify/*               /index.html   200
+# Cloudflare Pages Redirects & SPA Rewrites
+
+# Clean directory trailing-slash redirects for SPA shells
+/login                  /login/       308
+/admin                  /admin/       308
+
+# Admin SPA client-side routes rewrite to admin shell
+/admin/*                /admin/       200
+
+# Verification & document signing SPA routes
+/sign/*                 /             200
+/verify/*               /             200
+
+# Legacy & booking sub-routes
+/destinations/*/book    /book-destination/  308
+/destinations-old/*     /destinations/      308
+/packages-old/*         /packages/          308

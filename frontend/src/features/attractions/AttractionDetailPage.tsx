@@ -271,7 +271,7 @@ const AttractionDetailPage: React.FC = () => {
                 >
                   {packages?.map(pkg => (
                     <div key={pkg?.id} className="flex-shrink-0 w-80 bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                      <Link to={`/packages/${pkg?.slug}`}>
+                      <Link to={`/packages/${pkg?.country?.slug || destinationSlug || 'unknown'}/${pkg?.slug}/`}>
                         <img
                           src={getImageUrlWithFallback(pkg?.cover_image, IMAGE_VARIANTS.MEDIUM)}
                           alt={pkg?.name}
@@ -291,7 +291,7 @@ const AttractionDetailPage: React.FC = () => {
                           </span>
                         </div>
 
-                        <Link to={`/packages/${pkg?.slug}`} className="block">
+                        <Link to={`/packages/${pkg?.country?.slug || destinationSlug || 'unknown'}/${pkg?.slug}/`} className="block">
                           <h3 className="text-lg font-medium text-charcoal hover:text-hover transition-colors mb-2">
                             {pkg?.name}
                           </h3>
@@ -354,7 +354,7 @@ const AttractionDetailPage: React.FC = () => {
                   {group_trips?.map((trip) => {
                     return (
                       <div key={trip.id} className="flex-shrink-0 w-80 bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                        <Link to={`/group-trips/${trip.slug}`}>
+                        <Link to={`/group-trips/${trip.slug}/`}>
                           <img
                             src={getImageUrlWithFallback(trip.cover_image, IMAGE_VARIANTS.MEDIUM, '/group_trips.jpeg')}
                             alt={trip.name}
@@ -376,7 +376,7 @@ const AttractionDetailPage: React.FC = () => {
                             )}
                           </div>
 
-                          <Link to={`/group-trips/${trip?.slug}`} className="block">
+                          <Link to={`/group-trips/${trip?.slug}/`} className="block">
                             <h3 className="text-lg font-semibold text-charcoal hover:text-hover transition-colors mb-2">
                               {trip?.name}
                             </h3>
@@ -418,7 +418,7 @@ const AttractionDetailPage: React.FC = () => {
 
                           {/* Action Button */}
                           <div className="mt-4 pt-3 border-t border-gray-100">
-                            <Link to={`/group-trips/${trip.slug}`}>
+                            <Link to={`/group-trips/${trip.slug}/`}>
                               <Button variant="primary" size="sm" className="w-full">
                                 View Details & Book
                               </Button>
@@ -447,7 +447,7 @@ const AttractionDetailPage: React.FC = () => {
                   {hotels.map((hotel) => (
                     <Link
                       key={hotel.id}
-                      to={`/hotels/${hotel.slug}`}
+                      to={`/hotels/${hotel.slug}/`}
                       className="group block bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-all duration-300"
                     >
                       {/* Hotel image */}

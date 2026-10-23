@@ -44,7 +44,7 @@ const ActivitiesTab: React.FC<ActivitiesTabProps> = ({ countryId, preview = fals
             {preview && activeActivities.length > 9 && destinationSlug && (
                 <div className="mt-12 text-center">
                     <Link
-                        to={`/destinations/${destinationSlug}/activities`}
+                        to={`/destinations/${destinationSlug}/activities/`}
                         className="inline-flex items-center px-8 py-4 border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all duration-300 shadow-sm hover:shadow-lg active:scale-95 uppercase tracking-wider text-sm"
                     >
                         See All Activities

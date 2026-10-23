@@ -253,11 +253,11 @@ const MainLayout = () => {
   }, [partnerParam]);
 
   const navigationItems = [
-    { label: 'Destinations', path: '/destinations' },
-    { label: 'Packages', path: '/packages' },
-    { label: 'Stays', path: '/stays' },
-    { label: 'Holiday Types', path: '/holiday-types' },
-    { label: 'Blog', path: '/blog' },
+    { label: 'Destinations', path: '/destinations/' },
+    { label: 'Packages', path: '/packages/' },
+    { label: 'Stays', path: '/stays/' },
+    { label: 'Holiday Types', path: '/holiday-types/' },
+    { label: 'Blog', path: '/blog/' },
   ];
 
   const footerSections = [
@@ -272,13 +272,13 @@ const MainLayout = () => {
     {
       title: 'Company',
       links: [
-        { label: 'About Us', path: '/about-us' },
-        { label: 'Contact Us', path: '/contact-us' },
-        { label: 'Visa Application', path: '/visa-application' },
-        { label: 'Flight Booking', path: '/flights' },
-        { label: 'Careers', path: '/careers' },
-        { label: 'Terms & Conditions', path: '/terms' },
-        { label: 'Privacy Policy', path: '/privacy' },
+        { label: 'About Us', path: '/about-us/' },
+        { label: 'Contact Us', path: '/contact-us/' },
+        { label: 'Visa Application', path: '/visa-application/' },
+        { label: 'Flight Booking', path: '/flights/' },
+        { label: 'Careers', path: '/careers/' },
+        { label: 'Terms & Conditions', path: '/terms/' },
+        { label: 'Privacy Policy', path: '/privacy/' },
       ],
     },
     {

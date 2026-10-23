@@ -14,7 +14,7 @@ const DestinationCard: React.FC<DestinationCardProps> = React.memo(({ destinatio
   return (
     <article className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden h-full flex flex-col">
       <Link
-        to={`/destinations/${destination.slug}`}
+        to={`/destinations/${destination.slug}/`}
         className="block min-h-[44px] h-full flex flex-col"
         aria-label={`Explore ${destination.name} destination${destination.region ? ` in ${destination.region.name}` : ''}`}
       >

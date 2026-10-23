@@ -102,7 +102,7 @@ const RecommendedHotels: React.FC = () => {
               hotels?.slice(0, 8).map((hotel) => (
                 <Link
                   key={hotel.id}
-                  to={`/hotels/${hotel.country?.slug || 'unknown'}/${hotel.slug}`}
+                  to={`/hotels/${hotel.slug}/`}
                   className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 group flex-shrink-0 w-80 border border-gray-100"
                 >
                   <div className="relative">
@@ -203,10 +203,10 @@ const RecommendedHotels: React.FC = () => {
           <Link
             to={
               countries?.find(c => c.name === activeTab)?.slug
-                ? `/destinations/${countries.find(c => c.name === activeTab)?.slug}/hotels`
+                ? `/destinations/${countries.find(c => c.name === activeTab)?.slug}/hotels/`
                 : activeTab
                   ? `/hotels?country=${encodeURIComponent(activeTab)}`
-                  : '/hotels'
+                  : '/hotels/'
             }
             className="inline-flex items-center text-primary hover:text-primary-dark font-medium group transition-colors"
           >

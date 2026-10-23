@@ -102,7 +102,7 @@ const TrendingActivities: React.FC = () => {
             ) : activities.slice(0, 8).map(activity => (
               <Link
                 key={activity.id}
-                to={`/destinations/${activity.countries?.[0]?.slug || 'unknown'}/activities/${activity.slug}`}
+                to={`/activities/${activity.slug}/`}
                 className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 group block flex-shrink-0 w-80"
               >
                 <div className="relative">
@@ -163,10 +163,10 @@ const TrendingActivities: React.FC = () => {
           <Link
             to={
               availableCountries?.find(c => c.name === activeTab)?.slug
-                ? `/destinations/${availableCountries.find(c => c.name === activeTab)?.slug}/activities`
+                ? `/destinations/${availableCountries.find(c => c.name === activeTab)?.slug}/activities/`
                 : activeTab
                   ? `/activities?country=${encodeURIComponent(activeTab)}`
-                  : '/activities'
+                  : '/activities/'
             }
             className="inline-flex items-center text-primary hover:text-primary-dark font-medium group transition-colors"
           >

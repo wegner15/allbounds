@@ -248,7 +248,7 @@ const ActivityItem: React.FC<{ activity: ItineraryActivityDetail }> = ({ activit
 const HotelItem: React.FC<{ hotel: HotelSummary }> = ({ hotel }) => {
   return (
     <Link
-      to={`/hotels/${hotel.slug}`}
+      to={`/hotels/${hotel.slug}/`}
       className="group flex gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-xl hover:shadow-md active:shadow-sm transition-all duration-200 touch-manipulation min-h-[60px] border border-gray-200 hover:border-primary/30"
     >
       {(hotel.image_id || hotel.image_url) && (
@@ -300,7 +300,7 @@ const HotelItem: React.FC<{ hotel: HotelSummary }> = ({ hotel }) => {
 const AttractionItem: React.FC<{ attraction: AttractionSummary }> = ({ attraction }) => {
   return (
     <Link
-      to={`/attractions/${attraction.slug}`}
+      to={`/attractions/${attraction.slug}/`}
       className="group flex gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-xl hover:shadow-md active:shadow-sm transition-all duration-200 touch-manipulation min-h-[60px] border border-gray-200 hover:border-primary/30"
     >
       {(attraction.image_id || attraction.image_url) && (

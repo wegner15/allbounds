@@ -78,7 +78,7 @@ const SimilarAttractions: React.FC<SimilarAttractionsProps> = ({
           </p>
         </div>
         <Link
-          to="/attractions"
+          to="/attractions/"
           className="hidden sm:inline-flex items-center text-sm font-semibold text-primary hover:text-primary-dark transition-colors"
         >
           View All Attractions &rarr;
@@ -93,7 +93,7 @@ const SimilarAttractions: React.FC<SimilarAttractionsProps> = ({
           return (
             <Link
               key={att.id}
-              to={`/attractions/${countrySlug}/${att.slug}`}
+              to={`/attractions/${att.slug}/`}
               className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 flex flex-col"
             >
               <div className="relative h-48 overflow-hidden bg-gray-100">

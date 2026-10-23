@@ -14,7 +14,7 @@ const AttractionCard: React.FC<AttractionCardProps> = ({ attraction }) => {
 
   return (
     <Link
-      to={`/attractions/${slug}`}
+      to={`/attractions/${slug}/`}
       className="group bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 border border-gray-100 hover:border-accent/30 animate-fade-in"
     >
       {/* Attraction Image with square aspect ratio */}

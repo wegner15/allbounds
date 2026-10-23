@@ -280,7 +280,7 @@ const AttractionListPage: React.FC = () => {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-5">
             {filteredAttractions.map((attraction) => (
               <div key={attraction.id} className="bg-white rounded-2xl shadow-lg overflow-hidden group transform hover:-translate-y-1 transition-all duration-300 flex flex-col">
-                <Link to={`/attractions/${attraction.slug}`} className="block h-48 md:h-56 overflow-hidden">
+                <Link to={`/attractions/${attraction.slug}/`} className="block h-48 md:h-56 overflow-hidden">
                   <img
                     src={getImageUrlWithFallback(attraction.cover_image || attraction.image_id, IMAGE_VARIANTS.MEDIUM, '/home-heros/hero1.jpeg')}
                     alt={attraction.name}
@@ -306,7 +306,7 @@ const AttractionListPage: React.FC = () => {
                       {attraction.price ? `${formatPrice(attraction.price)}` : 'Free'}
                     </p>
                     <Link
-                      to={`/attractions/${attraction.slug}`}
+                      to={`/attractions/${attraction.slug}/`}
                       className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
                     >
                       View Details

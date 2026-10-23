@@ -99,7 +99,7 @@ const HotelCard: React.FC<HotelCardProps> = React.memo(({ hotel, isHotelPackage 
   return (
     <article className="group bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] flex flex-col h-full">
       <Link
-        to={`/destinations/${hotel.country?.slug || 'unknown'}/hotels/${hotel.slug}`}
+        to={`/hotels/${hotel.slug}/`}
         className="flex flex-col h-full min-h-[44px]"
         aria-label={`View details for ${hotel.name} hotel`}
       >

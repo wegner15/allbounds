@@ -243,7 +243,7 @@ const ActivityDetailPage: React.FC = () => {
                                         <svg className="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                                         </svg>
-                                        <Link to={`/destinations/${primaryCountry.slug}`} className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
+                                        <Link to={`/destinations/${primaryCountry.slug}/`} className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
                                             {primaryCountry.name}
                                         </Link>
                                     </div>
@@ -255,7 +255,7 @@ const ActivityDetailPage: React.FC = () => {
                                         <svg className="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                                         </svg>
-                                        <Link to={`/destinations/${primaryCountry.slug}/activities`} className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
+                                        <Link to={`/destinations/${primaryCountry.slug}/activities/`} className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
                                             {primaryCountry.name} Activities
                                         </Link>
                                     </div>
@@ -423,7 +423,7 @@ const ActivityDetailPage: React.FC = () => {
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                             {trips.packages.map(pkg => (
                                                 <div key={pkg.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col border border-gray-100">
-                                                    <Link to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}`} className="relative h-48 overflow-hidden group">
+                                                    <Link to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}/`} className="relative h-48 overflow-hidden group">
                                                         <img
                                                             src={getImageUrlWithFallback(pkg.image_id, IMAGE_VARIANTS.MEDIUM)}
                                                             alt={pkg.name}
@@ -442,7 +442,7 @@ const ActivityDetailPage: React.FC = () => {
                                                             <MapPin className="w-3.5 h-3.5 mr-1" />
                                                             {pkg.country?.name}
                                                         </div>
-                                                        <Link to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}`}>
+                                                        <Link to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}/`}>
                                                             <h4 className="text-base font-bold text-gray-900 mb-2 hover:text-teal-600 transition-colors line-clamp-1 font-playfair">
                                                                 {pkg.name}
                                                             </h4>
@@ -476,7 +476,7 @@ const ActivityDetailPage: React.FC = () => {
                                         <div className="grid grid-cols-1 gap-6">
                                             {trips.group_trips.map(trip => (
                                                 <div key={trip.id} className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col md:flex-row border border-gray-100 hover:shadow-2xl transition-all duration-300">
-                                                    <Link to={`/group-trips/${trip.slug}`} className="md:w-2/5 relative overflow-hidden group">
+                                                    <Link to={`/group-trips/${trip.slug}/`} className="md:w-2/5 relative overflow-hidden group">
                                                         <img
                                                             src={getImageUrlWithFallback(trip.image_id, IMAGE_VARIANTS.MEDIUM)}
                                                             alt={trip.name}
@@ -493,7 +493,7 @@ const ActivityDetailPage: React.FC = () => {
                                                             <MapPin className="w-3.5 h-3.5 mr-1" />
                                                             {trip.country?.name}
                                                         </div>
-                                                        <Link to={`/group-trips/${trip.slug}`}>
+                                                        <Link to={`/group-trips/${trip.slug}/`}>
                                                             <h4 className="text-xl font-bold text-gray-900 mb-3 hover:text-amber-600 transition-colors line-clamp-1 font-playfair">
                                                                 {trip.name}
                                                             </h4>
@@ -519,7 +519,7 @@ const ActivityDetailPage: React.FC = () => {
                                                                 <span className="text-xl font-black text-gray-900">${trip.price}</span>
                                                             </div>
                                                             <Link
-                                                                to={`/group-trips/${trip.slug}`}
+                                                                to={`/group-trips/${trip.slug}/`}
                                                                 className="bg-gray-900 hover:bg-gray-700 text-white font-bold py-2.5 px-5 rounded-xl transition-all shadow-lg shadow-gray-200"
                                                             >
                                                                 View Details
@@ -551,7 +551,7 @@ const ActivityDetailPage: React.FC = () => {
                                                 {activity.countries.map(c => (
                                                     <Link
                                                         key={c.id}
-                                                        to={`/destinations/${c.slug}`}
+                                                        to={`/destinations/${c.slug}/`}
                                                         className="text-sm text-teal-600 hover:text-teal-700 hover:underline"
                                                     >
                                                         {c.name}

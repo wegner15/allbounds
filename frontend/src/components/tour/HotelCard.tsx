@@ -14,7 +14,7 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel }) => {
 
   return (
     <Link
-      to={`/hotels/${slug}`}
+      to={`/hotels/${slug}/`}
       className="group bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 border border-gray-100 hover:border-primary/30 animate-fade-in"
     >
       {/* Hotel Image with 16:9 aspect ratio */}

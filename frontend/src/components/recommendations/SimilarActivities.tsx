@@ -79,7 +79,7 @@ const SimilarActivities: React.FC<SimilarActivitiesProps> = ({
           </p>
         </div>
         <Link
-          to="/activities"
+          to="/activities/"
           className="hidden sm:inline-flex items-center text-sm font-semibold text-primary hover:text-primary-dark transition-colors"
         >
           View All Activities &rarr;
@@ -95,7 +95,7 @@ const SimilarActivities: React.FC<SimilarActivitiesProps> = ({
           return (
             <Link
               key={act.id}
-              to={`/activities/${countrySlug}/${act.slug}`}
+              to={`/activities/${act.slug}/`}
               className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 flex flex-col"
             >
               <div className="relative h-48 overflow-hidden bg-gray-100">

@@ -628,7 +628,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 </div>
                 {filteredAttractions.length > attractionVisibleCount && (
                   <Link
-                    to={`/destinations/${destinationSlug}/attractions`}
+                    to={`/destinations/${destinationSlug}/attractions/`}
                     className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors cursor-pointer"
                   >
                     <span>Load More ({filteredAttractions.length - attractionVisibleCount} remaining)</span>
@@ -656,7 +656,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   {filteredAttractions.length > attractionVisibleCount && (
                     <div className="mt-8 text-center">
                       <Link
-                        to={`/destinations/${destinationSlug}/attractions`}
+                        to={`/destinations/${destinationSlug}/attractions/`}
                         className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-2xs hover:shadow-md active:scale-95 text-sm cursor-pointer"
                       >
                         <span>Load More Attractions ({filteredAttractions.length - attractionVisibleCount} remaining)</span>
@@ -681,7 +681,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 </div>
                 {filteredActivities.length > activityVisibleCount && (
                   <Link
-                    to={`/destinations/${destinationSlug}/activities`}
+                    to={`/destinations/${destinationSlug}/activities/`}
                     className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors cursor-pointer"
                   >
                     <span>Load More ({filteredActivities.length - activityVisibleCount} remaining)</span>
@@ -709,7 +709,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   {filteredActivities.length > activityVisibleCount && (
                     <div className="mt-8 text-center">
                       <Link
-                        to={`/destinations/${destinationSlug}/activities`}
+                        to={`/destinations/${destinationSlug}/activities/`}
                         className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-2xs hover:shadow-md active:scale-95 text-sm cursor-pointer"
                       >
                         <span>Load More Activities ({filteredActivities.length - activityVisibleCount} remaining)</span>
@@ -734,7 +734,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 </div>
                 {filteredPackages.length > packageVisibleCount && (
                   <Link
-                    to={`/destinations/${destinationSlug}/packages`}
+                    to={`/destinations/${destinationSlug}/packages/`}
                     className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors cursor-pointer"
                   >
                     <span>Load More ({filteredPackages.length - packageVisibleCount} remaining)</span>
@@ -762,7 +762,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   {filteredPackages.length > packageVisibleCount && (
                     <div className="mt-8 text-center">
                       <Link
-                        to={`/destinations/${destinationSlug}/packages`}
+                        to={`/destinations/${destinationSlug}/packages/`}
                         className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-2xs hover:shadow-md active:scale-95 text-sm cursor-pointer"
                       >
                         <span>Load More Packages ({filteredPackages.length - packageVisibleCount} remaining)</span>
@@ -787,7 +787,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 </div>
                 {filteredHotelPackages.length > hotelPackageVisibleCount && (
                   <Link
-                    to={`/destinations/${destinationSlug}/hotel-packages`}
+                    to={`/destinations/${destinationSlug}/hotel-packages/`}
                     className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors cursor-pointer"
                   >
                     <span>Load More ({filteredHotelPackages.length - hotelPackageVisibleCount} remaining)</span>
@@ -819,7 +819,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   {filteredHotelPackages.length > hotelPackageVisibleCount && (
                     <div className="mt-8 text-center">
                       <Link
-                        to={`/destinations/${destinationSlug}/hotel-packages`}
+                        to={`/destinations/${destinationSlug}/hotel-packages/`}
                         className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-2xs hover:shadow-md active:scale-95 text-sm cursor-pointer"
                       >
                         <span>Load More Hotel Packages ({filteredHotelPackages.length - hotelPackageVisibleCount} remaining)</span>
@@ -844,7 +844,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                 </div>
                 {filteredHotels.length > hotelVisibleCount && (
                   <Link
-                    to={`/destinations/${destinationSlug}/hotels`}
+                    to={`/destinations/${destinationSlug}/hotels/`}
                     className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors cursor-pointer"
                   >
                     <span>Load More ({filteredHotels.length - hotelVisibleCount} remaining)</span>
@@ -876,7 +876,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   {filteredHotels.length > hotelVisibleCount && (
                     <div className="mt-8 text-center">
                       <Link
-                        to={`/destinations/${destinationSlug}/hotels`}
+                        to={`/destinations/${destinationSlug}/hotels/`}
                         className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-2xs hover:shadow-md active:scale-95 text-sm cursor-pointer"
                       >
                         <span>Load More Accommodation ({filteredHotels.length - hotelVisibleCount} remaining)</span>

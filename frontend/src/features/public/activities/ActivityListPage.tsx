@@ -202,7 +202,7 @@ const ActivityListPage: React.FC = () => {
                 return (
                   <Link
                     key={act.id}
-                    to={`/activities/${countrySlug}/${act.slug}`}
+                    to={`/activities/${act.slug}/`}
                     className="group bg-white rounded-2xl overflow-hidden shadow-xs hover:shadow-xl border border-gray-100 transition-all duration-300 flex flex-col"
                   >
                     <div className="relative h-56 overflow-hidden bg-gray-100">

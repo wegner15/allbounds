@@ -48,7 +48,7 @@ const Footer: React.FC<FooterProps> = ({
       const destinationLinks = regionsWithCountries
         .map(region => ({
           label: region.name,
-          path: `/destinations/regions/${region.slug}`
+          path: `/regions/${region.slug}/`
         }))
         .slice(0, 8); // Limit to 8 regions just in case
 
@@ -65,7 +65,7 @@ const Footer: React.FC<FooterProps> = ({
         .slice(0, 7) // Limit to 7 types
         .map(type => ({
           label: type.name,
-          path: `/holiday-types/${type.slug}`
+          path: `/holiday-types/${type.slug}/`
         }));
 
       newSections[holidayTypesIndex] = {

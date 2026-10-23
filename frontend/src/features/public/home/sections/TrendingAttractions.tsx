@@ -99,7 +99,7 @@ const TrendingAttractions: React.FC = () => {
             ) : attractions?.slice(0, 8).map(attraction => (
               <Link
                 key={attraction.id}
-                to={`/attractions/${attraction.country?.slug || 'unknown'}/${attraction.slug}`}
+                to={`/attractions/${attraction.slug}/`}
                 className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 group block flex-shrink-0 w-80"
               >
                 <img
@@ -140,7 +140,7 @@ const TrendingAttractions: React.FC = () => {
           <Link
             to={
               availableCountries?.find(c => c.name === activeTab)?.slug
-                ? `/destinations/${availableCountries.find(c => c.name === activeTab)?.slug}/attractions`
+                ? `/destinations/${availableCountries.find(c => c.name === activeTab)?.slug}/attractions/`
                 : activeTab
                   ? `/attractions?country=${encodeURIComponent(activeTab)}`
                   : '/attractions'

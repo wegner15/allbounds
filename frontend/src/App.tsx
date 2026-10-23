@@ -488,6 +488,7 @@ const router = createBrowserRouter([
           { path: 'destinations/countries/new', element: <CreateCountryPage /> },
           { path: 'destinations/countries/:id/edit', element: <EditCountryPage /> },
           { path: 'countries/:id/visit-info', element: <ManageCountryVisitInfoPage /> },
+          { path: 'countries', element: <Navigate to="/admin/destinations/countries" replace /> },
           { path: 'travel-guides/categories', element: <TravelGuideCategoriesPage /> },
           // Holiday types management routes
           { path: 'holiday-types', element: <HolidayTypesListPage /> },
@@ -495,6 +496,7 @@ const router = createBrowserRouter([
           { path: 'holiday-types/:id/edit', element: <EditHolidayTypePage /> },
           // Hotel management routes
           { path: 'hotels', element: <HotelsListPage /> },
+          { path: 'hotel', element: <Navigate to="/admin/hotels" replace /> },
           { path: 'hotels/new', element: <CreateHotelPage /> },
           { path: 'hotels/:id/edit', element: <EditHotelPage /> },
           { path: 'hotels/:id/relationships', element: <HotelRelationshipsPage /> },
@@ -520,6 +522,7 @@ const router = createBrowserRouter([
           { path: 'exclusions/:id/edit', element: <EditExclusionPage /> },
           // Attraction management routes
           { path: 'attractions', element: <AttractionsListPage /> },
+          { path: 'attraction', element: <Navigate to="/admin/attractions" replace /> },
           { path: 'attractions/new', element: <CreateAttractionPage /> },
           { path: 'attractions/:id/edit', element: <EditAttractionPage /> },
           { path: 'attractions/:id/relationships', element: <AttractionRelationshipsPage /> },
@@ -528,6 +531,7 @@ const router = createBrowserRouter([
           { path: 'blog/edit/:id', element: <EditBlogPage /> },
           // Activity management routes
           { path: 'activities', element: <ActivityListPage /> },
+          { path: 'activity', element: <Navigate to="/admin/activities" replace /> },
           { path: 'activities/create', element: <ActivityCreatePage /> },
           { path: 'activities/:id/edit', element: <ActivityEditPage /> },
           // User management routes
@@ -536,6 +540,7 @@ const router = createBrowserRouter([
           { path: 'users/:id/edit', element: <EditUserPage /> },
           // Package management routes
           { path: 'packages', element: <PackagesListPage /> },
+          { path: 'package', element: <Navigate to="/admin/packages" replace /> },
           { path: 'packages/new', element: <CreatePackagePage /> },
           { path: 'packages/:id/edit', element: <EditPackagePage /> },
           // Group trip management routes

@@ -222,10 +222,10 @@ const AdminDashboardPage: React.FC = () => {
           </div>
           <div className="mt-6">
             <Link
-              to="/admin/activity"
+              to="/admin/activities"
               className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
             >
-              View all activity
+              View all activities
             </Link>
           </div>
         </div>

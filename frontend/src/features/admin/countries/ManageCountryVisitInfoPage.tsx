@@ -32,7 +32,7 @@ const ManageCountryVisitInfoPage: React.FC = () => {
       <div className="p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
           <p>Error loading country. Please try again later.</p>
-          <Link to="/admin/countries" className="text-red-700 underline mt-2 inline-block">
+          <Link to="/admin/destinations/countries" className="text-red-700 underline mt-2 inline-block">
             Back to Countries
           </Link>
         </div>
@@ -47,7 +47,7 @@ const ManageCountryVisitInfoPage: React.FC = () => {
           Manage Visit & Travel Guide Information: {country.name}
         </h1>
         <Link
-          to="/admin/countries"
+          to="/admin/destinations/countries"
           className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md text-gray-700"
         >
           Back to Countries

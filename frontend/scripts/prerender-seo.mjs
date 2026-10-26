@@ -16,7 +16,7 @@ const SITE_URL = (
 const API_BASE_URL = (
   process.env.API_BASE_URL ||
   process.env.VITE_PROD_BASE_URL ||
-  'https://api.allboundtravel.com/api/v1'
+  'https://api.allboundvacations.com/api/v1'
 ).replace(/\/+$/, '');
 
 const CLOUDFLARE_DELIVERY_URL = 'https://imagedelivery.net/4J4CgzUI_LpQRpA_N1TErQ';

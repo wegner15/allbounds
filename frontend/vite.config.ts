@@ -68,7 +68,7 @@ export default defineConfig({
     strictPort: true,
     host: true,
     cors: true,
-    allowedHosts: ['localhost', 'dev.allboundtravel.com', 'allboundtravel.com', 'localhost:8005', '127.0.0.1'],
+    allowedHosts: ['localhost', 'dev.allboundvacations.com', 'allboundvacations.com', 'api.allboundvacations.com', 'dev.allboundtravel.com', 'allboundtravel.com', 'localhost:8005', '127.0.0.1'],
     proxy: {
       '/api': {
         target: 'http://localhost:8005',

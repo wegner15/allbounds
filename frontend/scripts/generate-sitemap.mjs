@@ -18,7 +18,7 @@ const SITE_URL = normalizeBaseUrl(
 const API_BASE_URL = normalizeBaseUrl(
   process.env.API_BASE_URL ||
     process.env.VITE_PROD_BASE_URL ||
-    'https://api.allboundtravel.com/api/v1'
+    'https://api.allboundvacations.com/api/v1'
 );
 
 const staticRoutes = [

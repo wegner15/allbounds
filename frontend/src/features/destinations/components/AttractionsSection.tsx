@@ -15,10 +15,10 @@ const AttractionsSection: React.FC<AttractionsSectionProps> = React.memo(({
   countrySlug,
   countryName 
 }) => {
-  // Filter active attractions and limit to 8
+  // Filter active attractions and limit to 6 (2 rows of 3)
   const activeAttractions = attractions
     .filter(attraction => attraction.is_active)
-    .slice(0, 8);
+    .slice(0, 6);
 
   // Don't render if no active attractions
   if (activeAttractions.length === 0) {
@@ -62,8 +62,8 @@ const AttractionsSection: React.FC<AttractionsSectionProps> = React.memo(({
         )}
       </div>
 
-      {/* Attractions Grid - 1 column mobile, 2 columns desktop */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+      {/* Attractions Grid - up to 3 columns */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {activeAttractions.map((attraction) => (
           <AttractionCard key={attraction.id} attraction={attraction} />
         ))}

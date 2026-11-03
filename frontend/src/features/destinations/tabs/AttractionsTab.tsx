@@ -16,7 +16,7 @@ const AttractionsTab: React.FC<AttractionsTabProps> = ({ countryName, preview = 
 
     if (isLoading) {
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 animate-pulse">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 animate-pulse">
                 {[...Array(6)].map((_, i) => (
                     <div key={i} className="bg-gray-200 rounded-xl h-96"></div>
                 ))}
@@ -39,6 +39,7 @@ const AttractionsTab: React.FC<AttractionsTabProps> = ({ countryName, preview = 
                 emptyMessage="No attractions listed for this destination yet."
                 itemsPerPage={preview ? 9 : 9}
                 showPagination={!preview}
+                gridClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
             />
 
             {preview && activeAttractions.length > 9 && destinationSlug && (

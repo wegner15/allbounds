@@ -648,7 +648,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
 
               {filteredAttractions.length > 0 ? (
                 <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                     {filteredAttractions.slice(0, attractionVisibleCount).map((attr: any) => (
                       <AttractionCard key={attr.id} attraction={attr as any} />
                     ))}
@@ -1173,7 +1173,13 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
 
               {/* RESULTS GRID */}
               {visibleCategoryItems.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-5 gap-6">
+                <div
+                  className={
+                    activeTab === 'attractions'
+                      ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8'
+                      : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-5 gap-6'
+                  }
+                >
                   {activeTab === 'hotel-packages' &&
                     (visibleCategoryItems as typeof filteredHotelPackages).map((hotel) => (
                       <HotelCard

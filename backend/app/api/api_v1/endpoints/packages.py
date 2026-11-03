@@ -27,7 +27,33 @@ class SetCoverImageRequest(BaseModel):
 class UpdateFaqsRequest(BaseModel):
     faqs: List[dict]
 
+class ReorderItem(BaseModel):
+    id: int
+    order_index: int
+
+
+class ReorderRequest(BaseModel):
+    orders: List[ReorderItem]
+
+
 router = APIRouter()
+
+
+# NOTE: must be declared before the "/{package_id}" routes.
+@router.patch("/reorder", status_code=status.HTTP_200_OK)
+def reorder_packages(
+    *,
+    request: ReorderRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(has_permission("content:update")),
+) -> Any:
+    """
+    Bulk-update the manual display order of packages.
+    """
+    if not package_service.reorder_packages(db, [item.dict() for item in request.orders]):
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to reorder packages")
+    invalidate_cache_pattern("cache:*")
+    return {"message": "Packages reordered successfully"}
 
 @router.get("/", response_model=List[PackageListResponse])
 @cache_endpoint(ttl=86400)
@@ -35,8 +61,8 @@ def get_packages(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
-    order_by: str = "created_at",
-    order: str = "desc",
+    order_by: str = "order_index",
+    order: str = "asc",
     popular: bool = Query(False, description="Get popular (featured) packages"),
     country_id: int = Query(None, description="Filter by country ID"),
     country: str = Query(None, description="Filter by country name"),
@@ -47,7 +73,7 @@ def get_packages(
     """
     Retrieve all packages with optional ordering and filtering.
     Uses lightweight response to prevent OOM errors.
-    order_by options: created_at, name, price
+    order_by options: order_index (default, manual order), created_at, name, price
     order options: asc, desc
     """
     if holiday_type:
@@ -87,8 +113,8 @@ def get_paginated_packages(
     country_id: int = Query(None, description="Filter by country ID"),
     package_type: str = Query(None, description="Filter by package type (safari or holiday)"),
     include_inactive: bool = Query(True, description="Include inactive packages"),
-    order_by: str = Query("created_at", description="Field to order by"),
-    order: str = Query("desc", description="Order direction (asc/desc)"),
+    order_by: str = Query("order_index", description="Field to order by (order_index = manual order)"),
+    order: str = Query("asc", description="Order direction (asc/desc); ignored for order_index"),
 ) -> Any:
     """
     Retrieve paginated list of packages optimized for admin list view.

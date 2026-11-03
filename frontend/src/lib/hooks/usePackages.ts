@@ -268,3 +268,16 @@ export const useComprehensivePackageBySlug = (slug: string) => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
+
+// Hook for reordering packages (admin only)
+export const useReorderPackages = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (orders: { id: number; order_index: number }[]) => {
+      return apiClient.patch('/packages/reorder', { orders });
+    },
+    // Returning the promise makes mutateAsync wait until fresh data is loaded (no order flicker)
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['packages'], exact: false }),
+  });
+};

@@ -66,4 +66,5 @@ def format_group_trip_response(group_trip: GroupTrip, gallery_images: List[Dict[
         ],
         "is_active": group_trip.is_active,
         "is_featured": group_trip.is_featured,
+        "order_index": getattr(group_trip, "order_index", 0),
     }

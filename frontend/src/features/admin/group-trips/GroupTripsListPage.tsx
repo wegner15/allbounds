@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import { Link } from 'react-router-dom';
-import { useDeleteGroupTrip, usePaginatedGroupTrips } from '../../../lib/hooks/useGroupTrips';
+import { useDeleteGroupTrip, usePaginatedGroupTrips, useReorderGroupTrips } from '../../../lib/hooks/useGroupTrips';
 import CountryFilterSelect from '../../../components/ui/CountryFilterSelect';
 import CloudflareImage from '../../../components/ui/CloudflareImage';
+import { reorderPage } from '../../../lib/utils/reorder';
 import ErrorModal from '../../../components/ui/ErrorModal';
 
 const GroupTripsListPage: React.FC = () => {
@@ -31,7 +33,31 @@ const GroupTripsListPage: React.FC = () => {
     include_inactive: true,
   });
 
-  const groupTrips = data?.items || [];
+  // Local order is used for instant feedback while a reorder request is in flight
+  const [localOrder, setLocalOrder] = useState<any[] | null>(null);
+  const groupTrips: any[] = localOrder ?? data?.items ?? [];
+  const reorderMutation = useReorderGroupTrips();
+  // Manual ordering is only meaningful on the unfiltered list
+  const canReorder = !debouncedSearch && !selectedCountryId && !reorderMutation.isPending;
+
+  const moveItem = async (from: number, to: number) => {
+    const result = reorderPage(groupTrips, from, to);
+    if (!result) return;
+    setLocalOrder(result.items);
+    try {
+      await reorderMutation.mutateAsync(result.orders);
+    } catch (err: any) {
+      setErrorMessage(err?.response?.data?.detail || err?.message || 'Failed to save the new order. Please try again.');
+    } finally {
+      setLocalOrder(null);
+    }
+  };
+
+  const onDragEnd = (result: DropResult) => {
+    if (!result.destination || !canReorder) return;
+    moveItem(result.source.index, result.destination.index);
+  };
+
   const total = data?.total || 0;
   const totalPages = data?.pages || 0;
   const deleteGroupTrip = useDeleteGroupTrip();
@@ -145,9 +171,11 @@ const GroupTripsListPage: React.FC = () => {
           </div>
         ) : groupTrips && groupTrips.length > 0 ? (
           <div className="overflow-x-auto">
+            <DragDropContext onDragEnd={onDragEnd}>
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th scope="col" className="w-20 px-3 py-3"><span className="sr-only">Order</span></th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Group Trip
                   </th>
@@ -171,9 +199,29 @@ const GroupTripsListPage: React.FC = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {groupTrips.map((trip) => (
-                  <tr key={trip.id}>
+              <Droppable droppableId="group-trips" isDropDisabled={!canReorder}>
+                {(dropProvided) => (
+              <tbody className="bg-white divide-y divide-gray-200" ref={dropProvided.innerRef} {...dropProvided.droppableProps}>
+                {groupTrips.map((trip, index) => (
+                  <Draggable key={trip.id} draggableId={String(trip.id)} index={index} isDragDisabled={!canReorder}>
+                    {(provided, snapshot) => (
+                  <tr ref={provided.innerRef} {...provided.draggableProps} className={snapshot.isDragging ? 'bg-teal-50 shadow-lg' : ''}>
+                    <td className="w-20 px-3 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-1">
+                        <span
+                          {...provided.dragHandleProps}
+                          title={canReorder ? 'Drag to reorder' : 'Clear search and filters to reorder'}
+                          className={`select-none text-lg leading-none ${canReorder ? 'cursor-grab text-gray-500 hover:text-gray-800' : 'cursor-not-allowed text-gray-300'}`}
+                          aria-label="Drag to reorder"
+                        >
+                          ⠿
+                        </span>
+                        <div className="flex flex-col leading-none">
+                          <button type="button" disabled={!canReorder || index === 0} onClick={() => moveItem(index, index - 1)} title="Move up" aria-label="Move up" className="text-xs text-gray-500 hover:text-gray-900 disabled:opacity-30">▲</button>
+                          <button type="button" disabled={!canReorder || index === groupTrips.length - 1} onClick={() => moveItem(index, index + 1)} title="Move down" aria-label="Move down" className="text-xs text-gray-500 hover:text-gray-900 disabled:opacity-30">▼</button>
+                        </div>
+                      </div>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-10 w-10 flex-shrink-0">
@@ -249,9 +297,15 @@ const GroupTripsListPage: React.FC = () => {
                       </div>
                     </td>
                   </tr>
+                    )}
+                  </Draggable>
                 ))}
+                {dropProvided.placeholder}
               </tbody>
+                )}
+              </Droppable>
             </table>
+            </DragDropContext>
 
             {/* Pagination Bar */}
             {total > 0 && (

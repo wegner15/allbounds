@@ -64,11 +64,8 @@ const PackagesPage: React.FC = () => {
     if (featuredPackagesData && featuredPackagesData.length > 0) {
       setHeroPackages(featuredPackagesData);
     } else if (packagesData && packagesData.length > 0) {
-      // Fallback to latest packages ordered by creation date
-      const latestPackages = [...packagesData]
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        .slice(0, 10);
-      setHeroPackages(latestPackages);
+      // Fallback to top packages in manual order
+      setHeroPackages(packagesData.slice(0, 10));
     }
   }, [featuredPackagesData, packagesData]);
 

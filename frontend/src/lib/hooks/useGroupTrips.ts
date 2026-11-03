@@ -247,3 +247,16 @@ export const useDeleteGroupTrip = () => {
     },
   });
 };
+
+// Hook for reordering group trips (admin only)
+export const useReorderGroupTrips = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (orders: { id: number; order_index: number }[]) => {
+      return apiClient.patch('/group-trips/reorder', { orders });
+    },
+    // Returning the promise makes mutateAsync wait until fresh data is loaded (no order flicker)
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['groupTrips'], exact: false }),
+  });
+};

@@ -1,3 +1,22 @@
+const KNOWN_PUBLIC_ROUTE_PATTERNS = [
+  /^\/destinations\/[^/]+$/,
+  /^\/destinations\/[^/]+\/(packages|hotel-packages|group-trips|attractions|hotels|activities|book)$/,
+  /^\/destinations\/[^/]+\/(hotels|activities|attractions)\/[^/]+$/,
+  /^\/destinations\/(regions|countries)\/[^/]+$/,
+  /^\/destinations-old\/[^/]+$/,
+  /^\/regions(\/[^/]+)?$/,
+  /^\/countries(\/[^/]+)?$/,
+  /^\/packages(\/[^/]+(\/[^/]+)?)?$/,
+  /^\/packages-old\/[^/]+$/,
+  /^\/hotels(\/[^/]+(\/[^/]+)?)?$/,
+  /^\/activities(\/[^/]+(\/[^/]+)?)?$/,
+  /^\/attractions(\/[^/]+(\/[^/]+)?)?$/,
+  /^\/holiday-types(\/[^/]+)?$/,
+  /^\/group-trips(\/[^/]+)?$/,
+  /^\/blog(\/[^/]+)?$/,
+  /^\/(stays|contact|about-us|contact-us|careers|terms|privacy|payment-plans|visa-application|flights)$/,
+];
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -34,7 +53,24 @@ export default {
       });
     }
 
-    // For all other routes (prerendered SEO pages, assets, images), fetch directly
-    return env.ASSETS.fetch(request);
+    // For all other routes (prerendered SEO pages, assets, images), fetch directly first
+    const assetResponse = await env.ASSETS.fetch(request);
+
+    // If a static pre-rendered page isn't found yet (e.g. newly published CMS item or dynamic route),
+    // fallback to the root SPA shell if the URL matches a valid React Router route pattern.
+    const hasFileExtension = /\.[a-z0-9]+$/i.test(path.split('/').pop() || '');
+    if (
+      assetResponse.status === 404 &&
+      !hasFileExtension &&
+      KNOWN_PUBLIC_ROUTE_PATTERNS.some((pattern) => pattern.test(path))
+    ) {
+      const shellResponse = await env.ASSETS.fetch(new Request(new URL('/', request.url), request));
+      return new Response(shellResponse.body, {
+        status: 200,
+        headers: shellResponse.headers,
+      });
+    }
+
+    return assetResponse;
   },
 };

@@ -72,6 +72,7 @@ class PackageResponse(PackageBase):
     slug: str = Field(..., description="URL-friendly slug for the package", example="kenya-safari-adventure")
     is_active: bool = Field(..., description="Whether the package is active")
     is_featured: bool = Field(..., description="Whether the package is featured")
+    order_index: int = Field(0, description="Manual display order (lower = first)")
     is_deal: Optional[bool] = Field(False, description="Whether the package is a special deal")
     package_type: str = Field("safari", description="Package type: 'safari' or 'holiday'")
     is_published: bool = Field(..., description="Whether the package is published")
@@ -117,6 +118,7 @@ class PackageListResponse(BaseModel):
     slug: str
     is_active: bool
     is_featured: bool
+    order_index: int = 0
     is_deal: bool
     package_type: str = "safari"
     created_at: datetime

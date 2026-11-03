@@ -106,6 +106,7 @@ class GroupTripResponse(GroupTripBase):
     slug: str = Field(..., description="URL-friendly slug for the group trip", example="kenya-safari-group-tour")
     is_active: bool = Field(..., description="Whether the group trip is active")
     is_featured: bool = Field(..., description="Whether the group trip is featured")
+    order_index: int = Field(0, description="Manual display order (lower = first)")
     created_at: datetime
     updated_at: datetime
     published_at: Optional[datetime] = None

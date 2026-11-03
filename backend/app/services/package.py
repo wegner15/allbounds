@@ -1,7 +1,7 @@
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from sqlalchemy.orm import Session, joinedload, selectinload
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 
 from app.models.package import Package
 from app.models.package_price_chart import PackagePriceChart, PackagePriceChartHotel
@@ -14,6 +14,24 @@ from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_
 from app.core.cloudflare_config import cloudflare_settings
 
 class PackageService:
+    @staticmethod
+    def _apply_ordering(query, order_by: Optional[str], order: str = "desc"):
+        """
+        Apply sorting. Default is the manual order (`order_index` ascending, lower = first),
+        with newest-first as the tiebreaker. `order` is ignored for the manual order.
+        """
+        desc = order == "desc"
+        columns = {
+            "name": Package.name,
+            "price": Package.price,
+            "duration_days": Package.duration_days,
+            "created_at": Package.created_at,
+        }
+        if order_by in columns:
+            col = columns[order_by]
+            return query.order_by(col.desc() if desc else col.asc(), Package.id.desc())
+        return query.order_by(Package.order_index.asc(), Package.created_at.desc(), Package.id.desc())
+
     def _get_cloudflare_image_url(self, image_id: str, variant: str = "medium") -> Optional[str]:
         """
         Generate Cloudflare Images delivery URL.
@@ -22,7 +40,7 @@ class PackageService:
             return None
         return f"{cloudflare_settings.delivery_url}/{image_id}/{variant}"
 
-    def get_packages(self, db: Session, skip: int = 0, limit: int = 100, order_by: str = "created_at", order: str = "desc", tag: Optional[str] = None, package_type: Optional[str] = None) -> List[Package]:
+    def get_packages(self, db: Session, skip: int = 0, limit: int = 100, order_by: str = "order_index", order: str = "asc", tag: Optional[str] = None, package_type: Optional[str] = None) -> List[Package]:
         """
         Retrieve all packages with pagination and ordering.
         MEMORY FIX: Only load essential relationships to prevent OOM
@@ -41,22 +59,7 @@ class PackageService:
         if tag:
             query = query.filter(Package.tags.any(Tag.slug == tag))
             
-        # Apply ordering
-        if order_by == "created_at":
-            if order == "desc":
-                query = query.order_by(Package.created_at.desc())
-            else:
-                query = query.order_by(Package.created_at.asc())
-        elif order_by == "name":
-            if order == "desc":
-                query = query.order_by(Package.name.desc())
-            else:
-                query = query.order_by(Package.name.asc())
-        elif order_by == "price":
-            if order == "desc":
-                query = query.order_by(Package.price.desc())
-            else:
-                query = query.order_by(Package.price.asc())
+        query = self._apply_ordering(query, order_by, order)
 
         return query.offset(skip).limit(limit).all()
 
@@ -69,8 +72,8 @@ class PackageService:
         country_id: Optional[int] = None,
         package_type: Optional[str] = None,
         include_inactive: bool = True,
-        order_by: str = "created_at",
-        order: str = "desc",
+        order_by: str = "order_index",
+        order: str = "asc",
     ):
         """
         Retrieve paginated packages with search and filtering for admin panel.
@@ -109,16 +112,7 @@ class PackageService:
 
         total = query.count()
 
-        if order_by == "created_at":
-            query = query.order_by(Package.created_at.desc() if order == "desc" else Package.created_at.asc())
-        elif order_by == "name":
-            query = query.order_by(Package.name.desc() if order == "desc" else Package.name.asc())
-        elif order_by == "price":
-            query = query.order_by(Package.price.desc() if order == "desc" else Package.price.asc())
-        elif order_by == "duration_days":
-            query = query.order_by(Package.duration_days.desc() if order == "desc" else Package.duration_days.asc())
-        else:
-            query = query.order_by(Package.created_at.desc())
+        query = self._apply_ordering(query, order_by, order)
 
         skip = (page - 1) * limit if page > 0 else 0
         items = query.offset(skip).limit(limit).all()
@@ -144,7 +138,8 @@ class PackageService:
         )
         if package_type:
             query = query.filter(Package.package_type == package_type)
-            
+
+        query = self._apply_ordering(query, "order_index")
         return query.offset(skip).limit(limit).all()
     
     def get_featured_packages(self, db: Session, skip: int = 0, limit: int = 100, country: Optional[str] = None, tag: Optional[str] = None, package_type: Optional[str] = None) -> List[Package]:
@@ -177,7 +172,7 @@ class PackageService:
             selectinload(Package.inclusion_items),
             selectinload(Package.tags)
             # Removed joinedload(Package.holiday_types) - causes circular loading
-        ).offset(skip).limit(limit).all()
+        ).order_by(Package.order_index.asc(), Package.created_at.desc(), Package.id.desc()).offset(skip).limit(limit).all()
 
     def get_packages_by_holiday_type(self, db: Session, holiday_type_id: int, skip: int = 0, limit: int = 100) -> List[Package]:
         """
@@ -190,7 +185,25 @@ class PackageService:
         ).filter(
             Package.holiday_types.any(HolidayType.id == holiday_type_id),
             Package.is_active == True
-        ).offset(skip).limit(limit).all()
+        ).order_by(Package.order_index.asc(), Package.created_at.desc(), Package.id.desc()).offset(skip).limit(limit).all()
+
+    def reorder_packages(self, db: Session, orders: List[dict]) -> bool:
+        """
+        Bulk-update order_index. Expects [{"id": 1, "order_index": 0}, ...].
+        Single transaction, no per-row SELECT.
+        """
+        try:
+            if orders:
+                db.bulk_update_mappings(
+                    Package,
+                    [{"id": o["id"], "order_index": o["order_index"]} for o in orders],
+                )
+            db.commit()
+            return True
+        except Exception as e:
+            db.rollback()
+            print(f"Error reordering packages: {e}")
+            return False
 
     def get_package(self, db: Session, package_id: int) -> Optional[Package]:
         """
@@ -507,7 +520,10 @@ class PackageService:
         Create a new package.
         """
         slug = create_slug(package_create.name)
+        # New packages go to the top of the manual order
+        min_order = db.query(func.min(Package.order_index)).scalar()
         db_package = Package(
+            order_index=(min_order - 1) if min_order is not None else 0,
             name=package_create.name,
             summary=package_create.summary,
             description=package_create.description,

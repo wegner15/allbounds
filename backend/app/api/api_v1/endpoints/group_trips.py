@@ -15,7 +15,32 @@ from pydantic import BaseModel
 from app.services.group_trip import group_trip_service
 from app.auth.dependencies import get_current_user, has_permission
 
+class ReorderItem(BaseModel):
+    id: int
+    order_index: int
+
+
+class ReorderRequest(BaseModel):
+    orders: List[ReorderItem]
+
+
 router = APIRouter()
+
+
+# NOTE: must be declared before the "/{group_trip_id}" routes.
+@router.patch("/reorder", status_code=status.HTTP_200_OK)
+def reorder_group_trips(
+    *,
+    request: ReorderRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(has_permission("content:update")),
+) -> Any:
+    """
+    Bulk-update the manual display order of group trips.
+    """
+    if not group_trip_service.reorder_group_trips(db, [item.dict() for item in request.orders]):
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to reorder group trips")
+    return {"message": "Group trips reordered successfully"}
 
 @router.get("/paginated", response_model=PaginatedGroupTripResponse)
 def get_paginated_group_trips(
@@ -27,8 +52,8 @@ def get_paginated_group_trips(
     holiday_type_id: int = Query(None, description="Filter by holiday type ID"),
     tag: str = Query(None, description="Filter by tag slug"),
     include_inactive: bool = Query(True, description="Include inactive group trips"),
-    order_by: str = Query("created_at", description="Field to order by"),
-    order: str = Query("desc", description="Order direction (asc/desc)"),
+    order_by: str = Query("order_index", description="Field to order by (order_index = manual order)"),
+    order: str = Query("asc", description="Order direction (asc/desc); ignored for order_index"),
 ) -> Any:
     """
     Retrieve paginated list of group trips for admin list view.

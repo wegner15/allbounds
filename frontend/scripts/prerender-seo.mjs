@@ -374,6 +374,81 @@ const staticPages = [
     description: 'Reserve your next African destination vacation and travel itinerary with Allbound Vacations.',
     type: 'website',
   },
+  {
+    path: '/regions',
+    title: `Regions | ${SITE_NAME}`,
+    heading: 'Explore Our Regions',
+    description: 'Explore our diverse regions. From the savannas of East Africa to the deserts of North Africa, discover unique destinations.',
+    type: 'website',
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: 'Regions',
+        description: 'Explore our diverse regions across Africa.',
+        url: `${SITE_URL}/regions`,
+        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+      },
+      makeBreadcrumbs([
+        { name: 'Home', url: '/' },
+        { name: 'Destinations', url: '/destinations' },
+        { name: 'Regions', url: '/regions' },
+      ]),
+    ],
+  },
+  {
+    path: '/stays',
+    title: `Luxury Stays & Accommodations | ${SITE_NAME}`,
+    heading: 'Handpicked Safari Lodges & Boutique Stays',
+    description: 'Discover handpicked safari lodges, tented camps, and luxury beach resorts across Africa.',
+    type: 'website',
+  },
+  {
+    path: '/contact',
+    title: `Contact Form | ${SITE_NAME}`,
+    heading: 'Get in Touch',
+    description: 'Send us a message to start planning your African safari adventure.',
+    type: 'website',
+  },
+];
+
+const destinationCategories = [
+  {
+    slug: 'packages',
+    label: 'Tour Packages',
+    getDescription: (countryName) =>
+      `Discover the ultimate handpicked travel packages and custom tours across ${countryName}. From thrilling wildlife safaris in famous national reserves to cultural expeditions, luxury beach retreats, and adventure-filled itineraries.`,
+  },
+  {
+    slug: 'hotel-packages',
+    label: 'Hotel Packages',
+    getDescription: (countryName) =>
+      `Discover handpicked hotel packages and luxury safari lodge stays with seasonal rates and night packages in ${countryName}. Enjoy curated accommodations with all-inclusive amenities and tailored stays.`,
+  },
+  {
+    slug: 'group-trips',
+    label: 'Group Trips',
+    getDescription: (countryName) =>
+      `Join a vibrant community of explorers on our scheduled small-group departures to ${countryName}. Perfect for solo travelers, couples, or friends looking to travel together.`,
+  },
+  {
+    slug: 'attractions',
+    label: 'Attractions',
+    getDescription: (countryName) =>
+      `Explore the must-see landmarks, historical sites, and breathtaking natural wonders of ${countryName}. Plan your sightseeing checklist with our detailed guides on national parks and scenic vistas.`,
+  },
+  {
+    slug: 'hotels',
+    label: 'Accommodations',
+    getDescription: (countryName) =>
+      `Find the best boutique lodges, luxury safari camps, eco-resorts, and city hotels in ${countryName}. Explore our premium accommodation options.`,
+  },
+  {
+    slug: 'activities',
+    label: 'Activities',
+    getDescription: (countryName) =>
+      `Get active and dive into unique experiences across ${countryName}. Browse cultural walks, wildlife trekking, hiking, hot air balloon flights, and authentic local experiences.`,
+  },
 ];
 
 async function fetchList(path) {
@@ -546,7 +621,7 @@ async function main() {
   }
 
   // 2. Fetch dynamic entities from backend API
-  const [packages, blogs, countries, hotels, activities, attractions, groupTrips] = await Promise.all([
+  const [packages, blogs, countries, hotels, activities, attractions, groupTrips, regions, holidayTypes] = await Promise.all([
     fetchList('/packages/'),
     fetchList('/blog/'),
     fetchList('/countries/'),
@@ -554,6 +629,8 @@ async function main() {
     fetchList('/activities/'),
     fetchList('/attractions/'),
     fetchList('/group-trips/'),
+    fetchList('/regions/'),
+    fetchList('/holiday-types/'),
   ]);
 
   // Packages
@@ -648,6 +725,143 @@ async function main() {
       ]),
     ];
     const html = renderHtml(template, { title, heading: `${country.name} Travel & Safari Guide`, description, canonicalUrl, image, type: 'article', jsonLd });
+    await writePage(path, html);
+    count++;
+
+    // Country Legacy / Redirect Paths (/countries/:slug & /destinations/countries/:slug)
+    await writePage(`/countries/${country.slug}`, html);
+    await writePage(`/destinations/countries/${country.slug}`, html);
+    count += 2;
+
+    // Country Booking Page (/destinations/:slug/book)
+    const bookPath = `/destinations/${country.slug}/book`;
+    const bookHtml = renderHtml(template, {
+      title: `Book Your ${country.name} Trip | ${SITE_NAME}`,
+      heading: `Book Your ${country.name} Safari & Vacation`,
+      description: `Plan and book your custom safari or holiday in ${country.name} with ${SITE_NAME}.`,
+      canonicalUrl: `${SITE_URL}${bookPath}`,
+      image,
+      type: 'website',
+    });
+    await writePage(bookPath, bookHtml);
+    count++;
+
+    // Destination Category Pages (/destinations/:slug/:category)
+    for (const cat of destinationCategories) {
+      const catPath = `/destinations/${country.slug}/${cat.slug}`;
+      const customIntro = country.category_intros?.[cat.slug];
+      const catHeading = customIntro?.title?.trim() || `${cat.label} in ${country.name}`;
+      const catTitle = `${catHeading} | ${SITE_NAME}`;
+      const catDescription =
+        cleanText(customIntro?.description) || cleanText(cat.getDescription(country.name));
+      const catCanonicalUrl = `${SITE_URL}${catPath}`;
+      const catJsonLd = [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          name: catHeading,
+          description: catDescription,
+          image,
+          url: catCanonicalUrl,
+          provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        },
+        makeBreadcrumbs([
+          { name: 'Home', url: '/' },
+          { name: 'Destinations', url: '/destinations' },
+          { name: country.name, url: path },
+          { name: cat.label, url: catPath },
+        ]),
+      ];
+      const catHtml = renderHtml(template, {
+        title: catTitle,
+        heading: catHeading,
+        description: catDescription,
+        canonicalUrl: catCanonicalUrl,
+        image,
+        type: 'website',
+        jsonLd: catJsonLd,
+      });
+      await writePage(catPath, catHtml);
+      count++;
+    }
+  }
+
+  // Regions (/regions/:slug and /destinations/regions/:slug)
+  for (const region of regions) {
+    if (!region?.slug) continue;
+    const path = `/regions/${region.slug}`;
+    const destRegionPath = `/destinations/regions/${region.slug}`;
+    const title = `${region.name} Safari & Travel Guide | ${SITE_NAME}`;
+    const description =
+      cleanText(region.description || region.summary) ||
+      `Explore countries, safaris, and travel experiences in ${region.name} with ${SITE_NAME}.`;
+    const image = getImageUrl(region.image_id || region.cover_image);
+    const canonicalUrl = `${SITE_URL}${path}`;
+    const jsonLd = [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'TouristDestination',
+        name: region.name,
+        description,
+        image,
+        url: canonicalUrl,
+      },
+      makeBreadcrumbs([
+        { name: 'Home', url: '/' },
+        { name: 'Destinations', url: '/destinations' },
+        { name: 'Regions', url: '/regions' },
+        { name: region.name, url: path },
+      ]),
+    ];
+    const html = renderHtml(template, {
+      title,
+      heading: `${region.name} Destinations & Safaris`,
+      description,
+      canonicalUrl,
+      image,
+      type: 'article',
+      jsonLd,
+    });
+    await writePage(path, html);
+    await writePage(destRegionPath, html);
+    count += 2;
+  }
+
+  // Holiday Types (/holiday-types/:slug)
+  for (const ht of holidayTypes) {
+    if (!ht?.slug) continue;
+    const path = `/holiday-types/${ht.slug}`;
+    const title = `${ht.name} Safaris & Holidays | ${SITE_NAME}`;
+    const description =
+      cleanText(ht.description || ht.summary) ||
+      `Explore curated ${ht.name} packages, group trips, and experiences across Africa with ${SITE_NAME}.`;
+    const image = getImageUrl(ht.image_id || ht.cover_image);
+    const canonicalUrl = `${SITE_URL}${path}`;
+    const jsonLd = [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: ht.name,
+        description,
+        image,
+        url: canonicalUrl,
+        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+      },
+      makeBreadcrumbs([
+        { name: 'Home', url: '/' },
+        { name: 'Holiday Types', url: '/holiday-types' },
+        { name: ht.name, url: path },
+      ]),
+    ];
+    const html = renderHtml(template, {
+      title,
+      heading: `${ht.name} Tours & Safaris`,
+      description,
+      canonicalUrl,
+      image,
+      type: 'website',
+      jsonLd,
+    });
     await writePage(path, html);
     count++;
   }

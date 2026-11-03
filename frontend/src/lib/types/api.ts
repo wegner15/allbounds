@@ -203,6 +203,7 @@ export interface Activity extends BaseModel {
   image_id?: string;
   is_active: boolean;
   is_featured: boolean;
+  order_index?: number;
   countries: Country[];
   cover_image?: MediaAsset;
   tags?: ContentTag[];
@@ -433,6 +434,7 @@ export interface Package extends BaseModel {
   image_id?: string;
   is_active: boolean;
   is_featured: boolean;
+  order_index?: number;
   is_deal: boolean;
   package_type?: 'safari' | 'holiday' | string;
   inclusions?: InclusionExclusionItem[];
@@ -590,6 +592,7 @@ export interface ReviewDetail {
   reviewer_name: string;
   is_approved: boolean;
   is_featured: boolean;
+  order_index?: number;
   created_at: string;
 }
 
@@ -616,6 +619,7 @@ export interface PackageDetailResponse {
   image_id?: string;
   is_active: boolean;
   is_featured: boolean;
+  order_index?: number;
   is_deal: boolean;
   package_type?: 'safari' | 'holiday' | string;
   highlights?: string[];
@@ -720,6 +724,7 @@ export interface BlogPost extends BaseModel {
   is_published?: boolean;
   is_active: boolean;
   is_featured: boolean;
+  order_index?: number;
   author_id?: number;
   author?: User;
   published_at?: string;

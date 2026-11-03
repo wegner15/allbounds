@@ -39,6 +39,7 @@ class Package(Base):
     slug = Column(String(100), unique=True, index=True, nullable=False)
     is_active = Column(Boolean, default=True)
     is_featured = Column(Boolean, default=False)
+    order_index = Column(Integer, nullable=False, default=0, server_default="0", index=True)  # Manual display order (lower = first)
     is_deal = Column(Boolean, nullable=False, default=False, server_default=func.false())
     is_published = Column(Boolean, default=False)
     package_type = Column(String(50), nullable=False, default="safari", server_default="safari", index=True)

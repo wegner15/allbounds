@@ -1,6 +1,6 @@
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.group_trip import GroupTrip, GroupTripDeparture
@@ -14,6 +14,23 @@ from app.core.cloudflare_config import cloudflare_settings
 from app.services.group_trip_helper import format_group_trip_response
 
 class GroupTripService:
+    @staticmethod
+    def _apply_ordering(query, order_by: Optional[str] = None, order: str = "desc"):
+        """
+        Apply sorting. Default is the manual order (`order_index` ascending, lower = first),
+        with newest-first as the tiebreaker. `order` is ignored for the manual order.
+        """
+        desc = order == "desc"
+        columns = {
+            "name": GroupTrip.name,
+            "price": GroupTrip.price,
+            "created_at": GroupTrip.created_at,
+        }
+        if order_by in columns:
+            col = columns[order_by]
+            return query.order_by(col.desc() if desc else col.asc(), GroupTrip.id.desc())
+        return query.order_by(GroupTrip.order_index.asc(), GroupTrip.created_at.desc(), GroupTrip.id.desc())
+
     def get_group_trips(self, db: Session, skip: int = 0, limit: int = 100, tag: Optional[str] = None) -> List[GroupTrip]:
         """
         Retrieve all group trips with pagination.
@@ -30,7 +47,8 @@ class GroupTripService:
         
         if tag:
             query = query.filter(GroupTrip.tags.any(Tag.slug == tag))
-            
+
+        query = self._apply_ordering(query)
         return query.offset(skip).limit(limit).all()
 
     def get_paginated_group_trips(
@@ -43,8 +61,8 @@ class GroupTripService:
         holiday_type_id: Optional[int] = None,
         tag: Optional[str] = None,
         include_inactive: bool = True,
-        order_by: str = "created_at",
-        order: str = "desc",
+        order_by: str = "order_index",
+        order: str = "asc",
     ):
         """
         Retrieve paginated group trips with search and filtering for admin panel.
@@ -92,12 +110,7 @@ class GroupTripService:
 
         total = query.count()
 
-        if order_by == "name":
-            query = query.order_by(GroupTrip.name.desc() if order == "desc" else GroupTrip.name.asc())
-        elif order_by == "price":
-            query = query.order_by(GroupTrip.price.desc() if order == "desc" else GroupTrip.price.asc())
-        else:
-            query = query.order_by(GroupTrip.created_at.desc() if order == "desc" else GroupTrip.created_at.asc())
+        query = self._apply_ordering(query, order_by, order)
 
         skip = (page - 1) * limit if page > 0 else 0
         items = query.offset(skip).limit(limit).all()
@@ -125,7 +138,7 @@ class GroupTripService:
                 GroupTrip.country_id == country_id,
                 GroupTrip.countries.any(Country.id == country_id)
             )
-        ).offset(skip).limit(limit).all()
+        ).order_by(GroupTrip.order_index.asc(), GroupTrip.created_at.desc(), GroupTrip.id.desc()).offset(skip).limit(limit).all()
     
     def get_featured_group_trips(self, db: Session, skip: int = 0, limit: int = 100) -> List[GroupTrip]:
         """
@@ -142,7 +155,7 @@ class GroupTripService:
         ).filter(
             GroupTrip.is_active == True,
             GroupTrip.is_featured == True
-        ).offset(skip).limit(limit).all()
+        ).order_by(GroupTrip.order_index.asc(), GroupTrip.created_at.desc(), GroupTrip.id.desc()).offset(skip).limit(limit).all()
 
     def get_group_trips_by_holiday_type(self, db: Session, holiday_type_id: int, skip: int = 0, limit: int = 100) -> List[GroupTrip]:
         """
@@ -160,7 +173,25 @@ class GroupTripService:
         ).filter(
             GroupTrip.holiday_types.any(HolidayType.id == holiday_type_id),
             GroupTrip.is_active == True
-        ).offset(skip).limit(limit).all()
+        ).order_by(GroupTrip.order_index.asc(), GroupTrip.created_at.desc(), GroupTrip.id.desc()).offset(skip).limit(limit).all()
+
+    def reorder_group_trips(self, db: Session, orders: List[dict]) -> bool:
+        """
+        Bulk-update order_index. Expects [{"id": 1, "order_index": 0}, ...].
+        Single transaction, no per-row SELECT.
+        """
+        try:
+            if orders:
+                db.bulk_update_mappings(
+                    GroupTrip,
+                    [{"id": o["id"], "order_index": o["order_index"]} for o in orders],
+                )
+            db.commit()
+            return True
+        except Exception as e:
+            db.rollback()
+            print(f"Error reordering group trips: {e}")
+            return False
 
     def get_group_trip(self, db: Session, group_trip_id: int, include_inactive: bool = True) -> Optional[GroupTrip]:
         """
@@ -387,7 +418,10 @@ class GroupTripService:
         Create a new group trip.
         """
         slug = create_slug(group_trip_create.name)
+        # New group trips go to the top of the manual order
+        min_order = db.query(func.min(GroupTrip.order_index)).scalar()
         db_group_trip = GroupTrip(
+            order_index=(min_order - 1) if min_order is not None else 0,
             name=group_trip_create.name,
             summary=group_trip_create.summary,
             description=group_trip_create.description,

@@ -55,6 +55,7 @@ export interface Attraction {
   tag_ids?: number[];
   is_active: boolean;
   is_featured?: boolean;
+  order_index?: number;
   created_at: string;
   updated_at: string;
 }
@@ -404,5 +405,18 @@ export const useRemoveHotelFromAttraction = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['attractions', variables.attractionId, 'relationships'] });
     },
+  });
+};
+
+// Hook for reordering attractions (admin only)
+export const useReorderAttractions = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (orders: { id: number; order_index: number }[]) => {
+      return apiClient.patch('/attractions/reorder', { orders });
+    },
+    // Returning the promise makes mutateAsync wait until fresh data is loaded (no order flicker)
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['attractions'], exact: false }),
   });
 };

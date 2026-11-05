@@ -51,6 +51,7 @@ export interface Hotel {
   tag_ids?: number[];
   is_active: boolean;
   is_featured: boolean;
+  order_index?: number;
   price_charts?: any[];
   lowestPrice?: number | null;
   created_at: string;
@@ -295,5 +296,18 @@ export const useRemoveGroupTripFromHotel = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['hotels', variables.hotelId, 'relationships'] });
     },
+  });
+};
+
+// Hook for reordering hotels (admin only)
+export const useReorderHotels = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (orders: { id: number; order_index: number }[]) => {
+      return apiClient.patch('/hotels/reorder', { orders });
+    },
+    // Returning the promise makes mutateAsync wait until fresh data is loaded (no order flicker)
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['hotels'], exact: false }),
   });
 };

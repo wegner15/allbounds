@@ -25,7 +25,34 @@ from app.auth.dependencies import get_current_user, has_permission
 class SetCoverImageRequest(BaseModel):
     image_id: str
 
+
+class ReorderItem(BaseModel):
+    id: int
+    order_index: int
+
+
+class ReorderRequest(BaseModel):
+    orders: List[ReorderItem]
+
+
 router = APIRouter()
+
+
+# NOTE: must be declared before the "/{attraction_id}" routes.
+@router.patch("/reorder", status_code=status.HTTP_200_OK)
+def reorder_attractions(
+    *,
+    request: ReorderRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(has_permission("content:update")),
+) -> Any:
+    """
+    Bulk-update the manual display order of attractions.
+    """
+    if not attraction_service.reorder_attractions(db, [item.dict() for item in request.orders]):
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to reorder attractions")
+    return {"message": "Attractions reordered successfully"}
+
 
 @router.get("/paginated", response_model=PaginatedAttractionResponse)
 def get_paginated_attractions(
@@ -37,8 +64,8 @@ def get_paginated_attractions(
     category: Optional[str] = Query(None, description="Filter by category"),
     tag: Optional[str] = Query(None, description="Filter by tag slug"),
     include_inactive: bool = Query(True, description="Include inactive attractions"),
-    order_by: str = Query("created_at", description="Field to order by"),
-    order: str = Query("desc", description="Order direction (asc/desc)"),
+    order_by: str = Query("order_index", description="Field to order by (order_index = manual order)"),
+    order: str = Query("asc", description="Order direction (asc/desc); ignored for order_index"),
 ) -> Any:
     """
     Retrieve paginated list of attractions for admin list view.

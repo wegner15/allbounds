@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import { Link } from 'react-router-dom';
 import type { ActivityResponse } from '../../../lib/types/api';
 import Button from '../../../components/ui/Button';
 import { getCloudflareImageUrl } from '../../../utils/imageUtils';
-import { usePaginatedActivities, useDeleteActivity } from '../../../lib/hooks/useActivities';
+import { usePaginatedActivities, useDeleteActivity, useReorderActivities } from '../../../lib/hooks/useActivities';
 import CountryFilterSelect from '../../../components/ui/CountryFilterSelect';
+import { reorderPage } from '../../../lib/utils/reorder';
 import ErrorModal from '../../../components/ui/ErrorModal';
 
 const ActivityListPage: React.FC = () => {
@@ -33,7 +35,31 @@ const ActivityListPage: React.FC = () => {
     include_inactive: true,
   });
 
-  const activities = data?.items || [];
+  // Local order is used for instant feedback while a reorder request is in flight
+  const [localOrder, setLocalOrder] = useState<ActivityResponse[] | null>(null);
+  const activities: ActivityResponse[] = localOrder ?? data?.items ?? [];
+  const reorderMutation = useReorderActivities();
+  // Manual ordering is only meaningful on the unfiltered list
+  const canReorder = !debouncedSearch && !selectedCountryId && !reorderMutation.isPending;
+
+  const moveItem = async (from: number, to: number) => {
+    const result = reorderPage(activities, from, to);
+    if (!result) return;
+    setLocalOrder(result.items);
+    try {
+      await reorderMutation.mutateAsync(result.orders);
+    } catch (err: any) {
+      setErrorMessage(err?.response?.data?.detail || err?.message || 'Failed to save the new order. Please try again.');
+    } finally {
+      setLocalOrder(null);
+    }
+  };
+
+  const onDragEnd = (result: DropResult) => {
+    if (!result.destination || !canReorder) return;
+    moveItem(result.source.index, result.destination.index);
+  };
+
   const total = data?.total || 0;
   const totalPages = data?.pages || 0;
   const deleteActivity = useDeleteActivity();
@@ -122,9 +148,11 @@ const ActivityListPage: React.FC = () => {
       ) : (
         <div className="bg-white shadow rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
+            <DragDropContext onDragEnd={onDragEnd}>
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th scope="col" className="w-20 px-3 py-3"><span className="sr-only">Order</span></th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cover</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</th>
@@ -132,9 +160,29 @@ const ActivityListPage: React.FC = () => {
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {activities.map(activity => (
-                  <tr key={activity.id}>
+              <Droppable droppableId="activities" isDropDisabled={!canReorder}>
+                {(dropProvided) => (
+              <tbody className="bg-white divide-y divide-gray-200" ref={dropProvided.innerRef} {...dropProvided.droppableProps}>
+                {activities.map((activity, index) => (
+                  <Draggable key={activity.id} draggableId={String(activity.id)} index={index} isDragDisabled={!canReorder}>
+                    {(provided, snapshot) => (
+                  <tr ref={provided.innerRef} {...provided.draggableProps} className={snapshot.isDragging ? 'bg-teal-50 shadow-lg' : ''}>
+                    <td className="w-20 px-3 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-1">
+                        <span
+                          {...provided.dragHandleProps}
+                          title={canReorder ? 'Drag to reorder' : 'Clear search and filters to reorder'}
+                          className={`select-none text-lg leading-none ${canReorder ? 'cursor-grab text-gray-500 hover:text-gray-800' : 'cursor-not-allowed text-gray-300'}`}
+                          aria-label="Drag to reorder"
+                        >
+                          ⠿
+                        </span>
+                        <div className="flex flex-col leading-none">
+                          <button type="button" disabled={!canReorder || index === 0} onClick={() => moveItem(index, index - 1)} title="Move up" aria-label="Move up" className="text-xs text-gray-500 hover:text-gray-900 disabled:opacity-30">▲</button>
+                          <button type="button" disabled={!canReorder || index === activities.length - 1} onClick={() => moveItem(index, index + 1)} title="Move down" aria-label="Move down" className="text-xs text-gray-500 hover:text-gray-900 disabled:opacity-30">▼</button>
+                        </div>
+                      </div>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {(() => {
                         const coverMedia = activity.cover_image
@@ -187,9 +235,15 @@ const ActivityListPage: React.FC = () => {
                       </div>
                     </td>
                   </tr>
+                    )}
+                  </Draggable>
                 ))}
+                {dropProvided.placeholder}
               </tbody>
+                )}
+              </Droppable>
             </table>
+            </DragDropContext>
           </div>
 
           {/* Pagination Bar */}

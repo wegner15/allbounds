@@ -91,6 +91,7 @@ class AttractionResponse(AttractionBase):
     slug: str = Field(..., description="URL-friendly slug for the attraction", example="maasai-mara")
     is_active: bool = Field(..., description="Whether the attraction is active")
     is_featured: Optional[bool] = Field(False, description="Whether the attraction is featured")
+    order_index: int = Field(0, description="Manual display order (lower = first)")
     created_at: datetime
     updated_at: datetime
     cover_image: Optional[str] = Field(None, description="Cover image URL")

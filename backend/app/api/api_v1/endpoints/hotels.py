@@ -25,6 +25,32 @@ router = APIRouter()
 class SetCoverImageRequest(BaseModel):
     image_id: str
 
+
+class ReorderItem(BaseModel):
+    id: int
+    order_index: int
+
+
+class ReorderRequest(BaseModel):
+    orders: List[ReorderItem]
+
+
+# NOTE: must be declared before the "/{hotel_id}" routes.
+@router.patch("/reorder", status_code=status.HTTP_200_OK)
+def reorder_hotels(
+    *,
+    request: ReorderRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(has_permission("content:update")),
+) -> Any:
+    """
+    Bulk-update the manual display order of hotels.
+    """
+    if not hotel_service.reorder_hotels(db, [item.dict() for item in request.orders]):
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to reorder hotels")
+    return {"message": "Hotels reordered successfully"}
+
+
 @router.get("/paginated", response_model=PaginatedHotelResponse)
 def get_paginated_hotels(
     db: Session = Depends(get_db),
@@ -34,8 +60,8 @@ def get_paginated_hotels(
     country_id: int = Query(None, description="Filter by country ID"),
     tag: str = Query(None, description="Filter by tag slug"),
     include_inactive: bool = Query(True, description="Include inactive hotels"),
-    order_by: str = Query("created_at", description="Field to order by"),
-    order: str = Query("desc", description="Order direction (asc/desc)"),
+    order_by: str = Query("order_index", description="Field to order by (order_index = manual order)"),
+    order: str = Query("asc", description="Order direction (asc/desc); ignored for order_index"),
 ) -> Any:
     """
     Retrieve paginated list of hotels optimized for admin list view.

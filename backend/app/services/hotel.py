@@ -1,4 +1,5 @@
 from typing import List, Optional, Dict, Any
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.models.hotel import Hotel
@@ -11,6 +12,39 @@ from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_
 from app.core.cloudflare_config import cloudflare_settings
 
 class HotelService:
+    @staticmethod
+    def _apply_ordering(query, order_by: Optional[str] = None, order: str = "desc"):
+        """
+        Apply sorting. Default is the manual order (`order_index` ascending, lower = first),
+        with newest-first as the tiebreaker. `order` is ignored for the manual order.
+        """
+        desc = order == "desc"
+        columns = {
+            "name": Hotel.name,
+            "stars": Hotel.stars,
+            "created_at": Hotel.created_at,
+        }
+        if order_by in columns:
+            col = columns[order_by]
+            return query.order_by(col.desc() if desc else col.asc(), Hotel.id.desc())
+        return query.order_by(Hotel.order_index.asc(), Hotel.created_at.desc(), Hotel.id.desc())
+
+    def reorder_hotels(self, db: Session, orders: List[dict]) -> bool:
+        """
+        Bulk-update order_index. Expects [{"id": 1, "order_index": 0}, ...].
+        """
+        try:
+            if orders:
+                db.bulk_update_mappings(
+                    Hotel,
+                    [{"id": o["id"], "order_index": o["order_index"]} for o in orders],
+                )
+            db.commit()
+            return True
+        except Exception as e:
+            db.rollback()
+            print(f"Error reordering hotels: {e}")
+            return False
     def _get_cloudflare_image_url(self, image_id: str, variant: str = "medium") -> Optional[str]:
         """
         Generate Cloudflare Images delivery URL.
@@ -112,7 +146,7 @@ class HotelService:
         if tag:
             query = query.filter(Hotel.tags.any(Tag.slug == tag))
 
-        query = query.order_by(Hotel.created_at.desc())
+        query = self._apply_ordering(query)
 
         hotels = query.offset(skip).limit(limit).all()
 
@@ -137,6 +171,8 @@ class HotelService:
                 "image_url": cover_image_url,
                 "cover_image": cover_image_url,
                 "is_active": hotel.is_active,
+                "is_featured": hotel.is_featured,
+                "order_index": getattr(hotel, "order_index", 0),
                 "address": hotel.address,
                 "city": hotel.city,
                 "stars": hotel.stars,
@@ -174,8 +210,8 @@ class HotelService:
         country_id: Optional[int] = None,
         tag: Optional[str] = None,
         include_inactive: bool = True,
-        order_by: str = "created_at",
-        order: str = "desc",
+        order_by: str = "order_index",
+        order: str = "asc",
     ):
         """
         Retrieve paginated hotels with search and filtering for admin panel.
@@ -211,12 +247,7 @@ class HotelService:
 
         total = query.count()
 
-        if order_by == "name":
-            query = query.order_by(Hotel.name.desc() if order == "desc" else Hotel.name.asc())
-        elif order_by == "stars":
-            query = query.order_by(Hotel.stars.desc() if order == "desc" else Hotel.stars.asc())
-        else:
-            query = query.order_by(Hotel.created_at.desc() if order == "desc" else Hotel.created_at.asc())
+        query = self._apply_ordering(query, order_by, order)
 
         skip = (page - 1) * limit if page > 0 else 0
         hotels = query.offset(skip).limit(limit).all()
@@ -241,6 +272,8 @@ class HotelService:
                 "image_url": cover_image_url,
                 "cover_image": cover_image_url,
                 "is_active": hotel.is_active,
+                "is_featured": hotel.is_featured,
+                "order_index": getattr(hotel, "order_index", 0),
                 "address": hotel.address,
                 "city": hotel.city,
                 "stars": hotel.stars,
@@ -282,7 +315,7 @@ class HotelService:
         ).filter(
             Hotel.country_id == country_id,
             Hotel.is_active == True
-        ).order_by(Hotel.created_at.desc()).offset(skip).limit(limit).all()
+        ).order_by(Hotel.order_index.asc(), Hotel.created_at.desc(), Hotel.id.desc()).offset(skip).limit(limit).all()
         
         result = []
         for hotel in hotels:
@@ -308,6 +341,8 @@ class HotelService:
                 "image_url": cover_image_url,
                 "cover_image": cover_image_url,
                 "is_active": hotel.is_active,
+                "is_featured": hotel.is_featured,
+                "order_index": getattr(hotel, "order_index", 0),
                 "amenity_ids": [amenity.id for amenity in hotel.amenities],
                 "tags": [
                     {
@@ -353,7 +388,7 @@ class HotelService:
         if tag:
             query = query.filter(Hotel.tags.any(Tag.slug == tag))
 
-        hotels = query.order_by(Hotel.created_at.desc()).offset(skip).limit(limit).all()
+        hotels = query.order_by(Hotel.order_index.asc(), Hotel.created_at.desc(), Hotel.id.desc()).offset(skip).limit(limit).all()
         
         result = []
         for hotel in hotels:
@@ -377,6 +412,7 @@ class HotelService:
                 "cover_image": cover_image_url,
                 "is_active": hotel.is_active,
                 "is_featured": hotel.is_featured,
+                "order_index": getattr(hotel, "order_index", 0),
                 "address": hotel.address,
                 "city": hotel.city,
                 "stars": hotel.stars,
@@ -572,8 +608,12 @@ class HotelService:
         hotel_type_id = hotel_create.hotel_type_id
         if hotel_type_id in (0, "0"):
             hotel_type_id = None
+
+        # New hotels go to the top of the manual order
+        min_order = db.query(func.min(Hotel.order_index)).scalar()
         
         db_hotel = Hotel(
+            order_index=(min_order - 1) if min_order is not None else 0,
             name=hotel_create.name,
             summary=hotel_create.summary,
             description=hotel_create.description,

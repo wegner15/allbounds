@@ -1,4 +1,5 @@
 from typing import List, Optional
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.activity import Activity
@@ -8,6 +9,39 @@ from app.schemas.activity import ActivityCreate, ActivityUpdate
 from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
 
 class ActivityService:
+    @staticmethod
+    def _apply_ordering(query, order_by: Optional[str] = None, order: str = "desc"):
+        """
+        Apply sorting. Default is the manual order (`order_index` ascending, lower = first),
+        with newest-first as the tiebreaker. `order` is ignored for the manual order.
+        """
+        desc = order == "desc"
+        columns = {
+            "name": Activity.name,
+            "created_at": Activity.created_at,
+        }
+        if order_by in columns:
+            col = columns[order_by]
+            return query.order_by(col.desc() if desc else col.asc(), Activity.id.desc())
+        return query.order_by(Activity.order_index.asc(), Activity.created_at.desc(), Activity.id.desc())
+
+    def reorder_activities_bulk(self, db: Session, orders: List[dict]) -> bool:
+        """
+        Bulk-update order_index. Expects [{"id": 1, "order_index": 0}, ...].
+        """
+        try:
+            if orders:
+                db.bulk_update_mappings(
+                    Activity,
+                    [{"id": o["id"], "order_index": o["order_index"]} for o in orders],
+                )
+            db.commit()
+            return True
+        except Exception as e:
+            db.rollback()
+            print(f"Error reordering activities: {e}")
+            return False
+
     def get_activities(self, db: Session, skip: int = 0, limit: int = 100, tag: Optional[str] = None) -> List[Activity]:
         """
         Retrieve all activities with pagination.
@@ -16,6 +50,7 @@ class ActivityService:
         if tag:
             query = query.filter(Activity.tags.any(Tag.slug == tag))
             
+        query = self._apply_ordering(query)
         return query.options(
             joinedload(Activity.cover_image),
             joinedload(Activity.media_assets),
@@ -32,8 +67,8 @@ class ActivityService:
         country_id: Optional[int] = None,
         tag: Optional[str] = None,
         include_inactive: bool = True,
-        order_by: str = "created_at",
-        order: str = "desc",
+        order_by: str = "order_index",
+        order: str = "asc",
     ):
         """
         Retrieve paginated activities with search and filtering for admin panel.
@@ -68,10 +103,7 @@ class ActivityService:
 
         total = query.count()
 
-        if order_by == "name":
-            query = query.order_by(Activity.name.desc() if order == "desc" else Activity.name.asc())
-        else:
-            query = query.order_by(Activity.created_at.desc() if order == "desc" else Activity.created_at.asc())
+        query = self._apply_ordering(query, order_by, order)
 
         skip = (page - 1) * limit if page > 0 else 0
         items = query.offset(skip).limit(limit).all()
@@ -121,7 +153,7 @@ class ActivityService:
             joinedload(Activity.media_assets),
             joinedload(Activity.countries),
             joinedload(Activity.tags)
-        ).offset(skip).limit(limit).all()
+        ).order_by(Activity.order_index.asc(), Activity.created_at.desc(), Activity.id.desc()).offset(skip).limit(limit).all()
     
     def get_featured_activities(self, db: Session, skip: int = 0, limit: int = 100, country: Optional[str] = None, tag: Optional[str] = None) -> List[Activity]:
         """
@@ -143,7 +175,7 @@ class ActivityService:
             joinedload(Activity.cover_image),
             joinedload(Activity.media_assets),
             joinedload(Activity.countries)
-        ).offset(skip).limit(limit).all()
+        ).order_by(Activity.order_index.asc(), Activity.created_at.desc(), Activity.id.desc()).offset(skip).limit(limit).all()
     
     def get_featured_activities_by_country(self, db: Session, country_name: str, skip: int = 0, limit: int = 100) -> List[Activity]:
         """
@@ -161,7 +193,7 @@ class ActivityService:
             joinedload(Activity.cover_image),
             joinedload(Activity.media_assets),
             joinedload(Activity.countries)
-        ).offset(skip).limit(limit).all()
+        ).order_by(Activity.order_index.asc(), Activity.created_at.desc(), Activity.id.desc()).offset(skip).limit(limit).all()
     
     def create_activity(self, db: Session, activity_create: ActivityCreate) -> Activity:
         """
@@ -170,7 +202,9 @@ class ActivityService:
         from app.models.country import Country
         
         slug = create_slug(activity_create.name)
+        min_order = db.query(func.min(Activity.order_index)).scalar()
         db_activity = Activity(
+            order_index=(min_order - 1) if min_order is not None else 0,
             name=activity_create.name,
             description=activity_create.description,
             summary=activity_create.summary,

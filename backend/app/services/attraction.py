@@ -1,6 +1,6 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 
 from app.models.attraction import Attraction
 from app.models.country import Country
@@ -9,6 +9,39 @@ from app.schemas.attraction import AttractionCreate, AttractionUpdate
 from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
 
 class AttractionService:
+    @staticmethod
+    def _apply_ordering(query, order_by: Optional[str] = None, order: str = "desc"):
+        """
+        Apply sorting. Default is the manual order (`order_index` ascending, lower = first),
+        with newest-first as the tiebreaker. `order` is ignored for the manual order.
+        """
+        desc = order == "desc"
+        columns = {
+            "name": Attraction.name,
+            "price": Attraction.price,
+            "created_at": Attraction.created_at,
+        }
+        if order_by in columns:
+            col = columns[order_by]
+            return query.order_by(col.desc() if desc else col.asc(), Attraction.id.desc())
+        return query.order_by(Attraction.order_index.asc(), Attraction.created_at.desc(), Attraction.id.desc())
+
+    def reorder_attractions(self, db: Session, orders: List[dict]) -> bool:
+        """
+        Bulk-update order_index. Expects [{"id": 1, "order_index": 0}, ...].
+        """
+        try:
+            if orders:
+                db.bulk_update_mappings(
+                    Attraction,
+                    [{"id": o["id"], "order_index": o["order_index"]} for o in orders],
+                )
+            db.commit()
+            return True
+        except Exception as e:
+            db.rollback()
+            print(f"Error reordering attractions: {e}")
+            return False
     def get_attractions(
         self,
         db: Session,
@@ -67,7 +100,7 @@ class AttractionService:
             query = query.filter(Attraction.tags.any(Tag.slug == tag))
 
         return (
-            query.order_by(Attraction.created_at.desc())
+            self._apply_ordering(query)
             .offset(skip)
             .limit(limit)
             .all()
@@ -83,8 +116,8 @@ class AttractionService:
         category: Optional[str] = None,
         tag: Optional[str] = None,
         include_inactive: bool = True,
-        order_by: str = "created_at",
-        order: str = "desc",
+        order_by: str = "order_index",
+        order: str = "asc",
     ):
         """
         Retrieve paginated attractions with search and filtering for admin panel.
@@ -123,12 +156,7 @@ class AttractionService:
 
         total = query.count()
 
-        if order_by == "name":
-            query = query.order_by(Attraction.name.desc() if order == "desc" else Attraction.name.asc())
-        elif order_by == "price":
-            query = query.order_by(Attraction.price.desc() if order == "desc" else Attraction.price.asc())
-        else:
-            query = query.order_by(Attraction.created_at.desc() if order == "desc" else Attraction.created_at.asc())
+        query = self._apply_ordering(query, order_by, order)
 
         skip = (page - 1) * limit if page > 0 else 0
         items = query.offset(skip).limit(limit).all()
@@ -137,7 +165,7 @@ class AttractionService:
     
     def get_attractions_by_country(self, db: Session, country_id: int, skip: int = 0, limit: int = 100) -> List[Attraction]:
         """
-        Retrieve all attractions for a specific country with pagination ordered by newest first.
+        Retrieve all attractions for a specific country with pagination ordered by manual order_index.
         """
         return (
             db.query(Attraction)
@@ -150,7 +178,7 @@ class AttractionService:
                 Attraction.country_id == country_id,
                 Attraction.is_active == True,
             )
-            .order_by(Attraction.created_at.desc())
+            .order_by(Attraction.order_index.asc(), Attraction.created_at.desc(), Attraction.id.desc())
             .offset(skip)
             .limit(limit)
             .all()
@@ -202,7 +230,9 @@ class AttractionService:
         Create a new attraction.
         """
         slug = create_slug(attraction_create.name)
+        min_order = db.query(func.min(Attraction.order_index)).scalar()
         db_attraction = Attraction(
+            order_index=(min_order - 1) if min_order is not None else 0,
             name=attraction_create.name,
             summary=attraction_create.summary,
             description=attraction_create.description,

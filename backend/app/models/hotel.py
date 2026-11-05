@@ -56,6 +56,7 @@ class Hotel(Base):
     slug = Column(String(100), unique=True, index=True, nullable=False)
     is_active = Column(Boolean, default=True)
     is_featured = Column(Boolean, default=False)
+    order_index = Column(Integer, nullable=False, default=0, server_default="0", index=True)  # Manual display order (lower = first)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

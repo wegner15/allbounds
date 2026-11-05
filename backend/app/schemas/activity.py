@@ -45,6 +45,7 @@ class ActivityResponse(ActivityBase):
     slug: str = Field(..., description="URL-friendly slug for the activity", example="safari")
     is_active: bool = Field(..., description="Whether the activity is active")
     is_featured: bool = Field(default=False, description="Whether the activity is featured")
+    order_index: int = Field(0, description="Manual display order (lower = first)")
     cover_image: Optional[MediaAssetResponse] = Field(None, description="Cover image of the activity")
     media_assets: List[MediaAssetResponse] = Field([], description="Gallery of media assets for the activity")
     countries: List[CountryMinResponse] = Field([], description="Countries associated with the activity")

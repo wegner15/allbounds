@@ -33,6 +33,7 @@ class Activity(Base):
     cover_image_id = Column(Integer, ForeignKey("media_assets.id"), nullable=True)
     is_active = Column(Boolean, default=True)
     is_featured = Column(Boolean, default=False)
+    order_index = Column(Integer, nullable=False, default=0, server_default="0", index=True)  # Manual display order (lower = first)
     highlights = Column(JSON, nullable=True)
     inclusions = Column(JSON, nullable=True)
     exclusions = Column(JSON, nullable=True)

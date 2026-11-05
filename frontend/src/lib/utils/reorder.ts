@@ -25,8 +25,8 @@ export function reorderPage<T extends OrderedItem>(
   if (from === to || from < 0 || to < 0 || from >= items.length || to >= items.length) return null;
 
   const slots = items.map((item) => item.order_index ?? 0);
-  const strictlyIncreasing = slots.every((v, i) => i === 0 || v > slots[i - 1]);
-  const baseIndex = slots[0] !== 0 ? slots[0] : startIndex;
+  const strictlyIncreasing = slots[0] > 0 && slots.every((v, i) => i === 0 || v > slots[i - 1]);
+  const baseIndex = slots[0] > 0 ? slots[0] : startIndex + 1;
   const indices = strictlyIncreasing ? slots : items.map((_, i) => baseIndex + i);
 
   const moved = [...items];

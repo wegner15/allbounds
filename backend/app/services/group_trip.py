@@ -10,6 +10,7 @@ from app.models.inclusion_exclusion import Inclusion, Exclusion
 from app.models.blog import Tag
 from app.schemas.group_trip import GroupTripCreate, GroupTripUpdate, GroupTripDepartureCreate, GroupTripDepartureUpdate
 from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
+from app.utils.ordering import ensure_normalized_order, apply_page_reorder
 from app.core.cloudflare_config import cloudflare_settings
 from app.services.group_trip_helper import format_group_trip_response
 
@@ -35,6 +36,7 @@ class GroupTripService:
         """
         Retrieve all group trips with pagination.
         """
+        ensure_normalized_order(db, GroupTrip)
         query = db.query(GroupTrip).options(
             joinedload(GroupTrip.departures),
             joinedload(GroupTrip.country),
@@ -70,6 +72,7 @@ class GroupTripService:
         """
         from app.models.country import Country
         from app.models.holiday_type import HolidayType
+        ensure_normalized_order(db, GroupTrip)
         query = db.query(GroupTrip).options(
             joinedload(GroupTrip.departures),
             joinedload(GroupTrip.country),
@@ -178,20 +181,8 @@ class GroupTripService:
     def reorder_group_trips(self, db: Session, orders: List[dict]) -> bool:
         """
         Bulk-update order_index. Expects [{"id": 1, "order_index": 0}, ...].
-        Single transaction, no per-row SELECT.
         """
-        try:
-            if orders:
-                db.bulk_update_mappings(
-                    GroupTrip,
-                    [{"id": o["id"], "order_index": o["order_index"]} for o in orders],
-                )
-            db.commit()
-            return True
-        except Exception as e:
-            db.rollback()
-            print(f"Error reordering group trips: {e}")
-            return False
+        return apply_page_reorder(db, GroupTrip, orders)
 
     def get_group_trip(self, db: Session, group_trip_id: int, include_inactive: bool = True) -> Optional[GroupTrip]:
         """

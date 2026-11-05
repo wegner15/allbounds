@@ -11,6 +11,7 @@ from app.models.inclusion_exclusion import Inclusion, Exclusion
 from app.models.blog import BlogPost, Tag
 from app.schemas.package import PackageCreate, PackageUpdate
 from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
+from app.utils.ordering import ensure_normalized_order, apply_page_reorder
 from app.core.cloudflare_config import cloudflare_settings
 
 class PackageService:
@@ -45,6 +46,7 @@ class PackageService:
         Retrieve all packages with pagination and ordering.
         MEMORY FIX: Only load essential relationships to prevent OOM
         """
+        ensure_normalized_order(db, Package)
         query = db.query(Package).options(
             joinedload(Package.country),
             selectinload(Package.countries),
@@ -80,6 +82,7 @@ class PackageService:
         Returns (items, total_count).
         """
         from app.models.country import Country
+        ensure_normalized_order(db, Package)
         query = db.query(Package).options(
             joinedload(Package.country),
             selectinload(Package.countries),
@@ -190,20 +193,8 @@ class PackageService:
     def reorder_packages(self, db: Session, orders: List[dict]) -> bool:
         """
         Bulk-update order_index. Expects [{"id": 1, "order_index": 0}, ...].
-        Single transaction, no per-row SELECT.
         """
-        try:
-            if orders:
-                db.bulk_update_mappings(
-                    Package,
-                    [{"id": o["id"], "order_index": o["order_index"]} for o in orders],
-                )
-            db.commit()
-            return True
-        except Exception as e:
-            db.rollback()
-            print(f"Error reordering packages: {e}")
-            return False
+        return apply_page_reorder(db, Package, orders)
 
     def get_package(self, db: Session, package_id: int) -> Optional[Package]:
         """

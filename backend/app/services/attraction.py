@@ -7,6 +7,7 @@ from app.models.country import Country
 from app.models.blog import Tag
 from app.schemas.attraction import AttractionCreate, AttractionUpdate
 from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
+from app.utils.ordering import ensure_normalized_order, apply_page_reorder
 
 class AttractionService:
     @staticmethod
@@ -30,18 +31,8 @@ class AttractionService:
         """
         Bulk-update order_index. Expects [{"id": 1, "order_index": 0}, ...].
         """
-        try:
-            if orders:
-                db.bulk_update_mappings(
-                    Attraction,
-                    [{"id": o["id"], "order_index": o["order_index"]} for o in orders],
-                )
-            db.commit()
-            return True
-        except Exception as e:
-            db.rollback()
-            print(f"Error reordering attractions: {e}")
-            return False
+        return apply_page_reorder(db, Attraction, orders)
+
     def get_attractions(
         self,
         db: Session,
@@ -55,8 +46,9 @@ class AttractionService:
         featured: Optional[bool] = None,
     ) -> List[Attraction]:
         """
-        Retrieve all attractions with pagination ordered by newest first.
+        Retrieve all attractions with pagination ordered by manual order_index.
         """
+        ensure_normalized_order(db, Attraction)
         query = (
             db.query(Attraction)
             .options(joinedload(Attraction.country), joinedload(Attraction.activities), joinedload(Attraction.tags))
@@ -123,6 +115,7 @@ class AttractionService:
         Retrieve paginated attractions with search and filtering for admin panel.
         Returns (items, total_count).
         """
+        ensure_normalized_order(db, Attraction)
         query = db.query(Attraction).options(
             joinedload(Attraction.country),
             joinedload(Attraction.activities),

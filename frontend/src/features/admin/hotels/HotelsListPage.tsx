@@ -158,7 +158,7 @@ const HotelsListPage: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="w-20 px-3 py-3"><span className="sr-only">Order</span></th>
+                  <th scope="col" className="w-28 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Hotel
                   </th>
@@ -183,8 +183,8 @@ const HotelsListPage: React.FC = () => {
                   <Draggable key={hotel.id} draggableId={String(hotel.id)} index={index} isDragDisabled={!canReorder}>
                     {(provided, snapshot) => (
                   <tr ref={provided.innerRef} {...provided.draggableProps} className={snapshot.isDragging ? 'bg-teal-50 shadow-lg' : ''}>
-                    <td className="w-20 px-3 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-1">
+                    <td className="w-28 px-4 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
                         <span
                           {...provided.dragHandleProps}
                           title={canReorder ? 'Drag to reorder' : 'Clear search and filters to reorder'}
@@ -197,6 +197,12 @@ const HotelsListPage: React.FC = () => {
                           <button type="button" disabled={!canReorder || index === 0} onClick={() => moveItem(index, index - 1)} title="Move up" aria-label="Move up" className="text-xs text-gray-500 hover:text-gray-900 disabled:opacity-30">▲</button>
                           <button type="button" disabled={!canReorder || index === hotels.length - 1} onClick={() => moveItem(index, index + 1)} title="Move down" aria-label="Move down" className="text-xs text-gray-500 hover:text-gray-900 disabled:opacity-30">▼</button>
                         </div>
+                        <span
+                          className="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200 tabular-nums"
+                          title={`Manual order position (order_index: ${hotel.order_index ?? 0})`}
+                        >
+                          #{hotel.order_index && hotel.order_index > 0 ? hotel.order_index : (page - 1) * limit + index + 1}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

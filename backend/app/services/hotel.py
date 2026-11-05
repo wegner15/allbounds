@@ -9,6 +9,7 @@ from app.models.amenity import Amenity
 from app.models.blog import Tag
 from app.schemas.hotel import HotelCreate, HotelUpdate
 from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
+from app.utils.ordering import ensure_normalized_order, apply_page_reorder
 from app.core.cloudflare_config import cloudflare_settings
 
 class HotelService:
@@ -33,18 +34,7 @@ class HotelService:
         """
         Bulk-update order_index. Expects [{"id": 1, "order_index": 0}, ...].
         """
-        try:
-            if orders:
-                db.bulk_update_mappings(
-                    Hotel,
-                    [{"id": o["id"], "order_index": o["order_index"]} for o in orders],
-                )
-            db.commit()
-            return True
-        except Exception as e:
-            db.rollback()
-            print(f"Error reordering hotels: {e}")
-            return False
+        return apply_page_reorder(db, Hotel, orders)
     def _get_cloudflare_image_url(self, image_id: str, variant: str = "medium") -> Optional[str]:
         """
         Generate Cloudflare Images delivery URL.
@@ -128,8 +118,9 @@ class HotelService:
     def get_hotels(self, db: Session, skip: int = 0, limit: int = 100, recommended: Optional[bool] = None, country: Optional[str] = None, tag: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Retrieve all hotels with pagination and optional filtering, including cover images and price charts.
-        Hotels are ordered by creation date (newest first).
+        Hotels are ordered by manual order_index.
         """
+        ensure_normalized_order(db, Hotel)
         query = db.query(Hotel).options(
             joinedload(Hotel.country),
             joinedload(Hotel.amenities),
@@ -218,6 +209,7 @@ class HotelService:
         Returns (items, total_count).
         """
         from sqlalchemy import or_
+        ensure_normalized_order(db, Hotel)
         query = db.query(Hotel).options(
             joinedload(Hotel.country),
             joinedload(Hotel.amenities),

@@ -7,6 +7,7 @@ from app.models.media import MediaAsset
 from app.models.blog import Tag
 from app.schemas.activity import ActivityCreate, ActivityUpdate
 from app.utils.slug import create_slug, ensure_unique_slug, update_slug_if_name_changed
+from app.utils.ordering import ensure_normalized_order, apply_page_reorder
 
 class ActivityService:
     @staticmethod
@@ -29,23 +30,13 @@ class ActivityService:
         """
         Bulk-update order_index. Expects [{"id": 1, "order_index": 0}, ...].
         """
-        try:
-            if orders:
-                db.bulk_update_mappings(
-                    Activity,
-                    [{"id": o["id"], "order_index": o["order_index"]} for o in orders],
-                )
-            db.commit()
-            return True
-        except Exception as e:
-            db.rollback()
-            print(f"Error reordering activities: {e}")
-            return False
+        return apply_page_reorder(db, Activity, orders)
 
     def get_activities(self, db: Session, skip: int = 0, limit: int = 100, tag: Optional[str] = None) -> List[Activity]:
         """
         Retrieve all activities with pagination.
         """
+        ensure_normalized_order(db, Activity)
         query = db.query(Activity).filter(Activity.is_active == True)
         if tag:
             query = query.filter(Activity.tags.any(Tag.slug == tag))
@@ -76,6 +67,7 @@ class ActivityService:
         """
         from sqlalchemy import or_
         from app.models.country import Country
+        ensure_normalized_order(db, Activity)
         query = db.query(Activity).options(
             joinedload(Activity.cover_image),
             joinedload(Activity.countries),

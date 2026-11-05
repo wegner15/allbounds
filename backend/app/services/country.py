@@ -207,7 +207,11 @@ class CountryService:
         
         if not country:
             return None
-            
+
+        def _order_key(item):
+            created_ts = item.created_at.timestamp() if getattr(item, "created_at", None) else 0
+            return (getattr(item, "order_index", 0) or 0, -created_ts, -getattr(item, "id", 0))
+
         # Convert to dict with related data
         country_dict = {
             "id": country.id,
@@ -240,6 +244,7 @@ class CountryService:
                     "duration_days": pkg.duration_days,
                     "image_id": pkg.image_id,
                     "is_active": pkg.is_active,
+                    "order_index": getattr(pkg, "order_index", 0),
                     "price_charts": [
                         {
                             "id": pc.id,
@@ -253,7 +258,7 @@ class CountryService:
                         } for pc in pkg.price_charts if pc.is_active
                     ] if hasattr(pkg, 'price_charts') and pkg.price_charts else [],
                 }
-                for pkg in country.packages if pkg.is_active
+                for pkg in sorted((p for p in country.packages if p.is_active), key=_order_key)
             ],
             "group_trips": [
                 {
@@ -267,6 +272,7 @@ class CountryService:
                     "min_participants": trip.min_participants,
                     "image_id": trip.image_id,
                     "is_active": trip.is_active,
+                    "order_index": getattr(trip, "order_index", 0),
                     "price_charts": [
                         {
                             "id": pc.id,
@@ -291,7 +297,7 @@ class CountryService:
                         for dep in trip.departures if dep.is_active
                     ] if hasattr(trip, 'departures') else [],
                 }
-                for trip in country.group_trips if trip.is_active
+                for trip in sorted((t for t in country.group_trips if t.is_active), key=_order_key)
             ],
             "attractions": [
                 {
@@ -304,8 +310,9 @@ class CountryService:
                     "image_id": attr.image_id,
                     "cover_image": attr.cover_image or _cloudflare_image_url(attr.image_id),
                     "is_active": attr.is_active,
+                    "order_index": getattr(attr, "order_index", 0),
                 }
-                for attr in country.attractions if attr.is_active
+                for attr in sorted((a for a in country.attractions if a.is_active), key=_order_key)
             ],
             "accommodations": [
                 {
@@ -336,6 +343,7 @@ class CountryService:
                     "cover_image": _get_hotel_cover_image(hotel),
                     "slug": hotel.slug,
                     "is_active": hotel.is_active,
+                    "order_index": getattr(hotel, "order_index", 0),
                     "price_charts": [
                         {
                             "id": pc.id,
@@ -362,7 +370,7 @@ class CountryService:
                         } for pc in hotel.price_charts if pc.is_active
                     ] if hasattr(hotel, 'price_charts') and hotel.price_charts else [],
                 }
-                for hotel in country.hotels if hotel.is_active
+                for hotel in sorted((h for h in country.hotels if h.is_active), key=_order_key)
             ],
 
             "activities": [
@@ -375,8 +383,9 @@ class CountryService:
                     "image_id": _resolve_media_asset_url(activity.cover_image) if hasattr(activity, 'cover_image') and activity.cover_image else None,
                     "is_active": activity.is_active,
                     "is_featured": activity.is_featured,
+                    "order_index": getattr(activity, "order_index", 0),
                 }
-                for activity in country.activities if activity.is_active
+                for activity in sorted((act for act in country.activities if act.is_active), key=_order_key)
             ],
             "visit_info": {
                 "id": country.visit_info.id,
@@ -431,6 +440,10 @@ class CountryService:
             
         countries = query.order_by(desc(Country.is_favorite), Country.name).offset(skip).limit(limit).all()
 
+        def _order_key(item):
+            created_ts = item.created_at.timestamp() if getattr(item, "created_at", None) else 0
+            return (getattr(item, "order_index", 0) or 0, -created_ts, -getattr(item, "id", 0))
+
         result = []
         for country in countries:
             country_dict = {
@@ -468,8 +481,9 @@ class CountryService:
                         "image_id": pkg.image_id,
                         "is_active": pkg.is_active,
                         "is_featured": pkg.is_featured,
+                        "order_index": getattr(pkg, "order_index", 0),
                     }
-                    for pkg in country.packages if pkg.is_active
+                    for pkg in sorted((p for p in country.packages if p.is_active), key=_order_key)
                 ],
                 "group_trips": [
                     {
@@ -481,6 +495,7 @@ class CountryService:
                         "duration_days": gt.duration_days,
                         "image_id": gt.image_id,
                         "is_active": gt.is_active,
+                        "order_index": getattr(gt, "order_index", 0),
                         "max_participants": gt.max_participants,
                         "min_participants": gt.min_participants,
                         "departures": [
@@ -495,7 +510,7 @@ class CountryService:
                             for dep in gt.departures if dep.is_active
                         ]
                     }
-                    for gt in country.group_trips if gt.is_active
+                    for gt in sorted((g for g in country.group_trips if g.is_active), key=_order_key)
                 ],
                 "attractions": [
                     {
@@ -507,8 +522,9 @@ class CountryService:
                         "image_id": attr.image_id,
                         "cover_image": attr.cover_image or _cloudflare_image_url(attr.image_id),
                         "is_active": attr.is_active,
+                        "order_index": getattr(attr, "order_index", 0),
                     }
-                    for attr in country.attractions if attr.is_active
+                    for attr in sorted((a for a in country.attractions if a.is_active), key=_order_key)
                 ],
                 "accommodations": [
                     {
@@ -535,8 +551,9 @@ class CountryService:
                         "image_id": _resolve_media_asset_url(activity.cover_image) if hasattr(activity, 'cover_image') and activity.cover_image else None,
                         "is_active": activity.is_active,
                         "is_featured": activity.is_featured,
+                        "order_index": getattr(activity, "order_index", 0),
                     }
-                    for activity in country.activities if activity.is_active
+                    for activity in sorted((act for act in country.activities if act.is_active), key=_order_key)
                 ],
                 "hotels": [
                     {
@@ -557,8 +574,9 @@ class CountryService:
                         "cover_image": _get_hotel_cover_image(hotel),
                         "slug": hotel.slug,
                         "is_active": hotel.is_active,
+                        "order_index": getattr(hotel, "order_index", 0),
                     }
-                    for hotel in country.hotels if hotel.is_active
+                    for hotel in sorted((h for h in country.hotels if h.is_active), key=_order_key)
                 ],
                 "visit_info": {
                     "id": country.visit_info.id,

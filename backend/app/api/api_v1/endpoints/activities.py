@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.core.redis_cache import cache_endpoint
+from app.core.redis_cache import cache_endpoint, invalidate_cache_pattern
 from app.models.user import User
 from app.schemas.activity import (
     ActivityResponse,
@@ -42,6 +42,7 @@ def reorder_activities_bulk(
     """
     if not activity_service.reorder_activities_bulk(db, [item.dict() for item in request.orders]):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to reorder activities")
+    invalidate_cache_pattern("cache:*")
     return {"message": "Activities reordered successfully"}
 
 

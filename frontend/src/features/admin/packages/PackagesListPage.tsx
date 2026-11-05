@@ -32,6 +32,8 @@ const PackagesListPage: React.FC = () => {
     country_id: selectedCountryId,
     package_type: selectedPackageType !== 'all' ? selectedPackageType : undefined,
     include_inactive: true,
+    order_by: 'order_index',
+    order: 'asc',
   });
 
   // Local order is used for instant feedback while a reorder request is in flight
@@ -42,7 +44,7 @@ const PackagesListPage: React.FC = () => {
   const canReorder = !debouncedSearch && !selectedCountryId && selectedPackageType === 'all' && !reorderMutation.isPending;
 
   const moveItem = async (from: number, to: number) => {
-    const result = reorderPage(packages, from, to);
+    const result = reorderPage(packages, from, to, (page - 1) * limit);
     if (!result) return;
     setLocalOrder(result.items);
     try {

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload
 
 from app.db.database import get_db
-from app.core.redis_cache import cache_endpoint
+from app.core.redis_cache import cache_endpoint, invalidate_cache_pattern
 from app.models.hotel import Hotel
 from app.models.user import User
 from app.schemas.hotel import (
@@ -48,6 +48,7 @@ def reorder_hotels(
     """
     if not hotel_service.reorder_hotels(db, [item.dict() for item in request.orders]):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to reorder hotels")
+    invalidate_cache_pattern("cache:*")
     return {"message": "Hotels reordered successfully"}
 
 
@@ -248,8 +249,12 @@ def get_hotel_with_relationships(
         joinedload(Hotel.group_trips),
     ).filter(Hotel.id == hotel_id).first()
 
-    response.package_ids = [p.id for p in hotel_with_rels.packages] if hotel_with_rels else []
-    response.group_trip_ids = [gt.id for gt in hotel_with_rels.group_trips] if hotel_with_rels else []
+    def _order_key(item: Any) -> tuple:
+        created_ts = item.created_at.timestamp() if getattr(item, "created_at", None) else 0
+        return (getattr(item, "order_index", 0) or 0, -created_ts, -getattr(item, "id", 0))
+
+    response.package_ids = [p.id for p in sorted(hotel_with_rels.packages, key=_order_key)] if hotel_with_rels else []
+    response.group_trip_ids = [gt.id for gt in sorted(hotel_with_rels.group_trips, key=_order_key)] if hotel_with_rels else []
 
     return response
 

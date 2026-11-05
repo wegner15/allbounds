@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
+from app.core.redis_cache import invalidate_cache_pattern
 from app.models.user import User
 from app.schemas.group_trip import (
     GroupTripResponse, GroupTripCreate, GroupTripUpdate, GroupTripWithCountryResponse,
@@ -40,6 +41,7 @@ def reorder_group_trips(
     """
     if not group_trip_service.reorder_group_trips(db, [item.dict() for item in request.orders]):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to reorder group trips")
+    invalidate_cache_pattern("cache:*")
     return {"message": "Group trips reordered successfully"}
 
 @router.get("/paginated", response_model=PaginatedGroupTripResponse)

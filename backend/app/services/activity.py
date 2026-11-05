@@ -438,14 +438,18 @@ class ActivityService:
             packages = db.query(Package).filter(
                 Package.id.in_(package_ids),
                 Package.is_active == True
-            ).options(joinedload(Package.country)).all()
+            ).options(joinedload(Package.country)).order_by(
+                Package.order_index.asc(), Package.created_at.desc(), Package.id.desc()
+            ).all()
 
         group_trips = []
         if group_trip_ids:
             group_trips = db.query(GroupTrip).filter(
                 GroupTrip.id.in_(group_trip_ids),
                 GroupTrip.is_active == True
-            ).options(joinedload(GroupTrip.country)).all()
+            ).options(joinedload(GroupTrip.country)).order_by(
+                GroupTrip.order_index.asc(), GroupTrip.created_at.desc(), GroupTrip.id.desc()
+            ).all()
 
         return {
             "packages": packages,

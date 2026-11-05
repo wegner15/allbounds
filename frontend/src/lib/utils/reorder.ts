@@ -16,12 +16,18 @@ export interface ReorderResult<T> {
  * pages are never touched and only the visible rows are sent to the API.
  * Falls back to sequential values if the existing ones are not strictly increasing.
  */
-export function reorderPage<T extends OrderedItem>(items: T[], from: number, to: number): ReorderResult<T> | null {
+export function reorderPage<T extends OrderedItem>(
+  items: T[],
+  from: number,
+  to: number,
+  startIndex: number = 0
+): ReorderResult<T> | null {
   if (from === to || from < 0 || to < 0 || from >= items.length || to >= items.length) return null;
 
   const slots = items.map((item) => item.order_index ?? 0);
   const strictlyIncreasing = slots.every((v, i) => i === 0 || v > slots[i - 1]);
-  const indices = strictlyIncreasing ? slots : items.map((_, i) => slots[0] + i);
+  const baseIndex = slots[0] !== 0 ? slots[0] : startIndex;
+  const indices = strictlyIncreasing ? slots : items.map((_, i) => baseIndex + i);
 
   const moved = [...items];
   const [item] = moved.splice(from, 1);

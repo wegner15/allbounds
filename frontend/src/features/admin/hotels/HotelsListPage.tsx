@@ -33,6 +33,8 @@ const HotelsListPage: React.FC = () => {
     search: debouncedSearch || undefined,
     country_id: selectedCountryId,
     include_inactive: true,
+    order_by: 'order_index',
+    order: 'asc',
   });
 
   // Local order is used for instant feedback while a reorder request is in flight
@@ -43,7 +45,7 @@ const HotelsListPage: React.FC = () => {
   const canReorder = !debouncedSearch && !selectedCountryId && !reorderMutation.isPending;
 
   const moveItem = async (from: number, to: number) => {
-    const result = reorderPage(hotels, from, to);
+    const result = reorderPage(hotels, from, to, (page - 1) * limit);
     if (!result) return;
     setLocalOrder(result.items);
     try {

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.core.redis_cache import cache_endpoint
+from app.core.redis_cache import cache_endpoint, invalidate_cache_pattern
 from app.models.user import User
 from app.schemas.attraction import (
     AttractionResponse,
@@ -51,6 +51,7 @@ def reorder_attractions(
     """
     if not attraction_service.reorder_attractions(db, [item.dict() for item in request.orders]):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to reorder attractions")
+    invalidate_cache_pattern("cache:*")
     return {"message": "Attractions reordered successfully"}
 
 
@@ -315,12 +316,16 @@ def get_attraction_with_relationships(
     if attraction is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Attraction not found")
     
-    # Convert relationships to IDs for the response
+    # Convert relationships to IDs for the response (ordered by order_index)
+    def _order_key(item: Any) -> tuple:
+        created_ts = item.created_at.timestamp() if getattr(item, "created_at", None) else 0
+        return (getattr(item, "order_index", 0) or 0, -created_ts, -getattr(item, "id", 0))
+
     response = AttractionWithRelationshipsResponse.from_orm(attraction)
-    response.package_ids = [package.id for package in attraction.packages]
-    response.group_trip_ids = [group_trip.id for group_trip in attraction.group_trips]
-    response.activity_ids = [activity.id for activity in attraction.activities]
-    response.hotel_ids = [hotel.id for hotel in attraction.hotels]
+    response.package_ids = [package.id for package in sorted(attraction.packages, key=_order_key)]
+    response.group_trip_ids = [group_trip.id for group_trip in sorted(attraction.group_trips, key=_order_key)]
+    response.activity_ids = [activity.id for activity in sorted(attraction.activities, key=_order_key)]
+    response.hotel_ids = [hotel.id for hotel in sorted(attraction.hotels, key=_order_key)]
     
     return response
 
@@ -492,17 +497,26 @@ def get_trips_by_attraction(
     # Add gallery_images to the attraction object
     attraction.gallery_images = gallery_images_list
     
+    def _order_key(item: Any) -> tuple:
+        created_ts = item.created_at.timestamp() if getattr(item, "created_at", None) else 0
+        return (getattr(item, "order_index", 0) or 0, -created_ts, -getattr(item, "id", 0))
+
+    sorted_packages = sorted(attraction.packages, key=_order_key)
+    sorted_group_trips = sorted(attraction.group_trips, key=_order_key)
+    sorted_activities = sorted(attraction.activities, key=_order_key)
+    sorted_hotels = sorted(attraction.hotels, key=_order_key)
+
     # Get packages that include this attraction
-    packages = [PackageWithCountryResponse.from_orm(package) for package in attraction.packages[skip:skip+limit]]
+    packages = [PackageWithCountryResponse.from_orm(package) for package in sorted_packages[skip:skip+limit]]
     
     # Get group trips that include this attraction  
-    group_trips = [GroupTripWithCountryResponse.from_orm(group_trip) for group_trip in attraction.group_trips[skip:skip+limit]]
+    group_trips = [GroupTripWithCountryResponse.from_orm(group_trip) for group_trip in sorted_group_trips[skip:skip+limit]]
     
     # Get activities associated with this attraction
-    activities = [ActivityResponse.from_orm(activity) for activity in attraction.activities]
+    activities = [ActivityResponse.from_orm(activity) for activity in sorted_activities]
     
     # Get hotels associated with this attraction
-    hotels = [SimplifiedHotelResponse.model_validate(hotel) for hotel in attraction.hotels]
+    hotels = [SimplifiedHotelResponse.model_validate(hotel) for hotel in sorted_hotels]
     
     return {
         "attraction": AttractionWithCountryResponse.from_orm(attraction),
@@ -552,18 +566,27 @@ def get_trips_by_attraction_slug(
     
     # Add gallery_images to the attraction object
     attraction.gallery_images = gallery_images_list
+
+    def _order_key(item: Any) -> tuple:
+        created_ts = item.created_at.timestamp() if getattr(item, "created_at", None) else 0
+        return (getattr(item, "order_index", 0) or 0, -created_ts, -getattr(item, "id", 0))
+
+    sorted_packages = sorted(attraction.packages, key=_order_key)
+    sorted_group_trips = sorted(attraction.group_trips, key=_order_key)
+    sorted_activities = sorted(attraction.activities, key=_order_key)
+    sorted_hotels = sorted(attraction.hotels, key=_order_key)
     
     # Get packages that include this attraction
-    packages = [PackageWithCountryResponse.from_orm(package) for package in attraction.packages[skip:skip+limit]]
+    packages = [PackageWithCountryResponse.from_orm(package) for package in sorted_packages[skip:skip+limit]]
     
     # Get group trips that include this attraction  
-    group_trips = [GroupTripWithCountryResponse.from_orm(group_trip) for group_trip in attraction.group_trips[skip:skip+limit]]
+    group_trips = [GroupTripWithCountryResponse.from_orm(group_trip) for group_trip in sorted_group_trips[skip:skip+limit]]
     
     # Get activities associated with this attraction
-    activities = [ActivityResponse.from_orm(activity) for activity in attraction.activities]
+    activities = [ActivityResponse.from_orm(activity) for activity in sorted_activities]
     
     # Get hotels associated with this attraction
-    hotels = [SimplifiedHotelResponse.model_validate(hotel) for hotel in attraction.hotels]
+    hotels = [SimplifiedHotelResponse.model_validate(hotel) for hotel in sorted_hotels]
     
     return {
         "attraction": AttractionWithCountryResponse.from_orm(attraction),

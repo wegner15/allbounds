@@ -41,8 +41,8 @@ const HotelsListPage: React.FC = () => {
   const [localOrder, setLocalOrder] = useState<Hotel[] | null>(null);
   const hotels: Hotel[] = localOrder ?? data?.items ?? [];
   const reorderMutation = useReorderHotels();
-  // Manual ordering is only meaningful on the unfiltered list
-  const canReorder = !debouncedSearch && !selectedCountryId && !reorderMutation.isPending;
+  // Reordering is enabled on any list (including destination-specific) as long as free-text search is not filtering partial names
+  const canReorder = !debouncedSearch && !reorderMutation.isPending;
 
   const moveItem = async (from: number, to: number) => {
     const result = reorderPage(hotels, from, to, (page - 1) * limit);
@@ -187,7 +187,7 @@ const HotelsListPage: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <span
                           {...provided.dragHandleProps}
-                          title={canReorder ? 'Drag to reorder' : 'Clear search and filters to reorder'}
+                          title={canReorder ? 'Drag to reorder' : debouncedSearch ? 'Clear search to reorder' : 'Reordering in progress...'}
                           className={`select-none text-lg leading-none ${canReorder ? 'cursor-grab text-gray-500 hover:text-gray-800' : 'cursor-not-allowed text-gray-300'}`}
                           aria-label="Drag to reorder"
                         >
@@ -197,12 +197,19 @@ const HotelsListPage: React.FC = () => {
                           <button type="button" disabled={!canReorder || index === 0} onClick={() => moveItem(index, index - 1)} title="Move up" aria-label="Move up" className="text-xs text-gray-500 hover:text-gray-900 disabled:opacity-30">▲</button>
                           <button type="button" disabled={!canReorder || index === hotels.length - 1} onClick={() => moveItem(index, index + 1)} title="Move down" aria-label="Move down" className="text-xs text-gray-500 hover:text-gray-900 disabled:opacity-30">▼</button>
                         </div>
-                        <span
-                          className="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200 tabular-nums"
-                          title={`Manual order position (order_index: ${hotel.order_index ?? 0})`}
-                        >
-                          #{hotel.order_index && hotel.order_index > 0 ? hotel.order_index : (page - 1) * limit + index + 1}
-                        </span>
+                        <div className="flex flex-col items-center">
+                          <span
+                            className="inline-flex items-center justify-center min-w-[2rem] px-1.5 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200 tabular-nums"
+                            title={`Sequence position #${(page - 1) * limit + index + 1} (Global order: ${hotel.order_index ?? 0})`}
+                          >
+                            #{(page - 1) * limit + index + 1}
+                          </span>
+                          {selectedCountryId && hotel.order_index !== undefined && (
+                            <span className="text-[10px] text-gray-400 tabular-nums leading-tight" title={`Global order index: ${hotel.order_index}`}>
+                              idx: {hotel.order_index}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

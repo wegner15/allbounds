@@ -52,6 +52,7 @@ from app.models.finance import (
 )
 from app.models.supplier_bill import SupplierBill
 from app.models.supplier_payment import SupplierPayment
+from app.models.supplier_rate_card import SupplierRateCard, SupplierRateCardItem
 
 # This ensures all models are imported in the correct order
 __all__ = [

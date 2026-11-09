@@ -48,3 +48,4 @@ class Supplier(Base):
     bills = relationship("SupplierBill", back_populates="supplier", cascade="all, delete-orphan")
     payments = relationship("SupplierPayment", back_populates="supplier")
     vouchers = relationship("TravelVoucher", back_populates="supplier")
+    rate_cards = relationship("SupplierRateCard", back_populates="supplier", cascade="all, delete-orphan")

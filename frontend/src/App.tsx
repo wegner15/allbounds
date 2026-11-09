@@ -172,6 +172,8 @@ import { ClientsListPage } from './features/admin/finance/clients/ClientsListPag
 import { ClientDetailPage } from './features/admin/finance/clients/ClientDetailPage';
 import { SuppliersListPage } from './features/admin/finance/suppliers/SuppliersListPage';
 import { SupplierDetailPage } from './features/admin/finance/suppliers/SupplierDetailPage';
+import { QuotesListPage } from './features/admin/finance/quotes/QuotesListPage';
+import { QuoteEditorPage } from './features/admin/finance/quotes/QuoteEditorPage';
 import { RateCardsPage } from './features/admin/finance/ratecards/RateCardsPage';
 import { SupplierBillsPage } from './features/admin/finance/suppliers/SupplierBillsPage';
 import { ReportsOverviewPage } from './features/admin/finance/reports/ReportsOverviewPage';
@@ -467,6 +469,9 @@ const router = createBrowserRouter([
           { path: 'finance/clients/:id', element: <ClientDetailPage /> },
           { path: 'finance/suppliers', element: <SuppliersListPage /> },
           { path: 'finance/suppliers/:id', element: <SupplierDetailPage /> },
+          { path: 'finance/quotes', element: <QuotesListPage /> },
+          { path: 'finance/quotes/new', element: <QuoteEditorPage /> },
+          { path: 'finance/quotes/:id', element: <QuoteEditorPage /> },
           { path: 'finance/rate-cards', element: <RateCardsPage /> },
           { path: 'finance/bills', element: <SupplierBillsPage /> },
           { path: 'finance/reports', element: <ReportsOverviewPage /> },

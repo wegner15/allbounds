@@ -39,6 +39,7 @@ from app.api.api_v1.endpoints import (
     clients,
     suppliers,
     rate_cards,
+    tour_quotes,
     reports,
 )
 
@@ -87,5 +88,6 @@ api_router.include_router(email_logs.router, prefix="/email-logs", tags=["Logs"]
 api_router.include_router(finance.router, prefix="/finance", tags=["Finance"])
 api_router.include_router(clients.router, prefix="/clients", tags=["Clients"])
 api_router.include_router(suppliers.router, prefix="/suppliers", tags=["Suppliers"])
+api_router.include_router(tour_quotes.router, prefix="/tour-quotes", tags=["Tour Quotes"])
 api_router.include_router(rate_cards.router, prefix="/rate-cards", tags=["Supplier Rate Cards"])
 api_router.include_router(reports.router, prefix="/reports", tags=["Reports"])

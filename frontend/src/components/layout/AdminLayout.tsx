@@ -63,6 +63,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
       roles: ['admin', 'finance'],
       subItems: [
         { name: 'Finance Overview', href: '/admin/finance' },
+        { name: 'Tour Quotes', href: '/admin/finance/quotes' },
         { name: 'Invoices', href: '/admin/finance/invoices' },
         { name: 'E-Receipts', href: '/admin/finance/receipts' },
         { name: 'Clients (Receivables)', href: '/admin/finance/clients' },

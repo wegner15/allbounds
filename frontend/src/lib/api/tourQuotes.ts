@@ -29,8 +29,17 @@ export interface QuoteWrite {
 }
 
 export interface Quote extends QuoteWrite {
-  id: number; quote_number: string; status: QuoteStatus; prepared_by?: string | null; approved_by?: string | null;
-  invoice_id?: number | null; converted_scenario_id?: number | null; results: QuoteResult[];
+  id: number;
+  quote_number: string;
+  status: QuoteStatus;
+  prepared_by?: string | null;
+  approved_by?: string | null;
+  approved_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  invoice_id?: number | null;
+  converted_scenario_id?: number | null;
+  results: QuoteResult[];
 }
 
 export interface QuoteListItem {

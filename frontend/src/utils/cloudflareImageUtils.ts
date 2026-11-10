@@ -18,13 +18,25 @@ export const getCloudflareImageUrl = (
     return '';
   }
 
-  // If it's already a full URL, return it
-  if (imageId.startsWith('http')) {
-    return imageId;
+  let cleanId = String(imageId).trim();
+
+  // If it's already a full URL, return it directly
+  if (cleanId.startsWith('http://') || cleanId.startsWith('https://')) {
+    return cleanId;
   }
 
-  // Otherwise construct the Cloudflare delivery URL
-  return `${import.meta.env.VITE_CLOUDFLARE_IMAGES_DELIVERY_URL}/${imageId}/${variant}`;
+  // Strip cloudflare:// prefix if present
+  if (cleanId.startsWith('cloudflare://')) {
+    cleanId = cleanId.replace('cloudflare://', '');
+  }
+
+  // Fallback to configured delivery domain
+  const baseUrl = (
+    import.meta.env.VITE_CLOUDFLARE_IMAGES_DELIVERY_URL ||
+    'https://imagedelivery.net/4J4CgzUI_LpQRpA_N1TErQ'
+  ).replace(/\/+$/, '');
+
+  return `${baseUrl}/${cleanId}/${variant}`;
 };
 
 /**

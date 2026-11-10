@@ -242,11 +242,13 @@ export const QuoteEditorPage: React.FC = () => {
         const currentDesc = x.description ? x.description.trim() : '';
         const catDesc = (cat.description || cat.summary || '').trim();
         const newDesc = currentDesc ? `${currentDesc}\n\n${catDesc}` : catDesc;
+        const pickedImg = cat.image_url || x.image_url || null;
         return {
           ...x,
           title: x.title && x.title.trim() ? x.title : cat.name,
           description: newDesc,
-          image_url: cat.image_url || x.image_url,
+          image_url: pickedImg,
+          images: pickedImg ? [pickedImg] : (x.images || []),
         };
       })
     );
@@ -1050,7 +1052,7 @@ export const QuoteEditorPage: React.FC = () => {
 
                   <QuoteImageInput
                     mode="banner"
-                    value={d.image_url}
+                    value={d.image_url || (d.images && d.images[0]) || null}
                     disabled={locked}
                     label="Day Highlight Photo"
                     placeholder="Paste image URL (e.g. scenic view, safari camp) or upload image..."
@@ -1058,7 +1060,9 @@ export const QuoteEditorPage: React.FC = () => {
                       set(
                         'days',
                         form.days.map((x) =>
-                          x.day_number === d.day_number ? { ...x, image_url: url } : x
+                          x.day_number === d.day_number
+                            ? { ...x, image_url: url, images: url ? [url] : [] }
+                            : x
                         )
                       )
                     }

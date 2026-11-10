@@ -1,6 +1,8 @@
 from typing import Optional, List, Dict, Any
 from datetime import date, datetime
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from app.utils.text import strip_html
 
 STATUSES = {"draft", "submitted", "approved", "rejected", "converted"}
 
@@ -12,13 +14,42 @@ class ScenarioIn(BaseModel):
     foc_count: int = Field(0, ge=0)
     rooms: int = Field(1, ge=0)
 
+    @field_validator("pax", mode="before")
+    @classmethod
+    def coerce_pax(cls, v):
+        return 2 if v is None else v
+
+    @field_validator("foc_count", mode="before")
+    @classmethod
+    def coerce_foc(cls, v):
+        return 0 if v is None else v
+
+    @field_validator("rooms", mode="before")
+    @classmethod
+    def coerce_rooms(cls, v):
+        return 1 if v is None else v
+
 
 class DayIn(BaseModel):
     day_number: int = Field(ge=1)
     title: Optional[str] = None
     description: Optional[str] = None
     image_url: Optional[str] = None
-    images: List[str] = []
+    images: Optional[List[str]] = Field(default_factory=list)
+
+    @field_validator("title", "description", mode="before")
+    @classmethod
+    def clean_day_text(cls, v):
+        return strip_html(v)
+
+    @field_validator("images", mode="before")
+    @classmethod
+    def coerce_images(cls, v):
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return v
+        return [v] if v else []
 
 
 class ItemIn(BaseModel):
@@ -35,6 +66,32 @@ class ItemIn(BaseModel):
     rate_card_item_id: Optional[int] = None
     is_optional: bool = False
     sort_order: int = 0
+
+    @field_validator("description", mode="before")
+    @classmethod
+    def clean_item_description(cls, v):
+        cleaned = strip_html(v)
+        return cleaned if cleaned is not None else (v or "")
+
+    @field_validator("unit_cost", "tax_amount", mode="before")
+    @classmethod
+    def coerce_float(cls, v):
+        return 0.0 if v is None else v
+
+    @field_validator("qty", mode="before")
+    @classmethod
+    def coerce_qty(cls, v):
+        return 1.0 if v is None else v
+
+    @field_validator("is_optional", mode="before")
+    @classmethod
+    def coerce_bool(cls, v):
+        return False if v is None else v
+
+    @field_validator("sort_order", mode="before")
+    @classmethod
+    def coerce_sort(cls, v):
+        return 0 if v is None else v
 
 
 class DiscountIn(BaseModel):
@@ -143,3 +200,8 @@ class CatalogueItemResponse(BaseModel):
     default_price: Optional[float] = 0.0
     stars: Optional[float] = None
     price_category: Optional[str] = None
+
+    @field_validator("name", "summary", "description", mode="before")
+    @classmethod
+    def clean_catalogue_text(cls, v):
+        return strip_html(v)

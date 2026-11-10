@@ -81,7 +81,7 @@ class TourQuoteDay(Base):
     title = Column(String(255), nullable=True)
     description = Column(Text, nullable=True)
     image_url = Column(String(500), nullable=True)
-    images = Column(JSON, nullable=True, default=list)
+    images = Column(JSON, nullable=True, default=list, server_default='[]')
 
     quote = relationship("TourQuote", back_populates="days")
 

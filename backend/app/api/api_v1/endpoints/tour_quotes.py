@@ -21,6 +21,8 @@ from app.schemas.tour_quote import (
 from app.schemas.finance import InvoiceCreate, InvoiceLineItemCreate, InvoiceResponse
 from app.services import tour_quote_service as engine
 from app.services.finance_service import finance_service
+from app.utils.text import strip_html
+from app.core.cloudflare_config import cloudflare_settings
 
 router = APIRouter()
 
@@ -106,13 +108,58 @@ def _next_number(db: Session) -> str:
 
 def _apply_children(q: TourQuote, data: QuoteWrite) -> None:
     q.scenarios = [TourQuoteScenario(**s.model_dump(exclude={"id"})) for s in data.scenarios]
-    q.days = [TourQuoteDay(**d.model_dump()) for d in data.days]
-    q.items = [TourQuoteItem(**{**it.model_dump(), "sort_order": i}) for i, it in enumerate(data.items)]
+    q.days = [
+        TourQuoteDay(**{**d.model_dump(), "title": strip_html(d.title), "description": strip_html(d.description)})
+        for d in data.days
+    ]
+    q.items = [
+        TourQuoteItem(**{**it.model_dump(), "description": strip_html(it.description) or it.description, "sort_order": i})
+        for i, it in enumerate(data.items)
+    ]
     q.discounts = [TourQuoteDiscount(**d.model_dump()) for d in data.discounts]
 
 
 def _header(data: QuoteWrite) -> Dict[str, Any]:
     return data.model_dump(exclude={"scenarios", "days", "items", "discounts"})
+
+
+def _resolve_image_url(val: Optional[Any], fallback_media: Optional[List[Any]] = None) -> Optional[str]:
+    """Resolve an image_id, MediaAsset, or legacy file path into a full public HTTP delivery URL."""
+    delivery_url = (getattr(cloudflare_settings, "delivery_url", None) or "").rstrip("/")
+
+    def _format(id_or_path: Optional[str]) -> Optional[str]:
+        if not id_or_path:
+            return None
+        s = str(id_or_path).strip()
+        if s.startswith("http://") or s.startswith("https://"):
+            return s
+        if s.startswith("cloudflare://"):
+            s = s.split("cloudflare://", 1)[1]
+        if delivery_url and s:
+            return f"{delivery_url}/{s}/medium"
+        return s or None
+
+    # 1. Direct MediaAsset object
+    if val is not None and (hasattr(val, "storage_key") or hasattr(val, "file_path")):
+        res = _format(getattr(val, "storage_key", None) or getattr(val, "file_path", None))
+        if res:
+            return res
+
+    # 2. String ID or path
+    if isinstance(val, str) and val.strip():
+        res = _format(val)
+        if res:
+            return res
+
+    # 3. Fallback to attached media gallery
+    if fallback_media:
+        for m in fallback_media:
+            if m:
+                res = _format(getattr(m, "storage_key", None) or getattr(m, "file_path", None))
+                if res:
+                    return res
+
+    return None
 
 
 @router.get("/catalogue-search", response_model=List[CatalogueItemResponse])
@@ -131,7 +178,10 @@ def search_catalogue(
 
     # 1. Hotels
     if category in ("all", "hotel", "accommodation"):
-        qh = db.query(Hotel).options(joinedload(Hotel.country)).filter(Hotel.is_active.is_(True))
+        qh = db.query(Hotel).options(
+            joinedload(Hotel.country),
+            joinedload(Hotel.media_assets),
+        ).filter(Hotel.is_active.is_(True))
         if term:
             qh = qh.filter(or_(Hotel.name.ilike(term), Hotel.city.ilike(term)))
         if dest_term:
@@ -142,7 +192,7 @@ def search_catalogue(
         for h in hotels:
             c_name = h.country.name if h.country else None
             dest = ", ".join(filter(None, [h.city, c_name]))
-            img = h.image_id or getattr(h, "cover_image", None)
+            img = _resolve_image_url(h.image_id or getattr(h, "cover_image", None), getattr(h, "media_assets", None))
             desc = h.summary or h.description
             results.append(
                 CatalogueItemResponse(
@@ -164,7 +214,10 @@ def search_catalogue(
 
     # 2. Attractions & Parks
     if category in ("all", "attraction", "park_fee"):
-        qa = db.query(Attraction).options(joinedload(Attraction.country)).filter(Attraction.is_active.is_(True))
+        qa = db.query(Attraction).options(
+            joinedload(Attraction.country),
+            joinedload(Attraction.media_assets),
+        ).filter(Attraction.is_active.is_(True))
         if term:
             qa = qa.filter(or_(Attraction.name.ilike(term), Attraction.city.ilike(term)))
         if dest_term:
@@ -175,7 +228,7 @@ def search_catalogue(
         for a in attractions:
             c_name = a.country.name if a.country else None
             dest = ", ".join(filter(None, [a.city, c_name]))
-            img = a.cover_image or a.image_id
+            img = _resolve_image_url(a.image_id or getattr(a, "cover_image", None), getattr(a, "media_assets", None))
             desc = a.summary or a.description
             results.append(
                 CatalogueItemResponse(
@@ -195,14 +248,15 @@ def search_catalogue(
 
     # 3. Activities & Excursions
     if category in ("all", "activity"):
-        qact = db.query(Activity).options(joinedload(Activity.cover_image)).filter(Activity.is_active.is_(True))
+        qact = db.query(Activity).options(
+            joinedload(Activity.cover_image),
+            joinedload(Activity.media_assets),
+        ).filter(Activity.is_active.is_(True))
         if term:
             qact = qact.filter(or_(Activity.name.ilike(term), Activity.summary.ilike(term)))
         activities = qact.order_by(Activity.order_index.asc(), Activity.name.asc()).limit(limit).all()
         for ac in activities:
-            img = None
-            if ac.cover_image:
-                img = ac.cover_image.storage_key or ac.cover_image.file_path
+            img = _resolve_image_url(getattr(ac, "cover_image", None), getattr(ac, "media_assets", None))
             desc = ac.summary or ac.description
             results.append(
                 CatalogueItemResponse(

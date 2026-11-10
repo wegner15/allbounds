@@ -304,6 +304,7 @@ export const QuoteDocumentView: React.FC<Props> = ({ quote, results, settings, o
                 const dayCostItems = quote.items.filter(
                   (it) => it.day_number === day.day_number && !it.is_optional
                 );
+                const dayImg = day.image_url || (day.images && day.images[0]) || null;
                 return (
                   <div
                     key={day.day_number}
@@ -320,8 +321,8 @@ export const QuoteDocumentView: React.FC<Props> = ({ quote, results, settings, o
                       </div>
                     </div>
 
-                    <div className={day.image_url ? 'grid grid-cols-1 md:grid-cols-12 gap-4 items-start' : ''}>
-                      <div className={day.image_url ? 'md:col-span-8' : ''}>
+                    <div className={dayImg ? 'grid grid-cols-1 md:grid-cols-12 gap-4 items-start' : ''}>
+                      <div className={dayImg ? 'md:col-span-8' : ''}>
                         {day.description ? (
                           <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line mb-3">
                             {day.description}
@@ -365,10 +366,10 @@ export const QuoteDocumentView: React.FC<Props> = ({ quote, results, settings, o
                         )}
                       </div>
 
-                      {day.image_url && (
+                      {dayImg && (
                         <div className="md:col-span-4 flex-shrink-0">
                           <img
-                            src={getCloudflareImageUrl(day.image_url, 'medium')}
+                            src={getCloudflareImageUrl(dayImg, 'medium')}
                             alt={day.title || `Day ${day.day_number}`}
                             crossOrigin="anonymous"
                             className="w-full h-36 md:h-40 object-cover rounded-lg border border-gray-200 shadow-xs"

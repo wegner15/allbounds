@@ -1055,7 +1055,6 @@ export const QuoteEditorPage: React.FC = () => {
                     value={d.image_url || (d.images && d.images[0]) || null}
                     disabled={locked}
                     label="Day Highlight Photo"
-                    placeholder="Paste image URL (e.g. scenic view, safari camp) or upload image..."
                     onChange={(url) =>
                       set(
                         'days',

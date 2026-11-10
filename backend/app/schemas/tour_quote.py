@@ -17,6 +17,8 @@ class DayIn(BaseModel):
     day_number: int = Field(ge=1)
     title: Optional[str] = None
     description: Optional[str] = None
+    image_url: Optional[str] = None
+    images: List[str] = []
 
 
 class ItemIn(BaseModel):
@@ -28,6 +30,7 @@ class ItemIn(BaseModel):
     tax_amount: float = Field(0.0, ge=0)
     qty: float = Field(1.0, ge=0)
     capacity: Optional[int] = Field(None, ge=1)
+    image_url: Optional[str] = None
     supplier_id: Optional[int] = None
     rate_card_item_id: Optional[int] = None
     is_optional: bool = False
@@ -124,3 +127,19 @@ class ConvertRequest(BaseModel):
     scenario_id: int
     due_date: Optional[date] = None
     payment_terms: Optional[str] = None
+
+
+class CatalogueItemResponse(BaseModel):
+    entity_type: str  # 'hotel', 'attraction', 'activity'
+    entity_id: int
+    name: str
+    summary: Optional[str] = None
+    description: Optional[str] = None
+    destination: Optional[str] = None
+    country_name: Optional[str] = None
+    image_url: Optional[str] = None
+    suggested_component_type: str = "other"
+    suggested_cost_basis: str = "per_person"
+    default_price: Optional[float] = 0.0
+    stars: Optional[float] = None
+    price_category: Optional[str] = None

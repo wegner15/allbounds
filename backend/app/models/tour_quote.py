@@ -80,6 +80,8 @@ class TourQuoteDay(Base):
     day_number = Column(Integer, nullable=False)
     title = Column(String(255), nullable=True)
     description = Column(Text, nullable=True)
+    image_url = Column(String(500), nullable=True)
+    images = Column(JSON, nullable=True, default=list)
 
     quote = relationship("TourQuote", back_populates="days")
 
@@ -100,6 +102,7 @@ class TourQuoteItem(Base):
     tax_amount = Column(Float, nullable=False, default=0.0)  # supplier tax per unit
     qty = Column(Float, nullable=False, default=1.0)  # nights / days / transfers
     capacity = Column(Integer, nullable=True)  # seats per vehicle (per_vehicle)
+    image_url = Column(String(500), nullable=True)
 
     supplier_id = Column(Integer, ForeignKey("suppliers.id", ondelete="SET NULL"), nullable=True, index=True)
     rate_card_item_id = Column(Integer, ForeignKey("supplier_rate_card_items.id", ondelete="SET NULL"), nullable=True)

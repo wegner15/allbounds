@@ -19,6 +19,7 @@ import type { CompanyFinanceSettings } from '../../../../lib/types/finance';
 import { DocumentHeader } from '../components/DocumentHeader';
 import { DocumentStamp } from '../components/DocumentStamp';
 import { usePdfDownload } from '../../../../lib/utils/pdfGenerator';
+import { getCloudflareImageUrl } from '../../../../utils/cloudflareImageUtils';
 import '../components/PrintStyles.css';
 
 interface Props {
@@ -319,36 +320,65 @@ export const QuoteDocumentView: React.FC<Props> = ({ quote, results, settings, o
                       </div>
                     </div>
 
-                    {day.description ? (
-                      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line mb-3">
-                        {day.description}
-                      </p>
-                    ) : (
-                      <p className="text-xs text-gray-400 italic mb-2">
-                        Activities, sights, and arrangements as detailed below.
-                      </p>
-                    )}
+                    <div className={day.image_url ? 'grid grid-cols-1 md:grid-cols-12 gap-4 items-start' : ''}>
+                      <div className={day.image_url ? 'md:col-span-8' : ''}>
+                        {day.description ? (
+                          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line mb-3">
+                            {day.description}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-gray-400 italic mb-2">
+                            Activities, sights, and arrangements as detailed below.
+                          </p>
+                        )}
 
-                    {dayCostItems.length > 0 && (
-                      <div className="bg-gray-50/80 rounded-lg p-2.5 border border-gray-100 mt-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
-                          Arrangements & Included Services:
-                        </p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {dayCostItems.map((it, idx) => (
-                            <span
-                              key={idx}
-                              className="inline-flex items-center text-xs bg-white text-gray-800 px-2 py-1 rounded border border-gray-200"
-                            >
-                              <span className="font-medium text-teal-800 capitalize mr-1">
-                                {it.component_type.replace('_', ' ')}:
-                              </span>
-                              {it.description}
-                            </span>
-                          ))}
-                        </div>
+                        {dayCostItems.length > 0 && (
+                          <div className="bg-gray-50/80 rounded-lg p-2.5 border border-gray-100 mt-2">
+                            <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
+                              Arrangements & Included Services:
+                            </p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {dayCostItems.map((it, idx) => (
+                                <span
+                                  key={idx}
+                                  className="inline-flex items-center gap-1.5 text-xs bg-white text-gray-800 px-2 py-1 rounded border border-gray-200 shadow-2xs"
+                                >
+                                  {it.image_url && (
+                                    <img
+                                      src={getCloudflareImageUrl(it.image_url, 'thumbnail')}
+                                      alt={it.description}
+                                      crossOrigin="anonymous"
+                                      className="w-4 h-4 rounded object-cover flex-shrink-0"
+                                      onError={(e) => {
+                                        (e.currentTarget as HTMLImageElement).style.display = 'none';
+                                      }}
+                                    />
+                                  )}
+                                  <span className="font-medium text-teal-800 capitalize">
+                                    {it.component_type.replace('_', ' ')}:
+                                  </span>
+                                  <span>{it.description}</span>
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
+
+                      {day.image_url && (
+                        <div className="md:col-span-4 flex-shrink-0">
+                          <img
+                            src={getCloudflareImageUrl(day.image_url, 'medium')}
+                            alt={day.title || `Day ${day.day_number}`}
+                            crossOrigin="anonymous"
+                            className="w-full h-36 md:h-40 object-cover rounded-lg border border-gray-200 shadow-xs"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src = '/home-heros/hero1.jpeg';
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -366,8 +396,19 @@ export const QuoteDocumentView: React.FC<Props> = ({ quote, results, settings, o
             </h4>
             <ul className="space-y-2 text-xs text-gray-700">
               {includedItems.map((it, idx) => (
-                <li key={idx} className="flex items-start gap-2">
-                  <span className="text-emerald-600 font-bold mt-0.5">✓</span>
+                <li key={idx} className="flex items-center gap-2">
+                  <span className="text-emerald-600 font-bold">✓</span>
+                  {it.image_url && (
+                    <img
+                      src={getCloudflareImageUrl(it.image_url, 'thumbnail')}
+                      alt={it.description}
+                      crossOrigin="anonymous"
+                      className="w-5 h-5 rounded object-cover border border-gray-200 flex-shrink-0 shadow-2xs"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  )}
                   <span>
                     <strong className="capitalize text-gray-900">
                       {it.component_type.replace('_', ' ')}:
@@ -444,7 +485,20 @@ export const QuoteDocumentView: React.FC<Props> = ({ quote, results, settings, o
                 <tbody className="divide-y divide-amber-100">
                   {optionalItems.map((opt, idx) => (
                     <tr key={idx}>
-                      <td className="py-2 px-2 font-medium text-gray-900">{opt.description}</td>
+                      <td className="py-2 px-2 font-medium text-gray-900 flex items-center gap-2">
+                        {opt.image_url && (
+                          <img
+                            src={getCloudflareImageUrl(opt.image_url, 'thumbnail')}
+                            alt={opt.description}
+                            crossOrigin="anonymous"
+                            className="w-6 h-6 rounded object-cover border border-gray-200 flex-shrink-0"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        )}
+                        <span>{opt.description}</span>
+                      </td>
                       <td className="py-2 px-2 capitalize text-gray-600">
                         {opt.component_type.replace('_', ' ')}
                       </td>

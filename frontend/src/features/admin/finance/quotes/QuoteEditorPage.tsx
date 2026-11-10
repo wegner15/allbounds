@@ -25,6 +25,7 @@ import {
   type QuoteWrite,
   type QuoteItem,
   type QuoteResult,
+  type CatalogueItem,
 } from '../../../../lib/api/tourQuotes';
 import { rateCardsApi, type RateCard } from '../../../../lib/api/rateCards';
 import { clientsApi } from '../../../../lib/api/clients';
@@ -33,6 +34,9 @@ import type { CompanyFinanceSettings } from '../../../../lib/types/finance';
 import { COST_BASES } from '../ratecards/RateCardModal';
 import { STATUS_STYLE } from './QuotesListPage';
 import { QuoteDocumentView } from './QuoteDocumentView';
+import { QuoteImageInput } from './QuoteImageInput';
+import { CatalogueCombobox } from './CatalogueCombobox';
+import { CatalogueBrowserModal } from './CatalogueBrowserModal';
 import { usePdfDownload } from '../../../../lib/utils/pdfGenerator';
 
 const COMPONENTS = [
@@ -100,6 +104,7 @@ export const QuoteEditorPage: React.FC = () => {
   const [cards, setCards] = useState<RateCard[]>([]);
   const [settings, setSettings] = useState<CompanyFinanceSettings | null>(null);
   const [pickerFor, setPickerFor] = useState<number | null>(null);
+  const [catalogueModalFor, setCatalogueModalFor] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -219,6 +224,34 @@ export const QuoteEditorPage: React.FC = () => {
     setPickerFor(null);
   };
 
+  const handleAddCatalogueCostItem = (cat: CatalogueItem, dayNum: number | null) => {
+    addItem(dayNum === 0 ? null : dayNum, {
+      description: cat.name + (cat.stars ? ` (★${cat.stars})` : ''),
+      component_type: cat.suggested_component_type,
+      cost_basis: cat.suggested_cost_basis,
+      image_url: cat.image_url || null,
+      unit_cost: cat.default_price && cat.default_price > 0 ? cat.default_price : 0,
+    });
+  };
+
+  const handleSetDayHighlight = (cat: CatalogueItem, dayNum: number) => {
+    set(
+      'days',
+      form.days.map((x) => {
+        if (x.day_number !== dayNum) return x;
+        const currentDesc = x.description ? x.description.trim() : '';
+        const catDesc = (cat.description || cat.summary || '').trim();
+        const newDesc = currentDesc ? `${currentDesc}\n\n${catDesc}` : catDesc;
+        return {
+          ...x,
+          title: x.title && x.title.trim() ? x.title : cat.name,
+          description: newDesc,
+          image_url: cat.image_url || x.image_url,
+        };
+      })
+    );
+  };
+
   const save = async () => {
     if (!form.name.trim()) return setError('Quote name is required');
     try {
@@ -300,13 +333,29 @@ export const QuoteEditorPage: React.FC = () => {
   const itemRows = (d: number | null) =>
     dayItems(d).map(({ it, idx }) => (
       <tr key={idx} className="align-top hover:bg-gray-50/60">
-        <td className="pr-2 pb-2 min-w-[220px]">
-          <input
+        <td className="pr-2 pb-2 w-10 text-center align-middle">
+          <QuoteImageInput
+            mode="compact"
+            value={it.image_url}
             disabled={locked}
-            className={inp}
+            onChange={(url) => setItem(idx, { image_url: url })}
+          />
+        </td>
+        <td className="pr-2 pb-2 min-w-[240px]">
+          <CatalogueCombobox
             value={it.description}
-            placeholder="Service or activity title"
-            onChange={(e) => setItem(idx, { description: e.target.value })}
+            disabled={locked}
+            destination={form.destination}
+            onChange={(val) => setItem(idx, { description: val })}
+            onSelectCatalogueItem={(cat) => {
+              setItem(idx, {
+                description: cat.name + (cat.stars ? ` (★${cat.stars})` : ''),
+                component_type: cat.suggested_component_type,
+                cost_basis: cat.suggested_cost_basis,
+                image_url: cat.image_url || it.image_url,
+                unit_cost: cat.default_price && cat.default_price > 0 ? cat.default_price : it.unit_cost,
+              });
+            }}
           />
         </td>
         <td className="pr-2 pb-2 min-w-[130px]">
@@ -402,6 +451,7 @@ export const QuoteEditorPage: React.FC = () => {
         <table className="w-full text-sm mb-2">
           <thead className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
             <tr>
+              <th className="pb-2 w-10 text-center">Photo</th>
               <th className="pb-2">Cost Line Description</th>
               <th className="pb-2">Type</th>
               <th className="pb-2">Cost Basis</th>
@@ -428,6 +478,14 @@ export const QuoteEditorPage: React.FC = () => {
             onClick={() => setPickerFor(d ?? 0)}
           >
             <BookOpen className="w-4 h-4" /> From supplier rate card
+          </button>
+          <button
+            type="button"
+            className="text-emerald-800 hover:text-emerald-900 font-medium inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-emerald-50 hover:bg-emerald-100 transition-colors"
+            onClick={() => setCatalogueModalFor(d ?? 0)}
+            title="Browse existing Hotels, Attractions, and Activities"
+          >
+            <Sparkles className="w-4 h-4 text-emerald-700" /> Browse Catalogue
           </button>
         </div>
       )}
@@ -955,6 +1013,16 @@ export const QuoteEditorPage: React.FC = () => {
                     />
                     {!locked && (
                       <button
+                        type="button"
+                        onClick={() => setCatalogueModalFor(d.day_number)}
+                        className="text-xs font-semibold text-teal-800 bg-teal-50 hover:bg-teal-100 px-2.5 py-1.5 rounded-md flex items-center gap-1.5 transition-colors flex-shrink-0 whitespace-nowrap"
+                        title="Import an existing attraction, park or hotel to set Day Theme, narrative, and photo"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-teal-700" /> Import Day Theme
+                      </button>
+                    )}
+                    {!locked && (
+                      <button
                         className="text-red-500 hover:text-red-700 p-1 flex-shrink-0"
                         title="Delete day"
                         onClick={() => removeDay(d.day_number)}
@@ -978,7 +1046,23 @@ export const QuoteEditorPage: React.FC = () => {
                         )
                       )
                     }
-                    />
+                  />
+
+                  <QuoteImageInput
+                    mode="banner"
+                    value={d.image_url}
+                    disabled={locked}
+                    label="Day Highlight Photo"
+                    placeholder="Paste image URL (e.g. scenic view, safari camp) or upload image..."
+                    onChange={(url) =>
+                      set(
+                        'days',
+                        form.days.map((x) =>
+                          x.day_number === d.day_number ? { ...x, image_url: url } : x
+                        )
+                      )
+                    }
+                  />
 
                   <div className="pt-1">{itemTable(d.day_number)}</div>
                 </div>
@@ -1551,6 +1635,20 @@ export const QuoteEditorPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Catalogue Explorer Browser Modal */}
+      <CatalogueBrowserModal
+        isOpen={catalogueModalFor !== null}
+        onClose={() => setCatalogueModalFor(null)}
+        dayNumber={catalogueModalFor === 0 ? null : catalogueModalFor}
+        destination={form.destination}
+        onSelectCostItem={(cat) => handleAddCatalogueCostItem(cat, catalogueModalFor)}
+        onSetDayHighlight={(cat) => {
+          if (catalogueModalFor && catalogueModalFor > 0) {
+            handleSetDayHighlight(cat, catalogueModalFor);
+          }
+        }}
+      />
     </div>
   );
 };

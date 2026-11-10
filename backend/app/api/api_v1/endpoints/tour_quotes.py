@@ -7,12 +7,16 @@ from sqlalchemy.orm import Session, joinedload
 from app.db.database import get_db
 from app.models.user import User
 from app.models.client import Client
+from app.models.hotel import Hotel
+from app.models.attraction import Attraction
+from app.models.activity import Activity
+from app.models.country import Country
 from app.models.tour_quote import (
     TourQuote, TourQuoteScenario, TourQuoteDay, TourQuoteItem, TourQuoteDiscount,
 )
 from app.auth.dependencies import get_current_finance_or_admin
 from app.schemas.tour_quote import (
-    QuoteWrite, QuoteOut, QuoteListItem, ConvertRequest, STATUSES,
+    QuoteWrite, QuoteOut, QuoteListItem, ConvertRequest, CatalogueItemResponse, STATUSES,
 )
 from app.schemas.finance import InvoiceCreate, InvoiceLineItemCreate, InvoiceResponse
 from app.services import tour_quote_service as engine
@@ -109,6 +113,114 @@ def _apply_children(q: TourQuote, data: QuoteWrite) -> None:
 
 def _header(data: QuoteWrite) -> Dict[str, Any]:
     return data.model_dump(exclude={"scenarios", "days", "items", "discounts"})
+
+
+@router.get("/catalogue-search", response_model=List[CatalogueItemResponse])
+def search_catalogue(
+    q: Optional[str] = None,
+    category: Optional[str] = "all",
+    destination: Optional[str] = None,
+    limit: int = 25,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_finance_or_admin),
+) -> Any:
+    """Search existing Hotels, Attractions, and Activities to populate quotes."""
+    results: List[CatalogueItemResponse] = []
+    term = f"%{q.strip()}%" if q and q.strip() else None
+    dest_term = f"%{destination.strip()}%" if destination and destination.strip() else None
+
+    # 1. Hotels
+    if category in ("all", "hotel", "accommodation"):
+        qh = db.query(Hotel).options(joinedload(Hotel.country)).filter(Hotel.is_active.is_(True))
+        if term:
+            qh = qh.filter(or_(Hotel.name.ilike(term), Hotel.city.ilike(term)))
+        if dest_term:
+            qh = qh.outerjoin(Hotel.country).filter(
+                or_(Hotel.city.ilike(dest_term), Country.name.ilike(dest_term))
+            )
+        hotels = qh.order_by(Hotel.stars.desc().nullslast(), Hotel.name.asc()).limit(limit).all()
+        for h in hotels:
+            c_name = h.country.name if h.country else None
+            dest = ", ".join(filter(None, [h.city, c_name]))
+            img = h.image_id or getattr(h, "cover_image", None)
+            desc = h.summary or h.description
+            results.append(
+                CatalogueItemResponse(
+                    entity_type="hotel",
+                    entity_id=h.id,
+                    name=h.name,
+                    summary=h.summary,
+                    description=desc,
+                    destination=dest,
+                    country_name=c_name,
+                    image_url=img,
+                    suggested_component_type="accommodation",
+                    suggested_cost_basis="per_room",
+                    default_price=0.0,
+                    stars=h.stars,
+                    price_category=h.price_category,
+                )
+            )
+
+    # 2. Attractions & Parks
+    if category in ("all", "attraction", "park_fee"):
+        qa = db.query(Attraction).options(joinedload(Attraction.country)).filter(Attraction.is_active.is_(True))
+        if term:
+            qa = qa.filter(or_(Attraction.name.ilike(term), Attraction.city.ilike(term)))
+        if dest_term:
+            qa = qa.outerjoin(Attraction.country).filter(
+                or_(Attraction.city.ilike(dest_term), Country.name.ilike(dest_term))
+            )
+        attractions = qa.order_by(Attraction.order_index.asc(), Attraction.name.asc()).limit(limit).all()
+        for a in attractions:
+            c_name = a.country.name if a.country else None
+            dest = ", ".join(filter(None, [a.city, c_name]))
+            img = a.cover_image or a.image_id
+            desc = a.summary or a.description
+            results.append(
+                CatalogueItemResponse(
+                    entity_type="attraction",
+                    entity_id=a.id,
+                    name=a.name,
+                    summary=a.summary,
+                    description=desc,
+                    destination=dest,
+                    country_name=c_name,
+                    image_url=img,
+                    suggested_component_type="park_fee",
+                    suggested_cost_basis="per_person",
+                    default_price=float(a.price or 0.0),
+                )
+            )
+
+    # 3. Activities & Excursions
+    if category in ("all", "activity"):
+        qact = db.query(Activity).options(joinedload(Activity.cover_image)).filter(Activity.is_active.is_(True))
+        if term:
+            qact = qact.filter(or_(Activity.name.ilike(term), Activity.summary.ilike(term)))
+        activities = qact.order_by(Activity.order_index.asc(), Activity.name.asc()).limit(limit).all()
+        for ac in activities:
+            img = None
+            if ac.cover_image:
+                img = ac.cover_image.storage_key or ac.cover_image.file_path
+            desc = ac.summary or ac.description
+            results.append(
+                CatalogueItemResponse(
+                    entity_type="activity",
+                    entity_id=ac.id,
+                    name=ac.name,
+                    summary=ac.summary,
+                    description=desc,
+                    destination=None,
+                    country_name=None,
+                    image_url=img,
+                    suggested_component_type="activity",
+                    suggested_cost_basis="per_person",
+                    default_price=0.0,
+                )
+            )
+
+    return results[: limit * 2 if category == "all" else limit]
 
 
 @router.get("", response_model=List[QuoteListItem])

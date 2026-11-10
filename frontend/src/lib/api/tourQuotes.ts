@@ -4,11 +4,28 @@ import type { CostBasis } from './rateCards';
 export type QuoteStatus = 'draft' | 'submitted' | 'approved' | 'rejected' | 'converted';
 
 export interface QuoteScenario { id?: number; label?: string | null; pax: number; foc_count: number; rooms: number }
-export interface QuoteDay { day_number: number; title?: string | null; description?: string | null }
+export interface QuoteDay {
+  day_number: number;
+  title?: string | null;
+  description?: string | null;
+  image_url?: string | null;
+  images?: string[];
+}
 export interface QuoteItem {
-  id?: number; day_number: number | null; component_type: string; description: string;
-  cost_basis: CostBasis; unit_cost: number; tax_amount: number; qty: number; capacity?: number | null;
-  supplier_id?: number | null; rate_card_item_id?: number | null; is_optional: boolean; sort_order: number;
+  id?: number;
+  day_number: number | null;
+  component_type: string;
+  description: string;
+  cost_basis: CostBasis;
+  unit_cost: number;
+  tax_amount: number;
+  qty: number;
+  capacity?: number | null;
+  image_url?: string | null;
+  supplier_id?: number | null;
+  rate_card_item_id?: number | null;
+  is_optional: boolean;
+  sort_order: number;
 }
 export interface QuoteDiscount { label: string; mode: 'percent' | 'amount'; value: number; scope: 'total' | 'per_person' }
 
@@ -48,11 +65,39 @@ export interface QuoteListItem {
   scenario_summaries: { pax: number; price_per_person: number; final_total: number }[];
 }
 
+export interface CatalogueItem {
+  entity_type: 'hotel' | 'attraction' | 'activity';
+  entity_id: number;
+  name: string;
+  summary?: string | null;
+  description?: string | null;
+  destination?: string | null;
+  country_name?: string | null;
+  image_url?: string | null;
+  suggested_component_type: string;
+  suggested_cost_basis: CostBasis;
+  default_price?: number | null;
+  stars?: number | null;
+  price_category?: string | null;
+}
+
 export const tourQuotesApi = {
   list(params: { status?: string; search?: string; skip?: number; limit?: number } = {}): Promise<QuoteListItem[]> {
     const q = new URLSearchParams();
     Object.entries(params).forEach(([k, v]) => { if (v !== undefined && v !== '' && v !== 'all') q.set(k, String(v)); });
     return apiClient.get(`/tour-quotes?${q.toString()}`);
+  },
+  searchCatalogue(params: {
+    q?: string;
+    category?: string;
+    destination?: string;
+    limit?: number;
+  } = {}): Promise<CatalogueItem[]> {
+    const q = new URLSearchParams();
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== '' && v !== 'all') q.set(k, String(v));
+    });
+    return apiClient.get(`/tour-quotes/catalogue-search?${q.toString()}`);
   },
   get: (id: number): Promise<Quote> => apiClient.get(`/tour-quotes/${id}`),
   create: (d: QuoteWrite): Promise<Quote> => apiClient.post('/tour-quotes', d),

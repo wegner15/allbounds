@@ -14,6 +14,8 @@ import {
   MapPin,
   Plus,
   Printer,
+  Receipt,
+  ShieldCheck,
   Sparkles,
   Trash2,
   TrendingUp,
@@ -21,6 +23,7 @@ import {
 } from 'lucide-react';
 import {
   tourQuotesApi,
+  calculateQuoteLocally,
   type Quote,
   type QuoteWrite,
   type QuoteItem,
@@ -132,29 +135,41 @@ export const QuoteEditorPage: React.FC = () => {
     }
   }, [id]);
 
-  // Live preview (debounced) from the unsaved form
+  // Live calculation: immediate synchronous local calculation + server preview reconciliation
   const timer = useRef<number>();
   useEffect(() => {
     if (locked || form.scenarios.length === 0) return;
+
+    // 1. Immediately calculate locally so totals and taxes update without lag on every keystroke
+    const local = calculateQuoteLocally(form);
+    setResults(local);
+
+    // 2. Reconcile with server backend
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => {
       tourQuotesApi
         .preview(clean(form))
         .then((r) => {
-          setResults(r);
+          if (r && r.length > 0) {
+            setResults(r);
+          }
           setError(null);
         })
-        .catch((e) => setError(typeof e?.response?.data?.detail === 'string' ? e.response.data.detail : null));
-    }, 350);
+        .catch((e) => {
+          // If server preview returns an error, keep local results so totals are never blank
+          console.warn('Server preview error:', e);
+        });
+    }, 300);
     return () => window.clearTimeout(timer.current);
     // eslint-disable-next-line
   }, [form, locked]);
 
   const clean = (f: QuoteWrite): QuoteWrite => ({
     ...f,
+    name: f.name?.trim() ? f.name : 'Untitled Quote Proposal',
     start_date: f.start_date || null,
     end_date: f.end_date || null,
-    items: f.items.filter((i) => i.description.trim()),
+    items: f.items.filter((i) => i.description && i.description.trim()),
   });
 
   const set = <K extends keyof QuoteWrite>(k: K, v: QuoteWrite[K]) =>
@@ -447,52 +462,76 @@ export const QuoteEditorPage: React.FC = () => {
       </tr>
     ));
 
-  const itemTable = (d: number | null) => (
-    <div className="overflow-x-auto">
-      {dayItems(d).length > 0 && (
-        <table className="w-full text-sm mb-2">
-          <thead className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-            <tr>
-              <th className="pb-2 w-10 text-center">Photo</th>
-              <th className="pb-2">Cost Line Description</th>
-              <th className="pb-2">Type</th>
-              <th className="pb-2">Cost Basis</th>
-              <th className="pb-2">Unit Cost ({form.currency})</th>
-              <th className="pb-2">Qty</th>
-              <th className="pb-2">Capacity</th>
-              <th className="pb-2 text-center">Optional</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>{itemRows(d)}</tbody>
-        </table>
-      )}
-      {!locked && (
-        <div className="flex flex-wrap gap-2 text-sm pt-1">
-          <button
-            className="text-teal-800 hover:text-teal-900 font-medium inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-teal-50 hover:bg-teal-100 transition-colors"
-            onClick={() => addItem(d)}
-          >
-            <Plus className="w-4 h-4" /> Add cost line
-          </button>
-          <button
-            className="text-blue-700 hover:text-blue-800 font-medium inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-blue-50 hover:bg-blue-100 transition-colors"
-            onClick={() => setPickerFor(d ?? 0)}
-          >
-            <BookOpen className="w-4 h-4" /> From supplier rate card
-          </button>
-          <button
-            type="button"
-            className="text-emerald-800 hover:text-emerald-900 font-medium inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-emerald-50 hover:bg-emerald-100 transition-colors"
-            onClick={() => setCatalogueModalFor(d ?? 0)}
-            title="Browse existing Hotels, Attractions, and Activities"
-          >
-            <Sparkles className="w-4 h-4 text-emerald-700" /> Browse Catalogue
-          </button>
-        </div>
-      )}
-    </div>
-  );
+  const itemTable = (d: number | null) => {
+    const currentItems = dayItems(d);
+    const subtotal = currentItems.reduce(
+      (sum, { it }) =>
+        sum +
+        (Number(it.unit_cost) || 0) *
+          (it.qty !== undefined && it.qty !== null ? Number(it.qty) : 1),
+      0
+    );
+
+    return (
+      <div className="overflow-x-auto">
+        {currentItems.length > 0 && (
+          <table className="w-full text-sm mb-2">
+            <thead className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <tr>
+                <th className="pb-2 w-10 text-center">Photo</th>
+                <th className="pb-2">Cost Line Description</th>
+                <th className="pb-2">Type</th>
+                <th className="pb-2">Cost Basis</th>
+                <th className="pb-2">Unit Cost ({form.currency})</th>
+                <th className="pb-2">Qty</th>
+                <th className="pb-2">Capacity</th>
+                <th className="pb-2 text-center">Optional</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>{itemRows(d)}</tbody>
+            <tfoot>
+              <tr className="border-t border-gray-200 text-xs font-semibold text-gray-700 bg-gray-50/50">
+                <td colSpan={4} className="py-2 px-1 text-right text-gray-500">
+                  {d === null
+                    ? 'Trip-Wide Services Subtotal (Unit × Qty):'
+                    : `Day ${d} Subtotal (Unit × Qty):`}
+                </td>
+                <td className="py-2 font-bold text-gray-900">
+                  {form.currency} {fmt(subtotal)}
+                </td>
+                <td colSpan={4}></td>
+              </tr>
+            </tfoot>
+          </table>
+        )}
+        {!locked && (
+          <div className="flex flex-wrap gap-2 text-sm pt-1">
+            <button
+              className="text-teal-800 hover:text-teal-900 font-medium inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-teal-50 hover:bg-teal-100 transition-colors"
+              onClick={() => addItem(d)}
+            >
+              <Plus className="w-4 h-4" /> Add cost line
+            </button>
+            <button
+              className="text-blue-700 hover:text-blue-800 font-medium inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-blue-50 hover:bg-blue-100 transition-colors"
+              onClick={() => setPickerFor(d ?? 0)}
+            >
+              <BookOpen className="w-4 h-4" /> From supplier rate card
+            </button>
+            <button
+              type="button"
+              className="text-emerald-800 hover:text-emerald-900 font-medium inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-emerald-50 hover:bg-emerald-100 transition-colors"
+              onClick={() => setCatalogueModalFor(d ?? 0)}
+              title="Browse existing Hotels, Attractions, and Activities"
+            >
+              <Sparkles className="w-4 h-4 text-emerald-700" /> Browse Catalogue
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const comps = useMemo(
     () => Array.from(new Set(results.flatMap((r) => Object.keys(r.cost_by_component)))),
@@ -1078,6 +1117,128 @@ export const QuoteEditorPage: React.FC = () => {
                 >
                   <Plus className="w-4 h-4" /> Add Next Itinerary Day
                 </button>
+              )}
+            </section>
+
+            {/* 4. Totals, Tax & Investment Breakdown (At Bottom of Quote Editor) */}
+            <section className="bg-white border rounded-xl p-5 shadow-xs space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-3">
+                <div>
+                  <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                    <Receipt className="w-5 h-5 text-teal-700" />
+                    Overall Quotation Totals & Tax Breakdown
+                  </h2>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Consolidated summary of direct vendor costs, markup, contingency buffer, and tax calculations.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="font-semibold text-gray-700">Currency:</span>
+                  <span className="font-mono bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-bold">
+                    {form.currency}
+                  </span>
+                </div>
+              </div>
+
+              {results.length === 0 ? (
+                <div className="text-center py-6 text-gray-400 text-xs">
+                  Add cost line items above to view total package investments and tax breakdowns.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Detailed Scenarios Table */}
+                  <div className="overflow-x-auto border border-gray-200 rounded-xl">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="bg-gray-50 border-b border-gray-200 text-gray-600 font-semibold uppercase tracking-wider text-[11px]">
+                          <th className="py-2.5 px-3 text-left">Configuration</th>
+                          <th className="py-2.5 px-3 text-center">Travellers</th>
+                          <th className="py-2.5 px-3 text-right">Direct Cost</th>
+                          <th className="py-2.5 px-3 text-right">Profit / Markup</th>
+                          <th className="py-2.5 px-3 text-right">Pre-Tax Total</th>
+                          {form.tax_enabled && (
+                            <th className="py-2.5 px-3 text-right">
+                              {form.tax_name || 'VAT'} ({form.tax_rate}%)
+                            </th>
+                          )}
+                          <th className="py-2.5 px-3 text-right font-bold text-teal-950">Grand Total</th>
+                          <th className="py-2.5 px-3 text-right font-extrabold text-teal-800">Per Person</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {results.map((r, i) => (
+                          <tr key={r.scenario_id || i} className="hover:bg-teal-50/30">
+                            <td className="py-3 px-3 font-semibold text-gray-900">
+                              {r.label || `${r.pax} Travellers`}
+                              {r.rooms ? (
+                                <span className="block text-[10.5px] text-gray-500 font-normal">
+                                  {r.rooms} room{r.rooms === 1 ? '' : 's'}
+                                </span>
+                              ) : null}
+                            </td>
+                            <td className="py-3 px-3 text-center text-gray-700">
+                              <span className="font-semibold">{r.pax} pax</span>
+                              <span className="block text-[10px] text-gray-500">
+                                ({r.paying_pax} paying {r.foc_count > 0 ? `+ ${r.foc_count} FOC` : ''})
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 text-right text-gray-700">
+                              {form.currency} {fmt(r.direct_cost)}
+                              {r.contingency > 0 && (
+                                <span className="block text-[10px] text-gray-400">
+                                  +{fmt(r.contingency)} buffer
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3 px-3 text-right text-emerald-700 font-medium">
+                              +{form.currency} {fmt(r.expected_profit)}
+                              <span className="block text-[10px] text-gray-500">
+                                {r.profit_margin_percent}% margin
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 text-right text-gray-800 font-medium">
+                              {form.currency} {fmt(r.price_before_tax)}
+                            </td>
+                            {form.tax_enabled && (
+                              <td className="py-3 px-3 text-right text-gray-700">
+                                <span className="font-semibold text-amber-900">
+                                  {form.currency} {fmt(r.tax_amount)}
+                                </span>
+                                <span className="block text-[10px] text-gray-400">
+                                  {form.tax_inclusive ? 'Included in price' : 'Added to total'}
+                                </span>
+                              </td>
+                            )}
+                            <td className="py-3 px-3 text-right font-bold text-gray-900 text-sm">
+                              {form.currency} {fmt(r.final_total)}
+                            </td>
+                            <td className="py-3 px-3 text-right font-extrabold text-teal-800 text-sm">
+                              {form.currency} {fmt(r.price_per_person)}
+                              <span className="block text-[10px] text-gray-500 font-normal">per guest</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Tax summary callout banner */}
+                  <div className="bg-gray-50 rounded-lg p-3.5 border border-gray-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <ShieldCheck className="w-4 h-4 text-teal-700 flex-shrink-0" />
+                      <span>
+                        {form.tax_enabled
+                          ? form.tax_inclusive
+                            ? `Quoted package prices are inclusive of statutory ${form.tax_name || 'VAT'} (${form.tax_rate}%). Base prices and tax components are calculated automatically.`
+                            : `Quoted package prices exclude statutory ${form.tax_name || 'VAT'} (${form.tax_rate}%). Tax is added onto the pre-tax selling price.`
+                          : 'Taxation is currently disabled for this quotation (zero-rated / exempt under international tourism operations).'}
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-gray-500">
+                      Pricing Mode: <strong className="uppercase">{form.pricing_method}</strong> ({form.pricing_value}%)
+                    </span>
+                  </div>
+                </div>
               )}
             </section>
           </div>

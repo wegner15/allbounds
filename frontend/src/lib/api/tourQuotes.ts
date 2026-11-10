@@ -81,6 +81,134 @@ export interface CatalogueItem {
   price_category?: string | null;
 }
 
+export function calculateScenarioLocally(
+  quote: QuoteWrite,
+  scenario: QuoteScenario
+): QuoteResult {
+  const pax = Math.max(1, Number(scenario.pax) || 1);
+  const foc = Math.max(0, Number(scenario.foc_count) || 0);
+  const rooms = Math.max(0, Number(scenario.rooms) || 0);
+  const paying = Math.max(1, pax - foc);
+
+  const byComponent: Record<string, number> = {};
+  let optionalCost = 0;
+
+  for (const it of quote.items || []) {
+    const unit = (Number(it.unit_cost) || 0) + (Number(it.tax_amount) || 0);
+    const qty = it.qty !== undefined && it.qty !== null ? Number(it.qty) : 1;
+    const basis = it.cost_basis || 'per_person';
+    let mult = 1;
+
+    if (basis === 'per_person') {
+      mult = pax;
+    } else if (basis === 'per_room') {
+      mult = rooms;
+    } else if (basis === 'per_vehicle') {
+      const cap = Number(it.capacity) || 0;
+      mult = cap > 0 ? Math.ceil(pax / cap) : 1;
+    } else {
+      mult = 1;
+    }
+
+    const c = unit * qty * mult;
+    if (it.is_optional) {
+      optionalCost += c;
+    } else {
+      const ct = it.component_type || 'other';
+      byComponent[ct] = (byComponent[ct] || 0) + c;
+    }
+  }
+
+  const direct = Object.values(byComponent).reduce((a, b) => a + b, 0);
+  const contingency = (direct * (Number(quote.contingency_percent) || 0)) / 100;
+  const totalCost = direct + contingency;
+
+  const method = quote.pricing_method || 'markup';
+  const v = Number(quote.pricing_value) || 0;
+  let gross = totalCost;
+  if (method === 'margin') {
+    gross = v >= 100 ? totalCost : totalCost / (1 - v / 100);
+  } else {
+    gross = totalCost * (1 + v / 100);
+  }
+
+  let discountTotal = 0;
+  for (const d of quote.discounts || []) {
+    const val = Number(d.value) || 0;
+    if (d.mode === 'percent') {
+      discountTotal += (gross * val) / 100;
+    } else if (d.scope === 'per_person') {
+      discountTotal += val * paying;
+    } else {
+      discountTotal += val;
+    }
+  }
+  discountTotal = Math.min(discountTotal, gross);
+  const net = gross - discountTotal;
+
+  let taxAmount = 0;
+  let netExTax = net;
+  let finalTotal = net;
+
+  if (quote.tax_enabled && (Number(quote.tax_rate) || 0) > 0) {
+    const rate = Number(quote.tax_rate) / 100;
+    if (quote.tax_inclusive) {
+      taxAmount = net - net / (1 + rate);
+      netExTax = net - taxAmount;
+      finalTotal = net;
+    } else {
+      netExTax = net;
+      taxAmount = net * rate;
+      finalTotal = net + taxAmount;
+    }
+  }
+
+  const profit = netExTax - totalCost;
+  const margin = netExTax > 0 ? (profit / netExTax) * 100 : 0;
+  const markupApplied = totalCost > 0 ? (profit / totalCost) * 100 : 0;
+  const perPerson = finalTotal / paying;
+
+  let optSell = optionalCost;
+  if (method === 'margin') {
+    optSell = v >= 100 ? optionalCost : optionalCost / (1 - v / 100);
+  } else {
+    optSell = optionalCost * (1 + v / 100);
+  }
+
+  const r2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
+
+  return {
+    scenario_id: scenario.id,
+    label: scenario.label,
+    pax,
+    foc_count: foc,
+    paying_pax: paying,
+    rooms,
+    cost_by_component: Object.fromEntries(
+      Object.entries(byComponent).map(([k, val]) => [k, r2(val)])
+    ),
+    direct_cost: r2(direct),
+    contingency: r2(contingency),
+    total_cost: r2(totalCost),
+    selling_price_before_discount: r2(gross),
+    discount_total: r2(discountTotal),
+    price_before_tax: r2(netExTax),
+    tax_amount: r2(taxAmount),
+    final_total: r2(finalTotal),
+    price_per_person: r2(perPerson),
+    price_per_room: rooms > 0 ? r2(finalTotal / rooms) : null,
+    expected_profit: r2(profit),
+    profit_margin_percent: r2(margin),
+    effective_markup_percent: r2(markupApplied),
+    optional_cost: r2(optionalCost),
+    optional_price_per_person: r2(optSell / paying),
+  };
+}
+
+export function calculateQuoteLocally(quote: QuoteWrite): QuoteResult[] {
+  return (quote.scenarios || []).map((s) => calculateScenarioLocally(quote, s));
+}
+
 export const tourQuotesApi = {
   list(params: { status?: string; search?: string; skip?: number; limit?: number } = {}): Promise<QuoteListItem[]> {
     const q = new URLSearchParams();

@@ -6,6 +6,7 @@ import {
   Loader2,
   MapPin,
   Printer,
+  Receipt,
   Users,
   CheckCircle2,
   Sparkles,
@@ -14,7 +15,7 @@ import {
   Building2,
   Compass,
 } from 'lucide-react';
-import type { Quote, QuoteResult } from '../../../../lib/api/tourQuotes';
+import { calculateQuoteLocally, type Quote, type QuoteResult } from '../../../../lib/api/tourQuotes';
 import type { CompanyFinanceSettings } from '../../../../lib/types/finance';
 import { DocumentHeader } from '../components/DocumentHeader';
 import { DocumentStamp } from '../components/DocumentStamp';
@@ -62,6 +63,7 @@ export const QuoteDocumentView: React.FC<Props> = ({ quote, results, settings, o
   const documentRef = useRef<HTMLDivElement>(null);
   const { isGenerating, downloadPdf } = usePdfDownload();
 
+  const computedResults = results && results.length > 0 ? results : calculateQuoteLocally(quote);
   const duration = calculateDaysNights(quote.start_date, quote.end_date);
   const optionalItems = quote.items.filter((it) => it.is_optional);
   const includedItems = quote.items.filter((it) => !it.is_optional);
@@ -223,14 +225,14 @@ export const QuoteDocumentView: React.FC<Props> = ({ quote, results, settings, o
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {results.length === 0 ? (
+                {computedResults.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="py-6 text-center text-gray-500">
                       Pricing is being finalized.
                     </td>
                   </tr>
                 ) : (
-                  results.map((r, i) => (
+                  computedResults.map((r, i) => (
                     <tr
                       key={r.scenario_id || i}
                       className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50/70'}
@@ -513,6 +515,117 @@ export const QuoteDocumentView: React.FC<Props> = ({ quote, results, settings, o
             </div>
           </div>
         )}
+
+        {/* --- Bottom Totals & Tax Calculation Breakdown --- */}
+        <div className="mb-10 avoid-break">
+          <div className="bg-gradient-to-r from-teal-900 to-teal-950 text-white rounded-t-xl px-5 py-3.5 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <Receipt className="w-5 h-5 text-teal-300" />
+              <div>
+                <h4 className="font-bold text-sm tracking-wide uppercase">
+                  Quotation Investment & Tax Summary
+                </h4>
+                <p className="text-[11px] text-teal-200">
+                  Total package investments inclusive of applicable taxes, fees and levies
+                </p>
+              </div>
+            </div>
+            <span className="text-xs bg-teal-800 text-teal-100 font-mono px-2.5 py-1 rounded">
+              Currency: {quote.currency}
+            </span>
+          </div>
+
+          <div className="border border-t-0 border-gray-200 rounded-b-xl bg-white p-5 shadow-xs">
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-gray-200 text-gray-500 font-semibold uppercase tracking-wider text-[11px]">
+                    <th className="py-2.5 px-3 text-left">Group Configuration</th>
+                    <th className="py-2.5 px-3 text-center">Travellers</th>
+                    <th className="py-2.5 px-3 text-right">Package Subtotal</th>
+                    {quote.tax_enabled && (
+                      <th className="py-2.5 px-3 text-right">
+                        {quote.tax_name || 'VAT'} ({quote.tax_rate}%)
+                      </th>
+                    )}
+                    <th className="py-2.5 px-3 text-right text-teal-950 font-bold">Total Investment</th>
+                    <th className="py-2.5 px-3 text-right text-teal-800 font-bold">Per Person Sharing</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {computedResults.map((r, idx) => (
+                    <tr key={r.scenario_id || idx} className="hover:bg-gray-50/60">
+                      <td className="py-3 px-3 font-semibold text-gray-900">
+                        {r.label || `${r.pax} Travellers`}
+                        {r.foc_count > 0 && (
+                          <span className="ml-1.5 inline-block text-[10px] bg-teal-50 text-teal-800 font-bold px-1.5 py-0.5 rounded border border-teal-200">
+                            +{r.foc_count} FOC Leader
+                          </span>
+                        )}
+                        {r.rooms ? (
+                          <span className="block text-[11px] text-gray-500 font-normal">
+                            Accommodation: {r.rooms} room{r.rooms === 1 ? '' : 's'}
+                          </span>
+                        ) : null}
+                      </td>
+                      <td className="py-3 px-3 text-center text-gray-700">
+                        <span className="font-semibold">{r.pax}</span>
+                        <span className="block text-[10.5px] text-gray-500">
+                          ({r.paying_pax} paying)
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-right font-medium text-gray-700">
+                        {quote.currency} {fmt(r.price_before_tax)}
+                      </td>
+                      {quote.tax_enabled && (
+                        <td className="py-3 px-3 text-right text-gray-700">
+                          {quote.tax_rate > 0 ? (
+                            <>
+                              <span className="font-semibold">{quote.currency} {fmt(r.tax_amount)}</span>
+                              <span className="block text-[10px] text-gray-400">
+                                {quote.tax_inclusive ? 'Inclusive' : 'Added to subtotal'}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-gray-400 font-mono">0.00</span>
+                          )}
+                        </td>
+                      )}
+                      <td className="py-3 px-3 text-right">
+                        <span className="text-sm font-bold text-gray-950">
+                          {quote.currency} {fmt(r.final_total)}
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-right">
+                        <span className="text-sm font-extrabold text-teal-800">
+                          {quote.currency} {fmt(r.price_per_person)}
+                        </span>
+                        <span className="block text-[10px] text-gray-500">sharing basis</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Tax policy notes */}
+            <div className="mt-4 pt-3 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500">
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-teal-700 flex-shrink-0" />
+                <span>
+                  {quote.tax_enabled
+                    ? quote.tax_inclusive
+                      ? `All quoted amounts are fully inclusive of statutory ${quote.tax_name || 'VAT'} at ${quote.tax_rate}%. No hidden charges.`
+                      : `Statutory ${quote.tax_name || 'VAT'} at ${quote.tax_rate}% is itemized and added to the pre-tax package subtotal.`
+                    : 'Quoted package rates are zero-rated / exempt under international tourism operations.'}
+                </span>
+              </div>
+              <span className="text-[11px] text-gray-400">
+                Guaranteed pricing valid for 30 days from proposal date
+              </span>
+            </div>
+          </div>
+        </div>
 
         {/* Notes & Booking Terms */}
         {quote.notes && (

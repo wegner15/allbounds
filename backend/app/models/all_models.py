@@ -73,6 +73,8 @@ __all__ = [
     'Currency', 'CompanyFinanceSettings', 'Invoice', 'InvoiceLineItem', 'PaymentReceipt', 'TravelVoucher',
     'PaymentVoucher',
     'SupplierBill', 'SupplierPayment',
+    'SupplierRateCard', 'SupplierRateCardItem',
+    'TourQuote', 'TourQuoteScenario', 'TourQuoteDay', 'TourQuoteItem', 'TourQuoteDiscount',
 ]
 
 

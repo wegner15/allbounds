@@ -74,7 +74,7 @@ const RelatedDestinationsSection: React.FC<RelatedDestinationsSectionProps> = ({
         {/* View All Link - Show if there are more countries in the region */}
         {regionCountries && regionCountries.length > 5 && (
           <Link
-            to={`/regions/${country.region.slug}`}
+            to={`/regions/${country.region.slug}/`}
             className="hidden md:flex items-center space-x-2 text-teal-600 hover:text-teal-700 font-medium transition-colors group"
             aria-label={`View all destinations in ${country.region.name}`}
           >
@@ -100,7 +100,7 @@ const RelatedDestinationsSection: React.FC<RelatedDestinationsSectionProps> = ({
       {regionCountries && regionCountries.length > 5 && (
         <div className="mt-6 md:hidden">
           <Link
-            to={`/regions/${country.region.slug}`}
+            to={`/regions/${country.region.slug}/`}
             className="flex items-center justify-center space-x-2 w-full py-3 px-4 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors"
             aria-label={`View all destinations in ${country.region.name}`}
           >

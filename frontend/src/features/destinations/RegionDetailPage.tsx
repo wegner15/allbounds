@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import SeoHead from '../../components/seo/SeoHead';
+import { buildCollectionPageGraph } from '../../lib/schema-builders';
 import DOMPurify from 'dompurify';
 
 // Components
@@ -110,7 +111,7 @@ const RegionDetailPage: React.FC = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
             <p>Error loading region details. Please try again later.</p>
-            <Link to="/destinations" className="text-red-700 underline mt-2 inline-block">
+            <Link to="/destinations/" className="text-red-700 underline mt-2 inline-block">
               Back to Destinations
             </Link>
           </div>
@@ -119,13 +120,47 @@ const RegionDetailPage: React.FC = () => {
     );
   }
 
+  const canonicalRegionPath = `/regions/${region.slug}/`;
+  const regionDescription = region.description
+    ? region.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+    : `Explore ${region.name} with Allbound Vacations`;
+  const regionGraph = buildCollectionPageGraph({
+    name: region.name,
+    description: regionDescription,
+    canonicalPath: canonicalRegionPath,
+    items: (region.countries || []).map((c) => ({
+      name: c.name,
+      url: `/destinations/${c.slug}/`,
+      description: c.description,
+    })),
+    dateModified: region.updated_at,
+    breadcrumbs: [
+      { name: 'Home', url: '/' },
+      { name: 'Regions', url: '/regions/' },
+      { name: region.name, url: canonicalRegionPath },
+    ],
+  });
+
+  const formattedUpdatedAt = region.updated_at
+    ? new Date(region.updated_at).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : null;
+
+  const countryCount = region.countries?.length || 0;
+  const packageCount = packages?.length || 0;
+  const groupTripCount = groupTrips?.length || 0;
+
   return (
     <>
       <SeoHead
         title={region.name}
-        description={region.description || `Explore ${region.name} with Allbound Vacations`}
-        canonicalPath={`/regions/${region.slug}`}
+        description={regionDescription}
+        canonicalPath={canonicalRegionPath}
         image={getImageUrlWithFallback(region.image_id || region.image_url, IMAGE_VARIANTS.LARGE, '/home-heros/hero2.webp')}
+        structuredData={regionGraph}
       />
 
       <div className="bg-paper min-h-screen">
@@ -157,12 +192,12 @@ const RegionDetailPage: React.FC = () => {
             items={
               window.location.pathname.startsWith('/regions/')
                 ? [
-                  { label: 'Regions', path: '/regions' },
+                  { label: 'Regions', path: '/regions/' },
                   { label: region.name },
                 ]
                 : [
-                  { label: 'Destinations', path: '/destinations' },
-                  { label: 'Regions', path: '/regions' },
+                  { label: 'Destinations', path: '/destinations/' },
+                  { label: 'Regions', path: '/regions/' },
                   { label: region.name },
                 ]
             }
@@ -174,28 +209,44 @@ const RegionDetailPage: React.FC = () => {
             <div className="lg:col-span-2">
               {/* Region Overview */}
               <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-                <h2 className="text-2xl font-playfair text-charcoal mb-4">About {region.name}</h2>
+                <div className="flex flex-wrap items-baseline justify-between gap-2 mb-4">
+                  <h2 className="text-2xl font-playfair text-charcoal">About {region.name}</h2>
+                  {formattedUpdatedAt && (
+                    <p className="text-xs text-gray-500">
+                      Last updated:{' '}
+                      <time dateTime={region.updated_at}>{formattedUpdatedAt}</time>
+                    </p>
+                  )}
+                </div>
                 {region.description && (
                   <div className="text-gray-700 leading-relaxed mb-6">
                     <TextDisplay content={region.description} />
                   </div>
                 )}
 
-                {/* Statistics */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="text-2xl font-bold text-primary">{region.countries?.length || 0}</div>
-                    <div className="text-sm text-gray-600">Countries</div>
+                {/* Statistics (computed from real API data only) */}
+                {(countryCount > 0 || packageCount > 0 || groupTripCount > 0) && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {countryCount > 0 && (
+                      <div className="text-center p-4 bg-gray-50 rounded-lg">
+                        <div className="text-2xl font-bold text-primary">{countryCount}</div>
+                        <div className="text-sm text-gray-600">{countryCount === 1 ? 'Country' : 'Countries'}</div>
+                      </div>
+                    )}
+                    {packageCount > 0 && (
+                      <div className="text-center p-4 bg-gray-50 rounded-lg">
+                        <div className="text-2xl font-bold text-primary">{packageCount}</div>
+                        <div className="text-sm text-gray-600">{packageCount === 1 ? 'Tour Package' : 'Tour Packages'}</div>
+                      </div>
+                    )}
+                    {groupTripCount > 0 && (
+                      <div className="text-center p-4 bg-gray-50 rounded-lg">
+                        <div className="text-2xl font-bold text-primary">{groupTripCount}</div>
+                        <div className="text-sm text-gray-600">{groupTripCount === 1 ? 'Group Trip' : 'Group Trips'}</div>
+                      </div>
+                    )}
                   </div>
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="text-2xl font-bold text-primary">50+</div>
-                    <div className="text-sm text-gray-600">Destinations</div>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="text-2xl font-bold text-primary">100+</div>
-                    <div className="text-sm text-gray-600">Experiences</div>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Countries in Region */}
@@ -206,7 +257,7 @@ const RegionDetailPage: React.FC = () => {
                     {region.countries.map(country => (
                       <Link
                         key={country.id}
-                        to={`/destinations/${country.slug}`}
+                        to={`/destinations/${country.slug}/`}
                         className="group block"
                       >
                         <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
@@ -248,7 +299,7 @@ const RegionDetailPage: React.FC = () => {
                 <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
                   <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-playfair text-charcoal">Featured Packages</h2>
-                    <Link to={`/packages?region=${region.slug}`}>
+                    <Link to={`/packages/?region=${region.slug}`}>
                       <Button variant="outline" size="sm">
                         View All Packages
                       </Button>
@@ -258,7 +309,7 @@ const RegionDetailPage: React.FC = () => {
                     {packages.map(pkg => (
                       <Link
                         key={pkg.id}
-                        to={`/packages/${pkg.slug}`}
+                        to={pkg.country?.slug ? `/packages/${pkg.country.slug}/${pkg.slug}/` : `/packages/${pkg.slug}/`}
                         className="group block"
                       >
                         <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
@@ -305,7 +356,7 @@ const RegionDetailPage: React.FC = () => {
                 <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
                   <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-playfair text-charcoal">Join Group Adventures</h2>
-                    <Link to={`/group-trips?region=${region.slug}`}>
+                    <Link to={`/group-trips/?region=${region.slug}`}>
                       <Button variant="outline" size="sm">
                         View All Group Trips
                       </Button>
@@ -315,7 +366,7 @@ const RegionDetailPage: React.FC = () => {
                     {groupTrips.map(trip => (
                       <Link
                         key={trip.id}
-                        to={`/group-trips/${trip.slug}`}
+                        to={`/group-trips/${trip.slug}/`}
                         className="group block"
                       >
                         <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
@@ -399,17 +450,17 @@ const RegionDetailPage: React.FC = () => {
               <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <h3 className="text-lg font-semibold text-charcoal mb-4">Explore {region.name}</h3>
                 <div className="space-y-4">
-                  <Link to={`/packages?region=${region.slug}`} className="block">
+                  <Link to={`/packages/?region=${region.slug}`} className="block">
                     <Button variant="primary" className="w-full">
                       View All Packages
                     </Button>
                   </Link>
-                  <Link to={`/group-trips?region=${region.slug}`} className="block">
+                  <Link to={`/group-trips/?region=${region.slug}`} className="block">
                     <Button variant="outline" className="w-full">
                       Join Group Adventures
                     </Button>
                   </Link>
-                  <Link to="/contact" className="block">
+                  <Link to="/contact-us/" className="block">
                     <Button variant="outline" className="w-full">
                       Plan Custom Trip
                     </Button>

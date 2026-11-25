@@ -162,7 +162,7 @@ const MapContent: React.FC<MapContentProps> = ({ country }) => {
                     )}
                     {loc.type === 'attraction' && (
                       <Link
-                        to={`/attractions/${loc.slug}`}
+                        to={`/attractions/${loc.slug}/`}
                         className="text-sm text-primary hover:text-primary-dark font-medium inline-flex items-center gap-1"
                       >
                         View Details →

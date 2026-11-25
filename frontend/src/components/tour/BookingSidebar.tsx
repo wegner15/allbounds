@@ -374,7 +374,7 @@ const BookingSidebar: React.FC<BookingSidebarProps> = ({
           </a>
         </div>
         <Link
-          to="/contact"
+          to="/contact-us/"
           className="mt-4 block text-center text-sm font-bold text-primary hover:text-primary-dark py-3 touch-manipulation min-h-[44px] flex items-center justify-center bg-white rounded-lg hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
         >
           Contact us

@@ -1,5 +1,5 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
@@ -13,6 +13,7 @@ from app.schemas.blog import (
 )
 from app.services.blog import blog_service
 from app.services.audit import create_audit_log
+from app.services.indexnow import is_entity_public, notify_entity_change
 from app.auth.dependencies import get_current_active_superuser, get_current_user, get_current_user_optional
 from app.utils.slug import create_slug
 from app.core.redis_cache import invalidate_cache_pattern
@@ -106,6 +107,7 @@ def read_blog_post_by_slug(
 @router.post("/", response_model=BlogPostResponse)
 def create_blog_post(
     blog_post_in: BlogPostCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_active_superuser)
 ):
@@ -148,6 +150,7 @@ def create_blog_post(
         entity_id=blog_post.id
     )
     invalidate_cache_pattern("cache:*")
+    notify_entity_change(background_tasks, "blog", blog_post)
 
     return BlogPostResponse.model_validate(blog_post)
 
@@ -155,6 +158,7 @@ def create_blog_post(
 def update_blog_post(
     post_id: int,
     blog_post_in: BlogPostUpdate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_active_superuser)
 ):
@@ -165,6 +169,7 @@ def update_blog_post(
     if blog_post is None:
         raise HTTPException(status_code=404, detail="Blog post not found")
     
+    was_public = is_entity_public(blog_post)
     blog_post = blog_service.update_blog_post(
         db=db,
         post_id=post_id,
@@ -187,6 +192,7 @@ def update_blog_post(
         entity_id=post_id
     )
     invalidate_cache_pattern("cache:*")
+    notify_entity_change(background_tasks, "blog", blog_post, force=was_public)
 
     return BlogPostResponse.model_validate(blog_post)
 
@@ -220,6 +226,7 @@ def delete_blog_post(
 @router.post("/{post_id}/publish", response_model=BlogPostResponse)
 def publish_blog_post(
     post_id: int,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_active_superuser)
 ):
@@ -241,12 +248,14 @@ def publish_blog_post(
         entity_id=post_id
     )
     invalidate_cache_pattern("cache:*")
+    notify_entity_change(background_tasks, "blog", blog_post)
 
     return BlogPostResponse.model_validate(blog_post)
 
 @router.post("/{post_id}/unpublish", response_model=BlogPostResponse)
 def unpublish_blog_post(
     post_id: int,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_active_superuser)
 ):
@@ -268,6 +277,7 @@ def unpublish_blog_post(
         entity_id=post_id
     )
     invalidate_cache_pattern("cache:*")
+    notify_entity_change(background_tasks, "blog", blog_post, force=True)
 
     return BlogPostResponse.model_validate(blog_post)
 

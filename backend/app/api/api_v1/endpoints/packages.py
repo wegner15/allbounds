@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
@@ -17,6 +17,7 @@ from app.schemas.package import (
 )
 from app.schemas.package_detail import PackageDetailResponse
 from app.services.package import package_service
+from app.services.indexnow import is_entity_public, notify_entity_change
 from app.auth.dependencies import get_current_user, has_permission
 from app.core.memory_profiler import profile_memory_detailed
 from app.core.redis_cache import cache_endpoint, invalidate_cache_pattern
@@ -280,6 +281,7 @@ def create_package(
     *,
     db: Session = Depends(get_db),
     package_in: PackageCreate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:create")),
 ) -> Any:
     """
@@ -287,6 +289,7 @@ def create_package(
     """
     package = package_service.create_package(db, package_in)
     invalidate_cache_pattern("cache:*")
+    notify_entity_change(background_tasks, "package", package, db=db)
     return package
 
 @router.put("/{package_id}", response_model=PackageResponse)
@@ -295,6 +298,7 @@ def update_package(
     db: Session = Depends(get_db),
     package_id: int,
     package_in: PackageUpdate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:update")),
 ) -> Any:
     """
@@ -303,8 +307,10 @@ def update_package(
     package = package_service.get_package(db, package_id=package_id)
     if package is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Package not found")
+    was_public = is_entity_public(package)
     package = package_service.update_package(db, package_id=package_id, package_update=package_in)
     invalidate_cache_pattern("cache:*")
+    notify_entity_change(background_tasks, "package", package, db=db, force=was_public)
     return package
 
 @router.patch("/{package_id}", response_model=PackageResponse)
@@ -313,6 +319,7 @@ def patch_package(
     db: Session = Depends(get_db),
     package_id: int,
     package_in: PackageUpdate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:update")),
 ) -> Any:
     """
@@ -321,8 +328,10 @@ def patch_package(
     package = package_service.get_package(db, package_id=package_id)
     if package is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Package not found")
+    was_public = is_entity_public(package)
     package = package_service.patch_package(db, package_id=package_id, package_update=package_in)
     invalidate_cache_pattern("cache:*")
+    notify_entity_change(background_tasks, "package", package, db=db, force=was_public)
     return package
 
 @router.delete("/{package_id}", response_model=PackageResponse)
@@ -347,6 +356,7 @@ def publish_package(
     *,
     db: Session = Depends(get_db),
     package_id: int,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:publish")),
 ) -> Any:
     """
@@ -356,6 +366,7 @@ def publish_package(
     if package is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Package not found")
     package = package_service.publish_package(db, package_id=package_id)
+    notify_entity_change(background_tasks, "package", package, db=db)
     return package
 
 @router.post("/{package_id}/unpublish", response_model=PackageResponse)
@@ -363,6 +374,7 @@ def unpublish_package(
     *,
     db: Session = Depends(get_db),
     package_id: int,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:publish")),
 ) -> Any:
     """
@@ -372,6 +384,7 @@ def unpublish_package(
     if package is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Package not found")
     package = package_service.unpublish_package(db, package_id=package_id)
+    notify_entity_change(background_tasks, "package", package, db=db, force=True)
     return package
 
 @router.post("/{package_id}/holiday-types/{holiday_type_id}", response_model=PackageResponse)
@@ -466,6 +479,7 @@ def update_package_faqs(
     db: Session = Depends(get_db),
     package_id: int,
     request: UpdateFaqsRequest,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:update")),
 ) -> Any:
     """
@@ -474,4 +488,5 @@ def update_package_faqs(
     package = package_service.update_package_faqs(db, package_id=package_id, faqs=request.faqs)
     if package is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Package not found")
+    notify_entity_change(background_tasks, "package", package, db=db)
     return package

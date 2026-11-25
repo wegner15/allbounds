@@ -104,7 +104,7 @@ const DestinationOverviewSection: React.FC<DestinationOverviewSectionProps> = Re
             {/* Region Information */}
             {country.region && (
               <Link
-                to={`/regions/${country.region.slug}`}
+                to={`/regions/${country.region.slug}/`}
                 className="text-primary-600 hover:text-primary-700 transition-colors duration-200 flex items-center gap-2 text-sm md:text-base font-medium"
                 aria-label={`View ${country.region.name} region`}
               >

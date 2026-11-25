@@ -40,7 +40,7 @@ const MainNavigation: React.FC = () => {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}&type=tours`);
+      navigate(`/search/?q=${encodeURIComponent(searchQuery.trim())}&type=tours`);
       setSearchQuery(''); // Clear after search
       setMobileMenuOpen(false); // Close mobile menu if applicable
     }
@@ -53,13 +53,13 @@ const MainNavigation: React.FC = () => {
   // Navigation items
   const navItems: NavItem[] = [
     { label: 'HOME', path: '/' },
-    { label: 'DESTINATIONS', path: '/destinations', hasDropdown: true },
-    { label: 'HOLIDAY TYPES', path: '/holiday-types', hasDropdown: true },
-    { label: 'PACKAGES', path: '/packages' },
-    { label: 'GROUP TRIPS', path: '/group-trips' },
-    { label: 'FLIGHTS', path: '/flights' },
-    { label: 'BLOG', path: '/blog' },
-    { label: 'ABOUT US', path: '/about-us' },
+    { label: 'DESTINATIONS', path: '/destinations/', hasDropdown: true },
+    { label: 'HOLIDAY TYPES', path: '/holiday-types/', hasDropdown: true },
+    { label: 'PACKAGES', path: '/packages/' },
+    { label: 'GROUP TRIPS', path: '/group-trips/' },
+    { label: 'FLIGHTS', path: '/flights/' },
+    { label: 'BLOG', path: '/blog/' },
+    { label: 'ABOUT US', path: '/about-us/' },
   ];
 
   // Fetch regions with countries from API
@@ -269,7 +269,7 @@ const MainNavigation: React.FC = () => {
 
               {/* CTA Button */}
               <Link
-                to="/start-planning"
+                to="/start-planning/"
                 className="hidden sm:flex items-center px-6 py-3 bg-primary text-white text-sm font-bold rounded uppercase tracking-wider hover:bg-primary-dark transition-all transform hover:scale-[1.02] shadow-sm"
               >
                 Start Planning
@@ -396,7 +396,7 @@ const MainNavigation: React.FC = () => {
                 }`}
               >
                 <Link
-                  to="/start-planning"
+                  to="/start-planning/"
                   className="flex items-center px-4 py-2 bg-primary text-white text-xs font-bold rounded uppercase tracking-wider hover:bg-primary-dark transition-all shadow-sm whitespace-nowrap"
                 >
                   Start Planning
@@ -462,7 +462,7 @@ const MainNavigation: React.FC = () => {
                     {item.label === 'DESTINATIONS' && destinationsOpen && (
                       <div className="pl-4 py-2 space-y-2">
                         <Link
-                          to="/destinations"
+                          to="/destinations/"
                           className="block text-sm text-blue-600 hover:underline py-1"
                           onClick={() => setMobileMenuOpen(false)}
                         >
@@ -474,7 +474,7 @@ const MainNavigation: React.FC = () => {
                             {region.countries.slice(0, 3).map((country) => (
                               <Link
                                 key={country.slug}
-                                to={`/destinations/${country.slug}`}
+                                to={`/destinations/${country.slug}/`}
                                 className="block text-sm text-gray-700 hover:text-hover py-1 pl-2"
                                 onClick={() => setMobileMenuOpen(false)}
                               >
@@ -488,7 +488,7 @@ const MainNavigation: React.FC = () => {
                     {item.label === 'HOLIDAY TYPES' && holidayTypesOpen && (
                       <div className="pl-4 py-2 space-y-2">
                         <Link
-                          to="/holiday-types"
+                          to="/holiday-types/"
                           className="block text-sm text-blue-600 hover:underline py-1"
                           onClick={() => setMobileMenuOpen(false)}
                         >
@@ -497,7 +497,7 @@ const MainNavigation: React.FC = () => {
                         {holidayTypeItems.slice(0, 5).map((type) => (
                           <Link
                             key={type.slug}
-                            to={`/holiday-types/${type.slug}`}
+                            to={`/holiday-types/${type.slug}/`}
                             className="flex items-center space-x-2 text-sm text-gray-700 hover:text-hover py-1"
                             onClick={() => setMobileMenuOpen(false)}
                           >
@@ -533,7 +533,7 @@ const MainNavigation: React.FC = () => {
               </div>
 
               <Link
-                to="/start-planning"
+                to="/start-planning/"
                 className="block w-full text-center px-6 py-3 bg-primary text-white text-sm font-bold rounded uppercase tracking-wider hover:bg-primary-dark transition-colors shadow-sm"
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -552,7 +552,7 @@ const MainNavigation: React.FC = () => {
                 </button>
               ) : (
                 <Link
-                  to="/login"
+                  to="/login/"
                   className="block w-full text-center px-4 py-2 border border-gray-200 text-sm font-medium rounded text-charcoal bg-white hover:bg-gray-50 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -573,7 +573,7 @@ const MainNavigation: React.FC = () => {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="mb-4">
               <Link
-                to="/destinations"
+                to="/destinations/"
                 className="text-blue-600 hover:underline flex items-center"
                 onClick={() => setDestinationsOpen(false)}
               >
@@ -597,7 +597,7 @@ const MainNavigation: React.FC = () => {
                       {region.countries.map((country) => (
                         <li key={country.slug}>
                           <Link
-                            to={`/destinations/${country.slug}`}
+                            to={`/destinations/${country.slug}/`}
                             className="text-sm text-gray-600 hover:text-hover transition-colors"
                             onClick={() => setDestinationsOpen(false)}
                           >
@@ -623,7 +623,7 @@ const MainNavigation: React.FC = () => {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="mb-4">
               <Link
-                to="/holiday-types"
+                to="/holiday-types/"
                 className="text-blue-600 hover:underline"
                 onClick={() => setHolidayTypesOpen(false)}
               >
@@ -640,7 +640,7 @@ const MainNavigation: React.FC = () => {
                 holidayTypeItems.map((type) => (
                   <Link
                     key={type.slug}
-                    to={`/holiday-types/${type.slug}`}
+                    to={`/holiday-types/${type.slug}/`}
                     className="flex items-center space-x-2 text-charcoal hover:text-hover transition-colors"
                     onClick={() => setHolidayTypesOpen(false)}
                   >
@@ -655,7 +655,7 @@ const MainNavigation: React.FC = () => {
               {travelOptions.map((option) => (
                 <Link
                   key={option.slug}
-                  to={`/${option.slug}`}
+                  to={`/${option.slug}/`}
                   className="flex items-center space-x-2 text-charcoal hover:text-hover transition-colors"
                   onClick={() => setHolidayTypesOpen(false)}
                 >

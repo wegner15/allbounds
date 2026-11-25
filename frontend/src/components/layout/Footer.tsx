@@ -142,16 +142,32 @@ const Footer: React.FC<FooterProps> = ({
                 <div key={index}>
                   <h3 className="text-sm font-playfair font-bold text-white tracking-wider uppercase mb-4">{section.title}</h3>
                   <ul className="space-y-2">
-                    {section.links.map((link, linkIndex) => (
-                      <li key={linkIndex}>
-                        <Link
-                          to={link.path}
-                          className="text-sm font-lato text-gray-400 hover:text-primary transition-colors"
-                        >
-                          {link.label}
-                        </Link>
-                      </li>
-                    ))}
+                    {section.links.map((link, linkIndex) => {
+                      const isExternalOrProtocol = /^(?:tel:|mailto:|https?:\/\/|#)/i.test(link.path);
+                      const normalizedTo =
+                        isExternalOrProtocol || link.path === '/' || link.path.endsWith('/')
+                          ? link.path
+                          : `${link.path}/`;
+                      return (
+                        <li key={linkIndex}>
+                          {isExternalOrProtocol ? (
+                            <a
+                              href={link.path}
+                              className="text-sm font-lato text-gray-400 hover:text-primary transition-colors"
+                            >
+                              {link.label}
+                            </a>
+                          ) : (
+                            <Link
+                              to={normalizedTo}
+                              className="text-sm font-lato text-gray-400 hover:text-primary transition-colors"
+                            >
+                              {link.label}
+                            </Link>
+                          )}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               ))}

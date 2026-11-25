@@ -12,7 +12,8 @@ import Breadcrumb from '../../components/layout/Breadcrumb';
 import SeasonalPricingTable from '../../components/common/SeasonalPricingTable';
 import { useEntityPriceCharts } from '../../lib/hooks/usePackagePriceCharts';
 import SeoHead from '../../components/seo/SeoHead';
-import { buildAbsoluteUrl, SITE_NAME } from '../../lib/seo-config';
+import { buildPackageGraph } from '../../lib/schema-builders';
+import DestinationFAQ from '../destinations/components/DestinationFAQ';
 import type { HolidayTypeSummary } from '../../lib/types/api';
 
 const PackageDetailPageNew: React.FC = () => {
@@ -50,6 +51,10 @@ const PackageDetailPageNew: React.FC = () => {
     4
   );
 
+  const packageFaqs = (
+    packageDetail as (typeof packageDetail & { faqs?: Array<{ question: string; answer: string }> }) | undefined
+  )?.faqs;
+
   // Define navigation sections based on available data
   const navigationSections = useMemo(() => {
     if (!packageDetail) return [];
@@ -85,12 +90,16 @@ const PackageDetailPageNew: React.FC = () => {
     // Always include Pricing section
     sections.push({ id: 'pricing', label: 'Pricing' });
 
+    if (packageFaqs && packageFaqs.length > 0) {
+      sections.push({ id: 'faq', label: 'FAQs' });
+    }
+
     if (packageDetail.reviews && packageDetail.reviews.length > 0) {
       sections.push({ id: 'reviews', label: 'Reviews' });
     }
 
     return sections;
-  }, [packageDetail]);
+  }, [packageDetail, packageFaqs]);
 
   // Loading state with comprehensive skeleton
   if (isLoading) {
@@ -153,8 +162,8 @@ const PackageDetailPageNew: React.FC = () => {
 
   const destinationSlug = packageDetail.country?.slug || destination;
   const canonicalPackagePath = destinationSlug
-    ? `/packages/${destinationSlug}/${packageDetail.slug}`
-    : `/packages/${packageDetail.slug}`;
+    ? `/packages/${destinationSlug}/${packageDetail.slug}/`
+    : `/packages/${packageDetail.slug}/`;
 
   const rawDescription = packageDetail.summary ||
     packageDetail.description?.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() ||
@@ -163,45 +172,65 @@ const PackageDetailPageNew: React.FC = () => {
     ? `${rawDescription.substring(0, 152).trim()}...`
     : rawDescription;
 
-  // Build JSON-LD structured data for this tour package
-  const packageJsonLd = [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'TouristTrip',
-      name: packageDetail.name,
-      description: metaDescription,
-      image: packageDetail.image_id ? getImageUrlWithFallback(packageDetail.image_id, IMAGE_VARIANTS.LARGE) : undefined,
-      url: buildAbsoluteUrl(canonicalPackagePath),
-      provider: {
-        '@type': 'TravelAgency',
-        name: SITE_NAME,
-        url: 'https://allboundvacations.com',
-      },
-      touristType: packageDetail.holiday_types?.map(ht => ht.name) || ['Travel'],
-      itinerary: packageDetail.duration_days
-        ? { '@type': 'ItemList', numberOfItems: packageDetail.duration_days }
-        : undefined,
-      offers: activePriceCharts && activePriceCharts.length > 0
-        ? activePriceCharts.slice(0, 1).map((chart: any) => ({
-            '@type': 'Offer',
-            price: chart.base_price ?? chart.price ?? '',
-            priceCurrency: 'USD',
-            availability: 'https://schema.org/InStock',
-            url: buildAbsoluteUrl(canonicalPackagePath),
-          }))
-        : undefined,
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://allboundvacations.com' },
-        { '@type': 'ListItem', position: 2, name: 'Packages', item: buildAbsoluteUrl('/packages') },
-        { '@type': 'ListItem', position: 3, name: packageDetail.country.name, item: buildAbsoluteUrl(`/destinations/${packageDetail.country.slug}`) },
-        { '@type': 'ListItem', position: 4, name: packageDetail.name, item: buildAbsoluteUrl(canonicalPackagePath) },
-      ],
-    },
-  ];
+  const approvedReviews = (packageDetail.reviews || []).filter((r: any) => r.is_approved !== false);
+  const aggregateRating = approvedReviews.length > 0
+    ? {
+        ratingValue: approvedReviews.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / approvedReviews.length,
+        reviewCount: approvedReviews.length,
+      }
+    : undefined;
+
+  const packageImage = packageDetail.image_id
+    ? getImageUrlWithFallback(packageDetail.image_id, IMAGE_VARIANTS.LARGE)
+    : undefined;
+
+  // Build unified @graph JSON-LD structured data for this tour package
+  const packageJsonLd = buildPackageGraph({
+    name: packageDetail.name,
+    slug: packageDetail.slug,
+    description: metaDescription,
+    image: packageImage,
+    canonicalPath: canonicalPackagePath,
+    country: packageDetail.country
+      ? { name: packageDetail.country.name, slug: packageDetail.country.slug }
+      : undefined,
+    price: packageDetail.price,
+    priceCharts: activePriceCharts,
+    durationDays: packageDetail.duration_days,
+    itinerary: packageDetail.itinerary_items?.map((item: any) => ({
+      day_number: item.day_number,
+      title: item.title,
+      description: item.description,
+      location: item.location,
+    })),
+    holidayTypes: packageDetail.holiday_types,
+    inclusions: packageDetail.inclusion_items,
+    aggregateRating,
+    reviews: approvedReviews.map((r: any) => ({
+      authorName: r.reviewer_name,
+      ratingValue: r.rating,
+      reviewBody: r.content,
+      datePublished: r.created_at,
+      title: r.title,
+    })),
+    faqs: packageFaqs,
+    dateModified: packageDetail.updated_at,
+    datePublished: packageDetail.created_at,
+    breadcrumbs: [
+      { name: 'Home', url: '/' },
+      { name: 'Packages', url: '/packages/' },
+      { name: packageDetail.country.name, url: `/destinations/${packageDetail.country.slug}/` },
+      { name: packageDetail.name, url: canonicalPackagePath },
+    ],
+  });
+
+  const formattedUpdatedAt = packageDetail.updated_at
+    ? new Date(packageDetail.updated_at).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : null;
 
   return (
     <>
@@ -236,33 +265,41 @@ const PackageDetailPageNew: React.FC = () => {
             <div className="mb-4">
               <Breadcrumb
                 items={[
-                  { label: 'Packages', path: '/packages' },
-                  { label: packageDetail.country.name, path: `/destinations/${packageDetail.country.slug}` },
+                  { label: 'Packages', path: '/packages/' },
+                  { label: packageDetail.country.name, path: `/destinations/${packageDetail.country.slug}/` },
                   { label: packageDetail.name }
                 ]}
                 variant="light"
               />
             </div>
 
-            <div className="flex flex-wrap gap-2 mb-4">
-              {packageDetail.is_featured && (
-                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                  <i className="fas fa-star mr-2" />
-                  Featured Tour
-                </span>
-              )}
-              {packageDetail.holiday_types && packageDetail.holiday_types.length > 0 && (
-                <>
-                  {packageDetail.holiday_types.map((type: HolidayTypeSummary) => (
-                    <span
-                      key={type.id}
-                      className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200"
-                    >
-                      {type.icon && <i className={`fas fa-${type.icon} mr-2`} />}
-                      {type.name}
-                    </span>
-                  ))}
-                </>
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <div className="flex flex-wrap gap-2">
+                {packageDetail.is_featured && (
+                  <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                    <i className="fas fa-star mr-2" />
+                    Featured Tour
+                  </span>
+                )}
+                {packageDetail.holiday_types && packageDetail.holiday_types.length > 0 && (
+                  <>
+                    {packageDetail.holiday_types.map((type: HolidayTypeSummary) => (
+                      <span
+                        key={type.id}
+                        className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200"
+                      >
+                        {type.icon && <i className={`fas fa-${type.icon} mr-2`} />}
+                        {type.name}
+                      </span>
+                    ))}
+                  </>
+                )}
+              </div>
+              {formattedUpdatedAt && (
+                <p className="text-xs text-gray-500">
+                  Last updated:{' '}
+                  <time dateTime={packageDetail.updated_at}>{formattedUpdatedAt}</time>
+                </p>
               )}
             </div>
 
@@ -288,7 +325,7 @@ const PackageDetailPageNew: React.FC = () => {
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-5 pb-20 lg:pb-6">
           <div className="flex flex-col lg:flex-row gap-5 lg:gap-6">
             {/* Left Column - Main Content */}
-            <main className="flex-1 lg:w-2/3 min-w-0" role="main" aria-label="Tour package details">
+            <div className="flex-1 lg:w-2/3 min-w-0" aria-label="Tour package details">
               {/* Overview Section */}
               <div className="mb-4 md:mb-5">
                 <OverviewSection packageData={packageDetail} />
@@ -357,13 +394,23 @@ const PackageDetailPageNew: React.FC = () => {
                 />
               </div>
 
+              {/* FAQ Section - Visibly mounted in DOM to match FAQPage JSON-LD */}
+              {packageFaqs && packageFaqs.length > 0 && (
+                <section id="faq" className="mb-4 md:mb-5 scroll-mt-20 bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 border border-gray-100" aria-labelledby="package-faq-heading">
+                  <h2 id="package-faq-heading" className="text-2xl sm:text-3xl font-playfair font-bold text-charcoal mb-6">
+                    Frequently Asked Questions
+                  </h2>
+                  <DestinationFAQ faqs={packageFaqs} />
+                </section>
+              )}
+
               {/* Reviews Section */}
               {packageDetail.reviews && packageDetail.reviews.length > 0 && (
                 <div className="mb-4 md:mb-5">
                   <ReviewsSection reviews={packageDetail.reviews} />
                 </div>
               )}
-            </main>
+            </div>
 
             {/* Right Column - Booking Sidebar (Desktop Only) */}
             <aside className="hidden lg:block lg:w-1/3 flex-shrink-0" role="complementary" aria-label="Booking information">

@@ -40,7 +40,7 @@ const BlogsSection: React.FC<BlogsSectionProps> = ({
           {/* View All Link - Desktop */}
           {showViewAll && (
             <Link
-              to="/blog"
+              to="/blog/"
               className="hidden md:flex items-center gap-2 text-primary hover:text-primary-dark font-medium transition-colors group touch-manipulation min-h-[44px]"
             >
               View All Articles
@@ -57,7 +57,7 @@ const BlogsSection: React.FC<BlogsSectionProps> = ({
               role="listitem"
               className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col hover:-translate-y-1"
             >
-              <Link to={`/blog/${blog.slug}`} className="block relative h-52 sm:h-56 overflow-hidden bg-gray-100">
+              <Link to={`/blog/${blog.slug}/`} className="block relative h-52 sm:h-56 overflow-hidden bg-gray-100">
                 <img
                   src={getImageUrlWithFallback(
                     blog.cover_image_id || (blog as any).cover_image_url,
@@ -79,7 +79,7 @@ const BlogsSection: React.FC<BlogsSectionProps> = ({
                       <span>{new Date(blog.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                     </div>
                   )}
-                  <Link to={`/blog/${blog.slug}`}>
+                  <Link to={`/blog/${blog.slug}/`}>
                     <h3 className="text-lg sm:text-xl font-bold font-playfair text-charcoal group-hover:text-primary transition-colors line-clamp-2 mb-2.5">
                       {blog.title}
                     </h3>
@@ -93,7 +93,7 @@ const BlogsSection: React.FC<BlogsSectionProps> = ({
 
                 <div className="pt-4 border-t border-gray-100 flex items-center justify-between mt-auto">
                   <Link
-                    to={`/blog/${blog.slug}`}
+                    to={`/blog/${blog.slug}/`}
                     className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary group-hover:text-primary-dark transition-colors"
                   >
                     <span>Read Article</span>
@@ -109,7 +109,7 @@ const BlogsSection: React.FC<BlogsSectionProps> = ({
         {showViewAll && (
           <div className="md:hidden mt-6 sm:mt-8 text-center">
             <Link
-              to="/blog"
+              to="/blog/"
               className="inline-flex items-center gap-2 text-primary hover:text-primary-dark active:text-primary-dark font-medium transition-colors px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:bg-gray-50 active:bg-gray-100 touch-manipulation min-h-[44px]"
             >
               View All Articles

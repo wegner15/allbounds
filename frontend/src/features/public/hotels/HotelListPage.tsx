@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import SeoHead from '../../../components/seo/SeoHead';
+import { buildCollectionPageGraph } from '../../../lib/schema-builders';
 import { useHotels } from '../../../lib/hooks/useHotels';
 import { useHotelTypes } from '../../../lib/hooks/useHotelTypes';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
@@ -103,7 +104,18 @@ const HotelListPage: React.FC = () => {
       <SeoHead
         title="Hotels & Stays"
         description="Discover amazing hotels and accommodations for your next adventure with Allbound Vacations."
-        canonicalPath="/hotels"
+        canonicalPath="/hotels/"
+        structuredData={buildCollectionPageGraph({
+          name: 'Hotels & Stays',
+          description: 'Discover amazing hotels and accommodations for your next adventure with Allbound Vacations.',
+          canonicalPath: '/hotels/',
+          items: filteredHotels.slice(0, 30).map((h) => ({
+            name: h.name,
+            url: `/hotels/${h.slug}/`,
+            description: h.description,
+            image: h.image_id || h.image_url ? getImageUrlWithFallback(h.image_id || h.image_url, IMAGE_VARIANTS.MEDIUM) : undefined,
+          })),
+        })}
       />
       <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}

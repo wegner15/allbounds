@@ -1,17 +1,23 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Globe, ShieldCheck, Tag, Users, Clock, Plane, Star } from 'lucide-react';
+import { Globe, ShieldCheck, Tag, Users, Clock, Plane, Star, MapPin, Phone, Mail, Award } from 'lucide-react';
 import SeoHead from '../../../components/seo/SeoHead';
+import { buildAboutPageGraph } from '../../../lib/schema-builders';
+import { ORGANIZATION_OFFICES, ORGANIZATION_EMAIL } from '../../../lib/seo-config';
 import ThreeStepsSection from '../home/sections/ThreeStepsSection';
 import ContactUsCard from '../home/sections/ContactUsCard';
 
 const AboutUsPage: React.FC = () => {
+    const aboutDescription =
+        'Learn about Allbound Vacations, our East African travel specialists in Kampala and Nairobi, and why travelers trust us for tailor-made safaris and luxury journeys across Africa and beyond.';
+
     return (
         <>
             <SeoHead
                 title="About Us"
-                description="Learn about Allbound Vacations, our bespoke travel approach, and why travelers trust us for tailor-made journeys across Africa and beyond."
-                canonicalPath="/about-us"
+                description={aboutDescription}
+                canonicalPath="/about-us/"
+                structuredData={buildAboutPageGraph({ description: aboutDescription })}
             />
             <div className="bg-white">
             {/* Hero Section */}
@@ -51,6 +57,9 @@ const AboutUsPage: React.FC = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                         <div className="space-y-6">
+                            <h2 className="text-3xl md:text-4xl font-playfair font-bold text-charcoal">
+                                Who We Are &amp; Our Safari Expertise
+                            </h2>
                             <p className="text-lg text-gray-700 leading-relaxed font-light">
                                 <strong className="font-semibold text-primary">Allbound Vacations</strong> is a premier bespoke travel company specializing in tailor-made luxury trips and personalized travel experiences across Africa and beyond.
                                 We design custom itineraries that combine expert local knowledge, seamless logistics, and authentic experience, ensuring every journey is unique, stress-free, and unforgettable. We curate experiences built entirely around your interests, timeline, and budget.
@@ -160,6 +169,68 @@ const AboutUsPage: React.FC = () => {
                 </div>
             </section>
 
+            {/* Regional Offices & Credentials (E-E-A-T) */}
+            <section className="py-20 bg-white border-b border-gray-100">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-14 max-w-3xl mx-auto">
+                        <h2 className="text-3xl md:text-4xl font-playfair font-bold text-charcoal mb-4">
+                            Our Regional Offices &amp; Credentials
+                        </h2>
+                        <p className="text-base md:text-lg text-gray-600 font-lato leading-relaxed">
+                            Operating directly from East Africa with dedicated destination specialists in Kampala and Nairobi, we manage ground logistics, wildlife permits, vetted safari lodges, and regional flights firsthand.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {ORGANIZATION_OFFICES.map((office) => (
+                            <div key={office.countryCode} className="bg-gray-50 rounded-2xl p-8 border border-gray-100">
+                                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary mb-5">
+                                    <MapPin className="w-6 h-6" />
+                                </div>
+                                <h3 className="text-xl font-playfair font-bold text-charcoal mb-3">{office.name}</h3>
+                                <dl className="space-y-2 text-sm text-gray-600">
+                                    <div className="flex items-center gap-2">
+                                        <dt className="sr-only">Location</dt>
+                                        <dd className="font-medium text-charcoal">{office.city}, {office.country}</dd>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Phone className="w-4 h-4 text-primary shrink-0" />
+                                        <dt className="sr-only">Telephone</dt>
+                                        <dd>
+                                            <a href={`tel:${office.telephone.replace(/[^+\d]/g, '')}`} className="text-primary hover:underline font-semibold">
+                                                {office.displayPhone}
+                                            </a>
+                                        </dd>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Mail className="w-4 h-4 text-primary shrink-0" />
+                                        <dt className="sr-only">Email</dt>
+                                        <dd>
+                                            <a href={`mailto:${office.email}`} className="hover:text-primary transition-colors break-all">
+                                                {office.email}
+                                            </a>
+                                        </dd>
+                                    </div>
+                                </dl>
+                            </div>
+                        ))}
+
+                        <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100">
+                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary mb-5">
+                                <Award className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-xl font-playfair font-bold text-charcoal mb-3">Specialist Standards</h3>
+                            <ul className="space-y-2.5 text-sm text-gray-600 leading-relaxed">
+                                <li>• Direct gorilla &amp; chimpanzee trekking permit coordination in Uganda and Rwanda</li>
+                                <li>• Personally inspected safari lodges, tented camps, and beach resorts</li>
+                                <li>• Transparent seasonal rate charts with no hidden booking fees</li>
+                                <li>• 24/7 on-the-ground East Africa operations support (<a href={`mailto:${ORGANIZATION_EMAIL}`} className="text-primary hover:underline">{ORGANIZATION_EMAIL}</a>)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* Dual Promotional Sections */}
             <section className="grid grid-cols-1 md:grid-cols-2">
                 {/* Let's Chat */}
@@ -174,7 +245,7 @@ const AboutUsPage: React.FC = () => {
                         <a href="tel:+256782594008" className="border border-white hover:bg-white hover:text-primary transition-colors py-3 px-8 rounded font-bold tracking-widest text-sm flex-1">
                             CALL NOW
                         </a>
-                        <Link to="/start-planning" className="border border-white hover:bg-white hover:text-primary transition-colors py-3 px-8 rounded font-bold tracking-widest text-sm flex-1">
+                        <Link to="/start-planning/" className="border border-white hover:bg-white hover:text-primary transition-colors py-3 px-8 rounded font-bold tracking-widest text-sm flex-1">
                             START PLANNING
                         </Link>
                     </div>

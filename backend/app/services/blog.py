@@ -18,7 +18,11 @@ class BlogService:
         """
         Get all blog posts.
         """
-        query = db.query(BlogPost)
+        query = db.query(BlogPost).options(
+            selectinload(BlogPost.tags),
+            selectinload(BlogPost.author),
+            selectinload(BlogPost.packages).joinedload(Package.country),
+        )
         if active_only:
             query = query.filter(BlogPost.is_active == True)
         if published_only:
@@ -41,7 +45,11 @@ class BlogService:
         Returns (items, total_count).
         """
         from sqlalchemy import or_
-        query = db.query(BlogPost)
+        query = db.query(BlogPost).options(
+            selectinload(BlogPost.tags),
+            selectinload(BlogPost.author),
+            selectinload(BlogPost.packages).joinedload(Package.country),
+        )
 
         if not include_drafts:
             query = query.filter(BlogPost.is_published == True, BlogPost.is_active == True)

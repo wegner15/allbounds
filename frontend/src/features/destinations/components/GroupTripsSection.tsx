@@ -52,7 +52,7 @@ const GroupTripsSection: React.FC<GroupTripsSectionProps> = React.memo(({
         {/* View All Link - Only show if there are more than 6 group trips */}
         {groupTrips.filter(trip => trip.is_active).length > 6 && (
           <Link
-            to={`/group-trips?country=${countrySlug}`}
+            to={`/group-trips/?country=${countrySlug}`}
             className="hidden md:flex items-center space-x-2 text-purple-600 hover:text-purple-700 font-medium transition-colors group"
             aria-label={`View all group trips for ${countryName}`}
           >
@@ -73,7 +73,7 @@ const GroupTripsSection: React.FC<GroupTripsSectionProps> = React.memo(({
       {groupTrips.filter(trip => trip.is_active).length > 6 && (
         <div className="mt-6 md:hidden">
           <Link
-            to={`/group-trips?country=${countrySlug}`}
+            to={`/group-trips/?country=${countrySlug}`}
             className="flex items-center justify-center space-x-2 w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
             aria-label={`View all group trips for ${countryName}`}
           >

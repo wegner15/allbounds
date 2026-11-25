@@ -1,0 +1,38 @@
+/*
+  Content-Signal: ai-train=yes, search=yes, ai-input=yes
+
+/admin
+  X-Robots-Tag: noindex, nofollow
+
+/admin/*
+  X-Robots-Tag: noindex, nofollow
+
+/login
+  X-Robots-Tag: noindex, nofollow
+
+/login/*
+  X-Robots-Tag: noindex, nofollow
+
+/search
+  X-Robots-Tag: noindex, nofollow
+
+/search/*
+  X-Robots-Tag: noindex, nofollow
+
+/sign/*
+  X-Robots-Tag: noindex, nofollow
+
+/verify/*
+  X-Robots-Tag: noindex, nofollow
+
+/contact
+  X-Robots-Tag: noindex, nofollow
+
+/contact/*
+  X-Robots-Tag: noindex, nofollow
+
+/unauthorized
+  X-Robots-Tag: noindex, nofollow
+
+/form-showcase
+  X-Robots-Tag: noindex, nofollow

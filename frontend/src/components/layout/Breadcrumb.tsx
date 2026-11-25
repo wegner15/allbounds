@@ -12,6 +12,16 @@ export interface BreadcrumbProps {
   variant?: 'light' | 'dark';
 }
 
+const normalizeInternalPath = (path: string): string => {
+  if (!path || path === '/' || /^(?:https?:\/\/|tel:|mailto:|#)/i.test(path)) {
+    return path;
+  }
+  const [baseAndQuery, hash] = path.split('#');
+  const [base, query] = baseAndQuery.split('?');
+  const normalizedBase = base.endsWith('/') ? base : `${base}/`;
+  return `${normalizedBase}${query !== undefined ? `?${query}` : ''}${hash !== undefined ? `#${hash}` : ''}`;
+};
+
 const Breadcrumb: React.FC<BreadcrumbProps> = ({
   items,
   className = '',
@@ -57,7 +67,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
                 </span>
               ) : (
                 <Link
-                  to={item.path}
+                  to={normalizeInternalPath(item.path)}
                   className={`${linkClasses} hover:underline`}
                 >
                   {item.label}

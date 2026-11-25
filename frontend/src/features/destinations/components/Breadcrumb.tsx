@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
-import { Helmet } from 'react-helmet-async';
 
 interface BreadcrumbItem {
   label: string;
@@ -16,45 +15,9 @@ interface BreadcrumbProps {
 /**
  * Breadcrumb component showing navigation hierarchy
  * Displays: Home > Destinations > [Region Name] > [Country Name]
- * Includes structured data markup for SEO
  */
 const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, currentPage }) => {
-  // Generate structured data for breadcrumbs (JSON-LD format)
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Home",
-        "item": `${window.location.origin}/`
-      },
-      ...items.map((item, index) => ({
-        "@type": "ListItem",
-        "position": index + 2,
-        "name": item.label,
-        "item": `${window.location.origin}${item.href}`
-      })),
-      {
-        "@type": "ListItem",
-        "position": items.length + 2,
-        "name": currentPage,
-        "item": window.location.href
-      }
-    ]
-  };
-
   return (
-    <>
-      {/* Structured Data for SEO */}
-      <Helmet>
-        <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
-        </script>
-      </Helmet>
-
-      {/* Breadcrumb Navigation */}
       <nav 
         aria-label="Breadcrumb" 
         className="bg-white border-b border-gray-200"
@@ -111,7 +74,6 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, currentPage }) => {
           </ol>
         </div>
       </nav>
-    </>
   );
 };
 

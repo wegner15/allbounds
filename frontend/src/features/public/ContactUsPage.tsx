@@ -1,15 +1,21 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import SeoHead from '../../components/seo/SeoHead';
+import { buildContactPageGraph } from '../../lib/schema-builders';
 import ContactInquiryForm from '../../components/forms/ContactInquiryForm';
 
 const ContactUsPage: React.FC = () => {
+  const contactDescription =
+    'Get in touch with Allbound Vacations travel specialists in Kampala, Uganda and Nairobi, Kenya for personalized safari planning and booking inquiries.';
+
   return (
     <>
       <SeoHead
         title="Contact Us"
-        description="Get in touch with Allbound Vacations for personalized travel planning and inquiries."
-        canonicalPath="/contact-us"
+        description={contactDescription}
+        canonicalPath="/contact-us/"
+        structuredData={buildContactPageGraph({ description: contactDescription })}
       />
 
       <div className="min-h-screen bg-white">
@@ -36,12 +42,18 @@ const ContactUsPage: React.FC = () => {
               <div className="inline-flex items-center justify-center w-14 h-14 bg-primary/10 rounded-full mb-6 group-hover:bg-primary/20 transition-colors">
                 <Phone className="w-7 h-7 text-primary" />
               </div>
-              <h3 className="text-xl font-playfair font-bold text-charcoal mb-3">Phone</h3>
+              <h2 className="text-xl font-playfair font-bold text-charcoal mb-3">Phone</h2>
               <a
                 href="tel:+256782594008"
-                className="text-primary hover:text-primary-dark font-bold text-lg block transition-colors"
+                className="text-primary hover:text-primary-dark font-bold text-base block transition-colors"
               >
-                +(256) 782 594 008
+                UG: +(256) 782 594 008
+              </a>
+              <a
+                href="tel:+254723927458"
+                className="text-primary hover:text-primary-dark font-bold text-base block mt-1 transition-colors"
+              >
+                KE: +(254) 723 927 458
               </a>
               <p className="text-sm text-gray-500 mt-2 font-lato">24/7 Support Available</p>
             </div>
@@ -51,7 +63,7 @@ const ContactUsPage: React.FC = () => {
               <div className="inline-flex items-center justify-center w-14 h-14 bg-primary/10 rounded-full mb-6 group-hover:bg-primary/20 transition-colors">
                 <Mail className="w-7 h-7 text-primary" />
               </div>
-              <h3 className="text-xl font-playfair font-bold text-charcoal mb-3">Email</h3>
+              <h2 className="text-xl font-playfair font-bold text-charcoal mb-3">Email</h2>
               <a
                 href="mailto:bookings@allboundvacations.com"
                 className="text-primary hover:text-primary-dark font-bold block break-all transition-colors"
@@ -66,8 +78,9 @@ const ContactUsPage: React.FC = () => {
               <div className="inline-flex items-center justify-center w-14 h-14 bg-primary/10 rounded-full mb-6 group-hover:bg-primary/20 transition-colors">
                 <MapPin className="w-7 h-7 text-primary" />
               </div>
-              <h3 className="text-xl font-playfair font-bold text-charcoal mb-3">Location</h3>
+              <h2 className="text-xl font-playfair font-bold text-charcoal mb-3">Offices</h2>
               <p className="text-charcoal font-bold font-lato">Kampala, Uganda</p>
+              <p className="text-charcoal font-bold font-lato">Nairobi, Kenya</p>
               <p className="text-sm text-gray-500 mt-2 font-lato">Visit us in East Africa</p>
             </div>
 
@@ -76,7 +89,7 @@ const ContactUsPage: React.FC = () => {
               <div className="inline-flex items-center justify-center w-14 h-14 bg-primary/10 rounded-full mb-6 group-hover:bg-primary/20 transition-colors">
                 <Clock className="w-7 h-7 text-primary" />
               </div>
-              <h3 className="text-xl font-playfair font-bold text-charcoal mb-3">Business Hours</h3>
+              <h2 className="text-xl font-playfair font-bold text-charcoal mb-3">Business Hours</h2>
               <p className="text-charcoal font-bold font-lato">Mon - Fri: 9AM - 6PM</p>
               <p className="text-sm text-gray-500 mt-2 font-lato">Emergency Support 24/7</p>
             </div>
@@ -107,9 +120,9 @@ const ContactUsPage: React.FC = () => {
                     <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-playfair font-bold mb-6">
+                <h2 className="text-2xl font-playfair font-bold mb-6">
                   Why Choose Us?
-                </h3>
+                </h2>
                 <ul className="space-y-4 font-lato">
                   <li className="flex items-start">
                     <div className="bg-primary rounded-full p-1 mr-3 mt-1 shrink-0">
@@ -148,24 +161,24 @@ const ContactUsPage: React.FC = () => {
 
               {/* Quick Links */}
               <div className="bg-white rounded-lg shadow-xl p-8 border border-gray-100">
-                <h3 className="text-2xl font-playfair font-bold text-charcoal mb-6">
+                <h2 className="text-2xl font-playfair font-bold text-charcoal mb-6">
                   Quick Links
-                </h3>
+                </h2>
                 <div className="grid grid-cols-1 gap-4 font-lato">
                   {[
-                    { label: 'Explore Destinations', href: '/destinations' },
-                    { label: 'View Packages', href: '/packages' },
-                    { label: 'Group Trips', href: '/group-trips' },
-                    { label: 'About Us', href: '/about-us' }
+                    { label: 'Explore Destinations', href: '/destinations/' },
+                    { label: 'View Packages', href: '/packages/' },
+                    { label: 'Group Trips', href: '/group-trips/' },
+                    { label: 'About Us', href: '/about-us/' }
                   ].map((link) => (
-                    <a
+                    <Link
                       key={link.href}
-                      href={link.href}
+                      to={link.href}
                       className="flex items-center text-charcoal hover:text-primary font-bold group transition-colors"
                     >
                       <span className="w-2 h-2 bg-primary rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                       {link.label}
-                    </a>
+                    </Link>
                   ))}
                 </div>
               </div>

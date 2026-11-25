@@ -493,7 +493,7 @@ const PackagesPage: React.FC = () => {
 
                     return (
                       <div key={pkg.id} className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.01] flex flex-col h-full group">
-                        <Link to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}`} className="relative block h-64 overflow-hidden bg-gray-100">
+                        <Link to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}/`} className="relative block h-64 overflow-hidden bg-gray-100">
                           <img
                             src={getImageUrlWithFallback(pkg.image_id, IMAGE_VARIANTS.MEDIUM)}
                             alt={pkg.name}
@@ -549,7 +549,7 @@ const PackagesPage: React.FC = () => {
                             )}
                           </div>
 
-                          <Link to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}`} className="block">
+                          <Link to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}/`} className="block">
                             <h3 className="text-xl font-bold text-gray-900 hover:text-teal transition-colors mb-2 leading-tight font-playfair">
                               {pkg.name}
                             </h3>

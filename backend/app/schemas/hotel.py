@@ -63,7 +63,7 @@ class HotelResponse(HotelBase):
     order_index: int = Field(0, description="Manual display order (lower = first)")
     image_url: Optional[str] = Field(None, description="URL of the hotel's cover image")
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
 
     @field_validator('is_active', 'is_featured', mode='before')
     @classmethod

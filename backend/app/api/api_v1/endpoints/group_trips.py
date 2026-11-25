@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
@@ -14,6 +14,7 @@ from app.schemas.group_trip import (
 from app.schemas.media import MediaAssetResponse
 from pydantic import BaseModel
 from app.services.group_trip import group_trip_service
+from app.services.indexnow import is_entity_public, notify_entity_change
 from app.auth.dependencies import get_current_user, has_permission
 
 class ReorderItem(BaseModel):
@@ -171,12 +172,14 @@ def create_group_trip(
     *,
     db: Session = Depends(get_db),
     group_trip_in: GroupTripCreate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:create")),
 ) -> Any:
     """
     Create new group trip.
     """
     group_trip = group_trip_service.create_group_trip(db, group_trip_in)
+    notify_entity_change(background_tasks, "group_trip", group_trip)
     return group_trip
 
 @router.put("/{group_trip_id}", response_model=GroupTripResponse)
@@ -185,6 +188,7 @@ def update_group_trip(
     db: Session = Depends(get_db),
     group_trip_id: int,
     group_trip_in: GroupTripUpdate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:update")),
 ) -> Any:
     """
@@ -193,7 +197,9 @@ def update_group_trip(
     group_trip = group_trip_service.get_group_trip(db, group_trip_id=group_trip_id)
     if group_trip is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group trip not found")
+    was_public = is_entity_public(group_trip)
     group_trip = group_trip_service.update_group_trip(db, group_trip_id=group_trip_id, group_trip_update=group_trip_in)
+    notify_entity_change(background_tasks, "group_trip", group_trip, force=was_public)
     return group_trip
 
 @router.delete("/{group_trip_id}", response_model=GroupTripResponse)
@@ -217,6 +223,7 @@ def publish_group_trip(
     *,
     db: Session = Depends(get_db),
     group_trip_id: int,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:publish")),
 ) -> Any:
     """
@@ -226,6 +233,7 @@ def publish_group_trip(
     if group_trip is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group trip not found")
     group_trip = group_trip_service.publish_group_trip(db, group_trip_id=group_trip_id)
+    notify_entity_change(background_tasks, "group_trip", group_trip)
     return group_trip
 
 @router.post("/{group_trip_id}/unpublish", response_model=GroupTripResponse)
@@ -233,6 +241,7 @@ def unpublish_group_trip(
     *,
     db: Session = Depends(get_db),
     group_trip_id: int,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:publish")),
 ) -> Any:
     """
@@ -242,6 +251,7 @@ def unpublish_group_trip(
     if group_trip is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group trip not found")
     group_trip = group_trip_service.unpublish_group_trip(db, group_trip_id=group_trip_id)
+    notify_entity_change(background_tasks, "group_trip", group_trip, force=True)
     return group_trip
 
 @router.post("/{group_trip_id}/holiday-types", response_model=GroupTripResponse)

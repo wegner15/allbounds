@@ -40,7 +40,7 @@ const AttractionsSection: React.FC<AttractionsSectionProps> = ({
           {/* View All Link - Optional */}
           {showViewAll && (
             <Link
-              to="/attractions"
+              to="/attractions/"
               className="hidden md:flex items-center gap-2 text-teal-600 hover:text-teal-700 font-medium transition-colors group touch-manipulation min-h-[44px]"
             >
               View All Attractions
@@ -62,7 +62,7 @@ const AttractionsSection: React.FC<AttractionsSectionProps> = ({
         {showViewAll && (
           <div className="md:hidden mt-6 sm:mt-8 text-center px-4">
             <Link
-              to="/attractions"
+              to="/attractions/"
               className="inline-flex items-center gap-2 text-teal-600 hover:text-teal-700 active:text-teal-800 font-medium transition-colors px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:bg-gray-50 active:bg-gray-100 touch-manipulation min-h-[44px]"
             >
               View All Attractions

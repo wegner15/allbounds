@@ -10,6 +10,7 @@ interface DestinationHeroSectionProps {
   category?: string;
   scriptPrefix?: string;
   title?: string;
+  headingLevel?: 'h1' | 'h2';
   highlights?: string[];
   ctaText?: string;
   ctaLink?: string;
@@ -80,6 +81,7 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
   category,
   scriptPrefix = 'Discover',
   title,
+  headingLevel = 'h1',
   highlights: customHighlights,
   ctaText = 'BOOK A TRIP REQUEST',
   ctaLink,
@@ -112,7 +114,8 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
   }, [customHighlights, country.highlights, country.name, country.region?.name]);
 
   const targetTitle = title || country.name;
-  const bookingLink = ctaLink || `/destinations/${country.slug}/book`;
+  const bookingLink = ctaLink || `/destinations/${country.slug}/book/`;
+  const HeadingTag = headingLevel;
 
   return (
     <section
@@ -181,9 +184,9 @@ const DestinationHeroSection: React.FC<DestinationHeroSectionProps> = React.memo
             </div>
 
             {/* Headline */}
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-playfair font-bold text-white tracking-tight leading-[1.0] [text-shadow:0_3px_20px_rgba(0,0,0,1),0_1px_8px_rgba(0,0,0,0.95)]">
+            <HeadingTag className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-playfair font-bold text-white tracking-tight leading-[1.0] [text-shadow:0_3px_20px_rgba(0,0,0,1),0_1px_8px_rgba(0,0,0,0.95)]">
               {targetTitle}
-            </h1>
+            </HeadingTag>
 
             {/* Highlights */}
             {activeHighlights.length > 0 && (

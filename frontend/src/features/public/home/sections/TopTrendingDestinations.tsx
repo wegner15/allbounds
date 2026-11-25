@@ -53,7 +53,7 @@ const TopTrendingDestinations: React.FC = () => {
             return (
               <Link
                 key={destination.id}
-                to={`/destinations/${destination.slug}`}
+                to={`/destinations/${destination.slug}/`}
                 className={`relative rounded-xl overflow-hidden group cursor-pointer block shadow-sm hover:shadow-xl transition-shadow duration-300 ${index === 1 ? 'row-span-2' : 'h-60'
                   }`}
               >
@@ -82,7 +82,7 @@ const TopTrendingDestinations: React.FC = () => {
         {/* View All Button */}
         <div className="text-center">
           <Link
-            to="/destinations"
+            to="/destinations/"
             className="inline-flex items-center gap-2 px-6 py-3 border-2 border-primary text-primary hover:bg-primary hover:text-white font-medium rounded-lg transition-all duration-200"
           >
             View All

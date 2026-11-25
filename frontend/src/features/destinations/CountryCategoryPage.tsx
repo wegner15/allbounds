@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useCountryDetails } from '../../lib/hooks/useCountries';
 import SeoHead from '../../components/seo/SeoHead';
+import { buildCollectionPageGraph } from '../../lib/schema-builders';
 import { CountryDetailSkeleton } from './components/CountryDetailSkeleton';
 import { NotFoundError, NetworkError, DestinationErrorDisplay } from './components/DestinationErrorDisplay';
 import DestinationHeroSection from './components/DestinationHeroSection';
@@ -100,8 +101,8 @@ const CountryCategoryPage: React.FC = () => {
                 destinationSlug={country.slug}
                 activeTabId={category}
                 onTabChange={(tabId) => {
-                    if (tabId === 'all') navigate(`/destinations/${country.slug}`);
-                    else navigate(`/destinations/${country.slug}/${tabId}`);
+                    if (tabId === 'all') navigate(`/destinations/${country.slug}/`);
+                    else navigate(`/destinations/${country.slug}/${tabId}/`);
                 }}
                 hotels={country.hotels}
                 activities={country.activities}
@@ -153,9 +154,9 @@ const CountryCategoryPage: React.FC = () => {
 
     const handleSubNavClick = (sectionId: string) => {
         if (sectionId === 'overview') {
-            navigate(`/destinations/${country.slug}`);
+            navigate(`/destinations/${country.slug}/`);
         } else {
-            navigate(`/destinations/${country.slug}/${sectionId}`);
+            navigate(`/destinations/${country.slug}/${sectionId}/`);
         }
     };
 
@@ -168,22 +169,70 @@ const CountryCategoryPage: React.FC = () => {
         ? customIntro.description
         : getCategoryDescription();
 
+    const canonicalCategoryPath = `/destinations/${country.slug}/${canonicalCategory}/`;
+    const collectionItems =
+        category === 'attractions'
+            ? (country.attractions || []).slice(0, 20).map((a) => ({
+                  name: a.name,
+                  url: `/attractions/${a.slug}/`,
+                  description: a.summary || a.description,
+              }))
+            : category === 'hotels'
+              ? (country.hotels || []).slice(0, 20).map((h) => ({
+                    name: h.name,
+                    url: `/hotels/${h.slug}/`,
+                    description: h.summary || h.description,
+                }))
+              : category === 'activities'
+                ? (country.activities || []).slice(0, 20).map((a) => ({
+                      name: a.name,
+                      url: `/activities/${a.slug}/`,
+                      description: a.summary || a.description,
+                  }))
+                : category === 'group-trips'
+                  ? (country.group_trips || []).slice(0, 20).map((g) => ({
+                        name: g.name,
+                        url: `/group-trips/${g.slug}/`,
+                        description: g.description,
+                    }))
+                  : (country.packages || []).slice(0, 20).map((p) => ({
+                        name: p.name,
+                        url: `/packages/${country.slug}/${p.slug}/`,
+                        description: p.summary || p.description,
+                    }));
+
+    const collectionGraph = buildCollectionPageGraph({
+        name: displayTitle,
+        description: displayDescription,
+        canonicalPath: canonicalCategoryPath,
+        items: collectionItems,
+        dateModified: country.updated_at,
+        breadcrumbs: [
+            { name: 'Home', url: '/' },
+            { name: 'Destinations', url: '/destinations/' },
+            { name: country.name, url: `/destinations/${country.slug}/` },
+            { name: getCategoryLabel(), url: canonicalCategoryPath },
+        ],
+    });
+
     return (
         <div className="bg-gray-50 min-h-screen">
             <SeoHead
                 title={displayTitle}
-                canonicalPath={`/destinations/${country.slug}/${canonicalCategory}`}
+                description={displayDescription}
+                canonicalPath={canonicalCategoryPath}
+                structuredData={collectionGraph}
             />
 
             <Breadcrumb
                 items={[
-                    { label: 'Destinations', href: '/destinations' },
-                    { label: country.name, href: `/destinations/${country.slug}` }
+                    { label: 'Destinations', href: '/destinations/' },
+                    { label: country.name, href: `/destinations/${country.slug}/` }
                 ]}
                 currentPage={getCategoryLabel()}
             />
 
-            <DestinationHeroSection country={country} />
+            <DestinationHeroSection country={country} headingLevel="h2" />
 
             {/* Sub-Navigation Menu */}
             <SectionNavigation
@@ -198,7 +247,7 @@ const CountryCategoryPage: React.FC = () => {
                     {/* Back Link */}
                     <div className="mb-4">
                         <Link
-                            to={`/destinations/${country.slug}`}
+                            to={`/destinations/${country.slug}/`}
                             className="text-primary-dark hover:text-primary font-semibold flex items-center gap-1.5 transition-colors duration-200 text-sm md:text-base"
                         >
                             <span>&larr;</span> Back to {country.name} Overview
@@ -214,9 +263,9 @@ const CountryCategoryPage: React.FC = () => {
                 </div>
             </div>
 
-            <main className="fluid-container pb-12">
+            <div className="fluid-container pb-12">
                 {renderCategory()}
-            </main>
+            </div>
         </div>
     );
 

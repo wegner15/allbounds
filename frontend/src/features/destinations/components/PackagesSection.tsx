@@ -52,7 +52,7 @@ const PackagesSection: React.FC<PackagesSectionProps> = React.memo(({
         {/* View All Link - Only show if there are more than 6 packages */}
         {packages.filter(pkg => pkg.is_active).length > 6 && (
           <Link
-            to={`/packages?country=${countrySlug}`}
+            to={`/packages/?country=${countrySlug}`}
             className="hidden sm:flex items-center space-x-2 text-teal-600 hover:text-teal-700 font-medium transition-colors group min-h-[44px] flex-shrink-0"
             aria-label={`View all packages for ${countryName}`}
           >
@@ -73,7 +73,7 @@ const PackagesSection: React.FC<PackagesSectionProps> = React.memo(({
       {packages.filter(pkg => pkg.is_active).length > 6 && (
         <div className="mt-4 md:mt-6 sm:hidden">
           <Link
-            to={`/packages?country=${countrySlug}`}
+            to={`/packages/?country=${countrySlug}`}
             className="flex items-center justify-center space-x-2 w-full py-3 px-4 min-h-[44px] bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-medium rounded-lg transition-colors"
             aria-label={`View all packages for ${countryName}`}
           >

@@ -77,32 +77,40 @@ const TravelGuideSection: React.FC<TravelGuideSectionProps> = ({ countrySlug, co
     return categories.find((c) => c.slug === activeTabSlug || c.id === activeTabSlug) || categories[0];
   }, [categories, activeTabSlug]);
 
-  // Determine active items matching the active category
-  const activeItems = useMemo(() => {
-    if (!activeCategory) return [];
+  // Compute items for every category so all content stays mounted in the DOM
+  const categoryItemsMap = useMemo(() => {
+    const map: Record<string, Array<{ title: string; content: string; icon?: string }>> = {};
 
-    // 1. Try DB items matching activeCategory
-    if (apiItems.length > 0 && activeCategory.categoryId) {
-      const filtered = apiItems.filter((item) => item.category_id === activeCategory.categoryId);
-      if (filtered.length > 0) {
-        return filtered.map((item) => ({
-          title: item.title,
-          content: item.content,
-          icon: item.icon || activeCategory.icon || 'ℹ️',
-        }));
+    for (const cat of categories) {
+      const catKey = cat.slug || cat.id;
+
+      // 1. Try DB items matching category
+      if (apiItems.length > 0 && cat.categoryId) {
+        const filtered = apiItems.filter((item) => item.category_id === cat.categoryId);
+        if (filtered.length > 0) {
+          map[catKey] = filtered.map((item) => ({
+            title: item.title,
+            content: item.content,
+            icon: item.icon || cat.icon || 'ℹ️',
+          }));
+          continue;
+        }
       }
+
+      // 2. Try static guide data matching category slug
+      if (staticGuideData && cat.slug) {
+        const key = cat.slug as keyof typeof staticGuideData;
+        if (staticGuideData[key] && Array.isArray(staticGuideData[key]) && staticGuideData[key].length > 0) {
+          map[catKey] = staticGuideData[key];
+          continue;
+        }
+      }
+
+      map[catKey] = [];
     }
 
-    // 2. Try static guide data matching activeCategory slug
-    if (staticGuideData && activeCategory.slug) {
-      const key = activeCategory.slug as keyof typeof staticGuideData;
-      if (staticGuideData[key] && Array.isArray(staticGuideData[key]) && staticGuideData[key].length > 0) {
-        return staticGuideData[key];
-      }
-    }
-
-    return [];
-  }, [apiItems, activeCategory, staticGuideData]);
+    return map;
+  }, [categories, apiItems, staticGuideData]);
 
   if (categories.length === 0) {
     return null;
@@ -123,51 +131,78 @@ const TravelGuideSection: React.FC<TravelGuideSectionProps> = ({ countrySlug, co
       </div>
 
       {/* Tabs Navigation */}
-      <div className="flex overflow-x-auto pb-4 mb-8 -mx-6 px-6 md:mx-0 md:px-0 scrollbar-none gap-2">
+      <div
+        role="tablist"
+        aria-label={`${countryName} travel guide categories`}
+        className="flex overflow-x-auto pb-4 mb-8 -mx-6 px-6 md:mx-0 md:px-0 scrollbar-none gap-2"
+      >
         {categories.map((cat) => {
+          const catKey = cat.slug || cat.id;
           const isActive = (activeCategory?.slug && cat.slug === activeCategory.slug) || (activeCategory?.id && cat.id === activeCategory.id);
           return (
             <button
               key={cat.id}
-              onClick={() => setActiveTabSlug(cat.slug || cat.id)}
+              id={`travel-guide-tab-${catKey}`}
+              type="button"
+              role="tab"
+              aria-selected={!!isActive}
+              aria-controls={`travel-guide-panel-${catKey}`}
+              onClick={() => setActiveTabSlug(catKey)}
               className={`flex items-center gap-2 px-5 py-3 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
                 isActive
                   ? 'bg-primary text-white shadow-md shadow-primary/20 scale-[1.02]'
                   : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
               }`}
             >
-              <span>{cat.icon}</span>
+              <span aria-hidden="true">{cat.icon}</span>
               <span>{cat.label}</span>
             </button>
           );
         })}
       </div>
 
-      {/* Content Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {activeItems.map((item, index) => (
+      {/* All Category Panels Stay Mounted in DOM for Crawlers & Screen Readers */}
+      {categories.map((cat) => {
+        const catKey = cat.slug || cat.id;
+        const isActive = (activeCategory?.slug && cat.slug === activeCategory.slug) || (activeCategory?.id && cat.id === activeCategory.id);
+        const items = categoryItemsMap[catKey] || [];
+
+        return (
           <div
-            key={index}
-            className="group bg-gray-50/50 hover:bg-white rounded-2xl p-6 border border-gray-100 hover:border-gray-200/80 transition-all duration-300 hover:shadow-md flex flex-col h-full"
+            key={cat.id}
+            id={`travel-guide-panel-${catKey}`}
+            role="tabpanel"
+            aria-labelledby={`travel-guide-tab-${catKey}`}
+            className={isActive ? 'block' : 'sr-only'}
           >
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-3xl p-3 bg-white group-hover:bg-primary-light/10 rounded-xl transition-colors duration-300 shadow-sm border border-gray-100">
-                {item.icon || 'ℹ️'}
-              </span>
-              <span className="text-xs font-bold text-gray-400 group-hover:text-primary transition-colors duration-300">
-                {index + 1 < 10 ? `0${index + 1}` : index + 1}
-              </span>
+            <h3 className="sr-only">{cat.label}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {items.map((item, index) => (
+                <article
+                  key={index}
+                  className="group bg-gray-50/50 hover:bg-white rounded-2xl p-6 border border-gray-100 hover:border-gray-200/80 transition-all duration-300 hover:shadow-md flex flex-col h-full"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-3xl p-3 bg-white group-hover:bg-primary-light/10 rounded-xl transition-colors duration-300 shadow-sm border border-gray-100" aria-hidden="true">
+                      {item.icon || 'ℹ️'}
+                    </span>
+                    <span className="text-xs font-bold text-gray-400 group-hover:text-primary transition-colors duration-300">
+                      {index + 1 < 10 ? `0${index + 1}` : index + 1}
+                    </span>
+                  </div>
+                  <h4 className="text-lg font-bold text-gray-900 mb-2 font-playfair group-hover:text-primary transition-colors duration-300">
+                    {item.title}
+                  </h4>
+                  <RichTextDisplay
+                    content={item.content}
+                    className="text-gray-600 text-sm leading-relaxed flex-grow prose-p:my-1 prose-ul:my-1 prose-ol:my-1"
+                  />
+                </article>
+              ))}
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2 font-playfair group-hover:text-primary transition-colors duration-300">
-              {item.title}
-            </h3>
-            <RichTextDisplay
-              content={item.content}
-              className="text-gray-600 text-sm leading-relaxed flex-grow prose-p:my-1 prose-ul:my-1 prose-ol:my-1"
-            />
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 };

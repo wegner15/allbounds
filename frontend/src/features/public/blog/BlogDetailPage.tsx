@@ -5,8 +5,21 @@ import SeoHead from '../../../components/seo/SeoHead';
 import { RichTextDisplay } from '../../../components/ui/RichTextDisplay';
 import { useBlogBySlug as useBlog, useRelatedBlogs } from '../../../lib/hooks/useBlogs';
 import { getCloudflareImageUrl } from '../../../utils/cloudflareImageUtils';
-import { MapPin, Clock, Compass, ArrowRight } from 'lucide-react';
-import { buildAbsoluteUrl, SITE_NAME, SITE_URL } from '../../../lib/seo-config';
+import { MapPin, Clock, Compass, ArrowRight, User, Award } from 'lucide-react';
+import { SITE_NAME } from '../../../lib/seo-config';
+import { buildBlogPostingGraph } from '../../../lib/schema-builders';
+
+interface BlogAuthorMeta {
+  name?: string | null;
+  full_name?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  bio?: string | null;
+  job_title?: string | null;
+  avatar_url?: string | null;
+  credentials?: string | null;
+  same_as?: string[] | null;
+}
 
 const BlogDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -40,10 +53,15 @@ const BlogDetailPage: React.FC = () => {
   const cleanHtmlContent = (html: string) => {
     // Remove TinyMCE data attributes that are not needed for display
     const cleaned = html.replace(/ data-start="[^"]*"/g, '').replace(/ data-end="[^"]*"/g, '');
-    // Sanitize the HTML content
+    // Sanitize the HTML content (keep semantic tables/definitions/figures; disallow h1 to preserve single page H1)
     return DOMPurify.sanitize(cleaned, {
-      ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'img', 'hr'],
-      ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'width', 'height', 'style']
+      ALLOWED_TAGS: [
+        'p', 'br', 'strong', 'em', 'u', 'h2', 'h3', 'h4', 'h5', 'h6',
+        'ul', 'ol', 'li', 'blockquote', 'a', 'img', 'hr',
+        'table', 'thead', 'tbody', 'tr', 'th', 'td', 'caption',
+        'dl', 'dt', 'dd', 'figure', 'figcaption',
+      ],
+      ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'width', 'height', 'style', 'scope', 'colspan', 'rowspan'],
     });
   };
 
@@ -72,7 +90,7 @@ const BlogDetailPage: React.FC = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Article not found</h2>
           <p className="text-gray-600 mb-6">The article you're looking for doesn't exist or has been removed.</p>
           <Link
-            to="/blog"
+            to="/blog/"
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             Back to Blog
@@ -82,46 +100,50 @@ const BlogDetailPage: React.FC = () => {
     );
   }
 
+  const blogAuthor = (blog as unknown as { author?: BlogAuthorMeta | null }).author;
+  const authorDisplayName =
+    blogAuthor?.name ||
+    blogAuthor?.full_name ||
+    [blogAuthor?.first_name, blogAuthor?.last_name].filter(Boolean).join(' ').trim() ||
+    `${SITE_NAME} Editorial Team`;
+  const authorRole = blogAuthor?.job_title || 'Allbounds Travel Specialist';
+  const authorBio =
+    blogAuthor?.bio ||
+    'Destination specialist at Allbound Vacations crafting first-hand safari guides, wildlife itineraries, and travel advice across East Africa and beyond.';
+
   return (
     <>
       <SeoHead
         title={pageTitle}
         description={pageDescription}
-        canonicalPath={`/blog/${blog.slug}`}
+        canonicalPath={`/blog/${blog.slug}/`}
         image={pageImage}
         type="article"
-        publishedTime={blog.created_at || undefined}
+        publishedTime={blog.published_at || blog.created_at || undefined}
         modifiedTime={blog.updated_at || blog.created_at || undefined}
-        author={SITE_NAME}
-        structuredData={[
-          {
-            '@context': 'https://schema.org',
-            '@type': 'Article',
-            headline: blog.title,
-            description: pageDescription,
-            image: pageImage,
-            url: buildAbsoluteUrl(`/blog/${blog.slug}`),
-            datePublished: blog.created_at || undefined,
-            dateModified: blog.updated_at || blog.created_at || undefined,
-            author: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
-            publisher: {
-              '@type': 'Organization',
-              name: SITE_NAME,
-              url: SITE_URL,
-              logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo/main_logo.png` },
-            },
-            mainEntityOfPage: { '@type': 'WebPage', '@id': buildAbsoluteUrl(`/blog/${blog.slug}`) },
-          },
-          {
-            '@context': 'https://schema.org',
-            '@type': 'BreadcrumbList',
-            itemListElement: [
-              { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-              { '@type': 'ListItem', position: 2, name: 'Blog', item: buildAbsoluteUrl('/blog') },
-              { '@type': 'ListItem', position: 3, name: blog.title, item: buildAbsoluteUrl(`/blog/${blog.slug}`) },
-            ],
-          },
-        ]}
+        author={authorDisplayName}
+        structuredData={buildBlogPostingGraph({
+          title: blog.title,
+          slug: blog.slug,
+          description: pageDescription,
+          content: blog.content,
+          image: pageImage,
+          canonicalPath: `/blog/${blog.slug}/`,
+          datePublished: blog.published_at || blog.created_at || undefined,
+          dateModified: blog.updated_at || blog.created_at || undefined,
+          author: blogAuthor
+            ? {
+                ...blogAuthor,
+                name: authorDisplayName,
+                job_title: authorRole,
+              }
+            : {
+                name: authorDisplayName,
+                job_title: authorRole,
+              },
+          tags: blog.tags,
+          packages: blog.packages,
+        })}
       />
       <div className="min-h-screen bg-white">
       {/* Breadcrumb */}
@@ -142,7 +164,7 @@ const BlogDetailPage: React.FC = () => {
                   <svg className="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                   </svg>
-                  <Link to="/blog" className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
+                  <Link to="/blog/" className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
                     Blog
                   </Link>
                 </div>
@@ -223,11 +245,47 @@ const BlogDetailPage: React.FC = () => {
           dangerouslySetInnerHTML={{ __html: cleanHtmlContent(blog.content) }}
         />
 
+        {/* Author Bio / E-E-A-T Card */}
+        <aside
+          aria-label="About the author"
+          className="mt-12 p-6 rounded-2xl bg-gray-50 border border-gray-200/80 flex flex-col sm:flex-row items-start gap-5"
+        >
+          {blogAuthor?.avatar_url ? (
+            <img
+              src={blogAuthor.avatar_url}
+              alt={authorDisplayName}
+              className="w-16 h-16 rounded-full object-cover border border-gray-200 shrink-0"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <User className="w-8 h-8" />
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <h2 className="text-lg font-bold font-playfair text-charcoal">
+                {authorDisplayName}
+              </h2>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary-dark">
+                {authorRole}
+              </span>
+            </div>
+            {blogAuthor?.credentials && (
+              <p className="text-xs font-medium text-gray-600 flex items-center gap-1.5 mb-2">
+                <Award className="w-3.5 h-3.5 text-primary shrink-0" />
+                <span>{blogAuthor.credentials}</span>
+              </p>
+            )}
+            <p className="text-sm text-gray-600 leading-relaxed">{authorBio}</p>
+          </div>
+        </aside>
+
         {/* Footer */}
-        <footer className="mt-12 pt-8 border-t border-gray-200">
+        <footer className="mt-10 pt-8 border-t border-gray-200">
           <div className="flex items-center justify-between">
             <Link
-              to="/blog"
+              to="/blog/"
               className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium transition-colors"
             >
               <svg className="mr-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -332,7 +390,7 @@ const BlogDetailPage: React.FC = () => {
               </p>
             </div>
             <Link
-              to="/packages"
+              to="/packages/"
               className="inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:text-primary-dark transition-colors self-start sm:self-auto"
             >
               <span>Explore All Tours</span>
@@ -341,12 +399,14 @@ const BlogDetailPage: React.FC = () => {
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {blog.packages.map((pkg) => (
+            {blog.packages.map((pkg) => {
+              const pkgHref = pkg.country?.slug ? `/packages/${pkg.country.slug}/${pkg.slug}/` : `/packages/${pkg.slug}/`;
+              return (
               <div
                 key={pkg.id}
                 className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200/80 flex flex-col hover:-translate-y-1"
               >
-                <Link to={`/packages/${pkg.slug}`} className="block relative h-52 sm:h-56 overflow-hidden bg-gray-100">
+                <Link to={pkgHref} className="block relative h-52 sm:h-56 overflow-hidden bg-gray-100">
                   {pkg.image_id ? (
                     <img
                       src={getCloudflareImageUrl(pkg.image_id, 'medium')}
@@ -373,7 +433,7 @@ const BlogDetailPage: React.FC = () => {
 
                 <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
                   <div>
-                    <Link to={`/packages/${pkg.slug}`}>
+                    <Link to={pkgHref}>
                       <h3 className="text-lg font-bold font-playfair text-charcoal group-hover:text-primary transition-colors line-clamp-2 mb-2">
                         {pkg.name}
                       </h3>
@@ -395,7 +455,7 @@ const BlogDetailPage: React.FC = () => {
                     </div>
 
                     <Link
-                      to={`/packages/${pkg.slug}`}
+                      to={pkgHref}
                       className="inline-flex items-center gap-1 px-3.5 py-2 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95"
                     >
                       <span>View Tour</span>
@@ -404,7 +464,8 @@ const BlogDetailPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}
@@ -416,7 +477,7 @@ const BlogDetailPage: React.FC = () => {
           <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
             {relatedBlogs.map((relatedBlog) => (
               <article key={relatedBlog.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <Link to={`/blog/${relatedBlog.slug}`} className="block">
+                <Link to={`/blog/${relatedBlog.slug}/`} className="block">
                    {relatedBlog.cover_image_id && (
                      <div className="aspect-w-16 aspect-h-9 bg-gray-200">
                        <img

@@ -82,7 +82,7 @@ const HolidayByType: React.FC = () => {
                   <h3 className="text-2xl font-playfair font-bold text-white mb-2 drop-shadow-md tracking-wide">{type.name}</h3>
                   <p className="text-gray-100 mb-4 line-clamp-2 font-lato drop-shadow-sm">{type.description}</p>
                   <Link
-                    to={`/holiday-types/${type.slug}`}
+                    to={`/holiday-types/${type.slug}/`}
                     className="inline-block bg-white text-charcoal px-6 py-2 rounded font-bold font-lato hover:bg-primary hover:text-white transition-colors shadow-sm"
                   >
                     Learn More
@@ -95,7 +95,7 @@ const HolidayByType: React.FC = () => {
 
         <div className="text-center mt-6">
           <Link
-            to="/holiday-types"
+            to="/holiday-types/"
             className="inline-flex items-center gap-2 px-8 py-3 bg-primary text-white hover:bg-primary-dark font-bold font-lato rounded-lg transition-colors shadow-md hover:shadow-lg"
           >
             View All

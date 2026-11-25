@@ -1,5 +1,5 @@
 from typing import List, Optional, Any
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
@@ -9,6 +9,7 @@ from app.models.holiday_type import HolidayType
 from app.models.user import User
 from app.schemas.holiday_type import HolidayTypeResponse, HolidayTypeCreate, HolidayTypeUpdate
 from app.services.holiday_type import holiday_type_service
+from app.services.indexnow import is_entity_public, notify_entity_change
 from app.auth.dependencies import get_current_active_superuser, get_current_user, has_permission
 from app.utils.slug import create_slug
 
@@ -66,6 +67,7 @@ def read_holiday_type_by_slug(
 @router.post("/", response_model=HolidayTypeResponse)
 def create_holiday_type(
     holiday_type_in: HolidayTypeCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_active_superuser)
 ):
@@ -96,12 +98,14 @@ def create_holiday_type(
         icon=holiday_type_in.icon,
         order_index=holiday_type_in.order_index or 0
     )
+    notify_entity_change(background_tasks, "holiday_type", holiday_type)
     return holiday_type
 
 @router.put("/{holiday_type_id}", response_model=HolidayTypeResponse)
 def update_holiday_type(
     holiday_type_id: int,
     holiday_type_in: HolidayTypeUpdate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_active_superuser)
 ):
@@ -112,6 +116,7 @@ def update_holiday_type(
     if holiday_type is None:
         raise HTTPException(status_code=404, detail="Holiday type not found")
     
+    was_public = is_entity_public(holiday_type)
     holiday_type = holiday_type_service.update_holiday_type(
         db=db,
         holiday_type_id=holiday_type_id,
@@ -122,6 +127,7 @@ def update_holiday_type(
         icon=holiday_type_in.icon,
         order_index=holiday_type_in.order_index
     )
+    notify_entity_change(background_tasks, "holiday_type", holiday_type, force=was_public)
     return holiday_type
 
 @router.delete("/{holiday_type_id}", response_model=HolidayTypeResponse)

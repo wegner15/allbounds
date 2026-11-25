@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
@@ -14,6 +14,7 @@ from app.schemas.activity import (
     PaginatedActivityResponse,
 )
 from app.services.activity import activity_service
+from app.services.indexnow import is_entity_public, notify_entity_change
 from app.auth.dependencies import get_current_user, has_permission
 from pydantic import BaseModel
 
@@ -207,12 +208,14 @@ def create_activity(
     *,
     db: Session = Depends(get_db),
     activity_in: ActivityCreate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:create")),
 ) -> Any:
     """
     Create new activity.
     """
     activity = activity_service.create_activity(db, activity_in)
+    notify_entity_change(background_tasks, "activity", activity)
     return activity
 
 @router.put("/{activity_id}", response_model=ActivityResponse)
@@ -221,6 +224,7 @@ def update_activity(
     db: Session = Depends(get_db),
     activity_id: int,
     activity_in: ActivityUpdate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:update")),
 ) -> Any:
     """
@@ -229,7 +233,9 @@ def update_activity(
     activity = activity_service.get_activity(db, activity_id=activity_id)
     if activity is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Activity not found")
+    was_public = is_entity_public(activity)
     activity = activity_service.update_activity(db, activity_id=activity_id, activity_update=activity_in)
+    notify_entity_change(background_tasks, "activity", activity, force=was_public)
     return activity
 
 @router.delete("/{activity_id}", response_model=ActivityResponse)

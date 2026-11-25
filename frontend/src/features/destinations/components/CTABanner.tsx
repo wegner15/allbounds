@@ -27,7 +27,7 @@ const CTABanner: React.FC<CTABannerProps> = ({ countrySlug, countryName }) => {
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
             {/* Primary CTA - View Packages */}
             <Link
-              to={`/packages?country=${countrySlug}`}
+              to={`/packages/?country=${countrySlug}`}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-3.5 bg-white text-primary font-bold rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-white/50"
               aria-label={`View travel packages for ${countryName}`}
             >
@@ -37,7 +37,7 @@ const CTABanner: React.FC<CTABannerProps> = ({ countrySlug, countryName }) => {
             
             {/* Secondary CTA - Book Destination */}
             <Link
-              to={`/destinations/${countrySlug}/book`}
+              to={`/destinations/${countrySlug}/book/`}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-3.5 bg-transparent text-white font-bold rounded-xl border-2 border-white/80 hover:bg-white hover:text-primary hover:border-white shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-white/30"
               aria-label={`Plan my ${countryName} trip`}
             >

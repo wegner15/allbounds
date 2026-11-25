@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useActivityBySlug, useActivityTrips } from '../../../lib/hooks/useActivities';
 import DOMPurify from 'dompurify';
 import SeoHead from '../../../components/seo/SeoHead';
-import { buildAbsoluteUrl, SITE_NAME, SITE_URL } from '../../../lib/seo-config';
+import { buildAttractionGraph } from '../../../lib/schema-builders';
 import GridGallery from '../../../components/ui/GridGallery';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 import FromPriceDisplay from '../../../components/ui/FromPriceDisplay';
@@ -19,60 +19,31 @@ const ActivityDetailPage: React.FC = () => {
     const { data: trips } = useActivityTrips(slug || '');
     const [showFullDescription, setShowFullDescription] = React.useState(false);
 
-    // Compute Highlights
+    // Compute Highlights strictly from real API fields (no fabricated fallback copy)
     const highlightsList = React.useMemo(() => {
         if (!activity) return [];
         if (activity.highlights && activity.highlights.length > 0) {
             return activity.highlights;
         }
-        if (activity.summary) {
-            const items = activity.summary
-                .split(/(?<=[.!?])\s+|\n+/)
-                .map(s => s.trim().replace(/^[•\-\*\s]+/, ''))
-                .filter(s => s.length > 10);
-            if (items.length > 1) return items;
-        }
-        if (activity.description) {
-            const clean = activity.description.replace(/<[^>]*>/g, ' ');
-            const sentences = clean
-                .split(/(?<=[.!?])\s+|\n+/)
-                .map(s => s.trim().replace(/^[•\-\*\s]+/, ''))
-                .filter(s => s.length > 15 && s.length < 150);
-            if (sentences.length >= 2) return sentences.slice(0, 5);
-        }
-        return [
-            `Discover the history and unique charm of ${activity.name}`,
-            `Explore iconic local landmarks and top attractions with expert guidance`,
-            `Encounter vibrant culture, wildlife, or scenic natural landscapes`,
-            `Enjoy a seamless, memorable travel experience with provided support`,
-            `Capture stunning photos and create lifelong memories`
-        ];
+        return [];
     }, [activity]);
 
-    // Compute Inclusions
+    // Compute Inclusions strictly from real API fields
     const inclusionsList = React.useMemo(() => {
         if (!activity) return [];
         if (activity.inclusions && activity.inclusions.length > 0) {
             return activity.inclusions;
         }
-        return [
-            `Guided tour of ${activity.name}`,
-            `Professional English-speaking local guide`,
-            `All entry fees and activity tickets (if option selected)`,
-            `Hotel pickup and drop-off (select options)`
-        ];
+        return [];
     }, [activity]);
 
-    // Compute Exclusions
+    // Compute Exclusions strictly from real API fields
     const exclusionsList = React.useMemo(() => {
         if (!activity) return [];
         if (activity.exclusions && activity.exclusions.length > 0) {
             return activity.exclusions;
         }
-        return [
-            `Tips`,
-            `Gratuities`
-        ];
+        return [];
     }, [activity]);
 
     // Keyboard navigation is handled by GridGallery's Lightbox
@@ -170,7 +141,7 @@ const ActivityDetailPage: React.FC = () => {
                         <h2 className="text-2xl font-bold text-gray-900 mb-4">Activity not found</h2>
                         <p className="text-gray-600 mb-6">The activity you're looking for doesn't exist or has been removed.</p>
                         <Link
-                            to="/activities"
+                            to="/activities/"
                             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
                         >
                             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -184,44 +155,40 @@ const ActivityDetailPage: React.FC = () => {
 
     const allImages = getAllImages();
     const primaryCountry = activity.countries && activity.countries.length > 0 ? activity.countries[0] : null;
+    const activityUpdatedAt = (activity as unknown as { updated_at?: string | null }).updated_at || undefined;
+    const canonicalActivityPath = `/activities/${activity.slug || slug}/`;
+    const activityImage = activity.cover_image?.url || activity.cover_image?.file_path || activity.image_url || undefined;
 
     return (
         <div className="min-h-screen bg-white">
             <SeoHead
                 title={activity.name}
-                description={activity.summary || activity.description?.substring(0, 160) || undefined}
-                canonicalPath={`/activities/${slug}`}
-                image={activity.cover_image?.file_path || activity.image_url || undefined}
+                description={activity.summary || activity.description?.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 160) || undefined}
+                canonicalPath={canonicalActivityPath}
+                image={activityImage}
                 type="article"
+                modifiedTime={activityUpdatedAt}
                 keywords={[
                   activity.name,
                   ...(activity.countries?.map((c: any) => c.name) || []),
                   'activity', 'travel', 'experience',
                 ]}
-                structuredData={[
-                  {
-                    '@context': 'https://schema.org',
-                    '@type': 'TouristAttraction',
-                    name: activity.name,
-                    description: activity.summary || activity.description?.substring(0, 300) || undefined,
-                    image: activity.cover_image?.file_path || activity.image_url || undefined,
-                    url: buildAbsoluteUrl(`/activities/${slug}`),
-                    touristType: ['Activity', 'Experience'],
-                    provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
-                    containedInPlace: activity.countries?.[0]
-                      ? { '@type': 'Country', name: activity.countries[0].name }
-                      : undefined,
-                  },
-                  {
-                    '@context': 'https://schema.org',
-                    '@type': 'BreadcrumbList',
-                    itemListElement: [
-                      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-                      { '@type': 'ListItem', position: 2, name: 'Activities', item: buildAbsoluteUrl('/activities') },
-                      { '@type': 'ListItem', position: 3, name: activity.name, item: buildAbsoluteUrl(`/activities/${slug}`) },
-                    ],
-                  },
-                ]}
+                structuredData={buildAttractionGraph({
+                  name: activity.name,
+                  slug: activity.slug || slug || '',
+                  description: activity.summary || activity.description || undefined,
+                  image: activityImage,
+                  canonicalPath: canonicalActivityPath,
+                  country: primaryCountry,
+                  touristType: ['Activity', 'Experience'],
+                  dateModified: activityUpdatedAt,
+                  breadcrumbs: [
+                    { name: 'Home', url: '/' },
+                    { name: 'Activities', url: '/activities/' },
+                    ...(primaryCountry ? [{ name: primaryCountry.name, url: `/destinations/${primaryCountry.slug}/` }] : []),
+                    { name: activity.name, url: canonicalActivityPath },
+                  ],
+                })}
             />
 
             {/* Breadcrumb */}
@@ -312,6 +279,17 @@ const ActivityDetailPage: React.FC = () => {
                                     </span>
                                 </div>
                             )}
+                            {activityUpdatedAt && (
+                                <div className="flex items-center text-gray-500">
+                                    <Calendar className="h-4 w-4 mr-1.5 text-gray-400" />
+                                    <span>
+                                        Last updated{' '}
+                                        <time dateTime={activityUpdatedAt}>
+                                            {format(new Date(activityUpdatedAt), 'MMM d, yyyy')}
+                                        </time>
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -330,21 +308,23 @@ const ActivityDetailPage: React.FC = () => {
                         <div className="border-t border-b border-gray-200 divide-y divide-gray-200 mb-12">
 
                             {/* 1. Highlights Section */}
-                            <div className="py-8 flex flex-col md:flex-row md:items-start gap-4 md:gap-8">
-                                <div className="md:w-1/4 flex-shrink-0">
-                                    <h2 className="text-lg md:text-xl font-bold text-gray-900">Highlights</h2>
+                            {highlightsList.length > 0 && (
+                                <div className="py-8 flex flex-col md:flex-row md:items-start gap-4 md:gap-8">
+                                    <div className="md:w-1/4 flex-shrink-0">
+                                        <h2 className="text-lg md:text-xl font-bold text-gray-900">Highlights</h2>
+                                    </div>
+                                    <div className="md:w-3/4">
+                                        <ul className="space-y-3 text-gray-700 text-base leading-relaxed">
+                                            {highlightsList.map((item, index) => (
+                                                <li key={index} className="flex items-start">
+                                                    <span className="text-gray-900 font-bold mr-3 select-none text-lg">•</span>
+                                                    <span className="pt-0.5">{item}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
                                 </div>
-                                <div className="md:w-3/4">
-                                    <ul className="space-y-3 text-gray-700 text-base leading-relaxed">
-                                        {highlightsList.map((item, index) => (
-                                            <li key={index} className="flex items-start">
-                                                <span className="text-gray-900 font-bold mr-3 select-none text-lg">•</span>
-                                                <span className="pt-0.5">{item}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
+                            )}
 
                             {/* 2. Full Description Section */}
                             <div className="py-8 flex flex-col md:flex-row md:items-start gap-4 md:gap-8">
@@ -379,28 +359,30 @@ const ActivityDetailPage: React.FC = () => {
                             </div>
 
                             {/* 3. Includes Section */}
-                            <div className="py-8 flex flex-col md:flex-row md:items-start gap-4 md:gap-8">
-                                <div className="md:w-1/4 flex-shrink-0">
-                                    <h2 className="text-lg md:text-xl font-bold text-gray-900">Includes</h2>
-                                </div>
-                                <div className="md:w-3/4 space-y-3">
-                                    {/* Included items */}
-                                    {inclusionsList.map((item, index) => (
-                                        <div key={`inc-${index}`} className="flex items-start text-gray-700 text-base leading-relaxed">
-                                            <Check className="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0 mt-0.5" />
-                                            <span>{item}</span>
-                                        </div>
-                                    ))}
+                            {(inclusionsList.length > 0 || exclusionsList.length > 0) && (
+                                <div className="py-8 flex flex-col md:flex-row md:items-start gap-4 md:gap-8">
+                                    <div className="md:w-1/4 flex-shrink-0">
+                                        <h2 className="text-lg md:text-xl font-bold text-gray-900">Includes</h2>
+                                    </div>
+                                    <div className="md:w-3/4 space-y-3">
+                                        {/* Included items */}
+                                        {inclusionsList.map((item, index) => (
+                                            <div key={`inc-${index}`} className="flex items-start text-gray-700 text-base leading-relaxed">
+                                                <Check className="w-5 h-5 text-emerald-600 mr-3 flex-shrink-0 mt-0.5" />
+                                                <span>{item}</span>
+                                            </div>
+                                        ))}
 
-                                    {/* Excluded items */}
-                                    {exclusionsList.map((item, index) => (
-                                        <div key={`exc-${index}`} className="flex items-start text-gray-600 text-base leading-relaxed">
-                                            <X className="w-5 h-5 text-rose-500 mr-3 flex-shrink-0 mt-0.5" />
-                                            <span>{item}</span>
-                                        </div>
-                                    ))}
+                                        {/* Excluded items */}
+                                        {exclusionsList.map((item, index) => (
+                                            <div key={`exc-${index}`} className="flex items-start text-gray-600 text-base leading-relaxed">
+                                                <X className="w-5 h-5 text-rose-500 mr-3 flex-shrink-0 mt-0.5" />
+                                                <span>{item}</span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                         </div>
 
@@ -538,7 +520,7 @@ const ActivityDetailPage: React.FC = () => {
                     {/* Sidebar */}
                     <div className="lg:col-span-1">
                         <div className="bg-gray-50 rounded-xl p-6 sticky top-8">
-                            <h3 className="font-semibold text-gray-900 mb-4 text-lg">Activity Details</h3>
+                            <h2 className="font-semibold text-gray-900 mb-4 text-lg">Activity Details</h2>
 
                             {/* Location */}
                             {activity.countries && activity.countries.length > 0 && (
@@ -580,12 +562,12 @@ const ActivityDetailPage: React.FC = () => {
 
                         {/* Booking / Contact CTA */}
                         <div className="bg-white rounded-xl shadow-sm p-6 mt-6 border border-gray-100 sticky top-[280px]">
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">Book This Activity</h3>
+                            <h2 className="text-xl font-bold text-gray-900 mb-2">Book This Activity</h2>
                             <p className="text-gray-600 mb-6 text-sm">
                                 Interested in this activity? Contact us to customize your perfect trip including {activity.name}.
                             </p>
 
-                            <Link to="/contact" className="block w-full">
+                            <Link to="/contact-us/" className="block w-full">
                                 <Button variant="primary" className="w-full flex items-center justify-center">
                                     <Mail className="w-5 h-5 mr-2" />
                                     Contact Us

@@ -1,10 +1,11 @@
 import React, { lazy, Suspense, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import SeoHead from '../../components/seo/SeoHead';
-import { buildAbsoluteUrl, SITE_NAME, SITE_URL } from '../../lib/seo-config';
+import { buildCountryGraph } from '../../lib/schema-builders';
 
 // Hooks
 import { useCountryDetails } from '../../lib/hooks/useCountries';
+import { usePaginatedBlogs } from '../../lib/hooks/useBlogs';
 
 // Utils
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../utils/imageUtils';
@@ -59,6 +60,12 @@ const CountryDetailPageNew: React.FC = () => {
     error,
     refetch
   } = useCountryDetails(slug || '');
+
+  // Fetch country-related blog posts (when country name is loaded)
+  const { data: relatedBlogsData } = usePaginatedBlogs(
+    country?.name ? { search: country.name, limit: 3 } : undefined
+  );
+  const countryBlogs = country?.name ? (relatedBlogsData?.items || []) : [];
 
   // Automatically scroll to target section on initial page load or reload if URL contains a hash fragment
   // Unconditional hook call before early returns prevents React Rule of Hooks violations (Minified Error #310)
@@ -186,16 +193,50 @@ const CountryDetailPageNew: React.FC = () => {
 
   // Prepare breadcrumb items
   const breadcrumbItems = [
-    { label: 'Destinations', href: '/destinations' }
+    { label: 'Destinations', href: '/destinations/' }
   ];
 
   // Add region to breadcrumb if available
   if (country.region) {
     breadcrumbItems.push({
       label: country.region.name,
-      href: `/regions/${country.region.slug}`
+      href: `/regions/${country.region.slug}/`
     });
   }
+
+  const formattedUpdatedAt = country.updated_at
+    ? new Date(country.updated_at).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : null;
+
+  const countryGraph = buildCountryGraph({
+    name: country.name,
+    slug: country.slug,
+    description: pageDescription,
+    image: pageImage,
+    canonicalPath: `/destinations/${country.slug}/`,
+    region: country.region
+      ? { name: country.region.name, slug: country.region.slug }
+      : undefined,
+    attractions: (country.attractions || []).slice(0, 10).map((a: any) => ({
+      name: a.name,
+      slug: a.slug,
+      description: a.summary || a.description,
+    })),
+    faqs: country.faqs,
+    dateModified: country.updated_at,
+    breadcrumbs: [
+      { name: 'Home', url: '/' },
+      { name: 'Destinations', url: '/destinations/' },
+      ...(country.region
+        ? [{ name: country.region.name, url: `/regions/${country.region.slug}/` }]
+        : []),
+      { name: country.name, url: `/destinations/${country.slug}/` },
+    ],
+  });
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -233,7 +274,7 @@ const CountryDetailPageNew: React.FC = () => {
       <SeoHead
         title={country.name}
         description={pageDescription}
-        canonicalPath={`/destinations/${country.slug}`}
+        canonicalPath={`/destinations/${country.slug}/`}
         image={pageImage}
         type="article"
         keywords={[
@@ -241,31 +282,7 @@ const CountryDetailPageNew: React.FC = () => {
           country.region?.name,
           'destination', 'travel', 'vacation', 'tour',
         ].filter(Boolean) as string[]}
-        structuredData={[
-          {
-            '@context': 'https://schema.org',
-            '@type': 'TouristDestination',
-            name: country.name,
-            description: pageDescription,
-            image: pageImage,
-            url: buildAbsoluteUrl(`/destinations/${country.slug}`),
-            includesAttraction: (country.attractions || []).slice(0, 5).map((a: any) => ({
-              '@type': 'TouristAttraction',
-              name: a.name,
-            })),
-            provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
-          },
-          {
-            '@context': 'https://schema.org',
-            '@type': 'BreadcrumbList',
-            itemListElement: [
-              { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-              { '@type': 'ListItem', position: 2, name: 'Destinations', item: buildAbsoluteUrl('/destinations') },
-              ...(country.region ? [{ '@type': 'ListItem', position: 3, name: country.region.name, item: buildAbsoluteUrl(`/regions/${country.region.slug}`) }] : []),
-              { '@type': 'ListItem', position: country.region ? 4 : 3, name: country.name, item: buildAbsoluteUrl(`/destinations/${country.slug}`) },
-            ],
-          },
-        ]}
+        structuredData={countryGraph}
       />
 
       {/* Skip to Content Link for Keyboard Navigation */}
@@ -286,7 +303,7 @@ const CountryDetailPageNew: React.FC = () => {
       <DestinationHeroSection country={country} />
 
       {/* Main Content Area - Scrollable Sections */}
-      <main id="main-content" className="bg-gray-50 flex-grow">
+      <div id="main-content" className="bg-gray-50 flex-grow">
         {/* Section Navigation */}
         <SectionNavigation
           sections={[
@@ -306,6 +323,12 @@ const CountryDetailPageNew: React.FC = () => {
         <div className="fluid-container py-8">
           {/* Overview Section */}
           <section id="overview" className="scroll-mt-24 mb-20">
+            {formattedUpdatedAt && (
+              <p className="text-xs text-gray-500 mb-3 text-right">
+                Last updated:{' '}
+                <time dateTime={country.updated_at}>{formattedUpdatedAt}</time>
+              </p>
+            )}
             <DestinationOverviewSection country={country} />
           </section>
 
@@ -369,13 +392,59 @@ const CountryDetailPageNew: React.FC = () => {
             </div>
           </section>
 
-          {/* Blog Section */}
-          <section id="blog" className="scroll-mt-24 mb-20">
-            <div className="bg-white rounded-2xl border border-gray-200/60 p-6 md:p-8 shadow-sm">
-              <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">Latest from our Blog</h2>
-              <div className="text-gray-600">Coming soon... Discover travel stories and tips for {country.name}.</div>
-            </div>
-          </section>
+          {/* Related Blog Posts (only rendered when matching articles exist) */}
+          {countryBlogs.length > 0 && (
+            <section id="blog" className="scroll-mt-24 mb-20">
+              <div className="bg-white rounded-2xl border border-gray-200/60 p-6 md:p-8 shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-playfair font-bold text-gray-900">
+                    {country.name} Travel Stories &amp; Guides
+                  </h2>
+                  <Link
+                    to="/blog/"
+                    className="text-sm font-semibold text-primary hover:text-primary-dark transition-colors"
+                  >
+                    View all articles &rarr;
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {countryBlogs.map((post) => (
+                    <article
+                      key={post.id}
+                      className="group border border-gray-200/80 rounded-xl overflow-hidden hover:shadow-md transition-shadow flex flex-col"
+                    >
+                      {post.cover_image_id && (
+                        <Link to={`/blog/${post.slug}/`} className="block h-44 overflow-hidden bg-gray-100">
+                          <img
+                            src={getImageUrlWithFallback(post.cover_image_id, IMAGE_VARIANTS.MEDIUM)}
+                            alt={post.title}
+                            loading="lazy"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </Link>
+                      )}
+                      <div className="p-4 flex flex-col flex-grow">
+                        <h3 className="text-lg font-playfair font-bold text-gray-900 group-hover:text-primary transition-colors mb-2 line-clamp-2">
+                          <Link to={`/blog/${post.slug}/`}>{post.title}</Link>
+                        </h3>
+                        {post.summary && (
+                          <p className="text-sm text-gray-600 line-clamp-3 mb-3 flex-grow">
+                            {post.summary.replace(/<[^>]*>/g, '')}
+                          </p>
+                        )}
+                        <Link
+                          to={`/blog/${post.slug}/`}
+                          className="text-sm font-semibold text-primary hover:text-primary-dark mt-auto"
+                        >
+                          Read guide &rarr;
+                        </Link>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
         </div>
 
         {/* Share Destination - Full Width */}
@@ -398,7 +467,7 @@ const CountryDetailPageNew: React.FC = () => {
             </Suspense>
           </section>
         </div>
-      </main>
+      </div>
     </DestinationErrorBoundary>
   );
 };

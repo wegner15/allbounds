@@ -196,6 +196,7 @@ class BlogPostSummary(BaseModel):
     cover_image_url: Optional[str] = None
     published_at: Optional[datetime] = None
     created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
     is_published: bool = True
     
     class Config:
@@ -221,7 +222,7 @@ class PackageDetailResponse(BaseModel):
     package_type: str = "safari"
     highlights: Optional[List[str]] = None
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
     
     # Relationships
     country: CountrySummary

@@ -52,7 +52,7 @@ const AttractionsSection: React.FC<AttractionsSectionProps> = React.memo(({
         {/* View All Link - Only show if there are more than 8 attractions */}
         {attractions.filter(attraction => attraction.is_active).length > 8 && (
           <Link
-            to={`/attractions?country=${countrySlug}`}
+            to={`/attractions/?country=${countrySlug}`}
             className="hidden sm:flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium transition-colors group min-h-[44px] flex-shrink-0"
             aria-label={`View all attractions in ${countryName}`}
           >
@@ -73,7 +73,7 @@ const AttractionsSection: React.FC<AttractionsSectionProps> = React.memo(({
       {attractions.filter(attraction => attraction.is_active).length > 8 && (
         <div className="mt-4 md:mt-6 sm:hidden">
           <Link
-            to={`/attractions?country=${countrySlug}`}
+            to={`/attractions/?country=${countrySlug}`}
             className="flex items-center justify-center space-x-2 w-full py-3 px-4 min-h-[44px] bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white font-medium rounded-lg transition-colors"
             aria-label={`View all attractions in ${countryName}`}
           >

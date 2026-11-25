@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import {
   SITE_URL,
@@ -9,10 +9,12 @@ import {
   DEFAULT_OG_IMAGE_HEIGHT,
   DEFAULT_LOCALE,
   DEFAULT_DESCRIPTION,
-  buildAbsoluteUrl,
+  normalizeCanonicalUrl,
 } from '../../lib/seo-config';
 
-type StructuredData = Record<string, unknown>;
+import type { JsonLdGraph } from '../../lib/schema-builders';
+
+type StructuredData = Record<string, unknown> | JsonLdGraph;
 
 export interface SeoHeadProps {
   title: string;
@@ -78,9 +80,9 @@ const SeoHead: React.FC<SeoHeadProps> = ({
   const rawCanonical = canonicalUrl
     ? canonicalUrl
     : canonicalPath
-      ? buildAbsoluteUrl(canonicalPath)
+      ? normalizeCanonicalUrl(canonicalPath)
       : (typeof window !== 'undefined' ? window.location.href : SITE_URL);
-  const canonical = buildAbsoluteUrl(rawCanonical);
+  const canonical = normalizeCanonicalUrl(rawCanonical);
 
   const ogImage = image || DEFAULT_OG_IMAGE;
   const ogImageWidth = imageWidth ?? (image ? undefined : DEFAULT_OG_IMAGE_WIDTH);
@@ -91,6 +93,18 @@ const SeoHead: React.FC<SeoHeadProps> = ({
   const jsonLdItems = structuredData
     ? (Array.isArray(structuredData) ? structuredData : [structuredData])
     : [];
+
+  // Deduplicate SSR-injected JSON-LD scripts from `_worker.js` once Helmet manages JSON-LD on the client.
+  useEffect(() => {
+    if (typeof document === 'undefined' || jsonLdItems.length === 0) return;
+
+    const ssrScripts = document.querySelectorAll(
+      'script[data-ssr-jsonld="true"], script[type="application/ld+json"]:not([data-rh="true"])'
+    );
+    ssrScripts.forEach((script) => {
+      script.parentNode?.removeChild(script);
+    });
+  }, [canonical, jsonLdItems.length]);
 
   const isArticle = type === 'article';
 

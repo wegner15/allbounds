@@ -27,7 +27,7 @@ class RegionResponse(RegionBase):
     slug: str = Field(..., description="URL-friendly slug for the region", example="africa")
     is_active: bool = Field(..., description="Whether the region is active")
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
     
     class Config:
         from_attributes = True

@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import CloudflareImage from '../../components/ui/CloudflareImage';
 import SeoHead from '../../components/seo/SeoHead';
+import { buildCollectionPageGraph } from '../../lib/schema-builders';
 
 // API Hooks
 import { useHolidayTypeBySlug } from '../../lib/hooks/useHolidayTypes';
@@ -150,7 +151,7 @@ const HolidayTypeDetailPage: React.FC = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
             <p>Error loading holiday type details. Please try again later.</p>
-            <Link to="/holiday-types" className="text-red-700 underline mt-2 inline-block">
+            <Link to="/holiday-types/" className="text-red-700 underline mt-2 inline-block">
               Back to Holiday Types
             </Link>
           </div>
@@ -159,13 +160,58 @@ const HolidayTypeDetailPage: React.FC = () => {
     );
   }
 
+  const canonicalHolidayPath = `/holiday-types/${holidayType.slug}/`;
+  const holidayDescription = holidayType.description
+    ? stripHtml(holidayType.description).replace(/\s+/g, ' ').trim()
+    : `Explore ${holidayType.name} holidays with Allbound Vacations.`;
+
+  const holidayTypeUpdatedAt = (holidayType as any).updated_at as string | undefined;
+  const formattedUpdatedAt = holidayTypeUpdatedAt
+    ? new Date(holidayTypeUpdatedAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : null;
+
+  const holidayCollectionItems = [
+    ...(packages || []).map((pkg) => ({
+      name: pkg.name,
+      url: pkg.country?.slug ? `/packages/${pkg.country.slug}/${pkg.slug}/` : `/packages/${pkg.slug}/`,
+      description: pkg.summary || pkg.description,
+    })),
+    ...(featuredDestinations || []).map((dest) => ({
+      name: dest.name,
+      url: `/destinations/${dest.slug}/`,
+      description: dest.description,
+    })),
+  ];
+
+  const holidayGraph = buildCollectionPageGraph({
+    name: `${holidayType.name} Holidays`,
+    description: holidayDescription,
+    canonicalPath: canonicalHolidayPath,
+    items: holidayCollectionItems,
+    dateModified: holidayTypeUpdatedAt,
+    breadcrumbs: [
+      { name: 'Home', url: '/' },
+      { name: 'Holiday Types', url: '/holiday-types/' },
+      { name: holidayType.name, url: canonicalHolidayPath },
+    ],
+  });
+
+  const destinationCount = featuredDestinations?.length || 0;
+  const packageCount = packages?.length || 0;
+  const groupTripCount = groupTrips?.length || 0;
+
   return (
     <>
       <SeoHead
         title={`${holidayType.name} Holidays`}
-        description={holidayType.description || undefined}
-        canonicalPath={`/holiday-types/${holidayType.slug}`}
+        description={holidayDescription}
+        canonicalPath={canonicalHolidayPath}
         image="/home-heros/hero3.webp"
+        structuredData={holidayGraph}
       />
 
       {/* Enhanced Hero Section */}
@@ -196,7 +242,7 @@ const HolidayTypeDetailPage: React.FC = () => {
             <div className="bg-black/20 backdrop-blur-sm rounded-md px-3 py-1.5 mb-8 inline-block">
               <Breadcrumb
                 items={[
-                  { label: 'Holiday Types', path: '/holiday-types' },
+                  { label: 'Holiday Types', path: '/holiday-types/' },
                   { label: holidayType.name },
                 ]}
                 variant="dark"
@@ -230,38 +276,42 @@ const HolidayTypeDetailPage: React.FC = () => {
 
             <div className="flex flex-wrap gap-4 mb-8">
               <Link
-                to={`/packages?holidayType=${holidayType.slug}`}
+                to={`/packages/?holidayType=${holidayType.slug}`}
                 className="bg-teal hover:bg-teal/90 text-white px-8 py-4 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
                 Explore Packages
               </Link>
               <Link
-                to={`/group-trips?holidayType=${holidayType.slug}`}
+                to={`/group-trips/?holidayType=${holidayType.slug}`}
                 className="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-8 py-4 rounded-lg font-semibold backdrop-blur-sm transition-all duration-300"
               >
                 View Group Trips
               </Link>
             </div>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white mb-1">50+</div>
-                <div className="text-sm text-white/80">Destinations</div>
+            {/* Quick Stats (computed from real API data only) */}
+            {(destinationCount > 0 || packageCount > 0 || groupTripCount > 0) && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mt-12">
+                {destinationCount > 0 && (
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-white mb-1">{destinationCount}</div>
+                    <div className="text-sm text-white/80">{destinationCount === 1 ? 'Destination' : 'Destinations'}</div>
+                  </div>
+                )}
+                {packageCount > 0 && (
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-white mb-1">{packageCount}</div>
+                    <div className="text-sm text-white/80">{packageCount === 1 ? 'Tour Package' : 'Tour Packages'}</div>
+                  </div>
+                )}
+                {groupTripCount > 0 && (
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-white mb-1">{groupTripCount}</div>
+                    <div className="text-sm text-white/80">{groupTripCount === 1 ? 'Group Trip' : 'Group Trips'}</div>
+                  </div>
+                )}
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white mb-1">1000+</div>
-                <div className="text-sm text-white/80">Happy Travelers</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white mb-1">4.9</div>
-                <div className="text-sm text-white/80">Average Rating</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white mb-1">24/7</div>
-                <div className="text-sm text-white/80">Support</div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -271,6 +321,12 @@ const HolidayTypeDetailPage: React.FC = () => {
         <div className="py-16 bg-white border-b border-gray-100">
           <div className="container mx-auto px-4 md:px-8">
             <div className="max-w-6xl mx-auto text-center">
+              {formattedUpdatedAt && (
+                <p className="text-xs text-gray-500 mb-4">
+                  Last updated:{' '}
+                  <time dateTime={holidayTypeUpdatedAt}>{formattedUpdatedAt}</time>
+                </p>
+              )}
               <div
                 className="text-lg md:text-xl lg:text-2xl text-charcoal leading-relaxed font-playfair px-2 sm:px-6"
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(holidayType.description || '') }}
@@ -338,7 +394,7 @@ const HolidayTypeDetailPage: React.FC = () => {
                 {featuredDestinations.map((destination) => (
                   <Link
                     key={destination.id}
-                    to={`/destinations/${destination.slug}`}
+                    to={`/destinations/${destination.slug}/`}
                     className="group block overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
                   >
                     <div className="relative h-80">
@@ -405,7 +461,7 @@ const HolidayTypeDetailPage: React.FC = () => {
                 {packages.map((pkg) => (
                   <Link
                     key={pkg.id}
-                    to={`/packages/${pkg.country?.slug || 'unknown'}/${pkg.slug}`}
+                    to={pkg.country?.slug ? `/packages/${pkg.country.slug}/${pkg.slug}/` : `/packages/${pkg.slug}/`}
                     className="group block bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden"
                   >
                     <div className="relative h-64">
@@ -414,13 +470,17 @@ const HolidayTypeDetailPage: React.FC = () => {
                         alt={pkg.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
-                        <div className="flex items-center space-x-1">
-                          <span className="text-yellow-400">★</span>
-                          <span className="text-sm font-semibold text-charcoal">{pkg.rating || 4.5}</span>
-                          <span className="text-xs text-gray-600">({pkg.review_count || 0})</span>
+                      {pkg.rating && (
+                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
+                          <div className="flex items-center space-x-1">
+                            <span className="text-yellow-400">★</span>
+                            <span className="text-sm font-semibold text-charcoal">{pkg.rating}</span>
+                            {pkg.review_count ? (
+                              <span className="text-xs text-gray-600">({pkg.review_count})</span>
+                            ) : null}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
 
                     <div className="p-6">
@@ -465,7 +525,7 @@ const HolidayTypeDetailPage: React.FC = () => {
 
             <div className="text-center mt-12">
               <Link
-                to={`/packages?holidayType=${holidayType.slug}`}
+                to={`/packages/?holidayType=${holidayType.slug}`}
                 className="inline-flex items-center space-x-2 bg-charcoal hover:bg-hover text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
                 <span>View All {holidayType.name} Packages</span>
@@ -507,7 +567,7 @@ const HolidayTypeDetailPage: React.FC = () => {
                 {groupTrips.map((trip) => (
                   <Link
                     key={trip.id}
-                    to={`/group-trips/${trip.slug}`}
+                    to={`/group-trips/${trip.slug}/`}
                     className="group block bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden"
                   >
                     <div className="relative h-64">
@@ -569,7 +629,7 @@ const HolidayTypeDetailPage: React.FC = () => {
 
             <div className="text-center mt-12">
               <Link
-                to={`/group-trips?holidayType=${holidayType.slug}`}
+                to={`/group-trips/?holidayType=${holidayType.slug}`}
                 className="inline-flex items-center space-x-2 bg-teal hover:bg-teal/90 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
                 <span>Explore All Group Trips</span>
@@ -750,13 +810,13 @@ const HolidayTypeDetailPage: React.FC = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                to="/contact"
+                to="/contact-us/"
                 className="bg-white text-teal px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors shadow-lg"
               >
                 Get Free Consultation
               </Link>
               <Link
-                to="/packages"
+                to="/packages/"
                 className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-teal transition-all duration-300"
               >
                 Browse All Packages

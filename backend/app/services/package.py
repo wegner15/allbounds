@@ -504,6 +504,8 @@ class PackageService:
             "is_active": package.is_active,
             "is_featured": package.is_featured,
             "package_type": getattr(package, 'package_type', 'safari') or 'safari',
+            "created_at": package.created_at,
+            "updated_at": package.updated_at,
         }
     
     def create_package(self, db: Session, package_create: PackageCreate) -> Package:

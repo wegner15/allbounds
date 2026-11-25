@@ -15,8 +15,8 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    minify: false, // Disable minification temporarily to debug
-    sourcemap: true, // Enable source maps
+    minify: 'esbuild',
+    sourcemap: false,
     commonjsOptions: {
       // Handle Leaflet's CommonJS modules properly
       transformMixedEsModules: true,

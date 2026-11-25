@@ -51,7 +51,7 @@ class CountryResponse(CountryBase):
     slug: str = Field(..., description="URL-friendly slug for the country", example="kenya")
     is_active: bool = Field(..., description="Whether the country is active")
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
     package_count: Optional[int] = 0
     media_assets: List[MediaAssetResponse] = Field(default_factory=list)
     

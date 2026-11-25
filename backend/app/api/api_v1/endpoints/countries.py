@@ -1,6 +1,6 @@
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
@@ -11,6 +11,7 @@ from app.schemas.region import RegionResponse
 from app.schemas.country_visit_info import CountryVisitInfo, CountryVisitInfoCreate, CountryVisitInfoUpdate
 from app.services.country import country_service
 from app.services.country_visit_info import country_visit_info_service
+from app.services.indexnow import notify_entity_change
 from app.auth.dependencies import get_current_user, has_permission
 
 router = APIRouter()
@@ -188,12 +189,14 @@ def create_country(
     *,
     db: Session = Depends(get_db),
     country_in: CountryCreate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:create")),
 ) -> Any:
     """
     Create new country.
     """
     country = country_service.create_country(db, country_in)
+    notify_entity_change(background_tasks, "country", country)
     return CountryResponse.from_orm(country)
 
 @router.put("/{country_id}", response_model=CountryResponse)
@@ -202,6 +205,7 @@ def update_country(
     db: Session = Depends(get_db),
     country_id: int,
     country_in: CountryUpdate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:update")),
 ) -> Any:
     """
@@ -211,6 +215,12 @@ def update_country(
     from app.core.redis_cache import invalidate_cache_pattern
     invalidate_cache_pattern(f"*get_country_details_by_slug*")
     invalidate_cache_pattern(f"*get_countries*")
+    notify_entity_change(
+        background_tasks,
+        "country",
+        country,
+        force=getattr(country_in, "is_active", None) is False,
+    )
     return CountryResponse.from_orm(country)
 
 

@@ -58,6 +58,13 @@ class Settings(BaseSettings):
     
     # Project settings
     PROJECT_NAME: str = "Allbounds API"
+    PUBLIC_SITE_URL: str = os.getenv("PUBLIC_SITE_URL", "https://allboundvacations.com")
+
+    # IndexNow settings (Bing, ChatGPT Search, Copilot, Perplexity, etc.)
+    # Disabled by default so local dev/tests never spam IndexNow.
+    # In production, set INDEXNOW_KEY and INDEXNOW_ENABLED=true.
+    INDEXNOW_KEY: Optional[str] = os.getenv("INDEXNOW_KEY")
+    INDEXNOW_ENABLED: bool = os.getenv("INDEXNOW_ENABLED", "false").lower() == "true"
     
     # Observability settings
     ENABLE_TRACING: bool = os.getenv("ENABLE_TRACING", "false").lower() == "true"

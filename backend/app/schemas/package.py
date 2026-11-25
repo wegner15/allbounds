@@ -77,7 +77,7 @@ class PackageResponse(PackageBase):
     package_type: str = Field("safari", description="Package type: 'safari' or 'holiday'")
     is_published: bool = Field(..., description="Whether the package is published")
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
     published_at: Optional[datetime] = None
     holiday_types: List[HolidayTypeResponse] = []
     inclusion_items: List[InclusionResponse] = []
@@ -122,6 +122,7 @@ class PackageListResponse(BaseModel):
     is_deal: bool
     package_type: str = "safari"
     created_at: datetime
+    updated_at: Optional[datetime] = None
     country: CountryResponse  # Only load country, not all relationships
     countries: List[CountryResponse] = []  # Additional destinations
     tags: List[ContentTagResponse] = []  # Tags for filtering

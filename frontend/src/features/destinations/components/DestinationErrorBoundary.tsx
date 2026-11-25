@@ -114,7 +114,7 @@ export class DestinationErrorBoundary extends Component<Props, State> {
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <p className="text-sm text-gray-500">
                   If this problem persists, please{' '}
-                  <Link to="/contact" className="text-primary hover:text-primary-dark font-semibold">
+                  <Link to="/contact-us/" className="text-primary hover:text-primary-dark font-semibold">
                     contact our support team
                   </Link>
                   .

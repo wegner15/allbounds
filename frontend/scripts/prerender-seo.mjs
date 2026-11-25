@@ -19,6 +19,10 @@ const API_BASE_URL = (
   'https://api.allboundvacations.com/api/v1'
 ).replace(/\/+$/, '');
 
+const ALLOW_OFFLINE_BUILD = process.env.ALLOW_OFFLINE_BUILD === 'true';
+const PAGE_LIMIT = 100;
+const MAX_PAGES = 50;
+
 const CLOUDFLARE_DELIVERY_URL = 'https://imagedelivery.net/4J4CgzUI_LpQRpA_N1TErQ';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/logo/og-default.png`;
 const SITE_NAME = 'Allbound Vacations';
@@ -114,8 +118,8 @@ const staticPages = [
         '@type': 'CollectionPage',
         name: 'Destinations',
         description: 'Explore breathtaking African destinations with Allbound Vacations.',
-        url: `${SITE_URL}/destinations`,
-        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        url: buildAbsoluteUrl('/destinations'),
+        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: buildAbsoluteUrl('/') },
       },
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
@@ -135,8 +139,8 @@ const staticPages = [
         '@type': 'CollectionPage',
         name: 'Tour Packages',
         description: 'Discover curated safari packages, wildlife tours, and luxury adventures crafted for unforgettable memories.',
-        url: `${SITE_URL}/packages`,
-        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        url: buildAbsoluteUrl('/packages'),
+        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: buildAbsoluteUrl('/') },
       },
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
@@ -156,8 +160,8 @@ const staticPages = [
         '@type': 'CollectionPage',
         name: 'Hotels & Luxury Lodges',
         description: 'Find handpicked luxury safari lodges, boutique hotels, and beachfront resorts across East Africa.',
-        url: `${SITE_URL}/hotels`,
-        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        url: buildAbsoluteUrl('/hotels'),
+        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: buildAbsoluteUrl('/') },
       },
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
@@ -177,8 +181,8 @@ const staticPages = [
         '@type': 'CollectionPage',
         name: 'Activities & Experiences',
         description: 'Explore exciting activities from gorilla trekking and hot air balloon safaris to cultural encounters.',
-        url: `${SITE_URL}/activities`,
-        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        url: buildAbsoluteUrl('/activities'),
+        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: buildAbsoluteUrl('/') },
       },
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
@@ -198,8 +202,8 @@ const staticPages = [
         '@type': 'CollectionPage',
         name: 'Top Attractions',
         description: 'Discover famous national parks, waterfalls, mountains, and wildlife reserves across Africa.',
-        url: `${SITE_URL}/attractions`,
-        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        url: buildAbsoluteUrl('/attractions'),
+        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: buildAbsoluteUrl('/') },
       },
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
@@ -219,8 +223,8 @@ const staticPages = [
         '@type': 'CollectionPage',
         name: 'Group Trips',
         description: 'Join scheduled group trips and expeditions with fellow travelers to extraordinary destinations.',
-        url: `${SITE_URL}/group-trips`,
-        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        url: buildAbsoluteUrl('/group-trips'),
+        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: buildAbsoluteUrl('/') },
       },
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
@@ -240,8 +244,8 @@ const staticPages = [
         '@type': 'CollectionPage',
         name: 'Holiday Types',
         description: 'Explore tours by holiday style: Wildlife Safari, Gorilla Trekking, Beach Holidays, Honeymoons, and more.',
-        url: `${SITE_URL}/holiday-types`,
-        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        url: buildAbsoluteUrl('/holiday-types'),
+        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: buildAbsoluteUrl('/') },
       },
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
@@ -261,8 +265,8 @@ const staticPages = [
         '@type': 'Blog',
         name: 'Allbound Vacations Blog',
         description: 'Read travel inspiration, safari guides, packing tips, and destination stories from our expert team.',
-        url: `${SITE_URL}/blog`,
-        publisher: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+        url: buildAbsoluteUrl('/blog'),
+        publisher: { '@type': 'Organization', name: SITE_NAME, url: buildAbsoluteUrl('/') },
       },
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
@@ -282,8 +286,8 @@ const staticPages = [
         '@type': 'AboutPage',
         name: 'About Us',
         description: 'Learn about Allbound Vacations — our mission, passion for authentic African travel, and dedicated team.',
-        url: `${SITE_URL}/about-us`,
-        mainEntity: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        url: buildAbsoluteUrl('/about-us'),
+        mainEntity: { '@type': 'TravelAgency', name: SITE_NAME, url: buildAbsoluteUrl('/') },
       },
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
@@ -303,11 +307,11 @@ const staticPages = [
         '@type': 'ContactPage',
         name: 'Contact Us',
         description: 'Get in touch with the Allbound Vacations travel team for customized itineraries, quotes, and inquiries.',
-        url: `${SITE_URL}/contact-us`,
+        url: buildAbsoluteUrl('/contact-us'),
         mainEntity: {
           '@type': 'TravelAgency',
           name: SITE_NAME,
-          url: SITE_URL,
+          url: buildAbsoluteUrl('/'),
           telephone: '+256-782-594-008',
           email: 'bookings@allboundvacations.com',
         },
@@ -386,8 +390,8 @@ const staticPages = [
         '@type': 'CollectionPage',
         name: 'Regions',
         description: 'Explore our diverse regions across Africa.',
-        url: `${SITE_URL}/regions`,
-        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        url: buildAbsoluteUrl('/regions'),
+        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: buildAbsoluteUrl('/') },
       },
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
@@ -397,18 +401,12 @@ const staticPages = [
     ],
   },
   {
-    path: '/stays',
-    title: `Luxury Stays & Accommodations | ${SITE_NAME}`,
-    heading: 'Handpicked Safari Lodges & Boutique Stays',
-    description: 'Discover handpicked safari lodges, tented camps, and luxury beach resorts across Africa.',
-    type: 'website',
-  },
-  {
     path: '/contact',
     title: `Contact Form | ${SITE_NAME}`,
     heading: 'Get in Touch',
     description: 'Send us a message to start planning your African safari adventure.',
     type: 'website',
+    noIndex: true,
   },
 ];
 
@@ -452,18 +450,48 @@ const destinationCategories = [
 ];
 
 async function fetchList(path) {
-  try {
-    const sep = path.includes('?') ? '&' : '?';
-    const url = `${API_BASE_URL}/${path.replace(/^\/+/, '')}${sep}limit=200`;
-    const res = await fetch(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(8000) });
-    if (!res.ok) return [];
-    const data = await res.json();
-    if (Array.isArray(data)) return data;
-    if (data && Array.isArray(data.items)) return data.items;
-    return [];
-  } catch (err) {
-    return [];
+  const allItems = [];
+  const normalizedBase = API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`;
+  const normalizedPath = path.replace(/^\/+/, '');
+
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const skip = page * PAGE_LIMIT;
+    const url = new URL(normalizedPath, normalizedBase);
+    url.searchParams.set('skip', String(skip));
+    url.searchParams.set('limit', String(PAGE_LIMIT));
+
+    try {
+      const res = await fetch(url.toString(), {
+        headers: { Accept: 'application/json' },
+        signal: AbortSignal.timeout(15000),
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} for ${path} (skip=${skip}, limit=${PAGE_LIMIT})`);
+      }
+
+      const data = await res.json();
+      const pageItems = Array.isArray(data) ? data : (data && Array.isArray(data.items) ? data.items : []);
+      allItems.push(...pageItems);
+
+      if (pageItems.length < PAGE_LIMIT) {
+        break;
+      }
+
+      if (page === MAX_PAGES - 1) {
+        console.warn(`[prerender-seo] Pagination hit MAX_PAGES (${MAX_PAGES}) cap for ${path}; collected ${allItems.length} items.`);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (ALLOW_OFFLINE_BUILD) {
+        console.warn(`[prerender-seo] Fetch failed for ${path} (ALLOW_OFFLINE_BUILD=true, continuing): ${message}`);
+        return allItems;
+      }
+      throw new Error(`[prerender-seo] Fetch failed for ${path}: ${message}`);
+    }
   }
+
+  return allItems;
 }
 
 function renderHtml(template, { title, heading, description, canonicalUrl, image, type = 'website', jsonLd, noIndex = false }) {
@@ -559,7 +587,7 @@ async function main() {
 
   // 1. Static pages
   for (const page of staticPages) {
-    const canonicalUrl = `${SITE_URL}${page.path}`;
+    const canonicalUrl = buildAbsoluteUrl(page.path);
     const html = renderHtml(template, {
       title: page.title,
       heading: page.heading,
@@ -568,6 +596,7 @@ async function main() {
       image: DEFAULT_OG_IMAGE,
       type: page.type,
       jsonLd: page.jsonLd,
+      noIndex: Boolean(page.noIndex),
     });
     await writePage(page.path, html);
     count++;
@@ -606,7 +635,7 @@ async function main() {
   ];
 
   for (const page of appShellPages) {
-    const canonicalUrl = `${SITE_URL}${page.path}`;
+    const canonicalUrl = buildAbsoluteUrl(page.path);
     const html = renderHtml(template, {
       title: page.title,
       heading: page.heading,
@@ -642,7 +671,7 @@ async function main() {
     const title = `${pkg.name} | ${SITE_NAME}`;
     const description = cleanText(pkg.summary || pkg.description) || `Explore ${pkg.name} with ${SITE_NAME}.`;
     const image = getImageUrl(pkg.image_id || pkg.cover_image);
-    const canonicalUrl = `${SITE_URL}${canonicalPath}`;
+    const canonicalUrl = buildAbsoluteUrl(canonicalPath);
     const jsonLd = [
       {
         '@context': 'https://schema.org',
@@ -651,7 +680,7 @@ async function main() {
         description,
         image,
         url: canonicalUrl,
-        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: buildAbsoluteUrl('/') },
       },
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
@@ -661,13 +690,8 @@ async function main() {
       ]),
     ];
     const html = renderHtml(template, { title, heading: pkg.name, description, canonicalUrl, image, type: 'article', jsonLd });
-    await writePage(path, html);
+    await writePage(canonicalPath, html);
     count++;
-
-    if (countrySlug) {
-      await writePage(canonicalPath, html);
-      count++;
-    }
   }
 
   // Blog Posts
@@ -677,7 +701,7 @@ async function main() {
     const title = `${blog.title} | ${SITE_NAME}`;
     const description = cleanText(blog.summary || blog.content) || `Read ${blog.title} on ${SITE_NAME}.`;
     const image = getImageUrl(blog.cover_image_id || blog.cover_image);
-    const canonicalUrl = `${SITE_URL}${path}`;
+    const canonicalUrl = buildAbsoluteUrl(path);
     const jsonLd = [
       {
         '@context': 'https://schema.org',
@@ -687,8 +711,8 @@ async function main() {
         image,
         url: canonicalUrl,
         datePublished: blog.published_at || blog.created_at,
-        author: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
-        publisher: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+        author: { '@type': 'Organization', name: SITE_NAME, url: buildAbsoluteUrl('/') },
+        publisher: { '@type': 'Organization', name: SITE_NAME, url: buildAbsoluteUrl('/') },
       },
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
@@ -708,7 +732,7 @@ async function main() {
     const title = `${country.name} Tours & Travel Guide | ${SITE_NAME}`;
     const description = cleanText(country.description) || `Discover travel experiences, safari packages, and hotels in ${country.name}.`;
     const image = getImageUrl(country.image_id || country.cover_image);
-    const canonicalUrl = `${SITE_URL}${path}`;
+    const canonicalUrl = buildAbsoluteUrl(path);
     const jsonLd = [
       {
         '@context': 'https://schema.org',
@@ -728,24 +752,6 @@ async function main() {
     await writePage(path, html);
     count++;
 
-    // Country Legacy / Redirect Paths (/countries/:slug & /destinations/countries/:slug)
-    await writePage(`/countries/${country.slug}`, html);
-    await writePage(`/destinations/countries/${country.slug}`, html);
-    count += 2;
-
-    // Country Booking Page (/destinations/:slug/book)
-    const bookPath = `/destinations/${country.slug}/book`;
-    const bookHtml = renderHtml(template, {
-      title: `Book Your ${country.name} Trip | ${SITE_NAME}`,
-      heading: `Book Your ${country.name} Safari & Vacation`,
-      description: `Plan and book your custom safari or holiday in ${country.name} with ${SITE_NAME}.`,
-      canonicalUrl: `${SITE_URL}${bookPath}`,
-      image,
-      type: 'website',
-    });
-    await writePage(bookPath, bookHtml);
-    count++;
-
     // Destination Category Pages (/destinations/:slug/:category)
     for (const cat of destinationCategories) {
       const catPath = `/destinations/${country.slug}/${cat.slug}`;
@@ -754,7 +760,7 @@ async function main() {
       const catTitle = `${catHeading} | ${SITE_NAME}`;
       const catDescription =
         cleanText(customIntro?.description) || cleanText(cat.getDescription(country.name));
-      const catCanonicalUrl = `${SITE_URL}${catPath}`;
+      const catCanonicalUrl = buildAbsoluteUrl(catPath);
       const catJsonLd = [
         {
           '@context': 'https://schema.org',
@@ -763,7 +769,7 @@ async function main() {
           description: catDescription,
           image,
           url: catCanonicalUrl,
-          provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+          provider: { '@type': 'TravelAgency', name: SITE_NAME, url: buildAbsoluteUrl('/') },
         },
         makeBreadcrumbs([
           { name: 'Home', url: '/' },
@@ -786,17 +792,16 @@ async function main() {
     }
   }
 
-  // Regions (/regions/:slug and /destinations/regions/:slug)
+  // Regions (/regions/:slug only; /destinations/regions/:slug 308-redirects)
   for (const region of regions) {
     if (!region?.slug) continue;
     const path = `/regions/${region.slug}`;
-    const destRegionPath = `/destinations/regions/${region.slug}`;
     const title = `${region.name} Safari & Travel Guide | ${SITE_NAME}`;
     const description =
       cleanText(region.description || region.summary) ||
       `Explore countries, safaris, and travel experiences in ${region.name} with ${SITE_NAME}.`;
     const image = getImageUrl(region.image_id || region.cover_image);
-    const canonicalUrl = `${SITE_URL}${path}`;
+    const canonicalUrl = buildAbsoluteUrl(path);
     const jsonLd = [
       {
         '@context': 'https://schema.org',
@@ -823,8 +828,7 @@ async function main() {
       jsonLd,
     });
     await writePage(path, html);
-    await writePage(destRegionPath, html);
-    count += 2;
+    count++;
   }
 
   // Holiday Types (/holiday-types/:slug)
@@ -836,7 +840,7 @@ async function main() {
       cleanText(ht.description || ht.summary) ||
       `Explore curated ${ht.name} packages, group trips, and experiences across Africa with ${SITE_NAME}.`;
     const image = getImageUrl(ht.image_id || ht.cover_image);
-    const canonicalUrl = `${SITE_URL}${path}`;
+    const canonicalUrl = buildAbsoluteUrl(path);
     const jsonLd = [
       {
         '@context': 'https://schema.org',
@@ -845,7 +849,7 @@ async function main() {
         description,
         image,
         url: canonicalUrl,
-        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: buildAbsoluteUrl('/') },
       },
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
@@ -866,19 +870,15 @@ async function main() {
     count++;
   }
 
-  // Hotels
+  // Hotels (/hotels/:slug only; nested country routes 308-redirect)
   for (const hotel of hotels) {
     if (!hotel?.slug) continue;
     const path = `/hotels/${hotel.slug}`;
-    const countrySlug = hotel.country?.slug || (typeof hotel.country === 'string' ? hotel.country.toLowerCase() : undefined);
-    const destPath = countrySlug ? `/destinations/${countrySlug}/hotels/${hotel.slug}` : undefined;
-    const nestedHotelPath = countrySlug ? `/hotels/${countrySlug}/${hotel.slug}` : undefined;
     const title = `${hotel.name.trim()} | ${SITE_NAME}`;
     const description = cleanText(hotel.summary || hotel.description) || `Book your luxury stay at ${hotel.name.trim()} with ${SITE_NAME}.`;
     const image = getImageUrl(hotel.cover_image || hotel.image_id || hotel.media_assets?.[0]?.file_path);
 
-    // 1. Root /hotels/:slug
-    const rootCanonical = `${SITE_URL}${path}`;
+    const rootCanonical = buildAbsoluteUrl(path);
     const rootJsonLd = [
       {
         '@context': 'https://schema.org',
@@ -901,74 +901,17 @@ async function main() {
     ];
     await writePage(path, renderHtml(template, { title, heading: hotel.name.trim(), description, canonicalUrl: rootCanonical, image, type: 'article', jsonLd: rootJsonLd }));
     count++;
-
-    if (countrySlug) {
-      // 2. Nested /hotels/:country/:slug
-      const nestedJsonLd = [
-        {
-          '@context': 'https://schema.org',
-          '@type': 'LodgingBusiness',
-          name: hotel.name.trim(),
-          description,
-          image,
-          url: rootCanonical,
-          starRating: hotel.stars ? { '@type': 'Rating', ratingValue: hotel.stars } : undefined,
-          address: hotel.country ? {
-            '@type': 'PostalAddress',
-            addressCountry: hotel.country.name || hotel.country,
-          } : undefined,
-        },
-        makeBreadcrumbs([
-          { name: 'Home', url: '/' },
-          { name: 'Hotels', url: '/hotels' },
-          { name: hotel.country?.name || countrySlug, url: `/destinations/${countrySlug}` },
-          { name: hotel.name.trim(), url: nestedHotelPath },
-        ]),
-      ];
-      await writePage(nestedHotelPath, renderHtml(template, { title, heading: hotel.name.trim(), description, canonicalUrl: rootCanonical, image, type: 'article', jsonLd: nestedJsonLd }));
-      count++;
-
-      // 3. /destinations/:country/hotels/:slug
-      const destJsonLd = [
-        {
-          '@context': 'https://schema.org',
-          '@type': 'LodgingBusiness',
-          name: hotel.name.trim(),
-          description,
-          image,
-          url: rootCanonical,
-          starRating: hotel.stars ? { '@type': 'Rating', ratingValue: hotel.stars } : undefined,
-          address: hotel.country ? {
-            '@type': 'PostalAddress',
-            addressCountry: hotel.country.name || hotel.country,
-          } : undefined,
-        },
-        makeBreadcrumbs([
-          { name: 'Home', url: '/' },
-          { name: 'Destinations', url: '/destinations' },
-          { name: hotel.country?.name || countrySlug, url: `/destinations/${countrySlug}` },
-          { name: 'Hotels', url: `/destinations/${countrySlug}/hotels` },
-          { name: hotel.name.trim(), url: destPath },
-        ]),
-      ];
-      await writePage(destPath, renderHtml(template, { title, heading: hotel.name.trim(), description, canonicalUrl: rootCanonical, image, type: 'article', jsonLd: destJsonLd }));
-      count++;
-    }
   }
 
-  // Activities
+  // Activities (/activities/:slug only; nested country routes 308-redirect)
   for (const act of activities) {
     if (!act?.slug) continue;
     const path = `/activities/${act.slug}`;
-    const countrySlug = act.country?.slug || act.countries?.[0]?.slug || (typeof act.country === 'string' ? act.country.toLowerCase() : undefined);
-    const destPath = countrySlug ? `/destinations/${countrySlug}/activities/${act.slug}` : undefined;
-    const nestedActPath = countrySlug ? `/activities/${countrySlug}/${act.slug}` : undefined;
     const title = `${act.name.trim()} | ${SITE_NAME}`;
     const description = cleanText(act.summary || act.description) || `Experience ${act.name.trim()} with ${SITE_NAME}.`;
     const image = getImageUrl(act.cover_image_id || act.image_id || act.cover_image?.file_path || act.media_assets?.[0]?.file_path);
 
-    // 1. Root /activities/:slug
-    const rootCanonical = `${SITE_URL}${path}`;
+    const rootCanonical = buildAbsoluteUrl(path);
     const rootJsonLd = [
       {
         '@context': 'https://schema.org',
@@ -977,7 +920,7 @@ async function main() {
         description,
         image,
         url: rootCanonical,
-        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: buildAbsoluteUrl('/') },
       },
       makeBreadcrumbs([
         { name: 'Home', url: '/' },
@@ -987,66 +930,17 @@ async function main() {
     ];
     await writePage(path, renderHtml(template, { title, heading: act.name.trim(), description, canonicalUrl: rootCanonical, image, type: 'article', jsonLd: rootJsonLd }));
     count++;
-
-    if (countrySlug) {
-      // 2. Nested /activities/:country/:slug
-      const nestedJsonLd = [
-        {
-          '@context': 'https://schema.org',
-          '@type': 'TouristAttraction',
-          name: act.name.trim(),
-          description,
-          image,
-          url: rootCanonical,
-          provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
-        },
-        makeBreadcrumbs([
-          { name: 'Home', url: '/' },
-          { name: 'Activities', url: '/activities' },
-          { name: act.country?.name || countrySlug, url: `/destinations/${countrySlug}` },
-          { name: act.name.trim(), url: nestedActPath },
-        ]),
-      ];
-      await writePage(nestedActPath, renderHtml(template, { title, heading: act.name.trim(), description, canonicalUrl: rootCanonical, image, type: 'article', jsonLd: nestedJsonLd }));
-      count++;
-
-      // 3. /destinations/:country/activities/:slug
-      const destJsonLd = [
-        {
-          '@context': 'https://schema.org',
-          '@type': 'TouristAttraction',
-          name: act.name.trim(),
-          description,
-          image,
-          url: rootCanonical,
-          provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
-        },
-        makeBreadcrumbs([
-          { name: 'Home', url: '/' },
-          { name: 'Destinations', url: '/destinations' },
-          { name: act.country?.name || countrySlug, url: `/destinations/${countrySlug}` },
-          { name: 'Activities', url: `/destinations/${countrySlug}/activities` },
-          { name: act.name.trim(), url: destPath },
-        ]),
-      ];
-      await writePage(destPath, renderHtml(template, { title, heading: act.name.trim(), description, canonicalUrl: rootCanonical, image, type: 'article', jsonLd: destJsonLd }));
-      count++;
-    }
   }
 
-  // Attractions
+  // Attractions (/attractions/:slug only; nested country routes 308-redirect)
   for (const att of attractions) {
     if (!att?.slug) continue;
     const path = `/attractions/${att.slug}`;
-    const countrySlug = att.country?.slug || (typeof att.country === 'string' ? att.country.toLowerCase() : undefined);
-    const destPath = countrySlug ? `/destinations/${countrySlug}/attractions/${att.slug}` : undefined;
-    const nestedAttPath = countrySlug ? `/attractions/${countrySlug}/${att.slug}` : undefined;
     const title = `${att.name.trim()} | ${SITE_NAME}`;
     const description = cleanText(att.summary || att.description) || `Visit ${att.name.trim()} with ${SITE_NAME}.`;
     const image = getImageUrl(att.image_id || att.cover_image || att.media_assets?.[0]?.file_path);
 
-    // 1. Root /attractions/:slug
-    const rootCanonical = `${SITE_URL}${path}`;
+    const rootCanonical = buildAbsoluteUrl(path);
     const rootJsonLd = [
       {
         '@context': 'https://schema.org',
@@ -1055,7 +949,7 @@ async function main() {
         description,
         image,
         url: rootCanonical,
-        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: buildAbsoluteUrl('/') },
         containedInPlace: att.country ? { '@type': 'Country', name: att.country.name || att.country } : undefined,
       },
       makeBreadcrumbs([
@@ -1066,53 +960,6 @@ async function main() {
     ];
     await writePage(path, renderHtml(template, { title, heading: att.name.trim(), description, canonicalUrl: rootCanonical, image, type: 'article', jsonLd: rootJsonLd }));
     count++;
-
-    if (countrySlug) {
-      // 2. Nested /attractions/:country/:slug
-      const nestedJsonLd = [
-        {
-          '@context': 'https://schema.org',
-          '@type': 'TouristAttraction',
-          name: att.name.trim(),
-          description,
-          image,
-          url: rootCanonical,
-          provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
-          containedInPlace: att.country ? { '@type': 'Country', name: att.country.name || att.country } : undefined,
-        },
-        makeBreadcrumbs([
-          { name: 'Home', url: '/' },
-          { name: 'Attractions', url: '/attractions' },
-          { name: att.country?.name || countrySlug, url: `/destinations/${countrySlug}` },
-          { name: att.name.trim(), url: nestedAttPath },
-        ]),
-      ];
-      await writePage(nestedAttPath, renderHtml(template, { title, heading: att.name.trim(), description, canonicalUrl: rootCanonical, image, type: 'article', jsonLd: nestedJsonLd }));
-      count++;
-
-      // 3. /destinations/:country/attractions/:slug
-      const destJsonLd = [
-        {
-          '@context': 'https://schema.org',
-          '@type': 'TouristAttraction',
-          name: att.name.trim(),
-          description,
-          image,
-          url: rootCanonical,
-          provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
-          containedInPlace: att.country ? { '@type': 'Country', name: att.country.name || att.country } : undefined,
-        },
-        makeBreadcrumbs([
-          { name: 'Home', url: '/' },
-          { name: 'Destinations', url: '/destinations' },
-          { name: att.country?.name || countrySlug, url: `/destinations/${countrySlug}` },
-          { name: 'Attractions', url: `/destinations/${countrySlug}/attractions` },
-          { name: att.name.trim(), url: destPath },
-        ]),
-      ];
-      await writePage(destPath, renderHtml(template, { title, heading: att.name.trim(), description, canonicalUrl: rootCanonical, image, type: 'article', jsonLd: destJsonLd }));
-      count++;
-    }
   }
 
   // Group Trips
@@ -1122,7 +969,7 @@ async function main() {
     const title = `${trip.name} | ${SITE_NAME}`;
     const description = cleanText(trip.summary || trip.description) || `Join the ${trip.name} group expedition with ${SITE_NAME}.`;
     const image = getImageUrl(trip.cover_image || trip.image_id || trip.media_assets?.[0]?.file_path);
-    const canonicalUrl = `${SITE_URL}${path}`;
+    const canonicalUrl = buildAbsoluteUrl(path);
     const jsonLd = [
       {
         '@context': 'https://schema.org',
@@ -1131,7 +978,7 @@ async function main() {
         description,
         image,
         url: canonicalUrl,
-        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
+        provider: { '@type': 'TravelAgency', name: SITE_NAME, url: buildAbsoluteUrl('/') },
         touristType: ['Group Travel', 'Expedition'],
         itinerary: trip.duration_days ? { '@type': 'ItemList', numberOfItems: trip.duration_days } : undefined,
       },

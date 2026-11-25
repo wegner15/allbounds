@@ -51,7 +51,7 @@ class ActivityResponse(ActivityBase):
     countries: List[CountryMinResponse] = Field([], description="Countries associated with the activity")
     tags: List[ContentTagResponse] = Field([], description="Tags associated with the activity")
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
     
     @field_validator('is_featured', mode='before')
     @classmethod

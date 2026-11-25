@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import SeoHead from '../../../components/seo/SeoHead';
+import { buildCollectionPageGraph } from '../../../lib/schema-builders';
 import { useBlogs } from '../../../lib/hooks/useBlogs';
 import { getCloudflareImageUrl } from '../../../utils/cloudflareImageUtils';
 
@@ -45,7 +46,7 @@ const BlogListPage: React.FC = () => {
       <SeoHead
         title="Blog"
         description="Discover amazing destinations, travel tips, and inspiring stories from around the world."
-        canonicalPath="/blog"
+        canonicalPath="/blog/"
       />
       <div className="min-h-screen bg-gray-50">
       <div className="fluid-container py-12">
@@ -94,7 +95,18 @@ const BlogListPage: React.FC = () => {
       <SeoHead
         title="Blog"
         description="Discover amazing destinations, travel tips, and inspiring stories from around the world."
-        canonicalPath="/blog"
+        canonicalPath="/blog/"
+        structuredData={buildCollectionPageGraph({
+          name: 'Travel Stories & Insights',
+          description: 'Discover amazing destinations, travel tips, and inspiring stories from around the world.',
+          canonicalPath: '/blog/',
+          items: filteredBlogs.slice(0, 30).map((b) => ({
+            name: b.title,
+            url: `/blog/${b.slug}/`,
+            description: b.summary,
+            image: b.cover_image_id ? getCloudflareImageUrl(b.cover_image_id, 'medium') : undefined,
+          })),
+        })}
       />
       <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -168,7 +180,7 @@ const BlogListPage: React.FC = () => {
                     
                     <h2 className="text-xl font-semibold text-gray-900 mb-3 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                       <Link
-                        to={`/blog/${blog.slug}`}
+                        to={`/blog/${blog.slug}/`}
                         className="hover:text-blue-600 transition-colors"
                       >
                         {blog.title}
@@ -202,7 +214,7 @@ const BlogListPage: React.FC = () => {
                     )}
                     
                     <Link
-                      to={`/blog/${blog.slug}`}
+                      to={`/blog/${blog.slug}/`}
                       className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors"
                     >
                       Read more

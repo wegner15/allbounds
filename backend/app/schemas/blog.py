@@ -3,6 +3,11 @@ from typing import Optional, List, Any
 from datetime import datetime
 
 from app.schemas.package import PackageListResponse
+from app.schemas.user import UserPublic
+
+# Public Author E-E-A-T Schema for Blog Posts
+class AuthorInfo(UserPublic):
+    pass
 
 # Tag Schema
 class TagBase(BaseModel):
@@ -47,6 +52,7 @@ class BlogPostResponse(BlogPostBase):
     id: int
     slug: str = Field(..., description="URL-friendly slug for the blog post", example="top-10-safari-destinations")
     author_id: int = Field(..., description="ID of the user who created the blog post")
+    author: Optional[AuthorInfo] = Field(None, description="Public author E-E-A-T profile")
     is_published: bool = Field(..., description="Whether the blog post is published")
     is_active: bool = Field(..., description="Whether the blog post is active")
     is_featured: bool = Field(..., description="Whether the blog post is featured")

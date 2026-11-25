@@ -40,7 +40,7 @@ const HotelsSection: React.FC<HotelsSectionProps> = ({
           {/* View All Link - Optional */}
           {showViewAll && (
             <Link
-              to="/hotels"
+              to="/hotels/"
               className="hidden md:flex items-center gap-2 text-primary hover:text-primary-dark font-semibold transition-all duration-200 hover:scale-105 group touch-manipulation min-h-[44px] px-4 py-2 rounded-lg hover:bg-primary/10"
             >
               View All Hotels
@@ -62,7 +62,7 @@ const HotelsSection: React.FC<HotelsSectionProps> = ({
         {showViewAll && (
           <div className="md:hidden mt-6 sm:mt-8 text-center px-4">
             <Link
-              to="/hotels"
+              to="/hotels/"
               className="inline-flex items-center gap-2 text-teal-600 hover:text-teal-700 active:text-teal-800 font-medium transition-colors px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:bg-white active:bg-gray-50 touch-manipulation min-h-[44px]"
             >
               View All Hotels

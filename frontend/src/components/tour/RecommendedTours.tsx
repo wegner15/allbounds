@@ -38,7 +38,7 @@ const RecommendedTours: React.FC<RecommendedToursProps> = ({
           {tours.map((tour) => (
             <Link
               key={tour.id}
-              to={`/packages/${tour.country?.slug || 'unknown'}/${tour.slug}`}
+              to={`/packages/${tour.country?.slug || 'unknown'}/${tour.slug}/`}
               className="group bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 border border-gray-100 hover:border-primary/30 animate-fade-in"
             >
               {/* Tour Image */}
@@ -123,7 +123,7 @@ const RecommendedTours: React.FC<RecommendedToursProps> = ({
         {/* View All Link */}
         <div className="text-center mt-10">
           <Link
-            to="/packages"
+            to="/packages/"
             className="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-semibold px-8 py-4 rounded-lg transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
           >
             Explore All Tours

@@ -1148,7 +1148,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
             </aside>
 
             {/* MAIN RESULTS CONTENT AREA */}
-            <main className="flex-1 min-w-0 space-y-6">
+            <div className="flex-1 min-w-0 space-y-6">
               {/* Header Stats & Active Filter Summary */}
               <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-gray-600 bg-white p-4 rounded-xl border border-gray-200/80 shadow-2xs">
                 <div>
@@ -1242,7 +1242,7 @@ export const DestinationExplorer: React.FC<DestinationExplorerProps> = ({
                   </button>
                 </div>
               )}
-            </main>
+            </div>
           </div>
 
         )}

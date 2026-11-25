@@ -58,7 +58,7 @@ const HotelsSection: React.FC<HotelsSectionProps> = React.memo(({
         {/* View All Link - Only show if there are more than 6 hotels */}
         {hotels.filter(hotel => hotel.is_active).length > 6 && (
           <Link
-            to={`/hotels?country=${countrySlug}`}
+            to={`/hotels/?country=${countrySlug}`}
             className="hidden sm:flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium transition-colors group min-h-[44px] flex-shrink-0"
             aria-label={`View all hotels in ${countryName}`}
           >
@@ -79,7 +79,7 @@ const HotelsSection: React.FC<HotelsSectionProps> = React.memo(({
       {hotels.filter(hotel => hotel.is_active).length > 6 && (
         <div className="mt-4 md:mt-6 sm:hidden">
           <Link
-            to={`/hotels?country=${countrySlug}`}
+            to={`/hotels/?country=${countrySlug}`}
             className="flex items-center justify-center space-x-2 w-full py-3 px-4 min-h-[44px] bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium rounded-lg transition-colors"
             aria-label={`View all hotels in ${countryName}`}
           >

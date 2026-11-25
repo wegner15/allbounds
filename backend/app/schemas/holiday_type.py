@@ -30,7 +30,7 @@ class HolidayTypeResponse(HolidayTypeBase):
     order_index: Optional[int] = Field(0, description="Sort order for the holiday type")
     is_active: bool = Field(..., description="Whether the holiday type is active")
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
     
     class Config:
         from_attributes = True

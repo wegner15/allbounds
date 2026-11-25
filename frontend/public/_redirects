@@ -2,3 +2,25 @@
 /destinations/*/book    /book-destination/  308
 /destinations-old/*     /destinations/      308
 /packages-old/*         /packages/          308
+/stays                  /hotels/            308
+/stays/                 /hotels/            308
+
+# Duplicate Entity Route Canonical Redirects
+/countries/:slug                            /destinations/:slug/  308
+/countries/:slug/                           /destinations/:slug/  308
+/destinations/countries/:slug               /destinations/:slug/  308
+/destinations/countries/:slug/              /destinations/:slug/  308
+/destinations/regions/:slug                 /regions/:slug/       308
+/destinations/regions/:slug/                /regions/:slug/       308
+/hotels/:country/:slug                      /hotels/:slug/        308
+/hotels/:country/:slug/                     /hotels/:slug/        308
+/destinations/:country/hotels/:slug         /hotels/:slug/        308
+/destinations/:country/hotels/:slug/        /hotels/:slug/        308
+/attractions/:country/:slug                 /attractions/:slug/   308
+/attractions/:country/:slug/                /attractions/:slug/   308
+/destinations/:country/attractions/:slug    /attractions/:slug/   308
+/destinations/:country/attractions/:slug/   /attractions/:slug/   308
+/activities/:country/:slug                  /activities/:slug/    308
+/activities/:country/:slug/                 /activities/:slug/    308
+/destinations/:country/activities/:slug     /activities/:slug/    308
+/destinations/:country/activities/:slug/    /activities/:slug/    308

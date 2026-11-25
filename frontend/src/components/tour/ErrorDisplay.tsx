@@ -93,7 +93,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
 
             {showBackButton && (
               <Link
-                to="/packages"
+                to="/packages/"
                 className="inline-flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-6 py-3 rounded-lg transition-all duration-200 hover:scale-105 active:scale-95"
               >
                 <ArrowLeft className="w-5 h-5" />

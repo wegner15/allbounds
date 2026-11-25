@@ -1,6 +1,6 @@
 import React from 'react';
 import type { PackageDetailResponse } from '../../lib/types/api';
-import { Clock, Users, TrendingUp, Sparkles, Check } from 'lucide-react';
+import { Clock, MapPin, Building2, Sparkles, Check } from 'lucide-react';
 
 interface OverviewSectionProps {
   packageData: PackageDetailResponse;
@@ -123,15 +123,8 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({ packageData })
     return items.slice(0, 7);
   }, [packageData]);
 
-  // Determine group size (placeholder logic - can be enhanced)
-  const groupSize = packageData.hotels && packageData.hotels.length > 0 
-    ? '2-15 people' 
-    : 'Flexible';
-
-  // Determine difficulty (placeholder logic - can be enhanced based on activities)
-  const difficulty = packageData.itinerary_items && packageData.itinerary_items.length > 7
-    ? 'Moderate'
-    : 'Easy';
+  const hotelCount = packageData.hotels?.length || 0;
+  const attractionCount = packageData.attractions?.length || 0;
 
   return (
     <section id="overview" className="scroll-mt-20 animate-fade-in" aria-labelledby="overview-heading">
@@ -151,49 +144,67 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({ packageData })
           />
         )}
 
-        {/* Tour Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 mb-6 md:mb-8">
-          {/* Duration */}
-          {packageData.duration_days && (
-            <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl p-5 sm:p-6 border border-primary/20 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <div className="flex items-center mb-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center mr-3 shadow-md">
-                  <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+        {/* Tour Stats Cards (only real API-backed facts) */}
+        {(packageData.duration_days || packageData.country?.name || hotelCount > 0 || attractionCount > 0) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 mb-6 md:mb-8">
+            {/* Duration */}
+            {packageData.duration_days && (
+              <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl p-5 sm:p-6 border border-primary/20 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div className="flex items-center mb-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center mr-3 shadow-md">
+                    <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  </div>
+                  <div className="text-xs sm:text-sm font-bold text-gray-600 uppercase tracking-wide">Duration</div>
                 </div>
-                <div className="text-xs sm:text-sm font-bold text-gray-600 uppercase tracking-wide">Duration</div>
+                <div className="text-2xl sm:text-3xl font-bold text-charcoal font-playfair ml-13 sm:ml-15">
+                  {packageData.duration_days} {packageData.duration_days === 1 ? 'Day' : 'Days'}
+                </div>
               </div>
-              <div className="text-2xl sm:text-3xl font-bold text-charcoal font-playfair ml-13 sm:ml-15">
-                {packageData.duration_days} {packageData.duration_days === 1 ? 'Day' : 'Days'}
-              </div>
-            </div>
-          )}
+            )}
 
-          {/* Group Size */}
-          <div className="bg-gradient-to-br from-accent/10 to-accent/5 rounded-xl p-5 sm:p-6 border border-accent/20 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-            <div className="flex items-center mb-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-accent to-accent-dark rounded-xl flex items-center justify-center mr-3 shadow-md">
-                <Users className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            {/* Destination */}
+            {packageData.country?.name && (
+              <div className="bg-gradient-to-br from-accent/10 to-accent/5 rounded-xl p-5 sm:p-6 border border-accent/20 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div className="flex items-center mb-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-accent to-accent-dark rounded-xl flex items-center justify-center mr-3 shadow-md">
+                    <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  </div>
+                  <div className="text-xs sm:text-sm font-bold text-gray-600 uppercase tracking-wide">Destination</div>
+                </div>
+                <div className="text-2xl sm:text-3xl font-bold text-charcoal font-playfair ml-13 sm:ml-15">
+                  {packageData.country.name}
+                </div>
               </div>
-              <div className="text-xs sm:text-sm font-bold text-gray-600 uppercase tracking-wide">Group Size</div>
-            </div>
-            <div className="text-2xl sm:text-3xl font-bold text-charcoal font-playfair ml-13 sm:ml-15">
-              {groupSize}
-            </div>
-          </div>
+            )}
 
-          {/* Difficulty */}
-          <div className="bg-gradient-to-br from-success/10 to-success/5 rounded-xl p-5 sm:p-6 border border-success/20 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-            <div className="flex items-center mb-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-success to-green-600 rounded-xl flex items-center justify-center mr-3 shadow-md">
-                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            {/* Accommodations or Attractions count */}
+            {hotelCount > 0 ? (
+              <div className="bg-gradient-to-br from-success/10 to-success/5 rounded-xl p-5 sm:p-6 border border-success/20 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div className="flex items-center mb-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-success to-green-600 rounded-xl flex items-center justify-center mr-3 shadow-md">
+                    <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  </div>
+                  <div className="text-xs sm:text-sm font-bold text-gray-600 uppercase tracking-wide">Accommodations</div>
+                </div>
+                <div className="text-2xl sm:text-3xl font-bold text-charcoal font-playfair ml-13 sm:ml-15">
+                  {hotelCount} {hotelCount === 1 ? 'Property' : 'Properties'}
+                </div>
               </div>
-              <div className="text-xs sm:text-sm font-bold text-gray-600 uppercase tracking-wide">Difficulty</div>
-            </div>
-            <div className="text-2xl sm:text-3xl font-bold text-charcoal font-playfair ml-13 sm:ml-15">
-              {difficulty}
-            </div>
+            ) : attractionCount > 0 ? (
+              <div className="bg-gradient-to-br from-success/10 to-success/5 rounded-xl p-5 sm:p-6 border border-success/20 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div className="flex items-center mb-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-success to-green-600 rounded-xl flex items-center justify-center mr-3 shadow-md">
+                    <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  </div>
+                  <div className="text-xs sm:text-sm font-bold text-gray-600 uppercase tracking-wide">Attractions</div>
+                </div>
+                <div className="text-2xl sm:text-3xl font-bold text-charcoal font-playfair ml-13 sm:ml-15">
+                  {attractionCount} {attractionCount === 1 ? 'Highlight' : 'Highlights'}
+                </div>
+              </div>
+            ) : null}
           </div>
-        </div>
+        )}
 
         {/* Tour Highlights & "Why Choose This Tour" Callout Box */}
         <div className="bg-gradient-to-br from-primary via-primary-dark to-primary rounded-2xl p-6 sm:p-7 md:p-9 text-white shadow-xl border border-primary-light/20 relative overflow-hidden">

@@ -69,7 +69,7 @@ const HolidayTypesPage: React.FC = () => {
             {holidayTypes?.map(holidayType => (
               <Link
                 key={holidayType.id}
-                to={`/holiday-types/${holidayType.slug}`}
+                to={`/holiday-types/${holidayType.slug}/`}
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
                 <div className="relative h-48">

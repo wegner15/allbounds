@@ -33,7 +33,7 @@ class CountryVisitInfoUpdate(BaseModel):
 class CountryVisitInfo(CountryVisitInfoBase):
     id: int
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

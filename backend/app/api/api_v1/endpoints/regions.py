@@ -1,6 +1,6 @@
 from typing import Any, List, Dict
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
@@ -10,6 +10,7 @@ from app.schemas.region import RegionResponse, RegionCreate, RegionUpdate
 from app.schemas.country import CountryResponse
 from app.services.region import region_service
 from app.services.country import country_service
+from app.services.indexnow import is_entity_public, notify_entity_change
 from app.auth.dependencies import get_current_user, has_permission
 
 router = APIRouter()
@@ -178,12 +179,14 @@ def create_region(
     *,
     db: Session = Depends(get_db),
     region_in: RegionCreate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:create"))
 ) -> Any:
     """
     Create new region.
     """
     region = region_service.create_region(db, region_in)
+    notify_entity_change(background_tasks, "region", region)
     return region
 
 @router.put("/{region_id}", response_model=RegionResponse)
@@ -192,6 +195,7 @@ def update_region(
     db: Session = Depends(get_db),
     region_id: int,
     region_in: RegionUpdate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:update"))
 ) -> Any:
     """
@@ -200,7 +204,9 @@ def update_region(
     region = region_service.get_region(db, region_id=region_id)
     if region is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Region not found")
+    was_public = is_entity_public(region)
     region = region_service.update_region(db, region_id=region_id, region_update=region_in)
+    notify_entity_change(background_tasks, "region", region, force=was_public)
     return region
 
 @router.delete("/{region_id}", response_model=RegionResponse)

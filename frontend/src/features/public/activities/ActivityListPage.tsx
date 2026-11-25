@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import SeoHead from '../../../components/seo/SeoHead';
+import { buildCollectionPageGraph } from '../../../lib/schema-builders';
 import { useActivities } from '../../../lib/hooks/useActivities';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 import { MapPin, Search, Compass, Sparkles } from 'lucide-react';
@@ -111,7 +112,18 @@ const ActivityListPage: React.FC = () => {
       <SeoHead
         title="Activities & Excursions"
         description="Discover thrilling adventures, day tours, water sports, wildlife safaris, and guided excursions with Allbound Vacations."
-        canonicalPath="/activities"
+        canonicalPath="/activities/"
+        structuredData={buildCollectionPageGraph({
+          name: 'Activities & Excursions',
+          description: 'Discover thrilling adventures, day tours, water sports, wildlife safaris, and guided excursions with Allbound Vacations.',
+          canonicalPath: '/activities/',
+          items: filteredActivities.slice(0, 30).map((act) => ({
+            name: act.name,
+            url: `/activities/${act.slug}/`,
+            description: act.summary || act.description,
+            image: act.image_id ? getImageUrlWithFallback(act.image_id, IMAGE_VARIANTS.MEDIUM) : act.image_url || undefined,
+          })),
+        })}
       />
       <div className="min-h-screen bg-gray-50">
         {/* Top Hero Introductory Section */}

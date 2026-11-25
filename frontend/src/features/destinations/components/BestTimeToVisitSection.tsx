@@ -1,5 +1,6 @@
 import React from 'react';
 import { Lightbulb } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import type { CountryVisitInfo } from '../../../lib/types/api';
 
 interface BestTimeToVisitSectionProps {
@@ -138,6 +139,74 @@ const BestTimeToVisitSection: React.FC<BestTimeToVisitSectionProps> = React.memo
         </div>
       </div>
 
+      {/* Semantic Monthly Breakdown Table (accessible & citable for AI retrievers and screen readers) */}
+      <div className="mb-6 overflow-x-auto rounded-lg border border-gray-200">
+        <table className="min-w-full divide-y divide-gray-200 text-left text-sm">
+          <caption className="sr-only">
+            Monthly travel ratings, weather conditions, and highlights
+          </caption>
+          <thead className="bg-gray-50">
+            <tr>
+              <th scope="col" className="px-4 py-3 font-semibold text-gray-900 whitespace-nowrap">
+                Month
+              </th>
+              <th scope="col" className="px-4 py-3 font-semibold text-gray-900 whitespace-nowrap">
+                Rating
+              </th>
+              <th scope="col" className="px-4 py-3 font-semibold text-gray-900">
+                Weather &amp; Highlights
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100 bg-white">
+            {MONTH_NAMES.map((month) => {
+              const monthData = ratingsByMonth[month];
+              const rating = monthData?.rating || 'unknown';
+              const legendEntry = RATING_LEGEND.find((item) => item.rating === rating);
+              const ratingLabel = legendEntry?.label || (rating === 'discouraged' ? 'Discouraged' : 'Not rated');
+              const notes = monthData?.notes;
+
+              return (
+                <tr key={month} className="hover:bg-gray-50/70">
+                  <th scope="row" className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
+                    {month}
+                  </th>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${
+                        rating === 'excellent'
+                          ? 'bg-[#91b5a9]/20 text-[#3e6b5d]'
+                          : rating === 'good'
+                            ? 'bg-[#abad98]/25 text-[#5b5e47]'
+                            : rating === 'fair'
+                              ? 'bg-[#eeca80]/30 text-[#7d5e18]'
+                              : rating === 'poor'
+                                ? 'bg-[#9d683c]/20 text-[#7a4b25]'
+                                : rating === 'discouraged'
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      {ratingLabel}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-gray-700 leading-relaxed">
+                    {notes ? (
+                      <div
+                        className="prose prose-sm max-w-none prose-p:my-0.5 prose-ul:my-0.5 prose-li:my-0"
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(notes) }}
+                      />
+                    ) : (
+                      <span className="text-gray-500">{legendEntry?.description || '—'}</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
       {/* General Notes / Travel Tips */}
       {visitInfo.general_notes && (
         <div className="mt-6 p-5 sm:p-6 bg-gradient-to-br from-[#f0f6f4] via-[#f7faf9] to-[#edf4f1] rounded-xl border border-[#d8e7e1] shadow-xs">
@@ -151,7 +220,7 @@ const BestTimeToVisitSection: React.FC<BestTimeToVisitSectionProps> = React.memo
           </div>
           <div
             className="text-gray-700 leading-relaxed prose prose-sm max-w-none prose-p:my-1.5 prose-ul:my-1.5 prose-li:my-0.5 text-sm sm:text-base"
-            dangerouslySetInnerHTML={{ __html: visitInfo.general_notes }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(visitInfo.general_notes) }}
           />
         </div>
       )}

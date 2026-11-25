@@ -123,7 +123,7 @@ export const DestinationErrorDisplay: React.FC<DestinationErrorDisplayProps> = (
             <p className="text-sm text-gray-600 mb-3">Looking for something else?</p>
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
               <Link
-                to="/destinations"
+                to="/destinations/"
                 className="inline-flex items-center justify-center gap-2 text-sm text-primary hover:text-primary-dark font-semibold transition-colors"
               >
                 <Globe className="w-4 h-4" />

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey, Table
+from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey, Table, JSON
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
@@ -28,6 +28,11 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     first_name = Column(String(100), nullable=True)
     last_name = Column(String(100), nullable=True)
+    bio = Column(Text, nullable=True)
+    job_title = Column(String(255), nullable=True)
+    avatar_url = Column(String(500), nullable=True)
+    credentials = Column(String(500), nullable=True)
+    same_as = Column(JSON, nullable=True)
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

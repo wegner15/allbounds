@@ -37,7 +37,7 @@ const GroupTripCard: React.FC<GroupTripCardProps> = React.memo(({ groupTrip }) =
   return (
     <article className="group bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] flex flex-col h-full">
       <Link
-        to={`/group-trips/${groupTrip.slug}`}
+        to={`/group-trips/${groupTrip.slug}/`}
         className="flex flex-col h-full min-h-[44px]"
         aria-label={`View details for ${groupTrip.name} group trip`}
       >

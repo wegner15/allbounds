@@ -52,13 +52,19 @@ const ItineraryDayCard: React.FC<ItineraryDayCardProps> = ({
 
   const hasActivities = (custom_activities && custom_activities.length > 0) || (linked_activities && linked_activities.length > 0);
 
+  const panelId = `itinerary-day-panel-${day_number}`;
+  const buttonId = `itinerary-day-button-${day_number}`;
+
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-xl hover:border-primary/30 animate-fade-in">
       {/* Day Header - Always Visible */}
       <button
+        id={buttonId}
+        type="button"
         onClick={onToggle}
         className="w-full p-4 sm:p-5 md:p-6 flex items-start justify-between hover:bg-gray-50/80 active:bg-gray-100 transition-all duration-200 text-left touch-manipulation min-h-[60px]"
         aria-expanded={isExpanded}
+        aria-controls={panelId}
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 sm:gap-3 mb-2">
@@ -121,61 +127,70 @@ const ItineraryDayCard: React.FC<ItineraryDayCardProps> = ({
         </div>
       </button>
 
-      {/* Expanded Content */}
-      {isExpanded && (
-        <div className="px-4 sm:px-5 md:px-6 pb-4 sm:pb-5 md:pb-6 border-t border-gray-100 animate-slide-down">
-          {/* Description */}
-          {description && (
-            <div className="mt-3 sm:mt-4 text-sm sm:text-base text-gray-700 leading-relaxed">
-              <RichTextDisplay content={description} className="text-gray-700 text-sm sm:text-base leading-relaxed prose-p:my-2 prose-ul:my-2 prose-ol:my-2" />
-            </div>
-          )}
+      {/* Day Details - Always mounted in DOM for SEO/AI crawlers & screen readers */}
+      <div
+        id={panelId}
+        role="region"
+        aria-labelledby={buttonId}
+        className={`grid transition-all duration-300 ease-in-out ${
+          isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="px-4 sm:px-5 md:px-6 pb-4 sm:pb-5 md:pb-6 border-t border-gray-100">
+            {/* Description */}
+            {description && (
+              <div className="mt-3 sm:mt-4 text-sm sm:text-base text-gray-700 leading-relaxed">
+                <RichTextDisplay content={description} className="text-gray-700 text-sm sm:text-base leading-relaxed prose-p:my-2 prose-ul:my-2 prose-ol:my-2" />
+              </div>
+            )}
 
-          {/* Activities Timeline */}
-          {hasActivities && (
-            <div className="mt-4 sm:mt-5 md:mt-6">
-              <h4 className="text-base sm:text-lg font-semibold text-charcoal mb-3 sm:mb-4 font-playfair">Activities</h4>
-              <div className="space-y-4">
-                {linked_activities && linked_activities.map((activity) => (
-                  <LinkedActivityItem key={`linked-${activity.id}`} activity={activity} />
-                ))}
-                {custom_activities && custom_activities
-                  .sort((a, b) => a.order_index - b.order_index)
-                  .map((activity) => (
-                    <ActivityItem key={`custom-${activity.id}`} activity={activity} />
+            {/* Activities Timeline */}
+            {hasActivities && (
+              <div className="mt-4 sm:mt-5 md:mt-6">
+                <h4 className="text-base sm:text-lg font-semibold text-charcoal mb-3 sm:mb-4 font-playfair">Activities</h4>
+                <div className="space-y-4">
+                  {linked_activities && linked_activities.map((activity) => (
+                    <LinkedActivityItem key={`linked-${activity.id}`} activity={activity} />
                   ))}
+                  {custom_activities && custom_activities
+                    .sort((a, b) => a.order_index - b.order_index)
+                    .map((activity) => (
+                      <ActivityItem key={`custom-${activity.id}`} activity={activity} />
+                    ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Hotels */}
-          {hotels && hotels.length > 0 && (
-            <div className="mt-4 sm:mt-5 md:mt-6">
-              <h4 className="text-base sm:text-lg font-semibold text-charcoal mb-3 sm:mb-4 font-playfair">Accommodation</h4>
-              <div className="space-y-2 sm:space-y-3">
-                {hotels.map((hotel) => (
-                  <HotelItem key={hotel.id} hotel={hotel} />
-                ))}
+            {/* Hotels */}
+            {hotels && hotels.length > 0 && (
+              <div className="mt-4 sm:mt-5 md:mt-6">
+                <h4 className="text-base sm:text-lg font-semibold text-charcoal mb-3 sm:mb-4 font-playfair">Accommodation</h4>
+                <div className="space-y-2 sm:space-y-3">
+                  {hotels.map((hotel) => (
+                    <HotelItem key={hotel.id} hotel={hotel} />
+                  ))}
+                </div>
+                {accommodation_notes && (
+                  <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-gray-600 italic">{accommodation_notes}</p>
+                )}
               </div>
-              {accommodation_notes && (
-                <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-gray-600 italic">{accommodation_notes}</p>
-              )}
-            </div>
-          )}
+            )}
 
-          {/* Attractions */}
-          {attractions && attractions.length > 0 && (
-            <div className="mt-4 sm:mt-5 md:mt-6">
-              <h4 className="text-base sm:text-lg font-semibold text-charcoal mb-3 sm:mb-4 font-playfair">Attractions</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                {attractions.map((attraction) => (
-                  <AttractionItem key={attraction.id} attraction={attraction} />
-                ))}
+            {/* Attractions */}
+            {attractions && attractions.length > 0 && (
+              <div className="mt-4 sm:mt-5 md:mt-6">
+                <h4 className="text-base sm:text-lg font-semibold text-charcoal mb-3 sm:mb-4 font-playfair">Attractions</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  {attractions.map((attraction) => (
+                    <AttractionItem key={attraction.id} attraction={attraction} />
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

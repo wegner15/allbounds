@@ -1,6 +1,6 @@
 from typing import List, Optional
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, computed_field
 
 # Base User Schema
 class UserBase(BaseModel):
@@ -9,6 +9,31 @@ class UserBase(BaseModel):
     is_superuser: Optional[bool] = False
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+    bio: Optional[str] = None
+    job_title: Optional[str] = None
+    avatar_url: Optional[str] = None
+    credentials: Optional[str] = None
+    same_as: Optional[List[str]] = None
+
+# Public author/profile schema (safe for unauthenticated endpoints & JSON-LD Person E-E-A-T)
+class UserPublic(BaseModel):
+    id: int
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    bio: Optional[str] = None
+    job_title: Optional[str] = None
+    avatar_url: Optional[str] = None
+    credentials: Optional[str] = None
+    same_as: Optional[List[str]] = None
+
+    @computed_field
+    @property
+    def name(self) -> Optional[str]:
+        parts = [p.strip() for p in (self.first_name, self.last_name) if p and p.strip()]
+        return " ".join(parts) if parts else None
+
+    class Config:
+        from_attributes = True
 
 # Schema for Role
 class RoleBase(BaseModel):
@@ -44,6 +69,11 @@ class UserUpdate(BaseModel):
     is_superuser: Optional[bool] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+    bio: Optional[str] = None
+    job_title: Optional[str] = None
+    avatar_url: Optional[str] = None
+    credentials: Optional[str] = None
+    same_as: Optional[List[str]] = None
     role_ids: Optional[List[int]] = None
     role_names: Optional[List[str]] = None
 

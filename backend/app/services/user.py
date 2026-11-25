@@ -34,6 +34,11 @@ class UserService:
             hashed_password=get_password_hash(user_in.password),
             first_name=user_in.first_name,
             last_name=user_in.last_name,
+            bio=user_in.bio,
+            job_title=user_in.job_title,
+            avatar_url=user_in.avatar_url,
+            credentials=user_in.credentials,
+            same_as=user_in.same_as,
             is_active=user_in.is_active,
             is_superuser=user_in.is_superuser,
         )

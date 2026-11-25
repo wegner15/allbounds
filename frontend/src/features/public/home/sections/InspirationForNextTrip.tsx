@@ -40,7 +40,7 @@ const InspirationForNextTrip: React.FC = () => {
             <p className="text-charcoal/60 font-lato mt-1">Travel articles to ignite your wanderlust.</p>
           </div>
           <Link
-            to="/blog"
+            to="/blog/"
             className="text-primary hover:text-primary-dark flex items-center font-medium transition-colors"
           >
             More articles
@@ -58,7 +58,7 @@ const InspirationForNextTrip: React.FC = () => {
             {isLoading
               ? renderMainSkeletons()
               : mainArticles.map(article => (
-                  <Link key={article.id} to={`/blog/${article.slug}`} className="block group">
+                  <Link key={article.id} to={`/blog/${article.slug}/`} className="block group">
                     {/* Image container with overlay — text is INSIDE the overlay, not bare on image */}
                     <div className="relative h-72 rounded-xl overflow-hidden shadow-md">
                       <img
@@ -90,7 +90,7 @@ const InspirationForNextTrip: React.FC = () => {
               : sideArticles.map(article => (
                   <Link
                     key={article.id}
-                    to={`/blog/${article.slug}`}
+                    to={`/blog/${article.slug}/`}
                     className="flex items-center gap-4 group"
                   >
                     <div className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden shadow-sm">
@@ -114,7 +114,7 @@ const InspirationForNextTrip: React.FC = () => {
             {/* CTA to blog */}
             {!isLoading && sideArticles.length > 0 && (
               <Link
-                to="/blog"
+                to="/blog/"
                 className="inline-flex items-center mt-2 text-sm font-semibold text-primary hover:text-primary-dark transition-colors"
               >
                 View all articles →

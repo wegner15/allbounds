@@ -587,6 +587,8 @@ class HotelService:
                 "slug": hotel.hotel_type.slug,
             } if hotel.hotel_type else None,
             "is_active": hotel.is_active,
+            "created_at": hotel.created_at,
+            "updated_at": hotel.updated_at,
         }
     
     def create_hotel(self, db: Session, hotel_create: HotelCreate) -> Hotel:

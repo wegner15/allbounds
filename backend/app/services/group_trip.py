@@ -402,6 +402,8 @@ class GroupTripService:
             ],
             "is_active": group_trip.is_active,
             "is_featured": group_trip.is_featured,
+            "created_at": group_trip.created_at,
+            "updated_at": group_trip.updated_at,
         }
     
     def create_group_trip(self, db: Session, group_trip_create: GroupTripCreate) -> GroupTrip:
@@ -846,6 +848,8 @@ class GroupTripService:
             ],
             "is_active": group_trip.is_active,
             "is_featured": group_trip.is_featured,
+            "created_at": group_trip.created_at,
+            "updated_at": group_trip.updated_at,
         }
 
     def add_inclusion(self, db: Session, group_trip_id: int, inclusion_id: int) -> Optional[GroupTrip]:

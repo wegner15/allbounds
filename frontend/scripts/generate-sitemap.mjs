@@ -21,6 +21,10 @@ const API_BASE_URL = normalizeBaseUrl(
     'https://api.allboundvacations.com/api/v1'
 );
 
+const ALLOW_OFFLINE_BUILD = process.env.ALLOW_OFFLINE_BUILD === 'true';
+const PAGE_LIMIT = 100;
+const MAX_PAGES = 50;
+
 const staticRoutes = [
   { path: '/', changefreq: 'daily', priority: '1.0' },
   { path: '/destinations/', changefreq: 'weekly', priority: '0.9' },
@@ -37,11 +41,10 @@ const staticRoutes = [
   { path: '/visa-application/', changefreq: 'monthly', priority: '0.5' },
   { path: '/flights/', changefreq: 'monthly', priority: '0.5' },
   { path: '/regions/', changefreq: 'monthly', priority: '0.4' },
-  { path: '/stays/', changefreq: 'monthly', priority: '0.4' },
 ];
 
 const contentRouteSlugs = new Set(['careers', 'terms', 'privacy']);
-const destinationCategoryRoutes = ['packages', 'group-trips', 'attractions', 'hotels', 'activities'];
+const destinationCategoryRoutes = ['packages', 'hotel-packages', 'group-trips', 'attractions', 'hotels', 'activities'];
 
 async function main() {
   await mkdir(publicDir, { recursive: true });
@@ -146,33 +149,52 @@ function normalizeBaseUrl(value) {
 }
 
 async function fetchList(path) {
-  try {
-    const response = await fetch(joinApiUrl(path), {
-      headers: {
-        Accept: 'application/json',
-      },
-    });
+  const allItems = [];
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status} for ${path}`);
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const skip = page * PAGE_LIMIT;
+    try {
+      const response = await fetch(joinApiUrl(path, { skip, limit: PAGE_LIMIT }), {
+        headers: {
+          Accept: 'application/json',
+        },
+        signal: AbortSignal.timeout(15000),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status} for ${path} (skip=${skip}, limit=${PAGE_LIMIT})`);
+      }
+
+      const data = await response.json();
+      const pageItems = normalizeList(data);
+      allItems.push(...pageItems);
+
+      if (pageItems.length < PAGE_LIMIT) {
+        break;
+      }
+
+      if (page === MAX_PAGES - 1) {
+        console.warn(`Sitemap pagination hit MAX_PAGES (${MAX_PAGES}) cap for ${path}; collected ${allItems.length} items.`);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (ALLOW_OFFLINE_BUILD) {
+        console.warn(`Sitemap fetch failed for ${path} (ALLOW_OFFLINE_BUILD=true, continuing): ${message}`);
+        return allItems;
+      }
+      throw new Error(`Sitemap fetch failed for ${path}: ${message}`);
     }
-
-    const data = await response.json();
-    return normalizeList(data);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.warn(`Sitemap fetch failed for ${path}: ${message}`);
-    return [];
   }
+
+  return allItems;
 }
 
-function joinApiUrl(path) {
+function joinApiUrl(path, { skip = 0, limit = PAGE_LIMIT } = {}) {
   const normalizedBase = API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`;
   const normalizedPath = path.replace(/^\/+/, '');
   const url = new URL(normalizedPath, normalizedBase);
-  if (!url.searchParams.has('limit')) {
-    url.searchParams.set('limit', '200');
-  }
+  url.searchParams.set('skip', String(skip));
+  url.searchParams.set('limit', String(limit));
   return url.toString();
 }
 
@@ -259,16 +281,48 @@ function buildXml(urls) {
     `</urlset>\n`;
 }
 
+const ALLOWED_AI_AND_SEARCH_BOTS = [
+  'OAI-SearchBot',
+  'ChatGPT-User',
+  'GPTBot',
+  'Claude-SearchBot',
+  'Claude-User',
+  'ClaudeBot',
+  'PerplexityBot',
+  'Perplexity-User',
+  'Googlebot',
+  'Google-Extended',
+  'Bingbot',
+  'Applebot',
+  'Applebot-Extended',
+];
+
+const DISALLOWED_PATHS = [
+  '/admin/',
+  '/login',
+  '/search',
+  '/sign/',
+  '/verify/',
+  '/unauthorized',
+  '/form-showcase',
+  '/contact',
+];
+
 function buildRobotsTxt() {
+  const disallowLines = DISALLOWED_PATHS.map((p) => `Disallow: ${p}`);
+  const contentSignal = 'Content-Signal: ai-train=yes, search=yes, ai-input=yes';
+
   return [
+    '# AI Search, Citation & Training Crawlers (Explicitly Allowed)',
+    ...ALLOWED_AI_AND_SEARCH_BOTS.map((bot) => `User-agent: ${bot}`),
+    'Allow: /',
+    ...disallowLines,
+    contentSignal,
+    '',
     'User-agent: *',
     'Allow: /',
-    'Disallow: /admin/',
-    'Disallow: /login',
-    'Disallow: /search',
-    'Disallow: /unauthorized',
-    'Disallow: /form-showcase',
-    'Disallow: /contact',
+    ...disallowLines,
+    contentSignal,
     '',
     `Sitemap: ${new URL('/sitemap.xml', SITE_URL).toString()}`,
     '',

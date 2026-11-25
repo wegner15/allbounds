@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload
 
 from app.db.database import get_db
@@ -16,6 +16,7 @@ from app.schemas.hotel import (
     PaginatedHotelResponse,
 )
 from app.services.hotel import hotel_service
+from app.services.indexnow import is_entity_public, notify_entity_change
 from app.auth.dependencies import get_current_user, has_permission
 from pydantic import BaseModel
 
@@ -186,12 +187,14 @@ def create_hotel(
     *,
     db: Session = Depends(get_db),
     hotel_in: HotelCreate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:create")),
 ) -> Any:
     """
     Create new hotel.
     """
     hotel = hotel_service.create_hotel(db, hotel_in)
+    notify_entity_change(background_tasks, "hotel", hotel)
     return hotel
 
 @router.put("/{hotel_id}", response_model=HotelResponse)
@@ -200,6 +203,7 @@ def update_hotel(
     db: Session = Depends(get_db),
     hotel_id: int,
     hotel_in: HotelUpdate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:update")),
 ) -> Any:
     """
@@ -208,7 +212,9 @@ def update_hotel(
     hotel = hotel_service.get_hotel(db, hotel_id=hotel_id)
     if hotel is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hotel not found")
+    was_public = is_entity_public(hotel)
     hotel = hotel_service.update_hotel(db, hotel_id=hotel_id, hotel_update=hotel_in)
+    notify_entity_change(background_tasks, "hotel", hotel, force=was_public)
     return hotel
 
 @router.delete("/{hotel_id}", response_model=HotelResponse)

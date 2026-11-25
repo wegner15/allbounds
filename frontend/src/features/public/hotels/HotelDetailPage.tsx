@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { useHotelBySlug } from '../../../lib/hooks/useHotels';
 import SeoHead from '../../../components/seo/SeoHead';
-import { buildAbsoluteUrl, SITE_NAME, SITE_URL } from '../../../lib/seo-config';
+import { buildHotelGraph } from '../../../lib/schema-builders';
 import PackageBookingForm from '../../../components/forms/PackageBookingForm';
 import InquiryForm from '../../../components/forms/InquiryForm';
 import Breadcrumb from '../../../components/layout/Breadcrumb';
@@ -275,14 +275,15 @@ const HotelDetailPage: React.FC = () => {
         <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Hotel not found</h2>
-            <Link to="/hotels" className="text-blue-600 hover:text-blue-700">Back to Hotels</Link>
+            <Link to="/hotels/" className="text-blue-600 hover:text-blue-700">Back to Hotels</Link>
           </div>
         </div>
       </>
     );
   }
 
-  const canonicalHotelPath = `/hotels/${hotel.slug}`;
+  const canonicalHotelPath = `/hotels/${hotel.slug}/`;
+  const hotelUpdatedAt = (hotel as unknown as { updated_at?: string | null }).updated_at || undefined;
 
   const rawHotelDescription = hotel.summary ||
     hotel.description?.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() ||
@@ -299,46 +300,32 @@ const HotelDetailPage: React.FC = () => {
         canonicalPath={canonicalHotelPath}
         image={hotel.cover_image || undefined}
         type="article"
+        modifiedTime={hotelUpdatedAt}
         keywords={[
           hotel.name,
           hotel.country?.name,
           hotel.hotel_type?.name,
           'hotel', 'accommodation', 'stay', 'lodge',
         ].filter(Boolean) as string[]}
-        structuredData={[
-          {
-            '@context': 'https://schema.org',
-            '@type': 'LodgingBusiness',
-            name: hotel.name,
-            description: hotelDescription,
-            image: hotel.cover_image || undefined,
-            url: buildAbsoluteUrl(canonicalHotelPath),
-            starRating: hotel.stars ? { '@type': 'Rating', ratingValue: hotel.stars } : undefined,
-            address: hotel.country ? {
-              '@type': 'PostalAddress',
-              addressCountry: hotel.country.slug?.toUpperCase() || hotel.country.name,
-            } : undefined,
-            containedInPlace: hotel.country ? {
-              '@type': 'Country',
-              name: hotel.country.name,
-            } : undefined,
-            amenityFeature: (hotel.amenities || []).slice(0, 10).map((a: any) => ({
-              '@type': 'LocationFeatureSpecification',
-              name: a.name,
-              value: true,
-            })),
-          },
-          {
-            '@context': 'https://schema.org',
-            '@type': 'BreadcrumbList',
-            itemListElement: [
-              { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-              { '@type': 'ListItem', position: 2, name: 'Hotels', item: buildAbsoluteUrl('/hotels') },
-              ...(hotel.country ? [{ '@type': 'ListItem', position: 3, name: hotel.country.name, item: buildAbsoluteUrl(`/destinations/${hotel.country.slug}`) }] : []),
-              { '@type': 'ListItem', position: hotel.country ? 4 : 3, name: hotel.name, item: buildAbsoluteUrl(canonicalHotelPath) },
-            ],
-          },
-        ]}
+        structuredData={buildHotelGraph({
+          name: hotel.name,
+          slug: hotel.slug,
+          description: hotelDescription,
+          image: hotel.cover_image || undefined,
+          canonicalPath: canonicalHotelPath,
+          country: hotel.country,
+          city: hotel.city,
+          address: hotel.address,
+          latitude: hotel.latitude,
+          longitude: hotel.longitude,
+          stars: hotel.stars,
+          priceCategory: hotel.price_category,
+          checkInTime: hotel.check_in_time,
+          checkOutTime: hotel.check_out_time,
+          amenities: hotel.amenities,
+          priceCharts: activePriceCharts,
+          dateModified: hotelUpdatedAt,
+        })}
       />
       <div className="min-h-screen bg-gray-50">
         {/* Breadcrumb Section */}
@@ -346,9 +333,9 @@ const HotelDetailPage: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <Breadcrumb
               items={[
-                { label: 'Destinations', path: '/destinations' },
-                { label: hotel?.country?.name || 'Country', path: `/destinations/${hotel?.country?.slug}` },
-                { label: `${hotel?.country?.name || ''} Hotels`, path: `/destinations/${hotel?.country?.slug}/hotels` },
+                { label: 'Destinations', path: '/destinations/' },
+                { label: hotel?.country?.name || 'Country', path: `/destinations/${hotel?.country?.slug}/` },
+                { label: `${hotel?.country?.name || ''} Hotels`, path: `/destinations/${hotel?.country?.slug}/hotels/` },
                 { label: hotel?.name || 'Hotel' },
               ]}
             />
@@ -387,6 +374,17 @@ const HotelDetailPage: React.FC = () => {
                   <div className="flex items-center">
                     <DollarSign className="h-5 w-5 mr-1 text-primary" />
                     <span className="font-medium text-gray-900">{hotel.price_category} category</span>
+                  </div>
+                )}
+                {hotelUpdatedAt && (
+                  <div className="flex items-center text-sm text-gray-500">
+                    <Calendar className="h-4 w-4 mr-1.5 text-gray-400" />
+                    <span>
+                      Last updated{' '}
+                      <time dateTime={hotelUpdatedAt}>
+                        {format(parseISO(hotelUpdatedAt), 'MMM d, yyyy')}
+                      </time>
+                    </span>
                   </div>
                 )}
               </div>
@@ -582,7 +580,7 @@ const HotelDetailPage: React.FC = () => {
                 ) : (
                   <div className="p-6 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div>
-                      <h4 className="font-bold text-gray-900 text-base font-playfair">Tailored Rates & Availability Upon Request</h4>
+                      <h3 className="font-bold text-gray-900 text-base font-playfair">Tailored Rates & Availability Upon Request</h3>
                       <p className="text-xs sm:text-sm text-gray-600 mt-1">
                         Seasonal night packages for {hotel.name} can be reserved directly or customized to your stay dates.
                       </p>

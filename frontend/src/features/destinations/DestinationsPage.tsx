@@ -38,7 +38,7 @@ const DestinationsPage: React.FC = () => {
         <div className="text-center text-white p-4 relative z-10">
           <h1 className="text-4xl md:text-6xl font-playfair font-bold text-white mb-4 drop-shadow-xl">Discover Amazing Destinations</h1>
           <p className="text-xl md:text-2xl mb-8 font-light drop-shadow-md">Explore the beauty and culture of Africa and beyond</p>
-          <Link to="/packages">
+          <Link to="/packages/">
             <Button variant="primary" size="lg">
               Explore Packages
             </Button>
@@ -93,7 +93,7 @@ const DestinationsPage: React.FC = () => {
                 .filter(region => selectedRegion === 'All' || region.name === selectedRegion)
                 .map(region => (
                   <div key={region.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col h-full">
-                    <Link to={`/destinations/regions/${region.slug}`}>
+                    <Link to={`/regions/${region.slug}/`}>
                       <img
                         src={getImageUrlWithFallback(region.image_id || region.image_url, IMAGE_VARIANTS.LARGE, '/home-heros/hero2.webp')}
                         alt={region.name}
@@ -101,7 +101,7 @@ const DestinationsPage: React.FC = () => {
                       />
                     </Link>
                     <div className="p-6 flex-1 flex flex-col">
-                      <Link to={`/destinations/regions/${region.slug}`}>
+                      <Link to={`/regions/${region.slug}/`}>
                         <h3 className="text-xl font-playfair text-charcoal hover:text-hover transition-colors mb-3">
                           {region.name}
                         </h3>
@@ -120,7 +120,7 @@ const DestinationsPage: React.FC = () => {
                             {region.countries.slice(0, 4).map(country => (
                               <Link
                                 key={country.id}
-                                to={`/destinations/${country.slug}`}
+                                to={`/destinations/${country.slug}/`}
                                 className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded hover:bg-gray-200 transition-colors"
                               >
                                 {country.name}
@@ -135,7 +135,7 @@ const DestinationsPage: React.FC = () => {
                         </div>
                       )}
 
-                      <Link to={`/destinations/regions/${region.slug}`} className="mt-auto">
+                      <Link to={`/regions/${region.slug}/`} className="mt-auto">
                         <Button variant="primary" className="w-full">
                           Explore Region
                         </Button>
@@ -160,7 +160,7 @@ const DestinationsPage: React.FC = () => {
                     .slice(0, 9)
                     .map(country => (
                       <div key={country.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col h-full">
-                        <Link to={`/destinations/${country.slug}`}>
+                        <Link to={`/destinations/${country.slug}/`}>
                           <img
                             src={getImageUrlWithFallback(country.image_id || country.image_url, IMAGE_VARIANTS.LARGE, '/home-heros/hero1.jpeg')}
                             alt={country.name}
@@ -168,7 +168,7 @@ const DestinationsPage: React.FC = () => {
                           />
                         </Link>
                         <div className="p-6 flex-1 flex flex-col">
-                          <Link to={`/destinations/${country.slug}`}>
+                          <Link to={`/destinations/${country.slug}/`}>
                             <h3 className="text-xl font-playfair text-charcoal hover:text-hover transition-colors mb-3">
                               {country.name}
                             </h3>
@@ -178,7 +178,7 @@ const DestinationsPage: React.FC = () => {
                               <TextDisplay content={country.summary} />
                             </div>
                           )}
-                          <Link to={`/destinations/${country.slug}`} className="mt-auto">
+                          <Link to={`/destinations/${country.slug}/`} className="mt-auto">
                             <Button variant="outline" size="sm" className="w-full">
                               Explore {country.name}
                             </Button>

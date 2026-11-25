@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import SeoHead from '../../../components/seo/SeoHead';
+import { buildCollectionPageGraph } from '../../../lib/schema-builders';
 import { useAttractions } from '../../../lib/hooks/useAttractions';
 import { getImageUrlWithFallback, IMAGE_VARIANTS } from '../../../utils/imageUtils';
 
@@ -184,7 +185,18 @@ const AttractionListPage: React.FC = () => {
       <SeoHead
         title="Attractions"
         description="Explore museums, parks, monuments, and unique experiences across our destination network."
-        canonicalPath="/attractions"
+        canonicalPath="/attractions/"
+        structuredData={buildCollectionPageGraph({
+          name: 'Attractions & Landmarks',
+          description: 'Explore museums, parks, monuments, and unique experiences across our destination network.',
+          canonicalPath: '/attractions/',
+          items: filteredAttractions.slice(0, 30).map((a) => ({
+            name: a.name,
+            url: `/attractions/${a.slug}/`,
+            description: a.description,
+            image: a.cover_image || a.image_id ? getImageUrlWithFallback(a.cover_image || a.image_id, IMAGE_VARIANTS.MEDIUM) : undefined,
+          })),
+        })}
       />
       <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}

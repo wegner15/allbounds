@@ -144,9 +144,9 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ reviews }) => {
                 
                 {/* Reviewer Info */}
                 <div className="min-w-0">
-                  <h4 className="font-semibold text-sm sm:text-base text-gray-900 truncate">
+                  <h3 className="font-semibold text-sm sm:text-base text-gray-900 truncate">
                     {review.reviewer_name}
-                  </h4>
+                  </h3>
                   <p className="text-xs sm:text-sm text-gray-600">
                     {formatDate(review.created_at)}
                   </p>
@@ -161,9 +161,9 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ reviews }) => {
 
             {/* Review Title */}
             {review.title && (
-              <h5 className="font-semibold text-sm sm:text-base text-gray-900 mb-2">
+              <h4 className="font-semibold text-sm sm:text-base text-gray-900 mb-2">
                 {review.title}
-              </h5>
+              </h4>
             )}
 
             {/* Review Content */}

@@ -1,7 +1,7 @@
 from typing import Any, List, Optional
 from pydantic import BaseModel
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
@@ -20,6 +20,7 @@ from app.schemas.package import PackageWithCountryResponse
 from app.schemas.group_trip import GroupTripWithCountryResponse
 from app.schemas.activity import ActivityResponse
 from app.services.attraction import attraction_service
+from app.services.indexnow import is_entity_public, notify_entity_change
 from app.auth.dependencies import get_current_user, has_permission
 
 class SetCoverImageRequest(BaseModel):
@@ -244,12 +245,14 @@ def create_attraction(
     *,
     db: Session = Depends(get_db),
     attraction_in: AttractionCreate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:create")),
 ) -> Any:
     """
     Create new attraction.
     """
     attraction = attraction_service.create_attraction(db, attraction_in)
+    notify_entity_change(background_tasks, "attraction", attraction)
     return attraction
 
 @router.put("/{attraction_id}", response_model=AttractionResponse)
@@ -259,6 +262,7 @@ def update_attraction(
     db: Session = Depends(get_db),
     attraction_id: int,
     attraction_in: AttractionUpdate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(has_permission("content:update")),
 ) -> Any:
     """
@@ -267,7 +271,9 @@ def update_attraction(
     attraction = attraction_service.get_attraction(db, attraction_id=attraction_id)
     if attraction is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Attraction not found")
+    was_public = is_entity_public(attraction)
     attraction = attraction_service.update_attraction(db, attraction_id=attraction_id, attraction_update=attraction_in)
+    notify_entity_change(background_tasks, "attraction", attraction, force=was_public)
     return attraction
 
 @router.post("/{attraction_id}/cover-image", response_model=AttractionResponse)

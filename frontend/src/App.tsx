@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider, Outlet, useSearchParams, ScrollRes
 import { HelmetProvider } from 'react-helmet-async';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/api';
+import { trackAiReferralOnce } from './lib/ai-analytics';
 import { AuthProvider, useAuth } from './lib/contexts/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import ErrorBoundary, { RouteErrorFallback } from './components/ErrorBoundary';
@@ -190,7 +191,7 @@ import { PublicInvoiceViewPage } from './features/public/verification/PublicInvo
 
 const CountrySlugRedirect = () => {
   const { slug } = useParams<{ slug: string }>();
-  return <Navigate to={`/destinations/${slug || ''}`} replace />;
+  return <Navigate to={slug ? `/destinations/${slug}/` : '/destinations/'} replace />;
 };
 
 const StaysPage = () => (
@@ -258,7 +259,7 @@ const MainLayout = () => {
   const navigationItems = [
     { label: 'Destinations', path: '/destinations/' },
     { label: 'Packages', path: '/packages/' },
-    { label: 'Stays', path: '/stays/' },
+    { label: 'Stays', path: '/hotels/' },
     { label: 'Holiday Types', path: '/holiday-types/' },
     { label: 'Blog', path: '/blog/' },
   ];
@@ -306,10 +307,10 @@ const MainLayout = () => {
         logo="/logo/main_logo.png"
         sections={footerSections}
         socialLinks={{
-          facebook: 'https://facebook.com',
-          twitter: 'https://twitter.com',
-          instagram: 'https://instagram.com',
-          youtube: 'https://youtube.com',
+          facebook: 'https://facebook.com/AllboundVacations',
+          twitter: 'https://twitter.com/AllboundVacations',
+          instagram: 'https://instagram.com/AllboundVacations',
+          youtube: 'https://youtube.com/AllboundVacations',
         }}
       />
     </div>
@@ -388,7 +389,7 @@ const router = createBrowserRouter([
       { path: 'regions', element: <RegionsPage /> },
       { path: 'regions/:slug', element: <RegionDetailPage /> },
       { path: 'countries/:slug', element: <CountrySlugRedirect /> },
-      { path: 'countries', element: <Navigate to="/destinations" replace /> },
+      { path: 'countries', element: <Navigate to="/destinations/" replace /> },
       { path: 'packages', element: <PackagesPage /> },
       { path: 'packages/:destination/:slug', element: <PackageDetailPageNew /> },
       { path: 'packages/:slug', element: <PackageDetailPageNew /> },
@@ -581,6 +582,10 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  useEffect(() => {
+    trackAiReferralOnce();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>

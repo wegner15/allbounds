@@ -93,7 +93,7 @@ class AttractionResponse(AttractionBase):
     is_featured: Optional[bool] = Field(False, description="Whether the attraction is featured")
     order_index: int = Field(0, description="Manual display order (lower = first)")
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
     cover_image: Optional[str] = Field(None, description="Cover image URL")
     country: Optional[CountryResponse] = Field(None, description="Country details for the attraction")
     

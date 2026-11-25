@@ -118,7 +118,7 @@ const SpecialTopDeals: React.FC = () => {
             </p>
           </div>
           <Link
-            to="/packages"
+            to="/packages/"
             className="text-primary hover:text-primary-dark flex items-center font-lato font-medium transition-colors"
           >
             View All Deals
@@ -140,7 +140,7 @@ const SpecialTopDeals: React.FC = () => {
                   return (
                     <Link
                       key={deal.id}
-                      to={`/packages/${deal.country?.slug || 'unknown'}/${deal.slug}`}
+                      to={`/packages/${deal.country?.slug || 'unknown'}/${deal.slug}/`}
                       className="relative flex-shrink-0 w-80 h-96 rounded-xl overflow-hidden group cursor-pointer block shadow-md hover:shadow-xl transition-shadow duration-300"
                     >
                       {/* Card image */}

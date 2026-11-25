@@ -122,7 +122,7 @@ const AttractionDetailPage: React.FC = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Attraction not found</h2>
           <p className="text-gray-600 mb-6">The attraction you're looking for doesn't exist or has been removed.</p>
           <Link
-            to="/attractions"
+            to="/attractions/"
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
           >
             Back to Attractions
@@ -152,7 +152,7 @@ const AttractionDetailPage: React.FC = () => {
                   <svg className="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                   </svg>
-                  <Link to="/attractions" className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
+                  <Link to="/attractions/" className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
                     Attractions
                   </Link>
                 </div>
@@ -267,7 +267,7 @@ const AttractionDetailPage: React.FC = () => {
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2">
                   {(attraction.activities && attraction.activities.length > 0 ? attraction.activities : (countryActivities || [])).slice(0, 4).map((activity) => (
-                    <Link key={activity.id} to={`/activities/${activity.slug}`} className="group block">
+                    <Link key={activity.id} to={`/activities/${activity.slug}/`} className="group block">
                       <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
                         <h3 className="font-medium text-gray-900 group-hover:text-teal-600 mb-1">{activity.name}</h3>
                         {activity.summary && <p className="text-sm text-gray-600 line-clamp-2">{activity.summary}</p>}
@@ -286,7 +286,7 @@ const AttractionDetailPage: React.FC = () => {
                   {attraction.hotels.map((hotel) => (
                     <Link
                       key={hotel.id}
-                      to={`/hotels/${hotel.slug}`}
+                      to={`/hotels/${hotel.slug}/`}
                       className="group block bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-all duration-300"
                     >
                       {/* Hotel image */}

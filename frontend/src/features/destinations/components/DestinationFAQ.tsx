@@ -87,6 +87,9 @@ const DestinationFAQItem: React.FC<DestinationFAQItemProps> = ({
     isExpanded,
     onToggle,
 }) => {
+    const panelId = `destination-faq-panel-${index}`;
+    const buttonId = `destination-faq-button-${index}`;
+
     return (
         <div className={`
             bg-white rounded-xl shadow-md overflow-hidden border transition-all duration-300 animate-fade-in
@@ -94,9 +97,12 @@ const DestinationFAQItem: React.FC<DestinationFAQItemProps> = ({
         `}>
             {/* Header - Always Visible */}
             <button
+                id={buttonId}
+                type="button"
                 onClick={onToggle}
                 className="w-full p-4 sm:p-5 md:p-6 flex items-start justify-between hover:bg-gray-50/80 active:bg-gray-100 transition-all duration-200 text-left touch-manipulation min-h-[60px]"
                 aria-expanded={isExpanded}
+                aria-controls={panelId}
             >
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 sm:gap-3">
@@ -126,14 +132,23 @@ const DestinationFAQItem: React.FC<DestinationFAQItemProps> = ({
                 </div>
             </button>
 
-            {/* Expanded Content */}
-            {isExpanded && (
-                <div className="px-4 sm:px-5 md:px-6 pb-4 sm:pb-5 md:pb-6 border-t border-gray-100 animate-slide-down">
-                    <div className="mt-3 sm:mt-4 text-sm sm:text-base text-gray-700 leading-relaxed pl-0 sm:pl-13">
-                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(faq.answer) }} />
+            {/* Answer Content - Always mounted in DOM for SEO/AI crawlers & screen readers */}
+            <div
+                id={panelId}
+                role="region"
+                aria-labelledby={buttonId}
+                className={`grid transition-all duration-300 ease-in-out ${
+                    isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                }`}
+            >
+                <div className="overflow-hidden">
+                    <div className="px-4 sm:px-5 md:px-6 pb-4 sm:pb-5 md:pb-6 border-t border-gray-100">
+                        <div className="mt-3 sm:mt-4 text-sm sm:text-base text-gray-700 leading-relaxed pl-0 sm:pl-13">
+                            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(faq.answer) }} />
+                        </div>
                     </div>
                 </div>
-            )}
+            </div>
         </div>
     );
 };

@@ -57,7 +57,7 @@ const RegionsPage: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {(regionsData || []).map(region => (
                             <div key={region.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col h-full">
-                                <Link to={`/destinations/regions/${region.slug}`}>
+                                <Link to={`/regions/${region.slug}/`}>
                                     <div className="relative h-64 overflow-hidden">
                                         <img
                                             src={getImageUrlWithFallback(region.image_id || region.image_url, IMAGE_VARIANTS.LARGE, '/home-heros/hero2.webp')}
@@ -87,7 +87,7 @@ const RegionsPage: React.FC = () => {
                                                 {region.countries.slice(0, 5).map(country => (
                                                     <Link
                                                         key={country.id}
-                                                        to={`/destinations/${country.slug}`}
+                                                        to={`/destinations/${country.slug}/`}
                                                         className="text-xs bg-teal-50 text-teal-700 border border-teal-100 px-2 py-1 rounded hover:bg-teal-100 transition-colors"
                                                     >
                                                         {country.name}
@@ -102,7 +102,7 @@ const RegionsPage: React.FC = () => {
                                         </div>
                                     )}
 
-                                    <Link to={`/destinations/regions/${region.slug}`} className="mt-4">
+                                    <Link to={`/regions/${region.slug}/`} className="mt-4">
                                         <Button variant="outline" className="w-full">
                                             Explore Region
                                         </Button>

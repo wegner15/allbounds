@@ -129,7 +129,7 @@ const PopularSafariPackages: React.FC = () => {
                   key={trip.id}
                   className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col flex-shrink-0 w-80 snap-start"
                 >
-                  <Link to={`/packages/${trip.slug}`} className="relative block overflow-hidden">
+                  <Link to={trip.country?.slug ? `/packages/${trip.country.slug}/${trip.slug}/` : `/packages/${trip.slug}/`} className="relative block overflow-hidden">
                     <img
                       src={getImageUrlWithFallback(
                         trip.image_id,
@@ -176,7 +176,7 @@ const PopularSafariPackages: React.FC = () => {
                       </div>
                     </div>
 
-                    <Link to={`/packages/${trip.slug}`}>
+                    <Link to={trip.country?.slug ? `/packages/${trip.country.slug}/${trip.slug}/` : `/packages/${trip.slug}/`}>
                       <h3 className="font-bold text-lg text-gray-900 line-clamp-1 group-hover:text-amber-600 transition-colors">
                         {trip.name}
                       </h3>
@@ -207,7 +207,7 @@ const PopularSafariPackages: React.FC = () => {
                         className="text-left"
                       />
                       <Link
-                        to={`/packages/${trip.slug}`}
+                        to={trip.country?.slug ? `/packages/${trip.country.slug}/${trip.slug}/` : `/packages/${trip.slug}/`}
                         className="px-3.5 py-1.5 bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white rounded-lg text-xs font-bold transition-colors"
                       >
                         View Details

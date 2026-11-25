@@ -58,6 +58,24 @@ async def health_check():
     """Health check endpoint for the API."""
     return {"status": "ok"}
 
+
+@app.get("/{indexnow_key}.txt", include_in_schema=False)
+async def indexnow_key_verification(indexnow_key: str):
+    """
+    Serve the IndexNow ownership verification file when INDEXNOW_KEY is configured.
+
+    IndexNow requires `keyLocation` to be hosted on the same host as submitted URLs
+    (e.g., `https://allboundvacations.com/{INDEXNOW_KEY}.txt`). In production with
+    Cloudflare Pages, either place `{INDEXNOW_KEY}.txt` in `frontend/public/` or
+    route `/{INDEXNOW_KEY}.txt` to this endpoint.
+    """
+    from app.services.indexnow import verify_indexnow_key
+
+    verified_key = verify_indexnow_key(indexnow_key)
+    if not verified_key:
+        return Response(status_code=404)
+    return Response(content=verified_key, media_type="text/plain; charset=utf-8")
+
 @app.get("/health/db")
 async def database_health_check():
     """

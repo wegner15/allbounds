@@ -108,7 +108,7 @@ class GroupTripResponse(GroupTripBase):
     is_featured: bool = Field(..., description="Whether the group trip is featured")
     order_index: int = Field(0, description="Manual display order (lower = first)")
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
     published_at: Optional[datetime] = None
     holiday_types: List[HolidayTypeResponse] = Field(default_factory=list, description="Holiday types associated with this group trip")
     inclusion_items: List[InclusionResponse] = Field(default_factory=list, description="Inclusions associated with this group trip")

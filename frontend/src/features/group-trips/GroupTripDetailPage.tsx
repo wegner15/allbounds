@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useGroupTripDetailsBySlug } from '../../lib/hooks/useGroupTrips';
 import { useAppStore } from '../../lib/store';
 import SeoHead from '../../components/seo/SeoHead';
-import { buildAbsoluteUrl, SITE_NAME, SITE_URL } from '../../lib/seo-config';
+import { buildGroupTripGraph } from '../../lib/schema-builders';
 
 // Components
 import Breadcrumb from '../../components/layout/Breadcrumb';
@@ -141,7 +141,7 @@ const GroupTripDetailPage: React.FC = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
             <p>Error loading group trip details. Please try again later.</p>
-            <Link to="/group-trips" className="text-red-700 underline mt-2 inline-block">
+            <Link to="/group-trips/" className="text-red-700 underline mt-2 inline-block">
               Back to Group Trips
             </Link>
           </div>
@@ -157,7 +157,11 @@ const GroupTripDetailPage: React.FC = () => {
     ? `${rawTripDescription.substring(0, 152).trim()}...`
     : rawTripDescription;
 
-  const canonicalTripPath = `/group-trips/${tripDetail.slug}`;
+  const canonicalTripPath = `/group-trips/${tripDetail.slug}/`;
+  const tripUpdatedAt = (tripDetail as unknown as { updated_at?: string | null }).updated_at || undefined;
+  const tripImage = tripDetail?.cover_image
+    ? getImageUrlWithFallback(tripDetail.cover_image, IMAGE_VARIANTS.LARGE)
+    : undefined;
 
   return (
     <>
@@ -165,38 +169,29 @@ const GroupTripDetailPage: React.FC = () => {
         title={tripDetail.name}
         description={tripDescription}
         canonicalPath={canonicalTripPath}
-        image={tripDetail?.cover_image ? getImageUrlWithFallback(tripDetail.cover_image, IMAGE_VARIANTS.LARGE) : undefined}
+        image={tripImage}
         type="article"
+        modifiedTime={tripUpdatedAt}
         keywords={[
           tripDetail.name,
           tripDetail.country?.name,
           'group trip', 'group travel', 'tour',
         ].filter(Boolean) as string[]}
-        structuredData={[
-          {
-            '@context': 'https://schema.org',
-            '@type': 'TouristTrip',
-            name: tripDetail.name,
-            description: tripDescription,
-            image: tripDetail?.cover_image ? getImageUrlWithFallback(tripDetail.cover_image, IMAGE_VARIANTS.LARGE) : undefined,
-            url: buildAbsoluteUrl(canonicalTripPath),
-            provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
-            touristType: ['Group Travel'],
-            itinerary: tripDetail.duration_days
-              ? { '@type': 'ItemList', numberOfItems: tripDetail.duration_days }
-              : undefined,
-          },
-          {
-            '@context': 'https://schema.org',
-            '@type': 'BreadcrumbList',
-            itemListElement: [
-              { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-              { '@type': 'ListItem', position: 2, name: 'Group Trips', item: buildAbsoluteUrl('/group-trips') },
-              ...(tripDetail.country ? [{ '@type': 'ListItem', position: 3, name: tripDetail.country.name, item: buildAbsoluteUrl(`/destinations/${tripDetail.country.slug}`) }] : []),
-              { '@type': 'ListItem', position: tripDetail.country ? 4 : 3, name: tripDetail.name, item: buildAbsoluteUrl(canonicalTripPath) },
-            ],
-          },
-        ]}
+        structuredData={buildGroupTripGraph({
+          name: tripDetail.name,
+          slug: tripDetail.slug,
+          description: tripDescription,
+          image: tripImage,
+          canonicalPath: canonicalTripPath,
+          country: tripDetail.country,
+          price: tripDetail.price,
+          priceCharts: activePriceCharts,
+          durationDays: tripDetail.duration_days,
+          maxParticipants: tripDetail.max_participants,
+          departures: tripDetail.departures,
+          holidayTypes: tripDetail.holiday_types,
+          dateModified: tripUpdatedAt,
+        })}
       />
 
       {/* Sticky Trip Info Card */}
@@ -261,8 +256,8 @@ const GroupTripDetailPage: React.FC = () => {
             <div className="container mx-auto">
               <Breadcrumb
                 items={[
-                  { label: 'Group Trips', path: '/group-trips' },
-                  { label: tripDetail.country.name, path: `/destinations/${tripDetail.country.slug}` },
+                  { label: 'Group Trips', path: '/group-trips/' },
+                  { label: tripDetail.country.name, path: `/destinations/${tripDetail.country.slug}/` },
                   { label: tripDetail.name },
                 ]}
                 variant="dark"
@@ -297,41 +292,39 @@ const GroupTripDetailPage: React.FC = () => {
       )}
 
       <div className={`container mx-auto px-4 ${isScrolled ? 'py-24' : 'py-8'}`}>
-        {/* Breadcrumb fallback if no cover image */}
-        {!tripDetail.cover_image && (
-          <Breadcrumb
-            items={[
-              { label: 'Group Trips', path: '/group-trips' },
-              { label: tripDetail.country.name, path: `/destinations/${tripDetail.country.slug}` },
-              { label: tripDetail.name },
-            ]}
-            className="mb-6"
-          />
+        {/* Breadcrumb & single H1 fallback when no hero carousel is rendered */}
+        {carouselImages.length === 0 && (
+          <>
+            <Breadcrumb
+              items={[
+                { label: 'Group Trips', path: '/group-trips/' },
+                { label: tripDetail.country.name, path: `/destinations/${tripDetail.country.slug}/` },
+                { label: tripDetail.name },
+              ]}
+              className="mb-6"
+            />
+            <h1 className="text-4xl font-playfair font-bold text-charcoal mb-3">{tripDetail.name}</h1>
+            <div className="flex flex-wrap items-center gap-3 text-gray-600 mb-6">
+              <span>
+                {tripDetail.duration_days && `${tripDetail.duration_days} days`}
+                {tripDetail.price && ` • From $${tripDetail.price}`}
+              </span>
+            </div>
+          </>
         )}
 
-        {/* Title fallback if no cover image */}
-        {!tripDetail.cover_image && (
-          <h1 className="text-4xl font-playfair text-charcoal mb-4">{tripDetail.name}</h1>
+        {tripUpdatedAt && (
+          <p className="text-xs text-gray-500 mb-6">
+            Last updated{' '}
+            <time dateTime={tripUpdatedAt}>
+              {format(new Date(tripUpdatedAt), 'MMM d, yyyy')}
+            </time>
+          </p>
         )}
-
-
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main content */}
           <div className="lg:col-span-2">
-            {/* Title and basic info - only show if no cover image */}
-            {!tripDetail.cover_image && (
-              <>
-                <h1 className="text-4xl font-playfair text-charcoal mb-4">{tripDetail.name}</h1>
-
-                <div className="flex items-center mb-6">
-                  <div className="text-gray-600">
-                    {tripDetail.duration_days && `${tripDetail.duration_days} days`}
-                    {tripDetail.price && ` • From $${tripDetail.price}`}
-                  </div>
-                </div>
-              </>
-            )}
 
 
             {/* Group Trip Content */}

@@ -5,7 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import DOMPurify from 'dompurify';
 import SeoHead from '../../components/seo/SeoHead';
-import { buildAbsoluteUrl, SITE_NAME, SITE_URL } from '../../lib/seo-config';
+import { buildAttractionGraph } from '../../lib/schema-builders';
 import { useAttractionTrips } from '../../hooks/useAttractionTrips';
 import { RichTextDisplay } from '../../components/ui/RichTextDisplay';
 import Button from '../../components/ui/Button';
@@ -113,7 +113,7 @@ const AttractionDetailPage: React.FC = () => {
   }
 
   const destinationSlug = destination || attraction?.country?.slug;
-  const canonicalAttractionPath = `/attractions/${slug}`;
+  const canonicalAttractionPath = `/attractions/${slug}/`;
 
   const rawAttractionDesc = attraction?.summary ||
     attraction?.description?.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() ||
@@ -121,6 +121,41 @@ const AttractionDetailPage: React.FC = () => {
   const attractionDesc = rawAttractionDesc.length > 155
     ? `${rawAttractionDesc.substring(0, 152).trim()}...`
     : rawAttractionDesc;
+
+  const attractionUpdatedAt = (attraction as any)?.updated_at as string | undefined;
+  const formattedUpdatedAt = attractionUpdatedAt
+    ? new Date(attractionUpdatedAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : null;
+
+  const attractionGraph = buildAttractionGraph({
+    name: attraction?.name?.trim() || 'Attraction',
+    slug: slug || attraction?.slug || '',
+    description: attractionDesc,
+    image: getAllImages[0]?.file_path || undefined,
+    canonicalPath: canonicalAttractionPath,
+    country: attraction?.country
+      ? { name: attraction.country.name, slug: attraction.country.slug }
+      : undefined,
+    city: attraction?.city,
+    address: attraction?.address,
+    latitude: attraction?.latitude,
+    longitude: attraction?.longitude,
+    openingHours: (attraction as any)?.opening_hours,
+    price: attraction?.price,
+    dateModified: attractionUpdatedAt,
+    breadcrumbs: [
+      { name: 'Home', url: '/' },
+      { name: 'Attractions', url: '/attractions/' },
+      ...(destinationSlug
+        ? [{ name: attraction?.country?.name || destinationSlug, url: `/destinations/${destinationSlug}/` }]
+        : []),
+      { name: attraction?.name?.trim() || 'Attraction', url: canonicalAttractionPath },
+    ],
+  });
 
   return (
     <>
@@ -135,30 +170,7 @@ const AttractionDetailPage: React.FC = () => {
           attraction?.country?.name,
           'attraction', 'sightseeing', 'travel',
         ].filter(Boolean) as string[]}
-        structuredData={[
-          {
-            '@context': 'https://schema.org',
-            '@type': 'TouristAttraction',
-            name: attraction?.name?.trim(),
-            description: attractionDesc,
-            image: getAllImages[0]?.file_path || undefined,
-            url: buildAbsoluteUrl(canonicalAttractionPath),
-            provider: { '@type': 'TravelAgency', name: SITE_NAME, url: SITE_URL },
-            containedInPlace: attraction?.country
-              ? { '@type': 'Country', name: attraction.country.name }
-              : undefined,
-          },
-          {
-            '@context': 'https://schema.org',
-            '@type': 'BreadcrumbList',
-            itemListElement: [
-              { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-              { '@type': 'ListItem', position: 2, name: 'Attractions', item: buildAbsoluteUrl('/attractions') },
-              ...(destinationSlug ? [{ '@type': 'ListItem', position: 3, name: attraction?.country?.name || destinationSlug, item: buildAbsoluteUrl(`/destinations/${destinationSlug}`) }] : []),
-              { '@type': 'ListItem', position: destinationSlug ? 4 : 3, name: attraction?.name?.trim() || 'Attraction', item: buildAbsoluteUrl(canonicalAttractionPath) },
-            ],
-          },
-        ]}
+        structuredData={attractionGraph}
       />
       <div className="min-h-screen bg-gray-50">
       {/* Breadcrumb Section */}
@@ -166,9 +178,9 @@ const AttractionDetailPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Breadcrumb
             items={[
-              { label: 'Destinations', path: '/destinations' },
-              { label: attraction?.country?.name || 'Country', path: `/destinations/${attraction?.country?.slug}` },
-              { label: `${attraction?.country?.name || ''} Attractions`, path: `/destinations/${attraction?.country?.slug}/attractions` },
+              { label: 'Destinations', path: '/destinations/' },
+              { label: attraction?.country?.name || 'Country', path: `/destinations/${attraction?.country?.slug}/` },
+              { label: `${attraction?.country?.name || ''} Attractions`, path: `/destinations/${attraction?.country?.slug}/attractions/` },
               { label: attraction?.name || 'Attraction' },
             ]}
           />
@@ -200,6 +212,13 @@ const AttractionDetailPage: React.FC = () => {
                 <div className="flex items-center">
                   <DollarSign className="h-4 w-4 mr-1 text-teal-600" />
                   <span className="font-semibold text-gray-900">From ${attraction.price}</span>
+                </div>
+              )}
+
+              {formattedUpdatedAt && (
+                <div className="text-xs text-gray-500">
+                  Last updated:{' '}
+                  <time dateTime={attractionUpdatedAt}>{formattedUpdatedAt}</time>
                 </div>
               )}
             </div>
@@ -497,7 +516,7 @@ const AttractionDetailPage: React.FC = () => {
                 <p className="text-gray-600 mb-6">
                   Currently, there are no travel packages or group trips that include this attraction.
                 </p>
-                <Link to="/packages">
+                <Link to="/packages/">
                   <Button>Browse All Packages</Button>
                 </Link>
               </div>

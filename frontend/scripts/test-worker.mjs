@@ -963,3 +963,95 @@ test('GET and HEAD /llms.txt return llmstxt.org structured directory (live API +
   assert.match(offlineBody, /\[Travel Blog & Safari Guides\]\(https:\/\/allboundvacations\.com\/blog\/\)/);
   assert.match(offlineBody, /\[About Allbound Vacations\]\(https:\/\/allboundvacations\.com\/about-us\/\)/);
 });
+
+test('GET and HEAD /.well-known/api-catalog return RFC 9727 API Catalog Linkset and / includes Link header', async () => {
+  installMockFetch();
+  const mockCache = createMockCache();
+  globalThis.caches = { default: mockCache };
+  const { env } = createMockEnv();
+  const waitUntilPromises = [];
+  const ctx = { waitUntil: (p) => waitUntilPromises.push(p) };
+
+  const expectedContentType =
+    'application/linkset+json; profile="https://www.rfc-editor.org/info/rfc9727"';
+  const expectedLinkHeader =
+    '<https://allboundvacations.com/.well-known/api-catalog>; rel="api-catalog"';
+
+  // 1. GET /.well-known/api-catalog
+  const getRes = await worker.fetch(
+    new Request('https://allboundvacations.com/.well-known/api-catalog'),
+    env,
+    ctx
+  );
+  assert.equal(getRes.status, 200);
+  assert.equal(getRes.headers.get('Content-Type'), expectedContentType);
+  assert.ok(getRes.headers.get('Content-Type').includes('application/linkset+json'));
+  assert.equal(getRes.headers.get('Cache-Control'), 'public, max-age=3600');
+  assert.equal(getRes.headers.get('Access-Control-Allow-Origin'), '*');
+  assert.equal(getRes.headers.get('Content-Signal'), 'ai-train=yes, search=yes, ai-input=yes');
+
+  const rawBody = await getRes.text();
+  const catalog = JSON.parse(rawBody);
+  assert.ok(Array.isArray(catalog.linkset) && catalog.linkset.length === 1);
+  const entry = catalog.linkset[0];
+  assert.equal(entry.anchor, 'https://api.allboundvacations.com/api/v1');
+  assert.deepEqual(entry['service-desc'], [
+    {
+      href: 'https://api.allboundvacations.com/api/v1/openapi.json',
+      type: 'application/openapi+json',
+    },
+  ]);
+  assert.deepEqual(entry['service-doc'], [
+    {
+      href: 'https://api.allboundvacations.com/docs',
+      type: 'text/html',
+    },
+  ]);
+  assert.deepEqual(entry.status, [
+    {
+      href: 'https://api.allboundvacations.com/health',
+      type: 'application/json',
+    },
+  ]);
+
+  // Verify static fallback file matches worker payload
+  const staticCatalogText = await readFile(
+    resolve(frontendRoot, 'public/.well-known/api-catalog'),
+    'utf8'
+  );
+  assert.deepEqual(JSON.parse(staticCatalogText), catalog);
+
+  // 2. HEAD /.well-known/api-catalog
+  const headRes = await worker.fetch(
+    new Request('https://allboundvacations.com/.well-known/api-catalog', { method: 'HEAD' }),
+    env,
+    ctx
+  );
+  assert.equal(headRes.status, 200);
+  assert.equal(headRes.headers.get('Content-Type'), expectedContentType);
+  assert.equal(headRes.headers.get('Cache-Control'), 'public, max-age=3600');
+  assert.equal(headRes.headers.get('Access-Control-Allow-Origin'), '*');
+  assert.equal(headRes.headers.get('Content-Signal'), 'ai-train=yes, search=yes, ai-input=yes');
+  assert.equal(await headRes.text(), '');
+
+  // 3. Homepage GET / (HTML + cached HTML + Markdown) includes RFC 9727 Link header
+  const homeHtmlRes = await worker.fetch(new Request('https://allboundvacations.com/'), env, ctx);
+  await Promise.all(waitUntilPromises);
+  assert.equal(homeHtmlRes.status, 200);
+  assert.equal(homeHtmlRes.headers.get('Link'), expectedLinkHeader);
+
+  const homeCachedRes = await worker.fetch(new Request('https://allboundvacations.com/'), env, ctx);
+  assert.equal(homeCachedRes.status, 200);
+  assert.equal(homeCachedRes.headers.get('X-Allbounds-SSR'), 'cache-hit');
+  assert.equal(homeCachedRes.headers.get('Link'), expectedLinkHeader);
+
+  const homeMdRes = await worker.fetch(
+    new Request('https://allboundvacations.com/', { headers: { Accept: 'text/markdown' } }),
+    env,
+    ctx
+  );
+  await Promise.all(waitUntilPromises);
+  assert.equal(homeMdRes.status, 200);
+  assert.equal(homeMdRes.headers.get('Content-Type'), 'text/markdown; charset=utf-8');
+  assert.equal(homeMdRes.headers.get('Link'), expectedLinkHeader);
+});

@@ -1,6 +1,10 @@
 /*
   Content-Signal: ai-train=yes, search=yes, ai-input=yes
 
+/.well-known/api-catalog
+  Content-Type: application/linkset+json; profile="https://www.rfc-editor.org/info/rfc9727"
+  Access-Control-Allow-Origin: *
+
 /admin
   X-Robots-Tag: noindex, nofollow
 

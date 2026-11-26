@@ -22,6 +22,35 @@ const DEFAULT_DESCRIPTION =
 const CONTENT_SIGNAL_HEADER = 'ai-train=yes, search=yes, ai-input=yes';
 const PUBLIC_CACHE_CONTROL = 'public, s-maxage=3600, max-age=300';
 const NEGOTIATED_CLIENT_CACHE_CONTROL = 'public, max-age=300, must-revalidate';
+const API_CATALOG_CONTENT_TYPE =
+  'application/linkset+json; profile="https://www.rfc-editor.org/info/rfc9727"';
+const API_CATALOG_LINK_HEADER = `<${SITE_URL}/.well-known/api-catalog>; rel="api-catalog"`;
+const API_CATALOG_DOCUMENT = {
+  linkset: [
+    {
+      anchor: DEFAULT_API_BASE_URL,
+      'service-desc': [
+        {
+          href: `${DEFAULT_API_BASE_URL}/openapi.json`,
+          type: 'application/openapi+json',
+        },
+      ],
+      'service-doc': [
+        {
+          href: 'https://api.allboundvacations.com/docs',
+          type: 'text/html',
+        },
+      ],
+      status: [
+        {
+          href: 'https://api.allboundvacations.com/health',
+          type: 'application/json',
+        },
+      ],
+    },
+  ],
+};
+const API_CATALOG_JSON = `${JSON.stringify(API_CATALOG_DOCUMENT, null, 2)}\n`;
 const API_TIMEOUT_MS = 4000;
 
 const DESTINATION_CATEGORIES = {
@@ -3126,6 +3155,22 @@ export default {
       return handleLlmsTxt(request, env, ctx, url);
     }
 
+    // 0b. RFC 9727 API Catalog (/.well-known/api-catalog) — handled before static file pass-through
+    if (
+      (request.method === 'GET' || request.method === 'HEAD') &&
+      path === '/.well-known/api-catalog'
+    ) {
+      return new Response(request.method === 'HEAD' ? null : API_CATALOG_JSON, {
+        status: 200,
+        headers: {
+          'Content-Type': API_CATALOG_CONTENT_TYPE,
+          'Cache-Control': 'public, max-age=3600',
+          'Access-Control-Allow-Origin': '*',
+          'Content-Signal': CONTENT_SIGNAL_HEADER,
+        },
+      });
+    }
+
     // 1. Pass through non-GET/HEAD requests, /api/*, and static files with extensions
     const lastSegment = path.split('/').pop() || '';
     const hasFileExtension = /\.[a-z0-9]+$/i.test(lastSegment);
@@ -3240,6 +3285,9 @@ export default {
         if (cached) {
           const hitHeaders = new Headers(cached.headers);
           applyNegotiatedClientCacheHeaders(hitHeaders);
+          if (path === '/') {
+            hitHeaders.set('Link', API_CATALOG_LINK_HEADER);
+          }
           hitHeaders.set('X-Allbounds-SSR', 'cache-hit');
           return new Response(cached.body, {
             status: cached.status,
@@ -3370,6 +3418,10 @@ export default {
         'Content-Signal': CONTENT_SIGNAL_HEADER,
         'X-Allbounds-SSR': 'rendered',
       });
+    }
+
+    if (path === '/') {
+      cacheHeaders.set('Link', API_CATALOG_LINK_HEADER);
     }
 
     // Store in Cloudflare Cache API (1-hour edge TTL via s-maxage=3600, separate __variant key)

@@ -1,0 +1,25 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://api.allboundvacations.com/api/v1",
+      "service-desc": [
+        {
+          "href": "https://api.allboundvacations.com/api/v1/openapi.json",
+          "type": "application/openapi+json"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://api.allboundvacations.com/docs",
+          "type": "text/html"
+        }
+      ],
+      "status": [
+        {
+          "href": "https://api.allboundvacations.com/health",
+          "type": "application/json"
+        }
+      ]
+    }
+  ]
+}

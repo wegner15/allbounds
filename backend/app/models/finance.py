@@ -92,6 +92,9 @@ class Invoice(Base):
     # Trip / Booking Summary
     trip_summary = Column(JSON, nullable=False, default=dict)
 
+    # Flight Details (optional structured itinerary: pnr, notes, segments)
+    flight_details = Column(JSON, nullable=True)
+
     # Financial Totals
     subtotal = Column(Float, nullable=False, default=0.0)
     discount_amount = Column(Float, nullable=False, default=0.0)

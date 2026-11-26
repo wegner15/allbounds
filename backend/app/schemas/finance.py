@@ -165,6 +165,27 @@ class InvoiceLineItemResponse(InvoiceLineItemBase):
 
 
 # ==========================================
+# FLIGHT DETAILS SCHEMAS
+# ==========================================
+
+class FlightSegment(BaseModel):
+    airline: str = Field(..., min_length=1, max_length=20)
+    flight_number: str = Field(..., min_length=1, max_length=20)
+    date: str = Field(default="", max_length=30)
+    origin: str = Field(..., min_length=1, max_length=10)
+    destination: str = Field(..., min_length=1, max_length=10)
+    departure_time: str = Field(default="", max_length=20)
+    arrival_time: str = Field(default="", max_length=20)
+    day: Optional[str] = Field(default=None, max_length=20)
+
+
+class FlightDetails(BaseModel):
+    pnr: Optional[str] = Field(default=None, max_length=50)
+    notes: Optional[str] = Field(default=None, max_length=2000)
+    segments: List[FlightSegment] = Field(default_factory=list)
+
+
+# ==========================================
 # INVOICE SCHEMAS
 # ==========================================
 
@@ -184,6 +205,7 @@ class InvoiceBase(BaseModel):
     client_type: str = Field(default="individual", description="individual or corporate")
     client_details: Dict[str, Any] = Field(default_factory=dict)
     trip_summary: Dict[str, Any] = Field(default_factory=dict)
+    flight_details: Optional[FlightDetails] = None
     subtotal: float = 0.0
     discount_amount: float = 0.0
     promotional_discount: float = 0.0
@@ -228,6 +250,7 @@ class InvoiceUpdate(BaseModel):
     client_type: Optional[str] = None
     client_details: Optional[Dict[str, Any]] = None
     trip_summary: Optional[Dict[str, Any]] = None
+    flight_details: Optional[FlightDetails] = None
     subtotal: Optional[float] = None
     discount_amount: Optional[float] = None
     promotional_discount: Optional[float] = None

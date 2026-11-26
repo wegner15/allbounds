@@ -1,3 +1,4 @@
+import html
 import math
 from datetime import datetime, date
 from typing import Optional, List, Dict, Any, Tuple
@@ -152,6 +153,105 @@ DEFAULT_SUPPLIER_CATEGORIES = [
     {"id": "guide", "label": "Tour Guide"},
     {"id": "other", "label": "Other Service"}
 ]
+
+
+def _serialize_flight_details(flight_details: Optional[Any]) -> Optional[Dict[str, Any]]:
+    if flight_details is None:
+        return None
+    if hasattr(flight_details, "model_dump"):
+        return flight_details.model_dump()
+    if hasattr(flight_details, "dict"):
+        return flight_details.dict()
+    if isinstance(flight_details, dict):
+        return dict(flight_details)
+    return None
+
+
+def render_flight_itinerary_html(flight_details: Optional[Any]) -> str:
+    """
+    Render a clean HTML Flight Itinerary table for invoice emails when
+    flight_details contains one or more segments. Returns empty string otherwise.
+    """
+    data = _serialize_flight_details(flight_details)
+    if not data:
+        return ""
+
+    segments = data.get("segments") or []
+    if not segments:
+        return ""
+
+    pnr = (data.get("pnr") or "").strip()
+    notes = (data.get("notes") or "").strip()
+
+    rows_html = []
+    for idx, seg in enumerate(segments, start=1):
+        seg_dict = seg if isinstance(seg, dict) else (
+            seg.model_dump() if hasattr(seg, "model_dump") else seg.dict()
+        )
+        airline = html.escape(str(seg_dict.get("airline") or "").strip())
+        flight_number = html.escape(str(seg_dict.get("flight_number") or "").strip())
+        flight_code = f"{airline} {flight_number}".strip()
+        seg_date = html.escape(str(seg_dict.get("date") or "").strip()) or "&mdash;"
+        origin = html.escape(str(seg_dict.get("origin") or "").strip())
+        destination = html.escape(str(seg_dict.get("destination") or "").strip())
+        route = f"{origin} &rarr; {destination}" if (origin or destination) else "&mdash;"
+        departure = html.escape(str(seg_dict.get("departure_time") or "").strip()) or "&mdash;"
+        arrival = html.escape(str(seg_dict.get("arrival_time") or "").strip()) or "&mdash;"
+        day = html.escape(str(seg_dict.get("day") or "").strip()) or "&mdash;"
+
+        row_bg = "#ffffff" if idx % 2 == 1 else "#f8fafc"
+        rows_html.append(
+            f'<tr style="background-color: {row_bg};">'
+            f'<td style="padding: 8px 10px; border-bottom: 1px solid #e2e8f0; text-align: center; color: #64748b;">{idx}</td>'
+            f'<td style="padding: 8px 10px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #0f172a;">{flight_code}</td>'
+            f'<td style="padding: 8px 10px; border-bottom: 1px solid #e2e8f0; color: #334155;">{seg_date}</td>'
+            f'<td style="padding: 8px 10px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #0f172a;">{route}</td>'
+            f'<td style="padding: 8px 10px; border-bottom: 1px solid #e2e8f0; color: #334155;">{departure}</td>'
+            f'<td style="padding: 8px 10px; border-bottom: 1px solid #e2e8f0; color: #334155;">{arrival}</td>'
+            f'<td style="padding: 8px 10px; border-bottom: 1px solid #e2e8f0; text-align: center; color: #334155;">{day}</td>'
+            f"</tr>"
+        )
+
+    pnr_html = ""
+    if pnr:
+        pnr_html = (
+            f'<p style="margin: 0 0 12px 0; font-size: 13px; color: #334155;">'
+            f'<strong>PNR / Booking Reference:</strong> '
+            f'<span style="font-family: monospace; background-color: #e2e8f0; padding: 2px 6px; border-radius: 4px; color: #0f172a;">{html.escape(pnr)}</span>'
+            f"</p>"
+        )
+
+    notes_html = ""
+    if notes:
+        notes_html = (
+            f'<p style="margin: 12px 0 0 0; font-size: 13px; color: #475569;">'
+            f'<strong>Flight Notes:</strong> {html.escape(notes)}'
+            f"</p>"
+        )
+
+    return f"""
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 20px 0;">
+            <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #0f172a;">Flight Itinerary</h3>
+            {pnr_html}
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px; background-color: #ffffff; border: 1px solid #e2e8f0;">
+                <thead>
+                    <tr style="background-color: #008080; color: #ffffff; text-align: left;">
+                        <th style="padding: 8px 10px; text-align: center;">#</th>
+                        <th style="padding: 8px 10px;">Flight</th>
+                        <th style="padding: 8px 10px;">Date</th>
+                        <th style="padding: 8px 10px;">Route</th>
+                        <th style="padding: 8px 10px;">Departure</th>
+                        <th style="padding: 8px 10px;">Arrival</th>
+                        <th style="padding: 8px 10px; text-align: center;">Day</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {"".join(rows_html)}
+                </tbody>
+            </table>
+            {notes_html}
+        </div>
+    """.strip()
 
 
 class FinanceService:
@@ -400,6 +500,7 @@ class FinanceService:
             client_type=invoice_in.client_type,
             client_details=invoice_in.client_details,
             trip_summary=invoice_in.trip_summary,
+            flight_details=_serialize_flight_details(invoice_in.flight_details),
             subtotal=subtotal,
             discount_amount=invoice_in.discount_amount,
             promotional_discount=invoice_in.promotional_discount,
@@ -674,6 +775,9 @@ class FinanceService:
 
             if "subtotal" not in update_data:
                 update_data["subtotal"] = computed_subtotal
+
+        if "flight_details" in update_data:
+            update_data["flight_details"] = _serialize_flight_details(update_data["flight_details"])
 
         for field, value in update_data.items():
             setattr(invoice, field, value)
@@ -1463,6 +1567,8 @@ class FinanceService:
         stamp_date = getattr(invoice, "issue_date", None) or datetime.now()
         stamp_status = "paid" if (invoice.balance_due or 0) <= 0 else "invoice"
 
+        flight_itinerary_html = render_flight_itinerary_html(invoice.flight_details)
+
         html_body = f"""
         <p>Dear {name},</p>
         <p>{custom_message or 'Please find below the summary of your invoice for your upcoming travel with Allbound Vacations.'}</p>
@@ -1473,6 +1579,7 @@ class FinanceService:
             <p><strong>Amount Paid:</strong> {invoice.currency} {invoice.amount_paid:,.2f}</p>
             <p style="font-size: 18px; color: #008080;"><strong>Balance Due: {invoice.currency} {invoice.balance_due:,.2f}</strong></p>
         </div>
+        {flight_itinerary_html}
         <p>Thank you for choosing Allbound Vacations.</p>
         {stamp_img_html(invoice.invoice_number, stamp_status)}
         """

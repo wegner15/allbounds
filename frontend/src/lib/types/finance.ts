@@ -95,6 +95,23 @@ export interface TripSummary {
   tour_package_name?: string;
 }
 
+export interface FlightSegment {
+  airline: string;        // e.g. "KQ"
+  flight_number: string;  // e.g. "411"
+  date: string;           // e.g. "28NOV"
+  origin: string;         // e.g. "EBB"
+  destination: string;    // e.g. "NBO"
+  departure_time: string; // e.g. "0935"
+  arrival_time: string;   // e.g. "1050"
+  day?: string;           // e.g. "SA"
+}
+
+export interface FlightDetails {
+  pnr?: string;
+  notes?: string;
+  segments: FlightSegment[];
+}
+
 export interface SupplierExpenseItem {
   id?: string;
   category?: string;
@@ -148,6 +165,7 @@ export interface Invoice {
   client_type: 'individual' | 'corporate';
   client_details: ClientDetails;
   trip_summary: TripSummary;
+  flight_details?: FlightDetails | null;
   subtotal: number;
   discount_amount: number;
   promotional_discount: number;
@@ -192,6 +210,7 @@ export interface InvoiceCreateRequest {
   client_type: 'individual' | 'corporate';
   client_details: ClientDetails;
   trip_summary: TripSummary;
+  flight_details?: FlightDetails | null;
   subtotal: number;
   discount_amount: number;
   promotional_discount: number;

@@ -24,9 +24,11 @@ import {
   ShieldCheck,
   ExternalLink,
   Ban,
+  Plane,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Invoice, CompanyFinanceSettings, InvoiceProfitability, Supplier } from '../../../../lib/types/finance';
+import { formatFlightTime } from '../utils/flightParser';
 import { DocumentHeader } from '../components/DocumentHeader';
 import { DocumentStamp } from '../components/DocumentStamp';
 import { usePdfDownload } from '../../../../lib/utils/pdfGenerator';
@@ -870,6 +872,72 @@ export const InvoiceDocumentView: React.FC<InvoiceDocumentViewProps> = ({
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* D2. Flight Itinerary (shown when flight_details has segments) */}
+          {invoice.flight_details?.segments && invoice.flight_details.segments.length > 0 && (
+            <div className="mb-6 bg-white border border-teal-200/80 rounded-xl overflow-hidden print-avoid-break">
+              <div className="bg-teal-50/80 px-4 py-2.5 border-b border-teal-200/70 flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-xs font-bold text-teal-900 uppercase tracking-wider flex items-center">
+                  <Plane className="w-3.5 h-3.5 mr-1.5 text-teal-700" /> Flight Itinerary
+                </h3>
+                {invoice.flight_details.pnr && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-white border border-teal-200 text-xs font-mono font-bold text-teal-900">
+                    <span className="text-gray-500 font-sans font-normal mr-1.5">Booking Ref / PNR:</span>
+                    {invoice.flight_details.pnr}
+                  </span>
+                )}
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
+                  <thead className="bg-gray-50 text-gray-600 text-[11px] font-bold uppercase">
+                    <tr>
+                      <th className="px-3 py-2 text-left w-10">#</th>
+                      <th className="px-3 py-2 text-left">Flight</th>
+                      <th className="px-3 py-2 text-left">Date</th>
+                      <th className="px-3 py-2 text-left">Route</th>
+                      <th className="px-3 py-2 text-center">Departure</th>
+                      <th className="px-3 py-2 text-center">Arrival</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 bg-white">
+                    {invoice.flight_details.segments.map((seg, segIdx) => (
+                      <tr key={segIdx} className="hover:bg-gray-50/60">
+                        <td className="px-3 py-2 text-gray-400 font-mono text-xs">{segIdx + 1}</td>
+                        <td className="px-3 py-2 font-mono font-bold text-teal-900 whitespace-nowrap">
+                          {seg.airline} {seg.flight_number}
+                        </td>
+                        <td className="px-3 py-2 whitespace-nowrap text-gray-800 font-medium">
+                          <span>{seg.date}</span>
+                          {seg.day && (
+                            <span className="ml-1.5 inline-block px-1.5 py-0.5 rounded bg-teal-50 text-teal-800 border border-teal-200/70 font-mono text-[10px] font-semibold">
+                              {seg.day}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-3 py-2 font-mono font-semibold text-gray-900 whitespace-nowrap">
+                          <span>{seg.origin}</span>
+                          <span className="mx-1.5 text-teal-600">&rarr;</span>
+                          <span>{seg.destination}</span>
+                        </td>
+                        <td className="px-3 py-2 text-center font-mono text-gray-800 whitespace-nowrap">
+                          {formatFlightTime(seg.departure_time)}
+                        </td>
+                        <td className="px-3 py-2 text-center font-mono text-gray-800 whitespace-nowrap">
+                          {formatFlightTime(seg.arrival_time)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {invoice.flight_details.notes && (
+                <div className="px-4 py-2.5 bg-gray-50/80 border-t border-gray-200 text-xs text-gray-600">
+                  <span className="font-semibold text-gray-800">Flight / Baggage Notes: </span>
+                  <span className="whitespace-pre-line">{invoice.flight_details.notes}</span>
+                </div>
+              )}
             </div>
           )}
 

@@ -18,7 +18,8 @@ import {
   CheckCircle2,
   X,
   ChevronDown,
-  Check
+  Check,
+  Plane
 } from 'lucide-react';
 import { financeApi } from '../../../../lib/api/finance';
 import { suppliersApi } from '../../../../lib/api/suppliers';
@@ -32,7 +33,9 @@ import type {
   CompanyFinanceSettings,
   Supplier,
   Client,
-  FinanceCategoryOption
+  FinanceCategoryOption,
+  FlightSegment,
+  FlightDetails
 } from '../../../../lib/types/finance';
 import { CategoryManagerModal } from '../components/CategoryManagerModal';
 import {
@@ -40,6 +43,7 @@ import {
   normalizeCategories,
   ensureCategoryIncluded
 } from '../utils/categoryUtils';
+import { parseGdsFlightPlan } from '../utils/flightParser';
 
 export const InvoiceEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -112,6 +116,16 @@ export const InvoiceEditorPage: React.FC = () => {
   const [mealPlan, setMealPlan] = useState<string>('Full Board');
   const [transportationType, setTransportationType] = useState<string>('Private 4x4 Safari Land Cruiser');
   const [tourPackageName, setTourPackageName] = useState<string>('');
+
+  // Flight Details (shown when Travel Type is Flight or existing invoice has flight segments)
+  const [flightPnr, setFlightPnr] = useState<string>('');
+  const [flightNotes, setFlightNotes] = useState<string>('');
+  const [flightSegments, setFlightSegments] = useState<FlightSegment[]>([]);
+  const [gdsRawInput, setGdsRawInput] = useState<string>('');
+  const [gdsParseMessage, setGdsParseMessage] = useState<{
+    type: 'success' | 'warning' | 'error';
+    text: string;
+  } | null>(null);
 
   const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([
     {
@@ -315,6 +329,18 @@ export const InvoiceEditorPage: React.FC = () => {
           setMealPlan(t.meal_plan || '');
           setTransportationType(t.transportation_type || '');
           setTourPackageName(t.tour_package_name || '');
+
+          if (inv.flight_details) {
+            setFlightPnr(inv.flight_details.pnr || '');
+            setFlightNotes(inv.flight_details.notes || '');
+            setFlightSegments(
+              Array.isArray(inv.flight_details.segments) ? inv.flight_details.segments : []
+            );
+          } else {
+            setFlightPnr('');
+            setFlightNotes('');
+            setFlightSegments([]);
+          }
 
           setPromotionalDiscount(inv.promotional_discount || 0);
           setVatAmount(inv.vat_amount || 0);
@@ -575,6 +601,63 @@ export const InvoiceEditorPage: React.FC = () => {
     setLineItems(lineItems.filter((_, i) => i !== index));
   };
 
+  // Flight Details handlers
+  const handleParseGdsPlan = () => {
+    if (!gdsRawInput.trim()) {
+      setGdsParseMessage({
+        type: 'error',
+        text: 'Paste one or more GDS flight lines first (e.g. 1 KQ 411 28NOV EBB NBO 0935 1050 SA).'
+      });
+      return;
+    }
+    const { segments, skippedLines } = parseGdsFlightPlan(gdsRawInput);
+    if (segments.length === 0) {
+      setGdsParseMessage({
+        type: 'error',
+        text: 'Could not recognize any flight segments. Check the format (e.g. 1 KQ 411 28NOV EBB NBO 0935 1050 SA).'
+      });
+      return;
+    }
+    setFlightSegments(segments);
+    if (skippedLines.length > 0) {
+      setGdsParseMessage({
+        type: 'warning',
+        text: `Parsed ${segments.length} flight leg${segments.length === 1 ? '' : 's'}. Skipped ${skippedLines.length} unrecognized line${skippedLines.length === 1 ? '' : 's'}.`
+      });
+    } else {
+      setGdsParseMessage({
+        type: 'success',
+        text: `Parsed ${segments.length} flight leg${segments.length === 1 ? '' : 's'} into the itinerary below.`
+      });
+    }
+  };
+
+  const addFlightSegment = () => {
+    setFlightSegments((prev) => [
+      ...prev,
+      {
+        airline: '',
+        flight_number: '',
+        date: '',
+        origin: '',
+        destination: '',
+        departure_time: '',
+        arrival_time: '',
+        day: ''
+      }
+    ]);
+  };
+
+  const updateFlightSegment = (index: number, field: keyof FlightSegment, value: string) => {
+    setFlightSegments((prev) =>
+      prev.map((seg, i) => (i === index ? { ...seg, [field]: value } : seg))
+    );
+  };
+
+  const removeFlightSegment = (index: number) => {
+    setFlightSegments((prev) => prev.filter((_, i) => i !== index));
+  };
+
   // 1-Click Import from Booking
   const handleImportBooking = (bId: string) => {
     const parsedId = parseInt(bId, 10);
@@ -683,6 +766,43 @@ export const InvoiceEditorPage: React.FC = () => {
       tour_package_name: tourPackageName
     };
 
+    const cleanedSegments: FlightSegment[] = flightSegments
+      .map((seg) => ({
+        airline: seg.airline.trim().toUpperCase(),
+        flight_number: seg.flight_number.trim(),
+        date: seg.date.trim().toUpperCase(),
+        origin: seg.origin.trim().toUpperCase(),
+        destination: seg.destination.trim().toUpperCase(),
+        departure_time: seg.departure_time.trim().replace(':', ''),
+        arrival_time: seg.arrival_time.trim().replace(':', ''),
+        ...(seg.day?.trim() ? { day: seg.day.trim().toUpperCase() } : {})
+      }))
+      .filter(
+        (seg) =>
+          seg.airline ||
+          seg.flight_number ||
+          seg.date ||
+          seg.origin ||
+          seg.destination ||
+          seg.departure_time ||
+          seg.arrival_time
+      );
+
+    const isFlightTravel = travelType.trim().toLowerCase() === 'flight';
+    const hasFlightData =
+      cleanedSegments.length > 0 || Boolean(flightPnr.trim()) || Boolean(flightNotes.trim());
+
+    const flightDetailsPayload: FlightDetails | null | undefined =
+      (isFlightTravel || hasFlightData) && hasFlightData
+        ? {
+            ...(flightPnr.trim() ? { pnr: flightPnr.trim() } : {}),
+            ...(flightNotes.trim() ? { notes: flightNotes.trim() } : {}),
+            segments: cleanedSegments
+          }
+        : isEditing
+        ? null
+        : undefined;
+
     const payload = {
       // Leave invoice_number undefined for new invoices so backend generates it
       invoice_number: isEditing ? invoiceNumber : undefined,
@@ -700,6 +820,7 @@ export const InvoiceEditorPage: React.FC = () => {
       client_type: clientType,
       client_details: clientDetails,
       trip_summary: tripSummary,
+      flight_details: flightDetailsPayload,
       subtotal,
       discount_amount: itemsDiscount,
       promotional_discount: promotionalDiscount || 0,
@@ -1337,6 +1458,208 @@ export const InvoiceEditorPage: React.FC = () => {
               />
             </div>
           </div>
+
+          {/* Flight Details / Itinerary (shown when Travel Type is Flight or existing segments exist) */}
+          {(travelType.trim().toLowerCase() === 'flight' || flightSegments.length > 0) && (
+            <div className="mt-6 pt-5 border-t border-gray-200 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-xs font-bold text-teal-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <Plane className="w-4 h-4 text-teal-700" /> Flight Details / Itinerary
+                  </h3>
+                  <p className="text-[11px] text-gray-500 mt-0.5">
+                    Paste a GDS flight plan (Amadeus / Galileo / Sabre) or add individual flight legs below. Included on the client invoice & PDF.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={addFlightSegment}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-900 border border-teal-200 rounded-lg text-xs font-semibold shadow-2xs transition cursor-pointer self-start sm:self-auto"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Add Flight Leg
+                </button>
+              </div>
+
+              {/* Quick Paste Flight Plan (GDS) */}
+              <div className="p-3.5 bg-teal-50/50 border border-teal-200/80 rounded-xl space-y-2.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <label className="text-xs font-bold text-teal-950 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-teal-700" />
+                    Quick Paste Flight Plan (GDS)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleParseGdsPlan}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-teal-800 hover:bg-teal-900 text-white rounded-lg text-xs font-semibold shadow-2xs transition cursor-pointer self-start sm:self-auto"
+                  >
+                    Parse Flight Plan
+                  </button>
+                </div>
+                <textarea
+                  rows={4}
+                  value={gdsRawInput}
+                  onChange={(e) => {
+                    setGdsRawInput(e.target.value);
+                    if (gdsParseMessage) setGdsParseMessage(null);
+                  }}
+                  placeholder={`1 KQ 411 28NOV EBB NBO 0935 1050 SA\n2 KQ 756 28NOV NBO LLW 1210 1325 SA\n3 KQ 754 03DEC LLW NBO 1230 1555 TH\n4 KQ 416 03DEC NBO EBB 1845 2000 TH`}
+                  className="w-full p-2.5 border border-teal-200 rounded-lg text-xs font-mono bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+                {gdsParseMessage && (
+                  <p
+                    className={`text-[11px] font-medium ${
+                      gdsParseMessage.type === 'success'
+                        ? 'text-emerald-700'
+                        : gdsParseMessage.type === 'warning'
+                        ? 'text-amber-700'
+                        : 'text-red-600'
+                    }`}
+                  >
+                    {gdsParseMessage.text}
+                  </p>
+                )}
+              </div>
+
+              {/* Booking Ref / PNR & Baggage / Flight Notes */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-1">Booking Ref / PNR</label>
+                  <input
+                    type="text"
+                    value={flightPnr}
+                    onChange={(e) => setFlightPnr(e.target.value.toUpperCase())}
+                    placeholder="e.g. 6X9KLP"
+                    className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono uppercase"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-gray-700 font-semibold mb-1">Baggage / Flight Notes</label>
+                  <input
+                    type="text"
+                    value={flightNotes}
+                    onChange={(e) => setFlightNotes(e.target.value)}
+                    placeholder="e.g. 2x23kg checked baggage included, Economy Class (Non-refundable)"
+                    className="w-full p-2 border border-gray-300 rounded-lg text-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Flight Segments Editor */}
+              {flightSegments.length > 0 ? (
+                <div className="overflow-x-auto border border-gray-200 rounded-xl">
+                  <table className="min-w-full divide-y divide-gray-200 text-xs">
+                    <thead className="bg-gray-50 text-gray-600 uppercase font-semibold text-[10px]">
+                      <tr>
+                        <th className="px-2.5 py-2 text-left w-8">#</th>
+                        <th className="px-2 py-2 text-left w-20">Airline</th>
+                        <th className="px-2 py-2 text-left w-24">Flight #</th>
+                        <th className="px-2 py-2 text-left w-24">Date</th>
+                        <th className="px-2 py-2 text-left w-20">From</th>
+                        <th className="px-2 py-2 text-left w-20">To</th>
+                        <th className="px-2 py-2 text-left w-24">Dep. Time</th>
+                        <th className="px-2 py-2 text-left w-24">Arr. Time</th>
+                        <th className="px-2 py-2 text-left w-16">Day</th>
+                        <th className="px-2 py-2 text-center w-10"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 bg-white">
+                      {flightSegments.map((seg, segIdx) => (
+                        <tr key={segIdx} className="hover:bg-gray-50/70">
+                          <td className="px-2.5 py-2 text-gray-400 font-mono">{segIdx + 1}</td>
+                          <td className="px-2 py-1.5">
+                            <input
+                              type="text"
+                              value={seg.airline}
+                              onChange={(e) => updateFlightSegment(segIdx, 'airline', e.target.value.toUpperCase())}
+                              placeholder="KQ"
+                              className="w-full p-1.5 border border-gray-300 rounded-md text-xs font-mono uppercase"
+                            />
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <input
+                              type="text"
+                              value={seg.flight_number}
+                              onChange={(e) => updateFlightSegment(segIdx, 'flight_number', e.target.value)}
+                              placeholder="411"
+                              className="w-full p-1.5 border border-gray-300 rounded-md text-xs font-mono"
+                            />
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <input
+                              type="text"
+                              value={seg.date}
+                              onChange={(e) => updateFlightSegment(segIdx, 'date', e.target.value.toUpperCase())}
+                              placeholder="28NOV"
+                              className="w-full p-1.5 border border-gray-300 rounded-md text-xs font-mono uppercase"
+                            />
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <input
+                              type="text"
+                              value={seg.origin}
+                              onChange={(e) => updateFlightSegment(segIdx, 'origin', e.target.value.toUpperCase())}
+                              placeholder="EBB"
+                              className="w-full p-1.5 border border-gray-300 rounded-md text-xs font-mono uppercase"
+                            />
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <input
+                              type="text"
+                              value={seg.destination}
+                              onChange={(e) => updateFlightSegment(segIdx, 'destination', e.target.value.toUpperCase())}
+                              placeholder="NBO"
+                              className="w-full p-1.5 border border-gray-300 rounded-md text-xs font-mono uppercase"
+                            />
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <input
+                              type="text"
+                              value={seg.departure_time}
+                              onChange={(e) => updateFlightSegment(segIdx, 'departure_time', e.target.value)}
+                              placeholder="0935"
+                              className="w-full p-1.5 border border-gray-300 rounded-md text-xs font-mono"
+                            />
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <input
+                              type="text"
+                              value={seg.arrival_time}
+                              onChange={(e) => updateFlightSegment(segIdx, 'arrival_time', e.target.value)}
+                              placeholder="1050"
+                              className="w-full p-1.5 border border-gray-300 rounded-md text-xs font-mono"
+                            />
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <input
+                              type="text"
+                              value={seg.day || ''}
+                              onChange={(e) => updateFlightSegment(segIdx, 'day', e.target.value.toUpperCase())}
+                              placeholder="SA"
+                              className="w-full p-1.5 border border-gray-300 rounded-md text-xs font-mono uppercase"
+                            />
+                          </td>
+                          <td className="px-2 py-1.5 text-center">
+                            <button
+                              type="button"
+                              onClick={() => removeFlightSegment(segIdx)}
+                              title="Remove flight leg"
+                              className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="p-4 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-center text-xs text-gray-500">
+                  No flight legs added yet. Paste a GDS itinerary above and click <strong>Parse Flight Plan</strong>, or click <strong>+ Add Flight Leg</strong>.
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Section 4: Itemized Services (Line Items) */}

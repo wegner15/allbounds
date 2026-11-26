@@ -21,6 +21,7 @@ const DEFAULT_DESCRIPTION =
 
 const CONTENT_SIGNAL_HEADER = 'ai-train=yes, search=yes, ai-input=yes';
 const PUBLIC_CACHE_CONTROL = 'public, s-maxage=3600, max-age=300';
+const NEGOTIATED_CLIENT_CACHE_CONTROL = 'public, max-age=300, must-revalidate';
 const API_TIMEOUT_MS = 4000;
 
 const DESTINATION_CATEGORIES = {
@@ -321,14 +322,15 @@ function prefersMarkdown(request) {
     let q = 1;
     for (let i = 1; i < segments.length; i++) {
       const param = segments[i].trim();
-      if (/^q=/i.test(param)) {
-        const parsed = Number.parseFloat(param.slice(2));
-        q = Number.isFinite(parsed) ? parsed : 0;
+      const qMatch = param.match(/^q\s*=\s*(.+)$/i);
+      if (qMatch) {
+        const parsed = Number.parseFloat(qMatch[1]);
+        q = Number.isFinite(parsed) && parsed > 0 ? Math.min(1, parsed) : 0;
         break;
       }
     }
 
-    if (mediaType === 'text/markdown' && q > markdownQ) {
+    if ((mediaType === 'text/markdown' || mediaType === 'text/x-markdown') && q > markdownQ) {
       markdownQ = q;
     } else if (mediaType === 'text/html' && q > htmlQ) {
       htmlQ = q;
@@ -336,6 +338,14 @@ function prefersMarkdown(request) {
   }
 
   return markdownQ > 0 && markdownQ >= htmlQ;
+}
+
+function applyNegotiatedClientCacheHeaders(headers) {
+  headers.set('Vary', 'Accept');
+  headers.set('Cache-Control', NEGOTIATED_CLIENT_CACHE_CONTROL);
+  headers.set('Cloudflare-CDN-Cache-Control', 'no-store');
+  headers.set('CDN-Cache-Control', 'no-store');
+  return headers;
 }
 
 function escapeMdLinkText(text) {
@@ -3041,6 +3051,8 @@ async function serveNotFoundResponse(request, env, { wantsMarkdown = false } = {
       'Content-Type': 'text/markdown; charset=utf-8',
       Vary: 'Accept',
       'Cache-Control': 'public, max-age=60',
+      'Cloudflare-CDN-Cache-Control': 'no-store',
+      'CDN-Cache-Control': 'no-store',
       'Content-Signal': CONTENT_SIGNAL_HEADER,
       'x-markdown-tokens': String(estimateMarkdownTokens(mdBody)),
       'X-Robots-Tag': 'noindex, nofollow',
@@ -3056,6 +3068,8 @@ async function serveNotFoundResponse(request, env, { wantsMarkdown = false } = {
     'Content-Type': 'text/html; charset=utf-8',
     Vary: 'Accept',
     'Cache-Control': 'public, max-age=60',
+    'Cloudflare-CDN-Cache-Control': 'no-store',
+    'CDN-Cache-Control': 'no-store',
     'X-Robots-Tag': 'noindex, nofollow',
     'X-Allbounds-SSR': '404',
   });
@@ -3225,6 +3239,7 @@ export default {
         const cached = await cache.match(cacheKey);
         if (cached) {
           const hitHeaders = new Headers(cached.headers);
+          applyNegotiatedClientCacheHeaders(hitHeaders);
           hitHeaders.set('X-Allbounds-SSR', 'cache-hit');
           return new Response(cached.body, {
             status: cached.status,
@@ -3276,6 +3291,8 @@ export default {
           'Content-Type': 'text/markdown; charset=utf-8',
           Vary: 'Accept',
           'Cache-Control': 'no-store',
+          'Cloudflare-CDN-Cache-Control': 'no-store',
+          'CDN-Cache-Control': 'no-store',
           'Content-Signal': CONTENT_SIGNAL_HEADER,
           'x-markdown-tokens': String(estimateMarkdownTokens(fallbackMd)),
           'X-Allbounds-SSR': 'md-fallback',
@@ -3290,6 +3307,8 @@ export default {
       if (staticAsset && staticAsset.ok) {
         const headers = new Headers(staticAsset.headers);
         headers.set('Vary', 'Accept');
+        headers.set('Cloudflare-CDN-Cache-Control', 'no-store');
+        headers.set('CDN-Cache-Control', 'no-store');
         headers.set('Content-Signal', CONTENT_SIGNAL_HEADER);
         headers.set('X-Allbounds-SSR', 'static-fallback');
         return new Response(request.method === 'HEAD' ? null : staticAsset.body, {
@@ -3303,6 +3322,8 @@ export default {
       const headers = new Headers(shellFallback.headers);
       headers.set('Content-Type', 'text/html; charset=utf-8');
       headers.set('Vary', 'Accept');
+      headers.set('Cloudflare-CDN-Cache-Control', 'no-store');
+      headers.set('CDN-Cache-Control', 'no-store');
       headers.set('Content-Signal', CONTENT_SIGNAL_HEADER);
       headers.set('X-Allbounds-SSR', 'spa-fallback');
       return new Response(request.method === 'HEAD' ? null : shellFallback.body, {
@@ -3312,26 +3333,25 @@ export default {
     }
 
     // 6. Serve negotiated Markdown or SSR HTML response
-    let response;
+    //    Store 1-hour variant in Workers caches.default (PUBLIC_CACHE_CONTROL),
+    //    but instruct Cloudflare's outer CDN never to cache across Accept variants.
+    let responseBody;
+    let cacheHeaders;
     if (wantsMarkdown) {
-      const markdownBody =
+      responseBody =
         routeResult.markdown ||
         joinMdSections([
           `# ${routeResult.title || SITE_NAME}`,
           `Canonical URL: ${buildAbsoluteUrl(routeResult.canonicalUrl || path)}`,
           routeResult.description || DEFAULT_DESCRIPTION,
         ]);
-      const mdHeaders = new Headers({
+      cacheHeaders = new Headers({
         'Content-Type': 'text/markdown; charset=utf-8',
         Vary: 'Accept',
         'Cache-Control': PUBLIC_CACHE_CONTROL,
         'Content-Signal': CONTENT_SIGNAL_HEADER,
-        'x-markdown-tokens': String(estimateMarkdownTokens(markdownBody)),
+        'x-markdown-tokens': String(estimateMarkdownTokens(responseBody)),
         'X-Allbounds-SSR': 'rendered',
-      });
-      response = new Response(request.method === 'HEAD' ? null : markdownBody, {
-        status: 200,
-        headers: mdHeaders,
       });
     } else {
       const shellRes = await env.ASSETS.fetch(
@@ -3341,25 +3361,24 @@ export default {
         })
       );
       const templateHtml = await shellRes.text();
-      const ssrHtml = injectSsrIntoShell(templateHtml, routeResult);
+      responseBody = injectSsrIntoShell(templateHtml, routeResult);
 
-      const responseHeaders = new Headers({
+      cacheHeaders = new Headers({
         'Content-Type': 'text/html; charset=utf-8',
         Vary: 'Accept',
         'Cache-Control': PUBLIC_CACHE_CONTROL,
         'Content-Signal': CONTENT_SIGNAL_HEADER,
         'X-Allbounds-SSR': 'rendered',
       });
-
-      response = new Response(request.method === 'HEAD' ? null : ssrHtml, {
-        status: 200,
-        headers: responseHeaders,
-      });
     }
 
-    // Store in Cloudflare Cache API (1-hour edge TTL via s-maxage=3600)
+    // Store in Cloudflare Cache API (1-hour edge TTL via s-maxage=3600, separate __variant key)
     if (cache && request.method === 'GET') {
-      const putPromise = cache.put(cacheKey, response.clone()).catch(() => {});
+      const cacheResponse = new Response(responseBody, {
+        status: 200,
+        headers: cacheHeaders,
+      });
+      const putPromise = cache.put(cacheKey, cacheResponse).catch(() => {});
       if (ctx && typeof ctx.waitUntil === 'function') {
         ctx.waitUntil(putPromise);
       } else {
@@ -3367,6 +3386,10 @@ export default {
       }
     }
 
-    return response;
+    const clientHeaders = applyNegotiatedClientCacheHeaders(new Headers(cacheHeaders));
+    return new Response(request.method === 'HEAD' ? null : responseBody, {
+      status: 200,
+      headers: clientHeaders,
+    });
   },
 };

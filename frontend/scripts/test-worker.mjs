@@ -335,8 +335,18 @@ test('Homepage / returns canonical, TravelAgency + WebSite @graph JSON-LD, seman
 
   assert.equal(res.status, 200);
   assert.equal(res.headers.get('Content-Signal'), 'ai-train=yes, search=yes, ai-input=yes');
-  assert.equal(res.headers.get('Cache-Control'), 'public, s-maxage=3600, max-age=300');
+  assert.equal(res.headers.get('Cache-Control'), 'public, max-age=300, must-revalidate');
+  assert.equal(res.headers.get('Cloudflare-CDN-Cache-Control'), 'no-store');
+  assert.equal(res.headers.get('CDN-Cache-Control'), 'no-store');
+  assert.equal(res.headers.get('Vary'), 'Accept');
   assert.equal(res.headers.get('X-Allbounds-SSR'), 'rendered');
+
+  // Internal caches.default entry retains 1-hour edge TTL without CDN no-store
+  const cachedHtmlEntry = mockCache.store.get('https://allboundvacations.com/?__variant=html');
+  assert.ok(cachedHtmlEntry, 'Expected html variant cached in caches.default');
+  assert.equal(cachedHtmlEntry.headers.get('Cache-Control'), 'public, s-maxage=3600, max-age=300');
+  assert.equal(cachedHtmlEntry.headers.get('Cloudflare-CDN-Cache-Control'), null);
+  assert.equal(cachedHtmlEntry.headers.get('CDN-Cache-Control'), null);
 
   const html = await res.text();
   assert.match(html, /<link rel="canonical" href="https:\/\/allboundvacations\.com\/" \/>/);
@@ -353,10 +363,14 @@ test('Homepage / returns canonical, TravelAgency + WebSite @graph JSON-LD, seman
   assert.equal(org['@id'], 'https://allboundvacations.com/#organization');
   assert.equal(org.url, 'https://allboundvacations.com/');
 
-  // Second request should hit cache
+  // Second request should hit cache and still bypass outer Cloudflare CDN caching
   const res2 = await worker.fetch(new Request('https://allboundvacations.com/?utm_source=chatgpt'), env, ctx);
   assert.equal(res2.status, 200);
   assert.equal(res2.headers.get('X-Allbounds-SSR'), 'cache-hit');
+  assert.equal(res2.headers.get('Cache-Control'), 'public, max-age=300, must-revalidate');
+  assert.equal(res2.headers.get('Cloudflare-CDN-Cache-Control'), 'no-store');
+  assert.equal(res2.headers.get('CDN-Cache-Control'), 'no-store');
+  assert.equal(res2.headers.get('Vary'), 'Accept');
 });
 
 test('Package detail route renders full itinerary, pricing table, inclusions, FAQs, and unified @graph JSON-LD', async () => {
@@ -656,7 +670,9 @@ test('Accept: text/markdown on / and /packages/uganda/gorilla-trek/ returns stru
   assert.equal(homeRes.headers.get('Content-Type'), 'text/markdown; charset=utf-8');
   assert.equal(homeRes.headers.get('Vary'), 'Accept');
   assert.equal(homeRes.headers.get('Content-Signal'), 'ai-train=yes, search=yes, ai-input=yes');
-  assert.equal(homeRes.headers.get('Cache-Control'), 'public, s-maxage=3600, max-age=300');
+  assert.equal(homeRes.headers.get('Cache-Control'), 'public, max-age=300, must-revalidate');
+  assert.equal(homeRes.headers.get('Cloudflare-CDN-Cache-Control'), 'no-store');
+  assert.equal(homeRes.headers.get('CDN-Cache-Control'), 'no-store');
 
   const homeMd = await homeRes.text();
   assert.equal(homeRes.headers.get('x-markdown-tokens'), String(Math.ceil(homeMd.length / 4)));
@@ -682,7 +698,9 @@ test('Accept: text/markdown on / and /packages/uganda/gorilla-trek/ returns stru
   assert.equal(pkgRes.headers.get('Content-Type'), 'text/markdown; charset=utf-8');
   assert.equal(pkgRes.headers.get('Vary'), 'Accept');
   assert.equal(pkgRes.headers.get('Content-Signal'), 'ai-train=yes, search=yes, ai-input=yes');
-  assert.equal(pkgRes.headers.get('Cache-Control'), 'public, s-maxage=3600, max-age=300');
+  assert.equal(pkgRes.headers.get('Cache-Control'), 'public, max-age=300, must-revalidate');
+  assert.equal(pkgRes.headers.get('Cloudflare-CDN-Cache-Control'), 'no-store');
+  assert.equal(pkgRes.headers.get('CDN-Cache-Control'), 'no-store');
 
   const pkgMd = await pkgRes.text();
   assert.equal(pkgRes.headers.get('x-markdown-tokens'), String(Math.ceil(pkgMd.length / 4)));
@@ -724,6 +742,11 @@ test('Cache separates Markdown and HTML variants on the same route with Vary: Ac
   assert.equal(mdRes1.status, 200);
   assert.equal(mdRes1.headers.get('Content-Type'), 'text/markdown; charset=utf-8');
   assert.equal(mdRes1.headers.get('Vary'), 'Accept');
+  assert.equal(mdRes1.headers.get('Cloudflare-CDN-Cache-Control'), 'no-store');
+  assert.equal(mdRes1.headers.get('CDN-Cache-Control'), 'no-store');
+  assert.equal(mdRes1.headers.get('Cache-Control'), 'public, max-age=300, must-revalidate');
+  assert.equal(mdRes1.headers.get('Content-Signal'), 'ai-train=yes, search=yes, ai-input=yes');
+  assert.ok(Number(mdRes1.headers.get('x-markdown-tokens')) > 0);
   assert.equal(mdRes1.headers.get('X-Allbounds-SSR'), 'rendered');
 
   // Second request: HTML on the exact same route must NOT get cached Markdown
@@ -736,6 +759,9 @@ test('Cache separates Markdown and HTML variants on the same route with Vary: Ac
   assert.equal(htmlRes1.status, 200);
   assert.equal(htmlRes1.headers.get('Content-Type'), 'text/html; charset=utf-8');
   assert.equal(htmlRes1.headers.get('Vary'), 'Accept');
+  assert.equal(htmlRes1.headers.get('Cloudflare-CDN-Cache-Control'), 'no-store');
+  assert.equal(htmlRes1.headers.get('CDN-Cache-Control'), 'no-store');
+  assert.equal(htmlRes1.headers.get('Cache-Control'), 'public, max-age=300, must-revalidate');
   assert.equal(htmlRes1.headers.get('X-Allbounds-SSR'), 'rendered');
   const htmlBody = await htmlRes1.text();
   assert.match(htmlBody, /<!doctype html>/i);
@@ -747,6 +773,12 @@ test('Cache separates Markdown and HTML variants on the same route with Vary: Ac
     ctx
   );
   assert.equal(mdRes2.headers.get('Content-Type'), 'text/markdown; charset=utf-8');
+  assert.equal(mdRes2.headers.get('Vary'), 'Accept');
+  assert.equal(mdRes2.headers.get('Cloudflare-CDN-Cache-Control'), 'no-store');
+  assert.equal(mdRes2.headers.get('CDN-Cache-Control'), 'no-store');
+  assert.equal(mdRes2.headers.get('Cache-Control'), 'public, max-age=300, must-revalidate');
+  assert.equal(mdRes2.headers.get('Content-Signal'), 'ai-train=yes, search=yes, ai-input=yes');
+  assert.equal(mdRes2.headers.get('x-markdown-tokens'), mdRes1.headers.get('x-markdown-tokens'));
   assert.equal(mdRes2.headers.get('X-Allbounds-SSR'), 'cache-hit');
 
   const htmlRes2 = await worker.fetch(
@@ -755,23 +787,56 @@ test('Cache separates Markdown and HTML variants on the same route with Vary: Ac
     ctx
   );
   assert.equal(htmlRes2.headers.get('Content-Type'), 'text/html; charset=utf-8');
+  assert.equal(htmlRes2.headers.get('Vary'), 'Accept');
+  assert.equal(htmlRes2.headers.get('Cloudflare-CDN-Cache-Control'), 'no-store');
+  assert.equal(htmlRes2.headers.get('CDN-Cache-Control'), 'no-store');
+  assert.equal(htmlRes2.headers.get('Cache-Control'), 'public, max-age=300, must-revalidate');
   assert.equal(htmlRes2.headers.get('X-Allbounds-SSR'), 'cache-hit');
 
-  // Quality preference: text/html preferred over lower-q text/markdown -> HTML
-  const lowerQRes = await worker.fetch(
-    new Request(routeUrl, { headers: { Accept: 'text/html, text/markdown;q=0.5' } }),
-    env,
-    ctx
-  );
-  assert.equal(lowerQRes.headers.get('Content-Type'), 'text/html; charset=utf-8');
+  // Verify standard agent Accept headers negotiate Markdown
+  for (const acceptHeader of [
+    'text/markdown',
+    'TEXT/MARKDOWN; charset=utf-8',
+    'text/markdown, text/html;q=0.9, */*;q=0.8',
+    'text/markdown, text/plain;q=0.9, */*;q=0.8',
+    'text/markdown, */*',
+  ]) {
+    const res = await worker.fetch(
+      new Request(routeUrl, { headers: { Accept: acceptHeader } }),
+      env,
+      ctx
+    );
+    assert.equal(
+      res.headers.get('Content-Type'),
+      'text/markdown; charset=utf-8',
+      `Expected Markdown for Accept: ${acceptHeader}`
+    );
+    assert.equal(res.headers.get('Cloudflare-CDN-Cache-Control'), 'no-store');
+    assert.equal(res.headers.get('CDN-Cache-Control'), 'no-store');
+    assert.equal(res.headers.get('Vary'), 'Accept');
+  }
 
-  // Wildcard browser default */* -> HTML
-  const wildcardRes = await worker.fetch(
-    new Request(routeUrl, { headers: { Accept: '*/*' } }),
-    env,
-    ctx
-  );
-  assert.equal(wildcardRes.headers.get('Content-Type'), 'text/html; charset=utf-8');
+  // Verify browser / default Accept headers negotiate HTML
+  for (const acceptHeader of [
+    'text/html, application/xhtml+xml, application/xml;q=0.9, text/markdown;q=0.8',
+    'text/html, text/markdown;q=0.5',
+    'text/html, */*;q=0.8',
+    '*/*',
+  ]) {
+    const res = await worker.fetch(
+      new Request(routeUrl, { headers: { Accept: acceptHeader } }),
+      env,
+      ctx
+    );
+    assert.equal(
+      res.headers.get('Content-Type'),
+      'text/html; charset=utf-8',
+      `Expected HTML for Accept: ${acceptHeader}`
+    );
+    assert.equal(res.headers.get('Cloudflare-CDN-Cache-Control'), 'no-store');
+    assert.equal(res.headers.get('CDN-Cache-Control'), 'no-store');
+    assert.equal(res.headers.get('Vary'), 'Accept');
+  }
 });
 
 test('Accept: text/markdown converts blog HTML safely and returns 404 Markdown on missing slug', async () => {

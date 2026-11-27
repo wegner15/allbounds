@@ -52,6 +52,18 @@ const QuickActionsSidebar: React.FC<QuickActionsSidebarProps> = React.memo(({
     };
   }, [isVisible]);
 
+  // Coordinate mobile fixed bottom bar with the global BackToTopButton
+  useEffect(() => {
+    if (isVisible) {
+      document.documentElement.dataset.hasMobileQuickActions = 'true';
+    } else {
+      delete document.documentElement.dataset.hasMobileQuickActions;
+    }
+    return () => {
+      delete document.documentElement.dataset.hasMobileQuickActions;
+    };
+  }, [isVisible]);
+
   const handleViewPackages = useCallback(() => {
     navigate(`/packages?country=${countrySlug}`);
   }, [navigate, countrySlug]);

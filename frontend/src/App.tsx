@@ -14,6 +14,7 @@ import SeoHead from './components/seo/SeoHead';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import ScrollToTop from './components/layout/ScrollToTop';
+import BackToTopButton from './components/ui/BackToTopButton';
 
 // Import feature pages
 import { DestinationBookingPage } from './features/public/planning/DestinationBookingPage';
@@ -313,6 +314,7 @@ const MainLayout = () => {
           youtube: 'https://youtube.com/AllboundVacations',
         }}
       />
+      <BackToTopButton />
     </div>
   );
 };

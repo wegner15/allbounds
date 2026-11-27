@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import useAuthHook from '../../lib/hooks/useAuthHook';
+import BackToTopButton from '../ui/BackToTopButton';
 
 // Types for navigation items
 interface NavItem {
@@ -530,6 +531,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = 'Admin Dash
             </div>
           </div>
         </main>
+        <BackToTopButton scrollContainerRef={mainRef} />
       </div>
     </div>
   );

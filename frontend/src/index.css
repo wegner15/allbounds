@@ -28,6 +28,23 @@
   display: none;  /* Safari and Chrome */
 }
 
+:root {
+  --ease-out-quart: cubic-bezier(0.23, 1, 0.32, 1);
+  --back-to-top-offset-y: 0px;
+}
+
+@media (max-width: 767px) {
+  :root[data-has-mobile-hero-cta='true'] {
+    --back-to-top-offset-y: 4.5rem;
+  }
+}
+
+@media (max-width: 1023px) {
+  :root[data-has-mobile-quick-actions='true'] {
+    --back-to-top-offset-y: 4.75rem;
+  }
+}
+
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
@@ -245,6 +262,63 @@ html {
     content: '';
     @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent;
     animation: shimmer 2s infinite;
+  }
+
+  /* Floating Back-to-Top button motion & pointer-gated hover */
+  .back-to-top-btn {
+    bottom: calc(max(1.5rem, env(safe-area-inset-bottom)) + var(--back-to-top-offset-y, 0px));
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.92);
+    transition:
+      opacity 160ms var(--ease-out-quart),
+      transform 160ms var(--ease-out-quart),
+      background-color 160ms ease,
+      box-shadow 160ms ease,
+      bottom 220ms var(--ease-out-quart);
+    will-change: transform, opacity;
+  }
+
+  .back-to-top-btn[data-visible='true'] {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    transition:
+      opacity 220ms var(--ease-out-quart),
+      transform 220ms var(--ease-out-quart),
+      background-color 160ms ease,
+      box-shadow 160ms ease,
+      bottom 220ms var(--ease-out-quart);
+  }
+
+  .back-to-top-btn[data-visible='true']:active {
+    transform: translate3d(0, 0, 0) scale(0.95);
+    transition-duration: 140ms;
+  }
+
+  .back-to-top-icon {
+    transition: transform 180ms var(--ease-out-quart);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .back-to-top-btn[data-visible='true']:hover {
+      background-color: #2D3748;
+      box-shadow: 0 12px 24px -4px rgba(45, 55, 72, 0.35), 0 0 0 1px rgba(143, 186, 192, 0.35);
+    }
+
+    .back-to-top-btn[data-visible='true']:hover .back-to-top-icon {
+      transform: translateY(-2px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .back-to-top-btn,
+    .back-to-top-btn[data-visible='true'],
+    .back-to-top-btn[data-visible='true']:active {
+      transform: none;
+    }
+
+    .back-to-top-btn[data-visible='true']:hover .back-to-top-icon {
+      transform: none;
+    }
   }
 }
 

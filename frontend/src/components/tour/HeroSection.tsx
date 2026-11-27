@@ -65,6 +65,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({ packageData, onBookNowClick, 
     setCurrentImageIndex(index);
   };
 
+  // Coordinate floating mobile "Book Now" pill with the global BackToTopButton
+  React.useEffect(() => {
+    document.documentElement.dataset.hasMobileHeroCta = 'true';
+    return () => {
+      delete document.documentElement.dataset.hasMobileHeroCta;
+    };
+  }, []);
+
   // Auto-play carousel
   React.useEffect(() => {
     if (hasMultipleImages) {
